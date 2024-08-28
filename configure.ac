@@ -1,0 +1,146 @@
+dnl -*- Autoconf -*-
+
+m4_define([project_name], [hexpuzzle])
+m4_define([project_url], [https://github.com/pdkl95/]project_name)
+m4_define([project_email], pdkl95@gmail.com)
+m4_define([project_author], [Brent Sanders])
+m4_define([project_copyright_year], [2023])
+m4_define([project_licence], [GPLv3+])
+m4_define([project_licence_desc], [GNU GPL version 3 or later <http://gnu.org/licences/gpl.html>])
+
+
+dnl Release Version
+m4_define([project_major_version], [0])
+m4_define([project_minor_version], [1])
+m4_define([project_micro_version], [0])
+m4_define([project_version], project_major_version.project_minor_version.project_micro_version)
+
+AC_PREREQ([2.64])
+
+AC_INIT(project_name,project_version,project_email,project_name,project_url)
+
+dnl http://xkcd.com/371/
+m4_append([AM_SANITY_CHECK],[
+AS_ECHO(["Build environment is grinning and holding a spatula. Guess not."])
+])
+
+
+dnl =================================
+dnl ===  general Autotools Setup  ===
+dnl =================================
+
+AC_CONFIG_AUX_DIR([build-aux])
+AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_SRCDIR([Makefile.am])
+AC_CONFIG_HEADERS([config.h])
+
+AM_INIT_AUTOMAKE([1.13 foreign color-tests dist-xz subdir-objects -Wall -Werror])
+AM_MAINTAINER_MODE([enable])
+
+dnl =======================
+dnl ===  early options  ===
+dnl =======================
+
+dnl >>> Build in debug mode
+
+AC_ARG_ENABLE([debug],
+    AS_HELP_STRING([--enable-debug], [Enable normal debug features (-g, -O0)]))
+
+AS_IF([test "x$enable_debug" = "xyes"], [
+     CFLAGS="$CFLAGS -ggdb3 -O0"
+     LDFLAGS="$LDFLAGS -ggdb3"
+])
+
+AH_TEMPLATE([DEBUG_BUILD], [Defined to 1 when --enable-debug is active])
+AS_IF([test "x$enable_debug" = "xyes"],[AC_DEFINE([DEBUG_BUILD],[1])])
+
+
+dnl ========================================
+dnl ===  Compiler/Language Dependencies  ===
+dnl ========================================
+
+AC_PROG_CC 
+AM_PROG_CC_C_O
+
+AC_USE_SYSTEM_EXTENSIONS
+
+AX_CHECK_STDC
+
+
+dnl ===============================================================
+dnl ===  Export the project configuration into config.h macros  ===
+dnl ==============================================================-
+
+dnl push this all into the headers
+AH_TEMPLATE([PACKAGE_AUTHOR],
+        [Author(s) of the project, and holder of the copyright])
+AH_TEMPLATE([PACKAGE_COPYRIGHT_YEAR],
+        [The year(s) that the project's copyright was established])
+AH_TEMPLATE([PACKAGE_COPYRIGHT_STRING],
+        [Official string to use when printing the project's copyright])
+AH_TEMPLATE([PACKAGE_LICENCE],
+        [Short name or abbreviation for the project's licencse])
+AH_TEMPLATE([PACKAGE_LICENCE_DESC],
+        [Full, descriptive name of the project's licencse])
+AC_DEFINE([PACKAGE_AUTHOR],           "project_author")
+AC_DEFINE([PACKAGE_COPYRIGHT_YEAR],   "project_copyright_year")
+AC_DEFINE([PACKAGE_COPYRIGHT_STRING], "Copyright (c) project_copyright_year project_author")
+AC_DEFINE([PACKAGE_LICENCE],          "project_licence")
+AC_DEFINE([PACKAGE_LICENCE_DESC],     "project_licence_desc")
+
+
+dnl ====================================
+dnl ===  General Requirement Checks  ===
+dnl ====================================
+
+dnl Checks for compiler features
+AX_C___ATTRIBUTE__
+AC_C_CONST
+
+dnl Checks for header files.
+AC_CHECK_HEADERS([libgen.h limits.h math.h stdlib.h string.h unistd.h])
+AC_HEADER_ASSERT
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+AC_CHECK_HEADER_STDBOOL
+AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
+AC_TYPE_UINT32_T
+
+dnl Checks for library functions.
+AC_FUNC_MALLOC
+AC_FUNC_MMAP
+AC_CHECK_FUNCS([asprintf vasprintf])
+AX_FUNC_GETOPT_LONG
+
+dnl Checks for other declarations
+AC_CHECK_DECLS([strdupa])
+
+dnl Export any extra build options
+APP_CFLAGS="-I\$(top_srcdir)/external"
+APP_LIBS=""
+AC_SUBST(APP_CFLAGS)
+AC_SUBST(APP_LIBS)
+
+dnl =================================
+dnl ===  pkg-config dependencies  ===
+dnl =================================
+
+PKG_CHECK_MODULES([GL],     [gl     >= 10.0.4])
+PKG_CHECK_MODULES([RAYLIB], [raylib >=  5.0.0])
+ 
+ALL_PKG_CFLAGS="$GL_CFLAGS $RAYLIB_CFLAGS"
+ALL_PKG_LIBS="$GL_LIBS $RAYLIB_LIBS"
+
+
+dnl ================
+dnl ===  Output  ===
+dnl ================
+
+AC_SUBST(ALL_PKG_CFLAGS)
+AC_SUBST(ALL_PKG_LIBS)
+
+AC_CONFIG_FILES([Makefile])
+
+AC_OUTPUT
+
