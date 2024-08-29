@@ -27,13 +27,20 @@
 
 struct grid {
     int radius;
-    int width, height;
+    int tile_grid_width;
+    int tile_grid_height;
     int maxtiles;
 
     hex_axial_t center;
     tile_t *tiles;
 
     float tile_size;
+
+    Vector2 px_offset;
+    Vector2 px_grid_size;
+    Vector2 px_min;
+    Vector2 px_max;
+    Rectangle px_bounding_box;
 
     tile_t *hover;
 };

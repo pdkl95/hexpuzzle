@@ -37,6 +37,7 @@ extern Color TEXT_LIGHT_SHADOW;
 extern Color TEXT_DARK_SHADOW;
 
 void DrawTextShadow(const char *text, int posX, int posY, int fontSize, Color color);
+void DrawTextDropShadow(const char *text, int posX, int posY, int fontSize, Color fgcolor, Color bgcolor);
 
 Color ColorLerp(Color start, Color end, float amount);
 

@@ -71,11 +71,18 @@ Color cursor_outer_color;
 Color cursor_inner_color;
 
 extern Vector2 tile_origin;
-grid_t *grid;
+grid_t *grid = NULL;
 
 tile_t *drag_target = NULL;
 IVector2 drag_start;
 IVector2 drag_offset;
+
+#define MOUSE_TEXT_MAX_LINES 8
+#define MOUSE_TEXT_MAX_LINE_LENGTH 60
+char mouse_text[MOUSE_TEXT_MAX_LINES][MOUSE_TEXT_MAX_LINE_LENGTH];
+int mouse_text_idx = 0;
+int mouse_text_max_line_length = 0;
+int mouse_text_font_size = 20;
 
 #define print_popup(...) {                                          \
         popup_text = TextFormat(__VA_ARGS__);                       \
@@ -86,6 +93,19 @@ IVector2 drag_offset;
         infomsg(__VA_ARGS__);                   \
         print_popup(__VA_ARGS__);               \
     } while(0)
+
+static void add_mouse_text(const char *line)
+{
+    if (mouse_text_idx < MOUSE_TEXT_MAX_LINES) {
+        strncpy(mouse_text[mouse_text_idx], line, MOUSE_TEXT_MAX_LINE_LENGTH - 1);
+        mouse_text[mouse_text_idx][MOUSE_TEXT_MAX_LINE_LENGTH - 1] = '\0';
+
+        int width = MeasureText(mouse_text[mouse_text_idx], mouse_text_font_size);
+        mouse_text_max_line_length = MAX(width, mouse_text_max_line_length);
+
+        mouse_text_idx++;
+    }
+}
 
 static void
 schedule_resize(
@@ -227,6 +247,9 @@ handle_events(
     mouse_position.x = GetMouseX();
     mouse_position.y = GetMouseY();
 
+    mouse_text_idx = 0;
+    mouse_text_max_line_length = 0;
+
     bool any_zoom_active = false;
     if (drag_target) {
         drag_offset.x = mouse_position.x - drag_start.x;
@@ -271,15 +294,45 @@ handle_events(
     return true;
 }
 
+static void draw_mouse_text(void)
+{
+    if (mouse_text_idx) {
+        int vmargin = 4;
+        int hmargin = 8;
+        int font_size = mouse_text_font_size;
+        int line_height = font_size + 2;
+        int x = mouse_position.x + 30;
+        int y = mouse_position.y - ((mouse_text_idx / 2) * font_size) - 15;
+
+        Rectangle rec = {
+            .x      = x - hmargin,
+            .y      = y - vmargin,
+            .width  = mouse_text_max_line_length + (2 * hmargin),
+            .height = (mouse_text_idx * line_height) + (2 * vmargin)
+        };
+
+        DrawRectangleRounded(rec, 0.2, 0, ColorAlpha(DARKPURPLE, 0.333));
+        DrawRectangleRoundedLines(rec, 0.2, 0, 1.0, ColorAlpha(LIGHTGRAY, 0.666));
+
+        for (int i=0; i<mouse_text_idx; i++) {
+            DrawTextShadow(mouse_text[i], x, y, font_size, WHITE);
+            y += line_height;
+        }
+    }
+}
+
 static void draw_tiles(void)
 {
     Vector2 mpos = { (float)mouse_position.x, (float)mouse_position.y };
-    Vector2 mouse_tile_pos = Vector2Subtract(mpos, tile_origin);
+    add_mouse_text(TextFormat("mouse_position = [%d, %d]", mouse_position.x, mouse_position.y));
+
+    Vector2 mouse_tile_pos = Vector2Subtract(mpos, grid->px_offset);
+    add_mouse_text(TextFormat("mouse_tile_pos = [%d, %d]", (int)mouse_tile_pos.x, (int)mouse_tile_pos.y));
+
     hex_axial_t mouse_hex = pixel_to_hex_axial(mouse_tile_pos, grid->tile_size);
     grid_set_hover(grid, mouse_hex);
 
     grid_draw(grid);
-    //tile_draw(testtile, ivector2_to_vector2(drag_offset));
 }
 
 static void draw_gui_widgets(void)
@@ -342,6 +395,8 @@ render_frame(
         if (show_fps) {
             DrawTextShadow(TextFormat("FPS: %d", GetFPS()), 15, 10, 20, WHITE);
         }
+
+        draw_mouse_text();
     }
     EndDrawing();
 
@@ -425,9 +480,6 @@ gfx_cleanup(
 
 static void game_init(void)
 {
-    tile_origin.x = (float)(window_size.x / 2);
-    tile_origin.y = (float)(window_size.y / 2);
-
     grid = create_grid(2);
 }
 

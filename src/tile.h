@@ -47,7 +47,9 @@ tile_t *init_tile(tile_t *tile, hex_axial_t pos);
 tile_t *create_tile(void);
 void destroy_tile(tile_t *tile);
 
-void tile_draw(tile_t *tile, float tile_size, Vector2 offset);
+void tile_draw(tile_t *tile, float tile_size);
+
+Vector2 *tile_corners(tile_t *tile, float tile_size);
 
 #endif /*TILE_H*/
 

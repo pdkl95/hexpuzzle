@@ -32,6 +32,13 @@ void DrawTextShadow(const char *text, int posX, int posY, int fontSize, Color co
     DrawText(text, posX, posY, fontSize, color);
 }
 
+void DrawTextDropShadow(const char *text, int posX, int posY, int fontSize, Color fgcolor, Color bgcolor)
+{
+    DrawText(text, posX + 1, posY + 1, fontSize, bgcolor);
+    //DrawText(text, posX + 1, posY + 1, fontSize, ColorLerp(fgcolor, bgcolor, 1.0));
+    DrawText(text, posX,     posY,     fontSize, fgcolor);
+}
+
 Color ColorLerp(Color start, Color end, float amount)
 {
     Color result = {

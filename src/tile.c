@@ -20,6 +20,7 @@
  ****************************************************************************/
 
 #include "common.h"
+#include "raylib_helper.h"
 #include "tile.h"
 
 Vector2 tile_origin;
@@ -37,6 +38,8 @@ extern tile_t *drag_target;
 
 tile_t *init_tile(tile_t *tile, hex_axial_t pos)
 {
+    assert_not_null(tile);
+
     tile->enabled = true;
     tile->position = pos;
 
@@ -59,16 +62,18 @@ void destroy_tile(tile_t *tile)
     SAFEFREE(tile);
 }
 
-void tile_draw(tile_t *tile, float tile_size, Vector2 offset)
+Vector2 *tile_corners(tile_t *tile, float tile_size)
 {
+    Vector2 pos = hex_axial_to_pixel(tile->position, tile_size);
+    return hex_pixel_corners(pos, tile_size);
+}
+
+void tile_draw(tile_t *tile, float tile_size)
+{
+    assert_not_null(tile);
+
     bool drag = (drag_target == tile);
     Vector2 pos = hex_axial_to_pixel(tile->position, tile_size);
-    pos = Vector2Add(pos, tile_origin);
-    pos = Vector2Add(pos, offset);
-
-    //Vector2 *corners = hex_pixel_corners(pos, tile_size);
-    //DrawTriangleFan(corners, 7, tile->hover ? tile_bg_hover_color : tile_bg_color);
-    //DrawLineStrip(corners, 7, RED);
 
     DrawPoly(pos, 6, tile_size, 0.0f,
              drag
@@ -85,4 +90,17 @@ void tile_draw(tile_t *tile, float tile_size, Vector2 offset)
                        : tile_edge_color));
 
     DrawCircleV(pos, tile_size / 6.0, tile_center_color);
+
+    int font_size = 13;
+
+    DrawTextDropShadow("q=", pos.x - 16, pos.y - 22, font_size, ColorAlpha(ORANGE, 0.7), BLACK);
+
+    DrawTextDropShadow("r=", pos.x - 6, pos.y + 8, font_size, ColorAlpha(PINK, 0.7), BLACK);
+
+    font_size = 15;
+    DrawTextDropShadow(TextFormat("%d", tile->position.q),
+             pos.x, pos.y - 23, font_size, ORANGE, BLACK);
+
+    DrawTextDropShadow(TextFormat("%d", tile->position.r),
+             pos.x, pos.y + 7, font_size, PINK, BLACK);
 }

@@ -23,28 +23,52 @@
 #include "tile.h"
 #include "grid.h"
 
-static inline hex_axial_t grid_centerize_axial(grid_t *grid, hex_axial_t axial)
+static int grid_tile_storage_location(grid_t *grid, hex_axial_t axial)
 {
-    return hex_axial_add(grid->center,  axial);
+    assert_not_null(grid);
+
+    if (hex_axial_distance(axial, grid->center) > grid->radius) {
+        return -1;
+    }
+
+    if ((axial.r < 0) || (axial.r >= grid->tile_grid_height) ||
+        (axial.q < 0) || (axial.q >= grid->tile_grid_width)) {
+        return -1;
+    }
+    int loc = (axial.r * grid->tile_grid_width) + axial.q;
+
+    assert(loc >= 0);
+    assert(loc < grid->maxtiles);
+
+    return loc;
 }
 
-static inline int grid_tile_storage_location(grid_t *grid, hex_axial_t axial)
+static void grid_add_to_bounding_box(grid_t *grid, tile_t *tile)
 {
-    axial = grid_centerize_axial(grid, axial);
-    return (axial.r * grid->width) + axial.q;
+    Vector2 *corners = tile_corners(tile, grid->tile_size);
+    for (int i=0; i<6; i++) {
+        grid->px_min.x = MIN(grid->px_min.x, corners[i].x);
+        grid->px_min.y = MIN(grid->px_min.y, corners[i].y);
+
+        grid->px_max.x = MAX(grid->px_max.x, corners[i].x);
+        grid->px_max.y = MAX(grid->px_max.y, corners[i].y);
+   }
 }
 
 grid_t *create_grid(int radius)
 {
+    assert(radius > 0);
+    assert(radius < 10);
+
     grid_t *grid = calloc(1, sizeof(grid_t));
 
     grid->radius = radius;
 
-    grid->width  = (2 * radius) + 1;
-    grid->height = (2 * radius) + 1;
-    grid->maxtiles = grid->width * grid->height;
+    grid->tile_grid_width  = (2 * radius) + 1;
+    grid->tile_grid_height = (2 * radius) + 1;
+    grid->maxtiles = grid->tile_grid_width * grid->tile_grid_height;
 
-    grid->tile_size = 20.0f;
+    grid->tile_size = 40.0f;
 
     grid->hover = NULL;
 
@@ -53,55 +77,87 @@ grid_t *create_grid(int radius)
     grid->center.q = radius;
     grid->center.r = radius;
 
+    grid->px_min.x = (float)window_size.x;
+    grid->px_min.y = (float)window_size.y;
 
-    for (int q=0; q<grid->width; q++) {
-        for (int r=0; r<grid->height; r++) {
+    grid->px_max.x = 0.0f;
+    grid->px_max.y = 0.0f;
+
+    for (int q=0; q<grid->tile_grid_width; q++) {
+        for (int r=0; r<grid->tile_grid_height; r++) {
             hex_axial_t pos = {
                 .q = q,
                 .r = r
             };
-            hex_axial_t centered_pos = hex_axial_subtract(pos, grid->center);
-            tile_t *tile = grid_get_tile(grid, centered_pos);
-            init_tile(tile, pos);
+            if (hex_axial_distance(pos, grid->center) <= radius) {
+                tile_t *tile = grid_get_tile(grid, pos);
+                init_tile(tile, pos);
+                grid_add_to_bounding_box(grid, tile);
+            }
         }
     }
+
+    grid->px_bounding_box.x = grid->px_min.x;
+    grid->px_bounding_box.y = grid->px_min.y;
+    grid->px_bounding_box.width  = grid->px_max.x - grid->px_min.x;
+    grid->px_bounding_box.height = grid->px_max.y - grid->px_min.y;
+
+    grid->px_offset.x = ((float)window_size.x - grid->px_bounding_box.width)  / 2;
+    grid->px_offset.y = ((float)window_size.y - grid->px_bounding_box.height) / 2;
 
     return grid;
 }
 
 void destroy_grid(grid_t *grid)
 {
-    if (grid) {
-        SAFEFREE(grid->tiles);
-        SAFEFREE(grid);
-    }
+    assert_not_null(grid);
+
+    SAFEFREE(grid->tiles);
+    SAFEFREE(grid);
 }
 
 tile_t *grid_get_tile(grid_t *grid, hex_axial_t axial)
 {
+    assert_not_null(grid);
+
     int loc = grid_tile_storage_location(grid, axial);
-    return &grid->tiles[loc];
+    if ((loc >= 0) && (loc < grid->maxtiles)) {
+        return &grid->tiles[loc];
+    } else {
+        return NULL;
+    }
 }
 
 void grid_set_hover(grid_t *grid, hex_axial_t axial)
 {
-    if (grid->hover) {
-        grid->hover->hover = false;
-    }
-    grid->hover = grid_get_tile(grid, axial);
-    if (grid->hover) {
-        grid->hover->hover = true;
+    if (grid) {
+        if (grid->hover) {
+            grid->hover->hover = false;
+        }
+        grid->hover = grid_get_tile(grid, axial);
+        if (grid->hover) {
+            grid->hover->hover = true;
+        }
     }
 }
 
 void grid_draw(grid_t *grid)
 {
-    Vector2 offset = {0};
+    assert_not_null(grid);
+
+    rlPushMatrix();
+
+    rlTranslatef(grid->px_offset.x,
+                 grid->px_offset.y,
+                 0.0);
 
     for (int i=0; i<grid->maxtiles; i++) {
         tile_t *tile = &grid->tiles[i];
+        assert_not_null(tile);
         if (tile->enabled) {
-            tile_draw(tile, grid->tile_size, offset);
+            tile_draw(tile, grid->tile_size);
         }
     }
+
+    rlPopMatrix();
 }
