@@ -22,7 +22,6 @@
 #include "common.h"
 #include "tile.h"
 
-float tile_size = 60.0f;
 Vector2 tile_origin;
 
 Color tile_bg_color           = { 0x32, 0x32, 0x32, 0xff };
@@ -36,10 +35,23 @@ Color tile_edge_drag_color    = { 0x77, 0x77, 0x77, 0xff };
 
 extern tile_t *drag_target;
 
+tile_t *init_tile(tile_t *tile, hex_axial_t pos)
+{
+    tile->enabled = true;
+    tile->position = pos;
+
+    for (int i=0; i<6; i++) {
+        tile->path[i] = i;
+    }
+
+    return tile;
+}
+
 tile_t *create_tile(void)
 {
     tile_t *tile = calloc(1, sizeof(tile_t));
-    return tile;
+    hex_axial_t pos = {0};
+    return init_tile(tile, pos);
 }
 
 void destroy_tile(tile_t *tile)
@@ -47,7 +59,7 @@ void destroy_tile(tile_t *tile)
     SAFEFREE(tile);
 }
 
-void tile_draw(tile_t *tile, Vector2 offset)
+void tile_draw(tile_t *tile, float tile_size, Vector2 offset)
 {
     bool drag = (drag_target == tile);
     Vector2 pos = hex_axial_to_pixel(tile->position, tile_size);

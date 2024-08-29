@@ -1,6 +1,6 @@
 /****************************************************************************
  *                                                                          *
- * tile.h                                                                   *
+ * grid.h                                                                   *
  *                                                                          *
  * This file is part of hexpuzzle.                                          *
  *                                                                          *
@@ -19,35 +19,31 @@
  *                                                                          *
  ****************************************************************************/
 
-#ifndef TILE_H
-#define TILE_H
+#ifndef GRID_H
+#define GRID_H
 
 #include "hex.h"
+#include "tile.h"
 
-enum path_type {
-    PATH_TYPE_NONE = 0,
-    PATH_TYPE_RED,
-    PATH_TYPE_BLUE,
-    PATH_TYPE_YELLOW,
-    PATH_TYPE_GREEN
+struct grid {
+    int radius;
+    int width, height;
+    int maxtiles;
+
+    hex_axial_t center;
+    tile_t *tiles;
+
+    float tile_size;
+
+    tile_t *hover;
 };
-typedef enum path_type path_type_t;
+typedef struct grid grid_t;
 
-struct tile {
-    bool enabled;
+grid_t *create_grid(int radius);
+void destroy_grid(grid_t *grid);
+void grid_draw(grid_t *grid);
+tile_t *grid_get_tile(grid_t *grid, hex_axial_t axial);
+void grid_set_hover(grid_t *grid, hex_axial_t axial);
 
-    hex_axial_t position;
-    path_type_t path[6];
-
-    bool hover;
-};
-typedef struct tile tile_t;
-
-tile_t *init_tile(tile_t *tile, hex_axial_t pos);
-tile_t *create_tile(void);
-void destroy_tile(tile_t *tile);
-
-void tile_draw(tile_t *tile, float tile_size, Vector2 offset);
-
-#endif /*TILE_H*/
+#endif /*GRID_H*/
 

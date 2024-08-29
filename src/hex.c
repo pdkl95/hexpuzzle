@@ -187,3 +187,123 @@ Vector2 *hex_pixel_corners(Vector2 pos, float size)
 
     return corners;
 }
+
+
+/*** offset coordinate conversion ***/
+
+static hex_offset_t hex_axial_to_oddr(hex_axial_t axial)
+{
+    hex_offset_t offset = {
+        .type = HEX_OFFSET_ODD_R,
+        .row = axial.r,
+        .col = axial.q + (axial.r - (axial.r&1)) / 2
+    };
+    return offset;
+}
+
+static hex_axial_t hex_oddr_to_axial(hex_offset_t off)
+{
+    assert(off.type == HEX_OFFSET_ODD_R);
+    hex_axial_t axial = {
+        .q = off.col - (off.row - (off.row & 1)) / 2,
+        .r = off.row
+    };
+    return axial;
+}
+
+static hex_offset_t hex_axial_to_evenr(hex_axial_t axial)
+{
+    hex_offset_t offset = {
+        .type = HEX_OFFSET_EVEN_R,
+        .row = axial.r,
+        .col = axial.q + (axial.r + (axial.r&1)) / 2
+    };
+    return offset;
+}
+
+static hex_axial_t hex_evenr_to_axial(hex_offset_t off)
+{
+    assert(off.type == HEX_OFFSET_EVEN_R);
+    hex_axial_t axial = {
+        .q = off.col - (off.row + (off.row & 1)) / 2,
+        .r = off.row
+    };
+    return axial;
+}
+
+static hex_offset_t hex_axial_to_oddq(hex_axial_t axial)
+{
+    hex_offset_t offset = {
+        .type = HEX_OFFSET_ODD_Q,
+        .row = axial.r + (axial.r - (axial.r&1)) / 2,
+        .col = axial.q
+    };
+    return offset;
+}
+
+static hex_axial_t hex_oddq_to_axial(hex_offset_t off)
+{
+    assert(off.type == HEX_OFFSET_ODD_Q);
+    hex_axial_t axial = {
+        .q = off.col,
+        .r = off.row - (off.row - (off.row & 1)) / 2
+    };
+    return axial;
+}
+
+
+static hex_offset_t hex_axial_to_evenq(hex_axial_t axial)
+{
+    hex_offset_t offset = {
+        .type = HEX_OFFSET_EVEN_Q,
+        .row = axial.r + (axial.r - (axial.r&1)) / 2,
+        .col = axial.q
+    };
+    return offset;
+}
+
+static hex_axial_t hex_evenq_to_axial(hex_offset_t off)
+{
+    assert(off.type == HEX_OFFSET_EVEN_Q);
+    hex_axial_t axial = {
+        .q = off.col,
+        .r = off.row - (off.row - (off.row & 1)) / 2
+    };
+    return axial;
+}
+
+hex_offset_t hex_axial_to_offset(hex_axial_t axial, hex_offset_type_t type)
+{
+    switch (type) {
+    case HEX_OFFSET_ODD_R:
+        return hex_axial_to_oddr(axial);
+
+    case HEX_OFFSET_EVEN_R:
+        return hex_axial_to_evenr(axial);
+
+    case HEX_OFFSET_ODD_Q:
+        return hex_axial_to_oddq(axial);
+
+    case HEX_OFFSET_EVEN_Q:
+        return hex_axial_to_evenq(axial);
+    }
+    __builtin_unreachable();
+}
+
+hex_axial_t hex_offset_to_axial(hex_offset_t off)
+{
+    switch (off.type) {
+    case HEX_OFFSET_ODD_R:
+        return hex_oddr_to_axial(off);
+
+    case HEX_OFFSET_EVEN_R:
+        return hex_evenr_to_axial(off);
+
+    case HEX_OFFSET_ODD_Q:
+        return hex_oddq_to_axial(off);
+
+    case HEX_OFFSET_EVEN_Q:
+        return hex_evenq_to_axial(off);
+    }
+    __builtin_unreachable();
+}

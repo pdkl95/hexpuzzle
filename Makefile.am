@@ -28,6 +28,7 @@ hexpuzzle_CFLAGS = $(COMMON_PROG_CFLAGS)
 hexpuzzle_LDADD = $(COMMON_PROG_LDADD)
 
 hexpuzzle_SOURCES =                                \
+	src/grid.h            src/grid.c           \
 	src/hex.h             src/hex.c            \
 	src/logging.h         src/logging.c        \
 	src/options.h         src/options.c        \

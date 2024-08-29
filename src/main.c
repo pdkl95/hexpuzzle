@@ -29,7 +29,7 @@
 
 #include "options.h"
 #include "raylib_helper.h"
-#include "tile.h"
+#include "grid.h"
 
 #if defined(PLATFORM_DESKTOP)
 /* good */
@@ -70,9 +70,8 @@ Color CGOLD              = { 0xFF, 0xD7, 0x00, 255 };
 Color cursor_outer_color;
 Color cursor_inner_color;
 
-extern float tile_size;
 extern Vector2 tile_origin;
-tile_t *testtile;
+grid_t *grid;
 
 tile_t *drag_target = NULL;
 IVector2 drag_start;
@@ -242,7 +241,7 @@ handle_events(
             if (drag_target) {
                 // undo prev drag
             }
-            drag_target = testtile;
+            //drag_target = testtile;
             drag_start = mouse_position;
         }
         if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
@@ -276,9 +275,11 @@ static void draw_tiles(void)
 {
     Vector2 mpos = { (float)mouse_position.x, (float)mouse_position.y };
     Vector2 mouse_tile_pos = Vector2Subtract(mpos, tile_origin);
-    hex_axial_t mouse_hex = pixel_to_hex_axial(mouse_tile_pos, tile_size);
-    testtile->hover = hex_axial_eq(mouse_hex, testtile->position);
-    tile_draw(testtile, ivector2_to_vector2(drag_offset));
+    hex_axial_t mouse_hex = pixel_to_hex_axial(mouse_tile_pos, grid->tile_size);
+    grid_set_hover(grid, mouse_hex);
+
+    grid_draw(grid);
+    //tile_draw(testtile, ivector2_to_vector2(drag_offset));
 }
 
 static void draw_gui_widgets(void)
@@ -427,17 +428,12 @@ static void game_init(void)
     tile_origin.x = (float)(window_size.x / 2);
     tile_origin.y = (float)(window_size.y / 2);
 
-    testtile = create_tile();
-    testtile->position.q = 0;
-    testtile->position.r = 0;
-    for (int i=0; i<6; i++) {
-        testtile->path[i] = i;
-    }
+    grid = create_grid(2);
 }
 
 static void game_cleanup(void)
 {
-    destroy_tile(testtile);
+    destroy_grid(grid);
 }
 
 int

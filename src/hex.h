@@ -110,6 +110,27 @@ hex_cube_t hex_cube_subtract(hex_cube_t a, hex_cube_t b);
 int hex_cube_distance(hex_cube_t a, hex_cube_t b);
 hex_cube_t hex_cube_round(hex_cubef_t cubef);
 
+int hex_cube_distance(hex_cube_t a, hex_cube_t b);
+
+
+/*
+ * Offset Coordinates
+ */
+enum hex_offset_type {
+    HEX_OFFSET_ODD_R,
+    HEX_OFFSET_EVEN_R,
+    HEX_OFFSET_ODD_Q,
+    HEX_OFFSET_EVEN_Q,
+};
+typedef enum hex_offset_type hex_offset_type_t;
+
+struct hex_offset {
+    hex_offset_type_t type;
+    int row;
+    int col;
+};
+typedef struct hex_offset hex_offset_t;
+
 
 /*
  * Coordinate Conversion
@@ -154,6 +175,8 @@ static inline hex_cubef_t hex_axialf_to_cubef(hex_axialf_t axialf)
 
 Vector2 *hex_pixel_corners(Vector2 pos, float size);
 
+hex_offset_t hex_axial_to_offset(hex_axial_t axial, hex_offset_type_t type);
+hex_axial_t hex_offset_to_axial(hex_offset_t off);
 
 #endif /*HEX_H*/
 
