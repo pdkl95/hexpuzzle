@@ -25,13 +25,16 @@
 #include "hex.h"
 
 enum path_type {
-    PATH_TYPE_NONE = 0,
-    PATH_TYPE_RED,
-    PATH_TYPE_BLUE,
-    PATH_TYPE_YELLOW,
-    PATH_TYPE_GREEN
+    PATH_TYPE_NONE   = 0,
+    PATH_TYPE_RED    = 1,
+    PATH_TYPE_BLUE   = 2,
+    PATH_TYPE_YELLOW = 3,
+    PATH_TYPE_GREEN  = 4,
+    PATH_TYPE_MAX    = 5
 };
 typedef enum path_type path_type_t;
+
+Color path_type_color(path_type_t type);
 
 struct tile {
     bool enabled;
@@ -47,7 +50,7 @@ tile_t *init_tile(tile_t *tile, hex_axial_t pos);
 tile_t *create_tile(void);
 void destroy_tile(tile_t *tile);
 
-void tile_draw(tile_t *tile, float tile_size);
+void tile_draw(tile_t *tile, float tile_size, bool drqg);
 
 Vector2 *tile_corners(tile_t *tile, float tile_size);
 

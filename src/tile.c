@@ -34,7 +34,31 @@ Color tile_edge_color         = { 0x18, 0x18, 0x18, 0xff };
 Color tile_edge_hover_color   = { 0xaa, 0xaa, 0xaa, 0xff };
 Color tile_edge_drag_color    = { 0x77, 0x77, 0x77, 0xff };
 
-extern tile_t *drag_target;
+Color path_color_none   = { 0, 0, 0, 0 };
+Color path_color_red    = RED;
+Color path_color_blue   = BLUE;
+Color path_color_yellow = YELLOW;
+Color path_color_green  = GREEN;
+
+Color path_type_color(path_type_t type)
+{
+    switch (type) {
+    default:
+        return path_color_none;
+
+    case PATH_TYPE_RED:
+        return path_color_red;
+
+    case PATH_TYPE_BLUE:
+        return path_color_blue;
+
+    case PATH_TYPE_YELLOW:
+        return path_color_yellow;
+
+    case PATH_TYPE_GREEN:
+        return path_color_green;
+    }
+}
 
 tile_t *init_tile(tile_t *tile, hex_axial_t pos)
 {
@@ -44,7 +68,7 @@ tile_t *init_tile(tile_t *tile, hex_axial_t pos)
     tile->position = pos;
 
     for (int i=0; i<6; i++) {
-        tile->path[i] = i;
+        tile->path[i] = rand() % PATH_TYPE_MAX;
     }
 
     return tile;
@@ -68,11 +92,10 @@ Vector2 *tile_corners(tile_t *tile, float tile_size)
     return hex_pixel_corners(pos, tile_size);
 }
 
-void tile_draw(tile_t *tile, float tile_size)
+void tile_draw(tile_t *tile, float tile_size, bool drag)
 {
     assert_not_null(tile);
 
-    bool drag = (drag_target == tile);
     Vector2 pos = hex_axial_to_pixel(tile->position, tile_size);
 
     DrawPoly(pos, 6, tile_size, 0.0f,
@@ -82,6 +105,11 @@ void tile_draw(tile_t *tile, float tile_size)
                 ? tile_bg_hover_color
                 : tile_bg_color));
 
+    Vector2 *midpoints = hex_axial_pixel_edge_midpoints(tile->position, tile_size);
+    for (int i=0; i<6; i++) {
+        DrawLineEx(pos, midpoints[i], 5.0, path_type_color(tile->path[i]));
+    }
+
     DrawPolyLinesEx(pos, 6, tile_size, 0.0f, 2.0f,
                     drag
                     ? tile_edge_drag_color
@@ -89,7 +117,13 @@ void tile_draw(tile_t *tile, float tile_size)
                        ? tile_edge_hover_color
                        : tile_edge_color));
 
+
     DrawCircleV(pos, tile_size / 6.0, tile_center_color);
+
+#if 0
+    if (drag) {
+        return;
+    }
 
     int font_size = 13;
 
@@ -103,4 +137,5 @@ void tile_draw(tile_t *tile, float tile_size)
 
     DrawTextDropShadow(TextFormat("%d", tile->position.r),
              pos.x, pos.y + 7, font_size, PINK, BLACK);
+#endif
 }

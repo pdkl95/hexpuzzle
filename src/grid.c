@@ -128,16 +128,89 @@ tile_t *grid_get_tile(grid_t *grid, hex_axial_t axial)
     }
 }
 
-void grid_set_hover(grid_t *grid, hex_axial_t axial)
+void grid_swap(grid_t *grid, tile_t *a, tile_t *b)
+{
+    assert_not_null(grid);
+    assert_not_null(a);
+    assert_not_null(b);
+
+    for (int i=0; i<6; i++) {
+        path_type_t tmp = a->path[i];
+        a->path[i] = b->path[i];
+        b->path[i] = tmp;
+    }
+}
+
+void grid_check(grid_t *grid)
+{
+    assert_not_null(grid);
+}
+
+void grid_set_hover(grid_t *grid, IVector2 mouse_position)
 {
     if (grid) {
         if (grid->hover) {
             grid->hover->hover = false;
         }
-        grid->hover = grid_get_tile(grid, axial);
+
+        grid->mouse_pos.x = (float)mouse_position.x;
+        grid->mouse_pos.y = (float)mouse_position.y;
+
+        if (grid->drag_target) {
+            grid->drag_offset = Vector2Subtract(grid->mouse_pos, grid->drag_start);
+        } else {
+            grid->drag_offset.x = 0.0f;
+            grid->drag_offset.y = 0.0f;
+        }
+
+        Vector2 mouse_tile_pos = Vector2Subtract(grid->mouse_pos, grid->px_offset);
+        hex_axial_t mouse_hex = pixel_to_hex_axial(mouse_tile_pos, grid->tile_size);
+
+        grid->hover = grid_get_tile(grid, mouse_hex);
+
         if (grid->hover) {
             grid->hover->hover = true;
         }
+    }
+}
+
+void grid_drag_start(grid_t *grid)
+{
+    assert_not_null(grid);
+
+    if (grid->drag_target) {
+        grid->drag_target = NULL;
+    }
+
+    if (grid->hover) {
+        grid->drag_target = grid->hover;
+        grid->drag_start  = grid->mouse_pos; 
+    }
+}
+
+void grid_drop_tile(grid_t *grid, tile_t *drag_target, tile_t *drop_target)
+{
+    assert_not_null(grid);
+    assert_not_null(drag_target);
+    assert_not_null(drop_target);
+
+    assert(drag_target->enabled);
+    assert(drop_target->enabled);
+
+    grid_swap(grid, drag_target, drop_target);
+    grid_check(grid);
+}
+
+void grid_drag_stop(grid_t *grid)
+{
+    assert_not_null(grid);
+
+    if (grid->drag_target) {
+        if (grid->hover) {
+            grid_drop_tile(grid, grid->drag_target, grid->hover);
+        }
+
+        grid->drag_target = NULL;
     }
 }
 
@@ -155,9 +228,34 @@ void grid_draw(grid_t *grid)
         tile_t *tile = &grid->tiles[i];
         assert_not_null(tile);
         if (tile->enabled) {
-            tile_draw(tile, grid->tile_size);
+            if (tile == grid->drag_target) {
+                // defer ubtil after bg tiles are drawn
+            } else {
+                tile_draw(tile, grid->tile_size, false);
+            }
         }
     }
 
+    if (grid->drag_target) {
+        rlPushMatrix();
+
+        rlTranslatef(grid->drag_offset.x,
+                     grid->drag_offset.y,
+                     0.0);
+
+        tile_draw(grid->drag_target, grid->tile_size, true);
+
+        rlPopMatrix();
+    }
+
     rlPopMatrix();
+
+#if 0
+    if (grid->drag_target) {
+        DrawText(TextFormat("drag_target<%d,%d> drag_offset = (%f, %f)",
+                            grid->drag_target->position.q, grid->drag_target->position.r,
+                            grid->drag_offset.x, grid->drag_offset.y),
+                 10, 10, 20, GREEN);
+    }
+#endif
 }

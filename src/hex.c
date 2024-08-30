@@ -153,9 +153,8 @@ Vector2 *hex_axial_pixel_corners(hex_axial_t axial, float size)
     return hex_pixel_corners(pos, size);
 }
 
-Vector2 *hex_pixel_corners(Vector2 pos, float size)
+Vector2 *hex_flat_top_pixel_corners(Vector2 pos, float size)
 {
-
     static Vector2 corners[7];
 
     // right
@@ -186,6 +185,45 @@ Vector2 *hex_pixel_corners(Vector2 pos, float size)
     corners[6] = corners[0];
 
     return corners;
+}
+
+Vector2 *hex_pointy_top_pixel_corners(Vector2 pos, float size)
+{
+    static Vector2 corners[7];
+
+    corners[0].x = pos.x + (SQRT_3_2 * size);
+    corners[0].y = pos.y + (0.5 * size);
+
+    corners[1].x = pos.x;
+    corners[1].y = pos.y + size;
+
+    corners[2].x = pos.x - (SQRT_3_2 * size);
+    corners[2].y = pos.y + (0.5 * size);
+
+    corners[3].x = pos.x - (SQRT_3_2 * size);
+    corners[3].y = pos.y - (0.5 * size);
+
+    corners[4].x = pos.x;
+    corners[4].y = pos.y - size;
+
+    corners[5].x = pos.x + (SQRT_3_2 * size);
+    corners[5].y = pos.y - (0.5 * size);
+
+    // repeat first corner for easier polyline drawing
+    corners[6] = corners[0];
+
+    return corners;
+}
+
+Vector2 *hex_pixel_corners(Vector2 pos, float size)
+{
+    return hex_flat_top_pixel_corners(pos, size);
+}
+
+Vector2 *hex_axial_pixel_edge_midpoints(hex_axial_t axial, float size)
+{
+    Vector2 pos = hex_axial_to_pixel(axial, size);
+    return hex_pointy_top_pixel_corners(pos, size * SQRT_3_2);
 }
 
 

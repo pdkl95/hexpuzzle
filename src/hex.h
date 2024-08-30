@@ -72,6 +72,7 @@ Vector2 hex_axial_to_pixel(hex_axial_t axial, float size);
 hex_axial_t pixel_to_hex_axial(Vector2 p, float size);
 
 Vector2 *hex_axial_pixel_corners(hex_axial_t axial, float size);
+Vector2 *hex_axial_pixel_edge_midpoints(hex_axial_t axial, float size);
 
 bool hex_axial_eq(hex_axial_t a, hex_axial_t b);
 

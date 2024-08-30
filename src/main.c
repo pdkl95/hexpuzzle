@@ -23,6 +23,7 @@
 
 #include <getopt.h>
 #include <libgen.h>
+#include <time.h>
 
 #include "raygui/raygui.h"
 #include "raygui/style/terminal.h"
@@ -70,12 +71,7 @@ Color CGOLD              = { 0xFF, 0xD7, 0x00, 255 };
 Color cursor_outer_color;
 Color cursor_inner_color;
 
-extern Vector2 tile_origin;
 grid_t *grid = NULL;
-
-tile_t *drag_target = NULL;
-IVector2 drag_start;
-IVector2 drag_offset;
 
 #define MOUSE_TEXT_MAX_LINES 8
 #define MOUSE_TEXT_MAX_LINE_LENGTH 60
@@ -94,7 +90,7 @@ int mouse_text_font_size = 20;
         print_popup(__VA_ARGS__);               \
     } while(0)
 
-static void add_mouse_text(const char *line)
+UNUSED static void add_mouse_text(const char *line)
 {
     if (mouse_text_idx < MOUSE_TEXT_MAX_LINES) {
         strncpy(mouse_text[mouse_text_idx], line, MOUSE_TEXT_MAX_LINE_LENGTH - 1);
@@ -247,30 +243,19 @@ handle_events(
     mouse_position.x = GetMouseX();
     mouse_position.y = GetMouseY();
 
+    grid_set_hover(grid, mouse_position);
+
     mouse_text_idx = 0;
     mouse_text_max_line_length = 0;
 
     bool any_zoom_active = false;
-    if (drag_target) {
-        drag_offset.x = mouse_position.x - drag_start.x;
-        drag_offset.y = mouse_position.y - drag_start.y;
-    } else {
-        drag_offset.x = 0;
-        drag_offset.y = 0;
-    }
 
     if (IsCursorOnScreen()) {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            if (drag_target) {
-                // undo prev drag
-            }
-            //drag_target = testtile;
-            drag_start = mouse_position;
+            grid_drag_start(grid);
         }
         if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-            if (drag_target) {
-                drag_target = NULL;
-            }
+            grid_drag_stop(grid);
         }
     }
 
@@ -323,20 +308,26 @@ static void draw_mouse_text(void)
 
 static void draw_tiles(void)
 {
-    Vector2 mpos = { (float)mouse_position.x, (float)mouse_position.y };
-    add_mouse_text(TextFormat("mouse_position = [%d, %d]", mouse_position.x, mouse_position.y));
-
-    Vector2 mouse_tile_pos = Vector2Subtract(mpos, grid->px_offset);
-    add_mouse_text(TextFormat("mouse_tile_pos = [%d, %d]", (int)mouse_tile_pos.x, (int)mouse_tile_pos.y));
-
-    hex_axial_t mouse_hex = pixel_to_hex_axial(mouse_tile_pos, grid->tile_size);
-    grid_set_hover(grid, mouse_hex);
-
     grid_draw(grid);
 }
 
 static void draw_gui_widgets(void)
 {
+}
+
+static void draw_popup_text(void)
+{
+    float curtime = GetTime();
+    if (curtime < popup_text_active_until) {
+        float remaining = popup_text_active_until - curtime;
+        float fade = ease_quintic_in(remaining / popup_text_fade_time);
+        int corner_padding = 40;
+        int fade_font_size = 24;
+        int text_x = corner_padding;
+        int text_y = window_size.y - corner_padding - fade_font_size;
+        Color fade_text_color = ColorAlpha(popup_text_color, fade);
+        DrawText(popup_text, text_x, text_y, fade_font_size, fade_text_color);
+    }
 }
 
 static bool
@@ -348,49 +339,7 @@ render_frame(
         ClearBackground(BLACK);
         draw_tiles();
         draw_gui_widgets();
-
-        if (IsCursorOnScreen()) {
-            Vector2 center;
-            center.x = (float)mouse_position.x;
-            center.y = (float)mouse_position.y;
-
-            cursor_spin += cursor_spin_step;
-            while (cursor_spin >= 360.0) {
-                cursor_spin -= 360.0;
-            }
-            float spinosc = 0.5 * (sinf(3.0f * cursor_spin * M_PI / 180.0f) + 1.0);
-
-#define CURSOR_NUM_SECTORS 3
-#define CURSOR_SECTOR_SIZE (360.0f / CURSOR_NUM_SECTORS)
-#define CURSOR_RADIUS 12.0f
-#define CURSOR_INNER_RADIUS 4.0f
-
-            DrawRing(center,
-                     CURSOR_RADIUS,
-                     CURSOR_RADIUS + 1.5f,
-                     0.0f, 360.0f,
-                     0, cursor_outer_color);
-
-            for (int i=0; i<CURSOR_NUM_SECTORS; i++) {
-                float start_angle = ((float)i) * CURSOR_SECTOR_SIZE;
-                start_angle += cursor_spin;
-                float wedgesize = 2.5f + spinosc; // * 0.5;
-                float end_angle = start_angle + (CURSOR_SECTOR_SIZE/wedgesize);
-                DrawRing(center, CURSOR_INNER_RADIUS, CURSOR_RADIUS, start_angle, end_angle, 8, cursor_inner_color);
-            }
-        }
-
-        float curtime = GetTime();
-        if (curtime < popup_text_active_until) {
-            float remaining = popup_text_active_until - curtime;
-            float fade = ease_quintic_in(remaining / popup_text_fade_time);
-            int corner_padding = 40;
-            int fade_font_size = 24;
-            int text_x = corner_padding;
-            int text_y = window_size.y - corner_padding - fade_font_size;
-            Color fade_text_color = ColorAlpha(popup_text_color, fade);
-            DrawText(popup_text, text_x, text_y, fade_font_size, fade_text_color);
-        }
+        draw_popup_text();
 
         if (show_fps) {
             DrawTextShadow(TextFormat("FPS: %d", GetFPS()), 15, 10, 20, WHITE);
@@ -494,6 +443,8 @@ main(
     char *argv[]
 ) {
     progname = basename(argv[0]);
+
+    srand(time(NULL));
 
     options = create_options();
 
