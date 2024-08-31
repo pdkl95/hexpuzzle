@@ -36,7 +36,7 @@ enum hex_direction {
     HEX_DIR_DOWN       = 5
 };
 typedef enum hex_direction hex_direction_t;
-    
+
 /*
  * Axial Coordinates for hexagons
  */
@@ -76,6 +76,7 @@ Vector2 *hex_axial_pixel_edge_midpoints(hex_axial_t axial, float size);
 
 bool hex_axial_eq(hex_axial_t a, hex_axial_t b);
 
+hex_direction_t pixel_to_hex_axial_section(Vector2 p, float size);
 
 /*
  * Cube Coordinates for hexagons

@@ -51,8 +51,8 @@ static char usage_args[] = "";
 
 static char help_text[] =
     "\n"
-    "Mandelbrot Iterations\n"
-    "---------------------\n"
+    "Hex Puzzle\n"
+    "----------\n"
     "\n"
     "A hex-tile based puzzle game.\n"
     "\n"

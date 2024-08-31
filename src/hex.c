@@ -226,6 +226,17 @@ Vector2 *hex_axial_pixel_edge_midpoints(hex_axial_t axial, float size)
     return hex_pointy_top_pixel_corners(pos, size * SQRT_3_2);
 }
 
+hex_direction_t pixel_to_hex_axial_section(Vector2 p, float size)
+{
+    hex_axial_t axial = pixel_to_hex_axial(p, size);
+    Vector2 center = hex_axial_to_pixel(axial, size);
+    Vector2 relpos = Vector2Subtract(p, center);
+    float theta = atan2f(relpos.y, relpos.x);
+    if (theta < 0.0f) {
+        theta += TAU;
+    }
+    return (int)(theta / (TAU/6.0f));
+}
 
 /*** offset coordinate conversion ***/
 

@@ -164,15 +164,16 @@ do_resize(
 
     set_uniform_resolution();
     create_textures();
+    grid_resize(grid);
 
     window_size_changed = false;
     resize_time = 0;
 
     if (first_resize) {
         first_resize = false;
-        printf("resize: bypass\n");
+        infomsg("resize: bypass");
     } else {
-        printf("resize: request mandel redraw\n");
+        infomsg("resize: request redraw");
     }
 }
 
@@ -257,6 +258,10 @@ handle_events(
         if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
             grid_drag_stop(grid);
         }
+
+        if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+            grid_cycle_path(grid);
+        }
     }
 
     if (options->wait_events) {
@@ -330,6 +335,19 @@ static void draw_popup_text(void)
     }
 }
 
+static void draw_cartesian_grid(void)
+{
+    for (int x=0; x<window_size.x; x += 100) {
+        DrawLine(x, 0, x, window_size.y, DARKPURPLE);
+        DrawText(TextFormat("%d", x), (float)x + 3.0, 8.0, 16, YELLOW);
+    }
+
+    for (int y=0; y<window_size.y; y += 100) {
+        DrawLine(0, y, window_size.x, y, DARKPURPLE);
+        DrawText(TextFormat("%d", y), 3.0, (float)y + 3.9, 16, YELLOW);
+    }
+}
+
 static bool
 render_frame(
     void
@@ -337,6 +355,7 @@ render_frame(
     BeginDrawing();
     {
         ClearBackground(BLACK);
+        draw_cartesian_grid();
         draw_tiles();
         draw_gui_widgets();
         draw_popup_text();
@@ -389,7 +408,7 @@ void gfx_init(void)
     //flags |= FLAG_MSAA_4X_HINT;
     SetConfigFlags(flags);
 
-    InitWindow(window_size.x, window_size.y, "Mandelbrot Iterations");
+    InitWindow(window_size.x, window_size.y, "Hex Puzzle");
     SetWindowMinSize(OPTIONS_WINDOW_MIN_WIDTH,
                      OPTIONS_WINDOW_MIN_HEIGHT);
     SetWindowMaxSize(OPTIONS_WINDOW_MAX_WIDTH,

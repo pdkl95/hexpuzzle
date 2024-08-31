@@ -20,6 +20,7 @@
  ****************************************************************************/
 
 #include "common.h"
+#include "raylib_helper.h"
 #include "tile.h"
 #include "grid.h"
 
@@ -68,7 +69,7 @@ grid_t *create_grid(int radius)
     grid->tile_grid_height = (2 * radius) + 1;
     grid->maxtiles = grid->tile_grid_width * grid->tile_grid_height;
 
-    grid->tile_size = 40.0f;
+    grid->tile_size = 60.0f;
 
     grid->hover = NULL;
 
@@ -76,12 +77,6 @@ grid_t *create_grid(int radius)
 
     grid->center.q = radius;
     grid->center.r = radius;
-
-    grid->px_min.x = (float)window_size.x;
-    grid->px_min.y = (float)window_size.y;
-
-    grid->px_max.x = 0.0f;
-    grid->px_max.y = 0.0f;
 
     for (int q=0; q<grid->tile_grid_width; q++) {
         for (int r=0; r<grid->tile_grid_height; r++) {
@@ -92,8 +87,29 @@ grid_t *create_grid(int radius)
             if (hex_axial_distance(pos, grid->center) <= radius) {
                 tile_t *tile = grid_get_tile(grid, pos);
                 init_tile(tile, pos);
-                grid_add_to_bounding_box(grid, tile);
             }
+        }
+    }
+
+    grid_resize(grid);
+
+    return grid;
+}
+
+void grid_resize(grid_t *grid)
+{
+    assert_not_null(grid);
+
+    grid->px_min.x = (float)window_size.x * 10.0;
+    grid->px_min.y = (float)window_size.y * 10.0;
+
+    grid->px_max.x = 0.0f;
+    grid->px_max.y = 0.0f;
+
+    for (int i=0; i<grid->maxtiles; i++) {
+        tile_t *tile = &grid->tiles[i];
+        if (tile->enabled) {
+            grid_add_to_bounding_box(grid, tile);
         }
     }
 
@@ -105,7 +121,17 @@ grid_t *create_grid(int radius)
     grid->px_offset.x = ((float)window_size.x - grid->px_bounding_box.width)  / 2;
     grid->px_offset.y = ((float)window_size.y - grid->px_bounding_box.height) / 2;
 
-    return grid;
+    grid->px_offset.x -= grid->px_bounding_box.x;
+    grid->px_offset.y -= grid->px_bounding_box.y;
+
+#if 0
+    printf("window_size = (%d x %d)\n", window_size.x, window_size.y);
+    printf("px_min = [ %f, %f ]\n", grid->px_min.x, grid->px_min.y);
+    printf("px_max = [ %f, %f ]\n", grid->px_max.x, grid->px_max.y);
+    printf("px_bounding_box:\n");
+    printrect(grid->px_bounding_box);
+    printf("px_offset = [ %f, %f ]\n", grid->px_offset.x, grid->px_offset.y);
+#endif
 }
 
 void destroy_grid(grid_t *grid)
@@ -150,6 +176,7 @@ void grid_set_hover(grid_t *grid, IVector2 mouse_position)
 {
     if (grid) {
         if (grid->hover) {
+            tile_unset_hover(grid->hover);
             grid->hover->hover = false;
         }
 
@@ -169,7 +196,7 @@ void grid_set_hover(grid_t *grid, IVector2 mouse_position)
         grid->hover = grid_get_tile(grid, mouse_hex);
 
         if (grid->hover) {
-            grid->hover->hover = true;
+            tile_set_hover(grid->hover, grid->mouse_pos, grid->tile_size);
         }
     }
 }
@@ -211,6 +238,14 @@ void grid_drag_stop(grid_t *grid)
         }
 
         grid->drag_target = NULL;
+    }
+}
+
+void grid_cycle_path(grid_t *grid)
+{
+    assert_not_null(grid);
+    if (grid->hover) {
+        tile_cycle_hovered_path_section(grid->hover);
     }
 }
 

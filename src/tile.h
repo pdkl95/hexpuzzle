@@ -43,6 +43,7 @@ struct tile {
     path_type_t path[6];
 
     bool hover;
+    hex_direction_t hover_section;
 };
 typedef struct tile tile_t;
 
@@ -53,6 +54,12 @@ void destroy_tile(tile_t *tile);
 void tile_draw(tile_t *tile, float tile_size, bool drqg);
 
 Vector2 *tile_corners(tile_t *tile, float tile_size);
+
+void tile_set_hover(tile_t *tile, Vector2 mouse_pos, float tile_size);
+void tile_unset_hover(tile_t *tile);
+
+void tile_cycle_path_section(tile_t *tile, hex_direction_t section;);
+void tile_cycle_hovered_path_section(tile_t *tile);
 
 #endif /*TILE_H*/
 

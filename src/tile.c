@@ -92,6 +92,30 @@ Vector2 *tile_corners(tile_t *tile, float tile_size)
     return hex_pixel_corners(pos, tile_size);
 }
 
+void tile_set_hover(tile_t *tile, Vector2 mouse_pos, float tile_size)
+{
+    tile->hover = true;
+    tile->hover_section = pixel_to_hex_axial_section(mouse_pos, tile_size);
+}
+
+void tile_unset_hover(tile_t *tile)
+{
+    tile->hover = false;
+}
+
+void tile_cycle_path_section(tile_t *tile, hex_direction_t section)
+{
+    tile->path[section]++;
+    if (tile->path[section] > PATH_TYPE_MAX) {
+        tile->path[section] = PATH_TYPE_NONE;
+    }
+}
+
+void tile_cycle_hovered_path_section(tile_t *tile)
+{
+    tile_cycle_path_section(tile, tile->hover_section);
+}
+
 void tile_draw(tile_t *tile, float tile_size, bool drag)
 {
     assert_not_null(tile);
@@ -104,6 +128,13 @@ void tile_draw(tile_t *tile, float tile_size, bool drag)
              : (tile->hover
                 ? tile_bg_hover_color
                 : tile_bg_color));
+
+    if (tile->hover) {
+        Vector2 *corners = hex_pixel_corners(pos, tile_size);
+        Vector2 c1 = corners[tile->hover_section];
+        Vector2 c2 = corners[tile->hover_section + 1];
+        DrawTriangle(pos, c1, c2, ColorAlpha(YELLOW, 0.3));
+    }
 
     Vector2 *midpoints = hex_axial_pixel_edge_midpoints(tile->position, tile_size);
     for (int i=0; i<6; i++) {
@@ -125,17 +156,10 @@ void tile_draw(tile_t *tile, float tile_size, bool drag)
         return;
     }
 
-    int font_size = 13;
-
-    DrawTextDropShadow("q=", pos.x - 16, pos.y - 22, font_size, ColorAlpha(ORANGE, 0.7), BLACK);
-
-    DrawTextDropShadow("r=", pos.x - 6, pos.y + 8, font_size, ColorAlpha(PINK, 0.7), BLACK);
-
-    font_size = 15;
-    DrawTextDropShadow(TextFormat("%d", tile->position.q),
-             pos.x, pos.y - 23, font_size, ORANGE, BLACK);
-
-    DrawTextDropShadow(TextFormat("%d", tile->position.r),
-             pos.x, pos.y + 7, font_size, PINK, BLACK);
+    /* show each hex's axial coordinates */
+    int font_size = 14;
+    const char *coord_text = TextFormat("%d,%d", tile->position.q, tile->position.r);
+    int text_width = MeasureText(coord_text, font_size);
+    DrawTextDropShadow(coord_text, pos.x - (text_width/2), pos.y + 14, font_size, WHITE, BLACK);
 #endif
 }
