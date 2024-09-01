@@ -36,11 +36,24 @@ typedef enum path_type path_type_t;
 
 Color path_type_color(path_type_t type);
 
+struct tile_section {
+    Vector2 corners[3];
+};
+typedef struct tile_section tile_section_t;
+
 struct tile {
     bool enabled;
+    bool fixed;
 
     hex_axial_t position;
     path_type_t path[6];
+
+    float size;
+
+    Vector2 center;
+    Vector2 corners[7];
+    Vector2 midpoints[7];
+    tile_section_t sections[6];
 
     bool hover;
     hex_direction_t hover_section;
@@ -51,11 +64,10 @@ tile_t *init_tile(tile_t *tile, hex_axial_t pos);
 tile_t *create_tile(void);
 void destroy_tile(tile_t *tile);
 
-void tile_draw(tile_t *tile, float tile_size, bool drqg);
+void tile_set_size(tile_t *tile, float tile_size);
+void tile_draw(tile_t *tile, bool drqg);
 
-Vector2 *tile_corners(tile_t *tile, float tile_size);
-
-void tile_set_hover(tile_t *tile, Vector2 mouse_pos, float tile_size);
+void tile_set_hover(tile_t *tile, Vector2 mouse_pos);
 void tile_unset_hover(tile_t *tile);
 
 void tile_cycle_path_section(tile_t *tile, hex_direction_t section;);

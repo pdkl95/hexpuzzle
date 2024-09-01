@@ -49,6 +49,9 @@ struct grid {
     tile_t *drag_target;
     Vector2 drag_start;
     Vector2 drag_offset;
+    int drag_reset_frames;
+    int drag_reset_total_frames;
+    Vector2 drag_reset_vector;
 };
 typedef struct grid grid_t;
 

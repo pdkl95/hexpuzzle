@@ -65,6 +65,7 @@ tile_t *init_tile(tile_t *tile, hex_axial_t pos)
     assert_not_null(tile);
 
     tile->enabled = true;
+    tile->fixed = false;
     tile->position = pos;
 
     for (int i=0; i<6; i++) {
@@ -86,16 +87,14 @@ void destroy_tile(tile_t *tile)
     SAFEFREE(tile);
 }
 
-Vector2 *tile_corners(tile_t *tile, float tile_size)
+void tile_set_hover(tile_t *tile, Vector2 mouse_pos)
 {
-    Vector2 pos = hex_axial_to_pixel(tile->position, tile_size);
-    return hex_pixel_corners(pos, tile_size);
-}
-
-void tile_set_hover(tile_t *tile, Vector2 mouse_pos, float tile_size)
-{
+    Vector2 relvec = Vector2Subtract(mouse_pos, tile->center);
+    float theta = atan2f(-relvec.y, -relvec.x);
+    theta += TAU/2.0;
+    theta = TAU - theta;
     tile->hover = true;
-    tile->hover_section = pixel_to_hex_axial_section(mouse_pos, tile_size);
+    tile->hover_section = (int)(theta/TO_RADIANS(60.0));
 }
 
 void tile_unset_hover(tile_t *tile)
@@ -116,40 +115,74 @@ void tile_cycle_hovered_path_section(tile_t *tile)
     tile_cycle_path_section(tile, tile->hover_section);
 }
 
-void tile_draw(tile_t *tile, float tile_size, bool drag)
+void tile_set_size(tile_t *tile, float tile_size)
+{
+    tile->size = tile_size;
+    tile->center = hex_axial_to_pixel(tile->position, tile->size);
+
+    Vector2 *corners = hex_pixel_corners(tile->center, tile->size);
+    memcpy(tile->corners, corners, 7 * sizeof(Vector2));
+
+    Vector2 cent = Vector2Lerp(tile->midpoints[0], tile->midpoints[3], 0.5);
+
+    for (int i=0; i<6; i++) {
+        Vector2 c0 = tile->corners[i];
+        Vector2 c1 = tile->corners[i + 1];
+
+        tile->midpoints[i] = Vector2Lerp(c0, c1, 0.5);
+
+        tile->sections[i].corners[0] = c0;
+        tile->sections[i].corners[1] = c1;
+        tile->sections[i].corners[2] = cent;
+    }
+}
+
+void tile_draw(tile_t *tile, bool drag)
 {
     assert_not_null(tile);
 
-    Vector2 pos = hex_axial_to_pixel(tile->position, tile_size);
-
-    DrawPoly(pos, 6, tile_size, 0.0f,
-             drag
-             ? tile_bg_drag_color
-             : (tile->hover
-                ? tile_bg_hover_color
-                : tile_bg_color));
+    if (!tile->fixed) {
+        /* background */
+        DrawPoly(tile->center, 6, tile->size, 0.0f,
+                 drag
+                 ? tile_bg_drag_color
+                 : (tile->hover
+                    ? tile_bg_hover_color
+                    : tile_bg_color));
+    }
 
     if (tile->hover) {
-        Vector2 *corners = hex_pixel_corners(pos, tile_size);
-        Vector2 c1 = corners[tile->hover_section];
-        Vector2 c2 = corners[tile->hover_section + 1];
-        DrawTriangle(pos, c1, c2, ColorAlpha(YELLOW, 0.3));
+        /* section highlight */
+        tile_section_t sec = tile->sections[tile->hover_section];
+        DrawTriangle(sec.corners[0], sec.corners[1], sec.corners[2], ColorAlpha(YELLOW, 0.3));
     }
 
-    Vector2 *midpoints = hex_axial_pixel_edge_midpoints(tile->position, tile_size);
+    float line_width = tile->size / 6.0;
     for (int i=0; i<6; i++) {
-        DrawLineEx(pos, midpoints[i], 5.0, path_type_color(tile->path[i]));
+        /* colored strips */
+        Vector2 mid = tile->midpoints[i];
+        DrawLineEx(tile->center, mid, line_width, path_type_color(tile->path[i]));
+
+#if 0
+        /* section index label */
+        Vector2 offset = Vector2Scale(Vector2Subtract(tile->center, mid), 0.2);;
+        Vector2 mlabel = Vector2Add(mid, offset);
+        DrawTextShadow(TextFormat("%d", i), mlabel.x - 5, mlabel.y - 9, 18, RAYWHITE);
+#endif
     }
 
-    DrawPolyLinesEx(pos, 6, tile_size, 0.0f, 2.0f,
-                    drag
-                    ? tile_edge_drag_color
-                    : (tile->hover
-                       ? tile_edge_hover_color
-                       : tile_edge_color));
+    if (!tile->fixed) {
+        /* border */
+        DrawPolyLinesEx(tile->center, 6, tile->size, 0.0f, 2.0f,
+                        drag
+                        ? tile_edge_drag_color
+                        : (tile->hover
+                           ? tile_edge_hover_color
+                           : tile_edge_color));
+    }
 
-
-    DrawCircleV(pos, tile_size / 6.0, tile_center_color);
+    float center_circle_radius = line_width * 1.2;
+    DrawCircleV(tile->center, center_circle_radius, tile_center_color);
 
 #if 0
     if (drag) {
@@ -160,6 +193,6 @@ void tile_draw(tile_t *tile, float tile_size, bool drag)
     int font_size = 14;
     const char *coord_text = TextFormat("%d,%d", tile->position.q, tile->position.r);
     int text_width = MeasureText(coord_text, font_size);
-    DrawTextDropShadow(coord_text, pos.x - (text_width/2), pos.y + 14, font_size, WHITE, BLACK);
+    DrawTextDropShadow(coord_text, tile->center.x - (text_width/2), tile->center.y + 14, font_size, WHITE, BLACK);
 #endif
 }

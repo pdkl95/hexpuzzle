@@ -46,7 +46,7 @@ static int grid_tile_storage_location(grid_t *grid, hex_axial_t axial)
 
 static void grid_add_to_bounding_box(grid_t *grid, tile_t *tile)
 {
-    Vector2 *corners = tile_corners(tile, grid->tile_size);
+    Vector2 *corners = tile->corners;
     for (int i=0; i<6; i++) {
         grid->px_min.x = MIN(grid->px_min.x, corners[i].x);
         grid->px_min.y = MIN(grid->px_min.y, corners[i].y);
@@ -71,6 +71,9 @@ grid_t *create_grid(int radius)
 
     grid->tile_size = 60.0f;
 
+    grid->drag_reset_total_frames = 12;
+    grid->drag_reset_frames = 0;
+
     grid->hover = NULL;
 
     grid->tiles = calloc(grid->maxtiles, sizeof(tile_t));
@@ -93,6 +96,8 @@ grid_t *create_grid(int radius)
 
     grid_resize(grid);
 
+    grid->tiles[7].fixed = true;
+
     return grid;
 }
 
@@ -109,6 +114,7 @@ void grid_resize(grid_t *grid)
     for (int i=0; i<grid->maxtiles; i++) {
         tile_t *tile = &grid->tiles[i];
         if (tile->enabled) {
+            tile_set_size(tile, grid->tile_size);
             grid_add_to_bounding_box(grid, tile);
         }
     }
@@ -184,7 +190,17 @@ void grid_set_hover(grid_t *grid, IVector2 mouse_position)
         grid->mouse_pos.y = (float)mouse_position.y;
 
         if (grid->drag_target) {
-            grid->drag_offset = Vector2Subtract(grid->mouse_pos, grid->drag_start);
+            if (grid->drag_reset_frames > 0) {
+                float reset_fract = ((float)grid->drag_reset_frames) / ((float)grid->drag_reset_total_frames);
+                reset_fract = ease_exponential_in(reset_fract);
+                grid->drag_offset = Vector2Scale(grid->drag_reset_vector, reset_fract);
+                grid->drag_reset_frames--;
+                if (0 == grid->drag_reset_frames) {
+                    grid->drag_target = NULL;
+                }
+            } else {
+                grid->drag_offset = Vector2Subtract(grid->mouse_pos, grid->drag_start);
+            }
         } else {
             grid->drag_offset.x = 0.0f;
             grid->drag_offset.y = 0.0f;
@@ -196,7 +212,7 @@ void grid_set_hover(grid_t *grid, IVector2 mouse_position)
         grid->hover = grid_get_tile(grid, mouse_hex);
 
         if (grid->hover) {
-            tile_set_hover(grid->hover, grid->mouse_pos, grid->tile_size);
+            tile_set_hover(grid->hover, Vector2Subtract(grid->mouse_pos, grid->px_offset));
         }
     }
 }
@@ -210,8 +226,10 @@ void grid_drag_start(grid_t *grid)
     }
 
     if (grid->hover) {
-        grid->drag_target = grid->hover;
-        grid->drag_start  = grid->mouse_pos; 
+        if (!grid->hover->fixed) {
+            grid->drag_target = grid->hover;
+            grid->drag_start  = grid->mouse_pos;
+        }
     }
 }
 
@@ -224,8 +242,10 @@ void grid_drop_tile(grid_t *grid, tile_t *drag_target, tile_t *drop_target)
     assert(drag_target->enabled);
     assert(drop_target->enabled);
 
-    grid_swap(grid, drag_target, drop_target);
-    grid_check(grid);
+    if (!drop_target->fixed) {
+        grid_swap(grid, drag_target, drop_target);
+        grid_check(grid);
+    }
 }
 
 void grid_drag_stop(grid_t *grid)
@@ -233,11 +253,19 @@ void grid_drag_stop(grid_t *grid)
     assert_not_null(grid);
 
     if (grid->drag_target) {
-        if (grid->hover) {
-            grid_drop_tile(grid, grid->drag_target, grid->hover);
-        }
+        tile_t *drop_target = grid->hover;
 
-        grid->drag_target = NULL;
+        if (drop_target && !drop_target->fixed) {
+            printf("drag_stop(): drop target\n");
+            grid_drop_tile(grid, grid->drag_target, drop_target);
+            grid->drag_target = NULL;
+        } else {
+            printf("drag_stop(): reset\n");
+            grid->drag_reset_frames = grid->drag_reset_total_frames;;
+            grid->drag_reset_vector = grid->drag_offset;
+        }
+    } else {
+        printf("drag_stop(): missing drag target\n");
     }
 }
 
@@ -266,7 +294,7 @@ void grid_draw(grid_t *grid)
             if (tile == grid->drag_target) {
                 // defer ubtil after bg tiles are drawn
             } else {
-                tile_draw(tile, grid->tile_size, false);
+                tile_draw(tile, false);
             }
         }
     }
@@ -278,7 +306,7 @@ void grid_draw(grid_t *grid)
                      grid->drag_offset.y,
                      0.0);
 
-        tile_draw(grid->drag_target, grid->tile_size, true);
+        tile_draw(grid->drag_target, true);
 
         rlPopMatrix();
     }
