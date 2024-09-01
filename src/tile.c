@@ -26,8 +26,8 @@
 Vector2 tile_origin;
 
 Color tile_bg_color           = { 0x32, 0x32, 0x32, 0xff };
-Color tile_bg_hover_color     = { 0x50, 0x50, 0x50, 0xff };
-Color tile_bg_drag_color      = { 0x40, 0x40, 0x40, 0xff };
+Color tile_bg_hover_color     = { 0x40, 0x40, 0x40, 0xff };
+Color tile_bg_drag_color      = { 0x3b, 0x3b, 0x3b, 0xff };
 Color tile_center_color       = { 0x70, 0x70, 0x70, 0xff };
 Color tile_center_color_hover = { 0x90, 0x90, 0x90, 0xff };
 Color tile_edge_color         = { 0x18, 0x18, 0x18, 0xff };
@@ -151,7 +151,7 @@ void tile_draw(tile_t *tile, bool drag)
                     : tile_bg_color));
     }
 
-    if (tile->hover) {
+    if (edit_mode && tile->hover) {
         /* section highlight */
         tile_section_t sec = tile->sections[tile->hover_section];
         DrawTriangle(sec.corners[0], sec.corners[1], sec.corners[2], ColorAlpha(YELLOW, 0.3));

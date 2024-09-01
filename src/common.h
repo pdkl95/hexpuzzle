@@ -102,5 +102,6 @@ static inline Vector2 ivector2_to_vector2(IVector2 ivec)
 }
 
 extern IVector2 window_size;
+extern bool edit_mode;
 
 #endif /*COMMON_H*/
