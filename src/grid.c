@@ -160,19 +160,6 @@ tile_t *grid_get_tile(grid_t *grid, hex_axial_t axial)
     }
 }
 
-void grid_swap(grid_t *grid, tile_t *a, tile_t *b)
-{
-    assert_not_null(grid);
-    assert_not_null(a);
-    assert_not_null(b);
-
-    for (int i=0; i<6; i++) {
-        path_type_t tmp = a->path[i];
-        a->path[i] = b->path[i];
-        b->path[i] = tmp;
-    }
-}
-
 void grid_check(grid_t *grid)
 {
     assert_not_null(grid);
@@ -243,7 +230,7 @@ void grid_drop_tile(grid_t *grid, tile_t *drag_target, tile_t *drop_target)
     assert(drop_target->enabled);
 
     if (!drop_target->fixed) {
-        grid_swap(grid, drag_target, drop_target);
+        tile_swap_attributes(drag_target, drop_target);
         grid_check(grid);
     }
 }
@@ -269,11 +256,11 @@ void grid_drag_stop(grid_t *grid)
     }
 }
 
-void grid_cycle_path(grid_t *grid)
+void grid_modify_hovered_feature(grid_t *grid)
 {
     assert_not_null(grid);
     if (grid->hover) {
-        tile_cycle_hovered_path_section(grid->hover);
+        tile_modify_hovered_feature(grid->hover);
     }
 }
 
@@ -294,7 +281,7 @@ void grid_draw(grid_t *grid)
             if (tile == grid->drag_target) {
                 // defer ubtil after bg tiles are drawn
             } else {
-                tile_draw(tile, false);
+                tile_draw(tile, grid->drag_target);
             }
         }
     }
@@ -306,7 +293,7 @@ void grid_draw(grid_t *grid)
                      grid->drag_offset.y,
                      0.0);
 
-        tile_draw(grid->drag_target, true);
+        tile_draw(grid->drag_target, grid->drag_target);
 
         rlPopMatrix();
     }

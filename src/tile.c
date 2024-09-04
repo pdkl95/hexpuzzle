@@ -28,11 +28,15 @@ Vector2 tile_origin;
 Color tile_bg_color           = { 0x32, 0x32, 0x32, 0xff };
 Color tile_bg_hover_color     = { 0x40, 0x40, 0x40, 0xff };
 Color tile_bg_drag_color      = { 0x3b, 0x3b, 0x3b, 0xff };
+Color tile_bg_hidden_color    = { 0x32, 0x32, 0x32, 0x33 };
 Color tile_center_color       = { 0x70, 0x70, 0x70, 0xff };
 Color tile_center_color_hover = { 0x90, 0x90, 0x90, 0xff };
 Color tile_edge_color         = { 0x18, 0x18, 0x18, 0xff };
 Color tile_edge_hover_color   = { 0xaa, 0xaa, 0xaa, 0xff };
 Color tile_edge_drag_color    = { 0x77, 0x77, 0x77, 0xff };
+Color tile_edge_hidden_color  = { 0xe9, 0xdf, 0x9c, 0x44 };
+
+Color tile_bg_highlight_color = { 0xfd, 0xf9, 0x00, 0x4c };
 
 Color path_color_none   = { 0, 0, 0, 0 };
 Color path_color_red    = RED;
@@ -66,6 +70,8 @@ tile_t *init_tile(tile_t *tile, hex_axial_t pos)
 
     tile->enabled = true;
     tile->fixed = false;
+    tile->hidden = false;
+
     tile->position = pos;
 
     for (int i=0; i<6; i++) {
@@ -87,37 +93,95 @@ void destroy_tile(tile_t *tile)
     SAFEFREE(tile);
 }
 
+void tile_copy_attributes(tile_t *dst, tile_t *src)
+{
+    assert_not_null(dst);
+    assert_not_null(src);
+
+    dst->enabled = src->enabled;
+    dst->fixed   = src->fixed;
+    dst->hidden  = src->hidden;
+
+    for (int i=0; i<6; i++) {
+        dst->path[i] = src->path[i];
+    }
+}
+
+void tile_swap_attributes(tile_t *a, tile_t *b)
+{
+    assert_not_null(a);
+    assert_not_null(b);
+
+    tile_t tmp;
+    tile_copy_attributes(&tmp, a);
+    tile_copy_attributes(a, b);
+    tile_copy_attributes(b, &tmp);
+}
+
 void tile_set_hover(tile_t *tile, Vector2 mouse_pos)
 {
+    assert_not_null(tile);
+
     Vector2 relvec = Vector2Subtract(mouse_pos, tile->center);
     float theta = atan2f(-relvec.y, -relvec.x);
     theta += TAU/2.0;
     theta = TAU - theta;
     tile->hover = true;
     tile->hover_section = (int)(theta/TO_RADIANS(60.0));
+    tile->hover_center =
+        (Vector2DistanceSqr(mouse_pos, tile->center)
+         < (tile->center_circle_hover_radius *
+            tile->center_circle_hover_radius));
 }
 
 void tile_unset_hover(tile_t *tile)
 {
+    assert_not_null(tile);
+
     tile->hover = false;
+    tile->hover_center = false;
+}
+
+void tile_toggle_hidden(tile_t *tile)
+{
+    assert_not_null(tile);
+
+    tile->hidden = !tile->hidden;
 }
 
 void tile_cycle_path_section(tile_t *tile, hex_direction_t section)
 {
+    assert_not_null(tile);
+
     tile->path[section]++;
     if (tile->path[section] > PATH_TYPE_MAX) {
         tile->path[section] = PATH_TYPE_NONE;
     }
 }
 
-void tile_cycle_hovered_path_section(tile_t *tile)
+void tile_modify_hovered_feature(tile_t *tile)
 {
-    tile_cycle_path_section(tile, tile->hover_section);
+    assert_not_null(tile);
+
+    if (tile->hidden) {
+        tile_toggle_hidden(tile);
+    } else {
+        if (tile->hover_center) {
+            tile_toggle_hidden(tile);
+        } else {
+            tile_cycle_path_section(tile, tile->hover_section);
+        }
+    }
 }
 
 void tile_set_size(tile_t *tile, float tile_size)
 {
+    assert_not_null(tile);
+
     tile->size = tile_size;
+    tile->line_width = tile->size / 6.0;
+    tile->center_circle_draw_radius = tile->line_width * 1.2;
+    tile->center_circle_hover_radius = tile->line_width * 1.6;
     tile->center = hex_axial_to_pixel(tile->position, tile->size);
 
     Vector2 *corners = hex_pixel_corners(tile->center, tile->size);
@@ -137,9 +201,29 @@ void tile_set_size(tile_t *tile, float tile_size)
     }
 }
 
-void tile_draw(tile_t *tile, bool drag)
+void tile_draw(tile_t *tile, tile_t *drag_target)
 {
     assert_not_null(tile);
+    /* drag_target CAN be NULL */
+
+    bool drag = (tile == drag_target);
+    bool dragged_over = (!drag && drag_target && tile->hover);
+
+    if (tile->hidden) {
+        if (edit_mode) {
+            float hiddensize = tile->size - (tile->size * 0.08);
+            DrawPoly(tile->center, 6, hiddensize, 0.0f,
+                     dragged_over
+                     ? tile_bg_hover_color
+                     : tile_bg_hidden_color);
+            DrawPolyLinesEx(tile->center, 6, hiddensize, 0.0f, 2.0f,
+                            dragged_over
+                            ? tile_edge_hover_color
+                            : tile_edge_hidden_color);
+        }
+
+        return;
+    }
 
     if (!tile->fixed) {
         /* background */
@@ -151,17 +235,20 @@ void tile_draw(tile_t *tile, bool drag)
                     : tile_bg_color));
     }
 
-    if (edit_mode && tile->hover) {
+    if (edit_mode &&
+        tile->hover &&
+        !tile->hover_center &&
+        !drag_target
+    ) {
         /* section highlight */
         tile_section_t sec = tile->sections[tile->hover_section];
-        DrawTriangle(sec.corners[0], sec.corners[1], sec.corners[2], ColorAlpha(YELLOW, 0.3));
+        DrawTriangle(sec.corners[0], sec.corners[1], sec.corners[2], tile_bg_highlight_color);
     }
 
-    float line_width = tile->size / 6.0;
     for (int i=0; i<6; i++) {
         /* colored strips */
         Vector2 mid = tile->midpoints[i];
-        DrawLineEx(tile->center, mid, line_width, path_type_color(tile->path[i]));
+        DrawLineEx(tile->center, mid, tile->line_width, path_type_color(tile->path[i]));
 
 #if 0
         /* section index label */
@@ -181,8 +268,10 @@ void tile_draw(tile_t *tile, bool drag)
                            : tile_edge_color));
     }
 
-    float center_circle_radius = line_width * 1.2;
-    DrawCircleV(tile->center, center_circle_radius, tile_center_color);
+    DrawCircleV(tile->center, tile->center_circle_draw_radius, tile_center_color);
+if (tile->hover_center) {
+    DrawCircleV(tile->center, tile->center_circle_draw_radius, tile_bg_highlight_color);
+}
 
 #if 0
     if (drag) {

@@ -42,13 +42,23 @@ struct tile_section {
 typedef struct tile_section tile_section_t;
 
 struct tile {
+    /*
+     * game attr
+     */
     bool enabled;
     bool fixed;
-
-    hex_axial_t position;
+    bool hidden;
     path_type_t path[6];
 
+    /*
+     * drawing/ui attr
+     */
+    hex_axial_t position;
+
     float size;
+    float line_width;
+    float center_circle_draw_radius;
+    float center_circle_hover_radius;
 
     Vector2 center;
     Vector2 corners[7];
@@ -56,6 +66,7 @@ struct tile {
     tile_section_t sections[6];
 
     bool hover;
+    bool hover_center;
     hex_direction_t hover_section;
 };
 typedef struct tile tile_t;
@@ -64,14 +75,17 @@ tile_t *init_tile(tile_t *tile, hex_axial_t pos);
 tile_t *create_tile(void);
 void destroy_tile(tile_t *tile);
 
+void tile_copy_attributes(tile_t *dst, tile_t *src);
+void tile_swap_attributes(tile_t *a, tile_t *b);
+
 void tile_set_size(tile_t *tile, float tile_size);
-void tile_draw(tile_t *tile, bool drqg);
+void tile_draw(tile_t *tile, tile_t *drag_target);
 
 void tile_set_hover(tile_t *tile, Vector2 mouse_pos);
 void tile_unset_hover(tile_t *tile);
 
 void tile_cycle_path_section(tile_t *tile, hex_direction_t section;);
-void tile_cycle_hovered_path_section(tile_t *tile);
+void tile_modify_hovered_feature(tile_t *tile);
 
 #endif /*TILE_H*/
 

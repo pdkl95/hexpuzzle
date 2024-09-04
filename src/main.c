@@ -71,7 +71,7 @@ Color CGOLD              = { 0xFF, 0xD7, 0x00, 255 };
 Color cursor_outer_color;
 Color cursor_inner_color;
 
-bool edit_mode = false;
+bool edit_mode = true;
 grid_t *grid = NULL;
 
 #define MOUSE_TEXT_MAX_LINES 8
@@ -262,7 +262,7 @@ handle_events(
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
             if (edit_mode) {
-                grid_cycle_path(grid);
+                grid_modify_hovered_feature(grid);
             }
         }
     }

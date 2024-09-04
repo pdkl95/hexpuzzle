@@ -63,7 +63,7 @@ tile_t *grid_get_tile(grid_t *grid, hex_axial_t axial);
 void grid_set_hover(grid_t *grid, IVector2 mouse_position);
 void grid_drag_start(grid_t *grid);
 void grid_drag_stop(grid_t *grid);
-void grid_cycle_path(grid_t *grid);
+void grid_modify_hovered_feature(grid_t *grid);
 
 #endif /*GRID_H*/
 
