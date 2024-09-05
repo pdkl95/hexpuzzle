@@ -42,6 +42,7 @@
 const char *progversion = PACKAGE_VERSION;
 const char *progname    = PACKAGE_NAME;
 
+bool running = true;
 options_t *options = NULL;
 bool event_waiting_active = false;
 bool window_size_changed = false;
@@ -82,6 +83,8 @@ char mouse_text[MOUSE_TEXT_MAX_LINES][MOUSE_TEXT_MAX_LINE_LENGTH];
 int mouse_text_idx = 0;
 int mouse_text_max_line_length = 0;
 int mouse_text_font_size = 20;
+
+void gui_setup(void);
 
 #define print_popup(...) {                                          \
         popup_text = TextFormat(__VA_ARGS__);                       \
@@ -172,6 +175,7 @@ do_resize(
     set_uniform_resolution();
     create_textures();
     grid_resize(grid);
+    gui_setup();
 
     window_size_changed = false;
     resize_time = 0;
@@ -341,8 +345,46 @@ static void draw_tiles(void)
     grid_draw(grid);
 }
 
+#ifndef RAYGUI_ICON_SIZE
+#define RAYGUI_ICON_SIZE 16
+#endif
+
+#define WINDOW_MARGIN RAYGUI_ICON_SIZE
+
+#define BUTTON_MARGIN 4
+#define ICON_BUTTON_SIZE (RAYGUI_ICON_SIZE + (2 * BUTTON_MARGIN))
+
+Rectangle close_button_rect;
+Rectangle edit_button_rect;
+char close_button_text[6];
+char edit_button_text[6];
+
+void gui_setup(void)
+{
+    close_button_rect.x      = window_size.x - WINDOW_MARGIN - ICON_BUTTON_SIZE;
+    close_button_rect.y      = WINDOW_MARGIN;
+    close_button_rect.width  = ICON_BUTTON_SIZE;
+    close_button_rect.height = ICON_BUTTON_SIZE;
+
+    memcpy(close_button_text, GuiIconText(ICON_CROSS, NULL), 6);
+
+    edit_button_rect.x      = window_size.x - WINDOW_MARGIN - ICON_BUTTON_SIZE;
+    edit_button_rect.y      = close_button_rect.y + close_button_rect.height + WINDOW_MARGIN;
+    edit_button_rect.width  = ICON_BUTTON_SIZE;
+    edit_button_rect.height = ICON_BUTTON_SIZE;
+    
+    memcpy(edit_button_text,  GuiIconText(ICON_TOOLS, NULL), 6);
+}
+
 static void draw_gui_widgets(void)
 {
+    if (GuiButton(close_button_rect, close_button_text)) {
+        running = false;
+    }
+
+    if (GuiButton(edit_button_rect, edit_button_text)) {
+        edit_mode = !edit_mode;
+    }
 }
 
 static void draw_popup_text(void)
@@ -416,7 +458,7 @@ main_event_loop(
 ) {
     //infomsg("Entering main event loop...");
 
-    while (true) {
+    while (running) {
         if (window_size_changed) {
             resize();
         }
@@ -431,6 +473,8 @@ main_event_loop(
 
         frame_count += 1;
     };
+
+    return true;
 }
 
 void gfx_init(void)
