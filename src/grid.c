@@ -246,16 +246,22 @@ void grid_drag_stop(grid_t *grid)
         tile_t *drop_target = grid->hover;
 
         if (drop_target && !drop_target->fixed) {
+#ifdef DEBUG_DRAG_AND_DROP
             printf("drag_stop(): drop target\n");
+#endif
             grid_drop_tile(grid, grid->drag_target, drop_target);
             grid->drag_target = NULL;
         } else {
+#ifdef DEBUG_DRAG_AND_DROP
             printf("drag_stop(): reset\n");
+#endif
             grid->drag_reset_frames = grid->drag_reset_total_frames;;
             grid->drag_reset_vector = grid->drag_offset;
         }
     } else {
+#ifdef DEBUG_DRAG_AND_DROP
         printf("drag_stop(): missing drag target\n");
+#endif
     }
 }
 

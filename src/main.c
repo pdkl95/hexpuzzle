@@ -74,6 +74,7 @@ Color cursor_inner_color;
 
 bool edit_mode = true;
 grid_t *grid = NULL;
+level_t *current_level = NULL;
 
 #define MOUSE_TEXT_MAX_LINES 8
 #define MOUSE_TEXT_MAX_LINE_LENGTH 60
@@ -113,8 +114,10 @@ schedule_resize(
     double curtime = GetTime();
     resize_time = curtime + resize_delay;
 
+#if 0
     infomsg("scheduled resize at %f (now = %f, delta = %f)",
             resize_time, curtime, resize_time - curtime);
+#endif
 }
 
 UNUSED static void
@@ -162,7 +165,9 @@ do_resize(
     window_size.x = GetScreenWidth();
     window_size.y = GetScreenHeight();
 
+#ifdef DEBUG_RESIZE
     warnmsg("RESIZE to: %d x %d", window_size.x, window_size.y);
+#endif
 
     set_uniform_resolution();
     create_textures();
@@ -173,9 +178,13 @@ do_resize(
 
     if (first_resize) {
         first_resize = false;
+#ifdef DEBUG_RESIZE
         infomsg("resize: bypass");
+#endif
     } else {
+#ifdef DEBUG_RESIZE
         infomsg("resize: request redraw");
+#endif
     }
 }
 
@@ -191,7 +200,11 @@ resize(
     if (curtime < resize_time) {
         return;
     }
+
+#ifdef DEBUG_RESIZE
     warnmsg("RESIZE event (%f < %f)", curtime, resize_time);
+#endif
+
     do_resize();
 }
 
@@ -225,13 +238,17 @@ handle_events(
     void
 ) {
     if (WindowShouldClose()) {
-        infomsg("Window Closed");
+        //infomsg("Window Closed");
         return false;
     }
 
     if (IsKeyPressed(KEY_ESCAPE)) {
-        infomsg("etc - quit");
+        //infomsg("etc - quit");
         return false;
+    }
+
+    if (IsKeyPressed(KEY_F5)) {
+        edit_mode = !edit_mode;
     }
 
     if (IsKeyPressed(KEY_F8)) {
@@ -397,7 +414,7 @@ static bool
 main_event_loop(
     void
 ) {
-    infomsg("Entering main event loop...");
+    //infomsg("Entering main event loop...");
 
     while (true) {
         if (window_size_changed) {
@@ -468,22 +485,29 @@ gfx_cleanup(
     CloseWindow();
 }
 
+bool set_current_level(level_t *level)
+{
+    assert_not_null(level);
+
+    if (grid) {
+        destroy_grid(grid);
+        grid = NULL;
+    }
+
+    grid = level_create_grid(level);
+
+    return (!!grid);
+}
+
 static void game_init(void)
 {
     if (options->extra_argc == 1) {
         char *filename = options->extra_argv[0];
         level_t *lv = load_level_file(filename);
         if (lv) {
-            fprintf(stderr, "Successfully parsed \"%s\"\n", filename);
-        } else {
-            fprintf(stderr, "FAILED to parse parsed \"%s\"\n", filename);
+            set_current_level(lv);
         }
-
-        grid = level_create_grid(lv);
-    } else {
-        grid = create_grid(3);
     }
-
 }
 
 static void game_cleanup(void)

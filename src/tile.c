@@ -117,8 +117,10 @@ tile_t *create_tile_from_serialized_strings(char *addr, char *path, char *flags)
     assert(strlen(path)  == 6);
     assert(strlen(flags) == 3);
 
+#if 0
     printf("Creating tile from: addr=\"%s\" path=\"%s\" flags=\"%s\"\n",
            addr, path, flags);
+#endif
 
     tile_t *tile = create_tile();
 
@@ -326,9 +328,10 @@ void tile_draw(tile_t *tile, tile_t *drag_target)
     }
 
     DrawCircleV(tile->center, tile->center_circle_draw_radius, tile_center_color);
-if (tile->hover_center) {
-    DrawCircleV(tile->center, tile->center_circle_draw_radius, tile_bg_highlight_color);
-}
+
+    if (edit_mode && tile->hover_center) {
+        DrawCircleV(tile->center, tile->center_circle_draw_radius, tile_bg_highlight_color);
+    }
 
 #if 0
     if (drag) {
