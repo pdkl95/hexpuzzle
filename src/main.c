@@ -343,16 +343,30 @@ static void draw_popup_text(void)
     }
 }
 
-static void draw_cartesian_grid(void)
+static void draw_cartesian_grid(bool draw_labels)
 {
+    Color minor_color = { 112, 31, 126, 128 };
+
+    for (int x=0; x<window_size.x; x += 25) {
+        DrawLine(x, 0, x, window_size.y, minor_color);
+    }
+
+    for (int y=0; y<window_size.y; y += 25) {
+        DrawLine(0, y, window_size.x, y, minor_color);
+    }
+
     for (int x=0; x<window_size.x; x += 100) {
         DrawLine(x, 0, x, window_size.y, DARKPURPLE);
-        DrawText(TextFormat("%d", x), (float)x + 3.0, 8.0, 16, YELLOW);
+        if (draw_labels) {
+            DrawText(TextFormat("%d", x), (float)x + 3.0, 8.0, 16, YELLOW);
+        }
     }
 
     for (int y=0; y<window_size.y; y += 100) {
         DrawLine(0, y, window_size.x, y, DARKPURPLE);
-        DrawText(TextFormat("%d", y), 3.0, (float)y + 3.9, 16, YELLOW);
+        if (draw_labels) {
+            DrawText(TextFormat("%d", y), 3.0, (float)y + 3.9, 16, YELLOW);
+        }
     }
 }
 
@@ -363,7 +377,7 @@ render_frame(
     BeginDrawing();
     {
         ClearBackground(BLACK);
-        draw_cartesian_grid();
+        draw_cartesian_grid(false);
         draw_tiles();
         draw_gui_widgets();
         draw_popup_text();
@@ -456,7 +470,20 @@ gfx_cleanup(
 
 static void game_init(void)
 {
-    grid = create_grid(1);
+    if (options->extra_argc == 1) {
+        char *filename = options->extra_argv[0];
+        level_t *lv = load_level_file(filename);
+        if (lv) {
+            fprintf(stderr, "Successfully parsed \"%s\"\n", filename);
+        } else {
+            fprintf(stderr, "FAILED to parse parsed \"%s\"\n", filename);
+        }
+
+        grid = level_create_grid(lv);
+    } else {
+        grid = create_grid(3);
+    }
+
 }
 
 static void game_cleanup(void)
@@ -489,16 +516,6 @@ main(
     gfx_init();
     game_init();
     do_resize();
-
-    if (options->extra_argc == 1) {
-        char *filename = options->extra_argv[0];
-        level_t *lv = load_level_file(filename);
-        if (lv) {
-            fprintf(stderr, "Successfully parsed \"%s\"\n", filename);
-        } else {
-            fprintf(stderr, "FAILED to parse parsed \"%s\"\n", filename);
-        }
-    }
 
     bool run_ok = main_event_loop();
 

@@ -23,10 +23,13 @@
 #define LEVEL_H
 
 #include "tile.h"
+#include "grid.h"
 
 struct level {
     char *name;
     int radius;
+
+    int tile_count;
     tile_t *tiles;
 
     char *filename;
@@ -38,5 +41,6 @@ void destroy_level(level_t *level);
 bool level_parse_string(level_t *level, char *str);
 level_t *load_level_file(char *filename);
 
-#endif /*LEVEL_H*/
+grid_t *level_create_grid(level_t *level);
 
+#endif /*LEVEL_H*/

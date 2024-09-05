@@ -74,9 +74,11 @@ tile_t *init_tile(tile_t *tile, hex_axial_t pos)
 
     tile->position = pos;
 
+#if 0
     for (int i=0; i<6; i++) {
         tile->path[i] = rand() % PATH_TYPE_MAX;
     }
+#endif
 
     return tile;
 }
@@ -86,6 +88,61 @@ tile_t *create_tile(void)
     tile_t *tile = calloc(1, sizeof(tile_t));
     hex_axial_t pos = {0};
     return init_tile(tile, pos);
+}
+
+static void tile_set_flag_from_char(tile_t *tile, char c)
+{
+    assert_not_null(tile);
+
+    switch (c) {
+    case 'e': tile->enabled = false;  break;
+    case 'E': tile->enabled = true;   break;
+    case 'f': tile->fixed   = false;  break;
+    case 'F': tile->fixed   = true;   break;
+    case 'h': tile->hidden  = false;  break;
+    case 'H': tile->hidden  = true;   break;
+
+    default:
+        warnmsg("Invalid flag character: '%c'", c);
+        break;
+    }
+}
+
+tile_t *create_tile_from_serialized_strings(char *addr, char *path, char *flags)
+{
+    assert_not_null(addr);
+    assert_not_null(path);
+    assert_not_null(flags);
+    assert(strlen(addr)  >= 3);
+    assert(strlen(path)  == 6);
+    assert(strlen(flags) == 3);
+
+    printf("Creating tile from: addr=\"%s\" path=\"%s\" flags=\"%s\"\n",
+           addr, path, flags);
+
+    tile_t *tile = create_tile();
+
+    hex_axial_t pos = {0};
+    char *p = addr;
+    pos.q = (int)strtol(addr, &p, 10);
+    p++;
+    pos.r = (int)strtol(p, NULL, 10);
+
+    tile->position = pos;
+
+    for (int i=0; i<6; i++) {
+        char digit[2];
+        digit[0] = path[i];
+        digit[1] = '\0';
+
+        tile->path[i] = (int)strtol(digit, NULL, 10);
+    }
+
+    tile_set_flag_from_char(tile, flags[0]);
+    tile_set_flag_from_char(tile, flags[1]);
+    tile_set_flag_from_char(tile, flags[2]);
+
+    return tile;
 }
 
 void destroy_tile(tile_t *tile)
@@ -250,7 +307,7 @@ void tile_draw(tile_t *tile, tile_t *drag_target)
         Vector2 mid = tile->midpoints[i];
         DrawLineEx(tile->center, mid, tile->line_width, path_type_color(tile->path[i]));
 
-#if 1
+#if 0
         /* section index label */
         Vector2 offset = Vector2Scale(Vector2Subtract(tile->center, mid), 0.2);;
         Vector2 mlabel = Vector2Add(mid, offset);
@@ -273,7 +330,7 @@ if (tile->hover_center) {
     DrawCircleV(tile->center, tile->center_circle_draw_radius, tile_bg_highlight_color);
 }
 
-#if 1
+#if 0
     if (drag) {
         return;
     }

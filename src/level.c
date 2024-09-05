@@ -130,14 +130,47 @@ bool level_parse_string(level_t *level, char *str)
 
     token_list_t list = level_tokenize_string(str);
 
-    for (int i=0; i<list.token_count; i++) {
-        char *token = list.tokens[i];
-        printf("token >>>%s<<<\n", token);
+#define CMPSTR(test, expected) do {                                  \
+        if (0 != strncmp(test, expected, strlen(expected))) {        \
+            fprintf(stderr,                                          \
+                    "Parse failed: expected \"%s\", found \"%s\"\n", \
+                    expected, test);                                 \
+            goto fail;                                               \
+        }                                                            \
+    } while(0)
+#define CMP(idx, expected) \
+    CMPSTR(list.tokens[idx], expected)
+
+    CMP(0, "hexlevel");
+    CMP(1, "version");
+    CMP(3, "name");
+    CMP(5, "radius");
+    CMP(7, "begin_tiles");
+
+    level->name   = strdup(list.tokens[4]);
+    level->radius     = (int)strtol(list.tokens[6], NULL, 10);
+    level->tile_count = (int)strtol(list.tokens[8], NULL, 10);
+
+    printf("c=%d, r=%d, n=\"%s\"\n", level->tile_count, level->radius, level->name);
+
+    for(int i = 9; i<(list.token_count - 2); i += 4) {
+        CMP(i, "tile");
+        char *addr  = list.tokens[i+1];
+        char *path  = list.tokens[i+2];
+        char *flags = list.tokens[i+3];
+
+        tile_t *tile = create_tile_from_serialized_strings(addr, path, flags);
+        tile->next = level->tiles;
+        level->tiles = tile;
     }
 
+
     level_free_tokens(list);
-    exit(0);
     return true;
+
+  fail:
+    level_free_tokens(list);
+    return false;
 }
 
 static char *read_file_into_string(char *filename)
@@ -167,7 +200,7 @@ static char *read_file_into_string(char *filename)
 
     fclose(f);
 
-    fprintf(stderr, "Successfully read %zd characters from file \"%s\"\n", size, filename);
+    //fprintf(stderr, "Successfully read %zd characters from file \"%s\"\n", size, filename);
 
     return str;
 }
@@ -184,9 +217,25 @@ level_t *load_level_file(char *filename)
     level_t *level = alloc_level();
 
     if (level_parse_string(level, str)) {
+        free(str);
         level->filename = strdup(filename);
         return level;
     } else {
+        free(str);
         return NULL;
     }
+}
+
+grid_t *level_create_grid(level_t *level)
+{
+    grid_t *grid = create_grid(level->radius);
+
+    tile_t *tile = level->tiles;
+    while (tile) {
+        tile_t *grid_tile = grid_get_tile(grid, tile->position);\
+        tile_copy_attributes(grid_tile, tile);
+        tile = tile->next;
+    }
+
+    return grid;
 }
