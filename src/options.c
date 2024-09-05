@@ -235,5 +235,15 @@ options_parse_args(
         }
     }
 
+    if (optind < argc) {
+        options->extra_argc = argc - optind;
+        options->extra_argv = calloc(options->extra_argc, sizeof(char *));
+        int oi = optind;
+        int ei = 0;
+        for (; oi<argc; oi++, ei++) {
+            options->extra_argv[ei] = strdup(argv[oi]);
+        }
+    }
+
     return true;
 }

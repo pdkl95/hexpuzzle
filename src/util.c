@@ -26,6 +26,26 @@
 
 #include "util.h"
 
+char *strcat_alloc(const char *first, const char *second)
+{
+    size_t s1 = strlen(first);
+    size_t s2 = strlen(second);
+
+    size_t total_size = s1 + s2 + 1;
+    if (total_size < s2 + 1) {
+        return NULL;
+    }
+
+    char * ret = calloc(1, total_size);
+    if(ret == NULL) {
+        return NULL;
+    }
+
+    strcpy(ret, first);
+    strcpy(ret + s1, second);
+    return ret;
+}
+
 float
 ease_circular_in(
     float t

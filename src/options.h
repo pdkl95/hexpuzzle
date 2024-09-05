@@ -42,6 +42,9 @@ struct options {
     long max_fps;
     long initial_window_width;
     long initial_window_height;
+
+    char **extra_argv;
+    int extra_argc;
 };
 typedef struct options options_t;
 

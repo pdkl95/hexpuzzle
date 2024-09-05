@@ -22,6 +22,8 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+char *strcat_alloc(const char *first, const char *second);
+
 /********************
  * easing functions *
  ********************/

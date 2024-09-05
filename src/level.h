@@ -1,6 +1,6 @@
 /****************************************************************************
  *                                                                          *
- * grid.h                                                                   *
+ * level.h                                                                  *
  *                                                                          *
  * This file is part of hexpuzzle.                                          *
  *                                                                          *
@@ -19,54 +19,24 @@
  *                                                                          *
  ****************************************************************************/
 
-#ifndef GRID_H
-#define GRID_H
+#ifndef LEVEL_H
+#define LEVEL_H
 
-#include "hex.h"
 #include "tile.h"
 
-struct grid {
+struct level {
+    char *name;
     int radius;
-    int tile_grid_width;
-    int tile_grid_height;
-    int maxtiles;
-
-    hex_axial_t center;
     tile_t *tiles;
 
-    char *name;
-
-    float tile_size;
-
-    Vector2 px_offset;
-    Vector2 px_grid_size;
-    Vector2 px_min;
-    Vector2 px_max;
-    Rectangle px_bounding_box;
-
-    tile_t *hover;
-
-    Vector2 mouse_pos;
-
-    tile_t *drag_target;
-    Vector2 drag_start;
-    Vector2 drag_offset;
-    int drag_reset_frames;
-    int drag_reset_total_frames;
-    Vector2 drag_reset_vector;
+    char *filename;
 };
-typedef struct grid grid_t;
+typedef struct level level_t;
 
-grid_t *create_grid(int radius);
-void destroy_grid(grid_t *grid);
-void grid_resize(grid_t *grid);
-void grid_draw(grid_t *grid);
-tile_t *grid_get_tile(grid_t *grid, hex_axial_t axial);
-void grid_set_hover(grid_t *grid, IVector2 mouse_position);
-void grid_drag_start(grid_t *grid);
-void grid_drag_stop(grid_t *grid);
-void grid_modify_hovered_feature(grid_t *grid);
-void grid_serialize(grid_t *grid, FILE *f);
+void destroy_level(level_t *level);
 
-#endif /*GRID_H*/
+bool level_parse_string(level_t *level, char *str);
+level_t *load_level_file(char *filename);
+
+#endif /*LEVEL_H*/
 

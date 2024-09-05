@@ -250,7 +250,7 @@ void tile_draw(tile_t *tile, tile_t *drag_target)
         Vector2 mid = tile->midpoints[i];
         DrawLineEx(tile->center, mid, tile->line_width, path_type_color(tile->path[i]));
 
-#if 0
+#if 1
         /* section index label */
         Vector2 offset = Vector2Scale(Vector2Subtract(tile->center, mid), 0.2);;
         Vector2 mlabel = Vector2Add(mid, offset);
@@ -273,7 +273,7 @@ if (tile->hover_center) {
     DrawCircleV(tile->center, tile->center_circle_draw_radius, tile_bg_highlight_color);
 }
 
-#if 0
+#if 1
     if (drag) {
         return;
     }
@@ -284,4 +284,22 @@ if (tile->hover_center) {
     int text_width = MeasureText(coord_text, font_size);
     DrawTextDropShadow(coord_text, tile->center.x - (text_width/2), tile->center.y + 14, font_size, WHITE, BLACK);
 #endif
+}
+
+void tile_serialize(tile_t *tile, FILE *f)
+{
+    fprintf(f, "tile %d,%d %d%d%d%d%d%d %s%s%s\n",
+            tile->position.q,
+            tile->position.r,
+
+            tile->path[0],
+            tile->path[1],
+            tile->path[2],
+            tile->path[3],
+            tile->path[4],
+            tile->path[5],
+
+            tile->enabled ? "E" : "e",
+            tile->fixed   ? "F" : "f",
+            tile->hidden  ? "H" : "h");
 }

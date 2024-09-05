@@ -26,12 +26,6 @@
 
 static int grid_tile_storage_location(grid_t *grid, hex_axial_t axial)
 {
-    assert_not_null(grid);
-
-    if (hex_axial_distance(axial, grid->center) > grid->radius) {
-        return -1;
-    }
-
     if ((axial.r < 0) || (axial.r >= grid->tile_grid_height) ||
         (axial.q < 0) || (axial.q >= grid->tile_grid_width)) {
         return -1;
@@ -87,9 +81,17 @@ grid_t *create_grid(int radius)
                 .q = q,
                 .r = r
             };
+            tile_t *tile = grid_get_tile(grid, pos);
+            init_tile(tile, pos);
+
             if (hex_axial_distance(pos, grid->center) <= radius) {
-                tile_t *tile = grid_get_tile(grid, pos);
-                init_tile(tile, pos);
+                if (hex_axial_distance(pos, grid->center) > grid->radius) {
+                    tile->enabled = false;
+                } else {
+                    tile->enabled = true;
+                }
+            } else {
+                tile->enabled = false;
             }
         }
     }
@@ -97,6 +99,7 @@ grid_t *create_grid(int radius)
     grid_resize(grid);
 
     grid->tiles[7].fixed = true;
+    grid->name = strdup("Example");
 
     return grid;
 }
@@ -308,4 +311,16 @@ void grid_draw(grid_t *grid)
                  10, 10, 20, GREEN);
     }
 #endif
+}
+
+void grid_serialize(grid_t *grid, FILE *f)
+{
+    fprintf(f, "hexlevel version 1\n");
+    fprintf(f, "name \"%s\"\n", grid->name);
+    fprintf(f, "radius %d\n", grid->radius);
+    fprintf(f, "begin_tiles %d\n", grid->maxtiles);
+    for (int i=0; i<grid->maxtiles; i++) {
+        tile_serialize(&grid->tiles[i], f);
+    }
+    fprintf(f, "end_tiles\n");
 }

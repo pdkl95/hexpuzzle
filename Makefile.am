@@ -30,6 +30,7 @@ hexpuzzle_LDADD = $(COMMON_PROG_LDADD)
 hexpuzzle_SOURCES =                                \
 	src/grid.h            src/grid.c           \
 	src/hex.h             src/hex.c            \
+	src/level.h           src/level.c          \
 	src/logging.h         src/logging.c        \
 	src/options.h         src/options.c        \
 	src/raylib_helper.h   src/raylib_helper.c  \

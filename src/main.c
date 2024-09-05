@@ -31,6 +31,7 @@
 #include "options.h"
 #include "raylib_helper.h"
 #include "grid.h"
+#include "level.h"
 
 #if defined(PLATFORM_DESKTOP)
 /* good */
@@ -231,6 +232,10 @@ handle_events(
     if (IsKeyPressed(KEY_ESCAPE)) {
         infomsg("etc - quit");
         return false;
+    }
+
+    if (IsKeyPressed(KEY_F8)) {
+        grid_serialize(grid, stdout);
     }
 
     if (IsWindowResized()) {
@@ -451,7 +456,7 @@ gfx_cleanup(
 
 static void game_init(void)
 {
-    grid = create_grid(3);
+    grid = create_grid(1);
 }
 
 static void game_cleanup(void)
@@ -484,6 +489,16 @@ main(
     gfx_init();
     game_init();
     do_resize();
+
+    if (options->extra_argc == 1) {
+        char *filename = options->extra_argv[0];
+        level_t *lv = load_level_file(filename);
+        if (lv) {
+            fprintf(stderr, "Successfully parsed \"%s\"\n", filename);
+        } else {
+            fprintf(stderr, "FAILED to parse parsed \"%s\"\n", filename);
+        }
+    }
 
     bool run_ok = main_event_loop();
 

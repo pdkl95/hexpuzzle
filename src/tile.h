@@ -87,5 +87,7 @@ void tile_unset_hover(tile_t *tile);
 void tile_cycle_path_section(tile_t *tile, hex_direction_t section;);
 void tile_modify_hovered_feature(tile_t *tile);
 
+void tile_serialize(tile_t *tile, FILE *f);
+
 #endif /*TILE_H*/
 
