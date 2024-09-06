@@ -110,11 +110,11 @@ AC_TYPE_UINT32_T
 dnl Checks for library functions.
 AC_FUNC_MALLOC
 AC_FUNC_MMAP
-AC_CHECK_FUNCS([asprintf vasprintf])
+AC_CHECK_FUNCS([asprintf vasprintf strpbrk strsep])
 AX_FUNC_GETOPT_LONG
 
 dnl Checks for other declarations
-AC_CHECK_DECLS([strdupa])
+dnl AC_CHECK_DECLS([])
 
 dnl Export any extra build options
 APP_CFLAGS="-I\$(top_srcdir)/external"
