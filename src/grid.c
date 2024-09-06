@@ -145,10 +145,10 @@ void grid_resize(grid_t *grid)
 
 void destroy_grid(grid_t *grid)
 {
-    assert_not_null(grid);
-
-    SAFEFREE(grid->tiles);
-    SAFEFREE(grid);
+    if (grid) {
+        SAFEFREE(grid->tiles);
+        SAFEFREE(grid);
+    }
 }
 
 tile_t *grid_get_tile(grid_t *grid, hex_axial_t axial)

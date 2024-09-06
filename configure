@@ -1717,6 +1717,52 @@ $as_echo "$ac_res" >&6; }
 
 } # ac_fn_c_check_header_compile
 
+# ac_fn_c_try_link LINENO
+# -----------------------
+# Try to link conftest.$ac_ext, and return whether this succeeded.
+ac_fn_c_try_link ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  rm -f conftest.$ac_objext conftest$ac_exeext
+  if { { ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+$as_echo "$ac_try_echo"; } >&5
+  (eval "$ac_link") 2>conftest.err
+  ac_status=$?
+  if test -s conftest.err; then
+    grep -v '^ *+' conftest.err >conftest.er1
+    cat conftest.er1 >&5
+    mv -f conftest.er1 conftest.err
+  fi
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 test -x conftest$ac_exeext
+       }; then :
+  ac_retval=0
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_retval=1
+fi
+  # Delete the IPA/IPO (Inter Procedural Analysis/Optimization) information
+  # created by the PGI compiler (conftest_ipa8_conftest.oo), as it would
+  # interfere with the next link command; also delete a directory that is
+  # left behind by Apple's compiler.  We do this before executing the actions.
+  rm -rf conftest.dSYM conftest_ipa8_conftest.oo
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+  as_fn_set_status $ac_retval
+
+} # ac_fn_c_try_link
+
 # ac_fn_c_check_type LINENO TYPE VAR INCLUDES
 # -------------------------------------------
 # Tests whether TYPE exists after having included INCLUDES, setting cache
@@ -1824,52 +1870,6 @@ $as_echo "$ac_res" >&6; }
   eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
 
 } # ac_fn_c_find_uintX_t
-
-# ac_fn_c_try_link LINENO
-# -----------------------
-# Try to link conftest.$ac_ext, and return whether this succeeded.
-ac_fn_c_try_link ()
-{
-  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  rm -f conftest.$ac_objext conftest$ac_exeext
-  if { { ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
-$as_echo "$ac_try_echo"; } >&5
-  (eval "$ac_link") 2>conftest.err
-  ac_status=$?
-  if test -s conftest.err; then
-    grep -v '^ *+' conftest.err >conftest.er1
-    cat conftest.er1 >&5
-    mv -f conftest.er1 conftest.err
-  fi
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 test -x conftest$ac_exeext
-       }; then :
-  ac_retval=0
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_retval=1
-fi
-  # Delete the IPA/IPO (Inter Procedural Analysis/Optimization) information
-  # created by the PGI compiler (conftest_ipa8_conftest.oo), as it would
-  # interfere with the next link command; also delete a directory that is
-  # left behind by Apple's compiler.  We do this before executing the actions.
-  rm -rf conftest.dSYM conftest_ipa8_conftest.oo
-  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
-  as_fn_set_status $ac_retval
-
-} # ac_fn_c_try_link
 
 # ac_fn_c_check_func LINENO FUNC VAR
 # ----------------------------------
@@ -4681,6 +4681,12 @@ $as_echo "#define PACKAGE_LICENCE_DESC \"GNU GPL version 3 or later <http://gnu.
 
 
 
+$as_echo "#define _GNU_SOURCE /**/" >>confdefs.h
+
+
+
+
+
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking for __attribute__" >&5
 $as_echo_n "checking for __attribute__... " >&6; }
 if ${ax_cv___attribute__+:} false; then :
@@ -4802,15 +4808,100 @@ $as_echo "#define const /**/" >>confdefs.h
 fi
 
 
-for ac_header in libgen.h limits.h math.h stdlib.h string.h unistd.h
+for ac_header in dirent.h
 do :
-  as_ac_Header=`$as_echo "ac_cv_header_$ac_header" | $as_tr_sh`
-ac_fn_c_check_header_mongrel "$LINENO" "$ac_header" "$as_ac_Header" "$ac_includes_default"
-if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  ac_fn_c_check_header_mongrel "$LINENO" "dirent.h" "ac_cv_header_dirent_h" "$ac_includes_default"
+if test "x$ac_cv_header_dirent_h" = xyes; then :
   cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_header" | $as_tr_cpp` 1
+#define HAVE_DIRENT_H 1
 _ACEOF
 
+else
+  as_fn_error 1 "dirent.h not found" "$LINENO" 5
+fi
+
+done
+
+for ac_header in libgen.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "libgen.h" "ac_cv_header_libgen_h" "$ac_includes_default"
+if test "x$ac_cv_header_libgen_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBGEN_H 1
+_ACEOF
+
+else
+  as_fn_error 1 "libgen.h not found" "$LINENO" 5
+fi
+
+done
+
+for ac_header in limits.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "limits.h" "ac_cv_header_limits_h" "$ac_includes_default"
+if test "x$ac_cv_header_limits_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIMITS_H 1
+_ACEOF
+
+else
+  as_fn_error 1 "limits.h not found" "$LINENO" 5
+fi
+
+done
+
+for ac_header in math.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "math.h" "ac_cv_header_math_h" "$ac_includes_default"
+if test "x$ac_cv_header_math_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_MATH_H 1
+_ACEOF
+
+else
+  as_fn_error 1 "math.h not found" "$LINENO" 5
+fi
+
+done
+
+for ac_header in stdlib.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "stdlib.h" "ac_cv_header_stdlib_h" "$ac_includes_default"
+if test "x$ac_cv_header_stdlib_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_STDLIB_H 1
+_ACEOF
+
+else
+  as_fn_error 1 "stdlib.h not found" "$LINENO" 5
+fi
+
+done
+
+for ac_header in string.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "string.h" "ac_cv_header_string_h" "$ac_includes_default"
+if test "x$ac_cv_header_string_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_STRING_H 1
+_ACEOF
+
+else
+  as_fn_error 1 "string.h not found" "$LINENO" 5
+fi
+
+done
+
+for ac_header in unistd.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "unistd.h" "ac_cv_header_unistd_h" "$ac_includes_default"
+if test "x$ac_cv_header_unistd_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_UNISTD_H 1
+_ACEOF
+
+else
+  as_fn_error 1 "unistd.h not found" "$LINENO" 5
 fi
 
 done
@@ -4836,6 +4927,164 @@ fi
 
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_enable_assert" >&5
 $as_echo "$ac_enable_assert" >&6; }
+
+ac_header_dirent=no
+for ac_hdr in dirent.h sys/ndir.h sys/dir.h ndir.h; do
+  as_ac_Header=`$as_echo "ac_cv_header_dirent_$ac_hdr" | $as_tr_sh`
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_hdr that defines DIR" >&5
+$as_echo_n "checking for $ac_hdr that defines DIR... " >&6; }
+if eval \${$as_ac_Header+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/types.h>
+#include <$ac_hdr>
+
+int
+main ()
+{
+if ((DIR *) 0)
+return 0;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  eval "$as_ac_Header=yes"
+else
+  eval "$as_ac_Header=no"
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+eval ac_res=\$$as_ac_Header
+	       { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_res" >&5
+$as_echo "$ac_res" >&6; }
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_hdr" | $as_tr_cpp` 1
+_ACEOF
+
+ac_header_dirent=$ac_hdr; break
+fi
+
+done
+# Two versions of opendir et al. are in -ldir and -lx on SCO Xenix.
+if test $ac_header_dirent = dirent.h; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing opendir" >&5
+$as_echo_n "checking for library containing opendir... " >&6; }
+if ${ac_cv_search_opendir+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char opendir ();
+int
+main ()
+{
+return opendir ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' dir; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_opendir=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_opendir+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_opendir+:} false; then :
+
+else
+  ac_cv_search_opendir=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_opendir" >&5
+$as_echo "$ac_cv_search_opendir" >&6; }
+ac_res=$ac_cv_search_opendir
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+fi
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing opendir" >&5
+$as_echo_n "checking for library containing opendir... " >&6; }
+if ${ac_cv_search_opendir+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char opendir ();
+int
+main ()
+{
+return opendir ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' x; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_opendir=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_opendir+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_opendir+:} false; then :
+
+else
+  ac_cv_search_opendir=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_opendir" >&5
+$as_echo "$ac_cv_search_opendir" >&6; }
+ac_res=$ac_cv_search_opendir
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+fi
+
+fi
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for stdbool.h that conforms to C99" >&5
@@ -5230,17 +5479,40 @@ $as_echo "#define HAVE_MMAP 1" >>confdefs.h
 fi
 rm -f conftest.mmap conftest.txt
 
-for ac_func in asprintf vasprintf strpbrk strsep
-do :
-  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
-ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
-if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
-  cat >>confdefs.h <<_ACEOF
-#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
-_ACEOF
+ac_fn_c_check_func "$LINENO" "asprintf" "ac_cv_func_asprintf"
+if test "x$ac_cv_func_asprintf" = xyes; then :
 
+else
+  as_fn_error 1 "asprintf not found" "$LINENO" 5
 fi
-done
+
+ac_fn_c_check_func "$LINENO" "vasprintf" "ac_cv_func_vasprintf"
+if test "x$ac_cv_func_vasprintf" = xyes; then :
+
+else
+  as_fn_error 1 "vasprintf not found" "$LINENO" 5
+fi
+
+ac_fn_c_check_func "$LINENO" "scandir" "ac_cv_func_scandir"
+if test "x$ac_cv_func_scandir" = xyes; then :
+
+else
+  as_fn_error 1 "scandir not found" "$LINENO" 5
+fi
+
+ac_fn_c_check_func "$LINENO" "strpbrk" "ac_cv_func_strpbrk"
+if test "x$ac_cv_func_strpbrk" = xyes; then :
+
+else
+  as_fn_error 1 "strpbrk not found" "$LINENO" 5
+fi
+
+ac_fn_c_check_func "$LINENO" "strsep" "ac_cv_func_strsep"
+if test "x$ac_cv_func_strsep" = xyes; then :
+
+else
+  as_fn_error 1 "strsep not found" "$LINENO" 5
+fi
 
   # clean out junk possibly left behind by a previous configuration
   rm -f lib/getopt.h

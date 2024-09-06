@@ -22,6 +22,7 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+const char *filename_ext(const char *filename);
 char *strcat_alloc(const char *first, const char *second);
 
 /********************

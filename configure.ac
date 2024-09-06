@@ -93,13 +93,25 @@ dnl ====================================
 dnl ===  General Requirement Checks  ===
 dnl ====================================
 
+AC_DEFINE([_GNU_SOURCE], [], [We want GNU extensions])
+
+AC_DEFUN([ERR_NOT_FOUND],
+	[AC_MSG_ERROR([$1 not found], [1])])
+
 dnl Checks for compiler features
 AX_C___ATTRIBUTE__
 AC_C_CONST
 
 dnl Checks for header files.
-AC_CHECK_HEADERS([libgen.h limits.h math.h stdlib.h string.h unistd.h])
+AC_CHECK_HEADERS([dirent.h], [], [ERR_NOT_FOUND([dirent.h])])
+AC_CHECK_HEADERS([libgen.h], [], [ERR_NOT_FOUND([libgen.h])])
+AC_CHECK_HEADERS([limits.h], [], [ERR_NOT_FOUND([limits.h])])
+AC_CHECK_HEADERS([math.h], [], [ERR_NOT_FOUND([math.h])])
+AC_CHECK_HEADERS([stdlib.h], [], [ERR_NOT_FOUND([stdlib.h])])
+AC_CHECK_HEADERS([string.h], [], [ERR_NOT_FOUND([string.h])])
+AC_CHECK_HEADERS([unistd.h], [], [ERR_NOT_FOUND([unistd.h])])
 AC_HEADER_ASSERT
+AC_HEADER_DIRENT
 
 dnl Checks for typedefs, structures, and compiler characteristics.
 AC_CHECK_HEADER_STDBOOL
@@ -110,7 +122,11 @@ AC_TYPE_UINT32_T
 dnl Checks for library functions.
 AC_FUNC_MALLOC
 AC_FUNC_MMAP
-AC_CHECK_FUNCS([asprintf vasprintf strpbrk strsep])
+AC_CHECK_FUNC([asprintf], [], [ERR_NOT_FOUND([asprintf])])
+AC_CHECK_FUNC([vasprintf], [], [ERR_NOT_FOUND([vasprintf])])
+AC_CHECK_FUNC([scandir], [], [ERR_NOT_FOUND([scandir])])
+AC_CHECK_FUNC([strpbrk], [], [ERR_NOT_FOUND([strpbrk])])
+AC_CHECK_FUNC([strsep], [], [ERR_NOT_FOUND([strsep])])
 AX_FUNC_GETOPT_LONG
 
 dnl Checks for other declarations

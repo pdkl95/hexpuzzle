@@ -106,9 +106,9 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__dirstamp = $(am__leading_dot)dirstamp
-am_hexpuzzle_OBJECTS = src/hexpuzzle-grid.$(OBJEXT) \
-	src/hexpuzzle-hex.$(OBJEXT) src/hexpuzzle-level.$(OBJEXT) \
-	src/hexpuzzle-logging.$(OBJEXT) \
+am_hexpuzzle_OBJECTS = src/hexpuzzle-collection.$(OBJEXT) \
+	src/hexpuzzle-grid.$(OBJEXT) src/hexpuzzle-hex.$(OBJEXT) \
+	src/hexpuzzle-level.$(OBJEXT) src/hexpuzzle-logging.$(OBJEXT) \
 	src/hexpuzzle-options.$(OBJEXT) \
 	src/hexpuzzle-raylib_helper.$(OBJEXT) \
 	src/hexpuzzle-tile.$(OBJEXT) src/hexpuzzle-util.$(OBJEXT) \
@@ -327,6 +327,7 @@ COMMON_PROG_LDADD = \
 hexpuzzle_CFLAGS = $(COMMON_PROG_CFLAGS)
 hexpuzzle_LDADD = $(COMMON_PROG_LDADD)
 hexpuzzle_SOURCES = \
+	src/collection.h      src/collection.c     \
 	src/grid.h            src/grid.c           \
 	src/hex.h             src/hex.c            \
 	src/level.h           src/level.c          \
@@ -438,6 +439,8 @@ src/$(am__dirstamp):
 src/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/$(DEPDIR)
 	@: > src/$(DEPDIR)/$(am__dirstamp)
+src/hexpuzzle-collection.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-grid.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-hex.$(OBJEXT): src/$(am__dirstamp) \
@@ -468,6 +471,7 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-collection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-grid.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-hex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-level.Po@am__quote@
@@ -493,6 +497,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+src/hexpuzzle-collection.o: src/collection.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-collection.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-collection.Tpo -c -o src/hexpuzzle-collection.o `test -f 'src/collection.c' || echo '$(srcdir)/'`src/collection.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-collection.Tpo src/$(DEPDIR)/hexpuzzle-collection.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/collection.c' object='src/hexpuzzle-collection.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-collection.o `test -f 'src/collection.c' || echo '$(srcdir)/'`src/collection.c
+
+src/hexpuzzle-collection.obj: src/collection.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-collection.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-collection.Tpo -c -o src/hexpuzzle-collection.obj `if test -f 'src/collection.c'; then $(CYGPATH_W) 'src/collection.c'; else $(CYGPATH_W) '$(srcdir)/src/collection.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-collection.Tpo src/$(DEPDIR)/hexpuzzle-collection.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/collection.c' object='src/hexpuzzle-collection.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-collection.obj `if test -f 'src/collection.c'; then $(CYGPATH_W) 'src/collection.c'; else $(CYGPATH_W) '$(srcdir)/src/collection.c'; fi`
 
 src/hexpuzzle-grid.o: src/grid.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-grid.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-grid.Tpo -c -o src/hexpuzzle-grid.o `test -f 'src/grid.c' || echo '$(srcdir)/'`src/grid.c

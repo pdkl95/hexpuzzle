@@ -33,6 +33,7 @@
 #include "raylib_helper.h"
 #include "grid.h"
 #include "level.h"
+#include "collection.h"
 
 #if defined(PLATFORM_DESKTOP)
 /* good */
@@ -80,6 +81,7 @@ Color cursor_inner_color;
 bool edit_mode = true;
 grid_t *grid = NULL;
 level_t *current_level = NULL;
+collection_t *current_collection = NULL;
 
 #define MOUSE_TEXT_MAX_LINES 8
 #define MOUSE_TEXT_MAX_LINE_LENGTH 60
@@ -178,7 +180,9 @@ do_resize(
 
     set_uniform_resolution();
     create_textures();
-    grid_resize(grid);
+    if (grid) {
+        grid_resize(grid);
+    }
     gui_setup();
 
     window_size_changed = false;
@@ -284,15 +288,21 @@ handle_events(
 
     if (IsCursorOnScreen()) {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            grid_drag_start(grid);
+            if (grid) {
+                grid_drag_start(grid);
+            }
         }
         if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-            grid_drag_stop(grid);
+            if (grid) {
+                grid_drag_stop(grid);
+            }
         }
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
             if (edit_mode) {
-                grid_modify_hovered_feature(grid);
+                if (grid) {
+                    grid_modify_hovered_feature(grid);
+                }
             }
         }
     }
@@ -344,9 +354,11 @@ static void draw_mouse_text(void)
     }
 }
 
-static void draw_tiles(void)
+static void draw_gameboard(void)
 {
-    grid_draw(grid);
+    if (grid) {
+        grid_draw(grid);
+    }
 }
 
 #ifndef RAYGUI_ICON_SIZE
@@ -441,7 +453,7 @@ render_frame(
     {
         ClearBackground(BLACK);
         draw_cartesian_grid(false);
-        draw_tiles();
+        draw_gameboard();
         draw_gui_widgets();
         draw_popup_text();
 
@@ -565,9 +577,12 @@ static void game_init(void)
 
     if (options->extra_argc == 1) {
         char *filename = options->extra_argv[0];
-        level_t *lv = load_level_file(filename);
-        if (lv) {
-            set_current_level(lv);
+        current_collection = load_collection_path(filename);
+        if (IS_LEVEL_FILENAME(filename)) {
+            level_t *level = collection_find_level_by_filename(current_collection, filename);
+            if (level) {
+                set_current_level(level);
+            }
         }
     }
 }

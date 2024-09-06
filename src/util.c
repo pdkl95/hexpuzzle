@@ -26,6 +26,13 @@
 
 #include "util.h"
 
+const char *filename_ext(const char *filename)
+{
+    char *dot = strrchr(filename, '.');
+    if(!dot || dot == filename) return "";
+    return dot + 1;
+}
+
 char *strcat_alloc(const char *first, const char *second)
 {
     size_t s1 = strlen(first);

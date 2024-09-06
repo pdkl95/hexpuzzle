@@ -22,17 +22,29 @@
 #ifndef LEVEL_H
 #define LEVEL_H
 
+#define LEVEL_FILENAME_EXT "hexlevel"
+#define IS_LEVEL_FILENAME(filename) \
+    (0 == strcmp(filename_ext(filename), LEVEL_FILENAME_EXT))
+
 #include "tile.h"
 #include "grid.h"
 
 struct level {
+    char *id;
     char *name;
+
     int radius;
 
     int tile_count;
     tile_t *tiles;
 
     char *filename;
+
+    bool finished;
+    char *ui_name;
+    int ui_name_length;
+
+    struct level *prev, *next;
 };
 typedef struct level level_t;
 
@@ -42,5 +54,7 @@ bool level_parse_string(level_t *level, char *str);
 level_t *load_level_file(char *filename);
 
 grid_t *level_create_grid(level_t *level);
+
+void level_update_ui_name(level_t *level);
 
 #endif /*LEVEL_H*/

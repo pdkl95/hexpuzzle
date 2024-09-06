@@ -20,19 +20,37 @@
  ****************************************************************************/
 
 #include "common.h"
+
+#include "raygui/raygui.h"
+
 #include "tile.h"
 #include "grid.h"
 #include "level.h"
 
+#define LEVEL_DEFAULT_NAME "(unknown)"
+
 static level_t *alloc_level()
 {
     level_t *level = calloc(1, sizeof(level_t));
+
+    level->id = NULL;
+    level->name = NULL;
+    level->filename = NULL;
+    level->tiles = NULL;
+
+    level->next = NULL;
+
     return level;
 }
 
 void destroy_level(level_t *level)
 {
     if (level) {
+        if (level->next) {
+            destroy_level(level->next);
+        }
+
+        SAFEFREE(level->id);
         SAFEFREE(level->name);
         SAFEFREE(level->filename);
         SAFEFREE(level);
@@ -151,7 +169,7 @@ bool level_parse_string(level_t *level, char *str)
     level->radius     = (int)strtol(list.tokens[6], NULL, 10);
     level->tile_count = (int)strtol(list.tokens[8], NULL, 10);
 
-    printf("c=%d, r=%d, n=\"%s\"\n", level->tile_count, level->radius, level->name);
+    //printf("c=%d, r=%d, n=\"%s\"\n", level->tile_count, level->radius, level->name);
 
     for(int i = 9; i<(list.token_count - 2); i += 4) {
         CMP(i, "tile");
@@ -238,4 +256,23 @@ grid_t *level_create_grid(level_t *level)
     }
 
     return grid;
+}
+
+void level_update_ui_name(level_t *level)
+{
+    char *text = level->name ? level->name : LEVEL_DEFAULT_NAME;
+    int icon = level->finished
+        ? ICON_OK_TICK
+        : ICON_CROSS_SMALL;
+
+    const char *tmp = GuiIconText(icon, text);
+
+    int len = strlen(tmp);
+    if (len >= level->ui_name_length) {
+        SAFEFREE(level->ui_name);
+        level->ui_name = calloc(len + 1, sizeof(char));
+        level->ui_name_length = len;
+    }
+
+    memcpy(level->ui_name, tmp, strlen(tmp));
 }

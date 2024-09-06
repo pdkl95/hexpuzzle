@@ -149,7 +149,13 @@ tile_t *create_tile_from_serialized_strings(char *addr, char *path, char *flags)
 
 void destroy_tile(tile_t *tile)
 {
-    SAFEFREE(tile);
+    if (tile) {
+        if (tile->next) {
+            destroy_tile(tile);
+        }
+
+        SAFEFREE(tile);
+    }
 }
 
 void tile_copy_attributes(tile_t *dst, tile_t *src)
