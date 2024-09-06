@@ -57,4 +57,6 @@ grid_t *level_create_grid(level_t *level);
 
 void level_update_ui_name(level_t *level);
 
+void level_play(level_t *level);
+
 #endif /*LEVEL_H*/

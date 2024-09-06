@@ -25,6 +25,13 @@
 Color TEXT_LIGHT_SHADOW = { 0x11, 0x11, 0x11, 0x33 };
 Color TEXT_DARK_SHADOW  = {    0,    0,    0, 0xAA };
 
+void DrawTextWindowCenter(const char *text, int posY, int fontSize, Color color)
+{
+    int text_width = MeasureText(text, fontSize);
+    int margin_left = (window_size.x - text_width) / 2;
+    DrawText(text, margin_left, posY, fontSize, color);
+}
+
 void DrawTextShadow(const char *text, int posX, int posY, int fontSize, Color color)
 {
     DrawText(text, posX + 2, posY + 2, fontSize, TEXT_LIGHT_SHADOW);

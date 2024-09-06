@@ -275,4 +275,17 @@ void level_update_ui_name(level_t *level)
     }
 
     memcpy(level->ui_name, tmp, strlen(tmp));
+
+    //printf("level[\"%s\"].ui_)name = \"%s\"\n", level->name, level->ui_name);
+}
+
+void level_play(level_t *level)
+{
+    if (current_grid) {
+        destroy_grid(current_grid);
+        current_grid = NULL;
+    }
+
+    current_grid = level_create_grid(level);;
+    game_mode = GAME_MODE_PLAY_LEVEL;
 }

@@ -102,6 +102,17 @@ static inline Vector2 ivector2_to_vector2(IVector2 ivec)
 }
 
 extern IVector2 window_size;
-extern bool edit_mode;
+
+enum game_mode {
+    GAME_MODE_NULL = 0,
+    GAME_MODE_COLLECTION,
+    GAME_MODE_PLAY_LEVEL,
+    GAME_MODE_EDIT_LEVEL
+};
+typedef enum game_mode game_mode_t;
+
+extern game_mode_t game_mode;
+
+#define edit_mode (game_mode == GAME_MODE_EDIT_LEVEL)
 
 #endif /*COMMON_H*/

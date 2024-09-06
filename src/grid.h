@@ -68,5 +68,7 @@ void grid_drag_stop(grid_t *grid);
 void grid_modify_hovered_feature(grid_t *grid);
 void grid_serialize(grid_t *grid, FILE *f);
 
+extern grid_t *current_grid;
+
 #endif /*GRID_H*/
 

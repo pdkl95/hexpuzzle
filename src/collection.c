@@ -21,6 +21,8 @@
 
 #include "common.h"
 
+#include "raygui/raygui.h"
+
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
@@ -28,6 +30,7 @@
 
 #include "sglib/sglib.h"
 
+#include "raylib_helper.h"
 #include "collection.h"
 
 //#define INITIAL_LEVEL_NAME_COUNT 64
@@ -53,6 +56,10 @@ static collection_t *alloc_collection(void)
     collection->next = NULL;
 
     collection->level_count = 0;
+
+    collection->gui_list_scroll_index = 0;
+    collection->gui_list_active = 0;
+    collection->gui_list_focus = 0;
 
     return collection;
 }
@@ -100,9 +107,16 @@ void collection_scan_dir(collection_t *collection)
     }
 
     while (n--) {
-        printf("%s\n", namelist[n]->d_name);
+        char *filepath;
+        asprintf(&filepath, "%s/%s",
+                 collection->dirpath, namelist[n]->d_name);
+
+        collection_add_level_file(collection, filepath);
+
+        free(filepath);
         free(namelist[n]);
     }
+
     free(namelist);
 }
 
@@ -192,6 +206,17 @@ void destroy_collection(collection_t *collection)
     }
 }
 
+static void collection_show_level_names(collection_t *collection)
+{
+    printf("<level_names>\n");
+    level_t *level = collection->levels;
+    for (int i=0; i < collection->level_count; i++) {
+        printf("\t\"%s\" - \"%s\"\n", collection->level_names[i], level->name);
+        level = level->next;
+    }
+    printf("</level_names>\n");
+}
+
 void collection_add_level(collection_t *collection, level_t *level)
 {
     assert_not_null(collection);
@@ -208,7 +233,7 @@ void collection_add_level(collection_t *collection, level_t *level)
     collection->level_count++;
 
     if (collection->level_count >= collection->level_name_count) {
-        char **old_ptr = collection->level_names;
+        const char **old_ptr = collection->level_names;
         int old_count  = collection->level_name_count;
 
         collection->level_name_count *= 2;
@@ -218,9 +243,19 @@ void collection_add_level(collection_t *collection, level_t *level)
         free(old_ptr);
     }
 
-    level_update_ui_name(level);
+    level_t *lp = collection->levels;
+    int n=0;
+    while (lp) {
+        level_update_ui_name(level);
+        collection->level_names[n] = level->ui_name;
 
-    collection->level_names[collection->level_count] = level->ui_name;
+        lp = lp->next;
+        n++;
+    }
+
+    assert(n == collection->level_count);
+
+    collection_show_level_names(collection);
 }
 
 bool collection_add_level_file(collection_t *collection, char *filename)
@@ -230,6 +265,8 @@ bool collection_add_level_file(collection_t *collection, char *filename)
         collection_add_level(collection, level);
         return true;
     } else {
+        errmsg("cannot load level file \"%s\" into collection \"%s\"",
+               filename, collection->name);
         return false;
     }
 }
@@ -248,4 +285,47 @@ level_t *collection_find_level_by_filename(collection_t *collection, char *filen
     }
 
     return NULL;
+}
+
+void collection_draw(collection_t *collection)
+{
+    assert_not_null(collection);
+
+    float width =  window_size.x * 0.4;
+    float height = window_size.y * 0.64;
+
+    DrawTextWindowCenter("Collection", window_size.y * 0.08, 22, LIME);
+
+    Rectangle collection_list_rect = {
+        .x = (window_size.x - width)  / 2.0f,
+        .y = (window_size.y - height) / 2.0f,
+        .width  = width,
+        .height = height
+    };
+
+    GuiListViewEx(collection_list_rect,
+                  collection->level_names,
+                  collection->level_count,
+                  &collection->gui_list_scroll_index,
+                  &collection->gui_list_active,
+                  &collection->gui_list_focus);
+
+    Rectangle collection_button_rect = {
+        .x = collection_list_rect.x,
+        .y = collection_list_rect.y + collection_list_rect.height + 16,
+        .width  = collection_list_rect.width,
+        .height = window_size.y * 0.12
+    };
+
+    char *collection_button_text = "Play";
+
+    if (GuiButton(collection_button_rect, collection_button_text)) {
+        level_t *level = collection->levels;
+        int n = collection->gui_list_scroll_index;
+        while (n--) {
+            level = level->next;
+        }
+        printf("Play %d\n", collection->gui_list_scroll_index);
+        level_play(level);
+    }
 }

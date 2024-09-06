@@ -36,6 +36,8 @@ void printcolor(Color c);
 extern Color TEXT_LIGHT_SHADOW;
 extern Color TEXT_DARK_SHADOW;
 
+void DrawTextWindowCenter(const char *text, int posY, int fontSize, Color color);
+
 void DrawTextShadow(const char *text, int posX, int posY, int fontSize, Color color);
 void DrawTextDropShadow(const char *text, int posX, int posY, int fontSize, Color fgcolor, Color bgcolor);
 

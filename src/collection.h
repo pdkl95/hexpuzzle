@@ -37,8 +37,12 @@ struct collection {
     level_t *levels;
     int level_count;
 
-    char **level_names;
+    const char **level_names;
     int level_name_count;
+
+    int gui_list_scroll_index;
+    int gui_list_active;
+    int gui_list_focus;
 
     struct collection *prev, *next;
 };
@@ -60,6 +64,8 @@ void collection_add_level(collection_t *collection, level_t *level);
 bool collection_add_level_file(collection_t *collection, char *filename);
 
 level_t *collection_find_level_by_filename(collection_t *collection, char *filename);
+
+void collection_draw(collection_t *collection);
 
 #endif /*COLLECTION_H*/
 

@@ -78,8 +78,9 @@ Color CGOLD              = { 0xFF, 0xD7, 0x00, 255 };
 Color cursor_outer_color;
 Color cursor_inner_color;
 
-bool edit_mode = true;
-grid_t *grid = NULL;
+game_mode_t game_mode = GAME_MODE_NULL;
+
+grid_t *current_grid = NULL;
 level_t *current_level = NULL;
 collection_t *current_collection = NULL;
 
@@ -91,6 +92,43 @@ int mouse_text_max_line_length = 0;
 int mouse_text_font_size = 20;
 
 void gui_setup(void);
+
+char *game_mode_str()
+{
+    switch (game_mode) {
+    case GAME_MODE_NULL:
+        return "NULL";
+
+    case GAME_MODE_COLLECTION:
+        return "COLLECTION";
+
+    case GAME_MODE_PLAY_LEVEL:
+        return "PLAY_LEVEL";
+
+    case GAME_MODE_EDIT_LEVEL:
+        return "EDIT_LEVEL";
+
+    default:
+        __builtin_unreachable();
+    }
+}
+
+void toggle_edit_mode(void)
+{
+    switch (game_mode) {
+    case GAME_MODE_PLAY_LEVEL:
+        game_mode = GAME_MODE_EDIT_LEVEL;
+        break;
+
+    case GAME_MODE_EDIT_LEVEL:
+        game_mode = GAME_MODE_PLAY_LEVEL;
+        break;
+
+    default:
+        /* do nothing */
+        break;
+    }
+}
 
 #define print_popup(...) {                                          \
         popup_text = TextFormat(__VA_ARGS__);                       \
@@ -180,8 +218,8 @@ do_resize(
 
     set_uniform_resolution();
     create_textures();
-    if (grid) {
-        grid_resize(grid);
+    if (current_grid) {
+        grid_resize(current_grid);
     }
     gui_setup();
 
@@ -259,12 +297,22 @@ handle_events(
         return false;
     }
 
+    if (IsKeyPressed(KEY_F1)) {
+        printf("game_mode = %s\n", game_mode_str());
+        printf("collection->gui_list_scroll_index = %d\n",
+               current_collection->gui_list_scroll_index);
+        printf("collection->gui_list_active       = %d\n",
+               current_collection->gui_list_active);
+        printf("collection->gui_list_focus        = %d\n",
+               current_collection->gui_list_focus);
+    }
+
     if (IsKeyPressed(KEY_F5)) {
-        edit_mode = !edit_mode;
+        toggle_edit_mode();
     }
 
     if (IsKeyPressed(KEY_F8)) {
-        grid_serialize(grid, stdout);
+        grid_serialize(current_grid, stdout);
     }
 
     if (IsWindowResized()) {
@@ -279,7 +327,7 @@ handle_events(
     mouse_position.x = GetMouseX();
     mouse_position.y = GetMouseY();
 
-    grid_set_hover(grid, mouse_position);
+    grid_set_hover(current_grid, mouse_position);
 
     mouse_text_idx = 0;
     mouse_text_max_line_length = 0;
@@ -288,20 +336,20 @@ handle_events(
 
     if (IsCursorOnScreen()) {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            if (grid) {
-                grid_drag_start(grid);
+            if (current_grid) {
+                grid_drag_start(current_grid);
             }
         }
         if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-            if (grid) {
-                grid_drag_stop(grid);
+            if (current_grid) {
+                grid_drag_stop(current_grid);
             }
         }
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
             if (edit_mode) {
-                if (grid) {
-                    grid_modify_hovered_feature(grid);
+                if (current_grid) {
+                    grid_modify_hovered_feature(current_grid);
                 }
             }
         }
@@ -354,13 +402,6 @@ static void draw_mouse_text(void)
     }
 }
 
-static void draw_gameboard(void)
-{
-    if (grid) {
-        grid_draw(grid);
-    }
-}
-
 #ifndef RAYGUI_ICON_SIZE
 #define RAYGUI_ICON_SIZE 16
 #endif
@@ -399,7 +440,7 @@ static void draw_gui_widgets(void)
     }
 
     if (GuiButton(edit_button_rect, edit_button_text)) {
-        edit_mode = !edit_mode;
+        toggle_edit_mode();
     }
 }
 
@@ -453,8 +494,30 @@ render_frame(
     {
         ClearBackground(BLACK);
         draw_cartesian_grid(false);
-        draw_gameboard();
+
+        switch (game_mode) {
+        case GAME_MODE_PLAY_LEVEL:
+            /* fall through */
+        case GAME_MODE_EDIT_LEVEL:
+            if (current_grid) {
+                grid_draw(current_grid);
+            }
+            break;
+
+        case GAME_MODE_COLLECTION:
+            if (current_collection) {
+                collection_draw(current_collection);
+            }
+            break;
+
+        default:
+            /* do nothing */
+            break;
+        }
+
         draw_gui_widgets();
+
+
         draw_popup_text();
 
         if (show_fps) {
@@ -549,14 +612,14 @@ bool set_current_level(level_t *level)
 {
     assert_not_null(level);
 
-    if (grid) {
-        destroy_grid(grid);
-        grid = NULL;
+    if (current_grid) {
+        destroy_grid(current_grid);
+        current_grid = NULL;
     }
 
-    grid = level_create_grid(level);
+    current_grid = level_create_grid(level);
 
-    return (!!grid);
+    return (!!current_grid);
 }
 
 static void game_init(void)
@@ -577,19 +640,28 @@ static void game_init(void)
 
     if (options->extra_argc == 1) {
         char *filename = options->extra_argv[0];
+        if (options->verbose) {
+            infomsg("Loading: \"%s\"", filename);
+        }
         current_collection = load_collection_path(filename);
         if (IS_LEVEL_FILENAME(filename)) {
             level_t *level = collection_find_level_by_filename(current_collection, filename);
             if (level) {
                 set_current_level(level);
             }
+        } else if (IS_COLLECTION_FILENAME(filename)) {
+            game_mode = GAME_MODE_COLLECTION;
+        } else if (current_collection->dirpath) {
+            game_mode = GAME_MODE_COLLECTION;
+        } else {
+            assert(0);
         }
     }
 }
 
 static void game_cleanup(void)
 {
-    destroy_grid(grid);
+    destroy_grid(current_grid);
 }
 
 int
