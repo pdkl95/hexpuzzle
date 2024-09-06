@@ -24,6 +24,7 @@
 #include <getopt.h>
 #include <libgen.h>
 #include <time.h>
+#include <sys/stat.h>
 
 #include "raygui/raygui.h"
 #include "raygui/style/terminal.h"
@@ -41,6 +42,9 @@
 
 const char *progversion = PACKAGE_VERSION;
 const char *progname    = PACKAGE_NAME;
+
+#define CONFIG_SUBDIR_NAME PACKAGE_NAME
+char *config_dir;
 
 bool running = true;
 options_t *options = NULL;
@@ -545,6 +549,20 @@ bool set_current_level(level_t *level)
 
 static void game_init(void)
 {
+    if (-1 == mkdir(config_dir, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH)) {
+        if (errno == EEXIST) {
+            if (options->verbose) {
+                infomsg("Found config dir \"%s\"", config_dir);
+            }
+        } else {
+            errmsg("Could not created config dir \"%s\": %s", config_dir, strerror(errno));
+        }
+    } else {
+        if (options->verbose) {
+            infomsg("Created config dir \"%s\"", config_dir);
+        }
+    }
+
     if (options->extra_argc == 1) {
         char *filename = options->extra_argv[0];
         level_t *lv = load_level_file(filename);
@@ -567,6 +585,14 @@ main(
     progname = basename(argv[0]);
 
     srand(time(NULL));
+
+    char *xdg_config_dir = getenv("XDG_CONFIG_HOME");
+    char *home_dir       = getenv("HOME");
+    if (xdg_config_dir) {
+        asprintf(&config_dir, "%s/%s", xdg_config_dir, CONFIG_SUBDIR_NAME);
+    } else {
+        asprintf(&config_dir, "%s/.config/%s", home_dir, CONFIG_SUBDIR_NAME);
+    }
 
     options = create_options();
 
