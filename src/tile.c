@@ -207,6 +207,13 @@ void tile_unset_hover(tile_t *tile)
     tile->hover_center = false;
 }
 
+void tile_toggle_fixed(tile_t *tile)
+{
+    assert_not_null(tile);
+
+    tile->fixed = !tile->fixed;
+}
+
 void tile_toggle_hidden(tile_t *tile)
 {
     assert_not_null(tile);
@@ -232,7 +239,12 @@ void tile_modify_hovered_feature(tile_t *tile)
         tile_toggle_hidden(tile);
     } else {
         if (tile->hover_center) {
-            tile_toggle_hidden(tile);
+            if (IsKeyDown(KEY_LEFT_SHIFT) ||
+                IsKeyDown(KEY_RIGHT_SHIFT)) {
+                tile_toggle_hidden(tile);
+            } else {
+                tile_toggle_fixed(tile);
+            }
         } else {
             tile_cycle_path_section(tile, tile->hover_section);
         }

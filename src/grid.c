@@ -53,7 +53,7 @@ static void grid_add_to_bounding_box(grid_t *grid, tile_t *tile)
 grid_t *create_grid(int radius)
 {
     assert(radius > 0);
-    assert(radius < 10);
+    assert(radius < 6);
 
     grid_t *grid = calloc(1, sizeof(grid_t));
 

@@ -48,6 +48,7 @@ struct level {
 };
 typedef struct level level_t;
 
+level_t *create_level(void);
 void destroy_level(level_t *level);
 
 bool level_parse_string(level_t *level, char *str);

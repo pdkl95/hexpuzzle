@@ -321,11 +321,16 @@ void collection_draw(collection_t *collection)
 
     if (GuiButton(collection_button_rect, collection_button_text)) {
         level_t *level = collection->levels;
-        int n = collection->gui_list_scroll_index;
-        while (n--) {
-            level = level->next;
+        int n = collection->gui_list_active;
+        if (n >= 0) {
+            while (n--) {
+                level = level->next;
+            }
+            printf("Play si=%d a=%d f=%d\n",
+                   collection->gui_list_scroll_index,
+                   collection->gui_list_active,
+                   collection->gui_list_focus);
+            level_play(level);
         }
-        printf("Play %d\n", collection->gui_list_scroll_index);
-        level_play(level);
     }
 }

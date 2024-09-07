@@ -28,6 +28,9 @@
 #include "level.h"
 
 #define LEVEL_DEFAULT_NAME "(unknown)"
+#define LEVEL_MIN_RADIUS 1
+#define LEVEL_MAX_RADIUS 5
+#define LEVEL_DEFAULT_RADIUS LEVEL_MIN_RADIUS
 
 static level_t *alloc_level()
 {
@@ -39,6 +42,45 @@ static level_t *alloc_level()
     level->tiles = NULL;
 
     level->next = NULL;
+
+    return level;
+}
+
+static void level_fill_radius_with_tiles(level_t *level)
+{
+    int width  = (2 * level->radius) + 1;
+    int height = (2 * level->radius) + 1;
+
+    hex_axial_t center = {
+        .q = level->radius,
+        .r = level->radius
+    };
+
+    for (int q=0; q < width; q++) {
+        for (int r=0; r < height; r++) {
+            hex_axial_t pos = {
+                .q = q,
+                .r = r
+            };
+
+            if (hex_axial_distance(pos, center) <= level->radius) {
+                tile_t *tile = create_tile();
+                init_tile(tile, pos);
+                tile->enabled = true;
+                tile->next = level->tiles;
+                level->tiles = tile;
+            }
+        }
+    }
+}
+
+level_t *create_level(void)
+{
+    level_t *level = alloc_level();
+
+    level->radius = LEVEL_DEFAULT_RADIUS;
+
+    level_fill_radius_with_tiles(level);
 
     return level;
 }

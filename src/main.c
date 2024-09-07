@@ -130,6 +130,21 @@ void toggle_edit_mode(void)
     }
 }
 
+bool set_current_level(level_t *level)
+{
+    assert_not_null(level);
+
+    if (current_grid) {
+        destroy_grid(current_grid);
+        current_grid = NULL;
+    }
+
+    current_grid = level_create_grid(level);
+    grid_resize(current_grid);
+
+    return (!!current_grid);
+}
+
 void return_from_level(void)
 {
     if (current_grid) {
@@ -137,6 +152,15 @@ void return_from_level(void)
         current_grid = NULL;
     }
     game_mode = GAME_MODE_COLLECTION;
+}
+
+void create_new_level(void)
+{
+    level_t *level = create_level();
+    collection_add_level(current_collection, level);
+    set_current_level(level);
+
+    game_mode = GAME_MODE_EDIT_LEVEL;
 }
 
 #define print_popup(...) {                                          \
@@ -423,9 +447,11 @@ static void draw_mouse_text(void)
 Rectangle close_button_rect;
 Rectangle edit_button_rect;
 Rectangle return_button_rect;
+Rectangle new_level_button_rect;
 char close_button_text[6];
 char edit_button_text[6];
 char return_button_text[6];
+char new_level_button_text[6];
 
 void gui_setup(void)
 {
@@ -449,6 +475,13 @@ void gui_setup(void)
     return_button_rect.height = ICON_BUTTON_SIZE;
 
     memcpy(return_button_text,  GuiIconText(ICON_UNDO_FILL, NULL), 6);
+
+    new_level_button_rect.x      = return_button_rect.x;
+    new_level_button_rect.y      = return_button_rect.y + return_button_rect.height + WINDOW_MARGIN;
+    new_level_button_rect.width  = ICON_BUTTON_SIZE;
+    new_level_button_rect.height = ICON_BUTTON_SIZE;
+
+    memcpy(new_level_button_text,  GuiIconText(ICON_FILE_ADD, NULL), 6);
 }
 
 static void draw_gui_widgets(void)
@@ -467,6 +500,12 @@ static void draw_gui_widgets(void)
     case GAME_MODE_EDIT_LEVEL:
         if (GuiButton(return_button_rect, return_button_text)) {
             return_from_level();
+        }
+        break;
+
+    case GAME_MODE_COLLECTION:
+        if (GuiButton(new_level_button_rect, new_level_button_text)) {
+            create_new_level();
         }
         break;
 
@@ -637,20 +676,6 @@ gfx_cleanup(
 ) {
     unload_textures();
     CloseWindow();
-}
-
-bool set_current_level(level_t *level)
-{
-    assert_not_null(level);
-
-    if (current_grid) {
-        destroy_grid(current_grid);
-        current_grid = NULL;
-    }
-
-    current_grid = level_create_grid(level);
-
-    return (!!current_grid);
 }
 
 static void game_init(void)
