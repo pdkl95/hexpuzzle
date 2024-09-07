@@ -84,6 +84,8 @@ grid_t *current_grid = NULL;
 level_t *current_level = NULL;
 collection_t *current_collection = NULL;
 
+bool show_name_edit_box = false;
+
 #define MOUSE_TEXT_MAX_LINES 8
 #define MOUSE_TEXT_MAX_LINE_LENGTH 60
 char mouse_text[MOUSE_TEXT_MAX_LINES][MOUSE_TEXT_MAX_LINE_LENGTH];
@@ -141,6 +143,8 @@ bool set_current_level(level_t *level)
 
     current_grid = level_create_grid(level);
     grid_resize(current_grid);
+
+    current_level = level;
 
     return (!!current_grid);
 }
@@ -444,10 +448,14 @@ static void draw_mouse_text(void)
 #define BUTTON_MARGIN 4
 #define ICON_BUTTON_SIZE (RAYGUI_ICON_SIZE + (2 * BUTTON_MARGIN))
 
+Rectangle info_panel_rect;
+Rectangle name_text_rect;
+Rectangle name_edit_button_rect;
 Rectangle close_button_rect;
 Rectangle edit_button_rect;
 Rectangle return_button_rect;
 Rectangle new_level_button_rect;
+char name_edit_button_text[6];
 char close_button_text[6];
 char edit_button_text[6];
 char return_button_text[6];
@@ -455,6 +463,23 @@ char new_level_button_text[6];
 
 void gui_setup(void)
 {
+    info_panel_rect.x      = WINDOW_MARGIN;
+    info_panel_rect.y      = WINDOW_MARGIN;
+    info_panel_rect.width  = window_size.x * 0.3;
+    info_panel_rect.height = 100;
+
+    name_text_rect.x = WINDOW_MARGIN * 2;
+    name_text_rect.y = WINDOW_MARGIN * 2;
+    name_text_rect.width = window_size.x * 0.35;
+    name_text_rect.height = 30;
+
+    name_edit_button_rect.x = name_text_rect.x + name_text_rect.width + ICON_BUTTON_SIZE;
+    name_edit_button_rect.y = name_text_rect.y;
+    name_edit_button_rect.width  = ICON_BUTTON_SIZE;
+    name_edit_button_rect.height = ICON_BUTTON_SIZE;
+
+    memcpy(name_edit_button_text, GuiIconText(ICON_PENCIL, NULL), 6);
+
     close_button_rect.x      = window_size.x - WINDOW_MARGIN - ICON_BUTTON_SIZE;
     close_button_rect.y      = WINDOW_MARGIN;
     close_button_rect.width  = ICON_BUTTON_SIZE;
@@ -495,9 +520,12 @@ static void draw_gui_widgets(void)
     }
 
     switch (game_mode) {
-    case GAME_MODE_PLAY_LEVEL:
-        /* fall through */
     case GAME_MODE_EDIT_LEVEL:
+        /* fall through */
+    case GAME_MODE_PLAY_LEVEL:
+        GuiPanel(info_panel_rect, NULL);
+        GuiLabel(name_text_rect, current_level->name);
+
         if (GuiButton(return_button_rect, return_button_text)) {
             return_from_level();
         }
@@ -511,6 +539,19 @@ static void draw_gui_widgets(void)
 
     default:
         break;
+    }
+
+    if (game_mode == GAME_MODE_EDIT_LEVEL) {
+        if (GuiButton(name_edit_button_rect, name_edit_button_text)) {
+            printf("edit\n");
+            show_name_edit_box = true;
+        }
+    }
+}
+
+static void draw_popup_panels(void)
+{
+    if (show_name_edit_box) {
     }
 }
 
@@ -586,8 +627,7 @@ render_frame(
         }
 
         draw_gui_widgets();
-
-
+        draw_popup_panels();
         draw_popup_text();
 
         if (show_fps) {

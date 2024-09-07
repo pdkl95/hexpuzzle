@@ -115,4 +115,6 @@ extern game_mode_t game_mode;
 
 #define edit_mode (game_mode == GAME_MODE_EDIT_LEVEL)
 
+#define NAME_MAXLEN 22
+
 #endif /*COMMON_H*/

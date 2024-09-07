@@ -29,7 +29,7 @@
 #include "level.h"
 
 struct collection {
-    char *name;
+    char name[NAME_MAXLEN];
 
     char *dirpath;
     char *filename;

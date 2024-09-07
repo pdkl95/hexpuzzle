@@ -27,7 +27,7 @@
 #include "grid.h"
 #include "level.h"
 
-#define LEVEL_DEFAULT_NAME "(unknown)"
+#define LEVEL_DEFAULT_NAME "Untitled"
 #define LEVEL_MIN_RADIUS 1
 #define LEVEL_MAX_RADIUS 5
 #define LEVEL_DEFAULT_RADIUS LEVEL_MIN_RADIUS
@@ -36,8 +36,8 @@ static level_t *alloc_level()
 {
     level_t *level = calloc(1, sizeof(level_t));
 
+    level->name[0] = '\0';
     level->id = NULL;
-    level->name = NULL;
     level->filename = NULL;
     level->tiles = NULL;
 
@@ -78,6 +78,10 @@ level_t *create_level(void)
 {
     level_t *level = alloc_level();
 
+    static int seq = 0;
+    seq++;
+    snprintf(level->name, NAME_MAXLEN, "%s-%d", LEVEL_DEFAULT_NAME, seq);
+
     level->radius = LEVEL_DEFAULT_RADIUS;
 
     level_fill_radius_with_tiles(level);
@@ -93,7 +97,6 @@ void destroy_level(level_t *level)
         }
 
         SAFEFREE(level->id);
-        SAFEFREE(level->name);
         SAFEFREE(level->filename);
         SAFEFREE(level);
     }
@@ -207,7 +210,7 @@ bool level_parse_string(level_t *level, char *str)
     CMP(5, "radius");
     CMP(7, "begin_tiles");
 
-    level->name   = strdup(list.tokens[4]);
+    snprintf(level->name, NAME_MAXLEN, "%s", list.tokens[4]);
     level->radius     = (int)strtol(list.tokens[6], NULL, 10);
     level->tile_count = (int)strtol(list.tokens[8], NULL, 10);
 
@@ -302,23 +305,11 @@ grid_t *level_create_grid(level_t *level)
 
 void level_update_ui_name(level_t *level)
 {
-    char *text = level->name ? level->name : LEVEL_DEFAULT_NAME;
     int icon = level->finished
         ? ICON_OK_TICK
         : ICON_CROSS_SMALL;
 
-    const char *tmp = GuiIconText(icon, text);
-
-    int len = strlen(tmp);
-    if (len >= level->ui_name_length) {
-        SAFEFREE(level->ui_name);
-        level->ui_name = calloc(len + 1, sizeof(char));
-        level->ui_name_length = len;
-    }
-
-    memcpy(level->ui_name, tmp, strlen(tmp));
-
-    //printf("level[\"%s\"].ui_)name = \"%s\"\n", level->name, level->ui_name);
+    snprintf(level->ui_name, UI_NAME_MAXLEN, "%s", GuiIconText(icon, level->name));
 }
 
 void level_play(level_t *level)
@@ -329,5 +320,6 @@ void level_play(level_t *level)
     }
 
     current_grid = level_create_grid(level);;
+    current_level = level;
     game_mode = GAME_MODE_PLAY_LEVEL;
 }

@@ -48,7 +48,8 @@ static collection_t *alloc_collection(void)
     collection->level_name_count = INITIAL_LEVEL_NAME_COUNT;
     collection_alloc_level_names(collection);
 
-    collection->name = NULL;
+    collection->name[0] = '\0';
+
     collection->dirpath = NULL;
     collection->filename = NULL;
     collection->levels = NULL;
@@ -69,7 +70,7 @@ collection_t *create_collection(char *name)
     collection_t *collection = alloc_collection();
 
     if (name) {
-        collection->name = strdup(name);
+        snprintf(collection->name, NAME_MAXLEN, "%s", name);
     }
 
     return collection;
@@ -200,7 +201,6 @@ void destroy_collection(collection_t *collection)
             destroy_level(collection->levels);
         }
 
-        SAFEFREE(collection->name);
         SAFEFREE(collection->dirpath);
         SAFEFREE(collection->filename);
     }

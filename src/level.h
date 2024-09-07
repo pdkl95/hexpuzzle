@@ -29,9 +29,10 @@
 #include "tile.h"
 #include "grid.h"
 
+#define UI_NAME_MAXLEN  (6 + NAME_MAXLEN)
 struct level {
     char *id;
-    char *name;
+    char name[NAME_MAXLEN];
 
     int radius;
 
@@ -41,8 +42,7 @@ struct level {
     char *filename;
 
     bool finished;
-    char *ui_name;
-    int ui_name_length;
+    char ui_name[UI_NAME_MAXLEN];
 
     struct level *prev, *next;
 };
@@ -59,5 +59,7 @@ grid_t *level_create_grid(level_t *level);
 void level_update_ui_name(level_t *level);
 
 void level_play(level_t *level);
+
+extern level_t *current_level;
 
 #endif /*LEVEL_H*/
