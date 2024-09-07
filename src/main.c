@@ -130,6 +130,15 @@ void toggle_edit_mode(void)
     }
 }
 
+void return_from_level(void)
+{
+    if (current_grid) {
+        destroy_grid(current_grid);
+        current_grid = NULL;
+    }
+    game_mode = GAME_MODE_COLLECTION;
+}
+
 #define print_popup(...) {                                          \
         popup_text = TextFormat(__VA_ARGS__);                       \
         popup_text_active_until = GetTime() + popup_text_fade_time; \
@@ -413,8 +422,10 @@ static void draw_mouse_text(void)
 
 Rectangle close_button_rect;
 Rectangle edit_button_rect;
+Rectangle return_button_rect;
 char close_button_text[6];
 char edit_button_text[6];
+char return_button_text[6];
 
 void gui_setup(void)
 {
@@ -425,12 +436,19 @@ void gui_setup(void)
 
     memcpy(close_button_text, GuiIconText(ICON_CROSS, NULL), 6);
 
-    edit_button_rect.x      = window_size.x - WINDOW_MARGIN - ICON_BUTTON_SIZE;
+    edit_button_rect.x      = close_button_rect.x;
     edit_button_rect.y      = close_button_rect.y + close_button_rect.height + WINDOW_MARGIN;
     edit_button_rect.width  = ICON_BUTTON_SIZE;
     edit_button_rect.height = ICON_BUTTON_SIZE;
     
     memcpy(edit_button_text,  GuiIconText(ICON_TOOLS, NULL), 6);
+
+    return_button_rect.x      = edit_button_rect.x;
+    return_button_rect.y      = edit_button_rect.y + edit_button_rect.height + WINDOW_MARGIN;
+    return_button_rect.width  = ICON_BUTTON_SIZE;
+    return_button_rect.height = ICON_BUTTON_SIZE;
+
+    memcpy(return_button_text,  GuiIconText(ICON_UNDO_FILL, NULL), 6);
 }
 
 static void draw_gui_widgets(void)
@@ -441,6 +459,19 @@ static void draw_gui_widgets(void)
 
     if (GuiButton(edit_button_rect, edit_button_text)) {
         toggle_edit_mode();
+    }
+
+    switch (game_mode) {
+    case GAME_MODE_PLAY_LEVEL:
+        /* fall through */
+    case GAME_MODE_EDIT_LEVEL:
+        if (GuiButton(return_button_rect, return_button_text)) {
+            return_from_level();
+        }
+        break;
+
+    default:
+        break;
     }
 }
 
