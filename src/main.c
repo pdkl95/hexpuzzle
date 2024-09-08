@@ -57,6 +57,9 @@ double resize_delay = 0.5;
 double resize_time = 0.0;
 IVector2 window_size;
 IVector2 mouse_position;
+Vector2 mouse_positionf;
+bool mouse_left_click  = false;
+bool mouse_right_click = false;
 float cursor_spin = 0.0f;
 float cursor_spin_step = (360.0f / 100.0f);
 int frame_count = 0;
@@ -94,6 +97,16 @@ int mouse_text_max_line_length = 0;
 int mouse_text_font_size = 20;
 
 void gui_setup(void);
+
+void show_name_edit_dialog()
+{
+    if (current_level) {
+        memcpy(current_level->name_backup,
+               current_level->name,
+               NAME_MAXLEN);
+        show_name_edit_box = true;
+    }
+}
 
 char *game_mode_str()
 {
@@ -364,6 +377,9 @@ handle_events(
     mouse_position.x = GetMouseX();
     mouse_position.y = GetMouseY();
 
+    mouse_positionf.x = (float)mouse_position.x;
+    mouse_positionf.y = (float)mouse_position.y;
+
     grid_set_hover(current_grid, mouse_position);
 
     mouse_text_idx = 0;
@@ -371,8 +387,12 @@ handle_events(
 
     bool any_zoom_active = false;
 
+    mouse_left_click  = false;;
+    mouse_right_click = false;;
+
     if (IsCursorOnScreen()) {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+            mouse_left_click = true;
             if (current_grid) {
                 grid_drag_start(current_grid);
             }
@@ -384,6 +404,7 @@ handle_events(
         }
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
+            mouse_right_click = true;
             if (edit_mode) {
                 if (current_grid) {
                     grid_modify_hovered_feature(current_grid);
@@ -444,6 +465,7 @@ static void draw_mouse_text(void)
 #endif
 
 #define WINDOW_MARGIN RAYGUI_ICON_SIZE
+#define PANEL_INNER_MARGIN 12
 
 #define BUTTON_MARGIN 4
 #define ICON_BUTTON_SIZE (RAYGUI_ICON_SIZE + (2 * BUTTON_MARGIN))
@@ -461,22 +483,40 @@ char edit_button_text[6];
 char return_button_text[6];
 char new_level_button_text[6];
 
+char cancel_ok_with_icons[25];
+
 void gui_setup(void)
 {
+    cancel_ok_with_icons[0] = '\0';
+    strcat(cancel_ok_with_icons, "Cancel");
+    strcat(cancel_ok_with_icons, ";");
+    strcat(cancel_ok_with_icons, "Ok");
+
     info_panel_rect.x      = WINDOW_MARGIN;
     info_panel_rect.y      = WINDOW_MARGIN;
-    info_panel_rect.width  = window_size.x * 0.3;
-    info_panel_rect.height = 100;
 
-    name_text_rect.x = WINDOW_MARGIN * 2;
-    name_text_rect.y = WINDOW_MARGIN * 2;
-    name_text_rect.width = window_size.x * 0.35;
+    name_text_rect.x = WINDOW_MARGIN * PANEL_INNER_MARGIN;
+    name_text_rect.y = WINDOW_MARGIN + PANEL_INNER_MARGIN;
+    name_text_rect.width = window_size.x * 0.22;
     name_text_rect.height = 30;
 
     name_edit_button_rect.x = name_text_rect.x + name_text_rect.width + ICON_BUTTON_SIZE;
     name_edit_button_rect.y = name_text_rect.y;
+
     name_edit_button_rect.width  = ICON_BUTTON_SIZE;
     name_edit_button_rect.height = ICON_BUTTON_SIZE;
+
+    info_panel_rect.width  =
+        name_edit_button_rect.x
+        + name_edit_button_rect.width
+        + PANEL_INNER_MARGIN
+        - info_panel_rect.x;
+
+    info_panel_rect.height =
+        name_text_rect.y
+        + MAX(name_text_rect.height, name_edit_button_rect.height)
+        + (2 * PANEL_INNER_MARGIN)
+        - info_panel_rect.y;;
 
     memcpy(name_edit_button_text, GuiIconText(ICON_PENCIL, NULL), 6);
 
@@ -509,6 +549,47 @@ void gui_setup(void)
     memcpy(new_level_button_text,  GuiIconText(ICON_FILE_ADD, NULL), 6);
 }
 
+#define NAME_FONT_SIZE 22
+#define NAME_PANEL_ROUNDNES 0.2
+
+Color name_header_panel_bg_color   = { 0x72, 0x1C, 0xB8, 0xaa };
+Color name_header_panel_edge_color = { 0x94, 0x83, 0xA2, 0xcc };
+Color name_header_text_color       = { 0xD0, 0xC0, 0xFF, 0xff };
+
+static void draw_name_header(char *name)
+{
+    int textwidth = MeasureText(name, NAME_FONT_SIZE);
+
+    Rectangle text_rect = {
+        .x = WINDOW_MARGIN + PANEL_INNER_MARGIN,
+        .y = WINDOW_MARGIN + PANEL_INNER_MARGIN,
+        .width  = textwidth,
+        .height = NAME_FONT_SIZE
+    };
+
+    Rectangle panel_rect = {
+        .x = WINDOW_MARGIN,
+        .y = WINDOW_MARGIN,
+        .width  = textwidth      + (2 * PANEL_INNER_MARGIN),
+        .height = NAME_FONT_SIZE + (2 * PANEL_INNER_MARGIN)
+    };
+
+    //printf("panel_rect\n"); printrect(panel_rect);
+    //printf(" text_rect\n"); printrect(text_rect);
+
+    bool hover = CheckCollisionPointRec(mouse_positionf, text_rect);
+    if (hover && mouse_left_click) {
+        show_name_edit_dialog();
+    }
+
+    Color bg   = hover ? name_header_panel_edge_color : name_header_panel_bg_color;
+    Color edge = hover ? name_header_panel_bg_color : name_header_panel_edge_color;
+    DrawRectangleRounded(panel_rect, NAME_PANEL_ROUNDNES, 0, bg);
+    DrawRectangleRoundedLines(panel_rect, NAME_PANEL_ROUNDNES, 0, 1.0, edge);
+
+    DrawText(name, text_rect.x, text_rect.y, NAME_FONT_SIZE, name_header_text_color);
+}
+
 static void draw_gui_widgets(void)
 {
     if (GuiButton(close_button_rect, close_button_text)) {
@@ -523,8 +604,7 @@ static void draw_gui_widgets(void)
     case GAME_MODE_EDIT_LEVEL:
         /* fall through */
     case GAME_MODE_PLAY_LEVEL:
-        GuiPanel(info_panel_rect, NULL);
-        GuiLabel(name_text_rect, current_level->name);
+        draw_name_header(current_level->name);
 
         if (GuiButton(return_button_rect, return_button_text)) {
             return_from_level();
@@ -540,18 +620,46 @@ static void draw_gui_widgets(void)
     default:
         break;
     }
-
-    if (game_mode == GAME_MODE_EDIT_LEVEL) {
-        if (GuiButton(name_edit_button_rect, name_edit_button_text)) {
-            printf("edit\n");
-            show_name_edit_box = true;
-        }
-    }
 }
 
 static void draw_popup_panels(void)
 {
     if (show_name_edit_box) {
+        Rectangle edit_box_rect = {
+            (float)GetScreenWidth()/2 - 120,
+            (float)GetScreenHeight()/2 - 60,
+            240,
+            140
+        };
+        const char *icon = GuiIconText(ICON_PENCIL, "Edit Level Name");
+
+        int result = GuiTextInputBox(edit_box_rect,
+                                     icon,
+                                     "Level Name:",
+                                     cancel_ok_with_icons,
+                                     current_level->name,
+                                     NAME_MAXLEN,
+                                     NULL);
+//        printf("result = %d, btn=\"%s\"\n", result, cancel_ok_with_icons);
+
+        switch (result) {
+        case -1:
+            /* do nothing */
+            break;
+
+        case 2:
+            /* accept edit */
+            show_name_edit_box = false;
+            break;
+
+        case 1:
+            /* fall through */
+        default:
+            if (current_level) {
+                memcpy(current_level->name, current_level->name_backup, NAME_MAXLEN);
+            }
+            show_name_edit_box = false;
+        }
     }
 }
 

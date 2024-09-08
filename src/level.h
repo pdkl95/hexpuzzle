@@ -33,6 +33,7 @@
 struct level {
     char *id;
     char name[NAME_MAXLEN];
+    char name_backup[NAME_MAXLEN];
 
     int radius;
 
