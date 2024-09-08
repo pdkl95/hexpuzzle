@@ -48,6 +48,7 @@ const char *progname    = PACKAGE_NAME;
 char *config_dir;
 
 bool running = true;
+int automatic_event_polling_semaphore = 0;
 options_t *options = NULL;
 bool event_waiting_active = false;
 bool window_size_changed = false;
@@ -88,6 +89,7 @@ level_t *current_level = NULL;
 collection_t *current_collection = NULL;
 
 bool show_name_edit_box = false;
+bool show_ask_save_box = false;
 
 #define MOUSE_TEXT_MAX_LINES 8
 #define MOUSE_TEXT_MAX_LINE_LENGTH 60
@@ -98,7 +100,49 @@ int mouse_text_font_size = 20;
 
 void gui_setup(void);
 
-void show_name_edit_dialog()
+void enable_automatic_events(void)
+{
+    if (options->wait_events) {
+        if (0 == automatic_event_polling_semaphore) {
+#ifdef DEBUG_EVENT_POLLING
+            if (options->verbose) {
+                infomsg("Enabling automatic event polling.");
+            }
+#endif
+            DisableEventWaiting();
+            event_waiting_active = false;;
+            //PollInputEvents();
+        }
+        automatic_event_polling_semaphore++;
+#ifdef DEBUG_EVENT_POLLING
+        printf("semaphore++ = %d\n", automatic_event_polling_semaphore);
+#endif
+    }
+}
+
+void disable_automatic_events(void)
+{
+    if (options->wait_events) {
+        automatic_event_polling_semaphore--;
+
+        assert(automatic_event_polling_semaphore >= 0);
+
+        if (0 == automatic_event_polling_semaphore) {
+#ifdef DEBUG_EVENT_POLLING
+            if (options->verbose) {
+                infomsg("Disabling automatic event polling.");
+            }
+#endif
+            EnableEventWaiting();
+            event_waiting_active = true;
+        }
+#ifdef DEBUG_EVENT_POLLING
+        printf("semaphore-- = %d\n", automatic_event_polling_semaphore);
+#endif
+    }
+}
+
+void show_name_edit_dialog(void)
 {
     if (current_level) {
         memcpy(current_level->name_backup,
@@ -108,7 +152,7 @@ void show_name_edit_dialog()
     }
 }
 
-char *game_mode_str()
+char *game_mode_str(void)
 {
     switch (game_mode) {
     case GAME_MODE_NULL:
@@ -168,6 +212,7 @@ void return_from_level(void)
         destroy_grid(current_grid);
         current_grid = NULL;
     }
+    current_level = NULL;
     game_mode = GAME_MODE_COLLECTION;
 }
 
@@ -178,6 +223,8 @@ void create_new_level(void)
     set_current_level(level);
 
     game_mode = GAME_MODE_EDIT_LEVEL;
+
+    show_name_edit_dialog();
 }
 
 #define print_popup(...) {                                          \
@@ -385,8 +432,6 @@ handle_events(
     mouse_text_idx = 0;
     mouse_text_max_line_length = 0;
 
-    bool any_zoom_active = false;
-
     mouse_left_click  = false;;
     mouse_right_click = false;;
 
@@ -409,23 +454,6 @@ handle_events(
                 if (current_grid) {
                     grid_modify_hovered_feature(current_grid);
                 }
-            }
-        }
-    }
-
-    if (options->wait_events) {
-        if (event_waiting_active) {
-            /* event waiting currently ON */
-            if (any_zoom_active) {
-                // disablw waiting during user interaction
-                DisableEventWaiting();
-                event_waiting_active = false;
-            }
-        } else {
-            /* event waiting currently OFF */
-            if (!any_zoom_active) {
-                EnableEventWaiting();
-                event_waiting_active = true;
             }
         }
     }
@@ -484,13 +512,19 @@ char return_button_text[6];
 char new_level_button_text[6];
 
 char cancel_ok_with_icons[25];
+char no_yes_with_icons[25];
 
 void gui_setup(void)
 {
     cancel_ok_with_icons[0] = '\0';
-    strcat(cancel_ok_with_icons, "Cancel");
+    strcat(cancel_ok_with_icons, GuiIconText(ICON_CROSS,"Cancel"));
     strcat(cancel_ok_with_icons, ";");
-    strcat(cancel_ok_with_icons, "Ok");
+    strcat(cancel_ok_with_icons, GuiIconText(ICON_OK_TICK,"Ok"));
+
+    no_yes_with_icons[0] = '\0';
+    strcat(no_yes_with_icons, GuiIconText(ICON_CROSS,"No"));
+    strcat(no_yes_with_icons, ";");
+    strcat(no_yes_with_icons, GuiIconText(ICON_OK_TICK,"Yes"));
 
     info_panel_rect.x      = WINDOW_MARGIN;
     info_panel_rect.y      = WINDOW_MARGIN;
@@ -525,7 +559,7 @@ void gui_setup(void)
     close_button_rect.width  = ICON_BUTTON_SIZE;
     close_button_rect.height = ICON_BUTTON_SIZE;
 
-    memcpy(close_button_text, GuiIconText(ICON_CROSS, NULL), 6);
+    memcpy(close_button_text, GuiIconText(ICON_EXIT, NULL), 6);
 
     edit_button_rect.x      = close_button_rect.x;
     edit_button_rect.y      = close_button_rect.y + close_button_rect.height + WINDOW_MARGIN;
@@ -602,7 +636,14 @@ static void draw_gui_widgets(void)
 
     switch (game_mode) {
     case GAME_MODE_EDIT_LEVEL:
-        /* fall through */
+        draw_name_header(current_level->name);
+
+        if (GuiButton(return_button_rect, return_button_text)) {
+            printf("return\n");
+            show_ask_save_box = true;
+        }
+        break;
+
     case GAME_MODE_PLAY_LEVEL:
         draw_name_header(current_level->name);
 
@@ -622,7 +663,7 @@ static void draw_gui_widgets(void)
     }
 }
 
-static void draw_popup_panels(void)
+static void draw_name_edit_dialog(void)
 {
     if (show_name_edit_box) {
         Rectangle edit_box_rect = {
@@ -640,7 +681,6 @@ static void draw_popup_panels(void)
                                      current_level->name,
                                      NAME_MAXLEN,
                                      NULL);
-//        printf("result = %d, btn=\"%s\"\n", result, cancel_ok_with_icons);
 
         switch (result) {
         case -1:
@@ -659,8 +699,57 @@ static void draw_popup_panels(void)
                 memcpy(current_level->name, current_level->name_backup, NAME_MAXLEN);
             }
             show_name_edit_box = false;
+            break;
         }
     }
+}
+
+static void draw_ask_save_dialog(void)
+{
+    if (show_ask_save_box) {
+        Rectangle edit_box_rect = {
+            (float)GetScreenWidth()/2 - 120,
+            (float)GetScreenHeight()/2 - 60,
+            240,
+            140
+        };
+
+        const char *iconmsg = GuiIconText(ICON_FILE_SAVE_CLASSIC, "Save Level?");
+        int result = GuiMessageBox(edit_box_rect,
+                                   iconmsg,
+                                   "Save changes to level?",
+                                   no_yes_with_icons);
+
+        switch (result) {
+        case -1:
+            /* do nothing */
+            break;
+
+        case 2:
+            /* yes */
+            printf("collection_extract_level_from_grid()\n");
+            level_extract_from_grid(current_level, current_grid);
+            printf("collection_save()\n");
+            collection_save(current_collection);
+            show_ask_save_box = false;
+            printf("return_from_level()\n");
+            return_from_level();
+            break;
+
+        case 1:
+            /* no */
+            /* fall through */
+        default:
+            show_ask_save_box = false;
+            return_from_level();
+        }
+    }
+}
+
+static void draw_popup_panels(void)
+{
+    draw_name_edit_dialog();
+    draw_ask_save_dialog();
 }
 
 static void draw_popup_text(void)
@@ -806,6 +895,9 @@ void gfx_init(void)
     set_uniform_resolution();
 
     if (options->wait_events) {
+        if (options->verbose) {
+            infomsg("Disabling automatic event polling.");
+        }
         EnableEventWaiting();
         event_waiting_active = true;
     }

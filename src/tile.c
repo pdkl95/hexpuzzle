@@ -90,7 +90,7 @@ tile_t *create_tile(void)
     return init_tile(tile, pos);
 }
 
-static void tile_set_flag_from_char(tile_t *tile, char c)
+void tile_set_flag_from_char(tile_t *tile, char c)
 {
     assert_not_null(tile);
 
@@ -108,55 +108,29 @@ static void tile_set_flag_from_char(tile_t *tile, char c)
     }
 }
 
-tile_t *create_tile_from_serialized_strings(char *addr, char *path, char *flags)
-{
-    assert_not_null(addr);
-    assert_not_null(path);
-    assert_not_null(flags);
-    assert(strlen(addr)  >= 3);
-    assert(strlen(path)  == 6);
-    assert(strlen(flags) == 3);
-
-#if 0
-    printf("Creating tile from: addr=\"%s\" path=\"%s\" flags=\"%s\"\n",
-           addr, path, flags);
-#endif
-
-    tile_t *tile = create_tile();
-
-    hex_axial_t pos = {0};
-    char *p = addr;
-    pos.q = (int)strtol(addr, &p, 10);
-    p++;
-    pos.r = (int)strtol(p, NULL, 10);
-
-    tile->position = pos;
-
-    for (int i=0; i<6; i++) {
-        char digit[2];
-        digit[0] = path[i];
-        digit[1] = '\0';
-
-        tile->path[i] = (int)strtol(digit, NULL, 10);
-    }
-
-    tile_set_flag_from_char(tile, flags[0]);
-    tile_set_flag_from_char(tile, flags[1]);
-    tile_set_flag_from_char(tile, flags[2]);
-
-    return tile;
-}
-
 void destroy_tile(tile_t *tile)
 {
     if (tile) {
-        if (tile->next) {
-            destroy_tile(tile);
-        }
-
         SAFEFREE(tile);
     }
 }
+
+bool tile_eq(tile_t *tile, tile_t *other)
+{
+#define CMP(field) if (tile->field != other->field) { return false; }
+    CMP(enabled);
+    CMP(fixed);
+    CMP(hidden);
+    CMP(path[0]);
+    CMP(path[1]);
+    CMP(path[2]);
+    CMP(path[3]);
+    CMP(path[4]);
+    CMP(path[5]);
+#undef CMP
+    return true;
+}
+
 
 void tile_copy_attributes(tile_t *dst, tile_t *src)
 {

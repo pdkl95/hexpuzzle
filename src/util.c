@@ -21,10 +21,32 @@
 
 #include "common.h"
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <limits.h>
 #include <stdarg.h>
 #include <math.h>
 
 #include "util.h"
+
+bool file_exists(const char *file)
+{
+    struct stat sb;
+    return (stat(file, &sb) == 0);
+}
+
+const char *concat_dir_and_filename(const char *dir, const char *filename)
+{
+    static char buf[PATH_MAX];
+    int dirlast = strlen(dir) - 1;
+    if (dir[dirlast] == '/') {
+        snprintf(buf, PATH_MAX, "%s%s", dir, filename);
+    } else {
+        snprintf(buf, PATH_MAX, "%s/%s", dir, filename);
+    }
+    return buf;
+}
 
 const char *filename_ext(const char *filename)
 {

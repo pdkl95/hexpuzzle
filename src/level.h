@@ -36,11 +36,15 @@ struct level {
     char name_backup[NAME_MAXLEN];
 
     int radius;
+    int tile_width;
+    int tile_height;
 
     int tile_count;
     tile_t *tiles;
+    tile_t *old_tiles;
 
     char *filename;
+    bool changed;
 
     bool finished;
     char ui_name[UI_NAME_MAXLEN];
@@ -60,6 +64,13 @@ grid_t *level_create_grid(level_t *level);
 void level_update_ui_name(level_t *level);
 
 void level_play(level_t *level);
+
+void level_save_to_file(level_t *level, char *dirpath);
+void level_save_to_file_if_changed(level_t *level, char *dirpath);
+
+bool level_replace_from_memory(level_t *level, char *str);
+void level_extract_from_grid(level_t *level, grid_t *grid);
+void level_serialize(level_t *level, FILE *f);
 
 extern level_t *current_level;
 

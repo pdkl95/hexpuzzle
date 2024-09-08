@@ -23,6 +23,7 @@
 
 #include "raygui/raygui.h"
 
+#include "options.h"
 #include "tile.h"
 #include "grid.h"
 #include "level.h"
@@ -37,9 +38,15 @@ static level_t *alloc_level()
     level_t *level = calloc(1, sizeof(level_t));
 
     level->name[0] = '\0';
+
+    level->tile_width  = 0;
+    level->tile_height = 0;
+
     level->id = NULL;
     level->filename = NULL;
     level->tiles = NULL;
+    level->old_tiles = NULL;
+    level->changed = false;
 
     level->next = NULL;
 
@@ -51,10 +58,16 @@ static void level_fill_radius_with_tiles(level_t *level)
     int width  = (2 * level->radius) + 1;
     int height = (2 * level->radius) + 1;
 
+    level->tile_width  = width;
+    level->tile_height = height;
+
     hex_axial_t center = {
         .q = level->radius,
         .r = level->radius
     };
+
+    int tile_count = width * height;
+    level->tiles = calloc(tile_count, sizeof(tile_t));
 
     for (int q=0; q < width; q++) {
         for (int r=0; r < height; r++) {
@@ -64,11 +77,10 @@ static void level_fill_radius_with_tiles(level_t *level)
             };
 
             if (hex_axial_distance(pos, center) <= level->radius) {
-                tile_t *tile = create_tile();
+                int idx = (r * width) + q;
+                tile_t *tile = &(level->tiles[idx]);
                 init_tile(tile, pos);
                 tile->enabled = true;
-                tile->next = level->tiles;
-                level->tiles = tile;
             }
         }
     }
@@ -89,14 +101,21 @@ level_t *create_level(void)
     return level;
 }
 
+void level_clear_tiles(level_t *level)
+{
+    assert_not_null(level);
+
+    if (level->tiles) {
+        destroy_tile(level->tiles);
+        level->tiles = NULL;
+    }
+}
+
 void destroy_level(level_t *level)
 {
     if (level) {
-        if (level->next) {
-            destroy_level(level->next);
-        }
-
         SAFEFREE(level->id);
+        SAFEFREE(level->tiles);
         SAFEFREE(level->filename);
         SAFEFREE(level);
     }
@@ -143,14 +162,25 @@ static token_list_t level_tokenize_string(char *str)
             combine = tmp;
             tok = NULL;
 
-            if (combine[strlen(combine) - 1] == '"') {
+            int lastidx = strlen(combine) - 1;
+            if (combine[lastidx] == '"') {
+                combine[lastidx] = '\0';
                 tok = combine;
                 free_after_use = combine;
                 combine = NULL;
             }
         } else if (tok[0] == '"') {
-            combine = strdup(tok);
-            tok = NULL;
+            tok++;
+            int lastidx = strlen(tok) - 1;
+            if (tok[lastidx] == '"') {
+                tok[lastidx] = '\0';
+                tokens[n] = strdup(tok);
+                n++;
+                tok = NULL;
+            } else {
+                combine = strdup(tok);
+                tok = NULL;
+            }
         }
 
         if (tok) {
@@ -175,6 +205,12 @@ static token_list_t level_tokenize_string(char *str)
         .token_count = n
     };
 
+#if 0
+    for (int i=0; i<n; i++) {
+        printf("token[%d] = \"%s\"\n", i, tokens[i]);
+    }
+#endif
+
     return list;
 }
 
@@ -184,6 +220,46 @@ static void level_free_tokens(token_list_t list)
         SAFEFREE(list.tokens[i]);
     }
     SAFEFREE(list.tokens);
+}
+
+tile_t *level_setup_tile_from_serialized_strings(level_t *level, char *addr, char *path, char *flags)
+{
+    assert_not_null(level);
+    assert_not_null(addr);
+    assert_not_null(path);
+    assert_not_null(flags);
+    assert(strlen(addr)  >= 3);
+    assert(strlen(path)  == 6);
+    assert(strlen(flags) == 3);
+
+#if 0
+    printf("Creating tile from: addr=\"%s\" path=\"%s\" flags=\"%s\"\n",
+           addr, path, flags);
+#endif
+
+    tile_t *tile = create_tile();
+
+    hex_axial_t pos = {0};
+    char *p = addr;
+    pos.q = (int)strtol(addr, &p, 10);
+    p++;
+    pos.r = (int)strtol(p, NULL, 10);
+
+    tile->position = pos;
+
+    for (int i=0; i<6; i++) {
+        char digit[2];
+        digit[0] = path[i];
+        digit[1] = '\0';
+
+        tile->path[i] = (int)strtol(digit, NULL, 10);
+    }
+
+    tile_set_flag_from_char(tile, flags[0]);
+    tile_set_flag_from_char(tile, flags[1]);
+    tile_set_flag_from_char(tile, flags[2]);
+
+    return tile;
 }
 
 bool level_parse_string(level_t *level, char *str)
@@ -216,15 +292,15 @@ bool level_parse_string(level_t *level, char *str)
 
     //printf("c=%d, r=%d, n=\"%s\"\n", level->tile_count, level->radius, level->name);
 
+    level_fill_radius_with_tiles(level);
+
     for(int i = 9; i<(list.token_count - 2); i += 4) {
         CMP(i, "tile");
         char *addr  = list.tokens[i+1];
         char *path  = list.tokens[i+2];
         char *flags = list.tokens[i+3];
 
-        tile_t *tile = create_tile_from_serialized_strings(addr, path, flags);
-        tile->next = level->tiles;
-        level->tiles = tile;
+        level_setup_tile_from_serialized_strings(level, addr, path, flags);
     }
 
 
@@ -289,15 +365,28 @@ level_t *load_level_file(char *filename)
     }
 }
 
+bool level_replace_from_memory(level_t *level, char *str)
+{
+    assert_not_null(level);
+
+    level_clear_tiles(level);
+
+    return level_parse_string(level, str);
+}
+
 grid_t *level_create_grid(level_t *level)
 {
+    assert_not_null(level);
+
     grid_t *grid = create_grid(level->radius);
 
-    tile_t *tile = level->tiles;
-    while (tile) {
-        tile_t *grid_tile = grid_get_tile(grid, tile->position);\
-        tile_copy_attributes(grid_tile, tile);
-        tile = tile->next;
+    for (int q=0; q < level->tile_width; q++) {
+        for (int r=0; r < level->tile_height; r++) {
+            int idx = (r * level->tile_width) + q;
+            tile_t *tile = &(level->tiles[idx]);
+            tile_t *grid_tile = grid_get_tile(grid, tile->position);
+            tile_copy_attributes(grid_tile, tile);
+        }
     }
 
     return grid;
@@ -305,6 +394,8 @@ grid_t *level_create_grid(level_t *level)
 
 void level_update_ui_name(level_t *level)
 {
+    assert_not_null(level);
+
     int icon = level->finished
         ? ICON_OK_TICK
         : ICON_CROSS_SMALL;
@@ -314,6 +405,8 @@ void level_update_ui_name(level_t *level)
 
 void level_play(level_t *level)
 {
+    assert_not_null(level);
+
     if (current_grid) {
         destroy_grid(current_grid);
         current_grid = NULL;
@@ -322,4 +415,131 @@ void level_play(level_t *level)
     current_grid = level_create_grid(level);;
     current_level = level;
     game_mode = GAME_MODE_PLAY_LEVEL;
+}
+
+void level_save_to_file(level_t *level, char *dirpath)
+{
+    assert_not_null(level);
+
+    if (!level->filename) {
+        errmsg("Asked to save level to a file, but missing filename");
+    }
+
+    char *filepath = level->filename;
+    char *pathbuf = NULL;
+    if (dirpath) {
+        int len = strlen(level->filename)
+            + strlen(dirpath)
+            + 1   // "/"
+            + 1;  // \0
+        pathbuf = calloc(len, sizeof(char));
+
+        pathbuf[0] = '\0';
+        strcat(pathbuf, dirpath);
+        if ('/' != dirpath[strlen(dirpath) - 1]) {
+            strcat(pathbuf, "/");
+        }
+        strcat(pathbuf, level->filename);
+        filepath = &(pathbuf[0]);
+    }
+
+    if (options->verbose) {
+        infomsg("saving level \"%s\" to: \"%s\"", level->name, filepath);
+    }
+
+    FILE *f = fopen(pathbuf, "w");
+    if (!f) {
+        errmsg("cannot save level \"%s\" to \"%s\": $a",
+               level->name, pathbuf, strerror(errno));
+        return;
+    }
+
+    level_serialize(level, f);
+
+    fclose(f);
+    if (options->verbose) {
+        infomsg("save to \"%s\" finished", pathbuf);
+    }
+
+    if (pathbuf) {
+        free(pathbuf);
+    }
+
+    level->changed = false;
+}
+
+void level_save_to_file_if_changed(level_t *level, char *dirpath)
+{
+    assert_not_null(level);
+
+    if (level->changed) {
+        level_save_to_file(level, dirpath);
+    } else {
+        printf("level file \"%s\" hasn't changed - skipping save\n", level->name);
+    }
+}
+
+void level_extract_from_grid(level_t *level, grid_t *grid)
+{
+#if 1
+    int n=0;
+    for (int q=0; q < level->tile_width; q++) {
+        for (int r=0; r < level->tile_height; r++) {
+            int idx = (r * level->tile_width) + q;
+            tile_t *tile = &(level->tiles[idx]);
+            tile_t *grid_tile = grid_get_tile(grid, tile->position);
+            if (!tile_eq(tile, grid_tile)) {
+                n++;
+                level->changed = true;
+                tile_copy_attributes(tile, grid_tile);
+            }
+        }
+    }
+    if (level->changed) {
+        printf("extraction finished - %d tiles changed", n);
+    } else {
+        printf("extraction finished - zero changes!");
+    }
+#else
+    assert_not_null(level);
+    assert_not_null(current_level);
+    assert_not_null(current_grid);
+    assert(level == current_level);
+
+    int size = 40 * current_grid->maxtiles
+        + 64 //50    // header
+        + 32 //24    // footer
+        + NAME_MAXLEN;
+
+    char *buf = calloc(size, sizeof(char));
+
+    FILE *f = fmemopen(buf, size, "w");
+    grid_serialize(current_grid, f);
+    long filesize = ftell(f);
+    fclose(f);
+    buf[filesize + 1] = '\0';
+
+#if 0
+    printf("\nBEG>>>\n");
+    fwrite(buf, 1, filesize, stdout);
+    printf("\n<<<END\n");
+#endif
+
+    level_replace_from_memory(level, buf);
+
+    free(buf);
+#endif
+}
+
+void level_serialize(level_t *level, FILE *f)
+{
+    fprintf(f, "hexlevel version 1\n");
+    fprintf(f, "name \"%s\"\n", level->name);
+    fprintf(f, "radius %d\n", level->radius);
+    int total_tiles = level->tile_width * level->tile_height;
+    fprintf(f, "begin_tiles %d\n", total_tiles);
+    for (int i=0; i<total_tiles; i++) {
+        tile_serialize(&level->tiles[i], f);
+    }
+    fprintf(f, "end_tiles\n");
 }

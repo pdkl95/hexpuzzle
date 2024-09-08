@@ -33,6 +33,7 @@ struct collection {
 
     char *dirpath;
     char *filename;
+    int filename_seq;
 
     level_t *levels;
     int level_count;
@@ -66,6 +67,10 @@ bool collection_add_level_file(collection_t *collection, char *filename);
 level_t *collection_find_level_by_filename(collection_t *collection, char *filename);
 
 void collection_draw(collection_t *collection);
+
+void collection_save(collection_t *collection);
+
+void collection_extract_level_from_grid(collection_t *collection, level_t *level);
 
 #endif /*COLLECTION_H*/
 

@@ -68,16 +68,14 @@ struct tile {
     bool hover;
     bool hover_center;
     hex_direction_t hover_section;
-
-    struct tile *next;
 };
 typedef struct tile tile_t;
 
 tile_t *init_tile(tile_t *tile, hex_axial_t pos);
 tile_t *create_tile(void);
-tile_t *create_tile_from_serialized_strings(char *addr, char *path, char *flags);
 void destroy_tile(tile_t *tile);
 
+bool tile_eq(tile_t *dst, tile_t *other);
 void tile_copy_attributes(tile_t *dst, tile_t *src);
 void tile_swap_attributes(tile_t *a, tile_t *b);
 
@@ -91,6 +89,7 @@ void tile_cycle_path_section(tile_t *tile, hex_direction_t section;);
 void tile_modify_hovered_feature(tile_t *tile);
 
 void tile_serialize(tile_t *tile, FILE *f);
+void tile_set_flag_from_char(tile_t *tile, char c);
 
 #endif /*TILE_H*/
 

@@ -187,6 +187,7 @@ void grid_set_hover(grid_t *grid, IVector2 mouse_position)
                 grid->drag_reset_frames--;
                 if (0 == grid->drag_reset_frames) {
                     grid->drag_target = NULL;
+                    disable_automatic_events();
                 }
             } else {
                 grid->drag_offset = Vector2Subtract(grid->mouse_pos, grid->drag_start);
@@ -257,6 +258,7 @@ void grid_drag_stop(grid_t *grid)
 #endif
             grid->drag_reset_frames = grid->drag_reset_total_frames;;
             grid->drag_reset_vector = grid->drag_offset;
+            enable_automatic_events();
         }
     } else {
 #ifdef DEBUG_DRAG_AND_DROP

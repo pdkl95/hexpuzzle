@@ -30,11 +30,15 @@
 
 #include "sglib/sglib.h"
 
+#include "options.h"
 #include "raylib_helper.h"
 #include "collection.h"
 
 //#define INITIAL_LEVEL_NAME_COUNT 64
 #define INITIAL_LEVEL_NAME_COUNT 4
+
+#define COLLECTION_DEFAULT_FILENAME_PREFIX "level-"
+#define COLLECTION_DEFAULT_FILENAME_SUFFIX ".hexlevel"
 
 static void collection_alloc_level_names(collection_t *collection)
 {
@@ -55,6 +59,8 @@ static collection_t *alloc_collection(void)
     collection->levels = NULL;
     collection->prev = NULL;
     collection->next = NULL;
+
+    collection->filename_seq = 1;
 
     collection->level_count = 0;
 
@@ -206,8 +212,73 @@ void destroy_collection(collection_t *collection)
     }
 }
 
+static bool collection_level_filename_exists_in_collection(collection_t *collection, const char *name)
+{
+    assert_not_null(collection);
+    assert_not_null(name);
+    SGLIB_DL_LIST_MAP_ON_ELEMENTS(level_t, collection->levels, level, prev, next, {
+            if (level->filename) {
+                if (0 == strcmp(level->filename, name)) {
+                    return true;
+                }
+            }
+        });
+
+    return false;
+}
+
+static bool collection_level_filename_exists_as_existing_file(collection_t *collection, const char *name)
+{
+    if (collection->dirpath) {
+        const char *path = concat_dir_and_filename(collection->dirpath, name);
+        return file_exists(path);
+    } else {
+        return false;
+    }
+}
+
+static bool collection_level_filename_exists(collection_t *collection, const char *name)
+{
+    return collection_level_filename_exists_in_collection(collection, name)
+        || collection_level_filename_exists_as_existing_file(collection, name);
+}
+
+static void collection_generate_level_filename(collection_t *collection, level_t *level)
+{
+    assert_not_null(collection);
+    assert_not_null(level);
+
+    if (level->filename) {
+        return;
+    }
+
+    char *prefix = COLLECTION_DEFAULT_FILENAME_PREFIX;
+    char *suffix = COLLECTION_DEFAULT_FILENAME_SUFFIX;
+    int len = strlen(prefix)
+        + strlen(suffix)
+        + 3   // number 001-999
+        + 2;  // \0
+    char *tmp = calloc(len, sizeof(char));
+    len--;
+    for (int n=collection->filename_seq; n<1000; n++) {
+        snprintf(tmp, len, "%s%03d%s", prefix, n, suffix);
+        if (!collection_level_filename_exists(collection, tmp)) {
+            collection->filename_seq = n + 1;
+            level->filename = tmp;
+            if (options->verbose) {
+                infomsg("Generated filename: \"%s\"", level->filename);
+            }
+            return;
+        }
+    }
+
+    DIE("Only 999 level filenames are supported; sorry!");
+}
+
 static void collection_show_level_names(collection_t *collection)
 {
+    assert_not_null(collection);
+
     printf("<level_names>\n");
     level_t *level = collection->levels;
     for (int i=0; i < collection->level_count; i++) {
@@ -221,6 +292,10 @@ void collection_add_level(collection_t *collection, level_t *level)
 {
     assert_not_null(collection);
     assert_not_null(level);
+
+    if (!level->filename) {
+        collection_generate_level_filename(collection, level);
+    }
 
     if (collection->levels) {
         level_t *last;
@@ -255,11 +330,16 @@ void collection_add_level(collection_t *collection, level_t *level)
 
     assert(n == collection->level_count);
 
-    collection_show_level_names(collection);
+    if (options->verbose) {
+        collection_show_level_names(collection);
+    }
 }
 
 bool collection_add_level_file(collection_t *collection, char *filename)
 {
+    assert_not_null(collection);
+    assert_not_null(filename);
+
     level_t *level = load_level_file(filename);
     if (level) {
         collection_add_level(collection, level);
@@ -285,6 +365,37 @@ level_t *collection_find_level_by_filename(collection_t *collection, char *filen
     }
 
     return NULL;
+}
+
+void collection_save_dir(collection_t *collection)
+{
+    assert_not_null(collection);
+    assert_not_null(collection->dirpath);
+
+    SGLIB_DL_LIST_MAP_ON_ELEMENTS(level_t, collection->levels, level, prev, next, {
+            printf("trying to save level \"%s\"\n", level->name);
+            level_save_to_file_if_changed(level, collection->dirpath);
+        });
+}
+
+void collection_save_zip(collection_t *collection)
+{
+    assert_not_null(collection);
+
+    assert(0);
+}
+
+void collection_save(collection_t *collection)
+{
+    assert_not_null(collection);
+
+    if (collection->dirpath) {
+        collection_save_dir(collection);
+    } else if (collection->filename) {
+        collection_save_zip(collection);
+    } else {
+        errmsg("Cannot save collection; a filename or directory path is required");
+    }
 }
 
 void collection_draw(collection_t *collection)
@@ -326,10 +437,6 @@ void collection_draw(collection_t *collection)
             while (n--) {
                 level = level->next;
             }
-            printf("Play si=%d a=%d f=%d\n",
-                   collection->gui_list_scroll_index,
-                   collection->gui_list_active,
-                   collection->gui_list_focus);
             level_play(level);
         }
     }

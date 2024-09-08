@@ -87,6 +87,10 @@ extern const char *progversion;
 #include "util.h"
 #include "logging.h"
 
+void disable_automatic_events(void);
+void enable_automatic_events(void);
+
+
 typedef struct IVector2 {
     int x;
     int y;
