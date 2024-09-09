@@ -82,6 +82,10 @@ Color CGOLD              = { 0xFF, 0xD7, 0x00, 255 };
 Color cursor_outer_color;
 Color cursor_inner_color;
 
+Color magenta    = { 214,   2, 112, 255 };
+Color purple     = { 155,  79, 150, 255 };
+Color royal_blue = {   0,  56, 168, 255 };
+
 game_mode_t game_mode = GAME_MODE_NULL;
 
 grid_t *current_grid = NULL;
@@ -822,25 +826,65 @@ static void draw_popup_text(void)
 
 static void draw_cartesian_grid(bool draw_labels)
 {
-    Color minor_color = { 112, 31, 126, 128 };
+    Color minor_color = ColorAlpha(purple, 0.5);
 
-    for (int x=0; x<window_size.x; x += 25) {
-        DrawLine(x, 0, x, window_size.y, minor_color);
+    int minor_size = 25;
+    int minor_per_major = 4;
+    int major_size = minor_size * minor_per_major;
+    float wrap_size = (float)major_size;
+    float half_wrap = wrap_size / 2.0;
+
+    static float speed = 1.5;;
+    static float oldspeed = 1.5;;
+    static float newspeed = 1.5;;
+    static Vector2 off = { 1.0, 0.0 };
+    static Vector2 dir = { 1.0, 0.0 };
+    static Vector2 olddir = {0};
+    static Vector2 newdir = {0};
+    static int dir_lerp_frames = 0;
+#define TOTAL_LERP_FRAMES options->max_fps
+
+    if (!options->wait_events) {
+        if ((frame_count % (3 * options->max_fps)) == 0) {
+            oldspeed = speed;
+            newspeed = 1.0 + (2.0 * drand48());
+            float angle = (0.4 * TAU) * drand48() - (0.2 * TAU);
+            olddir = dir;
+            newdir = Vector2Normalize(Vector2Rotate(dir, angle));
+            dir_lerp_frames = TOTAL_LERP_FRAMES;
+        }
+        if (dir_lerp_frames > 0) {
+            dir_lerp_frames--;
+            float t = 1.0 - (((float)dir_lerp_frames) / ((float)TOTAL_LERP_FRAMES));
+            speed = Lerp(oldspeed, newspeed, t);
+            dir = Vector2Lerp(olddir, newdir, t);
+        }
+
+        off = Vector2Add(off, Vector2Scale(dir, speed));
+
+        if      (off.x < -half_wrap) { off.x += wrap_size; }
+        else if (off.x >  half_wrap) { off.x -= wrap_size; }
+        if      (off.y < -half_wrap) { off.y += wrap_size; }
+        else if (off.y >  half_wrap) { off.y -= wrap_size; }
     }
 
-    for (int y=0; y<window_size.y; y += 25) {
-        DrawLine(0, y, window_size.x, y, minor_color);
+    for (int x=-major_size; x<window_size.x + major_size; x += minor_size) {
+        DrawLine(x+off.x, 0, x+off.x, window_size.y, minor_color);
     }
 
-    for (int x=0; x<window_size.x; x += 100) {
-        DrawLine(x, 0, x, window_size.y, DARKPURPLE);
+    for (int y=-major_size; y<window_size.y + major_size; y += minor_size) {
+        DrawLine(0, y+off.y, window_size.x, y+off.y, minor_color);
+    }
+
+    for (int x=-major_size; x<window_size.x + major_size; x += major_size) {
+        DrawLine(x+off.x, 0, x+off.x, window_size.y, royal_blue);
         if (draw_labels) {
             DrawText(TextFormat("%d", x), (float)x + 3.0, 8.0, 16, YELLOW);
         }
     }
 
-    for (int y=0; y<window_size.y; y += 100) {
-        DrawLine(0, y, window_size.x, y, DARKPURPLE);
+    for (int y=-major_size; y<window_size.y + major_size; y += major_size) {
+        DrawLine(0, y+off.y, window_size.x, y+off.y, magenta);
         if (draw_labels) {
             DrawText(TextFormat("%d", y), 3.0, (float)y + 3.9, 16, YELLOW);
         }
@@ -1034,6 +1078,7 @@ main(
 ) {
     progname = basename(argv[0]);
 
+    srand48((long int)time(NULL));
     srand(time(NULL));
 
     char *xdg_config_dir = getenv("XDG_CONFIG_HOME");
