@@ -88,6 +88,8 @@ grid_t *current_grid = NULL;
 level_t *current_level = NULL;
 collection_t *current_collection = NULL;
 
+bool modal_ui_active = false;
+ui_result_t modal_ui_result;
 bool show_name_edit_box = false;
 bool show_ask_save_box = false;
 
@@ -389,8 +391,28 @@ handle_events(
         return false;
     }
 
+    if (IsWindowResized()) {
+        if (skip_next_resize_event) {
+            skip_next_resize_event = false;
+        } else {
+            schedule_resize();
+        }
+    }
+
+    if (modal_ui_active) {
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            modal_ui_result = UI_RESULT_CANCEL;
+        } else if (IsKeyPressed(KEY_ENTER)) {
+            modal_ui_result = UI_RESULT_OK;
+        } else {
+            modal_ui_result = UI_RESULT_PENDING;;
+        }
+
+        return true;
+    }
+
     if (IsKeyPressed(KEY_ESCAPE)) {
-        //infomsg("etc - quit");
+        infomsg("etc - quit");
         return false;
     }
 
@@ -410,14 +432,6 @@ handle_events(
 
     if (IsKeyPressed(KEY_F8)) {
         grid_serialize(current_grid, stdout);
-    }
-
-    if (IsWindowResized()) {
-        if (skip_next_resize_event) {
-            skip_next_resize_event = false;
-        } else {
-            schedule_resize();
-        }
     }
 
     //IVector2 old_mouse = mouse_position;
@@ -682,24 +696,19 @@ static void draw_name_edit_dialog(void)
                                      NAME_MAXLEN,
                                      NULL);
 
-        switch (result) {
-        case -1:
-            /* do nothing */
-            break;
-
-        case 2:
-            /* accept edit */
+        if ((result == 2) || (modal_ui_result == UI_RESULT_OK)) {
+           /* accept edit / ok */
             show_name_edit_box = false;
-            break;
+            modal_ui_result = UI_RESULT_NULL;
+        }
 
-        case 1:
-            /* fall through */
-        default:
+        if ((result == 1) || (modal_ui_result == UI_RESULT_CANCEL)) {
+            /* rollback edit / cancel */
             if (current_level) {
                 memcpy(current_level->name, current_level->name_backup, NAME_MAXLEN);
             }
             show_name_edit_box = false;
-            break;
+            modal_ui_result = UI_RESULT_NULL;
         }
     }
 }
@@ -720,12 +729,7 @@ static void draw_ask_save_dialog(void)
                                    "Save changes to level?",
                                    no_yes_with_icons);
 
-        switch (result) {
-        case -1:
-            /* do nothing */
-            break;
-
-        case 2:
+        if ((result == 2) || (modal_ui_result == UI_RESULT_OK)) {
             /* yes */
             printf("collection_extract_level_from_grid()\n");
             level_extract_from_grid(current_level, current_grid);
@@ -734,14 +738,14 @@ static void draw_ask_save_dialog(void)
             show_ask_save_box = false;
             printf("return_from_level()\n");
             return_from_level();
-            break;
+            modal_ui_result = UI_RESULT_NULL;
+        }
 
-        case 1:
+        if ((result == 1) || (modal_ui_result == UI_RESULT_CANCEL)) {
             /* no */
-            /* fall through */
-        default:
             show_ask_save_box = false;
             return_from_level();
+            modal_ui_result = UI_RESULT_NULL;
         }
     }
 }
@@ -838,6 +842,17 @@ render_frame(
     return true;
 }
 
+static void early_frame_setup(void)
+{
+    if (show_name_edit_box ||
+        show_ask_save_box
+    ) {
+        modal_ui_active = true;
+    } else {
+        modal_ui_active = false;
+    }
+}
+
 static bool
 main_event_loop(
     void
@@ -845,6 +860,8 @@ main_event_loop(
     //infomsg("Entering main event loop...");
 
     while (running) {
+        early_frame_setup();
+
         if (window_size_changed) {
             resize();
         }
@@ -883,6 +900,7 @@ void gfx_init(void)
     SetWindowMaxSize(OPTIONS_WINDOW_MAX_WIDTH,
                      OPTIONS_WINDOW_MAX_HEIGHT);
 
+    SetExitKey(KEY_NULL); // handle ESC ourself
     SetTargetFPS(options->max_fps);
     if (options->verbose) {
         infomsg("Target FPS: %d", options->max_fps);

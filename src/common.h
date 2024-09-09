@@ -90,6 +90,13 @@ extern const char *progversion;
 void disable_automatic_events(void);
 void enable_automatic_events(void);
 
+enum ui_result {
+    UI_RESULT_PENDING = -1,
+    UI_RESULT_NULL    = 0,
+    UI_RESULT_CANCEL  = 1,
+    UI_RESULT_OK      = 2
+};
+typedef enum ui_result ui_result_t;
 
 typedef struct IVector2 {
     int x;
