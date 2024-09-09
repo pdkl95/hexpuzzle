@@ -29,8 +29,6 @@
 #include "level.h"
 
 #define LEVEL_DEFAULT_NAME "Untitled"
-#define LEVEL_MIN_RADIUS 1
-#define LEVEL_MAX_RADIUS 5
 #define LEVEL_DEFAULT_RADIUS LEVEL_MIN_RADIUS
 
 static level_t *alloc_level()

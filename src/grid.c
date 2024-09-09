@@ -332,3 +332,8 @@ void grid_serialize(grid_t *grid, FILE *f)
     }
     fprintf(f, "end_tiles\n");
 }
+
+void grid_change_radius(grid_t *grid, int new_radius)
+{
+    printf("TODI: change grid radius from %d to %d\n", grid->radius, new_radius);
+}

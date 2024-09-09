@@ -22,6 +22,9 @@
 #ifndef LEVEL_H
 #define LEVEL_H
 
+#define LEVEL_MIN_RADIUS 1
+#define LEVEL_MAX_RADIUS 4
+
 #define LEVEL_FILENAME_EXT "hexlevel"
 #define IS_LEVEL_FILENAME(filename) \
     (0 == strcmp(filename_ext(filename), LEVEL_FILENAME_EXT))

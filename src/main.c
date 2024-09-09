@@ -512,13 +512,21 @@ static void draw_mouse_text(void)
 #define BUTTON_MARGIN 4
 #define ICON_BUTTON_SIZE (RAYGUI_ICON_SIZE + (2 * BUTTON_MARGIN))
 
-Rectangle info_panel_rect;
+#define NAME_FONT_SIZE 22
+#define PANEL_LABEL_FONT_SIZE 18
+#define PANEL_ROUNDNES 0.2
+
 Rectangle name_text_rect;
+Rectangle name_panel_rect;
 Rectangle name_edit_button_rect;
+Rectangle edit_panel_rect;
+Rectangle radius_spinner_label_rect;
+Rectangle radius_spinner_rect;
 Rectangle close_button_rect;
 Rectangle edit_button_rect;
 Rectangle return_button_rect;
 Rectangle new_level_button_rect;
+
 char name_edit_button_text[6];
 char close_button_text[6];
 char edit_button_text[6];
@@ -540,13 +548,21 @@ void gui_setup(void)
     strcat(no_yes_with_icons, ";");
     strcat(no_yes_with_icons, GuiIconText(ICON_OK_TICK,"Yes"));
 
-    info_panel_rect.x      = WINDOW_MARGIN;
-    info_panel_rect.y      = WINDOW_MARGIN;
+    /* info_panel_rect.x      = WINDOW_MARGIN; */
+    /* info_panel_rect.y      = WINDOW_MARGIN; */
 
-    name_text_rect.x = WINDOW_MARGIN * PANEL_INNER_MARGIN;
+    /* name_text_rect.x = WINDOW_MARGIN * PANEL_INNER_MARGIN; */
+    /* name_text_rect.y = WINDOW_MARGIN + PANEL_INNER_MARGIN; */
+    /* name_text_rect.width = window_size.x * 0.22; */
+    /* name_text_rect.height = 30; */
+
+    name_text_rect.x = WINDOW_MARGIN + PANEL_INNER_MARGIN;
     name_text_rect.y = WINDOW_MARGIN + PANEL_INNER_MARGIN;
-    name_text_rect.width = window_size.x * 0.22;
-    name_text_rect.height = 30;
+    name_text_rect.height = NAME_FONT_SIZE;
+
+    name_panel_rect.x = WINDOW_MARGIN;
+    name_panel_rect.y = WINDOW_MARGIN;
+    name_panel_rect.height = NAME_FONT_SIZE + (2 * PANEL_INNER_MARGIN);
 
     name_edit_button_rect.x = name_text_rect.x + name_text_rect.width + ICON_BUTTON_SIZE;
     name_edit_button_rect.y = name_text_rect.y;
@@ -554,19 +570,47 @@ void gui_setup(void)
     name_edit_button_rect.width  = ICON_BUTTON_SIZE;
     name_edit_button_rect.height = ICON_BUTTON_SIZE;
 
-    info_panel_rect.width  =
-        name_edit_button_rect.x
-        + name_edit_button_rect.width
-        + PANEL_INNER_MARGIN
-        - info_panel_rect.x;
+    /* info_panel_rect.width  = */
+    /*     name_edit_button_rect.x */
+    /*     + name_edit_button_rect.width */
+    /*     + PANEL_INNER_MARGIN */
+    /*     - info_panel_rect.x; */
 
-    info_panel_rect.height =
-        name_text_rect.y
-        + MAX(name_text_rect.height, name_edit_button_rect.height)
-        + (2 * PANEL_INNER_MARGIN)
-        - info_panel_rect.y;;
+    /* info_panel_rect.height = */
+    /*     name_text_rect.y */
+    /*     + MAX(name_text_rect.height, name_edit_button_rect.height) */
+    /*     + (2 * PANEL_INNER_MARGIN) */
+    /*     - info_panel_rect.y;; */
 
     memcpy(name_edit_button_text, GuiIconText(ICON_PENCIL, NULL), 6);
+
+    edit_panel_rect.x = name_panel_rect.x;
+    edit_panel_rect.y =
+        name_panel_rect.y
+        + name_panel_rect.height
+        + WINDOW_MARGIN;
+
+    radius_spinner_label_rect.x = name_text_rect.x;
+    radius_spinner_label_rect.y =
+        edit_panel_rect.y
+        + PANEL_INNER_MARGIN;
+    radius_spinner_label_rect.height = PANEL_LABEL_FONT_SIZE;
+
+    radius_spinner_rect.x = name_text_rect.x;
+    radius_spinner_rect.y =
+        radius_spinner_label_rect.y
+        + radius_spinner_label_rect.height
+        + PANEL_INNER_MARGIN;
+    radius_spinner_rect.width  = 125;
+    radius_spinner_rect.height = 30;
+
+    edit_panel_rect.width =
+        radius_spinner_rect.width
+        + (2 * PANEL_INNER_MARGIN);
+    edit_panel_rect.height =
+        radius_spinner_label_rect.height
+        + radius_spinner_rect.height
+        + (3 * PANEL_INNER_MARGIN);
 
     close_button_rect.x      = window_size.x - WINDOW_MARGIN - ICON_BUTTON_SIZE;
     close_button_rect.y      = WINDOW_MARGIN;
@@ -597,45 +641,48 @@ void gui_setup(void)
     memcpy(new_level_button_text,  GuiIconText(ICON_FILE_ADD, NULL), 6);
 }
 
-#define NAME_FONT_SIZE 22
-#define NAME_PANEL_ROUNDNES 0.2
-
-Color name_header_panel_bg_color   = { 0x72, 0x1C, 0xB8, 0xaa };
-Color name_header_panel_edge_color = { 0x94, 0x83, 0xA2, 0xcc };
-Color name_header_text_color       = { 0xD0, 0xC0, 0xFF, 0xff };
+Color panel_bg_color   = { 0x72, 0x1C, 0xB8, 0xaa };
+Color panel_edge_color = { 0x94, 0x83, 0xA2, 0xcc };
+Color panel_header_text_color = { 0xD0, 0xC0, 0xFF, 0xff };
 
 static void draw_name_header(char *name)
 {
     int textwidth = MeasureText(name, NAME_FONT_SIZE);
 
-    Rectangle text_rect = {
-        .x = WINDOW_MARGIN + PANEL_INNER_MARGIN,
-        .y = WINDOW_MARGIN + PANEL_INNER_MARGIN,
-        .width  = textwidth,
-        .height = NAME_FONT_SIZE
-    };
+    name_text_rect.width  = textwidth;
+    name_panel_rect.width = textwidth + (2 * PANEL_INNER_MARGIN);
 
-    Rectangle panel_rect = {
-        .x = WINDOW_MARGIN,
-        .y = WINDOW_MARGIN,
-        .width  = textwidth      + (2 * PANEL_INNER_MARGIN),
-        .height = NAME_FONT_SIZE + (2 * PANEL_INNER_MARGIN)
-    };
+    //printf("name_panel_rect\n"); printrect(name_panel_rect);
+    //printf(" name_text_rect\n"); printrect(name_text_rect);
 
-    //printf("panel_rect\n"); printrect(panel_rect);
-    //printf(" text_rect\n"); printrect(text_rect);
-
-    bool hover = CheckCollisionPointRec(mouse_positionf, text_rect);
+    bool hover = CheckCollisionPointRec(mouse_positionf, name_text_rect);
     if (hover && mouse_left_click) {
         show_name_edit_dialog();
     }
 
-    Color bg   = hover ? name_header_panel_edge_color : name_header_panel_bg_color;
-    Color edge = hover ? name_header_panel_bg_color : name_header_panel_edge_color;
-    DrawRectangleRounded(panel_rect, NAME_PANEL_ROUNDNES, 0, bg);
-    DrawRectangleRoundedLines(panel_rect, NAME_PANEL_ROUNDNES, 0, 1.0, edge);
+    Color bg   = hover ? panel_edge_color : panel_bg_color;
+    Color edge = hover ? panel_bg_color : panel_edge_color;
+    DrawRectangleRounded(name_panel_rect, PANEL_ROUNDNES, 0, bg);
+    DrawRectangleRoundedLines(name_panel_rect, PANEL_ROUNDNES, 0, 1.0, edge);
 
-    DrawText(name, text_rect.x, text_rect.y, NAME_FONT_SIZE, name_header_text_color);
+    DrawText(name, name_text_rect.x, name_text_rect.y, NAME_FONT_SIZE, panel_header_text_color);
+}
+
+static void draw_edit_panel(void)
+{
+    Color bg   = panel_bg_color;
+    Color edge = panel_edge_color;
+    DrawRectangleRounded(edit_panel_rect, PANEL_ROUNDNES, 0, bg);
+    DrawRectangleRoundedLines(edit_panel_rect, PANEL_ROUNDNES, 0, 1.0, edge);
+
+    DrawText("Board Radius", radius_spinner_label_rect.x, radius_spinner_label_rect.y,
+             PANEL_LABEL_FONT_SIZE, panel_header_text_color);
+
+    static int radius = 1; //current_grid->radius;
+    GuiSpinner(radius_spinner_rect, NULL, &radius, LEVEL_MIN_RADIUS, LEVEL_MAX_RADIUS, true);
+    if (current_grid->radius != radius) {
+        grid_change_radius(current_grid, radius);
+    }
 }
 
 static void draw_gui_widgets(void)
@@ -651,6 +698,8 @@ static void draw_gui_widgets(void)
     switch (game_mode) {
     case GAME_MODE_EDIT_LEVEL:
         draw_name_header(current_level->name);
+
+        draw_edit_panel();
 
         if (GuiButton(return_button_rect, return_button_text)) {
             printf("return\n");

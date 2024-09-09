@@ -67,6 +67,7 @@ void grid_drag_start(grid_t *grid);
 void grid_drag_stop(grid_t *grid);
 void grid_modify_hovered_feature(grid_t *grid);
 void grid_serialize(grid_t *grid, FILE *f);
+void grid_change_radius(grid_t *grid, int new_radius);
 
 extern grid_t *current_grid;
 
