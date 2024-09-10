@@ -77,6 +77,7 @@ void destroy_tile(tile_t *tile);
 
 bool tile_eq(tile_t *dst, tile_t *other);
 void tile_copy_attributes(tile_t *dst, tile_t *src);
+void tile_copy_attributes_except_enabled(tile_t *dst, tile_t *src);
 void tile_swap_attributes(tile_t *a, tile_t *b);
 
 void tile_set_size(tile_t *tile, float tile_size);

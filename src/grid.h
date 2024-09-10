@@ -27,6 +27,7 @@
 
 struct grid {
     int radius;
+    int tile_radius;
     int tile_grid_width;
     int tile_grid_height;
     int maxtiles;
@@ -36,6 +37,7 @@ struct grid {
 
     char *name;
 
+    float req_tile_size;
     float tile_size;
 
     Vector2 px_offset;

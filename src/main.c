@@ -59,7 +59,9 @@ double resize_time = 0.0;
 IVector2 window_size;
 IVector2 mouse_position;
 Vector2 mouse_positionf;
+bool stop_mouse_events = false;
 bool mouse_left_click  = false;
+bool mouse_left_release  = false;
 bool mouse_right_click = false;
 float cursor_spin = 0.0f;
 float cursor_spin_step = (360.0f / 100.0f);
@@ -146,6 +148,13 @@ void disable_automatic_events(void)
         printf("semaphore-- = %d\n", automatic_event_polling_semaphore);
 #endif
     }
+}
+
+static void stop_lmb_events(void)
+{
+    mouse_left_click   = false;
+    mouse_left_release = false;
+    stop_mouse_events  = true;
 }
 
 void show_name_edit_dialog(void)
@@ -450,29 +459,23 @@ handle_events(
     mouse_text_idx = 0;
     mouse_text_max_line_length = 0;
 
-    mouse_left_click  = false;;
-    mouse_right_click = false;;
+    stop_mouse_events  = false;
+
+    mouse_left_click   = false;;
+    mouse_left_release = false;
+    mouse_right_click  = false;;
 
     if (IsCursorOnScreen()) {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             mouse_left_click = true;
-            if (current_grid) {
-                grid_drag_start(current_grid);
-            }
         }
+
         if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-            if (current_grid) {
-                grid_drag_stop(current_grid);
-            }
+            mouse_left_release = false;
         }
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
             mouse_right_click = true;
-            if (edit_mode) {
-                if (current_grid) {
-                    grid_modify_hovered_feature(current_grid);
-                }
-            }
         }
     }
 
@@ -683,8 +686,9 @@ static void draw_edit_panel(void)
              PANEL_LABEL_FONT_SIZE, panel_header_text_color);
 
     static int radius = 1; //current_grid->radius;
-    GuiSpinner(radius_spinner_rect, NULL, &radius, LEVEL_MIN_RADIUS, LEVEL_MAX_RADIUS, true);
+    GuiSpinner(radius_spinner_rect, NULL, &radius, LEVEL_MIN_RADIUS, LEVEL_MAX_RADIUS, false);
     if (current_grid->radius != radius) {
+        stop_lmb_events();
         grid_change_radius(current_grid, radius);
     }
 }
@@ -693,10 +697,12 @@ static void draw_gui_widgets(void)
 {
     if (GuiButton(close_button_rect, close_button_text)) {
         running = false;
+        stop_lmb_events();
     }
 
     if (GuiButton(edit_button_rect, edit_button_text)) {
         toggle_edit_mode();
+        stop_lmb_events();
     }
 
     switch (game_mode) {
@@ -708,6 +714,7 @@ static void draw_gui_widgets(void)
         if (GuiButton(return_button_rect, return_button_text)) {
             printf("return\n");
             show_ask_save_box = true;
+            stop_lmb_events();
         }
         break;
 
@@ -716,12 +723,14 @@ static void draw_gui_widgets(void)
 
         if (GuiButton(return_button_rect, return_button_text)) {
             return_from_level();
+            stop_lmb_events();
         }
         break;
 
     case GAME_MODE_COLLECTION:
         if (GuiButton(new_level_button_rect, new_level_button_text)) {
             create_new_level();
+            stop_lmb_events();
         }
         break;
 
@@ -753,6 +762,7 @@ static void draw_name_edit_dialog(void)
            /* accept edit / ok */
             show_name_edit_box = false;
             modal_ui_result = UI_RESULT_NULL;
+            stop_lmb_events();
         }
 
         if ((result == 1) || (modal_ui_result == UI_RESULT_CANCEL)) {
@@ -762,6 +772,7 @@ static void draw_name_edit_dialog(void)
             }
             show_name_edit_box = false;
             modal_ui_result = UI_RESULT_NULL;
+            stop_lmb_events();
         }
     }
 }
@@ -792,6 +803,7 @@ static void draw_ask_save_dialog(void)
             printf("return_from_level()\n");
             return_from_level();
             modal_ui_result = UI_RESULT_NULL;
+            stop_lmb_events();
         }
 
         if ((result == 1) || (modal_ui_result == UI_RESULT_CANCEL)) {
@@ -799,6 +811,7 @@ static void draw_ask_save_dialog(void)
             show_ask_save_box = false;
             return_from_level();
             modal_ui_result = UI_RESULT_NULL;
+            stop_lmb_events();
         }
     }
 }
@@ -946,6 +959,33 @@ static void early_frame_setup(void)
     }
 }
 
+static void end_of_frame_updates(void)
+{
+    if (stop_mouse_events) {
+        return;
+    }
+
+    if (mouse_left_click) {
+        if (current_grid) {
+            grid_drag_start(current_grid);
+        }
+    }
+
+    if (mouse_left_release) {
+        if (current_grid) {
+            grid_drag_stop(current_grid);
+        }
+    }
+
+    if (mouse_right_click) {
+        if (edit_mode) {
+            if (current_grid) {
+                grid_modify_hovered_feature(current_grid);
+            }
+        }
+    }
+}
+
 static bool
 main_event_loop(
     void
@@ -966,6 +1006,8 @@ main_event_loop(
         if (!render_frame()) {
             return false;
         }
+
+        end_of_frame_updates();
 
         frame_count += 1;
     };

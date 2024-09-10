@@ -22,9 +22,19 @@
 #ifndef RAYLIB_HELPER_H
 #define RAYLIB_HELPER_H
 
+void printvec2(Vector2 v);
 void printrect(Rectangle r);
 void printcolorhex(Color c);
 void printcolor(Color c);
+
+#define pint(var) printf(QUOTE(var) "\t= % 9d\n", (var));
+#define pfloat(var) printf(QUOTE(var) "\t= % 12.2f\n", (var));
+
+#define pvec2(var) do { \
+        Vector2 vtmp = (var); \
+        printf(QUOTE(var) "\t= ( x=% 8.2f, y=% 8.2f )\n", \
+               vtmp.x, vtmp.y); \
+    } while(0)
 
 /*** Constants ***/
 

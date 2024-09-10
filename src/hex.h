@@ -22,6 +22,9 @@
 #ifndef HEX_H
 #define HEX_H
 
+/* 1.0 / SQRT(3) */
+#define INV_SQRT_3 0.5773502691896258
+
 #define SQRT_3 1.7320508075688772
 #define SQRT_3_2 (SQRT_3 / 2.0)
 #define SQRT_3_3 (SQRT_3 / 3.0)

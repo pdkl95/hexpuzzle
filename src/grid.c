@@ -24,6 +24,8 @@
 #include "tile.h"
 #include "grid.h"
 
+#define DEBUG_DRAG_AND_DROP 1
+
 static int grid_tile_storage_location(grid_t *grid, hex_axial_t axial)
 {
     if ((axial.r < 0) || (axial.r >= grid->tile_grid_height) ||
@@ -50,25 +52,13 @@ static void grid_add_to_bounding_box(grid_t *grid, tile_t *tile)
    }
 }
 
-grid_t *create_grid(int radius)
+void grid_build_tiles(grid_t *grid, int radius)
 {
-    assert(radius > 0);
-    assert(radius < 6);
-
-    grid_t *grid = calloc(1, sizeof(grid_t));
-
     grid->radius = radius;
 
     grid->tile_grid_width  = (2 * radius) + 1;
     grid->tile_grid_height = (2 * radius) + 1;
     grid->maxtiles = grid->tile_grid_width * grid->tile_grid_height;
-
-    grid->tile_size = 60.0f;
-
-    grid->drag_reset_total_frames = 12;
-    grid->drag_reset_frames = 0;
-
-    grid->hover = NULL;
 
     grid->tiles = calloc(grid->maxtiles, sizeof(tile_t));
 
@@ -96,10 +86,27 @@ grid_t *create_grid(int radius)
         }
     }
 
-    grid_resize(grid);
+    grid->hover       = NULL;
+    grid->drag_target = NULL;
 
-    grid->tiles[7].fixed = true;
-    grid->name = strdup("Example");
+    grid_resize(grid);
+}
+
+grid_t *create_grid(int radius)
+{
+    assert(radius > 0);
+    assert(radius < 6);
+
+    grid_t *grid = calloc(1, sizeof(grid_t));
+
+    grid->req_tile_size = 60.0f;
+
+    grid->drag_reset_total_frames = 12;
+    grid->drag_reset_frames = 0;
+
+    grid->hover = NULL;
+
+    grid_build_tiles(grid, radius);
 
     return grid;
 }
@@ -107,6 +114,28 @@ grid_t *create_grid(int radius)
 void grid_resize(grid_t *grid)
 {
     assert_not_null(grid);
+
+    Vector2 window_grid_margin = { 0.8, 0.8 };
+    Vector2 window = Vector2Scale(ivector2_to_vector2(window_size), 1.0);
+    Vector2 max_grid_size_px = Vector2Multiply(window, window_grid_margin);
+    int grid_width_in_hex_radii = 2 + (3 * grid->radius);
+    Vector2 max_tile_size = {
+        .x =  max_grid_size_px.x / ((float)grid_width_in_hex_radii),
+        .y = (max_grid_size_px.y / grid->tile_grid_height) * INV_SQRT_3
+    };
+
+    grid->tile_size = MIN(grid->req_tile_size,
+                          MIN(max_tile_size.x,
+                              max_tile_size.y));
+
+#if 0
+    printf(">>>=-- ~ --=<<<\n");
+    pvec2(window_grid_margin);
+    pvec2(max_grid_size_px);
+    pint(grid_width_in_hex_radii);
+    pvec2(max_tile_size);
+    pfloat(grid->tile_size);
+#endif
 
     grid->px_min.x = (float)window_size.x * 10.0;
     grid->px_min.y = (float)window_size.y * 10.0;
@@ -134,6 +163,7 @@ void grid_resize(grid_t *grid)
     grid->px_offset.y -= grid->px_bounding_box.y;
 
 #if 0
+    printf("-- px --\n");
     printf("window_size = (%d x %d)\n", window_size.x, window_size.y);
     printf("px_min = [ %f, %f ]\n", grid->px_min.x, grid->px_min.y);
     printf("px_max = [ %f, %f ]\n", grid->px_max.x, grid->px_max.y);
@@ -217,9 +247,16 @@ void grid_drag_start(grid_t *grid)
     }
 
     if (grid->hover) {
+#ifdef DEBUG_DRAG_AND_DROP
+        printf("drag_stop(): hover = %p\n", grid->hover);
+#endif
+
         if (!grid->hover->fixed) {
             grid->drag_target = grid->hover;
             grid->drag_start  = grid->mouse_pos;
+#ifdef DEBUG_DRAG_AND_DROP
+            printf("drag_start(): drag_target = %p\n", grid->drag_target);
+#endif
         }
     }
 }
@@ -309,6 +346,11 @@ void grid_draw(grid_t *grid)
         rlPopMatrix();
     }
 
+    if (current_grid) {
+        DrawRectangleLinesEx(current_grid->px_bounding_box, 5.0, LIME);
+    }
+
+
     rlPopMatrix();
 
 #if 0
@@ -336,4 +378,20 @@ void grid_serialize(grid_t *grid, FILE *f)
 void grid_change_radius(grid_t *grid, int new_radius)
 {
     printf("TODI: change grid radius from %d to %d\n", grid->radius, new_radius);
+
+    int old_maxtiles  = grid->maxtiles;
+    tile_t *old_tiles = grid->tiles;
+    grid->tiles = NULL;
+
+    grid_build_tiles(grid, new_radius);
+
+    for (int i=0; i<old_maxtiles; i++) {
+        tile_t *old_tile = &(old_tiles[i]);
+        tile_t *new_tile = grid_get_tile(grid, old_tile->position);
+        if (new_tile) {
+            tile_copy_attributes_except_enabled(new_tile, old_tile);
+        }
+    }
+
+    free(old_tiles);
 }

@@ -146,6 +146,19 @@ void tile_copy_attributes(tile_t *dst, tile_t *src)
     }
 }
 
+void tile_copy_attributes_except_enabled(tile_t *dst, tile_t *src)
+{
+    assert_not_null(dst);
+    assert_not_null(src);
+
+    dst->fixed   = src->fixed;
+    dst->hidden  = src->hidden;
+
+    for (int i=0; i<6; i++) {
+        dst->path[i] = src->path[i];
+    }
+}
+
 void tile_swap_attributes(tile_t *a, tile_t *b)
 {
     assert_not_null(a);
