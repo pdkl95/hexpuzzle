@@ -40,6 +40,11 @@ enum hex_direction {
 };
 typedef enum hex_direction hex_direction_t;
 
+inline static hex_direction_t hex_opposite_direction(hex_direction_t dir)
+{
+    return (dir + 3) % 6;
+}
+
 /*
  * Axial Coordinates for hexagons
  */

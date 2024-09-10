@@ -106,6 +106,8 @@ grid_t *create_grid(int radius)
 
     grid->hover = NULL;
 
+    grid->hover_section_adjacency_radius = 12.0;
+
     grid_build_tiles(grid, radius);
 
     return grid;
@@ -193,6 +195,14 @@ tile_t *grid_get_tile(grid_t *grid, hex_axial_t axial)
     }
 }
 
+tile_t *grid_find_neighbor_tile(grid_t *grid, tile_t *tile, hex_direction_t section)
+{
+    section = (section + 1) % 6;
+    hex_axial_t neighbor_pos = hex_axial_neighbors(tile->position, section);
+    tile_t *neighbor = grid_get_tile(grid, neighbor_pos);
+    return neighbor;
+}
+
 void grid_check(grid_t *grid)
 {
     assert_not_null(grid);
@@ -202,6 +212,12 @@ void grid_set_hover(grid_t *grid, IVector2 mouse_position)
 {
     if (grid) {
         if (grid->hover) {
+            if (grid->hover_adjacent) {
+                tile_unset_hover_adjacent(grid->hover);
+                tile_unset_hover_adjacent(grid->hover_adjacent);
+                grid->hover_adjacent = NULL;
+            }
+
             tile_unset_hover(grid->hover);
             grid->hover->hover = false;
         }
@@ -233,6 +249,20 @@ void grid_set_hover(grid_t *grid, IVector2 mouse_position)
         grid->hover = grid_get_tile(grid, mouse_hex);
 
         if (grid->hover) {
+            tile_t *tile = grid->hover;
+            Vector2 midpoint = tile->midpoints[tile->hover_section];
+            midpoint = Vector2Add(midpoint, grid->px_offset);
+            if (Vector2Distance(midpoint, grid->mouse_pos) < grid->hover_section_adjacency_radius) {
+                grid->hover_adjacent = grid_find_neighbor_tile(grid, tile, tile->hover_section);
+                if (grid->hover_adjacent) {
+                    grid->hover_section = tile->hover_section;
+                    grid->hover_adjacent_section = hex_opposite_direction(grid->hover_section);
+
+                    tile_set_hover_adjacent(grid->hover,          grid->hover_section,          grid->hover_adjacent);
+                    tile_set_hover_adjacent(grid->hover_adjacent, grid->hover_adjacent_section, grid->hover);
+                }
+            }
+
             tile_set_hover(grid->hover, Vector2Subtract(grid->mouse_pos, grid->px_offset));
         }
     }
@@ -346,10 +376,7 @@ void grid_draw(grid_t *grid)
         rlPopMatrix();
     }
 
-    if (current_grid) {
-        DrawRectangleLinesEx(current_grid->px_bounding_box, 5.0, LIME);
-    }
-
+    //DrawRectangleLinesEx(grid->px_bounding_box, 5.0, LIME);
 
     rlPopMatrix();
 

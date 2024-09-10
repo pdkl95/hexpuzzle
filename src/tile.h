@@ -68,6 +68,8 @@ struct tile {
     bool hover;
     bool hover_center;
     hex_direction_t hover_section;
+
+    struct tile *hover_adjacent;
 };
 typedef struct tile tile_t;
 
@@ -85,6 +87,9 @@ void tile_draw(tile_t *tile, tile_t *drag_target);
 
 void tile_set_hover(tile_t *tile, Vector2 mouse_pos);
 void tile_unset_hover(tile_t *tile);
+
+void tile_set_hover_adjacent(tile_t *tile, hex_direction_t section, tile_t *adjacent_tile);
+void tile_unset_hover_adjacent(tile_t *tile);
 
 void tile_cycle_path_section(tile_t *tile, hex_direction_t section;);
 void tile_modify_hovered_feature(tile_t *tile);

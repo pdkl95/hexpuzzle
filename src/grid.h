@@ -47,6 +47,10 @@ struct grid {
     Rectangle px_bounding_box;
 
     tile_t *hover;
+    hex_direction_t hover_section;
+    tile_t *hover_adjacent;
+    hex_direction_t hover_adjacent_section;
+    float hover_section_adjacency_radius;
 
     Vector2 mouse_pos;
 

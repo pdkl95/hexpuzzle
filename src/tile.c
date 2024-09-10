@@ -36,7 +36,8 @@ Color tile_edge_hover_color   = { 0xaa, 0xaa, 0xaa, 0xff };
 Color tile_edge_drag_color    = { 0x77, 0x77, 0x77, 0xff };
 Color tile_edge_hidden_color  = { 0xe9, 0xdf, 0x9c, 0x44 };
 
-Color tile_bg_highlight_color = { 0xfd, 0xf9, 0x00, 0x4c };
+Color tile_bg_highlight_color     = { 0xfd, 0xf9, 0x00, 0x4c };
+Color tile_bg_highlight_color_dim = { 0xfd, 0xf9, 0x00, 0x2c };
 
 Color path_color_none   = { 0, 0, 0, 0 };
 Color path_color_red    = RED;
@@ -194,6 +195,21 @@ void tile_unset_hover(tile_t *tile)
     tile->hover_center = false;
 }
 
+void tile_set_hover_adjacent(tile_t *tile, hex_direction_t section, tile_t *adjacent_tile)
+{
+    assert_not_null(tile);
+
+    tile->hover_adjacent = adjacent_tile;
+    tile->hover_section = section;
+}
+
+void tile_unset_hover_adjacent(tile_t *tile)
+{
+    assert_not_null(tile);
+
+    tile->hover_adjacent = NULL;
+}
+
 void tile_toggle_fixed(tile_t *tile)
 {
     assert_not_null(tile);
@@ -215,6 +231,13 @@ void tile_cycle_path_section(tile_t *tile, hex_direction_t section)
     tile->path[section]++;
     if (tile->path[section] > PATH_TYPE_MAX) {
         tile->path[section] = PATH_TYPE_NONE;
+    }
+
+    if (tile->hover_adjacent) {
+        hex_direction_t opposite_section =
+            hex_opposite_direction(section);
+
+        tile->hover_adjacent->path[opposite_section] = tile->path[section];
     }
 }
 
@@ -299,10 +322,17 @@ void tile_draw(tile_t *tile, tile_t *drag_target)
                     : tile_bg_color));
     }
 
-    if (edit_mode &&
-        tile->hover &&
-        !tile->hover_center &&
-        !drag_target
+    if (tile->hover_adjacent) {
+        Vector2 mid = tile->midpoints[tile->hover_section];
+        tile_section_t sec = tile->sections[tile->hover_section];
+        Vector2 c0 = Vector2Lerp(sec.corners[0], mid, 0.35);
+        Vector2 c1 = Vector2Lerp(sec.corners[1], mid, 0.35);
+        DrawTriangle(c0, c1, sec.corners[2], tile_bg_highlight_color_dim);
+
+    } else if (edit_mode &&
+               tile->hover &&
+               !tile->hover_center &&
+               !drag_target
     ) {
         /* section highlight */
         tile_section_t sec = tile->sections[tile->hover_section];
@@ -312,6 +342,7 @@ void tile_draw(tile_t *tile, tile_t *drag_target)
     for (int i=0; i<6; i++) {
         /* colored strips */
         Vector2 mid = tile->midpoints[i];
+
         DrawLineEx(tile->center, mid, tile->line_width, path_type_color(tile->path[i]));
 
 #if 0
@@ -320,6 +351,14 @@ void tile_draw(tile_t *tile, tile_t *drag_target)
         Vector2 mlabel = Vector2Add(mid, offset);
         DrawTextShadow(TextFormat("%d", i), mlabel.x - 5, mlabel.y - 9, 18, RAYWHITE);
 #endif
+    }
+
+    if (tile->hover_adjacent) {
+        assert(tile->hover_section >= 0);
+        assert(tile->hover_section < 6);
+        Vector2 mid = tile->midpoints[tile->hover_section];
+        float thickness = 1.0;
+        DrawLineEx(tile->center, mid, thickness, WHITE);
     }
 
     if (!tile->fixed) {
