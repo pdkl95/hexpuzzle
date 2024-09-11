@@ -25,11 +25,14 @@
 #define LEVEL_FILENAME_EXT      "hexlevel"
 #define COLLECTION_FILENAME_EXT "hexlevelpack"
 
+#define LEVEL_DEFAULT_NAME "Untitled"
+#define LEVEL_DEFAULT_RADIUS LEVEL_MIN_RADIUS
+
 #define LEVEL_MIN_RADIUS 1
 #define LEVEL_MAX_RADIUS 4
 
-#define TILE_GRID_WIDTH  ((2 * LEVEL_MAX_RADIUS) + 1)
-#define TILE_GRID_HEIGHT TILE_GRID_WIDTH
+#define TILE_LEVEL_WIDTH  ((2 * LEVEL_MAX_RADIUS) + 1)
+#define TILE_LEVEL_HEIGHT TILE_LEVEL_WIDTH
 
 #define LEVEL_CENTER_POSITION  \
     ((hex_axial_t){            \

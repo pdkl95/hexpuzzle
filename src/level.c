@@ -25,11 +25,25 @@
 
 #include "options.h"
 #include "tile.h"
-#include "grid.h"
 #include "level.h"
 
-#define LEVEL_DEFAULT_NAME "Untitled"
-#define LEVEL_DEFAULT_RADIUS LEVEL_MIN_RADIUS
+static void level_enable_tile_callback(hex_axial_t axial, void *data)
+{
+    level_t *level = (level_t *)data;
+    tile_t *tile = level_get_tile(level, axial);
+    if (tile) {
+        tile->enabled = true;
+    }
+}
+
+static void level_disable_tile_callback(hex_axial_t axial, void *data)
+{
+    level_t *level = (level_t *)data;
+    tile_t *tile = level_get_tile(level, axial);
+    if (tile) {
+        tile->enabled = false;
+    }
+}
 
 static level_t *alloc_level()
 {
@@ -43,15 +57,37 @@ static level_t *alloc_level()
 
     level->next = NULL;
 
+    level->radius = LEVEL_MIN_RADIUS;
+
+    level_reset(level);
+
     return level;
+}
+
+static void level_prepare_tiles(level_t *level);
+
+void level_reset(level_t *level)
+{
+    assert_not_null(level);
+    level->req_tile_size = 60.0f;
+
+    level->drag_reset_total_frames = 12;
+    level->drag_reset_frames = 0;
+
+    level->hover = NULL;
+    level->hover_section_adjacency_radius = 12.0;
+    level->drag_target = NULL;
+
+    level->center = LEVEL_CENTER_POSITION;
+    level->center_tile = level_get_tile(level, level->center);
+
+    level_prepare_tiles(level);
 }
 
 static void level_prepare_tiles(level_t *level)
 {
-    assert_not_null(level);
-
-    for (int q=0; q<TILE_GRID_WIDTH; q++) {
-        for (int r=0; r<TILE_GRID_HEIGHT; r++) {
+    for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
+        for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
             tile_t *tile = &(level->tiles[q][r]);
             hex_axial_t pos = {
                 .q = q,
@@ -60,21 +96,17 @@ static void level_prepare_tiles(level_t *level)
             init_tile(tile, pos);
         }
     }
+
+    level_resize(level);
 }
 
 static void lecel_setup_minimal_blank(level_t *level)
 {
-    for (int q=0; q<TILE_GRID_WIDTH; q++) {
-        for (int r=0; r<TILE_GRID_HEIGHT; r++) {
-            tile_t *tile = &(level->tiles[q][r]);
+    assert_not_null(level);
 
-            if (hex_axial_distance(tile->position, LEVEL_CENTER_POSITION) <= level->radius) {
-                tile->enabled = true;
-            }
-        }
-    }
+    level->radius = LEVEL_MIN_RADIUS;
+    level_enable_ring(level, level->radius);
 }
-
 
 level_t *create_level(void)
 {
@@ -105,8 +137,8 @@ tile_t *level_get_tile(level_t *level,  hex_axial_t axial)
 {
     assert_not_null(level);
 
-    if ((axial.r < 0) || (axial.r >= TILE_GRID_HEIGHT) ||
-        (axial.q < 0) || (axial.q >= TILE_GRID_WIDTH)) {
+    if ((axial.r < 0) || (axial.r >= TILE_LEVEL_HEIGHT) ||
+        (axial.q < 0) || (axial.q >= TILE_LEVEL_WIDTH)) {
         return NULL;
     }
 
@@ -364,23 +396,6 @@ bool level_replace_from_memory(level_t *level, char *str)
     return level_parse_string(level, str);
 }
 
-grid_t *level_create_grid(level_t *level)
-{
-    assert_not_null(level);
-
-    grid_t *grid = create_grid(level->radius);
-
-    for (int q=0; q < TILE_GRID_WIDTH; q++) {
-        for (int r=0; r < TILE_GRID_HEIGHT; r++) {
-            tile_t *tile = &(level->tiles[q][r]);
-            tile_t *grid_tile = grid_get_tile(grid, tile->position);
-            tile_copy_attributes(grid_tile, tile);
-        }
-    }
-
-    return grid;
-}
-
 void level_update_ui_name(level_t *level)
 {
     assert_not_null(level);
@@ -396,13 +411,13 @@ void level_play(level_t *level)
 {
     assert_not_null(level);
 
-    if (current_grid) {
-        destroy_grid(current_grid);
-        current_grid = NULL;
+    if (current_level) {
+        // unload level?
     }
 
-    current_grid = level_create_grid(level);;
     current_level = level;
+    level_reset(current_level);
+
     game_mode = GAME_MODE_PLAY_LEVEL;
 }
 
@@ -468,32 +483,11 @@ void level_save_to_file_if_changed(level_t *level, char *dirpath)
     }
 }
 
-void level_extract_from_grid(level_t *level, grid_t *grid)
-{
-    int n=0;
-    for (int q=0; q < TILE_GRID_WIDTH; q++) {
-        for (int r=0; r < TILE_GRID_HEIGHT; r++) {
-            tile_t *tile = &(level->tiles[q][r]);
-            tile_t *grid_tile = grid_get_tile(grid, tile->position);
-            if (!tile_eq(tile, grid_tile)) {
-                n++;
-                level->changed = true;
-                tile_copy_attributes(tile, grid_tile);
-            }
-        }
-    }
-    if (level->changed) {
-        printf("extraction finished - %d tiles changed", n);
-    } else {
-        printf("extraction finished - zero changes!");
-    }
-}
-
 static int level_count_enabled_tiles(level_t *level)
 {
     int count = 0;
-    for (int q=0; q < TILE_GRID_WIDTH; q++) {
-        for (int r=0; r < TILE_GRID_HEIGHT; r++) {
+    for (int q=0; q < TILE_LEVEL_WIDTH; q++) {
+        for (int r=0; r < TILE_LEVEL_HEIGHT; r++) {
             tile_t *tile = &(level->tiles[q][r]);
             if (tile->enabled) {
                 count++;
@@ -510,11 +504,344 @@ void level_serialize(level_t *level, FILE *f)
     fprintf(f, "radius %d\n", level->radius);
     int total_tiles = level_count_enabled_tiles(level);
     fprintf(f, "begin_tiles %d\n", total_tiles);
-    for (int q=0; q < TILE_GRID_WIDTH; q++) {
-        for (int r=0; r < TILE_GRID_HEIGHT; r++) {
+    for (int q=0; q < TILE_LEVEL_WIDTH; q++) {
+        for (int r=0; r < TILE_LEVEL_HEIGHT; r++) {
             tile_t *tile = &(level->tiles[q][r]);
             tile_serialize(tile, f);
         }
     }
     fprintf(f, "end_tiles\n");
+}
+
+static void level_add_to_bounding_box(level_t *level, tile_t *tile)
+{
+    assert_not_null(level);
+    assert_not_null(tile);
+
+    Vector2 *corners = tile->corners;
+    for (int i=0; i<6; i++) {
+        level->px_min.x = MIN(level->px_min.x, corners[i].x);
+        level->px_min.y = MIN(level->px_min.y, corners[i].y);
+
+        level->px_max.x = MAX(level->px_max.x, corners[i].x);
+        level->px_max.y = MAX(level->px_max.y, corners[i].y);
+   }
+}
+
+void level_resize(level_t *level)
+{
+    assert_not_null(level);
+
+    level->center_tile = level_get_tile(level, level->center);
+
+    Vector2 window_level_margin = { 0.8, 0.8 };
+    Vector2 window = Vector2Scale(ivector2_to_vector2(window_size), 1.0);
+    Vector2 max_level_size_px = Vector2Multiply(window, window_level_margin);
+    int level_width_in_hex_radii = 2 + (3 * level->radius);
+    Vector2 max_tile_size = {
+        .x =  max_level_size_px.x / ((float)level_width_in_hex_radii),
+        .y = (max_level_size_px.y / TILE_LEVEL_HEIGHT) * INV_SQRT_3
+    };
+
+    level->tile_size = MIN(level->req_tile_size,
+                          MIN(max_tile_size.x,
+                              max_tile_size.y));
+
+#if 0
+    printf(">>>=-- ~ --=<<<\n");
+    pvec2(window_level_margin);
+    pvec2(max_level_size_px);
+    pint(level_width_in_hex_radii);
+    pvec2(max_tile_size);
+    pfloat(level->tile_size);
+#endif
+
+    level->px_min.x = (float)window_size.x * 10.0;
+    level->px_min.y = (float)window_size.y * 10.0;
+
+    level->px_max.x = 0.0f;
+    level->px_max.y = 0.0f;
+
+    for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
+        for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
+            tile_t *tile = &(level->tiles[q][r]);
+            if (tile->enabled) {
+                tile_set_size(tile, level->tile_size);
+                level_add_to_bounding_box(level, tile);
+            }
+        }
+    }
+
+    level->px_bounding_box.x = level->px_min.x;
+    level->px_bounding_box.y = level->px_min.y;
+    level->px_bounding_box.width  = level->px_max.x - level->px_min.x;
+    level->px_bounding_box.height = level->px_max.y - level->px_min.y;
+
+    level->px_offset.x = ((float)window_size.x - level->px_bounding_box.width)  / 2;
+    level->px_offset.y = ((float)window_size.y - level->px_bounding_box.height) / 2;
+
+    level->px_offset.x -= level->px_bounding_box.x;
+    level->px_offset.y -= level->px_bounding_box.y;
+
+#if 0
+    printf("-- px --\n");
+    printf("window_size = (%d x %d)\n", window_size.x, window_size.y);
+    printf("px_min = [ %f, %f ]\n", level->px_min.x, level->px_min.y);
+    printf("px_max = [ %f, %f ]\n", level->px_max.x, level->px_max.y);
+    printf("px_bounding_box:\n");
+    printrect(level->px_bounding_box);
+    printf("px_offset = [ %f, %f ]\n", level->px_offset.x, level->px_offset.y);
+#endif
+}
+
+tile_t *level_find_neighbor_tile(level_t *level, tile_t *tile, hex_direction_t section)
+{
+    section = (section + 1) % 6;
+    hex_axial_t neighbor_pos = hex_axial_neighbor(tile->position, section);
+    tile_t *neighbor = level_get_tile(level, neighbor_pos);
+    return neighbor;
+}
+
+void level_check(level_t *level)
+{
+    assert_not_null(level);
+}
+
+void level_set_hover(level_t *level, IVector2 mouse_position)
+{
+    if (level) {
+        if (level->hover) {
+            if (level->hover_adjacent) {
+                tile_unset_hover_adjacent(level->hover);
+                tile_unset_hover_adjacent(level->hover_adjacent);
+                level->hover_adjacent = NULL;
+            }
+
+            tile_unset_hover(level->hover);
+            level->hover->hover = false;
+        }
+
+        level->mouse_pos.x = (float)mouse_position.x;
+        level->mouse_pos.y = (float)mouse_position.y;
+
+        if (level->drag_target) {
+            if (level->drag_reset_frames > 0) {
+                float reset_fract = ((float)level->drag_reset_frames) / ((float)level->drag_reset_total_frames);
+                reset_fract = ease_exponential_in(reset_fract);
+                level->drag_offset = Vector2Scale(level->drag_reset_vector, reset_fract);
+                level->drag_reset_frames--;
+                if (0 == level->drag_reset_frames) {
+                    level->drag_target = NULL;
+                    disable_automatic_events();
+                }
+            } else {
+                level->drag_offset = Vector2Subtract(level->mouse_pos, level->drag_start);
+            }
+        } else {
+            level->drag_offset.x = 0.0f;
+            level->drag_offset.y = 0.0f;
+        }
+
+        Vector2 mouse_tile_pos = Vector2Subtract(level->mouse_pos, level->px_offset);
+        hex_axial_t mouse_hex = pixel_to_hex_axial(mouse_tile_pos, level->tile_size);
+
+        level->hover = level_get_tile(level, mouse_hex);
+
+        if (level->hover) {
+            tile_t *tile = level->hover;
+            Vector2 midpoint = tile->midpoints[tile->hover_section];
+            midpoint = Vector2Add(midpoint, level->px_offset);
+            if (Vector2Distance(midpoint, level->mouse_pos) < level->hover_section_adjacency_radius) {
+                level->hover_adjacent = level_find_neighbor_tile(level, tile, tile->hover_section);
+                if (level->hover_adjacent) {
+                    level->hover_section = tile->hover_section;
+                    level->hover_adjacent_section = hex_opposite_direction(level->hover_section);
+
+                    tile_set_hover_adjacent(level->hover,          level->hover_section,          level->hover_adjacent);
+                    tile_set_hover_adjacent(level->hover_adjacent, level->hover_adjacent_section, level->hover);
+                }
+            }
+
+            tile_set_hover(level->hover, Vector2Subtract(level->mouse_pos, level->px_offset));
+        }
+    }
+}
+
+void level_drag_start(level_t *level)
+{
+    assert_not_null(level);
+
+    if (level->drag_target) {
+        level->drag_target = NULL;
+    }
+
+    if (level->hover) {
+#ifdef DEBUG_DRAG_AND_DROP
+        printf("drag_stop(): hover = %p\n", level->hover);
+#endif
+
+        if (!level->hover->fixed) {
+            level->drag_target = level->hover;
+            level->drag_start  = level->mouse_pos;
+#ifdef DEBUG_DRAG_AND_DROP
+            printf("drag_start(): drag_target = %p\n", level->drag_target);
+#endif
+        }
+    }
+}
+
+void level_drop_tile(level_t *level, tile_t *drag_target, tile_t *drop_target)
+{
+    assert_not_null(level);
+    assert_not_null(drag_target);
+    assert_not_null(drop_target);
+
+    assert(drag_target->enabled);
+    assert(drop_target->enabled);
+
+    if (!drop_target->fixed) {
+        tile_swap_attributes(drag_target, drop_target);
+        level_check(level);
+    }
+}
+
+void level_drag_stop(level_t *level)
+{
+    assert_not_null(level);
+
+    if (level->drag_target) {
+        tile_t *drop_target = level->hover;
+
+        if (drop_target && !drop_target->fixed) {
+#ifdef DEBUG_DRAG_AND_DROP
+            printf("drag_stop(): drop target\n");
+#endif
+            level_drop_tile(level, level->drag_target, drop_target);
+            level->drag_target = NULL;
+        } else {
+#ifdef DEBUG_DRAG_AND_DROP
+            printf("drag_stop(): reset\n");
+#endif
+            level->drag_reset_frames = level->drag_reset_total_frames;;
+            level->drag_reset_vector = level->drag_offset;
+            enable_automatic_events();
+        }
+    } else {
+#ifdef DEBUG_DRAG_AND_DROP
+        printf("drag_stop(): missing drag target\n");
+#endif
+    }
+}
+
+void level_modify_hovered_feature(level_t *level)
+{
+    assert_not_null(level);
+    if (level->hover) {
+        tile_modify_hovered_feature(level->hover);
+    }
+}
+
+void level_draw(level_t *level)
+{
+    assert_not_null(level);
+
+    rlPushMatrix();
+
+    rlTranslatef(level->px_offset.x,
+                 level->px_offset.y,
+                 0.0);
+    for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
+        for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
+            tile_t *tile = &(level->tiles[q][r]);
+            assert_not_null(tile);
+
+            if (tile->enabled) {
+                if (tile == level->drag_target) {
+                    // defer ubtil after bg tiles are drawn
+                } else {
+                    tile_draw(tile, level->drag_target);
+                }
+            }
+        }
+    }
+
+    if (level->drag_target) {
+        rlPushMatrix();
+
+        rlTranslatef(level->drag_offset.x,
+                     level->drag_offset.y,
+                     0.0);
+
+        tile_draw(level->drag_target, level->drag_target);
+
+        rlPopMatrix();
+    }
+
+    //DrawRectangleLinesEx(level->px_bounding_box, 5.0, LIME);
+
+    rlPopMatrix();
+
+#if 0
+    if (level->drag_target) {
+        DrawText(TextFormat("drag_target<%d,%d> drag_offset = (%f, %f)",
+                            level->drag_target->position.q, level->drag_target->position.r,
+                            level->drag_offset.x, level->drag_offset.y),
+                 10, 10, 20, GREEN);
+    }
+#endif
+}
+
+void level_enable_spiral(level_t *level, int radius)
+{
+    hex_axial_foreach_in_spiral(level->center_tile->position,
+                                radius,
+                                level_enable_tile_callback,
+                                level);
+    level_resize(level);
+}
+
+void level_disable_spiral(level_t *level, int radius)
+{
+    hex_axial_foreach_in_spiral(level->center_tile->position,
+                                radius,
+                                level_disable_tile_callback,
+                                level);
+    level_resize(level);
+}
+
+void level_enable_ring(level_t *level, int radius)
+{
+    hex_axial_foreach_in_ring(level->center_tile->position,
+                              radius,
+                              level_enable_tile_callback,
+                              level);
+    level_resize(level);
+}
+
+void level_disable_ring(level_t *level, int radius)
+{
+    hex_axial_foreach_in_ring(level->center_tile->position,
+                              radius,
+                              level_disable_tile_callback,
+                              level);
+    level_resize(level);
+}
+
+void level_set_radius(level_t *level, int new_radius)
+{
+    assert_not_null(level);
+    assert(new_radius >= LEVEL_MIN_RADIUS);
+    assert(new_radius <= LEVEL_MAX_RADIUS);
+
+    printf("change level radius from %d to %d\n", level->radius, new_radius);
+
+    while (new_radius > level->radius) {
+        level->radius++;
+        level_enable_ring(level, level->radius );
+    }
+
+    while (new_radius < level->radius) {
+        level->radius--;
+        level_disable_ring(level, level->radius);
+    }
 }

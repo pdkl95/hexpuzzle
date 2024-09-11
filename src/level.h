@@ -27,9 +27,9 @@
 #define IS_LEVEL_FILENAME(filename)                             \
     (0 == strcmp(filename_ext(filename), LEVEL_FILENAME_EXT))
 
+#include "const.h"
 #include "hex.h"
 #include "tile.h"
-#include "grid.h"
 
 struct level {
     char *id;
@@ -37,8 +37,35 @@ struct level {
     char name_backup[NAME_MAXLEN];
 
     int radius;
-    tile_t tiles[TILE_GRID_WIDTH][TILE_GRID_HEIGHT];
+    tile_t tiles[TILE_LEVEL_WIDTH][TILE_LEVEL_HEIGHT];
     int tile_count;
+
+    hex_axial_t center;
+    tile_t *center_tile;
+
+    float req_tile_size;
+    float tile_size;
+
+    Vector2 px_offset;
+    Vector2 px_grid_size;
+    Vector2 px_min;
+    Vector2 px_max;
+    Rectangle px_bounding_box;
+
+    tile_t *hover;
+    hex_direction_t hover_section;
+    tile_t *hover_adjacent;
+    hex_direction_t hover_adjacent_section;
+    float hover_section_adjacency_radius;
+
+    Vector2 mouse_pos;
+
+    tile_t *drag_target;
+    Vector2 drag_start;
+    Vector2 drag_offset;
+    int drag_reset_frames;
+    int drag_reset_total_frames;
+    Vector2 drag_reset_vector;
 
     char *filename;
     bool changed;
@@ -52,11 +79,10 @@ typedef struct level level_t;
 
 level_t *create_level(void);
 void destroy_level(level_t *level);
+void level_reset(level_t *level);
 
 bool level_parse_string(level_t *level, char *str);
 level_t *load_level_file(char *filename);
-
-grid_t *level_create_grid(level_t *level);
 
 tile_t *level_get_tile(level_t *level,  hex_axial_t axial);
 
@@ -68,8 +94,21 @@ void level_save_to_file(level_t *level, char *dirpath);
 void level_save_to_file_if_changed(level_t *level, char *dirpath);
 
 bool level_replace_from_memory(level_t *level, char *str);
-void level_extract_from_grid(level_t *level, grid_t *grid);
 void level_serialize(level_t *level, FILE *f);
+
+void level_resize(level_t *level);
+tile_t *level_find_neighbor_tile(level_t *level, tile_t *tile, hex_direction_t section);
+void level_set_hover(level_t *level, IVector2 mouse_position);
+void level_drag_start(level_t *level);
+void level_drag_stop(level_t *level);
+void level_modify_hovered_feature(level_t *level);
+void level_serialize(level_t *level, FILE *f);
+void level_enable_spiral(level_t *level, int radius);
+void level_disable_spiral(level_t *level, int radius);
+void level_enable_ring(level_t *level, int radius);
+void level_disable_ring(level_t *level, int radius);
+void level_set_radius(level_t *level, int new_radius);
+void level_draw(level_t *level);
 
 extern level_t *current_level;
 

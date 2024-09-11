@@ -31,7 +31,6 @@
 
 #include "options.h"
 #include "raylib_helper.h"
-#include "grid.h"
 #include "level.h"
 #include "collection.h"
 
@@ -89,7 +88,6 @@ Color royal_blue = {   0,  56, 168, 255 };
 
 game_mode_t game_mode = GAME_MODE_NULL;
 
-grid_t *current_grid = NULL;
 level_t *current_level = NULL;
 collection_t *current_collection = NULL;
 
@@ -200,24 +198,20 @@ bool set_current_level(level_t *level)
 {
     assert_not_null(level);
 
-    if (current_grid) {
-        destroy_grid(current_grid);
-        current_grid = NULL;
+    if (current_level) {
+        // unload current_level?
     }
 
-    current_grid = level_create_grid(level);
-    grid_resize(current_grid);
-
     current_level = level;
+    level_resize(current_level);
 
-    return (!!current_grid);
+    return (!!current_level);
 }
 
 void return_from_level(void)
 {
-    if (current_grid) {
-        destroy_grid(current_grid);
-        current_grid = NULL;
+    if (current_level) {
+        // unload current_level?
     }
     current_level = NULL;
     game_mode = GAME_MODE_COLLECTION;
@@ -322,8 +316,8 @@ do_resize(
 
     set_uniform_resolution();
     create_textures();
-    if (current_grid) {
-        grid_resize(current_grid);
+    if (current_level) {
+        level_resize(current_level);
     }
     gui_setup();
 
@@ -407,7 +401,9 @@ handle_events(
     }
 
     if (IsKeyPressed(KEY_F8)) {
-        grid_serialize(current_grid, stdout);
+        if (current_level) {
+            level_serialize(current_level, stdout);
+        }
     }
 
     //IVector2 old_mouse = mouse_position;
@@ -417,7 +413,9 @@ handle_events(
     mouse_positionf.x = (float)mouse_position.x;
     mouse_positionf.y = (float)mouse_position.y;
 
-    grid_set_hover(current_grid, mouse_position);
+    if (current_level) {
+        level_set_hover(current_level, mouse_position);
+    }
 
     mouse_text_idx = 0;
     mouse_text_max_line_length = 0;
@@ -429,23 +427,23 @@ handle_events(
     if (IsCursorOnScreen()) {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             mouse_left_click = true;
-            if (current_grid) {
-                grid_drag_start(current_grid);
+            if (current_level) {
+                level_drag_start(current_level);
             }
         }
 
         if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
             mouse_left_release = false;
-            if (current_grid) {
-                grid_drag_stop(current_grid);
+            if (current_level) {
+                level_drag_stop(current_level);
             }
         }
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
             mouse_right_click = true;
             if (edit_mode) {
-                if (current_grid) {
-                    grid_modify_hovered_feature(current_grid);
+                if (current_level) {
+                    level_modify_hovered_feature(current_level);
                 }
             }
         }
@@ -634,10 +632,10 @@ static void draw_edit_panel(void)
     DrawText("Board Radius", radius_spinner_label_rect.x, radius_spinner_label_rect.y,
              PANEL_LABEL_FONT_SIZE, panel_header_text_color);
 
-    static int radius = 1; //current_grid->radius;
+    static int radius = 1; //current_level->radius;
     GuiSpinner(radius_spinner_rect, NULL, &radius, LEVEL_MIN_RADIUS, LEVEL_MAX_RADIUS, false);
-    if (current_grid->radius != radius) {
-        grid_change_radius(current_grid, radius);
+    if (current_level->radius != radius) {
+        level_set_radius(current_level, radius);
     }
 }
 
@@ -736,8 +734,9 @@ static void draw_ask_save_dialog(void)
 
         if ((result == 2) || (modal_ui_result == UI_RESULT_OK)) {
             /* yes */
-            printf("collection_extract_level_from_grid()\n");
-            level_extract_from_grid(current_level, current_grid);
+            //printf("collection_extract_level_from_grid()\n");
+            //level_extract_from_grid(current_level, current_grid);
+            assert(false);
             printf("collection_save()\n");
             collection_save(current_collection);
             show_ask_save_box = false;
@@ -856,8 +855,8 @@ render_frame(
         case GAME_MODE_PLAY_LEVEL:
             /* fall through */
         case GAME_MODE_EDIT_LEVEL:
-            if (current_grid) {
-                grid_draw(current_grid);
+            if (current_level) {
+                level_draw(current_level);
             }
             break;
 
@@ -1020,7 +1019,6 @@ static void game_init(void)
 
 static void game_cleanup(void)
 {
-    destroy_grid(current_grid);
 }
 
 int

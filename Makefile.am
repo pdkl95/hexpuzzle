@@ -29,7 +29,7 @@ hexpuzzle_LDADD = $(COMMON_PROG_LDADD)
 
 hexpuzzle_SOURCES =                                \
 	src/collection.h      src/collection.c     \
-	src/grid.h            src/grid.c           \
+	src/const.h                                \
 	src/hex.h             src/hex.c            \
 	src/level.h           src/level.c          \
 	src/logging.h         src/logging.c        \
