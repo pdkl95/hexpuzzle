@@ -301,6 +301,10 @@ void tile_draw(tile_t *tile, tile_t *drag_target)
     assert_not_null(tile);
     /* drag_target CAN be NULL */
 
+    if (!tile->enabled) {
+        return;
+    }
+
     bool drag = (tile == drag_target);
     bool dragged_over = (!drag && drag_target && tile->hover);
 
@@ -385,7 +389,7 @@ void tile_draw(tile_t *tile, tile_t *drag_target)
         DrawCircleV(tile->center, tile->center_circle_draw_radius, tile_bg_highlight_color);
     }
 
-#if 1
+#if 0
     if (drag) {
         return;
     }

@@ -257,7 +257,8 @@ static void collection_generate_level_filename(collection_t *collection, level_t
     int len = strlen(prefix)
         + strlen(suffix)
         + 3   // number 001-999
-        + 2;  // \0
+        + 2   // \0
+        + 10;
     char *tmp = calloc(len, sizeof(char));
     len--;
     for (int n=collection->filename_seq; n<1000; n++) {

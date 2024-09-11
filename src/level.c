@@ -27,6 +27,8 @@
 #include "tile.h"
 #include "level.h"
 
+#define DEBUG_DRAG_AND_DROP 1
+
 static void level_enable_tile_callback(hex_axial_t axial, void *data)
 {
     level_t *level = (level_t *)data;
@@ -105,7 +107,7 @@ static void lecel_setup_minimal_blank(level_t *level)
     assert_not_null(level);
 
     level->radius = LEVEL_MIN_RADIUS;
-    level_enable_ring(level, level->radius);
+    level_enable_spiral(level, level->radius);
 }
 
 level_t *create_level(void)
@@ -538,9 +540,10 @@ void level_resize(level_t *level)
     Vector2 window = Vector2Scale(ivector2_to_vector2(window_size), 1.0);
     Vector2 max_level_size_px = Vector2Multiply(window, window_level_margin);
     int level_width_in_hex_radii = 2 + (3 * level->radius);
+    int current_level_height =  ((2 * level->radius) + 1);
     Vector2 max_tile_size = {
         .x =  max_level_size_px.x / ((float)level_width_in_hex_radii),
-        .y = (max_level_size_px.y / TILE_LEVEL_HEIGHT) * INV_SQRT_3
+        .y = (max_level_size_px.y / current_level_height) * INV_SQRT_3
     };
 
     level->tile_size = MIN(level->req_tile_size,
@@ -549,6 +552,7 @@ void level_resize(level_t *level)
 
 #if 0
     printf(">>>=-- ~ --=<<<\n");
+    pfloat(level->tile_size);
     pvec2(window_level_margin);
     pvec2(max_level_size_px);
     pint(level_width_in_hex_radii);
@@ -565,9 +569,9 @@ void level_resize(level_t *level)
     for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
         for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
             tile_t *tile = &(level->tiles[q][r]);
+            tile_set_size(tile, level->tile_size);
             if (tile->enabled) {
-                tile_set_size(tile, level->tile_size);
-                level_add_to_bounding_box(level, tile);
+              level_add_to_bounding_box(level, tile);
             }
         }
     }
@@ -648,21 +652,22 @@ void level_set_hover(level_t *level, IVector2 mouse_position)
         level->hover = level_get_tile(level, mouse_hex);
 
         if (level->hover) {
-            tile_t *tile = level->hover;
-            Vector2 midpoint = tile->midpoints[tile->hover_section];
-            midpoint = Vector2Add(midpoint, level->px_offset);
-            if (Vector2Distance(midpoint, level->mouse_pos) < level->hover_section_adjacency_radius) {
-                level->hover_adjacent = level_find_neighbor_tile(level, tile, tile->hover_section);
-                if (level->hover_adjacent) {
-                    level->hover_section = tile->hover_section;
-                    level->hover_adjacent_section = hex_opposite_direction(level->hover_section);
-
-                    tile_set_hover_adjacent(level->hover,          level->hover_section,          level->hover_adjacent);
-                    tile_set_hover_adjacent(level->hover_adjacent, level->hover_adjacent_section, level->hover);
+            if (level->hover->enabled) {
+                tile_t *tile = level->hover;
+                Vector2 midpoint = tile->midpoints[tile->hover_section];
+                midpoint = Vector2Add(midpoint, level->px_offset);
+                if (Vector2Distance(midpoint, level->mouse_pos) < level->hover_section_adjacency_radius) {
+                    level->hover_adjacent = level_find_neighbor_tile(level, tile, tile->hover_section);
+                    if (level->hover_adjacent) {
+                        level->hover_section = tile->hover_section;
+                        level->hover_adjacent_section = hex_opposite_direction(level->hover_section);
+                        tile_set_hover_adjacent(level->hover,          level->hover_section,          level->hover_adjacent);
+                        tile_set_hover_adjacent(level->hover_adjacent, level->hover_adjacent_section, level->hover);
+                    }
                 }
-            }
 
-            tile_set_hover(level->hover, Vector2Subtract(level->mouse_pos, level->px_offset));
+                tile_set_hover(level->hover, Vector2Subtract(level->mouse_pos, level->px_offset));
+            }
         }
     }
 }
@@ -680,7 +685,7 @@ void level_drag_start(level_t *level)
         printf("drag_stop(): hover = %p\n", level->hover);
 #endif
 
-        if (!level->hover->fixed) {
+        if (level->hover->enabled && !level->hover->fixed) {
             level->drag_target = level->hover;
             level->drag_start  = level->mouse_pos;
 #ifdef DEBUG_DRAG_AND_DROP
@@ -711,6 +716,10 @@ void level_drag_stop(level_t *level)
 
     if (level->drag_target) {
         tile_t *drop_target = level->hover;
+
+        if (drop_target && !drop_target->enabled) {
+            drop_target = NULL;
+        }
 
         if (drop_target && !drop_target->fixed) {
 #ifdef DEBUG_DRAG_AND_DROP
@@ -842,6 +851,6 @@ void level_set_radius(level_t *level, int new_radius)
 
     while (new_radius < level->radius) {
         level->radius--;
-        level_disable_ring(level, level->radius);
+        level_disable_ring(level, level->radius + 1);
     }
 }

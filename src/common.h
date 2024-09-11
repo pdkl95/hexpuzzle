@@ -85,6 +85,7 @@ extern const char *progversion;
 #endif
 
 #include "const.h"
+#include "raylib_helper.h"
 #include "util.h"
 #include "logging.h"
 

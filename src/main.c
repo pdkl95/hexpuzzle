@@ -30,7 +30,6 @@
 #include "raygui/style/terminal.h"
 
 #include "options.h"
-#include "raylib_helper.h"
 #include "level.h"
 #include "collection.h"
 

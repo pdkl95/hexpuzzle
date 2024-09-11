@@ -340,7 +340,7 @@ void hex_axial_foreach_in_spiral(hex_axial_t center, int radius, hex_axial_cb_t 
     assert(radius > 0);
 
     callback(center, data);
-    for (int k=1; k<radius; k++) {
+    for (int k = 1; k <= radius; k++) {
         hex_axial_foreach_in_ring(center, k, callback, data);
     }
 }
