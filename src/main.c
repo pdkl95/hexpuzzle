@@ -104,6 +104,11 @@ int mouse_text_font_size = 20;
 
 void gui_setup(void);
 
+static inline bool do_level_ui_interaction(void)
+{
+    return current_level && !modal_ui_active;
+};
+
 void enable_automatic_events(void)
 {
     if (options->wait_events) {
@@ -412,7 +417,7 @@ handle_events(
     mouse_positionf.x = (float)mouse_position.x;
     mouse_positionf.y = (float)mouse_position.y;
 
-    if (current_level) {
+    if (do_level_ui_interaction()) {
         level_set_hover(current_level, mouse_position);
     }
 
@@ -426,14 +431,14 @@ handle_events(
     if (IsCursorOnScreen()) {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             mouse_left_click = true;
-            if (current_level) {
+            if (do_level_ui_interaction()) {
                 level_drag_start(current_level);
             }
         }
 
         if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
             mouse_left_release = false;
-            if (current_level) {
+            if (do_level_ui_interaction()) {
                 level_drag_stop(current_level);
             }
         }
@@ -441,7 +446,7 @@ handle_events(
         if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
             mouse_right_click = true;
             if (edit_mode) {
-                if (current_level) {
+                if (do_level_ui_interaction()) {
                     level_modify_hovered_feature(current_level);
                 }
             }
@@ -688,8 +693,9 @@ static void draw_name_edit_dialog(void)
             240,
             140
         };
-        const char *icon = GuiIconText(ICON_PENCIL, "Edit Level Name");
 
+        GuiUnlock();
+        const char *icon = GuiIconText(ICON_PENCIL, "Edit Level Name");
         int result = GuiTextInputBox(edit_box_rect,
                                      icon,
                                      "Level Name:",
@@ -697,6 +703,7 @@ static void draw_name_edit_dialog(void)
                                      current_level->name,
                                      NAME_MAXLEN,
                                      NULL);
+        GuiLock();
 
         if ((result == 2) || (modal_ui_result == UI_RESULT_OK)) {
            /* accept edit / ok */
@@ -725,11 +732,13 @@ static void draw_ask_save_dialog(void)
             140
         };
 
+        GuiUnlock();
         const char *iconmsg = GuiIconText(ICON_FILE_SAVE_CLASSIC, "Save Level?");
         int result = GuiMessageBox(edit_box_rect,
                                    iconmsg,
                                    "Save changes to level?",
                                    no_yes_with_icons);
+        GuiLock();
 
         if ((result == 2) || (modal_ui_result == UI_RESULT_OK)) {
             /* yes */
@@ -891,8 +900,10 @@ static void early_frame_setup(void)
         show_ask_save_box
     ) {
         modal_ui_active = true;
+        GuiLock();
     } else {
         modal_ui_active = false;
+        GuiUnlock();
     }
 }
 
