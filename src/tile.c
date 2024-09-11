@@ -69,7 +69,7 @@ tile_t *init_tile(tile_t *tile, hex_axial_t pos)
 {
     assert_not_null(tile);
 
-    tile->enabled = true;
+    tile->enabled = false;
     tile->fixed = false;
     tile->hidden = false;
 
@@ -137,6 +137,14 @@ void tile_copy_attributes(tile_t *dst, tile_t *src)
 {
     assert_not_null(dst);
     assert_not_null(src);
+
+#if 0
+    printf("tile_copy [%d, %d] -> [%d, %d]\n",
+           src->position.q,
+           src->position.r,
+           dst->position.q,
+           dst->position.r);
+#endif
 
     dst->enabled = src->enabled;
     dst->fixed   = src->fixed;
@@ -377,7 +385,7 @@ void tile_draw(tile_t *tile, tile_t *drag_target)
         DrawCircleV(tile->center, tile->center_circle_draw_radius, tile_bg_highlight_color);
     }
 
-#if 0
+#if 1
     if (drag) {
         return;
     }

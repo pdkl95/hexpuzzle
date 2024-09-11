@@ -22,8 +22,9 @@
 #ifndef COLLECTION_H
 #define COLLECTION_H
 
-#define COLLECTION_FILENAME_EXT "hexlevelpack"
-#define IS_COLLECTION_FILENAME(filename) \
+#include "const.h"
+
+#define IS_COLLECTION_FILENAME(filename)                            \
     (0 == strcmp(filename_ext(filename), COLLECTION_FILENAME_EXT))
 
 #include "level.h"

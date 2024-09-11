@@ -1,6 +1,6 @@
 /****************************************************************************
  *                                                                          *
- * level.h                                                                  *
+ * const.h                                                                  *
  *                                                                          *
  * This file is part of hexpuzzle.                                          *
  *                                                                          *
@@ -19,58 +19,26 @@
  *                                                                          *
  ****************************************************************************/
 
-#ifndef LEVEL_H
-#define LEVEL_H
+#ifndef CONST_H
+#define CONST_H
 
-#include "const.h"
+#define LEVEL_FILENAME_EXT      "hexlevel"
+#define COLLECTION_FILENAME_EXT "hexlevelpack"
 
-#define IS_LEVEL_FILENAME(filename)                             \
-    (0 == strcmp(filename_ext(filename), LEVEL_FILENAME_EXT))
+#define LEVEL_MIN_RADIUS 1
+#define LEVEL_MAX_RADIUS 4
 
-#include "hex.h"
-#include "tile.h"
-#include "grid.h"
+#define TILE_GRID_WIDTH  ((2 * LEVEL_MAX_RADIUS) + 1)
+#define TILE_GRID_HEIGHT TILE_GRID_WIDTH
 
-struct level {
-    char *id;
-    char name[NAME_MAXLEN];
-    char name_backup[NAME_MAXLEN];
+#define LEVEL_CENTER_POSITION  \
+    ((hex_axial_t){            \
+        .q = LEVEL_MAX_RADIUS, \
+        .r = LEVEL_MAX_RADIUS  \
+     })
 
-    int radius;
-    tile_t tiles[TILE_GRID_WIDTH][TILE_GRID_HEIGHT];
-    int tile_count;
+#define NAME_MAXLEN 22
+#define UI_NAME_MAXLEN  (6 + NAME_MAXLEN)
 
-    char *filename;
-    bool changed;
+#endif /*CONST_H*/
 
-    bool finished;
-    char ui_name[UI_NAME_MAXLEN];
-
-    struct level *prev, *next;
-};
-typedef struct level level_t;
-
-level_t *create_level(void);
-void destroy_level(level_t *level);
-
-bool level_parse_string(level_t *level, char *str);
-level_t *load_level_file(char *filename);
-
-grid_t *level_create_grid(level_t *level);
-
-tile_t *level_get_tile(level_t *level,  hex_axial_t axial);
-
-void level_update_ui_name(level_t *level);
-
-void level_play(level_t *level);
-
-void level_save_to_file(level_t *level, char *dirpath);
-void level_save_to_file_if_changed(level_t *level, char *dirpath);
-
-bool level_replace_from_memory(level_t *level, char *str);
-void level_extract_from_grid(level_t *level, grid_t *grid);
-void level_serialize(level_t *level, FILE *f);
-
-extern level_t *current_level;
-
-#endif /*LEVEL_H*/

@@ -60,6 +60,9 @@ struct hex_axialf {
 };
 typedef struct hex_axialf hex_axialf_t;
 
+typedef void (*hex_axial_cb_t)(hex_axial_t axial, void *data);
+
+
 extern hex_axial_t hex_axial_direction_vectors[6];
 static inline hex_axial_t hex_axial_direction(hex_direction_t dir)
 {
@@ -68,7 +71,7 @@ static inline hex_axial_t hex_axial_direction(hex_direction_t dir)
 
 hex_axial_t hex_axial_add(hex_axial_t a, hex_axial_t b);
 
-static inline hex_axial_t hex_axial_neighbors(hex_axial_t axial, hex_direction_t dir)
+static inline hex_axial_t hex_axial_neighbor(hex_axial_t axial, hex_direction_t dir)
 {
     return hex_axial_add(axial, hex_axial_direction(dir));
 }
@@ -85,6 +88,18 @@ Vector2 *hex_axial_pixel_edge_midpoints(hex_axial_t axial, float size);
 bool hex_axial_eq(hex_axial_t a, hex_axial_t b);
 
 hex_direction_t pixel_to_hex_axial_section(Vector2 p, float size);
+
+inline static hex_axial_t hex_axial_scale(hex_axial_t axial, int factor)
+{
+    hex_axial_t rv = {
+        .q = axial.q * factor,
+        .r = axial.r * factor,
+    };
+    return rv;
+}
+
+void hex_axial_foreach_in_ring(hex_axial_t center, int radius, hex_axial_cb_t callback, void *data);
+void hex_axial_foreach_in_spiral(hex_axial_t center, int radius, hex_axial_cb_t callback, void *data);
 
 /*
  * Cube Coordinates for hexagons
@@ -111,7 +126,7 @@ static inline hex_cube_t hex_cube_direction(hex_direction_t dir)
 
 hex_cube_t hex_cube_add(hex_cube_t a, hex_cube_t b);
 
-static inline hex_cube_t hex_cube_neighbors(hex_cube_t cube, hex_direction_t dir)
+static inline hex_cube_t hex_cube_neighbor(hex_cube_t cube, hex_direction_t dir)
 {
     return hex_cube_add(cube, hex_cube_direction(dir));
 }

@@ -37,13 +37,8 @@ static level_t *alloc_level()
 
     level->name[0] = '\0';
 
-    level->tile_width  = 0;
-    level->tile_height = 0;
-
     level->id = NULL;
     level->filename = NULL;
-    level->tiles = NULL;
-    level->old_tiles = NULL;
     level->changed = false;
 
     level->next = NULL;
@@ -51,38 +46,35 @@ static level_t *alloc_level()
     return level;
 }
 
-static void level_fill_radius_with_tiles(level_t *level)
+static void level_prepare_tiles(level_t *level)
 {
-    int width  = (2 * level->radius) + 1;
-    int height = (2 * level->radius) + 1;
+    assert_not_null(level);
 
-    level->tile_width  = width;
-    level->tile_height = height;
-
-    hex_axial_t center = {
-        .q = level->radius,
-        .r = level->radius
-    };
-
-    int tile_count = width * height;
-    level->tiles = calloc(tile_count, sizeof(tile_t));
-
-    for (int q=0; q < width; q++) {
-        for (int r=0; r < height; r++) {
+    for (int q=0; q<TILE_GRID_WIDTH; q++) {
+        for (int r=0; r<TILE_GRID_HEIGHT; r++) {
+            tile_t *tile = &(level->tiles[q][r]);
             hex_axial_t pos = {
                 .q = q,
                 .r = r
             };
+            init_tile(tile, pos);
+        }
+    }
+}
 
-            if (hex_axial_distance(pos, center) <= level->radius) {
-                int idx = (r * width) + q;
-                tile_t *tile = &(level->tiles[idx]);
-                init_tile(tile, pos);
+static void lecel_setup_minimal_blank(level_t *level)
+{
+    for (int q=0; q<TILE_GRID_WIDTH; q++) {
+        for (int r=0; r<TILE_GRID_HEIGHT; r++) {
+            tile_t *tile = &(level->tiles[q][r]);
+
+            if (hex_axial_distance(tile->position, LEVEL_CENTER_POSITION) <= level->radius) {
                 tile->enabled = true;
             }
         }
     }
 }
+
 
 level_t *create_level(void)
 {
@@ -94,29 +86,31 @@ level_t *create_level(void)
 
     level->radius = LEVEL_DEFAULT_RADIUS;
 
-    level_fill_radius_with_tiles(level);
+    level_prepare_tiles(level);
+    lecel_setup_minimal_blank(level);
 
     return level;
-}
-
-void level_clear_tiles(level_t *level)
-{
-    assert_not_null(level);
-
-    if (level->tiles) {
-        destroy_tile(level->tiles);
-        level->tiles = NULL;
-    }
 }
 
 void destroy_level(level_t *level)
 {
     if (level) {
         SAFEFREE(level->id);
-        SAFEFREE(level->tiles);
         SAFEFREE(level->filename);
         SAFEFREE(level);
     }
+}
+
+tile_t *level_get_tile(level_t *level,  hex_axial_t axial)
+{
+    assert_not_null(level);
+
+    if ((axial.r < 0) || (axial.r >= TILE_GRID_HEIGHT) ||
+        (axial.q < 0) || (axial.q >= TILE_GRID_WIDTH)) {
+        return NULL;
+    }
+
+    return &(level->tiles[axial.q][axial.r]);
 }
 
 struct token_list {
@@ -290,7 +284,7 @@ bool level_parse_string(level_t *level, char *str)
 
     //printf("c=%d, r=%d, n=\"%s\"\n", level->tile_count, level->radius, level->name);
 
-    level_fill_radius_with_tiles(level);
+    level_prepare_tiles(level);
 
     for(int i = 9; i<(list.token_count - 2); i += 4) {
         CMP(i, "tile");
@@ -367,8 +361,6 @@ bool level_replace_from_memory(level_t *level, char *str)
 {
     assert_not_null(level);
 
-    level_clear_tiles(level);
-
     return level_parse_string(level, str);
 }
 
@@ -378,10 +370,9 @@ grid_t *level_create_grid(level_t *level)
 
     grid_t *grid = create_grid(level->radius);
 
-    for (int q=0; q < level->tile_width; q++) {
-        for (int r=0; r < level->tile_height; r++) {
-            int idx = (r * level->tile_width) + q;
-            tile_t *tile = &(level->tiles[idx]);
+    for (int q=0; q < TILE_GRID_WIDTH; q++) {
+        for (int r=0; r < TILE_GRID_HEIGHT; r++) {
+            tile_t *tile = &(level->tiles[q][r]);
             tile_t *grid_tile = grid_get_tile(grid, tile->position);
             tile_copy_attributes(grid_tile, tile);
         }
@@ -479,12 +470,10 @@ void level_save_to_file_if_changed(level_t *level, char *dirpath)
 
 void level_extract_from_grid(level_t *level, grid_t *grid)
 {
-#if 1
     int n=0;
-    for (int q=0; q < level->tile_width; q++) {
-        for (int r=0; r < level->tile_height; r++) {
-            int idx = (r * level->tile_width) + q;
-            tile_t *tile = &(level->tiles[idx]);
+    for (int q=0; q < TILE_GRID_WIDTH; q++) {
+        for (int r=0; r < TILE_GRID_HEIGHT; r++) {
+            tile_t *tile = &(level->tiles[q][r]);
             tile_t *grid_tile = grid_get_tile(grid, tile->position);
             if (!tile_eq(tile, grid_tile)) {
                 n++;
@@ -498,35 +487,20 @@ void level_extract_from_grid(level_t *level, grid_t *grid)
     } else {
         printf("extraction finished - zero changes!");
     }
-#else
-    assert_not_null(level);
-    assert_not_null(current_level);
-    assert_not_null(current_grid);
-    assert(level == current_level);
+}
 
-    int size = 40 * current_grid->maxtiles
-        + 64 //50    // header
-        + 32 //24    // footer
-        + NAME_MAXLEN;
-
-    char *buf = calloc(size, sizeof(char));
-
-    FILE *f = fmemopen(buf, size, "w");
-    grid_serialize(current_grid, f);
-    long filesize = ftell(f);
-    fclose(f);
-    buf[filesize + 1] = '\0';
-
-#if 0
-    printf("\nBEG>>>\n");
-    fwrite(buf, 1, filesize, stdout);
-    printf("\n<<<END\n");
-#endif
-
-    level_replace_from_memory(level, buf);
-
-    free(buf);
-#endif
+static int level_count_enabled_tiles(level_t *level)
+{
+    int count = 0;
+    for (int q=0; q < TILE_GRID_WIDTH; q++) {
+        for (int r=0; r < TILE_GRID_HEIGHT; r++) {
+            tile_t *tile = &(level->tiles[q][r]);
+            if (tile->enabled) {
+                count++;
+            }
+        }
+    }
+    return count;
 }
 
 void level_serialize(level_t *level, FILE *f)
@@ -534,10 +508,13 @@ void level_serialize(level_t *level, FILE *f)
     fprintf(f, "hexlevel version 1\n");
     fprintf(f, "name \"%s\"\n", level->name);
     fprintf(f, "radius %d\n", level->radius);
-    int total_tiles = level->tile_width * level->tile_height;
+    int total_tiles = level_count_enabled_tiles(level);
     fprintf(f, "begin_tiles %d\n", total_tiles);
-    for (int i=0; i<total_tiles; i++) {
-        tile_serialize(&level->tiles[i], f);
+    for (int q=0; q < TILE_GRID_WIDTH; q++) {
+        for (int r=0; r < TILE_GRID_HEIGHT; r++) {
+            tile_t *tile = &(level->tiles[q][r]);
+            tile_serialize(tile, f);
+        }
     }
     fprintf(f, "end_tiles\n");
 }

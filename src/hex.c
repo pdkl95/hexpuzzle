@@ -317,3 +317,30 @@ hex_axial_t hex_offset_to_axial(hex_offset_t off)
     }
     __builtin_unreachable();
 }
+
+void hex_axial_foreach_in_ring(hex_axial_t center, int radius, hex_axial_cb_t callback, void *data)
+{
+    assert_not_null(callback);
+    assert(radius > 0);
+
+    hex_axial_t offset = hex_axial_scale(hex_axial_direction(4), radius);
+    hex_axial_t hex = hex_axial_add(center, offset);
+
+    for (int i=0; i < 6; i++) {
+        for (int j=0; j < radius; j++) {
+            callback(hex, data);
+            hex = hex_axial_neighbor(hex, i);
+        }
+    }
+}
+
+void hex_axial_foreach_in_spiral(hex_axial_t center, int radius, hex_axial_cb_t callback, void *data)
+{
+    assert_not_null(callback);
+    assert(radius > 0);
+
+    callback(center, data);
+    for (int k=1; k<radius; k++) {
+        hex_axial_foreach_in_ring(center, k, callback, data);
+    }
+}

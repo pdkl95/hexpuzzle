@@ -23,25 +23,15 @@
 #include "raylib_helper.h"
 #include "tile.h"
 #include "grid.h"
+#include "level.h"
 
 #define DEBUG_DRAG_AND_DROP 1
 
-static int grid_tile_storage_location(grid_t *grid, hex_axial_t axial)
-{
-    if ((axial.r < 0) || (axial.r >= grid->tile_grid_height) ||
-        (axial.q < 0) || (axial.q >= grid->tile_grid_width)) {
-        return -1;
-    }
-    int loc = (axial.r * grid->tile_grid_width) + axial.q;
-
-    assert(loc >= 0);
-    assert(loc < grid->maxtiles);
-
-    return loc;
-}
-
 static void grid_add_to_bounding_box(grid_t *grid, tile_t *tile)
 {
+    assert_not_null(grid);
+    assert_not_null(tile);
+
     Vector2 *corners = tile->corners;
     for (int i=0; i<6; i++) {
         grid->px_min.x = MIN(grid->px_min.x, corners[i].x);
@@ -52,39 +42,45 @@ static void grid_add_to_bounding_box(grid_t *grid, tile_t *tile)
    }
 }
 
-void grid_build_tiles(grid_t *grid, int radius)
+static void grid_enable_tile_callback(hex_axial_t axial, void *data)
 {
+    grid_t *grid = (grid_t *)data;
+    tile_t *tile = grid_get_tile(grid, axial);
+    if (tile) {
+        tile->enabled = true;
+    }
+}
+
+static void grid_disable_tile_callback(hex_axial_t axial, void *data)
+{
+    grid_t *grid = (grid_t *)data;
+    tile_t *tile = grid_get_tile(grid, axial);
+    if (tile) {
+        tile->enabled = false;
+    }
+}
+
+void grid_prepare_tiles(grid_t *grid, int radius)
+{
+    assert_not_null(grid);
+    assert(radius <= LEVEL_MAX_RADIUS);
+
     grid->radius = radius;
 
-    grid->tile_grid_width  = (2 * radius) + 1;
-    grid->tile_grid_height = (2 * radius) + 1;
-    grid->maxtiles = grid->tile_grid_width * grid->tile_grid_height;
-
-    grid->tiles = calloc(grid->maxtiles, sizeof(tile_t));
-
-    grid->center.q = radius;
-    grid->center.r = radius;
-
-    for (int q=0; q<grid->tile_grid_width; q++) {
-        for (int r=0; r<grid->tile_grid_height; r++) {
+    for (int q=0; q<TILE_GRID_WIDTH; q++) {
+        for (int r=0; r<TILE_GRID_HEIGHT; r++) {
             hex_axial_t pos = {
                 .q = q,
                 .r = r
             };
             tile_t *tile = grid_get_tile(grid, pos);
             init_tile(tile, pos);
-
-            if (hex_axial_distance(pos, grid->center) <= radius) {
-                if (hex_axial_distance(pos, grid->center) > grid->radius) {
-                    tile->enabled = false;
-                } else {
-                    tile->enabled = true;
-                }
-            } else {
-                tile->enabled = false;
-            }
+            tile->enabled = false;
         }
     }
+
+    grid->center_tile->enabled = true;
+    grid_enable_ring(grid, radius);
 
     grid->hover       = NULL;
     grid->drag_target = NULL;
@@ -105,10 +101,14 @@ grid_t *create_grid(int radius)
     grid->drag_reset_frames = 0;
 
     grid->hover = NULL;
-
     grid->hover_section_adjacency_radius = 12.0;
 
-    grid_build_tiles(grid, radius);
+    //grid->maxtiles = TILE_GRID_WIDTH * TILE_GRID_HEIGHT;
+
+    grid->center = LEVEL_CENTER_POSITION;
+    grid->center_tile = grid_get_tile(grid, grid->center);
+
+    grid_prepare_tiles(grid, radius);
 
     return grid;
 }
@@ -117,13 +117,15 @@ void grid_resize(grid_t *grid)
 {
     assert_not_null(grid);
 
+    grid->center_tile = grid_get_tile(grid, grid->center);
+
     Vector2 window_grid_margin = { 0.8, 0.8 };
     Vector2 window = Vector2Scale(ivector2_to_vector2(window_size), 1.0);
     Vector2 max_grid_size_px = Vector2Multiply(window, window_grid_margin);
     int grid_width_in_hex_radii = 2 + (3 * grid->radius);
     Vector2 max_tile_size = {
         .x =  max_grid_size_px.x / ((float)grid_width_in_hex_radii),
-        .y = (max_grid_size_px.y / grid->tile_grid_height) * INV_SQRT_3
+        .y = (max_grid_size_px.y / TILE_GRID_HEIGHT) * INV_SQRT_3
     };
 
     grid->tile_size = MIN(grid->req_tile_size,
@@ -145,11 +147,13 @@ void grid_resize(grid_t *grid)
     grid->px_max.x = 0.0f;
     grid->px_max.y = 0.0f;
 
-    for (int i=0; i<grid->maxtiles; i++) {
-        tile_t *tile = &grid->tiles[i];
-        if (tile->enabled) {
-            tile_set_size(tile, grid->tile_size);
-            grid_add_to_bounding_box(grid, tile);
+    for (int q=0; q<TILE_GRID_WIDTH; q++) {
+        for (int r=0; r<TILE_GRID_HEIGHT; r++) {
+            tile_t *tile = &(grid->tiles[q][r]);
+            if (tile->enabled) {
+                tile_set_size(tile, grid->tile_size);
+                grid_add_to_bounding_box(grid, tile);
+            }
         }
     }
 
@@ -177,28 +181,25 @@ void grid_resize(grid_t *grid)
 
 void destroy_grid(grid_t *grid)
 {
-    if (grid) {
-        SAFEFREE(grid->tiles);
-        SAFEFREE(grid);
-    }
+    SAFEFREE(grid);
 }
 
 tile_t *grid_get_tile(grid_t *grid, hex_axial_t axial)
 {
     assert_not_null(grid);
 
-    int loc = grid_tile_storage_location(grid, axial);
-    if ((loc >= 0) && (loc < grid->maxtiles)) {
-        return &grid->tiles[loc];
-    } else {
+    if ((axial.r < 0) || (axial.r >= TILE_GRID_HEIGHT) ||
+        (axial.q < 0) || (axial.q >= TILE_GRID_WIDTH)) {
         return NULL;
     }
+
+    return &(grid->tiles[axial.q][axial.r]);
 }
 
 tile_t *grid_find_neighbor_tile(grid_t *grid, tile_t *tile, hex_direction_t section)
 {
     section = (section + 1) % 6;
-    hex_axial_t neighbor_pos = hex_axial_neighbors(tile->position, section);
+    hex_axial_t neighbor_pos = hex_axial_neighbor(tile->position, section);
     tile_t *neighbor = grid_get_tile(grid, neighbor_pos);
     return neighbor;
 }
@@ -351,15 +352,17 @@ void grid_draw(grid_t *grid)
     rlTranslatef(grid->px_offset.x,
                  grid->px_offset.y,
                  0.0);
+    for (int q=0; q<TILE_GRID_WIDTH; q++) {
+        for (int r=0; r<TILE_GRID_HEIGHT; r++) {
+            tile_t *tile = &(grid->tiles[q][r]);
+            assert_not_null(tile);
 
-    for (int i=0; i<grid->maxtiles; i++) {
-        tile_t *tile = &grid->tiles[i];
-        assert_not_null(tile);
-        if (tile->enabled) {
-            if (tile == grid->drag_target) {
-                // defer ubtil after bg tiles are drawn
-            } else {
-                tile_draw(tile, grid->drag_target);
+            if (tile->enabled) {
+                if (tile == grid->drag_target) {
+                    // defer ubtil after bg tiles are drawn
+                } else {
+                    tile_draw(tile, grid->drag_target);
+                }
             }
         }
     }
@@ -396,29 +399,49 @@ void grid_serialize(grid_t *grid, FILE *f)
     fprintf(f, "name \"%s\"\n", grid->name);
     fprintf(f, "radius %d\n", grid->radius);
     fprintf(f, "begin_tiles %d\n", grid->maxtiles);
-    for (int i=0; i<grid->maxtiles; i++) {
-        tile_serialize(&grid->tiles[i], f);
+    for (int q=0; q<TILE_GRID_WIDTH; q++) {
+        for (int r=0; r<TILE_GRID_HEIGHT; r++) {
+            tile_t *tile = &(grid->tiles[q][r]);
+            tile_serialize(tile, f);
+        }
     }
     fprintf(f, "end_tiles\n");
 }
 
+void grid_enable_ring(grid_t *grid, int radius)
+{
+    hex_axial_foreach_in_ring(grid->center_tile->position,
+                              radius,
+                              grid_enable_tile_callback,
+                              grid);
+    grid_resize(grid);
+}
+
+void grid_disable_ring(grid_t *grid, int radius)
+{
+    hex_axial_foreach_in_ring(grid->center_tile->position,
+                              radius,
+                              grid_disable_tile_callback,
+                              grid);
+    grid_resize(grid);
+}
+
 void grid_change_radius(grid_t *grid, int new_radius)
 {
-    printf("TODI: change grid radius from %d to %d\n", grid->radius, new_radius);
+    assert_not_null(grid);
+    assert(new_radius >= LEVEL_MIN_RADIUS);
+    assert(new_radius <= LEVEL_MAX_RADIUS);
 
-    int old_maxtiles  = grid->maxtiles;
-    tile_t *old_tiles = grid->tiles;
-    grid->tiles = NULL;
+    int old_radius = grid->radius;
+    printf("change grid radius from %d to %d\n", grid->radius, new_radius);
 
-    grid_build_tiles(grid, new_radius);
-
-    for (int i=0; i<old_maxtiles; i++) {
-        tile_t *old_tile = &(old_tiles[i]);
-        tile_t *new_tile = grid_get_tile(grid, old_tile->position);
-        if (new_tile) {
-            tile_copy_attributes_except_enabled(new_tile, old_tile);
-        }
+    if        (new_radius > old_radius) {
+        grid_enable_ring(grid, new_radius);
+    } else if (new_radius < old_radius) {
+        grid_disable_ring(grid, old_radius);
+    } else {
+        return;
     }
 
-    free(old_tiles);
+    grid->radius = new_radius;
 }

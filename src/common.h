@@ -84,6 +84,7 @@ extern const char *progversion;
 # define UNUSED_FUNCTION(x) UNUSED_ ##x
 #endif
 
+#include "const.h"
 #include "util.h"
 #include "logging.h"
 
@@ -125,7 +126,5 @@ typedef enum game_mode game_mode_t;
 extern game_mode_t game_mode;
 
 #define edit_mode (game_mode == GAME_MODE_EDIT_LEVEL)
-
-#define NAME_MAXLEN 22
 
 #endif /*COMMON_H*/
