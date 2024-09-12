@@ -88,6 +88,7 @@ tile_t *level_get_tile(level_t *level,  hex_axial_t axial);
 
 void level_update_ui_name(level_t *level);
 
+bool level_check(level_t *level);
 void level_play(level_t *level);
 
 void level_save_to_file(level_t *level, char *dirpath);
@@ -108,7 +109,7 @@ void level_disable_spiral(level_t *level, int radius);
 void level_enable_ring(level_t *level, int radius);
 void level_disable_ring(level_t *level, int radius);
 void level_set_radius(level_t *level, int new_radius);
-void level_draw(level_t *level);
+void level_draw(level_t *level, bool finished);
 
 extern level_t *current_level;
 

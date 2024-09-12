@@ -610,9 +610,22 @@ tile_t *level_find_neighbor_tile(level_t *level, tile_t *tile, hex_direction_t s
     return neighbor;
 }
 
-void level_check(level_t *level)
+bool level_check(level_t *level)
 {
     assert_not_null(level);
+
+    for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
+        for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
+            tile_t *tile = &(level->tiles[q][r]);
+            if (tile->enabled) {
+                if (!tile_check(tile)) {
+                    return false;
+                }
+            }
+        }
+    }
+
+    return true;
 }
 
 void level_set_hover(level_t *level, IVector2 mouse_position)
@@ -710,7 +723,6 @@ void level_drop_tile(level_t *level, tile_t *drag_target, tile_t *drop_target)
 
     if (!drop_target->fixed) {
         tile_swap_attributes(drag_target, drop_target);
-        level_check(level);
     }
 }
 
@@ -754,7 +766,7 @@ void level_modify_hovered_feature(level_t *level)
     }
 }
 
-void level_draw(level_t *level)
+void level_draw(level_t *level, bool finished)
 {
     assert_not_null(level);
 
@@ -763,6 +775,7 @@ void level_draw(level_t *level)
     rlTranslatef(level->px_offset.x,
                  level->px_offset.y,
                  0.0);
+
     for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
         for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
             tile_t *tile = &(level->tiles[q][r]);
@@ -772,7 +785,7 @@ void level_draw(level_t *level)
                 if (tile == level->drag_target) {
                     // defer ubtil after bg tiles are drawn
                 } else {
-                    tile_draw(tile, level->drag_target);
+                    tile_draw(tile, level->drag_target, finished);
                 }
             }
         }
@@ -785,7 +798,7 @@ void level_draw(level_t *level)
                      level->drag_offset.y,
                      0.0);
 
-        tile_draw(level->drag_target, level->drag_target);
+        tile_draw(level->drag_target, level->drag_target, finished);
 
         rlPopMatrix();
     }

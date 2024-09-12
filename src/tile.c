@@ -25,16 +25,17 @@
 
 Vector2 tile_origin;
 
-Color tile_bg_color           = { 0x32, 0x32, 0x32, 0xff };
-Color tile_bg_hover_color     = { 0x40, 0x40, 0x40, 0xff };
-Color tile_bg_drag_color      = { 0x3b, 0x3b, 0x3b, 0xff };
-Color tile_bg_hidden_color    = { 0x32, 0x32, 0x32, 0x33 };
-Color tile_center_color       = { 0x70, 0x70, 0x70, 0xff };
-Color tile_center_color_hover = { 0x90, 0x90, 0x90, 0xff };
-Color tile_edge_color         = { 0x18, 0x18, 0x18, 0xff };
-Color tile_edge_hover_color   = { 0xaa, 0xaa, 0xaa, 0xff };
-Color tile_edge_drag_color    = { 0x77, 0x77, 0x77, 0xff };
-Color tile_edge_hidden_color  = { 0xe9, 0xdf, 0x9c, 0x44 };
+Color tile_bg_color            = { 0x32, 0x32, 0x32, 0xff };
+Color tile_bg_hover_color      = { 0x40, 0x40, 0x40, 0xff };
+Color tile_bg_drag_color       = { 0x3b, 0x3b, 0x3b, 0xff };
+Color tile_bg_hidden_color     = { 0x32, 0x32, 0x32, 0x33 };
+Color tile_center_color        = { 0x70, 0x70, 0x70, 0xff };
+Color tile_center_color_hover  = { 0x90, 0x90, 0x90, 0xff };
+Color tile_edge_color          = { 0x18, 0x18, 0x18, 0xff };
+Color tile_edge_hover_color    = { 0xaa, 0xaa, 0xaa, 0xff };
+Color tile_edge_drag_color     = { 0x77, 0x77, 0x77, 0xff };
+Color tile_edge_hidden_color   = { 0xe9, 0xdf, 0x9c, 0x44 };
+Color tile_edge_finished_color = { 0x9b, 0xff, 0x9b, 0x80 };
 
 Color tile_bg_highlight_color     = { 0xfd, 0xf9, 0x00, 0x4c };
 Color tile_bg_highlight_color_dim = { 0xfd, 0xf9, 0x00, 0x2c };
@@ -203,6 +204,23 @@ void tile_swap_attributes(tile_t *a, tile_t *b)
     tile_copy_attributes(b, &tmp);
 }
 
+bool tile_check(tile_t *tile)
+{
+    for (hex_direction_t i=0; i<6; i++) {
+        if (tile->path[i] != PATH_TYPE_NONE) {
+            hex_direction_t opp_i = hex_opposite_direction(i);
+            tile_t *neighbor = tile->neighbors[i];
+            if (neighbor) {
+                if (tile->path[i] != neighbor->path[opp_i]) {
+                    return false;
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
 void tile_set_hover(tile_t *tile, Vector2 mouse_pos)
 {
     assert_not_null(tile);
@@ -320,7 +338,7 @@ void tile_set_size(tile_t *tile, float tile_size)
     }
 }
 
-void tile_draw(tile_t *tile, tile_t *drag_target)
+void tile_draw(tile_t *tile, tile_t *drag_target, bool finished)
 {
     assert_not_null(tile);
     /* drag_target CAN be NULL */
@@ -381,24 +399,26 @@ void tile_draw(tile_t *tile, tile_t *drag_target)
 
         DrawLineEx(tile->center, mid, tile->line_width, path_type_color(tile->path[i]));
 
-        tile_t *neighbor = tile->neighbors[i];
-        if (neighbor) {
-            hex_direction_t opposite = hex_opposite_direction(i);
-            if (neighbor->path[opposite] == tile->path[i]) {
-                Color highlight_color = path_type_highlight_color(tile->path[i]);
-                Vector2 path = Vector2Subtract(mid, tile->center);
-                Vector2 perp = Vector2Normalize((Vector2){ path.y, -path.x});
-                Vector2 shift = Vector2Scale(perp, tile->line_width / 2.0);
+        if (tile->path[i] != PATH_TYPE_NONE) {
+            tile_t *neighbor = tile->neighbors[i];
+            if (neighbor) {
+                hex_direction_t opposite = hex_opposite_direction(i);
+                if (neighbor->path[opposite] == tile->path[i]) {
+                    Color highlight_color = path_type_highlight_color(tile->path[i]);
+                    Vector2 path = Vector2Subtract(mid, tile->center);
+                    Vector2 perp = Vector2Normalize((Vector2){ path.y, -path.x});
+                    Vector2 shift = Vector2Scale(perp, tile->line_width / 2.0);
 
-                Vector2 s1 = Vector2Add(tile->center, shift);
-                Vector2 e1 = Vector2Add(mid,          shift);
-                shift = Vector2Negate(shift);
-                Vector2 s2 = Vector2Add(tile->center, shift);
-                Vector2 e2 = Vector2Add(mid,          shift);
+                    Vector2 s1 = Vector2Add(tile->center, shift);
+                    Vector2 e1 = Vector2Add(mid,          shift);
+                    shift = Vector2Negate(shift);
+                    Vector2 s2 = Vector2Add(tile->center, shift);
+                    Vector2 e2 = Vector2Add(mid,          shift);
 
-                highlight_color = ColorLerp(highlight_color, WHITE, 0.4);
-                DrawLineEx(s1, e1, 1.5, highlight_color);
-                DrawLineEx(s2, e2, 1.5, highlight_color);
+                    highlight_color = ColorLerp(highlight_color, WHITE, 0.4);
+                    DrawLineEx(s1, e1, 1.5, highlight_color);
+                    DrawLineEx(s2, e2, 1.5, highlight_color);
+                }
             }
         }
 
@@ -420,12 +440,23 @@ void tile_draw(tile_t *tile, tile_t *drag_target)
 
     if (!tile->fixed) {
         /* border */
-        DrawPolyLinesEx(tile->center, 6, tile->size, 0.0f, 2.0f,
-                        drag
-                        ? tile_edge_drag_color
-                        : (tile->hover
-                           ? tile_edge_hover_color
-                           : tile_edge_color));
+        Color border_color = tile_edge_drag_color;
+        float line_width = 2.0f;
+
+        if (!drag) {
+            if (tile->hover) {
+                border_color = tile_edge_hover_color;
+            } else {
+                border_color = tile_edge_color;
+            }
+        }
+
+        if (finished) {
+            border_color = tile_edge_finished_color;
+            line_width = 3.0;
+        }
+
+        DrawPolyLinesEx(tile->center, 6, tile->size, 0.0f, line_width, border_color);
     }
 
     DrawCircleV(tile->center, tile->center_circle_draw_radius, tile_center_color);

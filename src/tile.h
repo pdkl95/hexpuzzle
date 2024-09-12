@@ -83,8 +83,9 @@ void tile_copy_attributes(tile_t *dst, tile_t *src);
 void tile_copy_attributes_except_enabled(tile_t *dst, tile_t *src);
 void tile_swap_attributes(tile_t *a, tile_t *b);
 
+bool tile_check(tile_t *tile);
 void tile_set_size(tile_t *tile, float tile_size);
-void tile_draw(tile_t *tile, tile_t *drag_target);
+void tile_draw(tile_t *tile, tile_t *drag_target, bool finished);
 
 void tile_set_hover(tile_t *tile, Vector2 mouse_pos);
 void tile_unset_hover(tile_t *tile);

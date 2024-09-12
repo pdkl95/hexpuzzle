@@ -87,6 +87,8 @@ Color royal_blue = {   0,  56, 168, 255 };
 
 game_mode_t game_mode = GAME_MODE_NULL;
 
+bool level_finished = false;
+
 level_t *current_level = NULL;
 collection_t *current_collection = NULL;
 
@@ -451,6 +453,16 @@ handle_events(
                 }
             }
         }
+    }
+
+    if (current_level) {
+        if (level_check(current_level)) {
+            level_finished = true;
+        } else {
+            level_finished = false;
+        }
+    } else {
+        level_finished = false;
     }
 
     return true;
@@ -864,7 +876,7 @@ render_frame(
             /* fall through */
         case GAME_MODE_EDIT_LEVEL:
             if (current_level) {
-                level_draw(current_level);
+                level_draw(current_level, level_finished);
             }
             break;
 
