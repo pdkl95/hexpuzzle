@@ -96,6 +96,10 @@ static void level_prepare_tiles(level_t *level)
                 .r = r
             };
             init_tile(tile, pos);
+
+            for (hex_direction_t section = 0; section < 6; section++) {
+                tile->neighbors[section] = level_find_neighbor_tile(level, tile, section);
+            }
         }
     }
 

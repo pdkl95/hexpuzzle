@@ -64,6 +64,7 @@ struct tile {
     Vector2 corners[7];
     Vector2 midpoints[7];
     tile_section_t sections[6];
+    struct tile *neighbors[6];
 
     bool hover;
     bool hover_center;

@@ -44,6 +44,10 @@ Color path_color_red    = RED;
 Color path_color_blue   = BLUE;
 Color path_color_yellow = YELLOW;
 Color path_color_green  = GREEN;
+Color path_highlight_color_red    = { 255,  65,  81, 255 };
+Color path_highlight_color_blue   = { 70,  166, 255, 255 };
+Color path_highlight_color_yellow = { 255, 253, 127, 255 };
+Color path_highlight_color_green  = {  67, 255, 105, 255 };
 
 Color path_type_color(path_type_t type)
 {
@@ -62,6 +66,26 @@ Color path_type_color(path_type_t type)
 
     case PATH_TYPE_GREEN:
         return path_color_green;
+    }
+}
+
+Color path_type_highlight_color(path_type_t type)
+{
+    switch (type) {
+    default:
+        return path_color_none;
+
+    case PATH_TYPE_RED:
+        return path_highlight_color_red;
+
+    case PATH_TYPE_BLUE:
+        return path_highlight_color_blue;
+
+    case PATH_TYPE_YELLOW:
+        return path_highlight_color_yellow;
+
+    case PATH_TYPE_GREEN:
+        return path_highlight_color_green;
     }
 }
 
@@ -351,11 +375,32 @@ void tile_draw(tile_t *tile, tile_t *drag_target)
         DrawTriangle(sec.corners[0], sec.corners[1], sec.corners[2], tile_bg_highlight_color);
     }
 
-    for (int i=0; i<6; i++) {
+    for (hex_direction_t i=0; i<6; i++) {
         /* colored strips */
         Vector2 mid = tile->midpoints[i];
 
         DrawLineEx(tile->center, mid, tile->line_width, path_type_color(tile->path[i]));
+
+        tile_t *neighbor = tile->neighbors[i];
+        if (neighbor) {
+            hex_direction_t opposite = hex_opposite_direction(i);
+            if (neighbor->path[opposite] == tile->path[i]) {
+                Color highlight_color = path_type_highlight_color(tile->path[i]);
+                Vector2 path = Vector2Subtract(mid, tile->center);
+                Vector2 perp = Vector2Normalize((Vector2){ path.y, -path.x});
+                Vector2 shift = Vector2Scale(perp, tile->line_width / 2.0);
+
+                Vector2 s1 = Vector2Add(tile->center, shift);
+                Vector2 e1 = Vector2Add(mid,          shift);
+                shift = Vector2Negate(shift);
+                Vector2 s2 = Vector2Add(tile->center, shift);
+                Vector2 e2 = Vector2Add(mid,          shift);
+
+                highlight_color = ColorLerp(highlight_color, WHITE, 0.4);
+                DrawLineEx(s1, e1, 1.5, highlight_color);
+                DrawLineEx(s2, e2, 1.5, highlight_color);
+            }
+        }
 
 #if 0
         /* section index label */
