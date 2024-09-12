@@ -43,5 +43,7 @@
 #define NAME_MAXLEN 22
 #define UI_NAME_MAXLEN  (6 + NAME_MAXLEN)
 
+#define FINISHED_HUE_STEP 4.0
+
 #endif /*CONST_H*/
 

@@ -71,6 +71,8 @@ struct level {
     bool changed;
 
     bool finished;
+    float finished_hue;
+
     char ui_name[UI_NAME_MAXLEN];
 
     struct level *prev, *next;

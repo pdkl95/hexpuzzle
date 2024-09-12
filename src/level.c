@@ -27,7 +27,7 @@
 #include "tile.h"
 #include "level.h"
 
-#define DEBUG_DRAG_AND_DROP 1
+//#define DEBUG_DRAG_AND_DROP 1
 
 static void level_enable_tile_callback(hex_axial_t axial, void *data)
 {
@@ -58,6 +58,8 @@ static level_t *alloc_level()
     level->changed = false;
 
     level->next = NULL;
+
+    level->finished_hue = 0.0f;
 
     level->radius = LEVEL_MIN_RADIUS;
 
@@ -614,6 +616,8 @@ bool level_check(level_t *level)
 {
     assert_not_null(level);
 
+    path_int_t total = {0};
+
     for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
         for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
             tile_t *tile = &(level->tiles[q][r]);
@@ -621,11 +625,26 @@ bool level_check(level_t *level)
                 if (!tile_check(tile)) {
                     return false;
                 }
+
+                path_int_t counts = tile_count_path_types(tile);
+                for (int i=0; i<PATH_TYPE_COUNT; i++) {
+                    total.path[i] += counts.path[i];
+                }
             }
         }
     }
 
-    return true;
+    for (int i=0; i<PATH_TYPE_COUNT; i++) {
+        if (i == PATH_TYPE_NONE) {
+            continue;
+        }
+        if (total.path[i] > 0) {
+            return true;
+        }
+    }
+
+    // level is blank
+    return false;
 }
 
 void level_set_hover(level_t *level, IVector2 mouse_position)
@@ -770,6 +789,12 @@ void level_draw(level_t *level, bool finished)
 {
     assert_not_null(level);
 
+    level->finished_hue += FINISHED_HUE_STEP;
+    while (level->finished_hue > 360.0f) {
+        level->finished_hue -= 360.0f;
+    }
+    Color finished_color = ColorFromHSV(level->finished_hue, 0.7, 1.0);
+
     rlPushMatrix();
 
     rlTranslatef(level->px_offset.x,
@@ -785,7 +810,7 @@ void level_draw(level_t *level, bool finished)
                 if (tile == level->drag_target) {
                     // defer ubtil after bg tiles are drawn
                 } else {
-                    tile_draw(tile, level->drag_target, finished);
+                    tile_draw(tile, level->drag_target, finished, finished_color);
                 }
             }
         }
@@ -798,7 +823,7 @@ void level_draw(level_t *level, bool finished)
                      level->drag_offset.y,
                      0.0);
 
-        tile_draw(level->drag_target, level->drag_target, finished);
+        tile_draw(level->drag_target, level->drag_target, finished, finished_color);
 
         rlPopMatrix();
     }

@@ -27,6 +27,7 @@ void printrect(Rectangle r);
 void printcolorhex(Color c);
 void printcolor(Color c);
 
+#define pbool(var) printf(QUOTE(var) "\t= %s\n", (var) ? "true" : "false");
 #define pint(var) printf(QUOTE(var) "\t= % 9d\n", (var));
 #define pfloat(var) printf(QUOTE(var) "\t= % 12.2f\n", (var));
 

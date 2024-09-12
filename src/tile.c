@@ -90,6 +90,29 @@ Color path_type_highlight_color(path_type_t type)
     }
 }
 
+char *path_type_name(path_type_t type)
+{
+    switch (type) {
+    default:
+        return "(BAD VALUE)";
+
+    case PATH_TYPE_NONE:
+        return "NONE";
+
+    case PATH_TYPE_RED:
+        return "RED";
+
+    case PATH_TYPE_BLUE:
+        return "BLUE";
+
+    case PATH_TYPE_YELLOW:
+        return "YELLOW";
+
+    case PATH_TYPE_GREEN:
+        return "GREEN";
+    }
+}
+
 tile_t *init_tile(tile_t *tile, hex_axial_t pos)
 {
     assert_not_null(tile);
@@ -102,7 +125,7 @@ tile_t *init_tile(tile_t *tile, hex_axial_t pos)
 
 #if 0
     for (int i=0; i<6; i++) {
-        tile->path[i] = rand() % PATH_TYPE_MAX;
+        tile->path[i] = rand() % PATH_TYPE_COUNT;
     }
 #endif
 
@@ -206,6 +229,22 @@ void tile_swap_attributes(tile_t *a, tile_t *b)
 
 bool tile_check(tile_t *tile)
 {
+#if 0
+    bool show = false;
+    for (hex_direction_t i=0; i<6; i++) {
+        if (tile->path[i] != PATH_TYPE_NONE) {
+            show = true;
+        }
+    }
+
+    if (show) {
+        printf("*** tile (%d, %d)\n", tile->position.q, tile->position.q);
+        for (hex_direction_t i=0; i<6; i++) {
+            printf("\tpath[%d] = %s\n", i, path_type_name(tile->path[i]));
+        }
+    }
+#endif
+
     for (hex_direction_t i=0; i<6; i++) {
         if (tile->path[i] != PATH_TYPE_NONE) {
             hex_direction_t opp_i = hex_opposite_direction(i);
@@ -219,6 +258,17 @@ bool tile_check(tile_t *tile)
     }
 
     return true;
+}
+
+path_int_t tile_count_path_types(tile_t *tile)
+{
+    path_int_t rv = {0};
+
+    for (hex_direction_t i=0; i<6; i++) {
+        rv.path[tile->path[i]] += 1;
+    }
+
+    return rv;
 }
 
 void tile_set_hover(tile_t *tile, Vector2 mouse_pos)
@@ -249,8 +299,10 @@ void tile_set_hover_adjacent(tile_t *tile, hex_direction_t section, tile_t *adja
 {
     assert_not_null(tile);
 
-    tile->hover_adjacent = adjacent_tile;
-    tile->hover_section = section;
+    if (adjacent_tile->enabled) {
+        tile->hover_adjacent = adjacent_tile;
+        tile->hover_section = section;
+    }
 }
 
 void tile_unset_hover_adjacent(tile_t *tile)
@@ -279,7 +331,7 @@ void tile_cycle_path_section(tile_t *tile, hex_direction_t section)
     assert_not_null(tile);
 
     tile->path[section]++;
-    if (tile->path[section] > PATH_TYPE_MAX) {
+    if (tile->path[section] >= PATH_TYPE_COUNT) {
         tile->path[section] = PATH_TYPE_NONE;
     }
 
@@ -338,7 +390,7 @@ void tile_set_size(tile_t *tile, float tile_size)
     }
 }
 
-void tile_draw(tile_t *tile, tile_t *drag_target, bool finished)
+void tile_draw(tile_t *tile, tile_t *drag_target, bool finished, Color finished_color)
 {
     assert_not_null(tile);
     /* drag_target CAN be NULL */
@@ -404,7 +456,14 @@ void tile_draw(tile_t *tile, tile_t *drag_target, bool finished)
             if (neighbor) {
                 hex_direction_t opposite = hex_opposite_direction(i);
                 if (neighbor->path[opposite] == tile->path[i]) {
-                    Color highlight_color = path_type_highlight_color(tile->path[i]);
+                    Color highlight_color;
+                    float line_width = 1.5;
+                    if (finished) {
+                        highlight_color = ColorAlpha(finished_color, 0.9);
+                        line_width = 2.5;
+                    } else {
+                        highlight_color = path_type_highlight_color(tile->path[i]);
+                    }
                     Vector2 path = Vector2Subtract(mid, tile->center);
                     Vector2 perp = Vector2Normalize((Vector2){ path.y, -path.x});
                     Vector2 shift = Vector2Scale(perp, tile->line_width / 2.0);
@@ -416,8 +475,8 @@ void tile_draw(tile_t *tile, tile_t *drag_target, bool finished)
                     Vector2 e2 = Vector2Add(mid,          shift);
 
                     highlight_color = ColorLerp(highlight_color, WHITE, 0.4);
-                    DrawLineEx(s1, e1, 1.5, highlight_color);
-                    DrawLineEx(s2, e2, 1.5, highlight_color);
+                    DrawLineEx(s1, e1, line_width, highlight_color);
+                    DrawLineEx(s2, e2, line_width, highlight_color);
                 }
             }
         }
@@ -452,8 +511,8 @@ void tile_draw(tile_t *tile, tile_t *drag_target, bool finished)
         }
 
         if (finished) {
-            border_color = tile_edge_finished_color;
-            line_width = 3.0;
+            border_color = finished_color;
+            line_width = 2.0;
         }
 
         DrawPolyLinesEx(tile->center, 6, tile->size, 0.0f, line_width, border_color);

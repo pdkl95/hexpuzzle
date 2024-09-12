@@ -29,10 +29,15 @@ enum path_type {
     PATH_TYPE_RED    = 1,
     PATH_TYPE_BLUE   = 2,
     PATH_TYPE_YELLOW = 3,
-    PATH_TYPE_GREEN  = 4,
-    PATH_TYPE_MAX    = 5
+    PATH_TYPE_GREEN  = 4
 };
 typedef enum path_type path_type_t;
+#define PATH_TYPE_COUNT (PATH_TYPE_GREEN + 1)
+
+struct path_int {
+    int path[PATH_TYPE_COUNT];
+};
+typedef struct path_int path_int_t;
 
 Color path_type_color(path_type_t type);
 
@@ -84,8 +89,9 @@ void tile_copy_attributes_except_enabled(tile_t *dst, tile_t *src);
 void tile_swap_attributes(tile_t *a, tile_t *b);
 
 bool tile_check(tile_t *tile);
+path_int_t tile_count_path_types(tile_t *tile);
 void tile_set_size(tile_t *tile, float tile_size);
-void tile_draw(tile_t *tile, tile_t *drag_target, bool finished);
+void tile_draw(tile_t *tile, tile_t *drag_target, bool finished, Color finished_color);
 
 void tile_set_hover(tile_t *tile, Vector2 mouse_pos);
 void tile_unset_hover(tile_t *tile);

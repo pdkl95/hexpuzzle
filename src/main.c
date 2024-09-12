@@ -873,10 +873,14 @@ render_frame(
 
         switch (game_mode) {
         case GAME_MODE_PLAY_LEVEL:
-            /* fall through */
-        case GAME_MODE_EDIT_LEVEL:
             if (current_level) {
                 level_draw(current_level, level_finished);
+            }
+            break;
+
+        case GAME_MODE_EDIT_LEVEL:
+            if (current_level) {
+                level_draw(current_level, level_finished);// false);
             }
             break;
 
