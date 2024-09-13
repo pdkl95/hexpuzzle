@@ -92,6 +92,7 @@ void level_update_ui_name(level_t *level);
 
 bool level_check(level_t *level);
 void level_play(level_t *level);
+void level_edit(level_t *level);
 
 void level_save_to_file(level_t *level, char *dirpath);
 void level_save_to_file_if_changed(level_t *level, char *dirpath);

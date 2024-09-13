@@ -415,18 +415,37 @@ void level_update_ui_name(level_t *level)
     snprintf(level->ui_name, UI_NAME_MAXLEN, "%s", GuiIconText(icon, level->name));
 }
 
+static void level_load(level_t *level)
+{
+    current_level = level;
+    level_reset(current_level);
+}
+
+static void level_unload(void)
+{
+    if (current_level) {
+        // unload level?
+    }
+}
+
 void level_play(level_t *level)
 {
     assert_not_null(level);
 
-    if (current_level) {
-        // unload level?
-    }
-
-    current_level = level;
-    level_reset(current_level);
+    level_unload();
+    level_load(level);
 
     game_mode = GAME_MODE_PLAY_LEVEL;
+}
+
+void level_edit(level_t *level)
+{
+    assert_not_null(level);
+
+    level_unload();
+    level_load(level);
+
+    game_mode = GAME_MODE_EDIT_LEVEL;
 }
 
 void level_save_to_file(level_t *level, char *dirpath)

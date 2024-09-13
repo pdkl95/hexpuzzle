@@ -40,6 +40,8 @@
 #define COLLECTION_DEFAULT_FILENAME_PREFIX "level-"
 #define COLLECTION_DEFAULT_FILENAME_SUFFIX ".hexlevel"
 
+void create_new_level(void);
+
 static void collection_alloc_level_names(collection_t *collection)
 {
     collection->level_names = calloc(collection->level_name_count, sizeof(char *));
@@ -65,8 +67,8 @@ static collection_t *alloc_collection(void)
     collection->level_count = 0;
 
     collection->gui_list_scroll_index = 0;
-    collection->gui_list_active = 0;
-    collection->gui_list_focus = 0;
+    collection->gui_list_active = -1;
+    collection->gui_list_focus = -1;
 
     return collection;
 }
@@ -399,6 +401,70 @@ void collection_save(collection_t *collection)
     }
 }
 
+static void collection_draw_buttons(collection_t *collection, Rectangle collection_list_rect)
+{
+    float margin = 16.0;
+
+    Rectangle collection_play_button_rect = {
+        .x = collection_list_rect.x,
+        .y = collection_list_rect.y + collection_list_rect.height + margin,
+        .width  = collection_list_rect.width,
+        .height = window_size.y * 0.12
+    };
+
+    char *collection_play_button_text = "Play";
+
+    Rectangle collection_edit_button_rect = {
+        .x = collection_play_button_rect.x + collection_play_button_rect.width + margin,
+        .y = collection_play_button_rect.y,
+        .width  = collection_play_button_rect.height,
+        .height = collection_play_button_rect.height
+    };
+
+    char *collection_edit_button_text = "Edit";
+
+    Rectangle collection_new_button_rect = {
+        .x = collection_play_button_rect.x - margin - collection_play_button_rect.height,
+        .y = collection_play_button_rect.y,
+        .width  = collection_play_button_rect.height,
+        .height = collection_play_button_rect.height
+    };
+
+    char *collection_new_button_text = "New Level";
+
+    if (collection->gui_list_active == -1) {
+        GuiDisable();
+    }
+
+    if (GuiButton(collection_play_button_rect, collection_play_button_text)) {
+        level_t *level = collection->levels;
+        int n = collection->gui_list_active;
+        if (n >= 0) {
+            while (n--) {
+                level = level->next;
+            }
+            level_play(level);
+        }
+    }
+
+    if (GuiButton(collection_edit_button_rect, collection_edit_button_text)) {
+        level_t *level = collection->levels;
+        int n = collection->gui_list_active;
+        if (n >= 0) {
+            while (n--) {
+                level = level->next;
+            }
+            level_edit(level);
+        }
+    }
+
+    GuiEnable();
+
+    if (GuiButton(collection_new_button_rect, collection_new_button_text)) {
+        create_new_level();
+    }
+}
+
 void collection_draw(collection_t *collection)
 {
     assert_not_null(collection);
@@ -422,23 +488,5 @@ void collection_draw(collection_t *collection)
                   &collection->gui_list_active,
                   &collection->gui_list_focus);
 
-    Rectangle collection_button_rect = {
-        .x = collection_list_rect.x,
-        .y = collection_list_rect.y + collection_list_rect.height + 16,
-        .width  = collection_list_rect.width,
-        .height = window_size.y * 0.12
-    };
-
-    char *collection_button_text = "Play";
-
-    if (GuiButton(collection_button_rect, collection_button_text)) {
-        level_t *level = collection->levels;
-        int n = collection->gui_list_active;
-        if (n >= 0) {
-            while (n--) {
-                level = level->next;
-            }
-            level_play(level);
-        }
-    }
+    collection_draw_buttons(collection, collection_list_rect);
 }
