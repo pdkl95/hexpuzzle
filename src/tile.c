@@ -376,13 +376,18 @@ void tile_set_size(tile_t *tile, float tile_size)
     Vector2 *corners = hex_pixel_corners(tile->center, tile->size);
     memcpy(tile->corners, corners, 7 * sizeof(Vector2));
 
-    Vector2 cent = Vector2Lerp(tile->midpoints[0], tile->midpoints[3], 0.5);
-
     for (int i=0; i<6; i++) {
         Vector2 c0 = tile->corners[i];
         Vector2 c1 = tile->corners[i + 1];
 
         tile->midpoints[i] = Vector2Lerp(c0, c1, 0.5);
+    }
+
+    Vector2 cent = Vector2Lerp(tile->midpoints[0], tile->midpoints[3], 0.5);
+
+    for (int i=0; i<6; i++) {
+        Vector2 c0 = tile->corners[i];
+        Vector2 c1 = tile->corners[i + 1];
 
         tile->sections[i].corners[0] = c0;
         tile->sections[i].corners[1] = c1;
