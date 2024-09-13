@@ -375,6 +375,7 @@ level_t *load_level_file(char *filename)
 
     char *str = read_file_into_string(filename);
     if (NULL == str) {
+        errmsg("Error reading level file \"%s\"", filename);
         return NULL;
     }
 
@@ -383,8 +384,12 @@ level_t *load_level_file(char *filename)
     if (level_parse_string(level, str)) {
         free(str);
         level->filename = strdup(filename);
+        if (options->verbose) {
+            infomsg("Successfully loaded level file \"%s\"", filename);
+        }
         return level;
     } else {
+        errmsg("Error parsing level file \"%s\"", filename);
         free(str);
         return NULL;
     }

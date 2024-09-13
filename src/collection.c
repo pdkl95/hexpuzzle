@@ -136,7 +136,18 @@ collection_t *load_collection_dir(char *dirpath)
     collection_t *collection = create_collection(dirpath);
     collection->dirpath = strdup(dirpath);
 
-    collection_scan_dir(collection);
+    int last_idx = strlen(collection->dirpath);
+    if (last_idx > 0) {
+        last_idx--;
+        if (collection->dirpath[last_idx] == '/') {
+            collection->dirpath[last_idx] = '\0';
+        }
+
+        collection_scan_dir(collection);
+    } else {
+        errmsg("Directory name is zero-length!");
+    }
+
 
     return collection;
 }
