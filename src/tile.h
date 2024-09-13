@@ -79,6 +79,7 @@ struct tile {
 };
 typedef struct tile tile_t;
 
+void print_tile(tile_t *tile);
 tile_t *init_tile(tile_t *tile, hex_axial_t pos);
 tile_t *create_tile(void);
 void destroy_tile(tile_t *tile);

@@ -29,6 +29,18 @@
 
 //#define DEBUG_DRAG_AND_DROP 1
 
+void print_tiles(level_t *level)
+{
+    printf("Level \"%s\" tiles:\n", level->name);
+
+    for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
+        for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
+            tile_t *tile = &(level->tiles[q][r]);
+            print_tile(tile);
+        }
+    }
+}
+
 static void level_enable_tile_callback(hex_axial_t axial, void *data)
 {
     level_t *level = (level_t *)data;
@@ -85,7 +97,7 @@ void level_reset(level_t *level)
     level->center = LEVEL_CENTER_POSITION;
     level->center_tile = level_get_tile(level, level->center);
 
-    level_prepare_tiles(level);
+    level_resize(level);
 
     level_enable_spiral(level, level->radius);
 }
@@ -262,15 +274,17 @@ tile_t *level_setup_tile_from_serialized_strings(level_t *level, char *addr, cha
            addr, path, flags);
 #endif
 
-    tile_t *tile = create_tile();
-
     hex_axial_t pos = {0};
     char *p = addr;
     pos.q = (int)strtol(addr, &p, 10);
     p++;
     pos.r = (int)strtol(p, NULL, 10);
 
-    tile->position = pos;
+    tile_t *tile = level_get_tile(level, pos);
+    if (!tile) {
+        errmsg("Cannot find tile with address (%d, %d)\n", pos.q, pos.r);
+        return NULL;
+    }
 
     for (int i=0; i<6; i++) {
         char digit[2];
@@ -380,6 +394,18 @@ level_t *load_level_file(char *filename)
     }
 
     level_t *level = alloc_level();
+
+#if 0
+    if (options->verbose) {
+        printf("Parsing level file data:\n");
+        printf("----- BEGIN LEVEL FILE DATA -----\n");
+        puts(str);
+        if (last_char(str) != '\n') {
+            puts("\n");
+        }
+        printf("----- END LEVEL FILE DATA -----\n");
+    }
+#endif
 
     if (level_parse_string(level, str)) {
         free(str);
@@ -773,7 +799,7 @@ void level_drag_stop(level_t *level)
             drop_target = NULL;
         }
 
-        if (drop_target && !drop_target->fixed) {
+        if (drop_target && !drop_target->fixed && !drop_target->hidden) {
 #ifdef DEBUG_DRAG_AND_DROP
             printf("drag_stop(): drop target\n");
 #endif

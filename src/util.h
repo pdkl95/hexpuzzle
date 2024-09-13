@@ -22,6 +22,7 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+char last_char(char *str);
 bool file_exists(const char *file);
 const char *concat_dir_and_filename(const char *dir, const char *filename);
 const char *filename_ext(const char *filename);

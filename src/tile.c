@@ -50,6 +50,38 @@ Color path_highlight_color_blue   = { 70,  166, 255, 255 };
 Color path_highlight_color_yellow = { 255, 253, 127, 255 };
 Color path_highlight_color_green  = {  67, 255, 105, 255 };
 
+static char *tile_flag_string(tile_t *tile)
+{
+    static char buf[4];
+    buf[0] = tile->enabled ? 'E' : 'e';
+    buf[1] = tile->fixed   ? 'F' : 'f';
+    buf[2] = tile->hidden  ? 'H' : 'h';
+    buf[3] = '\0';
+    return buf;
+}
+
+static char *tile_path_string(tile_t *tile)
+{
+    static char buf[7];
+    snprintf(buf, 7, "%d%d%d%d%d%d",
+             tile->path[0],
+             tile->path[1],
+             tile->path[2],
+             tile->path[3],
+             tile->path[4],
+             tile->path[5]);
+    return buf;
+}
+
+void print_tile(tile_t *tile)
+{
+    printf("tile[%d, %d]<flags=%s path=%s>\n",
+           tile->position.q,
+           tile->position.r,
+           tile_flag_string(tile),
+           tile_path_string(tile));
+}
+
 Color path_type_color(path_type_t type)
 {
     switch (type) {

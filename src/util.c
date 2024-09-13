@@ -30,6 +30,16 @@
 
 #include "util.h"
 
+char last_char(char *str)
+{
+    int idx = strlen(str);
+    if (idx < 1) {
+        return '\0';
+    }
+
+    return str[idx - 1];
+}
+
 bool file_exists(const char *file)
 {
     struct stat sb;
