@@ -86,6 +86,8 @@ void level_reset(level_t *level)
     level->center_tile = level_get_tile(level, level->center);
 
     level_prepare_tiles(level);
+
+    level_enable_spiral(level, level->radius);
 }
 
 static void level_prepare_tiles(level_t *level)
@@ -108,14 +110,6 @@ static void level_prepare_tiles(level_t *level)
     level_resize(level);
 }
 
-static void lecel_setup_minimal_blank(level_t *level)
-{
-    assert_not_null(level);
-
-    level->radius = LEVEL_MIN_RADIUS;
-    level_enable_spiral(level, level->radius);
-}
-
 level_t *create_level(void)
 {
     level_t *level = alloc_level();
@@ -127,7 +121,6 @@ level_t *create_level(void)
     level->radius = LEVEL_DEFAULT_RADIUS;
 
     level_prepare_tiles(level);
-    lecel_setup_minimal_blank(level);
 
     return level;
 }
@@ -415,26 +408,28 @@ void level_update_ui_name(level_t *level)
     snprintf(level->ui_name, UI_NAME_MAXLEN, "%s", GuiIconText(icon, level->name));
 }
 
-static void level_load(level_t *level)
-{
-    current_level = level;
-    level_reset(current_level);
-}
-
-static void level_unload(void)
+void level_unload(void)
 {
     if (current_level) {
         // unload level?
+        current_level = NULL;
     }
+
+    game_mode = GAME_MODE_COLLECTION;
+}
+
+void level_load(level_t *level)
+{
+    level_unload();
+    current_level = level;
+    level_reset(current_level);
 }
 
 void level_play(level_t *level)
 {
     assert_not_null(level);
 
-    level_unload();
     level_load(level);
-
     game_mode = GAME_MODE_PLAY_LEVEL;
 }
 
@@ -442,9 +437,7 @@ void level_edit(level_t *level)
 {
     assert_not_null(level);
 
-    level_unload();
     level_load(level);
-
     game_mode = GAME_MODE_EDIT_LEVEL;
 }
 
@@ -827,7 +820,7 @@ void level_draw(level_t *level, bool finished)
 
             if (tile->enabled) {
                 if (tile == level->drag_target) {
-                    // defer ubtil after bg tiles are drawn
+                    // defer until after bg tiles are drawn
                 } else {
                     tile_draw(tile, level->drag_target, finished, finished_color);
                 }

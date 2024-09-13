@@ -200,37 +200,18 @@ void toggle_edit_mode(void)
     }
 }
 
-bool set_current_level(level_t *level)
-{
-    assert_not_null(level);
-
-    if (current_level) {
-        // unload current_level?
-    }
-
-    current_level = level;
-    level_resize(current_level);
-
-    return (!!current_level);
-}
-
 void return_from_level(void)
 {
     if (current_level) {
-        // unload current_level?
+        level_unload();
     }
-    current_level = NULL;
-    game_mode = GAME_MODE_COLLECTION;
 }
 
 void create_new_level(void)
 {
     level_t *level = create_level();
     collection_add_level(current_collection, level);
-    set_current_level(level);
-
-    game_mode = GAME_MODE_EDIT_LEVEL;
-
+    level_edit(level);
     show_name_edit_dialog();
 }
 
@@ -648,7 +629,11 @@ static void draw_edit_panel(void)
     DrawText("Board Radius", radius_spinner_label_rect.x, radius_spinner_label_rect.y,
              PANEL_LABEL_FONT_SIZE, panel_header_text_color);
 
-    static int radius = 1; //current_level->radius;
+    int radius = 1;
+    if (current_level) {
+        radius = current_level->radius;
+    }
+
     GuiSpinner(radius_spinner_rect, NULL, &radius, LEVEL_MIN_RADIUS, LEVEL_MAX_RADIUS, false);
     if (current_level->radius != radius) {
         level_set_radius(current_level, radius);
@@ -880,7 +865,7 @@ render_frame(
 
         case GAME_MODE_EDIT_LEVEL:
             if (current_level) {
-                level_draw(current_level, level_finished);// false);
+                level_draw(current_level, false);
             }
             break;
 
@@ -1031,7 +1016,7 @@ static void game_init(void)
         if (IS_LEVEL_FILENAME(filename)) {
             level_t *level = collection_find_level_by_filename(current_collection, filename);
             if (level) {
-                set_current_level(level);
+                level_play(level);
             }
         } else if (IS_COLLECTION_FILENAME(filename)) {
             game_mode = GAME_MODE_COLLECTION;

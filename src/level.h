@@ -91,6 +91,8 @@ tile_t *level_get_tile(level_t *level,  hex_axial_t axial);
 void level_update_ui_name(level_t *level);
 
 bool level_check(level_t *level);
+void level_unload(void);
+void level_load(level_t *level);
 void level_play(level_t *level);
 void level_edit(level_t *level);
 
