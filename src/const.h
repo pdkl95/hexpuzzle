@@ -22,8 +22,10 @@
 #ifndef CONST_H
 #define CONST_H
 
-#define LEVEL_FILENAME_EXT      "hexlevel"
+#define COLLECTION_ZIP_INDEX_FILENAME "levels.index"
+
 #define COLLECTION_FILENAME_EXT "hexlevelpack"
+#define LEVEL_FILENAME_EXT      "hexlevel"
 
 #define LEVEL_DEFAULT_NAME "Untitled"
 #define LEVEL_DEFAULT_RADIUS LEVEL_MIN_RADIUS

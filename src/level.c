@@ -383,16 +383,8 @@ static char *read_file_into_string(char *filename)
     return str;
 }
 
-level_t *load_level_file(char *filename)
+level_t *load_level_string(char *filename, char *str)
 {
-    assert_not_null(filename);
-
-    char *str = read_file_into_string(filename);
-    if (NULL == str) {
-        errmsg("Error reading level file \"%s\"", filename);
-        return NULL;
-    }
-
     level_t *level = alloc_level();
 
 #if 0
@@ -421,11 +413,17 @@ level_t *load_level_file(char *filename)
     }
 }
 
-bool level_replace_from_memory(level_t *level, char *str)
+level_t *load_level_file(char *filename)
 {
-    assert_not_null(level);
+    assert_not_null(filename);
 
-    return level_parse_string(level, str);
+    char *str = read_file_into_string(filename);
+    if (NULL == str) {
+        errmsg("Error reading level file \"%s\"", filename);
+        return NULL;
+    }
+
+    return load_level_string(filename, str);
 }
 
 void level_update_ui_name(level_t *level)

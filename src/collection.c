@@ -34,6 +34,8 @@
 #include "raylib_helper.h"
 #include "collection.h"
 
+#include "zip-kuba/zip.h"
+
 //#define INITIAL_LEVEL_NAME_COUNT 64
 #define INITIAL_LEVEL_NAME_COUNT 4
 
@@ -168,6 +170,63 @@ collection_t *load_collection_zip_file(char *filename)
 {
     collection_t *collection = create_collection(filename);
     collection->filename = strdup(filename);
+
+    struct zip_t *zip = zip_open(filename, 0, 'r');
+    {
+        if (options->verbose) {
+            infomsg("Decompressing and extracting level files from: \"%s\"", filename);
+            infomsg("Reading filenames from \"%s\"", COLLECTION_ZIP_INDEX_FILENAME);
+        }
+
+        char *indexbuf = NULL;
+
+        zip_entry_open(zip, COLLECTION_ZIP_INDEX_FILENAME);
+        {
+            size_t bufsize = zip_entry_size(zip);
+            bufsize++;
+            indexbuf = calloc(bufsize, sizeof(char));
+            zip_entry_read(zip, (void **)&indexbuf, &bufsize);
+            indexbuf[bufsize] = '\0';
+        }
+        zip_entry_close(zip);
+
+        char *delim = "\n";
+        int n=0;
+        char *filename = indexbuf, *end = indexbuf;
+        while (filename != NULL) {
+            strsep(&end, delim);
+
+            if (filename && strlen(filename) > 0) {
+                if (options->verbose) {
+                    infomsg("Unpacking level file \"%s\"", filename);
+                }
+
+                char *levelbuf = NULL;
+
+                zip_entry_open(zip, filename);
+                {
+                    size_t bufsize = zip_entry_size(zip);
+                    bufsize++;
+                    levelbuf = calloc(bufsize, sizeof(char));
+                    zip_entry_read(zip, (void **)&levelbuf, &bufsize);
+                    levelbuf[bufsize] = '\0';
+                }
+                zip_entry_close(zip);
+
+                level_t *level = load_level_string(filename, levelbuf);
+                collection_add_level(collection, level);
+
+                //free(levelbuf);
+
+                n++;
+            }
+
+            filename = end;
+        }
+
+        free(indexbuf);
+    }
+    zip_close(zip);
 
     return collection;
 }

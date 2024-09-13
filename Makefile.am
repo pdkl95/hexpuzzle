@@ -39,3 +39,8 @@ hexpuzzle_SOURCES =                                \
 	src/util.h            src/util.c           \
 	src/common.h          src/main.c
 
+hexpuzzle_SOURCES +=              \
+	external/zip-kuba/miniz.h \
+	external/zip-kuba/zip.h   \
+	external/zip-kuba/zip.c
+

@@ -81,9 +81,9 @@ Color CGOLD              = { 0xFF, 0xD7, 0x00, 255 };
 Color cursor_outer_color;
 Color cursor_inner_color;
 
-Color magenta    = { 214,   2, 112, 255 };
-Color purple     = { 155,  79, 150, 255 };
-Color royal_blue = {   0,  56, 168, 255 };
+Color magenta    = { 214,   2, 112, 255 }; // d60270
+Color purple     = { 155,  79, 150, 255 }; // 9b4f96
+Color royal_blue = {   0,  56, 168, 255 }; // 0038a8
 
 game_mode_t game_mode = GAME_MODE_NULL;
 

@@ -84,6 +84,7 @@ void destroy_level(level_t *level);
 void level_reset(level_t *level);
 
 bool level_parse_string(level_t *level, char *str);
+level_t *load_level_string(char *filename, char *str);
 level_t *load_level_file(char *filename);
 
 tile_t *level_get_tile(level_t *level,  hex_axial_t axial);
@@ -98,8 +99,6 @@ void level_edit(level_t *level);
 
 void level_save_to_file(level_t *level, char *dirpath);
 void level_save_to_file_if_changed(level_t *level, char *dirpath);
-
-bool level_replace_from_memory(level_t *level, char *str);
 void level_serialize(level_t *level, FILE *f);
 
 void level_resize(level_t *level);
