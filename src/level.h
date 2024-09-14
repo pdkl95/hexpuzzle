@@ -89,7 +89,7 @@ level_t *load_level_file(char *filename);
 
 tile_t *level_get_tile(level_t *level,  hex_axial_t axial);
 
-void level_update_ui_name(level_t *level);
+void level_update_ui_name(level_t *level, int idx);
 
 bool level_check(level_t *level);
 void level_unload(void);

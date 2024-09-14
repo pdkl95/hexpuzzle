@@ -427,7 +427,7 @@ level_t *load_level_file(char *filename)
     return level;
 }
 
-void level_update_ui_name(level_t *level)
+void level_update_ui_name(level_t *level, UNUSED int idx)
 {
     assert_not_null(level);
 

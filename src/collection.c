@@ -395,13 +395,33 @@ static void collection_show_level_names(collection_t *collection)
 {
     assert_not_null(collection);
 
-    printf("<level_names>\n");
+    printf("<collection");
+    if (collection->filename) {
+        printf(" file=\"%s\"", collection->filename);
+    }
+    if (collection->dirpath) {
+        printf(" dir=\"%s\"", collection->dirpath);
+    }
+    printf(">\n");
+
     level_t *level = collection->levels;
     for (int i=0; i < collection->level_count; i++) {
-        printf("\t\"%s\" - \"%s\"\n", collection->level_names[i], level->name);
+//#define DEBUG_SHOW_UI_NAME 1
+#ifdef DEBUG_SHOW_UI_NAME
+        printf("  %d:\tfilename=\"%s\"\tname=\"%s\"\tui_name=\"%s\"\n",
+               i,
+               level->filename,
+               level->name,
+               collection->level_names[i]);
+#else
+        printf("  %d:\tfilename=\"%s\"\tname=\"%s\"\n",
+               i,
+               level->filename,
+               level->name);
+#endif
         level = level->next;
     }
-    printf("</level_names>\n");
+    printf("</collection>\n");
 }
 
 void collection_add_level(collection_t *collection, level_t *level)
@@ -430,15 +450,17 @@ void collection_add_level(collection_t *collection, level_t *level)
         collection->level_name_count *= 2;
         collection_alloc_level_names(collection);
 
-        memcpy(collection->levels, old_ptr, old_count);
+        memcpy(collection->level_names, old_ptr, old_count);
         free(old_ptr);
     }
 
     level_t *lp = collection->levels;
     int n=0;
     while (lp) {
-        level_update_ui_name(level);
-        collection->level_names[n] = level->ui_name;
+        assert(n < collection->level_name_count);
+
+        level_update_ui_name(lp, n);
+        collection->level_names[n] = lp->ui_name;
 
         lp = lp->next;
         n++;
@@ -692,6 +714,8 @@ void collection_draw(collection_t *collection)
         .width  = width,
         .height = height
     };
+
+    GuiSetStyle(LISTVIEW, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
 
     GuiListViewEx(collection_list_rect,
                   collection->level_names,
