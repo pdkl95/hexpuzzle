@@ -38,6 +38,7 @@ struct level {
 
     int radius;
     tile_t tiles[TILE_LEVEL_WIDTH][TILE_LEVEL_HEIGHT];
+    tile_t *sorted_tiles[LEVEL_MAXTILES];
     int tile_count;
 
     hex_axial_t center;
@@ -82,6 +83,9 @@ typedef struct level level_t;
 level_t *create_level(void);
 void destroy_level(level_t *level);
 void level_reset(level_t *level);
+
+bool level_eq_tiles(level_t *level, level_t *other);
+void level_sort_tiles(level_t *level);
 
 bool level_parse_string(level_t *level, char *str);
 level_t *load_level_string(char *filename, char *str);

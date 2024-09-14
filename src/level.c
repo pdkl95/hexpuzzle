@@ -104,6 +104,8 @@ void level_reset(level_t *level)
 
 static void level_prepare_tiles(level_t *level)
 {
+    int n=0;
+
     for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
         for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
             tile_t *tile = &(level->tiles[q][r]);
@@ -116,6 +118,9 @@ static void level_prepare_tiles(level_t *level)
             for (hex_direction_t section = 0; section < 6; section++) {
                 tile->neighbors[section] = level_find_neighbor_tile(level, tile, section);
             }
+
+            level->sorted_tiles[n] = tile;
+            n++;
         }
     }
 
@@ -144,6 +149,28 @@ void destroy_level(level_t *level)
         SAFEFREE(level->filename);
         SAFEFREE(level);
     }
+}
+
+bool level_eq_tiles(level_t *level, level_t *other)
+{
+    level_sort_tiles(level);
+    level_sort_tiles(other);
+
+    for (int i=0; i < LEVEL_MAXTILES; i++) {
+        tile_t *level_tile = level->sorted_tiles[i];
+        tile_t *other_tile = other->sorted_tiles[i];
+
+        if (!tile_eq(level_tile, other_tile)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void level_sort_tiles(level_t *level)
+{
+    qsort(level->sorted_tiles, LEVEL_MAXTILES, sizeof(level_t *), compare_tiles);
 }
 
 tile_t *level_get_tile(level_t *level,  hex_axial_t axial)
@@ -549,16 +576,16 @@ static int level_count_enabled_tiles(level_t *level)
 
 void level_serialize(level_t *level, FILE *f)
 {
+    level_sort_tiles(level);
+
     fprintf(f, "hexlevel version 1\n");
     fprintf(f, "name \"%s\"\n", level->name);
     fprintf(f, "radius %d\n", level->radius);
     int total_tiles = level_count_enabled_tiles(level);
     fprintf(f, "begin_tiles %d\n", total_tiles);
-    for (int q=0; q < TILE_LEVEL_WIDTH; q++) {
-        for (int r=0; r < TILE_LEVEL_HEIGHT; r++) {
-            tile_t *tile = &(level->tiles[q][r]);
-            tile_serialize(tile, f);
-        }
+    for (int i=0; i < LEVEL_MAXTILES; i++) {
+        tile_t *tile = level->sorted_tiles[i];
+        tile_serialize(tile, f);
     }
     fprintf(f, "end_tiles\n");
 }

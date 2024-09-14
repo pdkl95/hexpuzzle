@@ -36,6 +36,8 @@
 #define TILE_LEVEL_WIDTH  ((2 * LEVEL_MAX_RADIUS) + 1)
 #define TILE_LEVEL_HEIGHT TILE_LEVEL_WIDTH
 
+#define LEVEL_MAXTILES (TILE_LEVEL_HEIGHT * TILE_LEVEL_WIDTH)
+
 #define LEVEL_CENTER_POSITION  \
     ((hex_axial_t){            \
         .q = LEVEL_MAX_RADIUS, \

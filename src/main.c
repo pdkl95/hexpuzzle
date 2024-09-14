@@ -349,7 +349,8 @@ handle_events(
 ) {
     if (WindowShouldClose()) {
         //infomsg("Window Closed");
-        return false;
+        running = false;
+        return true;
     }
 
     if (IsWindowResized()) {
@@ -374,7 +375,8 @@ handle_events(
 
     if (IsKeyPressed(KEY_ESCAPE)) {
         infomsg("etc - quit");
-        return false;
+        running = false;
+        return true;
     }
 
     if (IsKeyPressed(KEY_F1)) {

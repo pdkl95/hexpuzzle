@@ -212,6 +212,42 @@ bool tile_eq(tile_t *tile, tile_t *other)
     return true;
 }
 
+int compare_tiles(const void *p1, const void *p2)
+{
+    tile_t *t1 = (tile_t *)p1;
+    tile_t *t2 = (tile_t *)p2;
+
+    int rv;
+
+#define CMP(field) \
+    rv = ((int)t1->field) - ((int)t2->field); \
+    if (rv) { return rv; }
+
+    CMP(enabled);
+    CMP(hidden);
+    CMP(fixed);
+
+    CMP(path[0]);
+    CMP(path[1]);
+    CMP(path[2]);
+    CMP(path[3]);
+    CMP(path[4]);
+    CMP(path[5]);
+#undef CMP
+
+    return 0;
+
+#if 0
+    rv = ((int)t1->enabled) - ((int)t2->enabled);
+    if (rv) { return rv; }
+
+    rv = ((int)t1->hidden) - ((int)t2->hidden);
+    if (rv) { return rv; }
+
+    rv = ((int)t1->fixed) - ((int)t2->fixed);
+    if (rv) { return rv; }
+#endif
+}
 
 void tile_copy_attributes(tile_t *dst, tile_t *src)
 {
