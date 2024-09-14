@@ -168,11 +168,19 @@ collection_t *load_collection_level_file(char *filename)
 
 collection_t *load_collection_zip_file(char *filename)
 {
+    int errnum;
+
     collection_t *collection = create_collection(filename);
     collection->filename = strdup(filename);
 
-    struct zip_t *zip = zip_open(filename, 0, 'r');
-    {
+    struct zip_t *zip = zip_openwitherror(filename, 0, 'r', &errnum);
+    if (NULL == zip) {
+        errmsg("Cannot open level collection \"%s\" - %s", filename, zip_strerror(errnum));
+
+      fail_collection:
+        destroy_collection(collection);
+        return NULL;
+    } else {
         if (options->verbose) {
             infomsg("Decompressing and extracting level files from: \"%s\"", filename);
             infomsg("Reading filenames from \"%s\"", COLLECTION_ZIP_INDEX_FILENAME);
@@ -180,15 +188,31 @@ collection_t *load_collection_zip_file(char *filename)
 
         char *indexbuf = NULL;
 
-        zip_entry_open(zip, COLLECTION_ZIP_INDEX_FILENAME);
-        {
+        errnum = zip_entry_open(zip, COLLECTION_ZIP_INDEX_FILENAME);
+        if (errnum < 0) {
+            errmsg("Cannot open level collection index file \"%s\" - %s",
+                   COLLECTION_ZIP_INDEX_FILENAME, zip_strerror(errnum));
+            goto fail_collection;
+        } else {
             size_t bufsize = zip_entry_size(zip);
-            bufsize++;
-            indexbuf = calloc(bufsize, sizeof(char));
-            zip_entry_read(zip, (void **)&indexbuf, &bufsize);
+            indexbuf = calloc(bufsize + 11, sizeof(char));
+            errnum = zip_entry_noallocread(zip, (void *)indexbuf, bufsize);
+            if (errnum < 0) {
+                errmsg("Error reading the collection index file \"%s\" - %s",
+                   COLLECTION_ZIP_INDEX_FILENAME, zip_strerror(errnum));
+
+              fail_indexbuf_and_collection:
+                free(indexbuf);
+                goto fail_collection;
+            }
             indexbuf[bufsize] = '\0';
         }
-        zip_entry_close(zip);
+        errnum = zip_entry_close(zip);
+        if (errnum < 0) {
+            errmsg("Error closing the collection index file \"%s\" in collection \"%s\" - %s",
+                   COLLECTION_ZIP_INDEX_FILENAME, collection->filename, zip_strerror(errnum));
+            goto fail_indexbuf_and_collection;
+        }
 
         char *delim = "\n";
         int n=0;
@@ -203,20 +227,39 @@ collection_t *load_collection_zip_file(char *filename)
 
                 char *levelbuf = NULL;
 
-                zip_entry_open(zip, filename);
-                {
+                errnum = zip_entry_open(zip, filename);
+                if (errnum < 0) {
+                    errmsg("Cannot open the level file \"%s\" in collection \"%s\" - %s",
+                           filename, collection->filename, zip_strerror(errnum));
+                    free(levelbuf);
+                    continue;
+
+                } else {
                     size_t bufsize = zip_entry_size(zip);
-                    bufsize++;
-                    levelbuf = calloc(bufsize, sizeof(char));
-                    zip_entry_read(zip, (void **)&levelbuf, &bufsize);
+                    levelbuf = calloc(bufsize + 11, sizeof(char));
+                    errnum = zip_entry_noallocread(zip, (void *)levelbuf,  bufsize);
+                    if (errnum < 0) {
+                        errmsg("Error reading the level file \"%s\" in collection \"%s\" - %s",
+                               filename, collection->filename, zip_strerror(errnum));
+                        free(levelbuf);
+                        continue;
+                    }
                     levelbuf[bufsize] = '\0';
                 }
-                zip_entry_close(zip);
+                errnum = zip_entry_close(zip);
+                if (errnum < 0) {
+                    errmsg("Error closing the level file \"%s\" in collection \"%s\" - %s",
+                           filename, collection->filename, zip_strerror(errnum));
+                    free(levelbuf);
+                    continue;
+                }
 
                 level_t *level = load_level_string(filename, levelbuf);
                 collection_add_level(collection, level);
 
-                //free(levelbuf);
+                if (levelbuf) {
+                    free(levelbuf);
+                }
 
                 n++;
             }

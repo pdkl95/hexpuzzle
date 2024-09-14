@@ -1067,7 +1067,15 @@ main(
     game_init();
     do_resize();
 
+    if (options->verbose) {
+        infomsg("Entering Main Loop...");
+    }
+
     bool run_ok = main_event_loop();
+
+    if (options->verbose) {
+        infomsg("Main Loop exit was %s", run_ok ? "SUCCESS" : "FAILURE");
+    }
 
     game_cleanup();
     gfx_cleanup();

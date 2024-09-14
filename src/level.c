@@ -400,7 +400,6 @@ level_t *load_level_string(char *filename, char *str)
 #endif
 
     if (level_parse_string(level, str)) {
-        free(str);
         level->filename = strdup(filename);
         if (options->verbose) {
             infomsg("Successfully loaded level file \"%s\"", filename);
@@ -423,7 +422,9 @@ level_t *load_level_file(char *filename)
         return NULL;
     }
 
-    return load_level_string(filename, str);
+    level_t *level = load_level_string(filename, str);
+    free(str);
+    return level;
 }
 
 void level_update_ui_name(level_t *level)
