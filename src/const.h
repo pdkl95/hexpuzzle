@@ -47,5 +47,8 @@
 
 #define FINISHED_HUE_STEP 4.0
 
+// 1MB
+#define LEVEL_SERIALIZE_BUFSIZE (1024 * 1024)
+
 #endif /*CONST_H*/
 

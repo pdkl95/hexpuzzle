@@ -563,6 +563,17 @@ void level_serialize(level_t *level, FILE *f)
     fprintf(f, "end_tiles\n");
 }
 
+char *level_serialize_memory(level_t *level)
+{
+    static char buf[LEVEL_SERIALIZE_BUFSIZE];
+
+    FILE *f = fmemopen(buf, LEVEL_SERIALIZE_BUFSIZE, "w");
+    level_serialize(level, f);
+    fclose(f);
+
+    return buf;
+}
+
 static void level_add_to_bounding_box(level_t *level, tile_t *tile)
 {
     assert_not_null(level);

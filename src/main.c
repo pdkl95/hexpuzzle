@@ -739,9 +739,6 @@ static void draw_ask_save_dialog(void)
 
         if ((result == 2) || (modal_ui_result == UI_RESULT_OK)) {
             /* yes */
-            //printf("collection_extract_level_from_grid()\n");
-            //level_extract_from_grid(current_level, current_grid);
-            assert(false);
             printf("collection_save()\n");
             collection_save(current_collection);
             show_ask_save_box = false;

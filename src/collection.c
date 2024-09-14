@@ -498,7 +498,106 @@ void collection_save_zip(collection_t *collection)
 {
     assert_not_null(collection);
 
-    assert(0);
+    char *tmpname;
+    asprintf(&tmpname, "%s.tmp", collection->filename);
+
+    if (options->verbose) {
+        infomsg("Writing level collection to \"%s\"", tmpname);
+    }
+
+    int errnum;
+    struct zip_t *zip = zip_openwitherror(tmpname, ZIP_DEFAULT_COMPRESSION_LEVEL, 'w', &errnum);
+    if (NULL == zip) {
+        errmsg("Cannot open \"%s\" for writing - %s", tmpname, zip_strerror(errnum));
+        goto cleanup;
+    }
+
+    errnum = zip_entry_open(zip, COLLECTION_ZIP_INDEX_FILENAME);
+    if (errnum < 0) {
+        errmsg("Cannot open level collection index file \"%s\" for writing - %s",
+               COLLECTION_ZIP_INDEX_FILENAME, zip_strerror(errnum));
+        goto close_zip;
+    } else {
+        level_t *level = collection->levels;
+        bool first = true;
+        while (level) {
+            assert_not_null(level->filename);
+
+            if (first) {
+                first = false;
+            } else {
+                errnum = zip_entry_write(zip, "\n", 1);
+                if (errnum < 0) {
+                    errmsg("Error writing index file \"%s\" in collection \"%s\" - %s",
+                           COLLECTION_ZIP_INDEX_FILENAME, collection->filename, zip_strerror(errnum));
+                    goto close_zip;
+                }
+            }
+            errnum = zip_entry_write(zip, level->filename, strlen(level->filename));
+            if (errnum < 0) {
+                errmsg("Error writing index file \"%s\" in collection \"%s\" - %s",
+                       COLLECTION_ZIP_INDEX_FILENAME, collection->filename, zip_strerror(errnum));
+                goto close_zip;
+            }
+
+            level = level->next;
+        }
+    }
+    errnum = zip_entry_close(zip);
+    if (errnum < 0) {
+        errmsg("Error closing the collection index file \"%s\" in collection \"%s\" - %s",
+               COLLECTION_ZIP_INDEX_FILENAME, collection->filename, zip_strerror(errnum));
+        goto close_zip;
+    }
+
+    level_t *level = collection->levels;
+    while (level) {
+        errnum = zip_entry_open(zip, level->filename);
+        if (errnum < 0) {
+            errmsg("Cannot open level collection level file \"%s\" for writing - %s",
+                   level->filename, zip_strerror(errnum));
+            goto close_zip;
+        } else {
+
+            char *str = level_serialize_memory(level);
+            assert_not_null(str);
+
+            errnum = zip_entry_write(zip, str, strlen(str));
+            if (errnum < 0) {
+                errmsg("Error writing level file \"%s\" in collection \"%s\" - %s",
+                       level->filename, collection->filename, zip_strerror(errnum));
+                goto close_zip;
+            }
+
+            errnum = zip_entry_close(zip);
+            if (errnum < 0) {
+                errmsg("Error closing level file \"%s\" in collection \"%s\" - %s",
+                       level->filename, collection->filename, zip_strerror(errnum));
+                goto close_zip;
+            }
+        }
+
+        level = level->next;
+    }
+
+    zip_close(zip);
+
+    if (options->verbose) {
+        infomsg("Renaming \"%s\" to \"%s\"", tmpname, collection->filename);
+    }
+
+    if (-1 == rename(tmpname, collection->filename)) {
+        errmsg("Error trying to rename \"%s\" to \"%s\" - ",
+               tmpname, collection->filename, strerror(errno));
+    }
+
+  cleanup:
+    free(tmpname);
+    return;
+
+  close_zip:
+    zip_close(zip);
+    goto cleanup;
 }
 
 void collection_save(collection_t *collection)
