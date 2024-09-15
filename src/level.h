@@ -31,12 +31,21 @@
 #include "hex.h"
 #include "tile.h"
 
+enum used_tiles {
+    USED_TILES_NULL = 0,
+    USED_TILES_SOLVED,
+    USED_TILES_UNSOLVED
+};
+typedef enum used_tiles used_tiles_t;
+
 struct level {
     char *id;
     char name[NAME_MAXLEN];
     char name_backup[NAME_MAXLEN];
 
     int radius;
+
+    used_tiles_t currently_used_tiles;
 
     tile_t tiles[TILE_LEVEL_WIDTH][TILE_LEVEL_HEIGHT];
     tile_t solved_tiles[TILE_LEVEL_WIDTH][TILE_LEVEL_HEIGHT];
@@ -94,8 +103,9 @@ void level_sort_tiles(level_t *level);
 
 void level_use_solved_tiles(level_t *level);
 void level_use_unsolved_tiles(level_t *level);
-void level_store_tiles_as_solved(level_t *level);
-void level_store_tiles_as_unsolved(level_t *level);
+void level_backup_tiles(level_t *level);
+void level_store_tiles(level_t *level);
+void level_toggle_currently_used_tiles(level_t *level);
 
 bool level_parse_string(level_t *level, char *str);
 level_t *load_level_string(char *filename, char *str);

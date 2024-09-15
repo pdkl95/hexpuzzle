@@ -38,6 +38,12 @@ void printcolor(Color c);
                vtmp.x, vtmp.y); \
     } while(0)
 
+#define prect(var) do { \
+        Rectangle rtmp = (var); \
+        printf(QUOTE(var) "\t= ( x=% 8.2f, y=% 8.2f,\n", rtmp.x, rtmp.y); \
+        printf(QUOTE(var) "\t    w=% 8.2f, h=% 8.2f )\n", rtmp.width, rtmp.height); \
+    } while(0)
+
 /*** Constants ***/
 
 #define VEC2_ZERO    ((Vector2){ 0.0f, 0.0f })

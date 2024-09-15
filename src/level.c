@@ -47,6 +47,12 @@ static void level_enable_tile_callback(hex_axial_t axial, void *data)
     tile_t *tile = level_get_tile(level, axial);
     if (tile) {
         tile->enabled = true;
+        if (tile->solved) {
+            tile->solved->enabled = true;
+        }
+        if (tile->unsolved) {
+            tile->unsolved->enabled = true;
+        }
     }
 }
 
@@ -56,6 +62,133 @@ static void level_disable_tile_callback(hex_axial_t axial, void *data)
     tile_t *tile = level_get_tile(level, axial);
     if (tile) {
         tile->enabled = false;
+        if (tile->solved) {
+            tile->solved->enabled = false;
+        }
+        if (tile->unsolved) {
+            tile->unsolved->enabled = false;
+        }
+    }
+}
+
+static void copy_all_tiles(tile_t dst[][TILE_LEVEL_HEIGHT], tile_t src[][TILE_LEVEL_HEIGHT], bool copy_tile_pointers)
+{
+    for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
+        for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
+            tile_t *tile_dst = &(dst[q][r]);
+            tile_t *tile_src = &(src[q][r]);
+
+            tile_copy_attributes(tile_dst, tile_src);
+
+            if (copy_tile_pointers) {
+                tile_dst->solved   = tile_src->solved;
+                tile_dst->unsolved = tile_src->unsolved;
+            }
+        }
+    }
+}
+
+void level_use_unsolved_tiles(level_t *level)
+{
+    switch (level->currently_used_tiles) {
+    case USED_TILES_NULL:
+        copy_all_tiles(level->tiles, level->unsolved_tiles, true);
+        break;
+
+    case USED_TILES_SOLVED:
+        copy_all_tiles(level->tiles, level->unsolved_tiles, true);
+        level_store_tiles(level);
+        break;
+
+    case USED_TILES_UNSOLVED:
+        /* do nothing */
+        break;
+    }
+
+    level->currently_used_tiles = USED_TILES_UNSOLVED;
+}
+
+static inline void level_copy_tiles_as_solved(level_t *level)
+{
+    copy_all_tiles(level->solved_tiles, level->tiles, false);
+}
+
+static inline void level_copy_tiles_as_unsolved(level_t *level)
+{
+    copy_all_tiles(level->unsolved_tiles, level->tiles, false);
+}
+
+static inline void level_store_tiles_as_solved(level_t *level)
+{
+    level_copy_tiles_as_solved(level);
+    level->currently_used_tiles = USED_TILES_NULL;
+}
+
+static inline void level_store_tiles_as_unsolved(level_t *level)
+{
+    level_copy_tiles_as_unsolved(level);
+    level->currently_used_tiles = USED_TILES_NULL;
+}
+
+void level_backup_tiles(level_t *level)
+{
+    switch (level->currently_used_tiles) {
+    case USED_TILES_NULL:
+        /* do nothing */
+        break;
+
+    case USED_TILES_SOLVED:
+        level_copy_tiles_as_solved(level);
+        break;
+
+    case USED_TILES_UNSOLVED:
+        level_copy_tiles_as_unsolved(level);
+        break;
+    }
+}
+
+void level_store_tiles(level_t *level)
+{
+    switch (level->currently_used_tiles) {
+    case USED_TILES_NULL:
+        /* do nothing */
+        break;
+
+    case USED_TILES_SOLVED:
+        level_store_tiles_as_solved(level);
+        break;
+
+    case USED_TILES_UNSOLVED:
+        level_store_tiles_as_unsolved(level);
+        break;
+    }
+}
+
+void level_toggle_currently_used_tiles(level_t *level)
+{
+    switch (level->currently_used_tiles) {
+    case USED_TILES_NULL:
+        /* do nothing */
+        if (options->verbose) {
+            infomsg("level_toggle_currently_used_tiles() SKIP!");
+        }
+        break;
+
+    case USED_TILES_SOLVED:
+        if (options->verbose) {
+            infomsg("level_toggle_currently_used_tiles() Using SOLVED tiles");
+        }
+        level_store_tiles(level);
+        level_use_unsolved_tiles(level);
+        break;
+
+    case USED_TILES_UNSOLVED:
+        if (options->verbose) {
+            infomsg("level_toggle_currently_used_tiles() Using UNSOLVED tiles");
+        }
+        level_store_tiles(level);
+        level_use_solved_tiles(level);
+        break;
     }
 }
 
@@ -85,6 +218,9 @@ static void level_prepare_tiles(level_t *level);
 void level_reset(level_t *level)
 {
     assert_not_null(level);
+
+    level->currently_used_tiles = USED_TILES_NULL;
+
     level->req_tile_size = 60.0f;
 
     level->drag_reset_total_frames = 12;
@@ -100,6 +236,8 @@ void level_reset(level_t *level)
     level_resize(level);
 
     level_enable_spiral(level, level->radius);
+    level_copy_tiles_as_solved(level);
+    level_copy_tiles_as_unsolved(level);
 }
 
 static void level_prepare_tiles(level_t *level)
@@ -206,35 +344,24 @@ tile_t *level_get_unsolved_tile(level_t *level,  hex_axial_t axial)
     return &(level->unsolved_tiles[axial.q][axial.r]);
 }
 
-static void copy_all_tiles(tile_t dst[][TILE_LEVEL_HEIGHT], tile_t src[][TILE_LEVEL_HEIGHT])
-{
-    for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
-        for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
-            tile_t *tile_dst = &(dst[q][r]);
-            tile_t *tile_src = &(src[q][r]);
-            tile_copy_attributes(tile_dst, tile_src);
-        }
-    }
-}
-
 void level_use_solved_tiles(level_t *level)
 {
-    copy_all_tiles(level->tiles, level->solved_tiles);
-}
+    switch (level->currently_used_tiles) {
+    case USED_TILES_NULL:
+        copy_all_tiles(level->tiles, level->solved_tiles, true);
+        break;
 
-void level_use_unsolved_tiles(level_t *level)
-{
-    copy_all_tiles(level->tiles, level->unsolved_tiles);
-}
+    case USED_TILES_SOLVED:
+        /* do nothing */
+        break;
 
-void level_store_tiles_as_solved(level_t *level)
-{
-    copy_all_tiles(level->solved_tiles, level->tiles);
-}
+    case USED_TILES_UNSOLVED:
+        copy_all_tiles(level->tiles, level->solved_tiles, true);
+        level_store_tiles(level);
+        break;
+    }
 
-void level_store_tiles_as_unsolved(level_t *level)
-{
-    copy_all_tiles(level->unsolved_tiles, level->tiles);
+    level->currently_used_tiles = USED_TILES_SOLVED;
 }
 
 struct token_list {
@@ -394,6 +521,11 @@ void level_setup_tiles_from_serialized_strings(level_t *level, char *solved_addr
         tile_set_flag_from_char(  solved_tile, flags[i]);
         tile_set_flag_from_char(unsolved_tile, flags[i]);
     }
+
+    solved_tile->solved     = solved_tile;
+    solved_tile->unsolved   = unsolved_tile;
+    unsolved_tile->solved   = solved_tile;
+    unsolved_tile->unsolved = unsolved_tile;
 }
 
 bool level_parse_string(level_t *level, char *str)
@@ -555,8 +687,8 @@ void level_play(level_t *level)
 {
     assert_not_null(level);
 
-    level_use_unsolved_tiles(level);
     level_load(level);
+    level_use_unsolved_tiles(level);
     game_mode = GAME_MODE_PLAY_LEVEL;
 }
 
@@ -564,8 +696,8 @@ void level_edit(level_t *level)
 {
     assert_not_null(level);
 
-    level_use_solved_tiles(level);
     level_load(level);
+    level_use_solved_tiles(level);
     game_mode = GAME_MODE_EDIT_LEVEL;
 }
 
@@ -647,6 +779,7 @@ static int level_count_enabled_tiles(level_t *level)
 
 void level_serialize(level_t *level, FILE *f)
 {
+    level_backup_tiles(level);
     level_sort_tiles(level);
 
     fprintf(f, "hexlevel version 1\n");

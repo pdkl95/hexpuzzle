@@ -212,7 +212,7 @@ void create_new_level(void)
     level_t *level = create_level();
     collection_add_level(current_collection, level);
     level_edit(level);
-    show_name_edit_dialog();
+    //show_name_edit_dialog();
 }
 
 #define print_popup(...) {                                          \
@@ -488,8 +488,8 @@ static void draw_mouse_text(void)
 #define BUTTON_MARGIN 4
 #define ICON_BUTTON_SIZE (RAYGUI_ICON_SIZE + (2 * BUTTON_MARGIN))
 
-#define NAME_FONT_SIZE 22
-#define PANEL_LABEL_FONT_SIZE 18
+#define NAME_FONT_SIZE 20
+#define PANEL_LABEL_FONT_SIZE 14
 #define PANEL_ROUNDNES 0.2
 
 Rectangle name_text_rect;
@@ -500,6 +500,7 @@ Rectangle radius_spinner_label_rect;
 Rectangle radius_spinner_rect;
 Rectangle close_button_rect;
 Rectangle edit_button_rect;
+Rectangle edit_mode_toggle_rect;
 Rectangle return_button_rect;
 Rectangle new_level_button_rect;
 
@@ -511,6 +512,8 @@ char new_level_button_text[6];
 
 char cancel_ok_with_icons[25];
 char no_yes_with_icons[25];
+
+int edit_mode_toggle_active;
 
 void gui_setup(void)
 {
@@ -557,8 +560,16 @@ void gui_setup(void)
         radius_spinner_label_rect.y
         + radius_spinner_label_rect.height
         + PANEL_INNER_MARGIN;
-    radius_spinner_rect.width  = 125;
+    radius_spinner_rect.width  = 180;
     radius_spinner_rect.height = 30;
+
+    edit_mode_toggle_rect.x = radius_spinner_rect.x;
+    edit_mode_toggle_rect.y =
+        radius_spinner_rect.y
+        + radius_spinner_rect.height
+        + PANEL_INNER_MARGIN;
+    edit_mode_toggle_rect.width  = radius_spinner_rect.width;
+    edit_mode_toggle_rect.height = radius_spinner_rect.height;
 
     edit_panel_rect.width =
         radius_spinner_rect.width
@@ -566,7 +577,8 @@ void gui_setup(void)
     edit_panel_rect.height =
         radius_spinner_label_rect.height
         + radius_spinner_rect.height
-        + (3 * PANEL_INNER_MARGIN);
+        + edit_mode_toggle_rect.height
+        + (4 * PANEL_INNER_MARGIN);
 
     close_button_rect.x      = window_size.x - WINDOW_MARGIN - ICON_BUTTON_SIZE;
     close_button_rect.y      = WINDOW_MARGIN;
@@ -639,6 +651,29 @@ static void draw_edit_panel(void)
     GuiSpinner(radius_spinner_rect, NULL, &radius, LEVEL_MIN_RADIUS, LEVEL_MAX_RADIUS, false);
     if (current_level->radius != radius) {
         level_set_radius(current_level, radius);
+    }
+
+    int edit_mode_toggle_active;
+    switch (current_level->currently_used_tiles) {
+    case USED_TILES_NULL:
+        printf("return (NULL)\n");
+        return;
+
+    case USED_TILES_SOLVED:
+        edit_mode_toggle_active = 0;
+        break;
+
+    case USED_TILES_UNSOLVED:
+        edit_mode_toggle_active = 1;
+        break;
+    }
+
+    GuiToggleSlider(edit_mode_toggle_rect, "#112#Solved;#62#Scrambled", &edit_mode_toggle_active);
+
+    if ((edit_mode_toggle_active == 0 && current_level->currently_used_tiles == USED_TILES_UNSOLVED) ||
+        (edit_mode_toggle_active == 1 && current_level->currently_used_tiles == USED_TILES_SOLVED)
+    ) {
+        level_toggle_currently_used_tiles(current_level);
     }
 }
 

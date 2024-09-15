@@ -76,6 +76,9 @@ struct tile {
     hex_direction_t hover_section;
 
     struct tile *hover_adjacent;
+
+    struct tile *solved;
+    struct tile *unsolved;
 };
 typedef struct tile tile_t;
 
