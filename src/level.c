@@ -109,11 +109,17 @@ static void level_prepare_tiles(level_t *level)
     for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
         for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
             tile_t *tile = &(level->tiles[q][r]);
+            tile_t *solved_tile = &(level->solved_tiles[q][r]);
+            tile_t *unsolved_tile = &(level->unsolved_tiles[q][r]);
+
             hex_axial_t pos = {
                 .q = q,
                 .r = r
             };
-            init_tile(tile, pos);
+
+            init_tile(         tile, pos);
+            init_tile(  solved_tile, pos);
+            init_tile(unsolved_tile, pos);
 
             for (hex_direction_t section = 0; section < 6; section++) {
                 tile->neighbors[section] = level_find_neighbor_tile(level, tile, section);
@@ -173,16 +179,62 @@ void level_sort_tiles(level_t *level)
     qsort(level->sorted_tiles, LEVEL_MAXTILES, sizeof(level_t *), compare_tiles);
 }
 
+#define RETURN_NULL_IF_OUT_OF_BOUNDS                       \
+    if ((axial.r < 0) || (axial.r >= TILE_LEVEL_HEIGHT) || \
+        (axial.q < 0) || (axial.q >= TILE_LEVEL_WIDTH)) {  \
+        return NULL;                                       \
+    }
+
 tile_t *level_get_tile(level_t *level,  hex_axial_t axial)
 {
     assert_not_null(level);
-
-    if ((axial.r < 0) || (axial.r >= TILE_LEVEL_HEIGHT) ||
-        (axial.q < 0) || (axial.q >= TILE_LEVEL_WIDTH)) {
-        return NULL;
-    }
-
+    RETURN_NULL_IF_OUT_OF_BOUNDS;
     return &(level->tiles[axial.q][axial.r]);
+}
+
+tile_t *level_get_solved_tile(level_t *level,  hex_axial_t axial)
+{
+    assert_not_null(level);
+    RETURN_NULL_IF_OUT_OF_BOUNDS;
+    return &(level->solved_tiles[axial.q][axial.r]);
+}
+
+tile_t *level_get_unsolved_tile(level_t *level,  hex_axial_t axial)
+{
+    assert_not_null(level);
+    RETURN_NULL_IF_OUT_OF_BOUNDS;
+    return &(level->unsolved_tiles[axial.q][axial.r]);
+}
+
+static void copy_all_tiles(tile_t dst[][TILE_LEVEL_HEIGHT], tile_t src[][TILE_LEVEL_HEIGHT])
+{
+    for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
+        for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
+            tile_t *tile_dst = &(dst[q][r]);
+            tile_t *tile_src = &(src[q][r]);
+            tile_copy_attributes(tile_dst, tile_src);
+        }
+    }
+}
+
+void level_use_solved_tiles(level_t *level)
+{
+    copy_all_tiles(level->tiles, level->solved_tiles);
+}
+
+void level_use_unsolved_tiles(level_t *level)
+{
+    copy_all_tiles(level->tiles, level->unsolved_tiles);
+}
+
+void level_store_tiles_as_solved(level_t *level)
+{
+    copy_all_tiles(level->solved_tiles, level->tiles);
+}
+
+void level_store_tiles_as_unsolved(level_t *level)
+{
+    copy_all_tiles(level->unsolved_tiles, level->tiles);
 }
 
 struct token_list {
@@ -286,31 +338,46 @@ static void level_free_tokens(token_list_t list)
     SAFEFREE(list.tokens);
 }
 
-tile_t *level_setup_tile_from_serialized_strings(level_t *level, char *addr, char *path, char *flags)
+void level_setup_tiles_from_serialized_strings(level_t *level, char *solved_addr, char *unsolved_addr, char *path, char *flags)
 {
     assert_not_null(level);
-    assert_not_null(addr);
+    assert_not_null(solved_addr);
+    assert_not_null(unsolved_addr);
     assert_not_null(path);
     assert_not_null(flags);
-    assert(strlen(addr)  >= 3);
-    assert(strlen(path)  == 6);
-    assert(strlen(flags) == 3);
+
+    assert(strlen(solved_addr)   >= 3);
+    assert(strlen(unsolved_addr) >= 3);
+    assert(strlen(path)          == 6);
+    assert(strlen(flags)         == 3);
 
 #if 0
-    printf("Creating tile from: addr=\"%s\" path=\"%s\" flags=\"%s\"\n",
-           addr, path, flags);
+    printf("Creating tile from: solved_addr=\"%s\" unsolved_addr=\"%s\" path=\"%s\" flags=\"%s\"\n",
+           solved_addr, unsolved_addr, path, flags);
 #endif
 
-    hex_axial_t pos = {0};
-    char *p = addr;
-    pos.q = (int)strtol(addr, &p, 10);
-    p++;
-    pos.r = (int)strtol(p, NULL, 10);
+    hex_axial_t solved_pos = {0}, unsolved_pos = {0};
 
-    tile_t *tile = level_get_tile(level, pos);
-    if (!tile) {
-        errmsg("Cannot find tile with address (%d, %d)\n", pos.q, pos.r);
-        return NULL;
+    char *p = solved_addr;
+    solved_pos.q = (int)strtol(solved_addr, &p, 10);
+    p++;
+    solved_pos.r = (int)strtol(p, NULL, 10);
+
+    p = unsolved_addr;
+    unsolved_pos.q = (int)strtol(unsolved_addr, &p, 10);
+    p++;
+    unsolved_pos.r = (int)strtol(p, NULL, 10);
+
+    tile_t   *solved_tile = level_get_solved_tile(  level,   solved_pos);
+    tile_t *unsolved_tile = level_get_unsolved_tile(level, unsolved_pos);
+
+    if (!solved_tile) {
+        errmsg("Cannot find tile with solved_address (%d, %d)\n", solved_pos.q, solved_pos.r);
+        return;
+    }
+    if (!unsolved_tile) {
+        errmsg("Cannot find tile with unsolved_address (%d, %d)\n", unsolved_pos.q, unsolved_pos.r);
+        return;
     }
 
     for (int i=0; i<6; i++) {
@@ -318,14 +385,15 @@ tile_t *level_setup_tile_from_serialized_strings(level_t *level, char *addr, cha
         digit[0] = path[i];
         digit[1] = '\0';
 
-        tile->path[i] = (int)strtol(digit, NULL, 10);
+        path_type_t ptype = (int)strtol(digit, NULL, 10);
+        solved_tile->path[i] = ptype;
+        unsolved_tile->path[i] = ptype;
     }
 
-    tile_set_flag_from_char(tile, flags[0]);
-    tile_set_flag_from_char(tile, flags[1]);
-    tile_set_flag_from_char(tile, flags[2]);
-
-    return tile;
+    for (int i=0; i<3; i++) {
+        tile_set_flag_from_char(  solved_tile, flags[i]);
+        tile_set_flag_from_char(unsolved_tile, flags[i]);
+    }
 }
 
 bool level_parse_string(level_t *level, char *str)
@@ -360,13 +428,14 @@ bool level_parse_string(level_t *level, char *str)
 
     level_prepare_tiles(level);
 
-    for(int i = 9; i<(list.token_count - 2); i += 4) {
+    for(int i = 9; i<(list.token_count - 2); i += 5) {
         CMP(i, "tile");
-        char *addr  = list.tokens[i+1];
-        char *path  = list.tokens[i+2];
-        char *flags = list.tokens[i+3];
+        char *solved_addr   = list.tokens[i+1];
+        char *unsolved_addr = list.tokens[i+2];
+        char *path          = list.tokens[i+3];
+        char *flags         = list.tokens[i+4];
 
-        level_setup_tile_from_serialized_strings(level, addr, path, flags);
+        level_setup_tiles_from_serialized_strings(level, solved_addr, unsolved_addr, path, flags);
     }
 
 
@@ -486,6 +555,7 @@ void level_play(level_t *level)
 {
     assert_not_null(level);
 
+    level_use_unsolved_tiles(level);
     level_load(level);
     game_mode = GAME_MODE_PLAY_LEVEL;
 }
@@ -494,6 +564,7 @@ void level_edit(level_t *level)
 {
     assert_not_null(level);
 
+    level_use_solved_tiles(level);
     level_load(level);
     game_mode = GAME_MODE_EDIT_LEVEL;
 }

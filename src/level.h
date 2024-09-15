@@ -37,8 +37,13 @@ struct level {
     char name_backup[NAME_MAXLEN];
 
     int radius;
+
     tile_t tiles[TILE_LEVEL_WIDTH][TILE_LEVEL_HEIGHT];
+    tile_t solved_tiles[TILE_LEVEL_WIDTH][TILE_LEVEL_HEIGHT];
+    tile_t unsolved_tiles[TILE_LEVEL_WIDTH][TILE_LEVEL_HEIGHT];
+
     tile_t *sorted_tiles[LEVEL_MAXTILES];
+
     int tile_count;
 
     hex_axial_t center;
@@ -87,11 +92,18 @@ void level_reset(level_t *level);
 bool level_eq_tiles(level_t *level, level_t *other);
 void level_sort_tiles(level_t *level);
 
+void level_use_solved_tiles(level_t *level);
+void level_use_unsolved_tiles(level_t *level);
+void level_store_tiles_as_solved(level_t *level);
+void level_store_tiles_as_unsolved(level_t *level);
+
 bool level_parse_string(level_t *level, char *str);
 level_t *load_level_string(char *filename, char *str);
 level_t *load_level_file(char *filename);
 
 tile_t *level_get_tile(level_t *level,  hex_axial_t axial);
+tile_t *level_get_solved_tile(level_t *level,  hex_axial_t axial);
+tile_t *level_get_unsolved_tile(level_t *level,  hex_axial_t axial);
 
 void level_update_ui_name(level_t *level, int idx);
 
