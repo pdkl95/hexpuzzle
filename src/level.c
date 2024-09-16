@@ -21,6 +21,8 @@
 
 #include "common.h"
 
+#include <libgen.h>
+
 #include "raygui/raygui.h"
 
 #include "options.h"
@@ -276,6 +278,7 @@ level_t *create_level(void)
 
     level->radius = LEVEL_DEFAULT_RADIUS;
 
+    level->changed = true;
 
     return level;
 }
@@ -582,6 +585,12 @@ static char *read_file_into_string(char *filename)
     return str;
 }
 
+void level_set_file_path(level_t *level, char *path)
+{
+    level->filename = strdup(basename(path));
+    level->dirpath  = strdup(dirname(path));
+}
+
 level_t *load_level_string(char *filename, char *str)
 {
     level_t *level = alloc_level();
@@ -599,13 +608,15 @@ level_t *load_level_string(char *filename, char *str)
 #endif
 
     if (level_parse_string(level, str)) {
-        level->filename = strdup(filename);
+        level_set_file_path(level, filename);
         if (options->verbose) {
-            infomsg("Successfully loaded level file \"%s\"", filename);
+            infomsg("Successfully loaded level file \"%s/%s\"",
+                    level->dirpath, level->filename);
         }
         return level;
     } else {
-        errmsg("Error parsing level file \"%s\"", filename);
+        errmsg("Error parsing level file \"%s\"",
+               filename);
         free(str);
         return NULL;
     }
@@ -966,16 +977,18 @@ void level_set_hover(level_t *level, IVector2 mouse_position)
 
         if (level->hover) {
             if (level->hover->tile->enabled) {
-                tile_pos_t *pos = level->hover;
-                Vector2 midpoint = pos->midpoints[pos->hover_section];
-                midpoint = Vector2Add(midpoint, level->px_offset);
-                if (Vector2Distance(midpoint, level->mouse_pos) < level->hover_section_adjacency_radius) {
-                    level->hover_adjacent = level_find_current_neighbor_tile_pos(level, pos, pos->hover_section);
-                    if (level->hover_adjacent) {
-                        level->hover_section = pos->hover_section;
-                        level->hover_adjacent_section = hex_opposite_direction(level->hover_section);
-                        tile_pos_set_hover_adjacent(level->hover,          level->hover_section,          level->hover_adjacent);
-                        tile_pos_set_hover_adjacent(level->hover_adjacent, level->hover_adjacent_section, level->hover);
+                if (edit_mode) {
+                    tile_pos_t *pos = level->hover;
+                    Vector2 midpoint = pos->midpoints[pos->hover_section];
+                    midpoint = Vector2Add(midpoint, level->px_offset);
+                    if (Vector2Distance(midpoint, level->mouse_pos) < level->hover_section_adjacency_radius) {
+                        level->hover_adjacent = level_find_current_neighbor_tile_pos(level, pos, pos->hover_section);
+                        if (level->hover_adjacent) {
+                            level->hover_section = pos->hover_section;
+                            level->hover_adjacent_section = hex_opposite_direction(level->hover_section);
+                            tile_pos_set_hover_adjacent(level->hover,          level->hover_section,          level->hover_adjacent);
+                            tile_pos_set_hover_adjacent(level->hover_adjacent, level->hover_adjacent_section, level->hover);
+                        }
                     }
                 }
 
@@ -1036,6 +1049,8 @@ void level_swap_tile_pos(level_t *level, tile_pos_t *a, tile_pos_t *b)
         old_b_tile->unsolved_pos = a;
         break;
     }
+
+    level->changed = true;
 }
 
 
@@ -1091,6 +1106,7 @@ void level_modify_hovered_feature(level_t *level)
     assert_not_null(level);
     if (level->hover) {
         tile_pos_modify_hovered_feature(level->hover);
+        level->changed = true;
     }
 }
 

@@ -39,9 +39,6 @@
 //#define INITIAL_LEVEL_NAME_COUNT 64
 #define INITIAL_LEVEL_NAME_COUNT 4
 
-#define COLLECTION_DEFAULT_FILENAME_PREFIX "level-"
-#define COLLECTION_DEFAULT_FILENAME_SUFFIX ".hexlevel"
-
 void create_new_level(void);
 
 static void collection_alloc_level_names(collection_t *collection)
@@ -369,18 +366,13 @@ static void collection_generate_level_filename(collection_t *collection, level_t
 
     char *prefix = COLLECTION_DEFAULT_FILENAME_PREFIX;
     char *suffix = COLLECTION_DEFAULT_FILENAME_SUFFIX;
-    int len = strlen(prefix)
-        + strlen(suffix)
-        + 3   // number 001-999
-        + 2   // \0
-        + 10;
-    char *tmp = calloc(len, sizeof(char));
-    len--;
+
     for (int n=collection->filename_seq; n<1000; n++) {
-        snprintf(tmp, len, "%s%03d%s", prefix, n, suffix);
+        char *tmp;
+        asprintf(&tmp, "%s%03d%s", prefix, n, suffix);
         if (!collection_level_filename_exists(collection, tmp)) {
             collection->filename_seq = n + 1;
-            level->filename = tmp;
+            level_set_file_path(level, tmp);
             if (options->verbose) {
                 infomsg("Generated filename: \"%s\"", level->filename);
             }

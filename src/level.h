@@ -83,6 +83,7 @@ struct level {
     Vector2 drag_reset_vector;
 
     char *filename;
+    char *dirpath;
     bool changed;
 
     bool finished;
@@ -147,6 +148,7 @@ void level_load(level_t *level);
 void level_play(level_t *level);
 void level_edit(level_t *level);
 
+void level_set_file_path(level_t *level, char *path);
 void level_save_to_file(level_t *level, char *dirpath);
 void level_save_to_file_if_changed(level_t *level, char *dirpath);
 void level_serialize(level_t *level, FILE *f);
