@@ -107,8 +107,8 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__dirstamp = $(am__leading_dot)dirstamp
 am_hexpuzzle_OBJECTS = src/hexpuzzle-collection.$(OBJEXT) \
-	src/hexpuzzle-hex.$(OBJEXT) src/hexpuzzle-level.$(OBJEXT) \
-	src/hexpuzzle-logging.$(OBJEXT) \
+	src/hexpuzzle-color.$(OBJEXT) src/hexpuzzle-hex.$(OBJEXT) \
+	src/hexpuzzle-level.$(OBJEXT) src/hexpuzzle-logging.$(OBJEXT) \
 	src/hexpuzzle-options.$(OBJEXT) \
 	src/hexpuzzle-raylib_helper.$(OBJEXT) \
 	src/hexpuzzle-tile.$(OBJEXT) src/hexpuzzle-tile_draw.$(OBJEXT) \
@@ -328,12 +328,13 @@ COMMON_PROG_LDADD = \
 
 hexpuzzle_CFLAGS = $(COMMON_PROG_CFLAGS)
 hexpuzzle_LDADD = $(COMMON_PROG_LDADD)
-hexpuzzle_SOURCES = src/collection.h src/collection.c src/const.h \
-	src/hex.h src/hex.c src/level.h src/level.c src/logging.h \
-	src/logging.c src/options.h src/options.c src/raylib_helper.h \
-	src/raylib_helper.c src/tile.h src/tile.c src/tile_draw.h \
-	src/tile_draw.c src/tile_pos.h src/tile_pos.c src/util.h \
-	src/util.c src/common.h src/main.c external/zip-kuba/miniz.h \
+hexpuzzle_SOURCES = src/collection.h src/collection.c src/color.h \
+	src/color.c src/const.h src/hex.h src/hex.c src/level.h \
+	src/level.c src/logging.h src/logging.c src/options.h \
+	src/options.c src/raylib_helper.h src/raylib_helper.c \
+	src/tile.h src/tile.c src/tile_draw.h src/tile_draw.c \
+	src/tile_pos.h src/tile_pos.c src/util.h src/util.c \
+	src/common.h src/main.c external/zip-kuba/miniz.h \
 	external/zip-kuba/zip.h external/zip-kuba/zip.c
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
@@ -438,6 +439,8 @@ src/$(DEPDIR)/$(am__dirstamp):
 	@: > src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-collection.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/hexpuzzle-color.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-hex.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-level.$(OBJEXT): src/$(am__dirstamp) \
@@ -482,6 +485,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@external/zip-kuba/$(DEPDIR)/hexpuzzle-zip.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-collection.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-color.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-hex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-level.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-logging.Po@am__quote@
@@ -522,6 +526,20 @@ src/hexpuzzle-collection.obj: src/collection.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/collection.c' object='src/hexpuzzle-collection.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-collection.obj `if test -f 'src/collection.c'; then $(CYGPATH_W) 'src/collection.c'; else $(CYGPATH_W) '$(srcdir)/src/collection.c'; fi`
+
+src/hexpuzzle-color.o: src/color.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-color.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-color.Tpo -c -o src/hexpuzzle-color.o `test -f 'src/color.c' || echo '$(srcdir)/'`src/color.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-color.Tpo src/$(DEPDIR)/hexpuzzle-color.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/color.c' object='src/hexpuzzle-color.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-color.o `test -f 'src/color.c' || echo '$(srcdir)/'`src/color.c
+
+src/hexpuzzle-color.obj: src/color.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-color.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-color.Tpo -c -o src/hexpuzzle-color.obj `if test -f 'src/color.c'; then $(CYGPATH_W) 'src/color.c'; else $(CYGPATH_W) '$(srcdir)/src/color.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-color.Tpo src/$(DEPDIR)/hexpuzzle-color.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/color.c' object='src/hexpuzzle-color.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-color.obj `if test -f 'src/color.c'; then $(CYGPATH_W) 'src/color.c'; else $(CYGPATH_W) '$(srcdir)/src/color.c'; fi`
 
 src/hexpuzzle-hex.o: src/hex.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-hex.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-hex.Tpo -c -o src/hexpuzzle-hex.o `test -f 'src/hex.c' || echo '$(srcdir)/'`src/hex.c

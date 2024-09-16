@@ -30,6 +30,10 @@
 #include "raygui/style/terminal.h"
 
 #include "options.h"
+#include "color.h"
+
+#include "tile_draw.h"
+
 #include "level.h"
 #include "collection.h"
 
@@ -70,20 +74,6 @@ float popup_text_fade_time = 2.5f;
 float popup_text_active_until = 0.0f;
 const char *popup_text;
 Color popup_text_color = { 0xFF, 0xFA, 0xCD, 0xFF };
-
-Color TRANSPARENT_BLACK  = { 0, 0, 0, 0 };
-Color LIGHT_ORANGE       = { 255, 249, 187, 255 };
-Color CHARTREUSE         = { 194, 241, 146, 255 };
-Color DEEP_SKY_BLUE      = { 176, 224, 230, 255 };
-Color DODGER_BLUE        = { 0x1E, 0x90, 0xFF, 255 };
-Color DEEP_PINK          = { 0xFF, 0x14, 0x93, 255 };
-Color CGOLD              = { 0xFF, 0xD7, 0x00, 255 };
-Color cursor_outer_color;
-Color cursor_inner_color;
-
-Color magenta    = { 214,   2, 112, 255 }; // d60270
-Color purple     = { 155,  79, 150, 255 }; // 9b4f96
-Color royal_blue = {   0,  56, 168, 255 }; // 0038a8
 
 game_mode_t game_mode = GAME_MODE_NULL;
 
@@ -1009,12 +999,7 @@ void gfx_init(void)
         event_waiting_active = true;
     }
 
-    //cursor_outer_color = DODGER_BLUE;
-    cursor_outer_color = CGOLD;
-    cursor_outer_color = ColorAlpha(cursor_outer_color, 0.86);
-
-    cursor_inner_color = DEEP_PINK;
-    cursor_inner_color = ColorAlpha(cursor_inner_color, 0.65);
+    prepare_global_colors();
 }
 
 static void

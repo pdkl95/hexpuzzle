@@ -20,34 +20,11 @@
  ****************************************************************************/
 
 #include "common.h"
+#include "color.h"
+
 #include "tile.h"
 #include "tile_pos.h"
 #include "tile_draw.h"
-
-Color tile_bg_color            = { 0x32, 0x32, 0x32, 0xff };
-Color tile_bg_hover_color      = { 0x40, 0x40, 0x40, 0xff };
-Color tile_bg_drag_color       = { 0x3b, 0x3b, 0x3b, 0xff };
-Color tile_bg_hidden_color     = { 0x32, 0x32, 0x32, 0x33 };
-Color tile_center_color        = { 0x70, 0x70, 0x70, 0xff };
-Color tile_center_color_hover  = { 0x90, 0x90, 0x90, 0xff };
-Color tile_edge_color          = { 0x18, 0x18, 0x18, 0xff };
-Color tile_edge_hover_color    = { 0xaa, 0xaa, 0xaa, 0xff };
-Color tile_edge_drag_color     = { 0x77, 0x77, 0x77, 0xff };
-Color tile_edge_hidden_color   = { 0xe9, 0xdf, 0x9c, 0x44 };
-Color tile_edge_finished_color = { 0x9b, 0xff, 0x9b, 0x80 };
-
-Color tile_bg_highlight_color     = { 0xfd, 0xf9, 0x00, 0x4c };
-Color tile_bg_highlight_color_dim = { 0xfd, 0xf9, 0x00, 0x2c };
-
-Color path_color_none   = { 0, 0, 0, 0 };
-Color path_color_red    = RED;
-Color path_color_blue   = BLUE;
-Color path_color_yellow = YELLOW;
-Color path_color_green  = GREEN;
-Color path_highlight_color_red    = { 255,  65,  81, 255 };
-Color path_highlight_color_blue   = { 70,  166, 255, 255 };
-Color path_highlight_color_yellow = { 255, 253, 127, 255 };
-Color path_highlight_color_green  = {  67, 255, 105, 255 };
 
 Color path_type_color(path_type_t type)
 {

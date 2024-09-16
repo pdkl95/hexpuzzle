@@ -1,6 +1,6 @@
 /****************************************************************************
  *                                                                          *
- * tile_draw.h                                                              *
+ * color.h                                                                  *
  *                                                                          *
  * This file is part of hexpuzzle.                                          *
  *                                                                          *
@@ -19,18 +19,53 @@
  *                                                                          *
  ****************************************************************************/
 
-#ifndef TILE_DRAW_H
-#define TILE_DRAW_H
+#ifndef COLOR_H
+#define COLOR_H
 
-#include "tile.h"
-#include "tile_pos.h"
+extern Color TRANSPARENT_BLACK;
+extern Color LIGHT_ORANGE;
+extern Color CHARTREUSE;
+extern Color DEEP_SKY_BLUE;
+extern Color DODGER_BLUE;
+extern Color DEEP_PINK;
+extern Color CGOLD;
 
-void prepare_global_colors(void);
+extern Color cursor_outer_color;
+extern Color cursor_inner_color;
 
-Color path_type_color(path_type_t type);
-Color path_type_highlight_color(path_type_t type);
+extern Color magenta;
+extern Color purple;
+extern Color royal_blue;
 
-void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color finished_color);
 
-#endif /*TILE_DRAW_H*/
+extern Color tile_bg_color;
+extern Color tile_bg_hover_color;
+extern Color tile_bg_drag_color;
+extern Color tile_bg_hidden_color;
+extern Color tile_center_color;
+extern Color tile_center_color_hover;
+extern Color tile_edge_color;
+extern Color tile_edge_hover_color;
+extern Color tile_edge_drag_color;
+extern Color tile_edge_hidden_color;
+extern Color tile_edge_finished_color;
+
+extern Color tile_bg_highlight_color;
+extern Color tile_bg_highlight_color_dim;
+
+extern Color path_color_none;
+extern Color path_color_red;
+extern Color path_color_blue;
+extern Color path_color_yellow;
+extern Color path_color_green;
+extern Color path_highlight_color_red;
+extern Color path_highlight_color_blue;
+extern Color path_highlight_color_yellow;
+extern Color path_highlight_color_green;
+
+
+void prepare_global_colors();
+
+
+#endif /*COLOR_H*/
 
