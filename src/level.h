@@ -53,11 +53,8 @@ struct level {
     tile_t tiles[LEVEL_MAXTILES];
     tile_t *sorted_tiles[LEVEL_MAXTILES];
 
-    tile_pos_t _solved_positions[LEVEL_MAXTILES];
-    tile_pos_t _unsolved_positions[LEVEL_MAXTILES];
-
-    tile_pos_t *solved_positions[LEVEL_MAXTILES];
-    tile_pos_t *unsolved_positions[LEVEL_MAXTILES];
+    tile_pos_t solved_positions[LEVEL_MAXTILES];
+    tile_pos_t unsolved_positions[LEVEL_MAXTILES];
 
     hex_axial_t center;
 
@@ -112,14 +109,14 @@ static inline tile_pos_t *level_get_solved_tile_pos(level_t *level,  hex_axial_t
 {
     assert_not_null(level);
     RETURN_NULL_IF_OUT_OF_BOUNDS;
-    return level->solved_positions[addr_to_idx(axial)];
+    return &level->solved_positions[addr_to_idx(axial)];
 }
 
 static inline tile_pos_t *level_get_unsolved_tile_pos(level_t *level,  hex_axial_t axial)
 {
     assert_not_null(level);
     RETURN_NULL_IF_OUT_OF_BOUNDS;
-    return level->solved_positions[addr_to_idx(axial)];
+    return &level->solved_positions[addr_to_idx(axial)];
 }
 
 level_t *create_level(void);

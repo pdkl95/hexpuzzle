@@ -48,7 +48,7 @@ void print_tile_solved_positionss(level_t *level)
     printf("Level \"%s\" solved tile positionss:\n", level->name);
 
     for (int i = 0; i < LEVEL_MAXTILES; i++) {
-        tile_pos_t *pos = level->solved_positions[i];
+        tile_pos_t *pos = &level->solved_positions[i];
         printf("idx=%02d [%d, %d] ", i, pos->position.q, pos->position.r);
         print_tile(pos->tile);
     }
@@ -59,7 +59,7 @@ void print_tile_unsolved_positionss(level_t *level)
     printf("Level \"%s\" unsolved tile positionss:\n", level->name);
 
     for (int i = 0; i < LEVEL_MAXTILES; i++) {
-        tile_pos_t *pos = level->unsolved_positions[i];
+        tile_pos_t *pos = &level->unsolved_positions[i];
         printf("idx=%02d [%d, %d] ", i, pos->position.q, pos->position.r);
         print_tile(pos->tile);
     }
@@ -202,16 +202,13 @@ static level_t *alloc_level()
             };
 
             init_tile(&level->tiles[i]);
-            init_tile_pos(&level->_solved_positions[i], &level->tiles[i], addr);
-            init_tile_pos(&level->_unsolved_positions[i], &level->tiles[i], addr);
+            init_tile_pos(&level->solved_positions[i], &level->tiles[i], addr);
+            init_tile_pos(&level->unsolved_positions[i], &level->tiles[i], addr);
 
             level->sorted_tiles[i] = &(level->tiles[i]);
 
-            level->solved_positions[i]   = &(level->_solved_positions[i]);
-            level->unsolved_positions[i] = &(level->_unsolved_positions[i]);
-
-            level->tiles[i].solved_pos   = level->solved_positions[i];
-            level->tiles[i].unsolved_pos = level->unsolved_positions[i];
+            level->tiles[i].solved_pos   = &level->solved_positions[i];
+            level->tiles[i].unsolved_pos = &level->unsolved_positions[i];
 
             i++;
         }
@@ -231,8 +228,8 @@ static level_t *alloc_level()
 
     for (int i = 0; i < LEVEL_MAXTILES; i++) {
         for (hex_direction_t section = 0; section < 6; section++) {
-            tile_pos_t *solved_pos   = level->solved_positions[i];
-            tile_pos_t *unsolved_pos = level->unsolved_positions[i];
+            tile_pos_t *solved_pos   = &level->solved_positions[i];
+            tile_pos_t *unsolved_pos = &level->unsolved_positions[i];
             solved_pos->neighbors[section]   = level_find_solved_neighbor_tile_pos(  level,   solved_pos, section);
             unsolved_pos->neighbors[section] = level_find_unsolved_neighbor_tile_pos(level, unsolved_pos, section);
         }
