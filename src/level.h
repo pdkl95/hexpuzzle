@@ -53,9 +53,11 @@ struct level {
     tile_t tiles[LEVEL_MAXTILES];
     tile_t *sorted_tiles[LEVEL_MAXTILES];
 
-    set_of_tile_positions solved_tiles;
-    set_of_tile_positions unsolved_tiles;
-    set_of_tile_positions *current_tiles;
+    tile_pos_t _solved_positions[LEVEL_MAXTILES];
+    tile_pos_t _unsolved_positions[LEVEL_MAXTILES];
+
+    tile_pos_t *solved_positions[LEVEL_MAXTILES];
+    tile_pos_t *unsolved_positions[LEVEL_MAXTILES];
 
     hex_axial_t center;
 
@@ -95,6 +97,31 @@ struct level {
 };
 typedef struct level level_t;
 
+#define RETURN_NULL_IF_OUT_OF_BOUNDS                       \
+    if ((axial.r < 0) || (axial.r >= TILE_LEVEL_HEIGHT) || \
+        (axial.q < 0) || (axial.q >= TILE_LEVEL_WIDTH)) {  \
+        return NULL;                                       \
+    }
+
+static inline int addr_to_idx(hex_axial_t axial)
+{
+    return (axial.q * TILE_LEVEL_WIDTH) + axial.r;
+}
+
+static inline tile_pos_t *level_get_solved_tile_pos(level_t *level,  hex_axial_t axial)
+{
+    assert_not_null(level);
+    RETURN_NULL_IF_OUT_OF_BOUNDS;
+    return level->solved_positions[addr_to_idx(axial)];
+}
+
+static inline tile_pos_t *level_get_unsolved_tile_pos(level_t *level,  hex_axial_t axial)
+{
+    assert_not_null(level);
+    RETURN_NULL_IF_OUT_OF_BOUNDS;
+    return level->solved_positions[addr_to_idx(axial)];
+}
+
 level_t *create_level(void);
 void destroy_level(level_t *level);
 void level_reset(level_t *level);
@@ -108,14 +135,12 @@ void level_use_null_tile_pos(level_t *level);
 
 void level_toggle_currently_used_tiles(level_t *level);
 
+tile_t *level_get_tile(level_t *level,  hex_axial_t axial);
+tile_pos_t *level_get_current_tile_pos(level_t *level,  hex_axial_t axial);
+
 bool level_parse_string(level_t *level, char *str);
 level_t *load_level_string(char *filename, char *str);
 level_t *load_level_file(char *filename);
-
-tile_t *level_get_tile(level_t *level,  hex_axial_t axial);
-tile_pos_t *level_get_current_tile_pos(level_t *level,  hex_axial_t axial);
-tile_pos_t *level_get_solved_tile_pos(level_t *level,  hex_axial_t axial);
-tile_pos_t *level_get_unsolved_tile_pos(level_t *level,  hex_axial_t axial);
 
 void level_update_ui_name(level_t *level, int idx);
 

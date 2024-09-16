@@ -23,36 +23,31 @@
 #include "tile.h"
 #include "tile_pos.h"
 
-tile_pos_t *init_tile_pos(tile_pos_t *pos, hex_axial_t addr)
+tile_pos_t *init_tile_pos(tile_pos_t *pos, tile_t *tile, hex_axial_t addr)
 {
     assert_not_null(pos);
+    assert_not_null(tile);
+
+    pos->tile = tile;
 
     pos->position = addr;
+    pos->hover_adjacent = NULL;
+    pos->hover = false;
+    pos->hover_center = false;
 
     return pos;
 }
 
-tile_pos_t *create_tile_pos(hex_axial_t addr)
+tile_pos_t *create_tile_pos(hex_axial_t addr, tile_t *tile)
 {
     tile_pos_t *pos = calloc(1, sizeof(tile_pos_t));
-    init_tile_pos(pos, addr);
+    init_tile_pos(pos, tile, addr);
     return pos;
 }
 
 void destroy_tile_pos(tile_pos_t *pos)
 {
     SAFEFREE(pos);
-}
-
-void tile_pos_swap(set_of_tile_positions *list, tile_pos_t *a, tile_pos_t *b)
-{
-    hex_axial_t old_a_position = a->position;
-    hex_axial_t old_b_position = b->position;
-
-    a->position = old_b_position;
-    b->position = old_a_position;
-
-    tile_pos_t *pos = &((*list)[1][2]);
 }
 
 bool tile_pos_check(tile_pos_t *pos)
@@ -164,11 +159,10 @@ void tile_pos_modify_hovered_feature(tile_pos_t *pos)
     }
 }
 
-void tile_pos_set_size(tile_pos_t *pos, float tile_pos_size)
+void tile_pos_rebuild(tile_pos_t *pos)
 {
     assert_not_null(pos);
 
-    pos->size = tile_pos_size;
     pos->line_width = pos->size / 6.0;
     pos->center_circle_draw_radius = pos->line_width * 1.2;
     pos->center_circle_hover_radius = pos->line_width * 1.6;
@@ -194,5 +188,14 @@ void tile_pos_set_size(tile_pos_t *pos, float tile_pos_size)
         pos->sections[i].corners[1] = c1;
         pos->sections[i].corners[2] = cent;
     }
+}
+
+void tile_pos_set_size(tile_pos_t *pos, float tile_pos_size)
+{
+    assert_not_null(pos);
+
+    pos->size = tile_pos_size;
+
+    tile_pos_rebuild(pos);
 }
 

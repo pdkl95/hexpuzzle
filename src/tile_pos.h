@@ -57,16 +57,13 @@ struct tile_pos {
 };
 typedef struct tile_pos tile_pos_t;
 
-typedef tile_pos_t set_of_tile_positions[TILE_LEVEL_WIDTH][TILE_LEVEL_HEIGHT];
-
 void print_tile_pos(tile_pos_t *tile_pos);
-tile_pos_t *init_tile_pos(tile_pos_t *tile_pos, hex_axial_t addr);
-tile_pos_t *create_tile_pos(hex_axial_t addr);
+tile_pos_t *init_tile_pos(tile_pos_t *pos, tile_t *tile, hex_axial_t addr);
+tile_pos_t *create_tile_pos(hex_axial_t addr, tile_t *tile);
 void destroy_tile_pos(tile_pos_t *tile_pos);
 
-void tile_pos_swap(set_of_tile_positions *list, tile_pos_t *a, tile_pos_t *b);
-
 bool tile_pos_check(tile_pos_t *tile_pos);
+void tile_pos_rebuild(tile_pos_t *pos);
 void tile_pos_set_size(tile_pos_t *tile_pos, float tile_size);
 void tile_pos_draw(tile_pos_t *tile_pos, tile_pos_t *drag_target, bool finished, Color finished_color);
 
