@@ -1,0 +1,198 @@
+/****************************************************************************
+ *                                                                          *
+ * tile_pos.c                                                               *
+ *                                                                          *
+ * This file is part of hexpuzzle.                                          *
+ *                                                                          *
+ * hexpuzzle is free software: you can redistribute it and/or               *
+ * modify it under the terms of the GNU General Public License as published *
+ * by the Free Software Foundation, either version 3 of the License,        *
+ * or (at your option) any later version.                                   *
+ *                                                                          *
+ * hexpuzzle is distributed in the hope that it will be useful,             *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of           *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General *
+ * Public License for more details.                                         *
+ *                                                                          *
+ * You should have received a copy of the GNU General Public License along  *
+ * with hexpuzzle. If not, see <https://www.gnu.org/licenses/>.             *
+ *                                                                          *
+ ****************************************************************************/
+
+#include "common.h"
+#include "tile.h"
+#include "tile_pos.h"
+
+tile_pos_t *init_tile_pos(tile_pos_t *pos, hex_axial_t addr)
+{
+    assert_not_null(pos);
+
+    pos->position = addr;
+
+    return pos;
+}
+
+tile_pos_t *create_tile_pos(hex_axial_t addr)
+{
+    tile_pos_t *pos = calloc(1, sizeof(tile_pos_t));
+    init_tile_pos(pos, addr);
+    return pos;
+}
+
+void destroy_tile_pos(tile_pos_t *pos)
+{
+    SAFEFREE(pos);
+}
+
+void tile_pos_swap(set_of_tile_positions *list, tile_pos_t *a, tile_pos_t *b)
+{
+    hex_axial_t old_a_position = a->position;
+    hex_axial_t old_b_position = b->position;
+
+    a->position = old_b_position;
+    b->position = old_a_position;
+
+    tile_pos_t *pos = &((*list)[1][2]);
+}
+
+bool tile_pos_check(tile_pos_t *pos)
+{
+    for (hex_direction_t i=0; i<6; i++) {
+        if (pos->tile->path[i] != PATH_TYPE_NONE) {
+            hex_direction_t opp_i = hex_opposite_direction(i);
+            tile_pos_t *neighbor = pos->neighbors[i];
+            if (neighbor) {
+                if (pos->tile->path[i] != neighbor->tile->path[opp_i]) {
+                    return false;
+                }
+            }
+        }
+    }
+
+    return true;
+}
+
+void tile_pos_set_hover(tile_pos_t *pos, Vector2 mouse_pos)
+{
+    assert_not_null(pos);
+
+    Vector2 relvec = Vector2Subtract(mouse_pos, pos->center);
+    float theta = atan2f(-relvec.y, -relvec.x);
+    theta += TAU/2.0;
+    theta = TAU - theta;
+    pos->hover = true;
+    pos->hover_section = (int)(theta/TO_RADIANS(60.0));
+    pos->hover_center =
+        (Vector2DistanceSqr(mouse_pos, pos->center)
+         < (pos->center_circle_hover_radius *
+            pos->center_circle_hover_radius));
+}
+
+void tile_pos_unset_hover(tile_pos_t *pos)
+{
+    assert_not_null(pos);
+
+    pos->hover = false;
+    pos->hover_center = false;
+}
+
+void tile_pos_set_hover_adjacent(tile_pos_t *pos, hex_direction_t section, tile_pos_t *adjacent_pos)
+{
+    assert_not_null(pos);
+
+    if (adjacent_pos->tile->enabled) {
+        pos->hover_adjacent = adjacent_pos;
+        pos->hover_section = section;
+    }
+}
+
+void tile_pos_unset_hover_adjacent(tile_pos_t *pos)
+{
+    assert_not_null(pos);
+
+    pos->hover_adjacent = NULL;
+}
+
+void tile_pos_toggle_fixed(tile_pos_t *pos)
+{
+    assert_not_null(pos);
+
+    pos->tile->fixed = !pos->tile->fixed;
+}
+
+void tile_pos_toggle_hidden(tile_pos_t *pos)
+{
+    assert_not_null(pos);
+
+    pos->tile->hidden = !pos->tile->hidden;
+}
+
+void tile_pos_cycle_path_section(tile_pos_t *pos, hex_direction_t section)
+{
+    assert_not_null(pos);
+
+    pos->tile->path[section]++;
+    if (pos->tile->path[section] >= PATH_TYPE_COUNT) {
+        pos->tile->path[section]  = PATH_TYPE_NONE;
+    }
+
+    if (pos->hover_adjacent) {
+        hex_direction_t opposite_section =
+            hex_opposite_direction(section);
+
+        pos->hover_adjacent->tile->path[opposite_section] = pos->tile->path[section];
+    }
+}
+
+void tile_pos_modify_hovered_feature(tile_pos_t *pos)
+{
+    assert_not_null(pos);
+
+    if (pos->tile->hidden) {
+        tile_pos_toggle_hidden(pos);
+    } else {
+        if (pos->hover_center) {
+            if (IsKeyDown(KEY_LEFT_SHIFT) ||
+                IsKeyDown(KEY_RIGHT_SHIFT)) {
+                tile_pos_toggle_hidden(pos);
+            } else {
+                tile_pos_toggle_fixed(pos);
+            }
+        } else {
+            tile_pos_cycle_path_section(pos, pos->hover_section);
+        }
+    }
+}
+
+void tile_pos_set_size(tile_pos_t *pos, float tile_pos_size)
+{
+    assert_not_null(pos);
+
+    pos->size = tile_pos_size;
+    pos->line_width = pos->size / 6.0;
+    pos->center_circle_draw_radius = pos->line_width * 1.2;
+    pos->center_circle_hover_radius = pos->line_width * 1.6;
+    pos->center = hex_axial_to_pixel(pos->position, pos->size);
+
+    Vector2 *corners = hex_pixel_corners(pos->center, pos->size);
+    memcpy(pos->corners, corners, 7 * sizeof(Vector2));
+
+    for (int i=0; i<6; i++) {
+        Vector2 c0 = pos->corners[i];
+        Vector2 c1 = pos->corners[i + 1];
+
+        pos->midpoints[i] = Vector2Lerp(c0, c1, 0.5);
+    }
+
+    Vector2 cent = Vector2Lerp(pos->midpoints[0], pos->midpoints[3], 0.5);
+
+    for (int i=0; i<6; i++) {
+        Vector2 c0 = pos->corners[i];
+        Vector2 c1 = pos->corners[i + 1];
+
+        pos->sections[i].corners[0] = c0;
+        pos->sections[i].corners[1] = c1;
+        pos->sections[i].corners[2] = cent;
+    }
+}
+

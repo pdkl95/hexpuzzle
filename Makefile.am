@@ -36,6 +36,8 @@ hexpuzzle_SOURCES =                                \
 	src/options.h         src/options.c        \
 	src/raylib_helper.h   src/raylib_helper.c  \
 	src/tile.h            src/tile.c           \
+	src/tile_draw.h       src/tile_draw.c      \
+	src/tile_pos.h        src/tile_pos.c       \
 	src/util.h            src/util.c           \
 	src/common.h          src/main.c
 

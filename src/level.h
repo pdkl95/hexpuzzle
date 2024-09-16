@@ -30,6 +30,7 @@
 #include "const.h"
 #include "hex.h"
 #include "tile.h"
+#include "tile_pos.h"
 
 enum used_tiles {
     USED_TILES_NULL = 0,
@@ -47,16 +48,16 @@ struct level {
 
     used_tiles_t currently_used_tiles;
 
-    tile_t tiles[TILE_LEVEL_WIDTH][TILE_LEVEL_HEIGHT];
-    tile_t solved_tiles[TILE_LEVEL_WIDTH][TILE_LEVEL_HEIGHT];
-    tile_t unsolved_tiles[TILE_LEVEL_WIDTH][TILE_LEVEL_HEIGHT];
-
-    tile_t *sorted_tiles[LEVEL_MAXTILES];
-
     int tile_count;
 
+    tile_t tiles[LEVEL_MAXTILES];
+    tile_t *sorted_tiles[LEVEL_MAXTILES];
+
+    set_of_tile_positions solved_tiles;
+    set_of_tile_positions unsolved_tiles;
+    set_of_tile_positions *current_tiles;
+
     hex_axial_t center;
-    tile_t *center_tile;
 
     float req_tile_size;
     float tile_size;
@@ -67,15 +68,15 @@ struct level {
     Vector2 px_max;
     Rectangle px_bounding_box;
 
-    tile_t *hover;
+    tile_pos_t *hover;
     hex_direction_t hover_section;
-    tile_t *hover_adjacent;
+    tile_pos_t *hover_adjacent;
     hex_direction_t hover_adjacent_section;
     float hover_section_adjacency_radius;
 
     Vector2 mouse_pos;
 
-    tile_t *drag_target;
+    tile_pos_t *drag_target;
     Vector2 drag_start;
     Vector2 drag_offset;
     int drag_reset_frames;
@@ -101,10 +102,10 @@ void level_reset(level_t *level);
 bool level_eq_tiles(level_t *level, level_t *other);
 void level_sort_tiles(level_t *level);
 
-void level_use_solved_tiles(level_t *level);
-void level_use_unsolved_tiles(level_t *level);
-void level_backup_tiles(level_t *level);
-void level_store_tiles(level_t *level);
+void level_use_solved_tile_pos(level_t *level);
+void level_use_unsolved_tile_pos(level_t *level);
+void level_use_null_tile_pos(level_t *level);
+
 void level_toggle_currently_used_tiles(level_t *level);
 
 bool level_parse_string(level_t *level, char *str);
@@ -112,8 +113,9 @@ level_t *load_level_string(char *filename, char *str);
 level_t *load_level_file(char *filename);
 
 tile_t *level_get_tile(level_t *level,  hex_axial_t axial);
-tile_t *level_get_solved_tile(level_t *level,  hex_axial_t axial);
-tile_t *level_get_unsolved_tile(level_t *level,  hex_axial_t axial);
+tile_pos_t *level_get_current_tile_pos(level_t *level,  hex_axial_t axial);
+tile_pos_t *level_get_solved_tile_pos(level_t *level,  hex_axial_t axial);
+tile_pos_t *level_get_unsolved_tile_pos(level_t *level,  hex_axial_t axial);
 
 void level_update_ui_name(level_t *level, int idx);
 
@@ -127,8 +129,10 @@ void level_save_to_file(level_t *level, char *dirpath);
 void level_save_to_file_if_changed(level_t *level, char *dirpath);
 void level_serialize(level_t *level, FILE *f);
 
+tile_pos_t *level_find_solved_neighbor_tile_pos(level_t *level, tile_pos_t *tile, hex_direction_t section);
+tile_pos_t *level_find_unsolved_neighbor_tile_pos(level_t *level, tile_pos_t *tile, hex_direction_t section);
+
 void level_resize(level_t *level);
-tile_t *level_find_neighbor_tile(level_t *level, tile_t *tile, hex_direction_t section);
 void level_set_hover(level_t *level, IVector2 mouse_position);
 void level_drag_start(level_t *level);
 void level_drag_stop(level_t *level);

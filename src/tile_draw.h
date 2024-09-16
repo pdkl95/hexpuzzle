@@ -1,6 +1,6 @@
 /****************************************************************************
  *                                                                          *
- * tile.h                                                                   *
+ * tile_draw.h                                                              *
  *                                                                          *
  * This file is part of hexpuzzle.                                          *
  *                                                                          *
@@ -19,58 +19,16 @@
  *                                                                          *
  ****************************************************************************/
 
-#ifndef TILE_H
-#define TILE_H
+#ifndef TILE_DRAW_H
+#define TILE_DRAW_H
 
-#include "hex.h"
-
-enum path_type {
-    PATH_TYPE_NONE   = 0,
-    PATH_TYPE_RED    = 1,
-    PATH_TYPE_BLUE   = 2,
-    PATH_TYPE_YELLOW = 3,
-    PATH_TYPE_GREEN  = 4
-};
-typedef enum path_type path_type_t;
-#define PATH_TYPE_COUNT (PATH_TYPE_GREEN + 1)
-
-struct path_int {
-    int path[PATH_TYPE_COUNT];
-};
-typedef struct path_int path_int_t;
+#include "tile.h"
+#include "tile_pos.h"
 
 Color path_type_color(path_type_t type);
+Color path_type_highlight_color(path_type_t type);
 
-struct tile {
-    /*
-     * game attr
-     */
-    bool enabled;
-    bool fixed;
-    bool hidden;
-    path_type_t path[6];
+void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color finished_color);
 
-    struct tile_pos *solved_pos;
-    struct tile_pos *unsolved_pos;
-};
-typedef struct tile tile_t;
-
-int compare_tiles(const void *p1, const void *p2);
-
-void print_tile(tile_t *tile);
-tile_t *init_tile(tile_t *tile);
-tile_t *create_tile(void);
-void destroy_tile(tile_t *tile);
-
-bool tile_eq(tile_t *dst, tile_t *other);
-void tile_copy_attributes(tile_t *dst, tile_t *src);
-void tile_copy_attributes_except_enabled(tile_t *dst, tile_t *src);
-void tile_swap_attributes(tile_t *a, tile_t *b);
-
-path_int_t tile_count_path_types(tile_t *tile);
-
-void tile_serialize(tile_t *tile, FILE *f);
-void tile_set_flag_from_char(tile_t *tile, char c);
-
-#endif /*TILE_H*/
+#endif /*TILE_DRAW_H*/
 

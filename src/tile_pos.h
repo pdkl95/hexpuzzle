@@ -1,0 +1,83 @@
+/****************************************************************************
+ *                                                                          *
+ * tile_pos.h                                                               *
+ *                                                                          *
+ * This file is part of hexpuzzle.                                          *
+ *                                                                          *
+ * hexpuzzle is free software: you can redistribute it and/or               *
+ * modify it under the terms of the GNU General Public License as published *
+ * by the Free Software Foundation, either version 3 of the License,        *
+ * or (at your option) any later version.                                   *
+ *                                                                          *
+ * hexpuzzle is distributed in the hope that it will be useful,             *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of           *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General *
+ * Public License for more details.                                         *
+ *                                                                          *
+ * You should have received a copy of the GNU General Public License along  *
+ * with hexpuzzle. If not, see <https://www.gnu.org/licenses/>.             *
+ *                                                                          *
+ ****************************************************************************/
+
+#ifndef TILE_POS_H
+#define TILE_POS_H
+
+#include "tile.h"
+
+struct tile_section {
+    Vector2 corners[3];
+};
+typedef struct tile_section tile_section_t;
+
+struct tile_pos {
+    tile_t *tile;
+
+    hex_axial_t position;
+
+    /*
+     * drawing/ui attr
+     */
+    float size;
+    float line_width;
+    float center_circle_draw_radius;
+    float center_circle_hover_radius;
+
+    Vector2 center;
+    Vector2 corners[7];
+    Vector2 midpoints[7];
+    tile_section_t sections[6];
+    struct tile_pos *neighbors[6];
+
+    bool hover;
+    bool hover_center;
+    hex_direction_t hover_section;
+
+    struct tile_pos *hover_adjacent;
+
+};
+typedef struct tile_pos tile_pos_t;
+
+typedef tile_pos_t set_of_tile_positions[TILE_LEVEL_WIDTH][TILE_LEVEL_HEIGHT];
+
+void print_tile_pos(tile_pos_t *tile_pos);
+tile_pos_t *init_tile_pos(tile_pos_t *tile_pos, hex_axial_t addr);
+tile_pos_t *create_tile_pos(hex_axial_t addr);
+void destroy_tile_pos(tile_pos_t *tile_pos);
+
+void tile_pos_swap(set_of_tile_positions *list, tile_pos_t *a, tile_pos_t *b);
+
+bool tile_pos_check(tile_pos_t *tile_pos);
+void tile_pos_set_size(tile_pos_t *tile_pos, float tile_size);
+void tile_pos_draw(tile_pos_t *tile_pos, tile_pos_t *drag_target, bool finished, Color finished_color);
+
+void tile_pos_set_hover(tile_pos_t *tile_pos, Vector2 mouse_pos);
+void tile_pos_unset_hover(tile_pos_t *tile_pos);
+
+void tile_pos_set_hover_adjacent(tile_pos_t *tile_pos, hex_direction_t section, tile_pos_t *adjacent_tile);
+void tile_pos_unset_hover_adjacent(tile_pos_t *tile_pos);
+
+void tile_pos_cycle_path_section(tile_pos_t *tile_pos, hex_direction_t section;);
+void tile_pos_modify_hovered_feature(tile_pos_t *tile_pos);
+
+#endif /*TILE_POS_H*/
+

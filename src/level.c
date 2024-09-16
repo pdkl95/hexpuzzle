@@ -25,143 +25,144 @@
 
 #include "options.h"
 #include "tile.h"
+#include "tile_pos.h"
+#include "tile_draw.h"
 #include "level.h"
 
 //#define DEBUG_DRAG_AND_DROP 1
 
 void print_tiles(level_t *level)
 {
+    level_sort_tiles(level);
+
     printf("Level \"%s\" tiles:\n", level->name);
+    for (int i=0; i<LEVEL_MAXTILES; i++) {
+        tile_t *tile = level->sorted_tiles[i];
+        printf("%02d: ", i);
+        print_tile(tile);
+    }
+}
+
+void print_tile_solved_positionss(level_t *level)
+{
+    printf("Level \"%s\" solved tile positionss:\n", level->name);
 
     for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
         for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
-            tile_t *tile = &(level->tiles[q][r]);
-            print_tile(tile);
+            tile_pos_t *pos = &(level->solved_tiles[q][r]);
+            printf("[%d, %d] ", q, r);
+            print_tile(pos->tile);
         }
     }
 }
 
-static void level_enable_tile_callback(hex_axial_t axial, void *data)
+void print_tile_unsolved_positionss(level_t *level)
 {
-    level_t *level = (level_t *)data;
-    tile_t *tile = level_get_tile(level, axial);
-    if (tile) {
-        tile->enabled = true;
-        if (tile->solved) {
-            tile->solved->enabled = true;
-        }
-        if (tile->unsolved) {
-            tile->unsolved->enabled = true;
-        }
-    }
-}
+    printf("Level \"%s\" solved tile positionss:\n", level->name);
 
-static void level_disable_tile_callback(hex_axial_t axial, void *data)
-{
-    level_t *level = (level_t *)data;
-    tile_t *tile = level_get_tile(level, axial);
-    if (tile) {
-        tile->enabled = false;
-        if (tile->solved) {
-            tile->solved->enabled = false;
-        }
-        if (tile->unsolved) {
-            tile->unsolved->enabled = false;
-        }
-    }
-}
-
-static void copy_all_tiles(tile_t dst[][TILE_LEVEL_HEIGHT], tile_t src[][TILE_LEVEL_HEIGHT], bool copy_tile_pointers)
-{
     for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
         for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
-            tile_t *tile_dst = &(dst[q][r]);
-            tile_t *tile_src = &(src[q][r]);
-
-            tile_copy_attributes(tile_dst, tile_src);
-
-            if (copy_tile_pointers) {
-                tile_dst->solved   = tile_src->solved;
-                tile_dst->unsolved = tile_src->unsolved;
-            }
+            tile_pos_t *pos = &(level->unsolved_tiles[q][r]);
+            printf("[%d, %d] ", q, r);
+            print_tile(pos->tile);
         }
     }
 }
 
-void level_use_unsolved_tiles(level_t *level)
+static void level_enable_solved_tile_callback(hex_axial_t axial, void *data)
 {
+    level_t *level = (level_t *)data;
+    tile_pos_t *pos = level_get_solved_tile_pos(level, axial);
+    if (pos) {
+        pos->tile->enabled = true;
+    }
+}
+
+static void level_enable_unsolved_tile_callback(hex_axial_t axial, void *data)
+{
+    level_t *level = (level_t *)data;
+    tile_pos_t *pos = level_get_solved_tile_pos(level, axial);
+    if (pos) {
+        pos->tile->enabled = true;
+    }
+}
+
+static void level_enable_current_tile_callback(hex_axial_t axial, void *data)
+{
+    level_t *level = (level_t *)data;
     switch (level->currently_used_tiles) {
     case USED_TILES_NULL:
-        copy_all_tiles(level->tiles, level->unsolved_tiles, true);
+        /* do nothing */
+        if (options->verbose) {
+            errmsg("level_toggle_currently_used_tiles() No tile set in use!");
+        }
         break;
 
     case USED_TILES_SOLVED:
-        copy_all_tiles(level->tiles, level->unsolved_tiles, true);
-        level_store_tiles(level);
+        level_enable_solved_tile_callback(axial, data);
         break;
 
     case USED_TILES_UNSOLVED:
-        /* do nothing */
+        level_enable_unsolved_tile_callback(axial, data);
         break;
     }
+}
 
+static void level_disable_solved_tile_callback(hex_axial_t axial, void *data)
+{
+    level_t *level = (level_t *)data;
+    tile_pos_t *pos = level_get_solved_tile_pos(level, axial);
+    if (pos) {
+        pos->tile->enabled = false;
+    }
+}
+
+static void level_disable_unsolved_tile_callback(hex_axial_t axial, void *data)
+{
+    level_t *level = (level_t *)data;
+    tile_pos_t *pos = level_get_solved_tile_pos(level, axial);
+    if (pos) {
+        pos->tile->enabled = false;
+    }
+}
+
+static void level_disable_current_tile_callback(hex_axial_t axial, void *data)
+{
+    level_t *level = (level_t *)data;
+    switch (level->currently_used_tiles) {
+    case USED_TILES_NULL:
+        /* do nothing */
+        if (options->verbose) {
+            errmsg("level_toggle_currently_used_tiles() No tile set in use!");
+        }
+        break;
+
+    case USED_TILES_SOLVED:
+        level_disable_solved_tile_callback(axial, data);
+        break;
+
+    case USED_TILES_UNSOLVED:
+        level_disable_unsolved_tile_callback(axial, data);
+        break;
+    }
+}
+
+void level_use_solved_tile_pos(level_t *level)
+{
+    level->currently_used_tiles = USED_TILES_SOLVED;
+    level->current_tiles = &level->solved_tiles;
+}
+
+void level_use_unsolved_tile_pos(level_t *level)
+{
     level->currently_used_tiles = USED_TILES_UNSOLVED;
+    level->current_tiles = &level->unsolved_tiles;
 }
 
-static inline void level_copy_tiles_as_solved(level_t *level)
+void level_use_null_tile_pos(level_t *level)
 {
-    copy_all_tiles(level->solved_tiles, level->tiles, false);
-}
-
-static inline void level_copy_tiles_as_unsolved(level_t *level)
-{
-    copy_all_tiles(level->unsolved_tiles, level->tiles, false);
-}
-
-static inline void level_store_tiles_as_solved(level_t *level)
-{
-    level_copy_tiles_as_solved(level);
     level->currently_used_tiles = USED_TILES_NULL;
-}
-
-static inline void level_store_tiles_as_unsolved(level_t *level)
-{
-    level_copy_tiles_as_unsolved(level);
-    level->currently_used_tiles = USED_TILES_NULL;
-}
-
-void level_backup_tiles(level_t *level)
-{
-    switch (level->currently_used_tiles) {
-    case USED_TILES_NULL:
-        /* do nothing */
-        break;
-
-    case USED_TILES_SOLVED:
-        level_copy_tiles_as_solved(level);
-        break;
-
-    case USED_TILES_UNSOLVED:
-        level_copy_tiles_as_unsolved(level);
-        break;
-    }
-}
-
-void level_store_tiles(level_t *level)
-{
-    switch (level->currently_used_tiles) {
-    case USED_TILES_NULL:
-        /* do nothing */
-        break;
-
-    case USED_TILES_SOLVED:
-        level_store_tiles_as_solved(level);
-        break;
-
-    case USED_TILES_UNSOLVED:
-        level_store_tiles_as_unsolved(level);
-        break;
-    }
+    level->current_tiles = NULL;
 }
 
 void level_toggle_currently_used_tiles(level_t *level)
@@ -170,24 +171,23 @@ void level_toggle_currently_used_tiles(level_t *level)
     case USED_TILES_NULL:
         /* do nothing */
         if (options->verbose) {
-            infomsg("level_toggle_currently_used_tiles() SKIP!");
+            infomsg("level_toggle_currently_used_tiles() NULL");
         }
+        level_use_null_tile_pos(level);
         break;
 
     case USED_TILES_SOLVED:
         if (options->verbose) {
             infomsg("level_toggle_currently_used_tiles() Using SOLVED tiles");
         }
-        level_store_tiles(level);
-        level_use_unsolved_tiles(level);
+        level_use_solved_tile_pos(level);
         break;
 
     case USED_TILES_UNSOLVED:
         if (options->verbose) {
             infomsg("level_toggle_currently_used_tiles() Using UNSOLVED tiles");
         }
-        level_store_tiles(level);
-        level_use_solved_tiles(level);
+        level_use_unsolved_tile_pos(level);
         break;
     }
 }
@@ -219,8 +219,6 @@ void level_reset(level_t *level)
 {
     assert_not_null(level);
 
-    level->currently_used_tiles = USED_TILES_NULL;
-
     level->req_tile_size = 60.0f;
 
     level->drag_reset_total_frames = 12;
@@ -231,13 +229,18 @@ void level_reset(level_t *level)
     level->drag_target = NULL;
 
     level->center = LEVEL_CENTER_POSITION;
-    level->center_tile = level_get_tile(level, level->center);
+
+    level_prepare_tiles(level);
 
     level_resize(level);
 
+    level_use_solved_tile_pos(level);
     level_enable_spiral(level, level->radius);
-    level_copy_tiles_as_solved(level);
-    level_copy_tiles_as_unsolved(level);
+
+    level_use_solved_tile_pos(level);
+    level_enable_spiral(level, level->radius);
+
+    level_use_null_tile_pos(level);
 }
 
 static void level_prepare_tiles(level_t *level)
@@ -246,29 +249,51 @@ static void level_prepare_tiles(level_t *level)
 
     for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
         for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
-            tile_t *tile = &(level->tiles[q][r]);
-            tile_t *solved_tile = &(level->solved_tiles[q][r]);
-            tile_t *unsolved_tile = &(level->unsolved_tiles[q][r]);
+            tile_t *tile = &(level->tiles[n]);
+            tile_pos_t *solved_pos = &(level->solved_tiles[q][r]);
+            tile_pos_t *unsolved_pos = &(level->unsolved_tiles[q][r]);
+
+            assert_not_null(tile);
+            assert_not_null(solved_pos);
+            assert_not_null(unsolved_pos);
 
             hex_axial_t pos = {
                 .q = q,
                 .r = r
             };
 
-            init_tile(         tile, pos);
-            init_tile(  solved_tile, pos);
-            init_tile(unsolved_tile, pos);
+            init_tile(tile);
+
+            init_tile_pos(  solved_pos, pos);
+            init_tile_pos(unsolved_pos, pos);
+
+            tile->solved_pos = solved_pos;
+            tile->unsolved_pos = unsolved_pos;
+
+            solved_pos->tile = tile;
+            unsolved_pos->tile = tile;
+
+            n++;
+        }
+    }
+
+    n = 0;
+
+    for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
+        for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
+            tile_t *tile = &(level->tiles[n]);
+            tile_pos_t *solved_pos = &(level->solved_tiles[q][r]);
+            tile_pos_t *unsolved_pos = &(level->unsolved_tiles[q][r]);
 
             for (hex_direction_t section = 0; section < 6; section++) {
-                tile->neighbors[section] = level_find_neighbor_tile(level, tile, section);
+                solved_pos->neighbors[section]   = level_find_solved_neighbor_tile_pos(  level,   solved_pos, section);
+                unsolved_pos->neighbors[section] = level_find_unsolved_neighbor_tile_pos(level, unsolved_pos, section);
             }
 
             level->sorted_tiles[n] = tile;
             n++;
         }
     }
-
-    level_resize(level);
 }
 
 level_t *create_level(void)
@@ -281,7 +306,6 @@ level_t *create_level(void)
 
     level->radius = LEVEL_DEFAULT_RADIUS;
 
-    level_prepare_tiles(level);
 
     return level;
 }
@@ -317,51 +341,60 @@ void level_sort_tiles(level_t *level)
     qsort(level->sorted_tiles, LEVEL_MAXTILES, sizeof(level_t *), compare_tiles);
 }
 
+tile_pos_t *level_get_center_tile_pos(level_t *level)
+{
+    return level_get_current_tile_pos(level, LEVEL_CENTER_POSITION);
+}
+
 #define RETURN_NULL_IF_OUT_OF_BOUNDS                       \
     if ((axial.r < 0) || (axial.r >= TILE_LEVEL_HEIGHT) || \
         (axial.q < 0) || (axial.q >= TILE_LEVEL_WIDTH)) {  \
         return NULL;                                       \
     }
 
-tile_t *level_get_tile(level_t *level,  hex_axial_t axial)
+tile_pos_t *level_get_solved_tile_pos(level_t *level,  hex_axial_t axial)
 {
     assert_not_null(level);
-    RETURN_NULL_IF_OUT_OF_BOUNDS;
-    return &(level->tiles[axial.q][axial.r]);
-}
 
-tile_t *level_get_solved_tile(level_t *level,  hex_axial_t axial)
-{
-    assert_not_null(level);
     RETURN_NULL_IF_OUT_OF_BOUNDS;
+
     return &(level->solved_tiles[axial.q][axial.r]);
 }
 
-tile_t *level_get_unsolved_tile(level_t *level,  hex_axial_t axial)
+tile_pos_t *level_get_unsolved_tile_pos(level_t *level,  hex_axial_t axial)
 {
     assert_not_null(level);
+
     RETURN_NULL_IF_OUT_OF_BOUNDS;
+
     return &(level->unsolved_tiles[axial.q][axial.r]);
 }
 
-void level_use_solved_tiles(level_t *level)
+tile_pos_t *level_get_current_tile_pos(level_t *level,  hex_axial_t axial)
 {
+    assert_not_null(level);
+    RETURN_NULL_IF_OUT_OF_BOUNDS;
     switch (level->currently_used_tiles) {
     case USED_TILES_NULL:
-        copy_all_tiles(level->tiles, level->solved_tiles, true);
-        break;
+        assert(false && "not using any tile set");
+        __builtin_unreachable();
+        return NULL;
 
     case USED_TILES_SOLVED:
-        /* do nothing */
-        break;
+        return level_get_unsolved_tile_pos(level, axial);
 
     case USED_TILES_UNSOLVED:
-        copy_all_tiles(level->tiles, level->solved_tiles, true);
-        level_store_tiles(level);
-        break;
+        return level_get_unsolved_tile_pos(level, axial);
     }
 
-    level->currently_used_tiles = USED_TILES_SOLVED;
+    __builtin_unreachable();
+    return NULL;
+}
+
+tile_t *level_get_tile(level_t *level,  hex_axial_t axial)
+{
+    tile_pos_t *pos = level_get_current_tile_pos(level, axial);
+    return pos->tile;
 }
 
 struct token_list {
@@ -465,45 +498,45 @@ static void level_free_tokens(token_list_t list)
     SAFEFREE(list.tokens);
 }
 
-void level_setup_tiles_from_serialized_strings(level_t *level, char *solved_addr, char *unsolved_addr, char *path, char *flags)
+void level_setup_tiles_from_serialized_strings(level_t *level, char *solved_addr_str, char *unsolved_addr_str, char *path, char *flags)
 {
     assert_not_null(level);
-    assert_not_null(solved_addr);
-    assert_not_null(unsolved_addr);
+    assert_not_null(solved_addr_str);
+    assert_not_null(unsolved_addr_str);
     assert_not_null(path);
     assert_not_null(flags);
 
-    assert(strlen(solved_addr)   >= 3);
-    assert(strlen(unsolved_addr) >= 3);
-    assert(strlen(path)          == 6);
-    assert(strlen(flags)         == 3);
+    assert(strlen(solved_addr_str)   >= 3);
+    assert(strlen(unsolved_addr_str) >= 3);
+    assert(strlen(path)  == 6);
+    assert(strlen(flags) == 3);
 
 #if 0
     printf("Creating tile from: solved_addr=\"%s\" unsolved_addr=\"%s\" path=\"%s\" flags=\"%s\"\n",
            solved_addr, unsolved_addr, path, flags);
 #endif
 
-    hex_axial_t solved_pos = {0}, unsolved_pos = {0};
+    hex_axial_t solved_addr = {0}, unsolved_addr = {0};
 
-    char *p = solved_addr;
-    solved_pos.q = (int)strtol(solved_addr, &p, 10);
+    char *p = solved_addr_str;
+    solved_addr.q = (int)strtol(solved_addr_str, &p, 10);
     p++;
-    solved_pos.r = (int)strtol(p, NULL, 10);
+    solved_addr.r = (int)strtol(p, NULL, 10);
 
-    p = unsolved_addr;
-    unsolved_pos.q = (int)strtol(unsolved_addr, &p, 10);
+    p = unsolved_addr_str;
+    unsolved_addr.q = (int)strtol(unsolved_addr_str, &p, 10);
     p++;
-    unsolved_pos.r = (int)strtol(p, NULL, 10);
+    unsolved_addr.r = (int)strtol(p, NULL, 10);
 
-    tile_t   *solved_tile = level_get_solved_tile(  level,   solved_pos);
-    tile_t *unsolved_tile = level_get_unsolved_tile(level, unsolved_pos);
+    tile_pos_t   *solved_pos = level_get_solved_tile_pos(  level,   solved_addr);
+    tile_pos_t *unsolved_pos = level_get_unsolved_tile_pos(level, unsolved_addr);
 
-    if (!solved_tile) {
-        errmsg("Cannot find tile with solved_address (%d, %d)\n", solved_pos.q, solved_pos.r);
+    if (!solved_pos) {
+        errmsg("Cannot find tile with solved_address (%d, %d)\n", solved_addr.q, solved_addr.r);
         return;
     }
-    if (!unsolved_tile) {
-        errmsg("Cannot find tile with unsolved_address (%d, %d)\n", unsolved_pos.q, unsolved_pos.r);
+    if (!unsolved_pos) {
+        errmsg("Cannot find tile with unsolved_address (%d, %d)\n", unsolved_addr.q, unsolved_addr.r);
         return;
     }
 
@@ -513,19 +546,13 @@ void level_setup_tiles_from_serialized_strings(level_t *level, char *solved_addr
         digit[1] = '\0';
 
         path_type_t ptype = (int)strtol(digit, NULL, 10);
-        solved_tile->path[i] = ptype;
-        unsolved_tile->path[i] = ptype;
+        solved_pos->tile->path[i] = ptype;
+        unsolved_pos->tile->path[i] = ptype;
     }
 
     for (int i=0; i<3; i++) {
-        tile_set_flag_from_char(  solved_tile, flags[i]);
-        tile_set_flag_from_char(unsolved_tile, flags[i]);
+        tile_set_flag_from_char(solved_pos->tile, flags[i]);
     }
-
-    solved_tile->solved     = solved_tile;
-    solved_tile->unsolved   = unsolved_tile;
-    unsolved_tile->solved   = solved_tile;
-    unsolved_tile->unsolved = unsolved_tile;
 }
 
 bool level_parse_string(level_t *level, char *str)
@@ -688,7 +715,7 @@ void level_play(level_t *level)
     assert_not_null(level);
 
     level_load(level);
-    level_use_unsolved_tiles(level);
+    level_use_unsolved_tile_pos(level);
     game_mode = GAME_MODE_PLAY_LEVEL;
 }
 
@@ -697,7 +724,7 @@ void level_edit(level_t *level)
     assert_not_null(level);
 
     level_load(level);
-    level_use_solved_tiles(level);
+    level_use_solved_tile_pos(level);
     game_mode = GAME_MODE_EDIT_LEVEL;
 }
 
@@ -766,12 +793,10 @@ void level_save_to_file_if_changed(level_t *level, char *dirpath)
 static int level_count_enabled_tiles(level_t *level)
 {
     int count = 0;
-    for (int q=0; q < TILE_LEVEL_WIDTH; q++) {
-        for (int r=0; r < TILE_LEVEL_HEIGHT; r++) {
-            tile_t *tile = &(level->tiles[q][r]);
-            if (tile->enabled) {
-                count++;
-            }
+    for (int i=0; i < TILE_LEVEL_WIDTH; i++) {
+        tile_t *tile = &(level->tiles[i]);
+        if (tile->enabled) {
+            count++;
         }
     }
     return count;
@@ -779,7 +804,6 @@ static int level_count_enabled_tiles(level_t *level)
 
 void level_serialize(level_t *level, FILE *f)
 {
-    level_backup_tiles(level);
     level_sort_tiles(level);
 
     fprintf(f, "hexlevel version 1\n");
@@ -805,12 +829,12 @@ char *level_serialize_memory(level_t *level)
     return buf;
 }
 
-static void level_add_to_bounding_box(level_t *level, tile_t *tile)
+static void level_add_to_bounding_box(level_t *level, tile_pos_t *pos)
 {
     assert_not_null(level);
-    assert_not_null(tile);
+    assert_not_null(pos);
 
-    Vector2 *corners = tile->corners;
+    Vector2 *corners = pos->corners;
     for (int i=0; i<6; i++) {
         level->px_min.x = MIN(level->px_min.x, corners[i].x);
         level->px_min.y = MIN(level->px_min.y, corners[i].y);
@@ -824,7 +848,7 @@ void level_resize(level_t *level)
 {
     assert_not_null(level);
 
-    level->center_tile = level_get_tile(level, level->center);
+    //tile_pos_t *center_tile = level_get_center_tile_pos(level);
 
     Vector2 window_level_margin = { 0.8, 0.8 };
     Vector2 window = Vector2Scale(ivector2_to_vector2(window_size), 1.0);
@@ -856,13 +880,18 @@ void level_resize(level_t *level)
     level->px_max.x = 0.0f;
     level->px_max.y = 0.0f;
 
-    for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
-        for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
-            tile_t *tile = &(level->tiles[q][r]);
-            tile_set_size(tile, level->tile_size);
-            if (tile->enabled) {
-              level_add_to_bounding_box(level, tile);
-            }
+    level_sort_tiles(level);
+
+    for (int i=0; i<LEVEL_MAXTILES; i++) {
+        tile_t *tile = &(level->tiles[i]);
+        assert_not_null(tile);
+
+        tile_pos_t *solved_pos   = tile->solved_pos;
+        tile_pos_t *unsolved_pos = tile->unsolved_pos;
+        tile_pos_set_size(  solved_pos, level->tile_size);
+        tile_pos_set_size(unsolved_pos, level->tile_size);
+        if (tile->enabled) {
+            level_add_to_bounding_box(level, solved_pos);
         }
     }
 
@@ -888,11 +917,27 @@ void level_resize(level_t *level)
 #endif
 }
 
-tile_t *level_find_neighbor_tile(level_t *level, tile_t *tile, hex_direction_t section)
+tile_pos_t *level_find_solved_neighbor_tile_pos(level_t *level, tile_pos_t *pos, hex_direction_t section)
 {
     section = (section + 1) % 6;
-    hex_axial_t neighbor_pos = hex_axial_neighbor(tile->position, section);
-    tile_t *neighbor = level_get_tile(level, neighbor_pos);
+    hex_axial_t neighbor_pos = hex_axial_neighbor(pos->position, section);
+    tile_pos_t *neighbor = level_get_solved_tile_pos(level, neighbor_pos);
+    return neighbor;
+}
+
+tile_pos_t *level_find_unsolved_neighbor_tile_pos(level_t *level, tile_pos_t *pos, hex_direction_t section)
+{
+    section = (section + 1) % 6;
+    hex_axial_t neighbor_pos = hex_axial_neighbor(pos->position, section);
+    tile_pos_t *neighbor = level_get_unsolved_tile_pos(level, neighbor_pos);
+    return neighbor;
+}
+
+tile_pos_t *level_find_current_neighbor_tile_pos(level_t *level, tile_pos_t *pos, hex_direction_t section)
+{
+    section = (section + 1) % 6;
+    hex_axial_t neighbor_pos = hex_axial_neighbor(pos->position, section);
+    tile_pos_t *neighbor = level_get_current_tile_pos(level, neighbor_pos);
     return neighbor;
 }
 
@@ -904,13 +949,17 @@ bool level_check(level_t *level)
 
     for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
         for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
-            tile_t *tile = &(level->tiles[q][r]);
-            if (tile->enabled) {
-                if (!tile_check(tile)) {
+            hex_axial_t axial = {
+                .q = q,
+                .r = r
+            };
+            tile_pos_t *pos = level_get_current_tile_pos(level, axial);
+            if (pos->tile->enabled) {
+                if (!tile_pos_check(pos)) {
                     return false;
                 }
 
-                path_int_t counts = tile_count_path_types(tile);
+                path_int_t counts = tile_count_path_types(pos->tile);
                 for (int i=0; i<PATH_TYPE_COUNT; i++) {
                     total.path[i] += counts.path[i];
                 }
@@ -936,12 +985,12 @@ void level_set_hover(level_t *level, IVector2 mouse_position)
     if (level) {
         if (level->hover) {
             if (level->hover_adjacent) {
-                tile_unset_hover_adjacent(level->hover);
-                tile_unset_hover_adjacent(level->hover_adjacent);
+                tile_pos_unset_hover_adjacent(level->hover);
+                tile_pos_unset_hover_adjacent(level->hover_adjacent);
                 level->hover_adjacent = NULL;
             }
 
-            tile_unset_hover(level->hover);
+            tile_pos_unset_hover(level->hover);
             level->hover->hover = false;
         }
 
@@ -969,24 +1018,24 @@ void level_set_hover(level_t *level, IVector2 mouse_position)
         Vector2 mouse_tile_pos = Vector2Subtract(level->mouse_pos, level->px_offset);
         hex_axial_t mouse_hex = pixel_to_hex_axial(mouse_tile_pos, level->tile_size);
 
-        level->hover = level_get_tile(level, mouse_hex);
+        level->hover = level_get_current_tile_pos(level, mouse_hex);
 
         if (level->hover) {
-            if (level->hover->enabled) {
-                tile_t *tile = level->hover;
-                Vector2 midpoint = tile->midpoints[tile->hover_section];
+            if (level->hover->tile->enabled) {
+                tile_pos_t *pos = level->hover;
+                Vector2 midpoint = pos->midpoints[pos->hover_section];
                 midpoint = Vector2Add(midpoint, level->px_offset);
                 if (Vector2Distance(midpoint, level->mouse_pos) < level->hover_section_adjacency_radius) {
-                    level->hover_adjacent = level_find_neighbor_tile(level, tile, tile->hover_section);
+                    level->hover_adjacent = level_find_current_neighbor_tile_pos(level, pos, pos->hover_section);
                     if (level->hover_adjacent) {
-                        level->hover_section = tile->hover_section;
+                        level->hover_section = pos->hover_section;
                         level->hover_adjacent_section = hex_opposite_direction(level->hover_section);
-                        tile_set_hover_adjacent(level->hover,          level->hover_section,          level->hover_adjacent);
-                        tile_set_hover_adjacent(level->hover_adjacent, level->hover_adjacent_section, level->hover);
+                        tile_pos_set_hover_adjacent(level->hover,          level->hover_section,          level->hover_adjacent);
+                        tile_pos_set_hover_adjacent(level->hover_adjacent, level->hover_adjacent_section, level->hover);
                     }
                 }
 
-                tile_set_hover(level->hover, Vector2Subtract(level->mouse_pos, level->px_offset));
+                tile_pos_set_hover(level->hover, Vector2Subtract(level->mouse_pos, level->px_offset));
             }
         }
     }
@@ -1005,7 +1054,7 @@ void level_drag_start(level_t *level)
         printf("drag_stop(): hover = %p\n", level->hover);
 #endif
 
-        if (level->hover->enabled && !level->hover->fixed) {
+        if (level->hover->tile->enabled && !level->hover->tile->fixed) {
             level->drag_target = level->hover;
             level->drag_start  = level->mouse_pos;
 #ifdef DEBUG_DRAG_AND_DROP
@@ -1015,17 +1064,17 @@ void level_drag_start(level_t *level)
     }
 }
 
-void level_drop_tile(level_t *level, tile_t *drag_target, tile_t *drop_target)
+void level_drop_tile(level_t *level, tile_pos_t *drag_target, tile_pos_t *drop_target)
 {
     assert_not_null(level);
     assert_not_null(drag_target);
     assert_not_null(drop_target);
 
-    assert(drag_target->enabled);
-    assert(drop_target->enabled);
+    assert(drag_target->tile->enabled);
+    assert(drop_target->tile->enabled);
 
-    if (!drop_target->fixed) {
-        tile_swap_attributes(drag_target, drop_target);
+    if (!drop_target->tile->fixed) {
+        tile_pos_swap(level->current_tiles, level->drag_target, drop_target);
     }
 }
 
@@ -1034,13 +1083,13 @@ void level_drag_stop(level_t *level)
     assert_not_null(level);
 
     if (level->drag_target) {
-        tile_t *drop_target = level->hover;
+        tile_pos_t *drop_target = level->hover;
 
-        if (drop_target && !drop_target->enabled) {
+        if (drop_target && !drop_target->tile->enabled) {
             drop_target = NULL;
         }
 
-        if (drop_target && !drop_target->fixed && !drop_target->hidden) {
+        if (drop_target && !drop_target->tile->fixed && !drop_target->tile->hidden) {
 #ifdef DEBUG_DRAG_AND_DROP
             printf("drag_stop(): drop target\n");
 #endif
@@ -1065,7 +1114,7 @@ void level_modify_hovered_feature(level_t *level)
 {
     assert_not_null(level);
     if (level->hover) {
-        tile_modify_hovered_feature(level->hover);
+        tile_pos_modify_hovered_feature(level->hover);
     }
 }
 
@@ -1087,14 +1136,18 @@ void level_draw(level_t *level, bool finished)
 
     for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
         for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
-            tile_t *tile = &(level->tiles[q][r]);
-            assert_not_null(tile);
+            hex_axial_t addr = {
+                .q = q,
+                .r = r
+            };
+            tile_pos_t *pos = level_get_current_tile_pos(level, addr);
+            assert_not_null(pos);
 
-            if (tile->enabled) {
-                if (tile == level->drag_target) {
+            if (pos->tile->enabled) {
+                if (level->drag_target && pos->tile == level->drag_target->tile) {
                     // defer until after bg tiles are drawn
                 } else {
-                    tile_draw(tile, level->drag_target, finished, finished_color);
+                    tile_draw(pos, level->drag_target, finished, finished_color);
                 }
             }
         }
@@ -1128,36 +1181,40 @@ void level_draw(level_t *level, bool finished)
 
 void level_enable_spiral(level_t *level, int radius)
 {
-    hex_axial_foreach_in_spiral(level->center_tile->position,
+    tile_pos_t *pos = level_get_center_tile_pos(level);
+    hex_axial_foreach_in_spiral(pos->position,
                                 radius,
-                                level_enable_tile_callback,
+                                level_enable_current_tile_callback,
                                 level);
     level_resize(level);
 }
 
 void level_disable_spiral(level_t *level, int radius)
 {
-    hex_axial_foreach_in_spiral(level->center_tile->position,
+    tile_pos_t *pos = level_get_center_tile_pos(level);
+    hex_axial_foreach_in_spiral(pos->position,
                                 radius,
-                                level_disable_tile_callback,
+                                level_disable_current_tile_callback,
                                 level);
     level_resize(level);
 }
 
 void level_enable_ring(level_t *level, int radius)
 {
-    hex_axial_foreach_in_ring(level->center_tile->position,
+    tile_pos_t *pos = level_get_center_tile_pos(level);
+    hex_axial_foreach_in_ring(pos->position,
                               radius,
-                              level_enable_tile_callback,
+                              level_enable_current_tile_callback,
                               level);
     level_resize(level);
 }
 
 void level_disable_ring(level_t *level, int radius)
 {
-    hex_axial_foreach_in_ring(level->center_tile->position,
+    tile_pos_t *pos = level_get_center_tile_pos(level);
+    hex_axial_foreach_in_ring(pos->position,
                               radius,
-                              level_disable_tile_callback,
+                              level_disable_current_tile_callback,
                               level);
     level_resize(level);
 }

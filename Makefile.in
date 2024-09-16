@@ -111,7 +111,8 @@ am_hexpuzzle_OBJECTS = src/hexpuzzle-collection.$(OBJEXT) \
 	src/hexpuzzle-logging.$(OBJEXT) \
 	src/hexpuzzle-options.$(OBJEXT) \
 	src/hexpuzzle-raylib_helper.$(OBJEXT) \
-	src/hexpuzzle-tile.$(OBJEXT) src/hexpuzzle-util.$(OBJEXT) \
+	src/hexpuzzle-tile.$(OBJEXT) src/hexpuzzle-tile_draw.$(OBJEXT) \
+	src/hexpuzzle-tile_pos.$(OBJEXT) src/hexpuzzle-util.$(OBJEXT) \
 	src/hexpuzzle-main.$(OBJEXT) \
 	external/zip-kuba/hexpuzzle-zip.$(OBJEXT)
 hexpuzzle_OBJECTS = $(am_hexpuzzle_OBJECTS)
@@ -330,7 +331,8 @@ hexpuzzle_LDADD = $(COMMON_PROG_LDADD)
 hexpuzzle_SOURCES = src/collection.h src/collection.c src/const.h \
 	src/hex.h src/hex.c src/level.h src/level.c src/logging.h \
 	src/logging.c src/options.h src/options.c src/raylib_helper.h \
-	src/raylib_helper.c src/tile.h src/tile.c src/util.h \
+	src/raylib_helper.c src/tile.h src/tile.c src/tile_draw.h \
+	src/tile_draw.c src/tile_pos.h src/tile_pos.c src/util.h \
 	src/util.c src/common.h src/main.c external/zip-kuba/miniz.h \
 	external/zip-kuba/zip.h external/zip-kuba/zip.c
 all: config.h
@@ -448,6 +450,10 @@ src/hexpuzzle-raylib_helper.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-tile.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/hexpuzzle-tile_draw.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
+src/hexpuzzle-tile_pos.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-util.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-main.$(OBJEXT): src/$(am__dirstamp) \
@@ -483,6 +489,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-options.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raylib_helper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-tile.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-tile_draw.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-tile_pos.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-util.Po@am__quote@
 
 .c.o:
@@ -598,6 +606,34 @@ src/hexpuzzle-tile.obj: src/tile.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/tile.c' object='src/hexpuzzle-tile.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-tile.obj `if test -f 'src/tile.c'; then $(CYGPATH_W) 'src/tile.c'; else $(CYGPATH_W) '$(srcdir)/src/tile.c'; fi`
+
+src/hexpuzzle-tile_draw.o: src/tile_draw.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-tile_draw.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-tile_draw.Tpo -c -o src/hexpuzzle-tile_draw.o `test -f 'src/tile_draw.c' || echo '$(srcdir)/'`src/tile_draw.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-tile_draw.Tpo src/$(DEPDIR)/hexpuzzle-tile_draw.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/tile_draw.c' object='src/hexpuzzle-tile_draw.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-tile_draw.o `test -f 'src/tile_draw.c' || echo '$(srcdir)/'`src/tile_draw.c
+
+src/hexpuzzle-tile_draw.obj: src/tile_draw.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-tile_draw.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-tile_draw.Tpo -c -o src/hexpuzzle-tile_draw.obj `if test -f 'src/tile_draw.c'; then $(CYGPATH_W) 'src/tile_draw.c'; else $(CYGPATH_W) '$(srcdir)/src/tile_draw.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-tile_draw.Tpo src/$(DEPDIR)/hexpuzzle-tile_draw.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/tile_draw.c' object='src/hexpuzzle-tile_draw.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-tile_draw.obj `if test -f 'src/tile_draw.c'; then $(CYGPATH_W) 'src/tile_draw.c'; else $(CYGPATH_W) '$(srcdir)/src/tile_draw.c'; fi`
+
+src/hexpuzzle-tile_pos.o: src/tile_pos.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-tile_pos.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-tile_pos.Tpo -c -o src/hexpuzzle-tile_pos.o `test -f 'src/tile_pos.c' || echo '$(srcdir)/'`src/tile_pos.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-tile_pos.Tpo src/$(DEPDIR)/hexpuzzle-tile_pos.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/tile_pos.c' object='src/hexpuzzle-tile_pos.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-tile_pos.o `test -f 'src/tile_pos.c' || echo '$(srcdir)/'`src/tile_pos.c
+
+src/hexpuzzle-tile_pos.obj: src/tile_pos.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-tile_pos.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-tile_pos.Tpo -c -o src/hexpuzzle-tile_pos.obj `if test -f 'src/tile_pos.c'; then $(CYGPATH_W) 'src/tile_pos.c'; else $(CYGPATH_W) '$(srcdir)/src/tile_pos.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-tile_pos.Tpo src/$(DEPDIR)/hexpuzzle-tile_pos.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/tile_pos.c' object='src/hexpuzzle-tile_pos.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-tile_pos.obj `if test -f 'src/tile_pos.c'; then $(CYGPATH_W) 'src/tile_pos.c'; else $(CYGPATH_W) '$(srcdir)/src/tile_pos.c'; fi`
 
 src/hexpuzzle-util.o: src/util.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-util.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-util.Tpo -c -o src/hexpuzzle-util.o `test -f 'src/util.c' || echo '$(srcdir)/'`src/util.c
