@@ -159,8 +159,11 @@ char *game_mode_str(void)
     case GAME_MODE_NULL:
         return "NULL";
 
-    case GAME_MODE_COLLECTION:
-        return "COLLECTION";
+    case GAME_MODE_PLAY_COLLECTION:
+        return "PLAY_COLLECTION";
+
+    case GAME_MODE_EDIT_COLLECTION:
+        return "EDIT_COLLECTION";
 
     case GAME_MODE_PLAY_LEVEL:
         return "PLAY_LEVEL";
@@ -176,6 +179,18 @@ char *game_mode_str(void)
 void toggle_edit_mode(void)
 {
     switch (game_mode) {
+    case GAME_MODE_NULL:
+        warnmsg("Trying to toggle edit mode in NULL game mode?!");
+        break;
+
+    case GAME_MODE_PLAY_COLLECTION:
+        game_mode = GAME_MODE_EDIT_COLLECTION;
+        break;
+
+    case GAME_MODE_EDIT_COLLECTION:
+        game_mode = GAME_MODE_PLAY_COLLECTION;
+        break;
+
     case GAME_MODE_PLAY_LEVEL:
         game_mode = GAME_MODE_EDIT_LEVEL;
         break;
@@ -186,7 +201,7 @@ void toggle_edit_mode(void)
 
     default:
         /* do nothing */
-        break;
+        __builtin_unreachable();
     }
 }
 
@@ -611,6 +626,10 @@ static void draw_name_header(char *name)
     name_panel_rect.width = textwidth + (2 * PANEL_INNER_MARGIN);
 
     bool hover = CheckCollisionPointRec(mouse_positionf, name_text_rect);
+    if (game_mode != GAME_MODE_EDIT_LEVEL) {
+        hover = false;
+    }
+
     if (hover && mouse_left_click) {
         show_name_edit_dialog();
     }
@@ -673,10 +692,6 @@ static void draw_gui_widgets(void)
         running = false;
     }
 
-    if (GuiButton(edit_button_rect, edit_button_text)) {
-        toggle_edit_mode();
-    }
-
     switch (game_mode) {
     case GAME_MODE_EDIT_LEVEL:
         draw_name_header(current_level->name);
@@ -697,10 +712,17 @@ static void draw_gui_widgets(void)
         }
         break;
 
-    case GAME_MODE_COLLECTION:
+    case GAME_MODE_EDIT_COLLECTION:
         if (GuiButton(new_level_button_rect, new_level_button_text)) {
             create_new_level();
         }
+        /* fall through */
+
+    case GAME_MODE_PLAY_COLLECTION:
+        if (GuiButton(edit_button_rect, edit_button_text)) {
+            toggle_edit_mode();
+        }
+
         break;
 
     default:
@@ -893,7 +915,9 @@ render_frame(
             }
             break;
 
-        case GAME_MODE_COLLECTION:
+        case GAME_MODE_PLAY_COLLECTION:
+            /* fall through */
+        case GAME_MODE_EDIT_COLLECTION:
             if (current_collection) {
                 collection_draw(current_collection);
             }
@@ -1038,9 +1062,9 @@ static void game_init(void)
                 level_play(level);
             }
         } else if (IS_COLLECTION_FILENAME(filename)) {
-            game_mode = GAME_MODE_COLLECTION;
+            game_mode = GAME_MODE_PLAY_COLLECTION;
         } else if (current_collection->dirpath) {
-            game_mode = GAME_MODE_COLLECTION;
+            game_mode = GAME_MODE_PLAY_COLLECTION;
         } else {
             assert(0);
         }

@@ -706,21 +706,25 @@ static void collection_draw_buttons(collection_t *collection, Rectangle collecti
         }
     }
 
-    if (GuiButton(collection_edit_button_rect, collection_edit_button_text)) {
-        level_t *level = collection->levels;
-        int n = collection->gui_list_active;
-        if (n >= 0) {
-            while (n--) {
-                level = level->next;
+    if (game_mode == GAME_MODE_EDIT_COLLECTION) {
+        if (GuiButton(collection_edit_button_rect, collection_edit_button_text)) {
+            level_t *level = collection->levels;
+            int n = collection->gui_list_active;
+            if (n >= 0) {
+                while (n--) {
+                    level = level->next;
+                }
+                level_edit(level);
             }
-            level_edit(level);
         }
     }
 
     GuiEnable();
 
-    if (GuiButton(collection_new_button_rect, collection_new_button_text)) {
-        create_new_level();
+    if (game_mode == GAME_MODE_EDIT_COLLECTION) {
+        if (GuiButton(collection_new_button_rect, collection_new_button_text)) {
+            create_new_level();
+        }
     }
 }
 

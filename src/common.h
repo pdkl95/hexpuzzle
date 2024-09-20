@@ -118,7 +118,8 @@ extern IVector2 window_size;
 
 enum game_mode {
     GAME_MODE_NULL = 0,
-    GAME_MODE_COLLECTION,
+    GAME_MODE_PLAY_COLLECTION,
+    GAME_MODE_EDIT_COLLECTION,
     GAME_MODE_PLAY_LEVEL,
     GAME_MODE_EDIT_LEVEL
 };

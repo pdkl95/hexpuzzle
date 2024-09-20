@@ -665,9 +665,20 @@ void level_unload(void)
     if (current_level) {
         // unload level?
         current_level = NULL;
-    }
 
-    game_mode = GAME_MODE_COLLECTION;
+        switch (game_mode) {
+        case GAME_MODE_PLAY_LEVEL:
+            game_mode = GAME_MODE_PLAY_COLLECTION;
+            break;
+
+        case GAME_MODE_EDIT_LEVEL:
+            game_mode = GAME_MODE_EDIT_COLLECTION;
+            break;
+
+        default:
+            assert(false && "shouldn't be called in this game mode");
+        }
+    }
 }
 
 void level_load(level_t *level)
