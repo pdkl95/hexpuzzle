@@ -506,6 +506,39 @@ void collection_save_dir(collection_t *collection)
             printf("trying to save level \"%s\"\n", level->name);
             level_save_to_file_if_changed(level, collection->dirpath);
         });
+
+    const char *path = concat_dir_and_filename(collection->dirpath, COLLECTION_ZIP_INDEX_FILENAME);
+    FILE *f = fopen(path, "w");
+    if (NULL == f) {
+        errmsg("Could not open \"%s\" for writing: %s", path, strerror(errno));
+        return;
+    }
+
+    level_t *level = collection->levels;
+    bool first = true;
+    while (level) {
+        assert_not_null(level->filename);
+
+        if (first) {
+            first = false;
+        } else {
+            if (EOF == fputs("\n", f)) {
+                errmsg("Error writing index file \"%s\" in collection \"%s\" - fputs() returned EOF",
+                       COLLECTION_ZIP_INDEX_FILENAME, collection->filename);
+                goto close_file;
+            }
+        }
+        if (EOF == fputs(level->filename, f)) {
+            errmsg("Error writing index file \"%s\" in collection \"%s\" - fputs() returned EOF",
+                   COLLECTION_ZIP_INDEX_FILENAME, collection->filename);
+            goto close_file;
+        }
+
+        level = level->next;
+    }
+
+  close_file:
+    fclose(f);
 }
 
 void collection_save_zip(collection_t *collection)
