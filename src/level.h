@@ -32,6 +32,10 @@
 #include "tile.h"
 #include "tile_pos.h"
 
+extern bool feature_single_sector_editing;
+extern bool feature_adjacency_editing;
+#define feature_adjacency_only (!feature_single_sector_editing && feature_adjacency_editing)
+
 enum used_tiles {
     USED_TILES_NULL = 0,
     USED_TILES_SOLVED,
@@ -50,6 +54,7 @@ struct level {
 
     int tile_count;
 
+    int current_tile_write_idx;
     tile_t tiles[LEVEL_MAXTILES];
     tile_t *sorted_tiles[LEVEL_MAXTILES];
 
@@ -117,7 +122,7 @@ static inline tile_pos_t *level_get_unsolved_tile_pos(level_t *level,  hex_axial
 {
     assert_not_null(level);
     RETURN_NULL_IF_OUT_OF_BOUNDS;
-    return &level->solved_positions[addr_to_idx(axial)];
+    return &level->unsolved_positions[addr_to_idx(axial)];
 }
 
 level_t *create_level(void);
@@ -126,6 +131,16 @@ void level_reset(level_t *level);
 
 bool level_eq_tiles(level_t *level, level_t *other);
 void level_sort_tiles(level_t *level);
+
+inline static bool level_using_solved_tiles(level_t *level)
+{
+    return level->currently_used_tiles == USED_TILES_SOLVED;
+}
+
+inline static bool level_using_unsolved_tiles(level_t *level)
+{
+    return level->currently_used_tiles == USED_TILES_UNSOLVED;
+}
 
 void level_use_solved_tile_pos(level_t *level);
 void level_use_unsolved_tile_pos(level_t *level);

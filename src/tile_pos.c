@@ -22,6 +22,7 @@
 #include "common.h"
 #include "tile.h"
 #include "tile_pos.h"
+#include "level.h"
 
 tile_pos_t *init_tile_pos(tile_pos_t *pos, tile_t *tile, hex_axial_t addr)
 {
@@ -126,12 +127,22 @@ void tile_pos_cycle_path_section(tile_pos_t *pos, hex_direction_t section)
 {
     assert_not_null(pos);
 
-    pos->tile->path[section]++;
-    if (pos->tile->path[section] >= PATH_TYPE_COUNT) {
-        pos->tile->path[section]  = PATH_TYPE_NONE;
+    bool do_local = feature_single_sector_editing;
+    bool do_opposite = (!!pos->hover_adjacent) && feature_adjacency_editing;
+    if (do_opposite) {
+        do_local = true;
     }
 
-    if (pos->hover_adjacent) {
+    if (do_local) {
+        pos->tile->path[section]++;
+        if (pos->tile->path[section] >= PATH_TYPE_COUNT) {
+            pos->tile->path[section]  = PATH_TYPE_NONE;
+        }
+
+    }
+
+
+    if (do_opposite) {
         hex_direction_t opposite_section =
             hex_opposite_direction(section);
 

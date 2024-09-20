@@ -33,6 +33,9 @@
 
 //#define DEBUG_DRAG_AND_DROP 1
 
+bool feature_single_sector_editing = false;
+bool feature_adjacency_editing     = true;
+
 void print_tiles(level_t *level)
 {
     level_sort_tiles(level);
@@ -252,7 +255,7 @@ void level_reset(level_t *level)
     level->drag_reset_frames = 0;
 
     level->hover = NULL;
-    level->hover_section_adjacency_radius = 12.0;
+    level->hover_section_adjacency_radius = 16.0;
     level->drag_target = NULL;
 
     level->center = LEVEL_CENTER_POSITION;
@@ -330,7 +333,7 @@ tile_pos_t *level_get_current_tile_pos(level_t *level,  hex_axial_t axial)
         return NULL;
 
     case USED_TILES_SOLVED:
-        return level_get_unsolved_tile_pos(level, axial);
+        return level_get_solved_tile_pos(level, axial);
 
     case USED_TILES_UNSOLVED:
         return level_get_unsolved_tile_pos(level, axial);
@@ -489,19 +492,26 @@ void level_setup_tiles_from_serialized_strings(level_t *level, char *solved_addr
         return;
     }
 
+    tile_t *tile = &(level->tiles[level->current_tile_write_idx]);
+    tile->solved_pos = solved_pos;
+    tile->unsolved_pos = unsolved_pos;
+    solved_pos->tile = tile;
+    unsolved_pos->tile = tile;
+
     for (int i=0; i<6; i++) {
         char digit[2];
         digit[0] = path[i];
         digit[1] = '\0';
 
         path_type_t ptype = (int)strtol(digit, NULL, 10);
-        solved_pos->tile->path[i] = ptype;
-        unsolved_pos->tile->path[i] = ptype;
+        tile->path[i] = ptype;
     }
 
     for (int i=0; i<3; i++) {
-        tile_set_flag_from_char(solved_pos->tile, flags[i]);
+        tile_set_flag_from_char(tile, flags[i]);
     }
+
+    level->current_tile_write_idx++;
 }
 
 bool level_parse_string(level_t *level, char *str)
@@ -533,6 +543,8 @@ bool level_parse_string(level_t *level, char *str)
     level->tile_count = (int)strtol(list.tokens[8], NULL, 10);
 
     //printf("c=%d, r=%d, n=\"%s\"\n", level->tile_count, level->radius, level->name);
+
+    level->current_tile_write_idx = 0;
 
     for(int i = 9; i<(list.token_count - 2); i += 5) {
         CMP(i, "tile");
@@ -977,7 +989,7 @@ void level_set_hover(level_t *level, IVector2 mouse_position)
 
         if (level->hover) {
             if (level->hover->tile->enabled) {
-                if (edit_mode) {
+                if (edit_mode && feature_adjacency_editing) {
                     tile_pos_t *pos = level->hover;
                     Vector2 midpoint = pos->midpoints[pos->hover_section];
                     midpoint = Vector2Add(midpoint, level->px_offset);
@@ -1003,14 +1015,13 @@ void level_drag_start(level_t *level)
     assert_not_null(level);
 
     if (level->drag_target) {
-        level->drag_target = NULL;
-    }
-
-    if (level->hover) {
 #ifdef DEBUG_DRAG_AND_DROP
         printf("drag_stop(): hover = %p\n", level->hover);
 #endif
+        level->drag_target = NULL;
+    }
 
+    if (level->hover && level_using_unsolved_tiles(level)) {
         if (level->hover->tile->enabled && !level->hover->tile->fixed) {
             level->drag_target = level->hover;
             level->drag_start  = level->mouse_pos;
@@ -1023,16 +1034,24 @@ void level_drag_start(level_t *level)
 
 void level_swap_tile_pos(level_t *level, tile_pos_t *a, tile_pos_t *b)
 {
+    assert_not_null(level);
+    assert_not_null(a);
+    assert_not_null(b);
+
+    assert(a != b);
+    assert(a->tile != b->tile);
+    assert(!((a->position.q == b->position.q) && (a->position.r == b->position.r)));
+
     tile_t *old_a_tile = a->tile;
     tile_t *old_b_tile = b->tile;
 
+#ifdef DEBUG_DRAG_AND_DROP
+    printf("swap_tile_pos(): a=(%d, %d)\n", a->position.q, a->position.r);
+    printf("                 b=(%d, %d)\n", b->position.q, b->position.r);
+#endif
+
     a->tile = old_b_tile;
     b->tile = old_a_tile;
-
-#ifdef DEBUG_DRAG_AND_DROP
-    printf("swap_tile_pos(): a=(%d, %d)\n", old_a_position.q, old_a_position.r);
-    printf("                 b=(%d, %d)\n", old_b_position.q, old_b_position.r);
-#endif
 
     switch (level->currently_used_tiles) {
     case USED_TILES_NULL:
@@ -1064,7 +1083,7 @@ void level_drop_tile(level_t *level, tile_pos_t *drag_target, tile_pos_t *drop_t
     assert(drag_target->tile->enabled);
     assert(drop_target->tile->enabled);
 
-    if (!drop_target->tile->fixed) {
+    if (!drop_target->tile->fixed && level_using_unsolved_tiles(level)) {
         level_swap_tile_pos(level, level->drag_target, drop_target);
     }
 }
@@ -1105,8 +1124,11 @@ void level_modify_hovered_feature(level_t *level)
 {
     assert_not_null(level);
     if (level->hover) {
-        tile_pos_modify_hovered_feature(level->hover);
-        level->changed = true;
+        tile_pos_t *pos = level->hover;
+        if (pos->tile->enabled) {
+            tile_pos_modify_hovered_feature(pos);
+            level->changed = true;
+        }
     }
 }
 

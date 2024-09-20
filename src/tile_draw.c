@@ -25,6 +25,7 @@
 #include "tile.h"
 #include "tile_pos.h"
 #include "tile_draw.h"
+#include "level.h"
 
 Color path_type_color(path_type_t type)
 {
@@ -66,6 +67,15 @@ Color path_type_highlight_color(path_type_t type)
     }
 }
 
+static void draw_adjacency_highlight(tile_pos_t *pos)
+{
+    Vector2 mid = pos->midpoints[pos->hover_section];
+    tile_section_t sec = pos->sections[pos->hover_section];
+    Vector2 c0 = Vector2Lerp(sec.corners[0], mid, 0.35);
+    Vector2 c1 = Vector2Lerp(sec.corners[1], mid, 0.35);
+    DrawTriangle(c0, c1, sec.corners[2], tile_bg_highlight_color_dim);
+}
+
 void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color finished_color)
 {
     assert_not_null(pos);
@@ -104,21 +114,25 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
                     : tile_bg_color));
     }
 
-    if (pos->hover_adjacent) {
-        Vector2 mid = pos->midpoints[pos->hover_section];
-        tile_section_t sec = pos->sections[pos->hover_section];
-        Vector2 c0 = Vector2Lerp(sec.corners[0], mid, 0.35);
-        Vector2 c1 = Vector2Lerp(sec.corners[1], mid, 0.35);
-        DrawTriangle(c0, c1, sec.corners[2], tile_bg_highlight_color_dim);
-
-    } else if (edit_mode &&
-               pos->hover &&
-               !pos->hover_center &&
-               !drag_target
-    ) {
-        /* section highlight */
-        tile_section_t sec = pos->sections[pos->hover_section];
-        DrawTriangle(sec.corners[0], sec.corners[1], sec.corners[2], tile_bg_highlight_color);
+    if (edit_mode && !drag) {
+        if (feature_adjacency_only) {
+            if (pos->hover_adjacent) {
+                draw_adjacency_highlight(pos);
+            }
+        } else {
+            if (feature_adjacency_editing && pos->hover_adjacent) {
+                draw_adjacency_highlight(pos);
+            } else if (feature_single_sector_editing) {
+                if (pos->hover &&
+                    !pos->hover_center &&
+                    !drag_target) {
+                    /* section highlight */
+                    tile_section_t sec = pos->sections[pos->hover_section];
+                    DrawTriangle(sec.corners[0], sec.corners[1], sec.corners[2], tile_bg_highlight_color);
+                }
+            }
+            
+        }
     }
 
     for (hex_direction_t i=0; i<6; i++) {
@@ -200,7 +214,7 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         DrawCircleV(pos->center, pos->center_circle_draw_radius, tile_bg_highlight_color);
     }
 
-#if 0
+#if 1
     if (drag) {
         return;
     }
