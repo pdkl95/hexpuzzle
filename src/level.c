@@ -177,16 +177,16 @@ void level_toggle_currently_used_tiles(level_t *level)
 
     case USED_TILES_SOLVED:
         if (options->verbose) {
-            infomsg("level_toggle_currently_used_tiles() Using SOLVED tiles");
+            infomsg("level_toggle_currently_used_tiles() Using UNSOLVED tiles");
         }
-        level_use_solved_tile_pos(level);
+        level_use_unsolved_tile_pos(level);
         break;
 
     case USED_TILES_UNSOLVED:
         if (options->verbose) {
-            infomsg("level_toggle_currently_used_tiles() Using UNSOLVED tiles");
+            infomsg("level_toggle_currently_used_tiles() Using SOLVED tiles");
         }
-        level_use_unsolved_tile_pos(level);
+        level_use_solved_tile_pos(level);
         break;
     }
 }

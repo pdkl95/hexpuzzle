@@ -54,6 +54,8 @@ struct hex_axial {
 };
 typedef struct hex_axial hex_axial_t;
 
+//#define hex_axial_is(axial, q, r) (((axial).q == (q)) && ((axial).r == (r)))
+
 struct hex_axialf {
     float q;
     float r;

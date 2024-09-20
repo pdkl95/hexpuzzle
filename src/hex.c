@@ -109,7 +109,17 @@ Vector2 hex_axial_to_pixel(hex_axial_t axial, float size)
 
 hex_axial_t hex_axial_round(hex_axialf_t axialf)
 {
-    return hex_cube_to_axial(hex_cube_round(hex_axialf_to_cubef(axialf)));
+    int qgrid = roundf(axialf.q);
+    int rgrid = roundf(axialf.r);
+    float q = axialf.q - qgrid;
+    float r = axialf.r - rgrid;
+    int dq = (q*q >= r*r) ? roundf(q + 0.5 * r) : 0;
+    int dr = (q*q <  r*r) ? roundf(r + 0.5 * q) : 0;
+    hex_axial_t rv = {
+        .q = qgrid + dq,
+        .r = rgrid + dr
+    };
+    return rv;
 }
 
 hex_cube_t hex_cube_round(hex_cubef_t cubef)
