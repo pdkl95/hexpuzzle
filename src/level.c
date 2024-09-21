@@ -30,6 +30,7 @@
 #include "tile_pos.h"
 #include "tile_draw.h"
 #include "level.h"
+#include "collection.h"
 
 //#define DEBUG_DRAG_AND_DROP 1
 
@@ -271,13 +272,16 @@ void level_reset(level_t *level)
     level_use_null_tile_pos(level);
 }
 
-level_t *create_level(void)
+level_t *create_level(void *collection)
 {
+    collection_t *c = (collection_t *)collection;
     level_t *level = alloc_level();
 
     static int seq = 0;
-    seq++;
-    snprintf(level->name, NAME_MAXLEN, "%s-%d", LEVEL_DEFAULT_NAME, seq);
+    do {
+        seq++;
+        snprintf(level->name, NAME_MAXLEN, "%s-%d", LEVEL_DEFAULT_NAME, seq);
+    } while (c && collection_level_name_exists(c, level->name));
 
     level->radius = LEVEL_DEFAULT_RADIUS;
 

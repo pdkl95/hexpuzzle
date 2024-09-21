@@ -62,6 +62,7 @@ void destroy_collection(collection_t *collection);
 void collection_clear_levels(collection_t *collection);
 void collection_scan_dir(collection_t *collection);
 
+bool collection_level_name_exists(collection_t *collection, const char *name);
 void collection_add_level(collection_t *collection, level_t *level);
 bool collection_add_level_file(collection_t *collection, char *filename);
 

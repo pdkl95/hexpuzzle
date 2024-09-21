@@ -125,7 +125,7 @@ static inline tile_pos_t *level_get_unsolved_tile_pos(level_t *level,  hex_axial
     return &level->unsolved_positions[addr_to_idx(axial)];
 }
 
-level_t *create_level(void);
+level_t *create_level(void *collection);
 void destroy_level(level_t *level);
 void level_reset(level_t *level);
 

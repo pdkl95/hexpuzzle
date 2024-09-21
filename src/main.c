@@ -218,7 +218,7 @@ void return_from_level(void)
 
 void create_new_level(void)
 {
-    level_t *level = create_level();
+    level_t *level = create_level(current_collection);
     collection_add_level(current_collection, level);
     level_edit(level);
     //show_name_edit_dialog();

@@ -437,6 +437,41 @@ static void collection_show_level_names(collection_t *collection)
     printf("</collection>\n");
 }
 
+void collection_update_level_names(collection_t *collection)
+{
+    level_t *lp = collection->levels;
+    int n=0;
+    while (lp) {
+        assert(n < collection->level_name_count);
+
+        level_update_ui_name(lp, n);
+        collection->level_names[n] = lp->ui_name;
+
+        lp = lp->next;
+        n++;
+    }
+
+    assert(n == collection->level_count);
+
+    if (options->verbose) {
+        collection_show_level_names(collection);
+    }
+}
+
+bool collection_level_name_exists(collection_t *collection, const char *name)
+{
+    assert_not_null(collection);
+    assert_not_null(name);
+
+    SGLIB_DL_LIST_MAP_ON_ELEMENTS(level_t, collection->levels, level, prev, next, {
+            if (0 == strcmp(level->name, name)) {
+                return true;
+            }
+        });
+
+    return false;
+}
+
 void collection_add_level(collection_t *collection, level_t *level)
 {
     assert_not_null(collection);
@@ -467,23 +502,7 @@ void collection_add_level(collection_t *collection, level_t *level)
         free(old_ptr);
     }
 
-    level_t *lp = collection->levels;
-    int n=0;
-    while (lp) {
-        assert(n < collection->level_name_count);
-
-        level_update_ui_name(lp, n);
-        collection->level_names[n] = lp->ui_name;
-
-        lp = lp->next;
-        n++;
-    }
-
-    assert(n == collection->level_count);
-
-    if (options->verbose) {
-        collection_show_level_names(collection);
-    }
+    collection_update_level_names(collection);
 }
 
 bool collection_add_level_file(collection_t *collection, char *filename)
@@ -681,6 +700,62 @@ void collection_save(collection_t *collection)
     }
 }
 
+static level_t *collection_find_level_by_idx(collection_t *collection, int level_idx)
+{
+    level_t *p = collection->levels;
+
+    while (p && level_idx > 0) {
+        p = p->next;
+        level_idx--;
+    }
+
+    return p;
+}
+
+static void collection_move_level_earlier(collection_t *collection, int level_idx)
+{
+    level_t *level = collection_find_level_by_idx(collection, level_idx);
+    if (!level) {
+        return;
+    }
+
+    level_t *target = level->prev;
+    if (!target) {
+        return;
+    }
+
+    SGLIB_DL_LIST_DELETE(level_t, collection->levels, level, prev, next);
+    SGLIB_DL_LIST_ADD_BEFORE(level_t, target, level, prev, next);
+
+    level_t *first;
+    SGLIB_DL_LIST_GET_FIRST(level_t, target, prev, next, first);
+    collection->levels = first;
+
+    collection_update_level_names(collection);
+}
+
+static void collection_move_level_later(collection_t *collection, int level_idx)
+{
+    level_t *level = collection_find_level_by_idx(collection, level_idx);
+    if (!level) {
+        return;
+    }
+
+    level_t *target = level->next;
+    if (!target) {
+        return;
+    }
+
+    SGLIB_DL_LIST_DELETE(level_t, collection->levels, level, prev, next);
+    SGLIB_DL_LIST_ADD_AFTER(level_t, target, level, prev, next);
+
+    level_t *first;
+    SGLIB_DL_LIST_GET_FIRST(level_t, target, prev, next, first);
+    collection->levels = first;
+
+    collection_update_level_names(collection);
+}
+
 static void collection_draw_buttons(collection_t *collection, Rectangle collection_list_rect)
 {
     float margin = (float)RAYGUI_ICON_SIZE;
@@ -749,6 +824,59 @@ static void collection_draw_buttons(collection_t *collection, Rectangle collecti
     }
 }
 
+void collection_draw_move_buttons(collection_t *collection, Rectangle bounds)
+{
+    int count = collection->level_count;
+    int *scrollIndex = &collection->gui_list_scroll_index;
+
+    /* adapted from GuiListViewEx() */
+    bool useScrollBar = false;
+    if ((GuiGetStyle(LISTVIEW, LIST_ITEMS_HEIGHT) + GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING))*count > bounds.height) useScrollBar = true;
+
+    Rectangle itemBounds = { 0 };
+    itemBounds.x = bounds.x + GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING);
+    itemBounds.y = bounds.y + GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING) + GuiGetStyle(DEFAULT, BORDER_WIDTH);
+    itemBounds.width = bounds.width - 2*GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING) - GuiGetStyle(DEFAULT, BORDER_WIDTH);
+    itemBounds.height = (float)GuiGetStyle(LISTVIEW, LIST_ITEMS_HEIGHT);
+    if (useScrollBar) itemBounds.width -= GuiGetStyle(LISTVIEW, SCROLLBAR_WIDTH);
+
+    int visibleItems = (int)bounds.height/(GuiGetStyle(LISTVIEW, LIST_ITEMS_HEIGHT) + GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING));
+    if (visibleItems > count) visibleItems = count;
+
+    int startIndex = (scrollIndex == NULL)? 0 : *scrollIndex;
+    if ((startIndex < 0) || (startIndex > (count - visibleItems))) startIndex = 0;
+
+    for (int i = 0; i < visibleItems; i++) {
+        float ymargin = (itemBounds.height - RAYGUI_ICON_SIZE) / 2.0f;
+        Rectangle up_btn_rect = {
+            .x = itemBounds.x + itemBounds.width + 1 * (RAYGUI_ICON_SIZE),
+            .y = itemBounds.y + ymargin,
+            .width  = RAYGUI_ICON_SIZE,
+            .height = RAYGUI_ICON_SIZE
+        };
+        Rectangle down_btn_rect = {
+            .x = itemBounds.x + itemBounds.width + 2.5 * (RAYGUI_ICON_SIZE),
+            .y = itemBounds.y + ymargin,
+            .width  = RAYGUI_ICON_SIZE,
+            .height = RAYGUI_ICON_SIZE
+        };
+
+        if (i > 0) {
+            if (GuiButton(up_btn_rect, GuiIconText(ICON_ARROW_UP, NULL))) {
+                collection_move_level_earlier(collection, i);
+            }
+        }
+
+        if (i < visibleItems - 1) {
+            if (GuiButton(down_btn_rect, GuiIconText(ICON_ARROW_DOWN, NULL))) {
+                collection_move_level_later(collection, i);
+            }
+        }
+
+        itemBounds.y += (GuiGetStyle(LISTVIEW, LIST_ITEMS_HEIGHT) + GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING));
+    }
+}
+
 void collection_draw(collection_t *collection)
 {
     assert_not_null(collection);
@@ -795,6 +923,10 @@ void collection_draw(collection_t *collection)
                   &collection->gui_list_scroll_index,
                   &collection->gui_list_active,
                   &collection->gui_list_focus);
+
+    if (game_mode == GAME_MODE_EDIT_COLLECTION) {
+        collection_draw_move_buttons(collection, collection_list_rect);
+    }
 
     collection_draw_buttons(collection, collection_list_rect);
 }
