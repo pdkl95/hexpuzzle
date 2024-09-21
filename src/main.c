@@ -492,7 +492,7 @@ static void draw_mouse_text(void)
 
 #define BUTTON_MARGIN 4
 #define ICON_BUTTON_SIZE (RAYGUI_ICON_SIZE + (2 * BUTTON_MARGIN))
-
+#define ICON_FONT_SIZE RAYGUI_ICON_SIZE
 #define NAME_FONT_SIZE 20
 #define PANEL_LABEL_FONT_SIZE 14
 #define PANEL_ROUNDNES 0.2
@@ -509,11 +509,17 @@ Rectangle edit_mode_toggle_rect;
 Rectangle return_button_rect;
 Rectangle new_level_button_rect;
 
-char name_edit_button_text[6];
-char close_button_text[6];
-char edit_button_text[6];
-char return_button_text[6];
-char new_level_button_text[6];
+char close_button_text_str[] = "Quit";
+#define CLOSE_BUTTON_TEXT_LENGTH (6 + sizeof(close_button_text_str))
+char close_button_text[CLOSE_BUTTON_TEXT_LENGTH];
+
+char edit_button_text_str[] = "Edit";
+#define EDIT_BUTTON_TEXT_LENGTH (6 + sizeof(edit_button_text_str))
+char edit_button_text[EDIT_BUTTON_TEXT_LENGTH];
+
+char return_button_text_str[] = "Back";
+#define RETURN_BUTTON_TEXT_LENGTH (6 + sizeof(return_button_text_str))
+char return_button_text[RETURN_BUTTON_TEXT_LENGTH];
 
 char cancel_ok_with_icons[25];
 char no_yes_with_icons[25];
@@ -545,8 +551,6 @@ void gui_setup(void)
 
     name_edit_button_rect.width  = ICON_BUTTON_SIZE;
     name_edit_button_rect.height = ICON_BUTTON_SIZE;
-
-    memcpy(name_edit_button_text, GuiIconText(ICON_PENCIL, NULL), 6);
 
     edit_panel_rect.x = name_panel_rect.x;
     edit_panel_rect.y =
@@ -585,33 +589,33 @@ void gui_setup(void)
         + edit_mode_toggle_rect.height
         + (4 * PANEL_INNER_MARGIN);
 
-    close_button_rect.x      = window_size.x - WINDOW_MARGIN - ICON_BUTTON_SIZE;
+    int close_button_text_width  = MeasureText(close_button_text_str,  ICON_FONT_SIZE);
+    int edit_button_text_width   = MeasureText(edit_button_text_str,   ICON_FONT_SIZE);
+    int return_button_text_width = MeasureText(return_button_text_str, ICON_FONT_SIZE);
+    close_button_text_width = edit_button_text_width = return_button_text_width =
+        MAX(MAX(close_button_text_width, edit_button_text_width),
+            return_button_text_width);
+
+    close_button_rect.x      = window_size.x - WINDOW_MARGIN - ICON_BUTTON_SIZE - close_button_text_width;
     close_button_rect.y      = WINDOW_MARGIN;
-    close_button_rect.width  = ICON_BUTTON_SIZE;
+    close_button_rect.width  = ICON_BUTTON_SIZE + close_button_text_width;
     close_button_rect.height = ICON_BUTTON_SIZE;
 
-    memcpy(close_button_text, GuiIconText(ICON_EXIT, NULL), 6);
+    memcpy(close_button_text, GuiIconText(ICON_EXIT, close_button_text_str), CLOSE_BUTTON_TEXT_LENGTH);
 
     edit_button_rect.x      = close_button_rect.x;
     edit_button_rect.y      = close_button_rect.y + close_button_rect.height + WINDOW_MARGIN;
-    edit_button_rect.width  = ICON_BUTTON_SIZE;
+    edit_button_rect.width  = ICON_BUTTON_SIZE + edit_button_text_width;
     edit_button_rect.height = ICON_BUTTON_SIZE;
     
-    memcpy(edit_button_text,  GuiIconText(ICON_TOOLS, NULL), 6);
+    memcpy(edit_button_text,  GuiIconText(ICON_TOOLS, edit_button_text_str), EDIT_BUTTON_TEXT_LENGTH);
 
     return_button_rect.x      = edit_button_rect.x;
     return_button_rect.y      = edit_button_rect.y + edit_button_rect.height + WINDOW_MARGIN;
-    return_button_rect.width  = ICON_BUTTON_SIZE;
+    return_button_rect.width  = ICON_BUTTON_SIZE + return_button_text_width;
     return_button_rect.height = ICON_BUTTON_SIZE;
 
-    memcpy(return_button_text,  GuiIconText(ICON_UNDO_FILL, NULL), 6);
-
-    new_level_button_rect.x      = return_button_rect.x;
-    new_level_button_rect.y      = return_button_rect.y + return_button_rect.height + WINDOW_MARGIN;
-    new_level_button_rect.width  = ICON_BUTTON_SIZE;
-    new_level_button_rect.height = ICON_BUTTON_SIZE;
-
-    memcpy(new_level_button_text,  GuiIconText(ICON_FILE_ADD, NULL), 6);
+    memcpy(return_button_text,  GuiIconText(ICON_UNDO_FILL, return_button_text_str), RETURN_BUTTON_TEXT_LENGTH);
 }
 
 Color panel_bg_color   = { 0x72, 0x1C, 0xB8, 0xaa };
@@ -707,15 +711,14 @@ static void draw_gui_widgets(void)
     case GAME_MODE_PLAY_LEVEL:
         draw_name_header(current_level->name);
 
-        if (GuiButton(return_button_rect, return_button_text)) {
+        // NOTE: not return_button_rect; when the edit button
+        //       isn't shown, move up into edit button's place.
+        if (GuiButton(edit_button_rect, return_button_text)) {
             return_from_level();
         }
         break;
 
     case GAME_MODE_EDIT_COLLECTION:
-        if (GuiButton(new_level_button_rect, new_level_button_text)) {
-            create_new_level();
-        }
         /* fall through */
 
     case GAME_MODE_PLAY_COLLECTION:
