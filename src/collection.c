@@ -53,7 +53,7 @@ static collection_t *alloc_collection(void)
     collection->level_name_count = INITIAL_LEVEL_NAME_COUNT;
     collection_alloc_level_names(collection);
 
-    collection->name[0] = '\0';
+    //collection->name[0] = '\0';
 
     collection->dirpath = NULL;
     collection->filename = NULL;
@@ -72,13 +72,9 @@ static collection_t *alloc_collection(void)
     return collection;
 }
 
-collection_t *create_collection(char *name)
+collection_t *create_collection(void)
 {
     collection_t *collection = alloc_collection();
-
-    if (name) {
-        snprintf(collection->name, NAME_MAXLEN, "%s", name);
-    }
 
     return collection;
 }
@@ -132,7 +128,7 @@ collection_t *load_collection_dir(char *dirpath)
 {
     assert_not_null(dirpath);
 
-    collection_t *collection = create_collection(dirpath);
+    collection_t *collection = create_collection();
     collection->dirpath = strdup(dirpath);
 
     int last_idx = strlen(collection->dirpath);
@@ -153,7 +149,7 @@ collection_t *load_collection_dir(char *dirpath)
 
 collection_t *load_collection_level_file(char *filename)
 {
-    collection_t *collection = create_collection(NULL);
+    collection_t *collection = create_collection();
 
     if (collection_add_level_file(collection, filename)) {
         return collection;
@@ -167,7 +163,7 @@ collection_t *load_collection_zip_file(char *filename)
 {
     int errnum;
 
-    collection_t *collection = create_collection(filename);
+    collection_t *collection = create_collection();
     collection->filename = strdup(filename);
 
     struct zip_t *zip = zip_openwitherror(filename, 0, 'r', &errnum);
@@ -324,6 +320,31 @@ void destroy_collection(collection_t *collection)
     }
 }
 
+static const char *collection_path(collection_t *collection)
+{
+    if (!collection->dirpath && !collection->filename) {
+        return NULL;
+    }
+    if (collection->dirpath && !collection->filename) {
+        return collection->dirpath;
+    }
+    if (!collection->dirpath && collection->filename) {
+        return collection->filename;
+    }
+
+    return concat_dir_and_filename(collection->dirpath, collection->filename);
+}
+
+static const char *collection_name(collection_t *collection)
+{
+    const char *path = collection_path(collection);
+    if (path) {
+        return path;
+    } else {
+        return "(untitled)";
+    }
+}
+
 static bool collection_level_filename_exists_in_collection(collection_t *collection, const char *name)
 {
     assert_not_null(collection);
@@ -476,7 +497,7 @@ bool collection_add_level_file(collection_t *collection, char *filename)
         return true;
     } else {
         errmsg("cannot load level file \"%s\" into collection \"%s\"",
-               filename, collection->name);
+               filename, collection_name(collection));
         return false;
     }
 }
@@ -662,7 +683,7 @@ void collection_save(collection_t *collection)
 
 static void collection_draw_buttons(collection_t *collection, Rectangle collection_list_rect)
 {
-    float margin = 16.0;
+    float margin = (float)RAYGUI_ICON_SIZE;
 
     Rectangle collection_play_button_rect = {
         .x = collection_list_rect.x,
@@ -735,14 +756,36 @@ void collection_draw(collection_t *collection)
     float width =  window_size.x * 0.4;
     float height = window_size.y * 0.64;
 
-    DrawTextWindowCenter("Collection", window_size.y * 0.08, 22, LIME);
-
     Rectangle collection_list_rect = {
         .x = (window_size.x - width)  / 2.0f,
         .y = (window_size.y - height) / 2.0f,
         .width  = width,
         .height = height
     };
+
+    float theight = RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT + RAYGUI_ICON_SIZE;
+
+    Rectangle title_rect = {
+        .x = collection_list_rect.x,
+        .y = collection_list_rect.y - theight - RAYGUI_ICON_SIZE,
+        .width  = collection_list_rect.width,
+        .height = theight
+    };
+
+    Rectangle title_name_rect = {
+        .x = title_rect.x,
+        .y = title_rect.y + RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT,
+        .width  = title_rect.width,
+        .height = title_rect.height - RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT
+    };
+
+    GuiPanel(title_rect, "Collection");
+
+    int tempTextAlign = GuiGetStyle(LABEL, TEXT_ALIGNMENT);
+    GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
+    GuiLabel(title_name_rect, collection_name(collection));
+    GuiSetStyle(LABEL, TEXT_ALIGNMENT, tempTextAlign);
+
 
     GuiSetStyle(LISTVIEW, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
 

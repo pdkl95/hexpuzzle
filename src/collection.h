@@ -30,7 +30,7 @@
 #include "level.h"
 
 struct collection {
-    char name[NAME_MAXLEN];
+    //char name[NAME_MAXLEN];
 
     char *dirpath;
     char *filename;
@@ -50,7 +50,7 @@ struct collection {
 };
 typedef struct collection collection_t;
 
-collection_t *create_collection(char *name);
+collection_t *create_collection(void);
 collection_t *load_collection_dir(char *dirpath);
 collection_t *load_collection_level_file(char *filename);
 collection_t *load_collection_zip_file(char *filename);

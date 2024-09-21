@@ -516,20 +516,6 @@ static void draw_mouse_text(void)
     }
 }
 
-#ifndef RAYGUI_ICON_SIZE
-#define RAYGUI_ICON_SIZE 16
-#endif
-
-#define WINDOW_MARGIN RAYGUI_ICON_SIZE
-#define PANEL_INNER_MARGIN 12
-
-#define BUTTON_MARGIN 4
-#define ICON_BUTTON_SIZE (RAYGUI_ICON_SIZE + (2 * BUTTON_MARGIN))
-#define ICON_FONT_SIZE RAYGUI_ICON_SIZE
-#define NAME_FONT_SIZE 20
-#define PANEL_LABEL_FONT_SIZE 14
-#define PANEL_ROUNDNES 0.2
-
 Rectangle name_text_rect;
 Rectangle name_panel_rect;
 Rectangle name_edit_button_rect;
