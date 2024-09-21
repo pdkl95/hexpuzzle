@@ -250,6 +250,12 @@ void level_reset(level_t *level)
 {
     assert_not_null(level);
 
+    level->finished_anim_start = 0.0;
+    level->finished_anim_end   = 0.0;
+    level->finished_anim_fract = 0.0;
+    level->finished_anim_fade_in  = 0.0;
+    level->finished_anim_fade_out = 0.0;
+
     level->req_tile_size = 60.0f;
 
     level->drag_reset_total_frames = 12;
@@ -1151,6 +1157,16 @@ void level_draw(level_t *level, bool finished)
 {
     assert_not_null(level);
 
+    if (finished) {
+        double anim_delta = level->finished_anim_end - level->finished_anim_start;
+        double cur_delta  = GetTime() - level->finished_anim_start;
+        level->finished_anim_fract = (float)(cur_delta / anim_delta);
+        level->finished_anim_fade_in  = ease_back_out(level->finished_anim_fract);
+        level->finished_anim_fade_out = 1.0 - ease_quint_in(level->finished_anim_fract);
+    }
+
+    float finished_fade = MIN(level->finished_anim_fade_in, level->finished_anim_fade_out);
+
     level->finished_hue += FINISHED_HUE_STEP;
     while (level->finished_hue > 360.0f) {
         level->finished_hue -= 360.0f;
@@ -1176,7 +1192,7 @@ void level_draw(level_t *level, bool finished)
                 if (level->drag_target && pos->tile == level->drag_target->tile) {
                     // defer until after bg tiles are drawn
                 } else {
-                    tile_draw(pos, level->drag_target, finished, finished_color);
+                    tile_draw(pos, level->drag_target, finished, finished_color, finished_fade);
                 }
             }
         }
@@ -1189,7 +1205,7 @@ void level_draw(level_t *level, bool finished)
                      level->drag_offset.y,
                      0.0);
 
-        tile_draw(level->drag_target, level->drag_target, finished, finished_color);
+        tile_draw(level->drag_target, level->drag_target, finished, finished_color, finished_fade);
 
         rlPopMatrix();
     }
@@ -1266,3 +1282,10 @@ void level_set_radius(level_t *level, int new_radius)
         level_disable_ring(level, level->radius + 1);
     }
 }
+
+void level_win(level_t *level)
+{
+    level->finished_anim_start = GetTime();
+    level->finished_anim_end = level->finished_anim_start + FINISHED_ANIM_LENGTH;
+}
+

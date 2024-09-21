@@ -94,6 +94,13 @@ struct level {
     bool finished;
     float finished_hue;
 
+    double finished_anim_start;
+    double finished_anim_end;
+    float finished_anim_fract;
+    float finished_anim_fade_in;
+    float finished_anim_fade_out;
+
+
     char ui_name[UI_NAME_MAXLEN];
 
     struct level *prev, *next;
@@ -184,6 +191,7 @@ void level_enable_ring(level_t *level, int radius);
 void level_disable_ring(level_t *level, int radius);
 void level_set_radius(level_t *level, int new_radius);
 void level_draw(level_t *level, bool finished);
+void level_win(level_t *level);
 
 extern level_t *current_level;
 

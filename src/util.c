@@ -85,22 +85,47 @@ char *strcat_alloc(const char *first, const char *second)
     return ret;
 }
 
-float
-ease_circular_in(
-    float t
-) {
-    return 1 - sqrtf(1 - (t * t));
+float ease_circular_in(float t) {
+    return 1.0f - sqrtf(1.0f - (t * t));
 }
 
-float
-ease_exponential_in(
-    float t
-) {
-    if (t == 0.0) {
+float ease_circular_out(float t) {
+    return sqrtf(1.0f - powf(t - 1.0f, 2.0f));
+}
+
+float ease_quint_in(float t) {
+    return t * t * t * t * t;
+}
+
+float ease_quint_out(float t) {
+    return 1.0f - powf(1 - t, 5);
+}
+
+float ease_exponential_in(float t) {
+    if (t == 0.0f) {
         return t;
     } else {
-        return powf(2, 10 * (t - 1));
+        return powf(2.0f, 10.0f * (t - 1.0f));
     }
+}
+
+float ease_exponential_out(float t) {
+    if (t == 1.0f) {
+        return t;
+    } else {
+        return 1.0f - powf(2.0f, -10.0f * t);
+    }
+}
+
+#define EASE_BACK_C1 1.70158f
+#define EASE_BACK_C3 (EASE_BACK_C1 + 1.0f)
+
+float ease_back_in(float t) {
+    return 1.0f + EASE_BACK_C3 * powf(t - 1.0f, 3.0f) + EASE_BACK_C1 * powf(t - 1.0f, 2.0f);
+}
+
+float ease_back_out(float t) {
+    return EASE_BACK_C3 * t * t * t - EASE_BACK_C1 * t * t;
 }
 
 

@@ -76,7 +76,7 @@ static void draw_adjacency_highlight(tile_pos_t *pos)
     DrawTriangle(c0, c1, sec.corners[2], tile_bg_highlight_color_dim);
 }
 
-void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color finished_color)
+void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color finished_color, float finished_fade)
 {
     assert_not_null(pos);
     /* drag_target CAN be NULL */
@@ -84,6 +84,11 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
     if (!pos->tile->enabled) {
         return;
     }
+
+    Vector2 hex_seq_id = {
+        .x = pos->position.q / TILE_LEVEL_WIDTH,
+        .y = pos->position.r / TILE_LEVEL_HEIGHT
+    };
 
     bool drag = (pos == drag_target);
     bool dragged_over = (!drag && drag_target && pos->hover);
@@ -202,6 +207,14 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
 
         if (finished) {
             border_color = finished_color;
+            if ((finished_fade > hex_seq_id.x) && (finished_fade > hex_seq_id.y)) {
+                //Color mixcolor = ColorLerp(magenta);;
+                border_color = ColorLerp(border_color, purple, 0.5);
+            } else if (finished_fade > hex_seq_id.x) {
+                border_color = ColorLerp(border_color, magenta, 0.5);
+            } else if (finished_fade > hex_seq_id.y) {
+                border_color = ColorLerp(border_color, royal_blue, 0.5);
+            }
             line_width = 2.0;
         }
 

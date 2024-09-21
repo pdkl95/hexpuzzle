@@ -30,7 +30,7 @@ void prepare_global_colors(void);
 Color path_type_color(path_type_t type);
 Color path_type_highlight_color(path_type_t type);
 
-void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color finished_color);
+void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color finished_color, float finished_fade);
 
 #endif /*TILE_DRAW_H*/
 

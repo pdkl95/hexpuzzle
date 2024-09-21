@@ -479,6 +479,7 @@ handle_events(
     if (current_level) {
         if (level_check(current_level)) {
             level_finished = true;
+            level_win(current_level);
         } else {
             level_finished = false;
         }

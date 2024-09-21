@@ -36,7 +36,13 @@ char *strcat_alloc(const char *first, const char *second);
 #define ease_quintic_in(t)  ((t) * (t) * (t) * (t) * (t))
 
 float ease_circular_in(float t);
+float ease_circular_out(float t);
+float ease_quint_in(float t);
+float ease_quint_out(float t);
 float ease_exponential_in(float t);
+float ease_exponential_out(float t);
+float ease_back_in(float t);
+float ease_back_out(float t);
 
 /****************
  * fatal errors *
