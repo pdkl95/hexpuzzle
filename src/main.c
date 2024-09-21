@@ -28,6 +28,7 @@
 
 #include "raygui/raygui.h"
 #include "raygui/style/terminal.h"
+#include "raygui/gui_window_file_dialog.h"
 
 #include "options.h"
 #include "color.h"
@@ -86,6 +87,9 @@ bool modal_ui_active = false;
 ui_result_t modal_ui_result;
 bool show_name_edit_box = false;
 bool show_ask_save_box = false;
+bool show_open_file_box = false;
+
+GuiWindowFileDialogState open_file_box_state;
 
 #define MOUSE_TEXT_MAX_LINES 8
 #define MOUSE_TEXT_MAX_LINE_LENGTH 60
@@ -218,6 +222,35 @@ void create_new_level(void)
     collection_add_level(current_collection, level);
     level_edit(level);
     //show_name_edit_dialog();
+}
+
+void open_game_file(char *path)
+{
+    if (options->verbose) {
+        infomsg("Loading: \"%s\"", path);
+    }
+    collection_t *collection = load_collection_path(path);
+    if (!collection) {
+        errmsg("Cannot open \"%s\"", path);
+        return;
+    }
+    if (current_collection) {
+        destroy_collection(current_collection);
+    }
+    current_collection = collection;
+
+    if (IS_LEVEL_FILENAME(path)) {
+        level_t *level = collection_find_level_by_filename(current_collection, path);
+        if (level) {
+            level_play(level);
+        }
+    } else if (IS_COLLECTION_FILENAME(path)) {
+        game_mode = GAME_MODE_PLAY_COLLECTION;
+    } else if (current_collection->dirpath) {
+        game_mode = GAME_MODE_PLAY_COLLECTION;
+    } else {
+        assert(0);
+    }
 }
 
 #define print_popup(...) {                                          \
@@ -507,7 +540,7 @@ Rectangle close_button_rect;
 Rectangle edit_button_rect;
 Rectangle edit_mode_toggle_rect;
 Rectangle return_button_rect;
-Rectangle new_level_button_rect;
+Rectangle open_file_button_rect;
 
 char close_button_text_str[] = "Quit";
 #define CLOSE_BUTTON_TEXT_LENGTH (6 + sizeof(close_button_text_str))
@@ -520,6 +553,10 @@ char edit_button_text[EDIT_BUTTON_TEXT_LENGTH];
 char return_button_text_str[] = "Back";
 #define RETURN_BUTTON_TEXT_LENGTH (6 + sizeof(return_button_text_str))
 char return_button_text[RETURN_BUTTON_TEXT_LENGTH];
+
+char open_file_button_text_str[] = "Open File";
+#define OPEN_FILE_BUTTON_TEXT_LENGTH (6 + sizeof(open_file_button_text_str))
+char open_file_button_text[OPEN_FILE_BUTTON_TEXT_LENGTH];
 
 char cancel_ok_with_icons[25];
 char no_yes_with_icons[25];
@@ -616,6 +653,16 @@ void gui_setup(void)
     return_button_rect.height = ICON_BUTTON_SIZE;
 
     memcpy(return_button_text,  GuiIconText(ICON_UNDO_FILL, return_button_text_str), RETURN_BUTTON_TEXT_LENGTH);
+
+    int open_file_button_text_width = MeasureText(open_file_button_text_str, ICON_FONT_SIZE);
+
+    open_file_button_rect.x      = window_size.x - WINDOW_MARGIN - ICON_BUTTON_SIZE - open_file_button_text_width;
+    open_file_button_rect.y      = window_size.y - WINDOW_MARGIN - ICON_BUTTON_SIZE;
+    open_file_button_rect.width  = ICON_BUTTON_SIZE + open_file_button_text_width;
+    open_file_button_rect.height = ICON_BUTTON_SIZE;
+
+    memcpy(open_file_button_text,  GuiIconText(ICON_FILE_OPEN, open_file_button_text_str), OPEN_FILE_BUTTON_TEXT_LENGTH);
+
 }
 
 Color panel_bg_color   = { 0x72, 0x1C, 0xB8, 0xaa };
@@ -726,6 +773,10 @@ static void draw_gui_widgets(void)
             toggle_edit_mode();
         }
 
+        if (GuiButton(open_file_button_rect, open_file_button_text)) {
+            show_open_file_box = true;
+        }
+
         break;
 
     default:
@@ -808,10 +859,38 @@ static void draw_ask_save_dialog(void)
     }
 }
 
+static void draw_open_file_dialog(void)
+{
+    if (modal_ui_result == UI_RESULT_CANCEL) {
+        show_open_file_box = false;
+        modal_ui_result = UI_RESULT_NULL;
+    }
+
+    if (show_open_file_box) {
+        open_file_box_state.windowActive = true;
+
+        GuiUnlock();
+        GuiWindowFileDialog(&open_file_box_state);
+        GuiLock();
+
+        if (open_file_box_state.SelectFilePressed) {
+            const char *path = concat_dir_and_filename(open_file_box_state.dirPathText,
+                                                       open_file_box_state.fileNameText);
+            printf("open file \"%s\"\n", path);
+            show_open_file_box = false;
+        } else if (open_file_box_state.CancelFilePressed) {
+            show_open_file_box = false;
+        } else if (!open_file_box_state.windowActive) {
+            show_open_file_box = false;
+        }
+    }
+}
+
 static void draw_popup_panels(void)
 {
     draw_name_edit_dialog();
     draw_ask_save_dialog();
+    draw_open_file_dialog();
 }
 
 static void draw_popup_text(void)
@@ -949,7 +1028,8 @@ render_frame(
 static void early_frame_setup(void)
 {
     if (show_name_edit_box ||
-        show_ask_save_box
+        show_ask_save_box ||
+        show_open_file_box
     ) {
         modal_ui_active = true;
         GuiLock();
@@ -1027,6 +1107,8 @@ void gfx_init(void)
     }
 
     prepare_global_colors();
+
+    open_file_box_state = InitGuiWindowFileDialog(GetWorkingDirectory());
 }
 
 static void
@@ -1055,22 +1137,7 @@ static void game_init(void)
 
     if (options->extra_argc == 1) {
         char *filename = options->extra_argv[0];
-        if (options->verbose) {
-            infomsg("Loading: \"%s\"", filename);
-        }
-        current_collection = load_collection_path(filename);
-        if (IS_LEVEL_FILENAME(filename)) {
-            level_t *level = collection_find_level_by_filename(current_collection, filename);
-            if (level) {
-                level_play(level);
-            }
-        } else if (IS_COLLECTION_FILENAME(filename)) {
-            game_mode = GAME_MODE_PLAY_COLLECTION;
-        } else if (current_collection->dirpath) {
-            game_mode = GAME_MODE_PLAY_COLLECTION;
-        } else {
-            assert(0);
-        }
+        open_game_file(filename);
     }
 }
 

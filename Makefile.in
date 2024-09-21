@@ -110,6 +110,7 @@ am_hexpuzzle_OBJECTS = src/hexpuzzle-collection.$(OBJEXT) \
 	src/hexpuzzle-color.$(OBJEXT) src/hexpuzzle-hex.$(OBJEXT) \
 	src/hexpuzzle-level.$(OBJEXT) src/hexpuzzle-logging.$(OBJEXT) \
 	src/hexpuzzle-options.$(OBJEXT) \
+	src/hexpuzzle-raygui_file_dialog_impl.$(OBJEXT) \
 	src/hexpuzzle-raylib_helper.$(OBJEXT) \
 	src/hexpuzzle-tile.$(OBJEXT) src/hexpuzzle-tile_draw.$(OBJEXT) \
 	src/hexpuzzle-tile_pos.$(OBJEXT) src/hexpuzzle-util.$(OBJEXT) \
@@ -312,7 +313,9 @@ EXTRA_DIST = \
 	README.md \
 	lib/gnugetopt.h \
 	lib/getopt.c \
-	lib/getopt1.c
+	lib/getopt1.c \
+	external/raygui/raygui.h \
+	external/raygui/gui_window_file_dialog.h
 
 COMMON_PROG_CFLAGS = \
 	-DPLATFORM=PLATFORM_DESKTOP \
@@ -331,11 +334,12 @@ hexpuzzle_LDADD = $(COMMON_PROG_LDADD)
 hexpuzzle_SOURCES = src/collection.h src/collection.c src/color.h \
 	src/color.c src/const.h src/hex.h src/hex.c src/level.h \
 	src/level.c src/logging.h src/logging.c src/options.h \
-	src/options.c src/raylib_helper.h src/raylib_helper.c \
-	src/tile.h src/tile.c src/tile_draw.h src/tile_draw.c \
-	src/tile_pos.h src/tile_pos.c src/util.h src/util.c \
-	src/common.h src/main.c external/zip-kuba/miniz.h \
-	external/zip-kuba/zip.h external/zip-kuba/zip.c
+	src/options.c src/raygui_file_dialog_impl.c \
+	src/raylib_helper.h src/raylib_helper.c src/tile.h src/tile.c \
+	src/tile_draw.h src/tile_draw.c src/tile_pos.h src/tile_pos.c \
+	src/util.h src/util.c src/common.h src/main.c \
+	external/zip-kuba/miniz.h external/zip-kuba/zip.h \
+	external/zip-kuba/zip.c
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -449,6 +453,8 @@ src/hexpuzzle-logging.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-options.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/hexpuzzle-raygui_file_dialog_impl.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-raylib_helper.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-tile.$(OBJEXT): src/$(am__dirstamp) \
@@ -491,6 +497,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-logging.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-options.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raygui_file_dialog_impl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raylib_helper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-tile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-tile_draw.Po@am__quote@
@@ -596,6 +603,20 @@ src/hexpuzzle-options.obj: src/options.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/options.c' object='src/hexpuzzle-options.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-options.obj `if test -f 'src/options.c'; then $(CYGPATH_W) 'src/options.c'; else $(CYGPATH_W) '$(srcdir)/src/options.c'; fi`
+
+src/hexpuzzle-raygui_file_dialog_impl.o: src/raygui_file_dialog_impl.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-raygui_file_dialog_impl.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-raygui_file_dialog_impl.Tpo -c -o src/hexpuzzle-raygui_file_dialog_impl.o `test -f 'src/raygui_file_dialog_impl.c' || echo '$(srcdir)/'`src/raygui_file_dialog_impl.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-raygui_file_dialog_impl.Tpo src/$(DEPDIR)/hexpuzzle-raygui_file_dialog_impl.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/raygui_file_dialog_impl.c' object='src/hexpuzzle-raygui_file_dialog_impl.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-raygui_file_dialog_impl.o `test -f 'src/raygui_file_dialog_impl.c' || echo '$(srcdir)/'`src/raygui_file_dialog_impl.c
+
+src/hexpuzzle-raygui_file_dialog_impl.obj: src/raygui_file_dialog_impl.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-raygui_file_dialog_impl.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-raygui_file_dialog_impl.Tpo -c -o src/hexpuzzle-raygui_file_dialog_impl.obj `if test -f 'src/raygui_file_dialog_impl.c'; then $(CYGPATH_W) 'src/raygui_file_dialog_impl.c'; else $(CYGPATH_W) '$(srcdir)/src/raygui_file_dialog_impl.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-raygui_file_dialog_impl.Tpo src/$(DEPDIR)/hexpuzzle-raygui_file_dialog_impl.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/raygui_file_dialog_impl.c' object='src/hexpuzzle-raygui_file_dialog_impl.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-raygui_file_dialog_impl.obj `if test -f 'src/raygui_file_dialog_impl.c'; then $(CYGPATH_W) 'src/raygui_file_dialog_impl.c'; else $(CYGPATH_W) '$(srcdir)/src/raygui_file_dialog_impl.c'; fi`
 
 src/hexpuzzle-raylib_helper.o: src/raylib_helper.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-raylib_helper.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-raylib_helper.Tpo -c -o src/hexpuzzle-raylib_helper.o `test -f 'src/raylib_helper.c' || echo '$(srcdir)/'`src/raylib_helper.c
