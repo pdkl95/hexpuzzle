@@ -900,11 +900,13 @@ void collection_draw(collection_t *collection)
         .height = theight
     };
 
+    float name_height = RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT * 1.2;
+
     Rectangle title_name_rect = {
         .x = title_rect.x,
-        .y = title_rect.y + RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT,
+        .y = title_rect.y + name_height,
         .width  = title_rect.width,
-        .height = title_rect.height - RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT
+        .height = title_rect.height - name_height
     };
 
     GuiPanel(title_rect, "Collection");
