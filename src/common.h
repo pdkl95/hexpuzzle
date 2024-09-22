@@ -46,6 +46,7 @@
 #define TO_DEGREES(rad) ((rad) * (360.0/TAU))
 
 #include "raymath.h"
+#include "raygui/raygui.h"
 
 #define QUOTE(x) #x
 #define STR(macro) QUOTE(macro)

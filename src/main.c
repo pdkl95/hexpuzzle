@@ -26,8 +26,8 @@
 #include <time.h>
 #include <sys/stat.h>
 
-#include "raygui/raygui.h"
-#include "raygui/style/terminal.h"
+#include "raygui/style/dark.h"
+//#include "bi_lighting_font.h"
 #include "raygui/gui_window_file_dialog.h"
 
 #include "options.h"
@@ -1081,7 +1081,8 @@ void gfx_init(void)
 
     SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
 
-    GuiLoadStyleTerminal();
+    GuiLoadStyleDark();
+    //GuiLoadStyleBiLightingFont();
 
     set_uniform_resolution();
 

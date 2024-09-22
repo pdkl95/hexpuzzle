@@ -41,9 +41,12 @@ void DrawTextShadow(const char *text, int posX, int posY, int fontSize, Color co
 
 void DrawTextDropShadow(const char *text, int posX, int posY, int fontSize, Color fgcolor, Color bgcolor)
 {
-    DrawText(text, posX + 1, posY + 1, fontSize, bgcolor);
+    Font font = GuiGetFont();
+    Vector2 shadow_pos = { .x = posX + 1, .y = posY + 1 };
+    Vector2        pos = { .x = posX,     .y = posY     };
+    DrawTextEx(font, text, shadow_pos, fontSize, 1.0, bgcolor);
     //DrawText(text, posX + 1, posY + 1, fontSize, ColorLerp(fgcolor, bgcolor, 1.0));
-    DrawText(text, posX,     posY,     fontSize, fgcolor);
+    DrawTextEx(font, text,        pos, fontSize, 1.0, fgcolor);
 }
 
 Color ColorLerp(Color start, Color end, float amount)

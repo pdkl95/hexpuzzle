@@ -1,4 +1,8 @@
 hexpuzzle
+stuff/
+test*.hexlevel
+test*.hexlevelpack
+levels/
 compile_image_to_c_src
 screenshot*.png
 tests/*.trs
