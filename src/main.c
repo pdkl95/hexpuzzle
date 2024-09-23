@@ -37,6 +37,7 @@
 
 #include "level.h"
 #include "collection.h"
+#include "shader.h"
 
 #if defined(PLATFORM_DESKTOP)
 /* good */
@@ -70,6 +71,8 @@ float cursor_spin_step = (360.0f / 100.0f);
 int frame_count = 0;
 int frame_delay;
 bool show_fps = false;
+float current_time = 0.0f;
+double double_current_time = 0.0;
 
 float popup_text_fade_time = 2.5f;
 float popup_text_active_until = 0.0f;
@@ -323,9 +326,8 @@ static void
 set_uniform_resolution(
     void
 ) {
-    //float resolution[2] = { (float)window_size.x, (float)window_size.y };
-    //SetShaderValue(mandel_to_texture_prog, mandel_to_texture_loc.resolution, resolution, SHADER_UNIFORM_VEC2);
-    //SetShaderValue(sobel_prog, sobel_loc.resolution, resolution, SHADER_UNIFORM_VEC2);
+    float resolution[2] = { (float)window_size.x, (float)window_size.y };
+    SetShaderValue(win_border_shader, win_border_shader_loc.resolution, resolution, SHADER_UNIFORM_VEC2);
 }
 
 static void
@@ -1014,6 +1016,13 @@ render_frame(
 
 static void early_frame_setup(void)
 {
+    double_current_time = GetTime();
+    current_time = (float)double_current_time;
+
+    if (level_finished) {
+        SetShaderValue(win_border_shader, win_border_shader_loc.time, &current_time, SHADER_UNIFORM_FLOAT);
+    }
+
     if (show_name_edit_box ||
         show_ask_save_box ||
         show_open_file_box
@@ -1097,12 +1106,15 @@ void gfx_init(void)
     prepare_global_colors();
 
     open_file_box_state = InitGuiWindowFileDialog(GetWorkingDirectory());
+
+    load_shaders();
 }
 
 static void
 gfx_cleanup(
     void
 ) {
+    unload_shaders();
     unload_textures();
     CloseWindow();
 }

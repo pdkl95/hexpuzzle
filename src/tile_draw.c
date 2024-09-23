@@ -27,6 +27,8 @@
 #include "tile_draw.h"
 #include "level.h"
 
+extern Shader win_border_shader;
+
 Color path_type_color(path_type_t type)
 {
     switch (type) {
@@ -207,18 +209,24 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
 
         if (finished) {
             border_color = finished_color;
-            if ((finished_fade > hex_seq_id.x) && (finished_fade > hex_seq_id.y)) {
-                //Color mixcolor = ColorLerp(magenta);;
-                border_color = ColorLerp(border_color, purple, 0.5);
-            } else if (finished_fade > hex_seq_id.x) {
-                border_color = ColorLerp(border_color, magenta, 0.5);
-            } else if (finished_fade > hex_seq_id.y) {
-                border_color = ColorLerp(border_color, royal_blue, 0.5);
-            }
+            /* if ((finished_fade > hex_seq_id.x) && (finished_fade > hex_seq_id.y)) { */
+            /*     //Color mixcolor = ColorLerp(magenta);; */
+            /*     border_color = ColorLerp(border_color, purple, 0.5); */
+            /* } else if (finished_fade > hex_seq_id.x) { */
+            /*     border_color = ColorLerp(border_color, magenta, 0.5); */
+            /* } else if (finished_fade > hex_seq_id.y) { */
+            /*     border_color = ColorLerp(border_color, royal_blue, 0.5); */
+            /* } */
             line_width = 2.0;
-        }
 
-        DrawPolyLinesEx(pos->center, 6, pos->size, 0.0f, line_width, border_color);
+            BeginShaderMode(win_border_shader);
+            {
+                DrawPolyLinesEx(pos->center, 6, pos->size, 0.0f, line_width, border_color);
+            }
+            EndShaderMode();
+        } else {
+            DrawPolyLinesEx(pos->center, 6, pos->size, 0.0f, line_width, border_color);
+        }
     }
 
     DrawCircleV(pos->center, pos->center_circle_draw_radius, tile_center_color);

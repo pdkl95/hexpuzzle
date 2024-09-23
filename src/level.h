@@ -43,6 +43,14 @@ enum used_tiles {
 };
 typedef enum used_tiles used_tiles_t;
 
+enum finished_anim_state {
+    FINISHED_ANIM_NULL = 0,
+    FINISHED_ANIM_PREDELAY,
+    FINISHED_ANIM_ACTIVE,
+    FINISHED_ANIM_AFTER
+};
+typedef enum finished_anim_state finished_anim_state_t;
+
 struct level {
     char *id;
     char name[NAME_MAXLEN];
@@ -94,6 +102,7 @@ struct level {
     bool finished;
     float finished_hue;
 
+    finished_anim_state_t finished_anim_state;
     double finished_anim_start;
     double finished_anim_end;
     float finished_anim_fract;

@@ -503,6 +503,10 @@ void collection_add_level(collection_t *collection, level_t *level)
     }
 
     collection_update_level_names(collection);
+
+    if (collection->gui_list_active == -1) {
+        collection->gui_list_active = 0;
+    }
 }
 
 bool collection_add_level_file(collection_t *collection, char *filename)

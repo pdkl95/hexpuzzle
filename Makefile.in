@@ -112,7 +112,8 @@ am_hexpuzzle_OBJECTS = src/hexpuzzle-collection.$(OBJEXT) \
 	src/hexpuzzle-options.$(OBJEXT) \
 	src/hexpuzzle-raygui_file_dialog_impl.$(OBJEXT) \
 	src/hexpuzzle-raylib_helper.$(OBJEXT) \
-	src/hexpuzzle-tile.$(OBJEXT) src/hexpuzzle-tile_draw.$(OBJEXT) \
+	src/hexpuzzle-shader.$(OBJEXT) src/hexpuzzle-tile.$(OBJEXT) \
+	src/hexpuzzle-tile_draw.$(OBJEXT) \
 	src/hexpuzzle-tile_pos.$(OBJEXT) src/hexpuzzle-util.$(OBJEXT) \
 	src/hexpuzzle-main.$(OBJEXT) \
 	external/zip-kuba/hexpuzzle-zip.$(OBJEXT)
@@ -335,11 +336,11 @@ hexpuzzle_SOURCES = src/collection.h src/collection.c src/color.h \
 	src/color.c src/const.h src/hex.h src/hex.c src/level.h \
 	src/level.c src/logging.h src/logging.c src/options.h \
 	src/options.c src/raygui_file_dialog_impl.c \
-	src/raylib_helper.h src/raylib_helper.c src/tile.h src/tile.c \
-	src/tile_draw.h src/tile_draw.c src/tile_pos.h src/tile_pos.c \
-	src/util.h src/util.c src/common.h src/main.c \
-	external/zip-kuba/miniz.h external/zip-kuba/zip.h \
-	external/zip-kuba/zip.c
+	src/raylib_helper.h src/raylib_helper.c src/shader.h \
+	src/shader.c src/tile.h src/tile.c src/tile_draw.h \
+	src/tile_draw.c src/tile_pos.h src/tile_pos.c src/util.h \
+	src/util.c src/common.h src/main.c external/zip-kuba/miniz.h \
+	external/zip-kuba/zip.h external/zip-kuba/zip.c
 all: config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
@@ -457,6 +458,8 @@ src/hexpuzzle-raygui_file_dialog_impl.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-raylib_helper.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/hexpuzzle-shader.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-tile.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-tile_draw.$(OBJEXT): src/$(am__dirstamp) \
@@ -499,6 +502,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-options.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raygui_file_dialog_impl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raylib_helper.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-shader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-tile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-tile_draw.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-tile_pos.Po@am__quote@
@@ -631,6 +635,20 @@ src/hexpuzzle-raylib_helper.obj: src/raylib_helper.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/raylib_helper.c' object='src/hexpuzzle-raylib_helper.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-raylib_helper.obj `if test -f 'src/raylib_helper.c'; then $(CYGPATH_W) 'src/raylib_helper.c'; else $(CYGPATH_W) '$(srcdir)/src/raylib_helper.c'; fi`
+
+src/hexpuzzle-shader.o: src/shader.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-shader.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-shader.Tpo -c -o src/hexpuzzle-shader.o `test -f 'src/shader.c' || echo '$(srcdir)/'`src/shader.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-shader.Tpo src/$(DEPDIR)/hexpuzzle-shader.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/shader.c' object='src/hexpuzzle-shader.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-shader.o `test -f 'src/shader.c' || echo '$(srcdir)/'`src/shader.c
+
+src/hexpuzzle-shader.obj: src/shader.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-shader.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-shader.Tpo -c -o src/hexpuzzle-shader.obj `if test -f 'src/shader.c'; then $(CYGPATH_W) 'src/shader.c'; else $(CYGPATH_W) '$(srcdir)/src/shader.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-shader.Tpo src/$(DEPDIR)/hexpuzzle-shader.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/shader.c' object='src/hexpuzzle-shader.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-shader.obj `if test -f 'src/shader.c'; then $(CYGPATH_W) 'src/shader.c'; else $(CYGPATH_W) '$(srcdir)/src/shader.c'; fi`
 
 src/hexpuzzle-tile.o: src/tile.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-tile.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-tile.Tpo -c -o src/hexpuzzle-tile.o `test -f 'src/tile.c' || echo '$(srcdir)/'`src/tile.c
