@@ -16,7 +16,7 @@ void main()
 {
     float px = 1.0/resolution.y;
     float aspect = resolution.y/resolution.x;
-        
+
     vec2 uv = gl_FragCoord.xy / resolution.xy;
     vec2 position = (uv * 2.0) - 1.0;
 

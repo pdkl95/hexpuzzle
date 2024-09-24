@@ -106,7 +106,8 @@ CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__dirstamp = $(am__leading_dot)dirstamp
-am_hexpuzzle_OBJECTS = src/hexpuzzle-collection.$(OBJEXT) \
+am_hexpuzzle_OBJECTS = src/hexpuzzle-anim_fsm.$(OBJEXT) \
+	src/hexpuzzle-collection.$(OBJEXT) \
 	src/hexpuzzle-color.$(OBJEXT) src/hexpuzzle-hex.$(OBJEXT) \
 	src/hexpuzzle-level.$(OBJEXT) src/hexpuzzle-logging.$(OBJEXT) \
 	src/hexpuzzle-options.$(OBJEXT) \
@@ -332,10 +333,10 @@ COMMON_PROG_LDADD = \
 
 hexpuzzle_CFLAGS = $(COMMON_PROG_CFLAGS)
 hexpuzzle_LDADD = $(COMMON_PROG_LDADD)
-hexpuzzle_SOURCES = src/collection.h src/collection.c src/color.h \
-	src/color.c src/const.h src/hex.h src/hex.c src/level.h \
-	src/level.c src/logging.h src/logging.c src/options.h \
-	src/options.c src/raygui_file_dialog_impl.c \
+hexpuzzle_SOURCES = src/anim_fsm.h src/anim_fsm.c src/collection.h \
+	src/collection.c src/color.h src/color.c src/const.h src/hex.h \
+	src/hex.c src/level.h src/level.c src/logging.h src/logging.c \
+	src/options.h src/options.c src/raygui_file_dialog_impl.c \
 	src/raylib_helper.h src/raylib_helper.c src/shader.h \
 	src/shader.c src/tile.h src/tile.c src/tile_draw.h \
 	src/tile_draw.c src/tile_pos.h src/tile_pos.c src/util.h \
@@ -442,6 +443,8 @@ src/$(am__dirstamp):
 src/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/$(DEPDIR)
 	@: > src/$(DEPDIR)/$(am__dirstamp)
+src/hexpuzzle-anim_fsm.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-collection.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-color.$(OBJEXT): src/$(am__dirstamp) \
@@ -493,6 +496,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@external/zip-kuba/$(DEPDIR)/hexpuzzle-zip.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-anim_fsm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-collection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-color.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-hex.Po@am__quote@
@@ -523,6 +527,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+src/hexpuzzle-anim_fsm.o: src/anim_fsm.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-anim_fsm.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-anim_fsm.Tpo -c -o src/hexpuzzle-anim_fsm.o `test -f 'src/anim_fsm.c' || echo '$(srcdir)/'`src/anim_fsm.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-anim_fsm.Tpo src/$(DEPDIR)/hexpuzzle-anim_fsm.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/anim_fsm.c' object='src/hexpuzzle-anim_fsm.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-anim_fsm.o `test -f 'src/anim_fsm.c' || echo '$(srcdir)/'`src/anim_fsm.c
+
+src/hexpuzzle-anim_fsm.obj: src/anim_fsm.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-anim_fsm.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-anim_fsm.Tpo -c -o src/hexpuzzle-anim_fsm.obj `if test -f 'src/anim_fsm.c'; then $(CYGPATH_W) 'src/anim_fsm.c'; else $(CYGPATH_W) '$(srcdir)/src/anim_fsm.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-anim_fsm.Tpo src/$(DEPDIR)/hexpuzzle-anim_fsm.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/anim_fsm.c' object='src/hexpuzzle-anim_fsm.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-anim_fsm.obj `if test -f 'src/anim_fsm.c'; then $(CYGPATH_W) 'src/anim_fsm.c'; else $(CYGPATH_W) '$(srcdir)/src/anim_fsm.c'; fi`
 
 src/hexpuzzle-collection.o: src/collection.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-collection.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-collection.Tpo -c -o src/hexpuzzle-collection.o `test -f 'src/collection.c' || echo '$(srcdir)/'`src/collection.c

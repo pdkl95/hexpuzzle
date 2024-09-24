@@ -75,6 +75,11 @@ extern const char *progversion;
 #define assert_not_null(x) assert((x) != NULL)
 #define assert_this(x)     assert_not_null(x)
 
+#define assert_never_reached() do {                     \
+        assert(false && "This shouldn't ever happen!"); \
+        __builtin_unreachable();                        \
+    } while(0)
+
 #ifdef __GNUC__
 # define NORETURN __attribute__ ((noreturn))
 # define UNUSED   __attribute__ ((__unused__))

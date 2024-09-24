@@ -30,6 +30,7 @@ hexpuzzle_CFLAGS = $(COMMON_PROG_CFLAGS)
 hexpuzzle_LDADD = $(COMMON_PROG_LDADD)
 
 hexpuzzle_SOURCES =                                \
+	src/anim_fsm.h        src/anim_fsm.c       \
 	src/collection.h      src/collection.c     \
 	src/color.h           src/color.c          \
 	src/const.h                                \
