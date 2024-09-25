@@ -484,6 +484,7 @@ handle_events(
             level_win(current_level);
         } else {
             level_finished = false;
+            level_unwin(current_level);
         }
     } else {
         level_finished = false;

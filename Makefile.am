@@ -45,6 +45,7 @@ hexpuzzle_SOURCES =                                \
 	src/tile_draw.h       src/tile_draw.c      \
 	src/tile_pos.h        src/tile_pos.c       \
 	src/util.h            src/util.c           \
+	src/win_anim.h        src/win_anim.c       \
 	src/common.h          src/main.c
 
 hexpuzzle_SOURCES +=              \

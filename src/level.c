@@ -32,6 +32,7 @@
 #include "level.h"
 #include "collection.h"
 #include "shader.h"
+#include "win_anim.h"
 
 //#define DEBUG_DRAG_AND_DROP 1
 
@@ -221,6 +222,8 @@ static level_t *alloc_level()
         }
     }
 
+    level->win_anim = create_win_anim(level);
+
     level->name[0] = '\0';
 
     level->id = NULL;
@@ -250,14 +253,6 @@ static level_t *alloc_level()
 void level_reset(level_t *level)
 {
     assert_not_null(level);
-
-    level->finished_anim_state = FINISHED_ANIM_NULL;
-
-    level->finished_anim_start = 0.0;
-    level->finished_anim_end   = 0.0;
-    level->finished_anim_fract = 0.0;
-    level->finished_anim_fade_in  = 0.0;
-    level->finished_anim_fade_out = 0.0;
 
     level->req_tile_size = 60.0f;
 
@@ -1160,61 +1155,12 @@ void level_draw(level_t *level, bool finished)
 {
     assert_not_null(level);
 
-    if (finished) {
-        switch (level->finished_anim_state) {
-        case FINISHED_ANIM_PREDELAY:
-            if (double_current_time > level->finished_anim_start) {
-                level->finished_anim_state = FINISHED_ANIM_ACTIVE;
-                level->finished_anim_fract    = 0.0f;
-                level->finished_anim_fade_in  = 0.0f;
-                level->finished_anim_fade_out = 1.0f;
-            }
-            break;
-
-        case FINISHED_ANIM_ACTIVE:
-            if (double_current_time > level->finished_anim_end) {
-                level->finished_anim_state = FINISHED_ANIM_AFTER;
-                level->finished_anim_fract    = 1.0f;
-                level->finished_anim_fade_in  = 1.0f;
-                level->finished_anim_fade_out = 0.0f;
-            } else {
-                double anim_delta = level->finished_anim_end - level->finished_anim_start;
-                double cur_delta  = current_time - level->finished_anim_start;
-                level->finished_anim_fract = (float)(cur_delta / anim_delta);
-                level->finished_anim_fade_in  = ease_circular_out(level->finished_anim_fract);
-                level->finished_anim_fade_out = 0.0; //1.0 - ease_exponential_in(level->finished_anim_fract);
-            }
-
-            float fade[4] = {
-                level->finished_anim_fade_in,
-                level->finished_anim_fade_out,
-                level->finished_anim_fract,
-                0.0f
-            };
-            SetShaderValue(win_border_shader, win_border_shader_loc.fade, fade, SHADER_UNIFORM_VEC4);
-
-            printf("anim_fract = %3f, fade_in = %3f, fade_out = %3f\n",
-                   level->finished_anim_fract,
-                   level->finished_anim_fade_in,
-                   level->finished_anim_fade_out);
-            break;
-
-        case FINISHED_ANIM_AFTER:
-            /* do nothing */
-            break;
-
-        default:
-            /* do nothing */
-            break;
-        }
-    }
-
-    float finished_fade = MIN(level->finished_anim_fade_in, level->finished_anim_fade_out);
-
     level->finished_hue += FINISHED_HUE_STEP;
     while (level->finished_hue > 360.0f) {
         level->finished_hue -= 360.0f;
     }
+    win_anim_update(level->win_anim);
+
     Color finished_color = ColorFromHSV(level->finished_hue, 0.7, 1.0);
 
     rlPushMatrix();
@@ -1236,11 +1182,30 @@ void level_draw(level_t *level, bool finished)
                 if (level->drag_target && pos->tile == level->drag_target->tile) {
                     // defer until after bg tiles are drawn
                 } else {
-                    tile_draw(pos, level->drag_target, finished, finished_color, finished_fade);
+                    tile_draw(pos, level->drag_target, finished, finished_color);
                 }
             }
         }
     }
+
+    if (finished) {
+        BeginShaderMode(win_border_shader);
+        {
+            for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
+                for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
+                    hex_axial_t addr = {
+                        .q = q,
+                        .r = r
+                    };
+                    tile_pos_t *pos = level_get_current_tile_pos(level, addr);
+                    tile_draw_win_anim(pos, level);
+                }
+            }
+        }
+        EndShaderMode();
+    }
+
+    //win_anim_draw(level->win_anim);
 
     if (level->drag_target) {
         rlPushMatrix();
@@ -1249,7 +1214,15 @@ void level_draw(level_t *level, bool finished)
                      level->drag_offset.y,
                      0.0);
 
-        tile_draw(level->drag_target, level->drag_target, finished, finished_color, finished_fade);
+        tile_draw(level->drag_target, level->drag_target, finished, finished_color);
+
+        /* if (finished) { */
+        /*     BeginShaderMode(win_border_shader); */
+        /*     { */
+        /*         tile_draw_win_anim(pos, level); */
+        /*     } */
+        /*     EndShaderMode(); */
+        /* } */
 
         rlPopMatrix();
     }
@@ -1329,16 +1302,19 @@ void level_set_radius(level_t *level, int new_radius)
 
 void level_win(level_t *level)
 {
-    if (level->finished_anim_state != FINISHED_ANIM_NULL) {
+    if (win_anim_running(level->win_anim)) {
         return;
     }
 
-    level->finished_anim_state = FINISHED_ANIM_ACTIVE;
-    level->finished_anim_start = double_current_time + FINISHED_ANIM_PREDELAY_LENGTH;
-    level->finished_anim_end = level->finished_anim_start + FINISHED_ANIM_LENGTH;
+    win_anim_start(level->win_anim);
+}
 
-    printf("level_win(): anim_start = %3f, anim_end = %3f\n",
-           level->finished_anim_start,
-           level->finished_anim_end);
+void level_unwin(level_t *level)
+{
+    if (!win_anim_running(level->win_anim)) {
+        return;
+    }
+
+    win_anim_stop(level->win_anim);
 }
 

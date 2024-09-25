@@ -1,6 +1,6 @@
 /****************************************************************************
  *                                                                          *
- * tile_draw.h                                                              *
+ * win_anim.h                                                               *
  *                                                                          *
  * This file is part of hexpuzzle.                                          *
  *                                                                          *
@@ -19,20 +19,28 @@
  *                                                                          *
  ****************************************************************************/
 
-#ifndef TILE_DRAW_H
-#define TILE_DRAW_H
+#ifndef WIN_ANIM_H
+#define WIN_ANIM_H
 
-#include "tile.h"
-#include "tile_pos.h"
-#include "level.h"
+#include "anim_fsm.h"
 
-void prepare_global_colors(void);
+struct win_anim {
+    anim_fsm_t anim_fsm;
+    struct level *level;
+    bool running;
+};
+typedef struct win_anim win_anim_t;
 
-Color path_type_color(path_type_t type);
-Color path_type_highlight_color(path_type_t type);
+win_anim_t *create_win_anim(struct level *level);
+void destroy_win_anim(win_anim_t *win_anim);
 
-void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color finished_color);
-void tile_draw_win_anim(tile_pos_t *pos, struct level *level);
+void win_anim_update(win_anim_t *win_anim);
+void win_anim_draw(win_anim_t *win_anim);
 
-#endif /*TILE_DRAW_H*/
+bool win_anim_running(win_anim_t *win_anim);
+
+void win_anim_start(win_anim_t *win_anim);
+void win_anim_stop(win_anim_t *win_anim);
+
+#endif /*WIN_ANIM_H*/
 

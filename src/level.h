@@ -43,14 +43,6 @@ enum used_tiles {
 };
 typedef enum used_tiles used_tiles_t;
 
-enum finished_anim_state {
-    FINISHED_ANIM_NULL = 0,
-    FINISHED_ANIM_PREDELAY,
-    FINISHED_ANIM_ACTIVE,
-    FINISHED_ANIM_AFTER
-};
-typedef enum finished_anim_state finished_anim_state_t;
-
 struct level {
     char *id;
     char name[NAME_MAXLEN];
@@ -88,6 +80,8 @@ struct level {
 
     Vector2 mouse_pos;
 
+    char ui_name[UI_NAME_MAXLEN];
+
     tile_pos_t *drag_target;
     Vector2 drag_start;
     Vector2 drag_offset;
@@ -102,15 +96,7 @@ struct level {
     bool finished;
     float finished_hue;
 
-    finished_anim_state_t finished_anim_state;
-    double finished_anim_start;
-    double finished_anim_end;
-    float finished_anim_fract;
-    float finished_anim_fade_in;
-    float finished_anim_fade_out;
-
-
-    char ui_name[UI_NAME_MAXLEN];
+    struct win_anim *win_anim;
 
     struct level *prev, *next;
 };
@@ -201,6 +187,7 @@ void level_disable_ring(level_t *level, int radius);
 void level_set_radius(level_t *level, int new_radius);
 void level_draw(level_t *level, bool finished);
 void level_win(level_t *level);
+void level_unwin(level_t *level);
 
 extern level_t *current_level;
 

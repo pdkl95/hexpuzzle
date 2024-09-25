@@ -24,10 +24,10 @@
 
 struct anim_fsm;
 
-typedef void (*anim_fsm_update_cb_t)(struct anim_fsm *anim_fsm);
-typedef void (*anim_fsm_draw_cb_t)(struct anim_fsm *anim_fsm);
-typedef void (*anim_fsm_enter_state_cb_t)(struct anim_fsm *anim_fsm);
-typedef void (*anim_fsm_exit_state_cb_t)(struct anim_fsm *anim_fsm);
+typedef void (*anim_fsm_update_cb_t)(struct anim_fsm *anim_fsm, void *data);
+typedef void (*anim_fsm_draw_cb_t)(struct anim_fsm *anim_fsm, void *data);
+typedef void (*anim_fsm_enter_state_cb_t)(struct anim_fsm *anim_fsm, void *data);
+typedef void (*anim_fsm_exit_state_cb_t)(struct anim_fsm *anim_fsm, void *data);
 
 struct anim_fsm_callbacks {
     anim_fsm_update_cb_t      update;
@@ -38,13 +38,14 @@ struct anim_fsm_callbacks {
 typedef struct anim_fsm_callbacks anim_fsm_callbacks_t;
 
 enum anim_fsm_state_switch_mode {
-    ANIM_STATE_NEXT = 0,
-    ANIM_STATE_RESTART,
-    ANIM_STATE_STOP
+    ANIM_FSM_STATE_NEXT = 0,
+    ANIM_FSM_STATE_RESTART,
+    ANIM_FSM_STATE_STOP
 };
 typedef enum anim_fsm_state_switch_mode anim_fsm_state_switch_mode_t;
 
 struct anim_fsm_state {
+    char *name;
     double length;
     anim_fsm_state_switch_mode_t switch_mode;
     anim_fsm_callbacks_t *callbacks;
@@ -53,6 +54,8 @@ typedef struct anim_fsm_state anim_fsm_state_t;
 
 struct anim_fsm {
     anim_fsm_callbacks_t *callbacks;
+    void *data;
+
     anim_fsm_state_t *states;
     anim_fsm_state_t *current_state;
     int current_state_index;
@@ -69,21 +72,8 @@ struct anim_fsm {
 };
 typedef struct anim_fsm anim_fsm_t;
 
-#define anim_fsm_call(anim_fsm, callback_name) do {                     \
-        anim_fsm_callbacks_t *state_cb =                                \
-            (anim_fsm)->current_state->callbacks;                       \
-        anim_fsm_callbacks_t *common_cb =                               \
-            (anim_fsm)->callbacks;                                      \
-        if (state_cb && state_cb->callback_name) {                      \
-            state_cb->callback_name(anim_fsm);                          \
-        } else {                                                        \
-            if (common_cb && common_cb->callback_name) {                \
-                common_cb->callback_name(anim_fsm);                     \
-            }                                                           \
-        }                                                               \
-    } while(0)
-
-anim_fsm_t *create_anim_fsm(anim_fsm_state_t *states, anim_fsm_callbacks_t *callbacks);
+void init_anim_fsm(anim_fsm_t *anim_fsm, anim_fsm_state_t *states, anim_fsm_callbacks_t *callbacks, void *data);
+anim_fsm_t *create_anim_fsm(anim_fsm_state_t *states, anim_fsm_callbacks_t *callbacks, void *data);
 void destroy_anim_fsm(anim_fsm_t *anim_fsm);
 
 int anim_fsm_next_state_index(anim_fsm_t *anim_fsm);

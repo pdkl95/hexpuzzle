@@ -26,6 +26,9 @@
 #include "tile_pos.h"
 #include "tile_draw.h"
 #include "level.h"
+#include "win_anim.h"
+
+#include "stb/stb_perlin.h"
 
 extern Shader win_border_shader;
 
@@ -78,7 +81,7 @@ static void draw_adjacency_highlight(tile_pos_t *pos)
     DrawTriangle(c0, c1, sec.corners[2], tile_bg_highlight_color_dim);
 }
 
-void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color finished_color, float finished_fade)
+void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color finished_color)
 {
     assert_not_null(pos);
     /* drag_target CAN be NULL */
@@ -86,11 +89,6 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
     if (!pos->tile->enabled) {
         return;
     }
-
-    Vector2 hex_seq_id = {
-        .x = pos->position.q / TILE_LEVEL_WIDTH,
-        .y = pos->position.r / TILE_LEVEL_HEIGHT
-    };
 
     bool drag = (pos == drag_target);
     bool dragged_over = (!drag && drag_target && pos->hover);
@@ -113,12 +111,19 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
 
     if (!pos->tile->fixed) {
         /* background */
-        DrawPoly(pos->center, 6, pos->size, 0.0f,
-                 drag
-                 ? tile_bg_drag_color
-                 : (pos->hover
-                    ? tile_bg_hover_color
-                    : tile_bg_color));
+        Color bgcolor = drag
+            ? tile_bg_drag_color
+            : (pos->hover
+               ? tile_bg_hover_color
+               : tile_bg_color);
+
+        if (finished) {
+            float alpha = (1.0f + sinf(current_time * 0.666)) / 2.0f;
+            alpha = (alpha * 0.7) + 0.3;
+            bgcolor = ColorAlpha(bgcolor, alpha);
+        }
+
+        DrawPoly(pos->center, 6, pos->size, 0.0f, bgcolor);
     }
 
     if (edit_mode && !drag) {
@@ -208,22 +213,7 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         }
 
         if (finished) {
-            border_color = finished_color;
-            /* if ((finished_fade > hex_seq_id.x) && (finished_fade > hex_seq_id.y)) { */
-            /*     //Color mixcolor = ColorLerp(magenta);; */
-            /*     border_color = ColorLerp(border_color, purple, 0.5); */
-            /* } else if (finished_fade > hex_seq_id.x) { */
-            /*     border_color = ColorLerp(border_color, magenta, 0.5); */
-            /* } else if (finished_fade > hex_seq_id.y) { */
-            /*     border_color = ColorLerp(border_color, royal_blue, 0.5); */
-            /* } */
-            line_width = 2.0;
-
-            BeginShaderMode(win_border_shader);
-            {
-                DrawPolyLinesEx(pos->center, 6, pos->size, 0.0f, line_width, border_color);
-            }
-            EndShaderMode();
+            /* skip */
         } else {
             DrawPolyLinesEx(pos->center, 6, pos->size, 0.0f, line_width, border_color);
         }
@@ -248,3 +238,29 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
 #endif
 }
 
+static float tile_draw_hash_wave(tile_pos_t *pos)
+{
+    return stb_perlin_noise3(pos->center.x,
+                             pos->center.y,
+                             current_time,
+                             0, 0, 0);
+}
+
+void tile_draw_win_anim(tile_pos_t *pos, level_t *level)
+{
+    if (!pos->tile->enabled) {
+        return;
+    }
+
+    int tile_radius = hex_axial_distance(pos->position, LEVEL_CENTER_POSITION);
+    int offset = 3 - (tile_radius % 3);
+
+    Color color = {0};
+    color.r = (255/3) * offset;
+    color.g = (255 * tile_radius) / level->radius;
+    color.b = (unsigned char)(255.0f * tile_draw_hash_wave(pos));
+
+    float line_width = 2.0;
+
+    DrawPolyLinesEx(pos->center, 6, pos->size, 0.0f, line_width, color);
+}
