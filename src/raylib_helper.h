@@ -61,6 +61,8 @@ void DrawTextDropShadow(const char *text, int posX, int posY, int fontSize, Colo
 
 Color ColorLerp(Color start, Color end, float amount);
 
+bool ColorEq(Color a, Color b);
+
 /*** Misc Math ***/
 
 float nsinf(float x);

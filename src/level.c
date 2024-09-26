@@ -1165,7 +1165,7 @@ static void level_set_fade_transition(level_t *level, tile_pos_t *pos)
     }
 
     Vector2 radial = Vector2Subtract(pos->center, center_pos->center);
-    Vector2 modded = Vector2Scale(radial, 3.0);
+    Vector2 modded = Vector2Scale(radial, 4.0);
     Vector2 faded  = Vector2Lerp(modded, radial, level->fade_value_eased);
 
     Vector2 translate = Vector2Subtract(faded, radial);
@@ -1192,6 +1192,11 @@ void level_draw(level_t *level, bool finished)
     rlPushMatrix();
 
     if (do_fade) {
+        glBlendColor(0.0f, 0.0f, 0.0f, level->fade_value);
+        rlSetBlendFactors(RL_CONSTANT_ALPHA, RL_ONE_MINUS_CONSTANT_ALPHA, RL_FUNC_ADD);
+        rlSetBlendMode(RL_BLEND_CUSTOM);
+        rlEnableColorBlend();
+
         float rot = (1.0 - ease_circular_out(level->fade_value)) * (TAU/2.0);
         Vector2 hwin = {
             .x = window_size.x / 2.0,
@@ -1287,7 +1292,7 @@ void level_draw(level_t *level, bool finished)
     }
 
     //DrawRectangleLinesEx(level->px_bounding_box, 5.0, LIME);
-
+    rlSetBlendMode(RL_BLEND_ALPHA);
     rlPopMatrix();
 
 #if 0

@@ -61,6 +61,16 @@ Color ColorLerp(Color start, Color end, float amount)
     return result;
 }
 
+bool ColorEq(Color a, Color b)
+{
+    return (
+        (a.r == b.r) &&
+        (a.g == b.g) &&
+        (a.b == b.b) &&
+        (a.a == b.a)
+    );
+}
+
 void printrect(Rectangle r)
 {
     printf("Rect: x = %f, y = %f\n", r.x, r.y);

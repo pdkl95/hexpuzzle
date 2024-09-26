@@ -151,7 +151,11 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         /* colored strips */
         Vector2 mid = pos->midpoints[i];
 
-        DrawLineEx(pos->center, mid, pos->line_width, path_type_color(pos->tile->path[i]));
+
+        Color pcolor = path_type_color(pos->tile->path[i]);
+        if (!ColorEq(pcolor, path_color_none)) {
+            DrawLineEx(pos->center, mid, pos->line_width, pcolor);
+        }
 
         if (pos->tile->path[i] != PATH_TYPE_NONE) {
             tile_pos_t *neighbor = pos->neighbors[i];
