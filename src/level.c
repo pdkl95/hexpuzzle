@@ -234,6 +234,11 @@ static level_t *alloc_level()
 
     level->finished_hue = 0.0f;
 
+    level->fade_value        = 0.0f;
+    level->fade_value_eased  = 0.0f;
+    level->fade_delta        = 0.0f;
+    level->fade_target       = 0.0f;
+
     level->radius = LEVEL_MIN_RADIUS;
 
     for (int i = 0; i < LEVEL_MAXTILES; i++) {
@@ -702,6 +707,7 @@ void level_play(level_t *level)
 
     level_load(level);
     level_use_unsolved_tile_pos(level);
+    level_fade_in(level);
     game_mode = GAME_MODE_PLAY_LEVEL;
 }
 
@@ -1151,9 +1157,29 @@ void level_modify_hovered_feature(level_t *level)
     }
 }
 
+static void level_set_fade_transition(level_t *level, tile_pos_t *pos)
+{
+    tile_pos_t *center_pos = level_get_center_tile_pos(level);
+    if (center_pos == pos) {
+        return;
+    }
+
+    Vector2 radial = Vector2Subtract(pos->center, center_pos->center);
+    Vector2 modded = Vector2Scale(radial, 3.0);
+    Vector2 faded  = Vector2Lerp(modded, radial, level->fade_value_eased);
+
+    Vector2 translate = Vector2Subtract(faded, radial);
+
+    rlTranslatef(translate.x,
+                 translate.y,
+                 0.0);
+}
+
 void level_draw(level_t *level, bool finished)
 {
     assert_not_null(level);
+
+    bool do_fade = level_update_fade(level);
 
     level->finished_hue += FINISHED_HUE_STEP;
     while (level->finished_hue > 360.0f) {
@@ -1164,6 +1190,24 @@ void level_draw(level_t *level, bool finished)
     Color finished_color = ColorFromHSV(level->finished_hue, 0.7, 1.0);
 
     rlPushMatrix();
+
+    if (do_fade) {
+        float rot = (1.0 - ease_circular_out(level->fade_value)) * (TAU/2.0);
+        Vector2 hwin = {
+            .x = window_size.x / 2.0,
+            .y = window_size.y / 2.0
+        };
+
+        rlTranslatef(hwin.x,
+                     hwin.y,
+                     0.0);
+
+        rlRotatef(rot * (300.0/TAU), 0.0, 0.0, 1.0);
+
+        rlTranslatef(-hwin.x,
+                     -hwin.y,
+                     0.0);
+    }
 
     rlTranslatef(level->px_offset.x,
                  level->px_offset.y,
@@ -1182,7 +1226,14 @@ void level_draw(level_t *level, bool finished)
                 if (level->drag_target && pos->tile == level->drag_target->tile) {
                     // defer until after bg tiles are drawn
                 } else {
-                    tile_draw(pos, level->drag_target, finished, finished_color);
+                    if (do_fade) {
+                        rlPushMatrix();
+                        level_set_fade_transition(level, pos);
+                        tile_draw(pos, level->drag_target, finished, finished_color);
+                        rlPopMatrix();
+                    } else {
+                        tile_draw(pos, level->drag_target, finished, finished_color);
+                    }
                 }
             }
         }
@@ -1198,7 +1249,15 @@ void level_draw(level_t *level, bool finished)
                         .r = r
                     };
                     tile_pos_t *pos = level_get_current_tile_pos(level, addr);
-                    tile_draw_win_anim(pos, level);
+
+                    if (do_fade) {
+                        rlPushMatrix();
+                        level_set_fade_transition(level, pos);
+                        tile_draw_win_anim(pos, level);
+                        rlPopMatrix();
+                    } else {
+                        tile_draw_win_anim(pos, level);
+                    }
                 }
             }
         }
@@ -1287,7 +1346,7 @@ void level_set_radius(level_t *level, int new_radius)
     assert(new_radius >= LEVEL_MIN_RADIUS);
     assert(new_radius <= LEVEL_MAX_RADIUS);
 
-    printf("change level radius from %d to %d\n", level->radius, new_radius);
+    //printf("change level radius from %d to %d\n", level->radius, new_radius);
 
     while (new_radius > level->radius) {
         level->radius++;
@@ -1316,5 +1375,66 @@ void level_unwin(level_t *level)
     }
 
     win_anim_stop(level->win_anim);
+}
+
+bool level_update_fade(level_t *level)
+{
+    if (level->fade_value != level->fade_target) {
+        if (fabs(level->fade_value - level->fade_target) <= LEVEL_FADE_DELTA) {
+            level->fade_value       = level->fade_target;
+            level->fade_value_eased = level->fade_target;
+#ifdef DEBUG_LEVEL_FADE
+            printf("level_update_fade(): stopped at fade_target = %f\n", level->fade_target);
+#endif
+        } else {
+#ifdef DEBUG_LEVEL_FADE
+            float old_fade_value = level->fade_value;
+#endif
+
+            level->fade_value += level->fade_delta;
+            level->fade_value_eased = ease_back_in(level->fade_value);
+
+#ifdef DEBUG_LEVEL_FADE
+            printf("level_update_fade(): fade_value %f -> %f\n", old_fade_value, level->fade_value);
+#endif
+        }
+    }
+
+    return level->fade_value != 1.0f;
+}
+
+static void level_fade_transition(level_t *level)
+{
+    if (level->fade_value < level->fade_target) {
+        level->fade_delta = LEVEL_FADE_DELTA;
+    } else if (level->fade_value > level->fade_target) {
+        level->fade_delta = -LEVEL_FADE_DELTA;
+    } else {
+        /* equal */
+    }
+
+#ifdef DEBUG_LEVEL_FADE
+    printf("level_fade_transition(): fade_value  = %f\n", level->fade_value);
+    printf("level_fade_transition(): fade_target = %f\n", level->fade_target);
+    printf("level_fade_transition(): fade_delta  = %f\n", level->fade_delta);
+#endif
+}
+
+void level_fade_in(level_t *level)
+{
+#ifdef DEBUG_LEVEL_FADE
+    printf("level_fade_in()\n");
+#endif
+    level->fade_target = 1.0f;
+    level_fade_transition(level);
+}
+
+void level_fade_out(level_t *level)
+{
+#ifdef DEBUG_LEVEL_FADE
+    printf("level_fade_out()\n");
+#endif
+    level->fade_target = 0.0f;
+    level_fade_transition(level);
 }
 

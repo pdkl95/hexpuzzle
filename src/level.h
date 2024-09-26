@@ -96,6 +96,11 @@ struct level {
     bool finished;
     float finished_hue;
 
+    float fade_value;
+    float fade_value_eased;
+    float fade_delta;
+    float fade_target;
+
     struct win_anim *win_anim;
 
     struct level *prev, *next;
@@ -188,6 +193,9 @@ void level_set_radius(level_t *level, int new_radius);
 void level_draw(level_t *level, bool finished);
 void level_win(level_t *level);
 void level_unwin(level_t *level);
+bool level_update_fade(level_t *level);
+void level_fade_in(level_t *level);
+void level_fade_out(level_t *level);
 
 extern level_t *current_level;
 
