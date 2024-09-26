@@ -707,7 +707,7 @@ void level_play(level_t *level)
 
     level_load(level);
     level_use_unsolved_tile_pos(level);
-    level_fade_in(level);
+    level_fade_in(level, NULL, NULL);
     game_mode = GAME_MODE_PLAY_LEVEL;
 }
 
@@ -1165,7 +1165,7 @@ static void level_set_fade_transition(level_t *level, tile_pos_t *pos)
     }
 
     Vector2 radial = Vector2Subtract(pos->center, center_pos->center);
-    Vector2 modded = Vector2Scale(radial, 4.0);
+    Vector2 modded = Vector2Scale(radial, 5.0);
     Vector2 faded  = Vector2Lerp(modded, radial, level->fade_value_eased);
 
     Vector2 translate = Vector2Subtract(faded, radial);
@@ -1391,13 +1391,18 @@ bool level_update_fade(level_t *level)
 #ifdef DEBUG_LEVEL_FADE
             printf("level_update_fade(): stopped at fade_target = %f\n", level->fade_target);
 #endif
+
+            if (level->fade_finished_callback) {
+                level->fade_finished_callback(level, level->fade_finished_data);
+            }
+
         } else {
 #ifdef DEBUG_LEVEL_FADE
             float old_fade_value = level->fade_value;
 #endif
 
             level->fade_value += level->fade_delta;
-            level->fade_value_eased = ease_back_in(level->fade_value);
+            level->fade_value_eased = ease_exponential_out(level->fade_value);
 
 #ifdef DEBUG_LEVEL_FADE
             printf("level_update_fade(): fade_value %f -> %f\n", old_fade_value, level->fade_value);
@@ -1408,8 +1413,11 @@ bool level_update_fade(level_t *level)
     return level->fade_value != 1.0f;
 }
 
-static void level_fade_transition(level_t *level)
+static void level_fade_transition(level_t *level, level_fade_finished_cb_t callback, void *data)
 {
+    level->fade_finished_callback = callback;
+    level->fade_finished_data = data;
+
     if (level->fade_value < level->fade_target) {
         level->fade_delta = LEVEL_FADE_DELTA;
     } else if (level->fade_value > level->fade_target) {
@@ -1425,21 +1433,21 @@ static void level_fade_transition(level_t *level)
 #endif
 }
 
-void level_fade_in(level_t *level)
+void level_fade_in(level_t *level, level_fade_finished_cb_t callback, void *data)
 {
 #ifdef DEBUG_LEVEL_FADE
     printf("level_fade_in()\n");
 #endif
     level->fade_target = 1.0f;
-    level_fade_transition(level);
+    level_fade_transition(level, callback, data);
 }
 
-void level_fade_out(level_t *level)
+void level_fade_out(level_t *level, level_fade_finished_cb_t callback, void *data)
 {
 #ifdef DEBUG_LEVEL_FADE
     printf("level_fade_out()\n");
 #endif
     level->fade_target = 0.0f;
-    level_fade_transition(level);
+    level_fade_transition(level, callback, data);
 }
 

@@ -212,10 +212,17 @@ void toggle_edit_mode(void)
     }
 }
 
-void return_from_level(void)
+static void return_from_level_callback(UNUSED level_t *level, UNUSED void *data)
 {
     if (current_level) {
         level_unload();
+    }
+}
+
+void return_from_level(void)
+{
+    if (current_level) {
+        level_fade_out(current_level, return_from_level_callback, NULL);
     }
 }
 

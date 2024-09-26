@@ -43,6 +43,10 @@ enum used_tiles {
 };
 typedef enum used_tiles used_tiles_t;
 
+struct level;
+
+typedef void (*level_fade_finished_cb_t)(struct level *level, void *data);
+
 struct level {
     char *id;
     char name[NAME_MAXLEN];
@@ -100,6 +104,8 @@ struct level {
     float fade_value_eased;
     float fade_delta;
     float fade_target;
+    level_fade_finished_cb_t fade_finished_callback;
+    void *fade_finished_data;
 
     struct win_anim *win_anim;
 
@@ -194,8 +200,9 @@ void level_draw(level_t *level, bool finished);
 void level_win(level_t *level);
 void level_unwin(level_t *level);
 bool level_update_fade(level_t *level);
-void level_fade_in(level_t *level);
-void level_fade_out(level_t *level);
+void level_fade_in(level_t *level, level_fade_finished_cb_t callback, void *data);
+void level_fade_out(level_t *level, level_fade_finished_cb_t callback, void *data);
+
 
 extern level_t *current_level;
 

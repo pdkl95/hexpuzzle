@@ -45,10 +45,7 @@ void main()
     float tile_radius  = fragColor.r;
     float perlin_noise = fragColor.b;
 
-    //float progress = fade.x;
     float hue = fade.y;
-
-    //float wave = (sin((2.0 * time) + (tile_radius * TAU)) + 1.0) / 2.0;
 
     float wave_mix = (sin(1.0 * time) + 1.0) / 2.0;
 
@@ -57,18 +54,6 @@ void main()
 
     vec3 hsv = vec3(hue, 0.7, clamp(wave, 0.0, 1.0));
     color = hsv2rgb(hsv);
-
-    // float wave_margin = 0.03;
-    // float wave_start = smoothstep(min(dist_center - wave_margin, 0.0),
-    //                               dist_center + wave_margin,
-    //                               fade.x);
-    // wave_margin *= 0.5;
-    // float wave_end = smoothstep(min(dist_center - wave_margin, 0.0),
-    //                             dist_center + wave_margin,
-    //                             1.0 - fade.y);
-
-    // float wave_total = clamp(wave_start /*- wave_end*/, 0.0, 1.0);
-    // color *= wave_total;
 
     finalColor = clamp(vec4(color, alpha), 0.0, 1.0);
 }
