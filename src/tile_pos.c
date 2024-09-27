@@ -20,6 +20,7 @@
  ****************************************************************************/
 
 #include "common.h"
+#include "raylib_helper.h"
 #include "tile.h"
 #include "tile_pos.h"
 #include "level.h"
@@ -158,14 +159,27 @@ void tile_pos_modify_hovered_feature(tile_pos_t *pos)
         tile_pos_toggle_hidden(pos);
     } else {
         if (pos->hover_center) {
-            if (IsKeyDown(KEY_LEFT_SHIFT) ||
-                IsKeyDown(KEY_RIGHT_SHIFT)) {
+            if (is_any_shift_down()) {
                 tile_pos_toggle_hidden(pos);
             } else {
                 tile_pos_toggle_fixed(pos);
             }
         } else {
             tile_pos_cycle_path_section(pos, pos->hover_section);
+        }
+    }
+}
+
+void tile_pos_clear(tile_pos_t *pos, struct level *level)
+{
+    for (hex_direction_t i=0; i<6; i++) {
+        pos->tile->path[i] = PATH_TYPE_NONE;
+        if (feature_adjacency_only) {
+            tile_pos_t *neighbor = level_find_current_neighbor_tile_pos(level, pos, i);
+            if (neighbor) {\
+                hex_direction_t opp_i = hex_opposite_direction(i);
+                neighbor->tile->path[opp_i] = PATH_TYPE_NONE;
+            }
         }
     }
 }

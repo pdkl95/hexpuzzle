@@ -24,6 +24,8 @@
 
 #include "tile.h"
 
+struct level;
+
 struct tile_section {
     Vector2 corners[3];
 };
@@ -75,6 +77,8 @@ void tile_pos_unset_hover_adjacent(tile_pos_t *tile_pos);
 
 void tile_pos_cycle_path_section(tile_pos_t *tile_pos, hex_direction_t section;);
 void tile_pos_modify_hovered_feature(tile_pos_t *tile_pos);
+
+void tile_pos_clear(tile_pos_t *pos, struct level *level);
 
 #endif /*TILE_POS_H*/
 

@@ -44,6 +44,13 @@ void printcolor(Color c);
         printf(QUOTE(var) "\t    w=% 8.2f, h=% 8.2f )\n", rtmp.width, rtmp.height); \
     } while(0)
 
+/*** misc stuff */
+
+static inline bool is_any_shift_down(void)
+{
+    return IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT);
+}
+
 /*** Constants ***/
 
 #define VEC2_ZERO    ((Vector2){ 0.0f, 0.0f })

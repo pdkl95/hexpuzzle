@@ -2,20 +2,20 @@
  *                                                                            *
  *  main.c                                                                    *
  *                                                                            *
- *  This file is part of hexpuzzle.                                         *
+ *  This file is part of hexpuzzle.                                           *
  *                                                                            *
- *  hexpuzzle is free software: you can redistribute it and/or              *
+ *  hexpuzzle is free software: you can redistribute it and/or                *
  *  modify it under the terms of the GNU General Public License as published  *
  *  by the Free Software Foundation, either version 3 of the License,         *
  *  or (at your option) any later version.                                    *
  *                                                                            *
- *  hexpuzzle is distributed in the hope that it will be useful,            *
+ *  hexpuzzle is distributed in the hope that it will be useful,              *
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of            *
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General  *
  *  Public License for more details.                                          *
  *                                                                            *
  *  You should have received a copy of the GNU General Public License along   *
- *  with hexpuzzle. If not, see <https://www.gnu.org/licenses/>.            *
+ *  with hexpuzzle. If not, see <https://www.gnu.org/licenses/>.              *
  *                                                                            *
  ******************************************************************************/
 
@@ -26,8 +26,7 @@
 #include <time.h>
 #include <sys/stat.h>
 
-#include "raygui/style/dark.h"
-//#include "bi_lighting_font.h"
+#include "raygui/style/dark_alt.h"
 #include "raygui/gui_window_file_dialog.h"
 
 #include "options.h"
@@ -464,6 +463,9 @@ handle_events(
             mouse_left_click = true;
             if (do_level_ui_interaction()) {
                 level_drag_start(current_level);
+                if (edit_mode) {
+                    level_modify_hovered_feature(current_level);
+                }
             }
         }
 
@@ -476,9 +478,13 @@ handle_events(
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
             mouse_right_click = true;
-            if (edit_mode) {
-                if (do_level_ui_interaction()) {
-                    level_modify_hovered_feature(current_level);
+            if (do_level_ui_interaction()) {
+                if (edit_mode) {
+                    if (is_any_shift_down()) {
+                        level_clear_hovered_tile(current_level);
+                    } else {
+                        level_modify_hovered_feature(current_level);
+                    }
                 }
             }
         }

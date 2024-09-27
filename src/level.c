@@ -1158,6 +1158,18 @@ void level_modify_hovered_feature(level_t *level)
     }
 }
 
+void level_clear_hovered_tile(level_t *level)
+{
+    assert_not_null(level);
+    if (level->hover) {
+        tile_pos_t *pos = level->hover;
+        if (pos->tile->enabled) {
+            tile_pos_clear(pos, level);
+            level->changed = true;
+        }
+    }
+}
+
 static void level_set_fade_transition(level_t *level, tile_pos_t *pos)
 {
     tile_pos_t *center_pos = level_get_center_tile_pos(level);
