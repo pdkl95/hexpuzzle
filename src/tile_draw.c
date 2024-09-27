@@ -223,10 +223,15 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         }
     }
 
-    DrawCircleV(pos->center, pos->center_circle_draw_radius, tile_center_color);
+    if (finished) {
+        Color cent_color = ColorLerp(tile_center_color, finished_color, 0.5);
+        DrawCircleV(pos->center, pos->center_circle_draw_radius, cent_color);
+    } else {
+        DrawCircleV(pos->center, pos->center_circle_draw_radius, tile_center_color);
 
-    if (edit_mode && pos->hover_center) {
-        DrawCircleV(pos->center, pos->center_circle_draw_radius, tile_bg_highlight_color);
+        if (edit_mode && pos->hover_center) {
+            DrawCircleV(pos->center, pos->center_circle_draw_radius, tile_bg_highlight_color);
+        }
     }
 
 #if 0

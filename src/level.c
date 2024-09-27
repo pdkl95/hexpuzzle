@@ -1207,7 +1207,8 @@ void level_draw(level_t *level, bool finished)
                      hwin.y,
                      0.0);
 
-        rlRotatef(rot * (300.0/TAU), 0.0, 0.0, 1.0);
+        float rot_x = rot * (360.0 / TAU) * level->fade_rotate_speed;
+        rlRotatef(rot_x, 0.0, 0.0, 1.0);
 
         rlTranslatef(-hwin.x,
                      -hwin.y,
@@ -1417,6 +1418,11 @@ static void level_fade_transition(level_t *level, level_fade_finished_cb_t callb
 {
     level->fade_finished_callback = callback;
     level->fade_finished_data = data;
+
+    level->fade_rotate_speed = 0.8333;
+    if (rand() & 0x00000001) {
+        level->fade_rotate_speed *= -1.0;
+    }
 
     if (level->fade_value < level->fade_target) {
         level->fade_delta = LEVEL_FADE_DELTA;

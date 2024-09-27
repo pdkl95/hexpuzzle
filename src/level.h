@@ -106,6 +106,7 @@ struct level {
     float fade_target;
     level_fade_finished_cb_t fade_finished_callback;
     void *fade_finished_data;
+    float fade_rotate_speed;
 
     struct win_anim *win_anim;
 
