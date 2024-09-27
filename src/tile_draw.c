@@ -154,6 +154,10 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
 
         Color pcolor = path_type_color(pos->tile->path[i]);
         if (!ColorEq(pcolor, path_color_none)) {
+            if (finished) {
+                pcolor = ColorAlpha(pcolor, 0.666);
+            }
+
             DrawLineEx(pos->center, mid, pos->line_width, pcolor);
         }
 
@@ -225,6 +229,7 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
 
     if (finished) {
         Color cent_color = ColorLerp(tile_center_color, finished_color, 0.5);
+        cent_color = ColorBrightness(cent_color, -0.6);
         DrawCircleV(pos->center, pos->center_circle_draw_radius, cent_color);
     } else {
         DrawCircleV(pos->center, pos->center_circle_draw_radius, tile_center_color);

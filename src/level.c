@@ -717,6 +717,7 @@ void level_edit(level_t *level)
 
     level_load(level);
     level_use_solved_tile_pos(level);
+    level_fade_in(level, NULL, NULL);
     game_mode = GAME_MODE_EDIT_LEVEL;
 }
 

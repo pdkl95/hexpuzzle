@@ -231,7 +231,6 @@ void create_new_level(void)
     level_t *level = create_level(current_collection);
     collection_add_level(current_collection, level);
     level_edit(level);
-    //show_name_edit_dialog();
 }
 
 void open_game_file(char *path)
@@ -907,6 +906,25 @@ static void draw_popup_text(void)
 
 static void draw_cartesian_grid(bool draw_labels)
 {
+    rlPushMatrix();
+
+   Vector2 hwin = {
+        .x = window_size.x / 2.0,
+        .y = window_size.y / 2.0
+    };
+
+    rlTranslatef(hwin.x,
+                 hwin.y,
+                 0.0);
+
+    float rot_x = 2.0 * sinf(current_time / 10.0);
+    //float rot_x = rot * (360.0 / TAU) * level->fade_rotate_speed;
+    rlRotatef(rot_x, 0.0, 0.0, 1.0);
+
+    rlTranslatef(-hwin.x,
+                 -hwin.y,
+                 0.0);
+
     Color minor_color = ColorAlpha(purple, 0.5);
 
     int minor_size = 25;
@@ -970,6 +988,8 @@ static void draw_cartesian_grid(bool draw_labels)
             DrawText(TextFormat("%d", y), 3.0, (float)y + 3.9, 16, YELLOW);
         }
     }
+
+    rlPopMatrix();
 }
 
 static bool
@@ -1081,7 +1101,7 @@ void gfx_init(void)
     unsigned int flags = 0;
     flags |= FLAG_VSYNC_HINT;
     flags |= FLAG_WINDOW_RESIZABLE;
-    //flags |= FLAG_MSAA_4X_HINT;
+    flags |= FLAG_MSAA_4X_HINT;
     SetConfigFlags(flags);
 
     InitWindow(window_size.x, window_size.y, "Hex Puzzle");
