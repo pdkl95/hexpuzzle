@@ -5601,7 +5601,7 @@ done
 
 
 
-APP_CFLAGS="-I\$(top_srcdir)/external"
+APP_CFLAGS="-I\$(top_srcdir)/external -I\$(top_srcdir)/shaders"
 APP_LIBS=""
 
 

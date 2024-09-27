@@ -1,8 +1,12 @@
 AUTOMAKE_OPTIONS = subdir-objects
 
+SUFFIXES = .glsl
+
 ACLOCAL_AMFLAGS = -I m4
 
 AM_CPPFLAGS = -Wall -Wextra
+
+XXD ?= xxd
 
 EXTRA_DIST = \
 	README.md \
@@ -10,7 +14,8 @@ EXTRA_DIST = \
 	lib/getopt.c \
 	lib/getopt1.c \
 	external/raygui/raygui.h \
-	external/raygui/gui_window_file_dialog.h
+	external/raygui/gui_window_file_dialog.h \
+	shaders/win_border.frag.glsl
 
 bin_PROGRAMS = hexpuzzle
 
@@ -53,3 +58,15 @@ hexpuzzle_SOURCES +=              \
 	external/zip-kuba/zip.h   \
 	external/zip-kuba/zip.c
 
+dist_EXTRA_hexpuzzle_SOURCES = \
+	shaders/win_border.frag.h
+
+.glsl.h:
+	$(AM_V_GEN)$(XXD) -i $^ > $@
+
+
+BUILT_SOURCES = \
+	$(dist_EXTRA_hexpuzzle_SOURCES)
+
+MAINTAINERCLEANFILES = \
+	$(dist_EXTRA_hexpuzzle_SOURCES)

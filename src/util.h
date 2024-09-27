@@ -28,6 +28,8 @@ const char *concat_dir_and_filename(const char *dir, const char *filename);
 const char *filename_ext(const char *filename);
 char *strcat_alloc(const char *first, const char *second);
 
+char *strdup_xxd_include(unsigned char *buf, unsigned int len);
+
 /********************
  * easing functions *
  ********************/

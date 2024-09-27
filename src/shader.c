@@ -22,13 +22,19 @@
 #include "common.h"
 #include "shader.h"
 
+#include "win_border.frag.h"
 
 Shader win_border_shader;
 win_border_shader_loc_t win_border_shader_loc;
+char *win_border_shader_src;
 
 void load_shaders(void)
 {
-    win_border_shader = LoadShader(0, "shaders/win_border.frag.glsl");
+    win_border_shader_src = strdup_xxd_include(
+        shaders_win_border_frag_glsl,
+        shaders_win_border_frag_glsl_len);
+
+    win_border_shader = LoadShaderFromMemory(0, win_border_shader_src);
     win_border_shader_loc.resolution = GetShaderLocation(win_border_shader, "resolution");
     win_border_shader_loc.time       = GetShaderLocation(win_border_shader, "time");
     win_border_shader_loc.fade       = GetShaderLocation(win_border_shader, "fade");
@@ -37,4 +43,5 @@ void load_shaders(void)
 void unload_shaders(void)
 {
     UnloadShader(win_border_shader);
+    free(win_border_shader_src);
 }

@@ -156,8 +156,8 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(hexpuzzle_SOURCES)
-DIST_SOURCES = $(hexpuzzle_SOURCES)
+SOURCES = $(hexpuzzle_SOURCES) $(dist_EXTRA_hexpuzzle_SOURCES)
+DIST_SOURCES = $(hexpuzzle_SOURCES) $(dist_EXTRA_hexpuzzle_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -309,6 +309,7 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = subdir-objects
+SUFFIXES = .glsl
 ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -Wall -Wextra
 EXTRA_DIST = \
@@ -317,7 +318,8 @@ EXTRA_DIST = \
 	lib/getopt.c \
 	lib/getopt1.c \
 	external/raygui/raygui.h \
-	external/raygui/gui_window_file_dialog.h
+	external/raygui/gui_window_file_dialog.h \
+	shaders/win_border.frag.glsl
 
 COMMON_PROG_CFLAGS = \
 	-DPLATFORM=PLATFORM_DESKTOP \
@@ -343,11 +345,20 @@ hexpuzzle_SOURCES = src/anim_fsm.h src/anim_fsm.c src/collection.h \
 	src/util.c src/win_anim.h src/win_anim.c src/common.h \
 	src/main.c external/zip-kuba/miniz.h external/zip-kuba/zip.h \
 	external/zip-kuba/zip.c
-all: config.h
+dist_EXTRA_hexpuzzle_SOURCES = \
+	shaders/win_border.frag.h
+
+BUILT_SOURCES = \
+	$(dist_EXTRA_hexpuzzle_SOURCES)
+
+MAINTAINERCLEANFILES = \
+	$(dist_EXTRA_hexpuzzle_SOURCES)
+
+all: $(BUILT_SOURCES) config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
-.SUFFIXES: .c .o .obj
+.SUFFIXES: .glsl .c .h .o .obj
 am--refresh: Makefile
 	@:
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
@@ -992,13 +1003,15 @@ distcleancheck: distclean
 	       $(distcleancheck_listfiles) ; \
 	       exit 1; } >&2
 check-am: all-am
-check: check-am
+check: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) check-am
 all-am: Makefile $(PROGRAMS) config.h
 installdirs:
 	for dir in "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
-install: install-am
+install: $(BUILT_SOURCES)
+	$(MAKE) $(AM_MAKEFLAGS) install-am
 install-exec: install-exec-am
 install-data: install-data-am
 uninstall: uninstall-am
@@ -1032,6 +1045,8 @@ distclean-generic:
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
 	@echo "it deletes files that may require special tools to rebuild."
+	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
+	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
 clean: clean-am
 
 clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
@@ -1104,7 +1119,7 @@ ps-am:
 
 uninstall-am: uninstall-binPROGRAMS
 
-.MAKE: all install-am install-strip
+.MAKE: all check install install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am am--refresh check check-am clean \
 	clean-binPROGRAMS clean-cscope clean-generic cscope \
@@ -1125,6 +1140,11 @@ uninstall-am: uninstall-binPROGRAMS
 
 .PRECIOUS: Makefile
 
+
+XXD ?= xxd
+
+.glsl.h:
+	$(AM_V_GEN)$(XXD) -i $^ > $@
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

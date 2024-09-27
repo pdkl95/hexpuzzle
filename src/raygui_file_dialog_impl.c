@@ -27,6 +27,8 @@
 #define RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT        24
 #endif
 
+#include <stdlib.h>
+
 #define GUI_WINDOW_FILE_DIALOG_IMPLEMENTATION
 #include "raygui/gui_window_file_dialog.h"
 

@@ -85,6 +85,16 @@ char *strcat_alloc(const char *first, const char *second)
     return ret;
 }
 
+char *strdup_xxd_include(unsigned char *buf, unsigned int len)
+{
+    char *str = malloc(len + 1);
+
+    memcpy(str, buf, len);
+    str[len] = '\0';
+
+    return str;
+}
+
 float ease_circular_in(float t) {
     return 1.0f - sqrtf(1.0f - (t * t));
 }
