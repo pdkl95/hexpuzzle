@@ -462,9 +462,12 @@ handle_events(
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             mouse_left_click = true;
             if (do_level_ui_interaction()) {
-                level_drag_start(current_level);
-                if (edit_mode) {
+                if (edit_mode_solved) {
                     level_modify_hovered_feature(current_level);
+                //} else if (edit_mode_unsolved) {
+                //    level_drag_start(current_level);
+                } else {
+                    level_drag_start(current_level);
                 }
             }
         }
@@ -479,7 +482,7 @@ handle_events(
         if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
             mouse_right_click = true;
             if (do_level_ui_interaction()) {
-                if (edit_mode) {
+                if (edit_mode_solved) {
                     if (is_any_shift_down()) {
                         level_clear_hovered_tile(current_level);
                     } else {

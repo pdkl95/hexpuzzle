@@ -90,7 +90,7 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         return;
     }
 
-    bool drag = (pos == drag_target);
+    bool drag = (pos == drag_target) && !edit_mode_solved;
     bool dragged_over = (!drag && drag_target && pos->hover);
 
     if (pos->tile->hidden) {
@@ -113,7 +113,7 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         /* background */
         Color bgcolor = drag
             ? tile_bg_drag_color
-            : (pos->hover
+            : ((pos->hover && !edit_mode_solved)
                ? tile_bg_hover_color
                : tile_bg_color);
 
@@ -129,7 +129,7 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
 
     if (edit_mode && !drag) {
         if (feature_adjacency_only) {
-            if (pos->hover_adjacent) {
+            if (pos->hover_adjacent && edit_mode_solved) {
                 draw_adjacency_highlight(pos);
             }
         } else {
@@ -200,7 +200,7 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
 #endif
     }
 
-    if (pos->hover_adjacent) {
+    if (pos->hover_adjacent && edit_mode_solved) {
         assert(pos->hover_section >= 0);
         assert(pos->hover_section < 6);
         Vector2 mid = pos->midpoints[pos->hover_section];
@@ -214,11 +214,15 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         float line_width = 2.0f;
 
         if (!drag) {
-            if (pos->hover) {
+            if (pos->hover && !edit_mode_solved) {
                 border_color = tile_edge_hover_color;
             } else {
                 border_color = tile_edge_color;
             }
+        }
+
+        if (edit_mode_solved) {
+            border_color = tile_edge_color;
         }
 
         if (finished) {
@@ -235,7 +239,7 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
     } else {
         DrawCircleV(pos->center, pos->center_circle_draw_radius, tile_center_color);
 
-        if (edit_mode && pos->hover_center) {
+        if (edit_mode_solved && pos->hover_center) {
             DrawCircleV(pos->center, pos->center_circle_draw_radius, tile_bg_highlight_color);
         }
     }

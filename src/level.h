@@ -114,6 +114,11 @@ struct level {
 };
 typedef struct level level_t;
 
+#define edit_mode_solved   ((edit_mode) && current_level && \
+                            (current_level->currently_used_tiles == USED_TILES_SOLVED))
+#define edit_mode_unsolved ((edit_mode) && current_level && \
+                            (current_level->currently_used_tiles == USED_TILES_UNSOLVED))
+
 #define RETURN_NULL_IF_OUT_OF_BOUNDS                       \
     if ((axial.r < 0) || (axial.r >= TILE_LEVEL_HEIGHT) || \
         (axial.q < 0) || (axial.q >= TILE_LEVEL_WIDTH)) {  \
