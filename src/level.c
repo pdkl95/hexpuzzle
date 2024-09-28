@@ -1201,11 +1201,13 @@ void level_draw(level_t *level, bool finished)
     win_anim_update(level->win_anim);
 
     Color finished_color = ColorFromHSV(level->finished_hue, 0.7, 1.0);
+    float finished_fade_in = level->win_anim->fade[2];
 
     rlPushMatrix();
 
     if (do_fade) {
-        glBlendColor(0.0f, 0.0f, 0.0f, level->fade_value);
+        float blend_amount = level->fade_value;// * (1.0f - finished_fade_in);
+        glBlendColor(0.0f, 0.0f, 0.0f, blend_amount);
         rlSetBlendFactors(RL_CONSTANT_ALPHA, RL_ONE_MINUS_CONSTANT_ALPHA, RL_FUNC_ADD);
         rlSetBlendMode(RL_BLEND_CUSTOM);
         rlEnableColorBlend();
@@ -1248,10 +1250,10 @@ void level_draw(level_t *level, bool finished)
                     if (do_fade) {
                         rlPushMatrix();
                         level_set_fade_transition(level, pos);
-                        tile_draw(pos, level->drag_target, finished, finished_color);
+                        tile_draw(pos, level->drag_target, finished, finished_color, finished_fade_in);
                         rlPopMatrix();
                     } else {
-                        tile_draw(pos, level->drag_target, finished, finished_color);
+                        tile_draw(pos, level->drag_target, finished, finished_color, finished_fade_in);
                     }
                 }
             }
@@ -1292,7 +1294,7 @@ void level_draw(level_t *level, bool finished)
                      level->drag_offset.y,
                      0.0);
 
-        tile_draw(level->drag_target, level->drag_target, finished, finished_color);
+        tile_draw(level->drag_target, level->drag_target, finished, finished_color, finished_fade_in);
 
         /* if (finished) { */
         /*     BeginShaderMode(win_border_shader); */

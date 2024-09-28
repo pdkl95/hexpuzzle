@@ -64,6 +64,7 @@ dist_EXTRA_hexpuzzle_SOURCES = \
 .glsl.h:
 	$(AM_V_GEN)$(XXD) -i $^ > $@
 
+win_border.frag.h: win_border.frag.glsl
 
 BUILT_SOURCES = \
 	$(dist_EXTRA_hexpuzzle_SOURCES)

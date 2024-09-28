@@ -28,6 +28,7 @@ struct win_anim {
     anim_fsm_t anim_fsm;
     struct level *level;
     bool running;
+    float fade[4];
 };
 typedef struct win_anim win_anim_t;
 

@@ -36,11 +36,21 @@
         }                                                               \
     } while(0)
 
+anim_fsm_callbacks_t null_callbacks = {
+    .update      = NULL,
+    .draw        = NULL,
+    .enter_state = NULL,
+    .exit_state  = NULL,
+};
+
 void init_anim_fsm(anim_fsm_t *anim_fsm, anim_fsm_state_t *states, anim_fsm_callbacks_t *callbacks, void *data)
 {
     assert_not_null(anim_fsm);
     assert_not_null(states);
-    assert_not_null(callbacks);
+
+    if (!callbacks) {
+        callbacks = &null_callbacks;
+    }
 
     anim_fsm->callbacks = callbacks;
     anim_fsm->data = data;
@@ -64,7 +74,6 @@ void init_anim_fsm(anim_fsm_t *anim_fsm, anim_fsm_state_t *states, anim_fsm_call
 anim_fsm_t *create_anim_fsm(anim_fsm_state_t *states, anim_fsm_callbacks_t *callbacks, void *data)
 {
     assert_not_null(states);
-    assert_not_null(callbacks);
 
     anim_fsm_t *anim_fsm = calloc(1, sizeof(anim_fsm_t));
 
@@ -92,6 +101,9 @@ int anim_fsm_next_state_index(anim_fsm_t *anim_fsm)
 
     case ANIM_FSM_STATE_RESTART:
         return 0;
+
+    case ANIM_FSM_STATE_STAY:
+        return anim_fsm->current_state_index;
 
     case ANIM_FSM_STATE_STOP:
         /* fall through */

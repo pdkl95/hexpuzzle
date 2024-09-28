@@ -1146,6 +1146,8 @@ XXD ?= xxd
 .glsl.h:
 	$(AM_V_GEN)$(XXD) -i $^ > $@
 
+win_border.frag.h: win_border.frag.glsl
+
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

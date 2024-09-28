@@ -40,6 +40,7 @@ typedef struct anim_fsm_callbacks anim_fsm_callbacks_t;
 enum anim_fsm_state_switch_mode {
     ANIM_FSM_STATE_NEXT = 0,
     ANIM_FSM_STATE_RESTART,
+    ANIM_FSM_STATE_STAY,
     ANIM_FSM_STATE_STOP
 };
 typedef enum anim_fsm_state_switch_mode anim_fsm_state_switch_mode_t;

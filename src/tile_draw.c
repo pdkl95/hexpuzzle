@@ -81,7 +81,7 @@ static void draw_adjacency_highlight(tile_pos_t *pos)
     DrawTriangle(c0, c1, sec.corners[2], tile_bg_highlight_color_dim);
 }
 
-void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color finished_color)
+void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color finished_color, float finished_fade_in)
 {
     assert_not_null(pos);
     /* drag_target CAN be NULL */
@@ -120,7 +120,8 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         if (finished) {
             float alpha = (1.0f + sinf(current_time * 0.666)) / 2.0f;
             alpha = (alpha * 0.7) + 0.3;
-            bgcolor = ColorAlpha(bgcolor, alpha);
+            Color new_bgcolor = ColorAlpha(bgcolor, alpha);
+            bgcolor = ColorLerp(bgcolor, new_bgcolor, finished_fade_in);
         }
 
         DrawPoly(pos->center, 6, pos->size, 0.0f, bgcolor);

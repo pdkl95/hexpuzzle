@@ -28,25 +28,45 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
 {
     win_anim_t *win_anim = (win_anim_t *)data;
 
-    float fade[4] = {0};
-    fade[0] = anim_fsm->state_progress;
-    fade[1] = ((float)win_anim->level->finished_hue) / 360.0;
+    win_anim->fade[0] = anim_fsm->state_progress;
+    win_anim->fade[1] = ((float)win_anim->level->finished_hue) / 360.0;
 
-    //printf("progress = %f. hue = %f\n", fade[0], fade[1]);
+#if 0
+    printf("progress = %f. hue = %f, fadein = %f\n",
+           win_anim->fade[0],
+           win_anim->fade[1],
+           win_anim->fade[2]);
+#endif
 
-    SetShaderValue(win_border_shader, win_border_shader_loc.fade, fade, SHADER_UNIFORM_VEC4);
+    SetShaderValue(win_border_shader,
+                   win_border_shader_loc.fade,
+                   &(win_anim->fade[0]),
+                   SHADER_UNIFORM_VEC4);
 }
 
-anim_fsm_state_t states[] = {
-    { "HUE",  10.0, ANIM_FSM_STATE_RESTART, NULL },
-    { "STOP",  0.0, ANIM_FSM_STATE_STOP,    NULL }
-};
+static void win_anim_stay_update(struct anim_fsm *anim_fsm, void *data)
+{
+    win_anim_t *win_anim = (win_anim_t *)data;
 
-anim_fsm_callbacks_t callbacks = {
-    .update      = win_anim_common_update,
-    .draw        = NULL,
-    .enter_state = NULL,
-    .exit_state  = NULL,
+    win_anim->fade[2] = 1.0f;
+    win_anim_common_update(anim_fsm, data);
+}
+
+static void win_anim_fadein_update(struct anim_fsm *anim_fsm, void *data)
+{
+    win_anim_t *win_anim = (win_anim_t *)data;
+
+    win_anim->fade[2] = anim_fsm->state_progress;
+    win_anim_common_update(anim_fsm, data);
+}
+
+anim_fsm_callbacks_t fadein_callbacks = { .update = win_anim_fadein_update };
+anim_fsm_callbacks_t   stay_callbacks = { .update = win_anim_stay_update   };
+
+anim_fsm_state_t states[] = {
+    { "FADEIN",   5.0, ANIM_FSM_STATE_NEXT, &fadein_callbacks },
+    { "HUE",     10.0, ANIM_FSM_STATE_STAY,   &stay_callbacks },
+    { "STOP",     0.0, ANIM_FSM_STATE_STOP,              NULL }
 };
 
 win_anim_t *create_win_anim(struct level *level)
@@ -55,7 +75,13 @@ win_anim_t *create_win_anim(struct level *level)
 
     win_anim->running = false;
     win_anim->level = level;
-    init_anim_fsm(&win_anim->anim_fsm, states, &callbacks, win_anim);
+
+    win_anim->fade[0] = 0.0;
+    win_anim->fade[1] = 0.0;
+    win_anim->fade[2] = 0.0;
+    win_anim->fade[3] = 0.0;
+
+    init_anim_fsm(&win_anim->anim_fsm, states, NULL, win_anim);
 
     return win_anim;
 }
