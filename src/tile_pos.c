@@ -122,6 +122,18 @@ void tile_pos_toggle_hidden(tile_pos_t *pos)
     assert_not_null(pos);
 
     pos->tile->hidden = !pos->tile->hidden;
+
+    for (hex_direction_t dir=0; dir<6; dir++) {
+        hex_direction_t opp_dir =
+            hex_opposite_direction(dir);
+        tile_pos_t *neighbor = pos->neighbors[dir];
+
+        if (pos->tile->hidden) {
+            neighbor->tile->path[opp_dir] = PATH_TYPE_NONE;
+        } else {
+            neighbor->tile->path[opp_dir] = pos->tile->path[dir];;
+        }
+    }
 }
 
 void tile_pos_cycle_path_section(tile_pos_t *pos, hex_direction_t section)
