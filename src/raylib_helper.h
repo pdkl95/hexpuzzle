@@ -44,6 +44,12 @@ void printcolor(Color c);
         printf(QUOTE(var) "\t    w=% 8.2f, h=% 8.2f )\n", rtmp.width, rtmp.height); \
     } while(0)
 
+#define paxial(var) do { \
+        hex_axial_t tmp = (var); \
+        printf(QUOTE(var) "\t= ( q=%d, r=%d )\n", \
+               tmp.q, tmp.r); \
+    } while(0)
+
 /*** misc stuff */
 
 static inline bool is_any_shift_down(void)

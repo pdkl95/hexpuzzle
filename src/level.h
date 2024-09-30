@@ -32,10 +32,6 @@
 #include "tile.h"
 #include "tile_pos.h"
 
-extern bool feature_single_sector_editing;
-extern bool feature_adjacency_editing;
-#define feature_adjacency_only (!feature_single_sector_editing && feature_adjacency_editing)
-
 enum used_tiles {
     USED_TILES_NULL = 0,
     USED_TILES_SOLVED,
@@ -119,30 +115,9 @@ typedef struct level level_t;
 #define edit_mode_unsolved ((edit_mode) && current_level && \
                             (current_level->currently_used_tiles == USED_TILES_UNSOLVED))
 
-#define RETURN_NULL_IF_OUT_OF_BOUNDS                       \
-    if ((axial.r < 0) || (axial.r >= TILE_LEVEL_HEIGHT) || \
-        (axial.q < 0) || (axial.q >= TILE_LEVEL_WIDTH)) {  \
-        return NULL;                                       \
-    }
-
-static inline int addr_to_idx(hex_axial_t axial)
-{
-    return (axial.q * TILE_LEVEL_WIDTH) + axial.r;
-}
-
-static inline tile_pos_t *level_get_solved_tile_pos(level_t *level,  hex_axial_t axial)
-{
-    assert_not_null(level);
-    RETURN_NULL_IF_OUT_OF_BOUNDS;
-    return &level->solved_positions[addr_to_idx(axial)];
-}
-
-static inline tile_pos_t *level_get_unsolved_tile_pos(level_t *level,  hex_axial_t axial)
-{
-    assert_not_null(level);
-    RETURN_NULL_IF_OUT_OF_BOUNDS;
-    return &level->unsolved_positions[addr_to_idx(axial)];
-}
+int hex_axial_to_idx(hex_axial_t axial);
+tile_pos_t *level_get_solved_tile_pos(level_t *level,  hex_axial_t axial);
+tile_pos_t *level_get_unsolved_tile_pos(level_t *level,  hex_axial_t axial);
 
 level_t *create_level(void *collection);
 void destroy_level(level_t *level);

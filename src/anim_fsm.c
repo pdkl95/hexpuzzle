@@ -59,14 +59,14 @@ void init_anim_fsm(anim_fsm_t *anim_fsm, anim_fsm_state_t *states, anim_fsm_call
 
     anim_fsm->stop_state_index = 0;
     while (anim_fsm->states[anim_fsm->stop_state_index].switch_mode != ANIM_FSM_STATE_STOP) {
-        printf("skip state[%d] \"%s\"\n",
-               anim_fsm->stop_state_index,
-               anim_fsm->states[anim_fsm->stop_state_index].name);
+         /* printf("skip state[%d] \"%s\"\n", */
+         /*       anim_fsm->stop_state_index, */
+         /*       anim_fsm->states[anim_fsm->stop_state_index].name); */
 
         anim_fsm->stop_state_index++;
     }
 
-    printf("init_anim_fsm(): found stop state at index %d\n", anim_fsm->stop_state_index);
+    //printf("init_anim_fsm(): found stop state at index %d\n", anim_fsm->stop_state_index);
 
     assert(anim_fsm->stop_state_index > 0);
 }

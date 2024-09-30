@@ -127,24 +127,12 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         DrawPoly(pos->center, 6, pos->size, 0.0f, bgcolor);
     }
 
-    if (edit_mode && !drag) {
-        if (feature_adjacency_only) {
-            if (pos->hover_adjacent && edit_mode_solved) {
-                draw_adjacency_highlight(pos);
-            }
-        } else {
-            if (feature_adjacency_editing && pos->hover_adjacent) {
-                draw_adjacency_highlight(pos);
-            } else if (feature_single_sector_editing) {
-                if (pos->hover &&
-                    !pos->hover_center &&
-                    !drag_target) {
-                    /* section highlight */
-                    tile_section_t sec = pos->sections[pos->hover_section];
-                    DrawTriangle(sec.corners[0], sec.corners[1], sec.corners[2], tile_bg_highlight_color);
-                }
-            }
-            
+    if (edit_mode_solved && !drag && !pos->hover_center && !drag_target) {
+        if (pos->hover_adjacent || pos->hover) {
+            /* section highlight */
+            //tile_section_t sec = pos->sections[pos->hover_section];
+            //DrawTriangle(sec.corners[0], sec.corners[1], sec.corners[2], tile_bg_highlight_color);
+            draw_adjacency_highlight(pos);
         }
     }
 
@@ -198,9 +186,17 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         Vector2 mlabel = Vector2Add(mid, offset);
         DrawTextShadow(TextFormat("%d", i), mlabel.x - 5, mlabel.y - 9, 18, RAYWHITE);
 #endif
+
+#if 0
+        /* neighbor hex address label */
+        Vector2 offset = Vector2Scale(Vector2Subtract(pos->center, mid), 0.32);;
+        Vector2 mlabel = Vector2Add(mid, offset);
+        tile_pos_t *n = pos->neighbors[i];
+        DrawTextShadow(TextFormat("%d,%d", n->position.q, n->position.r), mlabel.x - 11, mlabel.y - 4, 16, RAYWHITE);
+#endif
     }
 
-    if (pos->hover_adjacent && edit_mode_solved) {
+    if (pos->hover_adjacent && !pos->hover_center && edit_mode_solved) {
         assert(pos->hover_section >= 0);
         assert(pos->hover_section < 6);
         Vector2 mid = pos->midpoints[pos->hover_section];
@@ -244,7 +240,7 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         }
     }
 
-#if 0
+#if 1
     if (drag) {
         return;
     }

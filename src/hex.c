@@ -24,6 +24,26 @@
 #include "common.h"
 #include "hex.h"
 
+const char *hex_direction_name(hex_direction_t dir)
+{
+    switch (dir) {
+    case HEX_DIR_DOWN_RIGHT:
+        return "DR";
+    case HEX_DIR_UP_RIGHT:
+        return "UR";
+    case HEX_DIR_UP:
+        return "UU";
+    case HEX_DIR_UP_LEFT:
+        return "UL";
+    case HEX_DIR_DOWN_LEFT:
+        return "DL";
+    case HEX_DIR_DOWN:
+        return "DD";
+    default:
+        __builtin_unreachable();
+    }
+}
+
 hex_axial_t hex_axial_direction_vectors[6] = {
     { .q =  1, .r =  0 },
     { .q =  1, .r = -1 },

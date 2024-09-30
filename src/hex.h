@@ -31,14 +31,16 @@
 
 /* flat-top directions */
 enum hex_direction {
-    HEX_DIR_DOWN_RIGHT = 0,
-    HEX_DIR_UP_RIGHT   = 1,
-    HEX_DIR_UP         = 2,
-    HEX_DIR_UP_LEFT    = 3,
-    HEX_DIR_DOWN_LEFT  = 4,
-    HEX_DIR_DOWN       = 5
+    HEX_DIR_UP_RIGHT   = 0,
+    HEX_DIR_UP         = 1,
+    HEX_DIR_UP_LEFT    = 2,
+    HEX_DIR_DOWN_LEFT  = 3,
+    HEX_DIR_DOWN       = 4,
+    HEX_DIR_DOWN_RIGHT = 5
 };
 typedef enum hex_direction hex_direction_t;
+
+const char *hex_direction_name(hex_direction_t dir);
 
 inline static hex_direction_t hex_opposite_direction(hex_direction_t dir)
 {

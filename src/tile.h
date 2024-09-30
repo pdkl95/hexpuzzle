@@ -24,6 +24,8 @@
 
 #include "hex.h"
 
+struct tile_pos;
+
 enum path_type {
     PATH_TYPE_NONE   = 0,
     PATH_TYPE_RED    = 1,
@@ -56,6 +58,10 @@ struct tile {
 typedef struct tile tile_t;
 
 int compare_tiles(const void *p1, const void *p2);
+
+char *tile_flag_string(tile_t *tile);
+char *tile_path_string(tile_t *tile);
+char *tile_our_pos_string(struct tile_pos *pos);
 
 void print_tile(tile_t *tile);
 tile_t *init_tile(tile_t *tile);

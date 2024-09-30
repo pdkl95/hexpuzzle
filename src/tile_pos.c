@@ -25,6 +25,20 @@
 #include "tile_pos.h"
 #include "level.h"
 
+void print_tile_pos(tile_pos_t *pos)
+{
+    if (pos) {
+        printf("tile_pos<pos=%s flags=%s path=%s h=%s ha=%s>\n",
+               tile_our_pos_string(pos),
+               tile_flag_string(pos->tile),
+               tile_path_string(pos->tile),
+               pos->hover ? "T" : "F",
+               pos->hover_adjacent ? "T" : "F");
+    } else {
+        printf("tile_pos<NULL>\n");
+    }
+}
+
 tile_pos_t *init_tile_pos(tile_pos_t *pos, tile_t *tile, hex_axial_t addr)
 {
     assert_not_null(pos);
@@ -79,6 +93,7 @@ void tile_pos_set_hover(tile_pos_t *pos, Vector2 mouse_pos)
     theta = TAU - theta;
     pos->hover = true;
     pos->hover_section = (int)(theta/TO_RADIANS(60.0));
+    //printf("tile_pos->hover_section = %d (theta = %f)\n", pos->hover_section, theta);
     pos->hover_center =
         (Vector2DistanceSqr(mouse_pos, pos->center)
          < (pos->center_circle_hover_radius *
@@ -91,21 +106,6 @@ void tile_pos_unset_hover(tile_pos_t *pos)
 
     pos->hover = false;
     pos->hover_center = false;
-}
-
-void tile_pos_set_hover_adjacent(tile_pos_t *pos, hex_direction_t section, tile_pos_t *adjacent_pos)
-{
-    assert_not_null(pos);
-
-    if (adjacent_pos->tile->enabled) {
-        pos->hover_adjacent = adjacent_pos;
-        pos->hover_section = section;
-    }
-}
-
-void tile_pos_unset_hover_adjacent(tile_pos_t *pos)
-{
-    assert_not_null(pos);
 
     pos->hover_adjacent = NULL;
 }
@@ -128,25 +128,11 @@ void tile_pos_cycle_path_section(tile_pos_t *pos, hex_direction_t section)
 {
     assert_not_null(pos);
 
-    bool do_local = feature_single_sector_editing;
-    bool do_opposite = (!!pos->hover_adjacent) && feature_adjacency_editing;
-    if (do_opposite) {
-        do_local = true;
-    }
+    pos->tile->path[section] = (pos->tile->path[section] + 1) % PATH_TYPE_COUNT;
 
-    if (do_local) {
-        pos->tile->path[section]++;
-        if (pos->tile->path[section] >= PATH_TYPE_COUNT) {
-            pos->tile->path[section]  = PATH_TYPE_NONE;
-        }
-
-    }
-
-
-    if (do_opposite) {
+    if (pos->hover_adjacent) {
         hex_direction_t opposite_section =
             hex_opposite_direction(section);
-
         pos->hover_adjacent->tile->path[opposite_section] = pos->tile->path[section];
     }
 }
@@ -174,12 +160,10 @@ void tile_pos_clear(tile_pos_t *pos, struct level *level)
 {
     for (hex_direction_t i=0; i<6; i++) {
         pos->tile->path[i] = PATH_TYPE_NONE;
-        if (feature_adjacency_only) {
-            tile_pos_t *neighbor = level_find_current_neighbor_tile_pos(level, pos, i);
-            if (neighbor) {\
-                hex_direction_t opp_i = hex_opposite_direction(i);
-                neighbor->tile->path[opp_i] = PATH_TYPE_NONE;
-            }
+        tile_pos_t *neighbor = level_find_current_neighbor_tile_pos(level, pos, i);
+        if (neighbor) {
+            hex_direction_t opp_i = hex_opposite_direction(i);
+            neighbor->tile->path[opp_i] = PATH_TYPE_NONE;
         }
     }
 }

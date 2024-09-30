@@ -59,7 +59,7 @@ struct tile_pos {
 };
 typedef struct tile_pos tile_pos_t;
 
-void print_tile_pos(tile_pos_t *tile_pos);
+void print_tile_pos(tile_pos_t *pos);
 tile_pos_t *init_tile_pos(tile_pos_t *pos, tile_t *tile, hex_axial_t addr);
 tile_pos_t *create_tile_pos(hex_axial_t addr, tile_t *tile);
 void destroy_tile_pos(tile_pos_t *tile_pos);
@@ -71,9 +71,6 @@ void tile_pos_draw(tile_pos_t *tile_pos, tile_pos_t *drag_target, bool finished,
 
 void tile_pos_set_hover(tile_pos_t *tile_pos, Vector2 mouse_pos);
 void tile_pos_unset_hover(tile_pos_t *tile_pos);
-
-void tile_pos_set_hover_adjacent(tile_pos_t *tile_pos, hex_direction_t section, tile_pos_t *adjacent_tile);
-void tile_pos_unset_hover_adjacent(tile_pos_t *tile_pos);
 
 void tile_pos_cycle_path_section(tile_pos_t *tile_pos, hex_direction_t section;);
 void tile_pos_modify_hovered_feature(tile_pos_t *tile_pos);

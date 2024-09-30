@@ -24,30 +24,38 @@
 #include "tile.h"
 #include "tile_pos.h"
 
-static char *tile_flag_string(tile_t *tile)
+char *tile_flag_string(tile_t *tile)
 {
-    static char buf[4];
-    buf[0] = tile->enabled ? 'E' : 'e';
-    buf[1] = tile->fixed   ? 'F' : 'f';
-    buf[2] = tile->hidden  ? 'H' : 'h';
-    buf[3] = '\0';
-    return buf;
+    if (tile) {
+        static char buf[4];
+        buf[0] = tile->enabled ? 'E' : 'e';
+        buf[1] = tile->fixed   ? 'F' : 'f';
+        buf[2] = tile->hidden  ? 'H' : 'h';
+        buf[3] = '\0';
+        return buf;
+    } else {
+        return "---";
+    }
 }
 
-static char *tile_path_string(tile_t *tile)
+char *tile_path_string(tile_t *tile)
 {
-    static char buf[7];
-    snprintf(buf, 7, "%d%d%d%d%d%d",
-             tile->path[0],
-             tile->path[1],
-             tile->path[2],
-             tile->path[3],
-             tile->path[4],
-             tile->path[5]);
-    return buf;
+    if (tile) {
+        static char buf[7];
+        snprintf(buf, 7, "%d%d%d%d%d%d",
+                 tile->path[0],
+                 tile->path[1],
+                 tile->path[2],
+                 tile->path[3],
+                 tile->path[4],
+                 tile->path[5]);
+        return buf;
+    } else {
+        return "(NULL)";
+    }
 }
 
-static char *tile_our_pos_string(tile_pos_t *pos)
+char *tile_our_pos_string(struct tile_pos *pos)
 {
     static char buf[20];
     if (pos) {
@@ -61,11 +69,15 @@ static char *tile_our_pos_string(tile_pos_t *pos)
 
 void print_tile(tile_t *tile)
 {
-    printf("tile<flags=%s path=%s s_pos=%s u_pos=%s>\n",
-           tile_flag_string(tile),
-           tile_path_string(tile),
-           tile_our_pos_string(tile->solved_pos),
-           tile_our_pos_string(tile->unsolved_pos));
+    if (tile) {
+        printf("tile<flags=%s path=%s s_pos=%s u_pos=%s>\n",
+               tile_flag_string(tile),
+               tile_path_string(tile),
+               tile_our_pos_string(tile->solved_pos),
+               tile_our_pos_string(tile->unsolved_pos));
+    } else {
+        printf("tile<NULL>\n");
+    }
 }
 
 char *path_type_name(path_type_t type)
@@ -96,8 +108,11 @@ tile_t *init_tile(tile_t *tile)
     assert_not_null(tile);
 
     tile->enabled = false;
-    tile->fixed = false;
-    tile->hidden = false;
+    tile->fixed   = false;
+    tile->hidden  = false;
+
+    tile->solved_pos   = NULL;
+    tile->unsolved_pos = NULL;
 
 #if 0
     for (int i=0; i<6; i++) {
