@@ -69,6 +69,8 @@ static collection_t *alloc_collection(void)
     collection->gui_list_active = -1;
     collection->gui_list_focus = -1;
 
+    collection->changed = false;
+
     return collection;
 }
 
@@ -444,7 +446,7 @@ void collection_update_level_names(collection_t *collection)
     while (lp) {
         assert(n < collection->level_name_count);
 
-        level_update_ui_name(lp, n);
+        level_update_ui_name(lp);
         collection->level_names[n] = lp->ui_name;
 
         lp = lp->next;
@@ -695,6 +697,8 @@ void collection_save(collection_t *collection)
 {
     assert_not_null(collection);
 
+    collection->changed = false;
+
     if (collection->dirpath) {
         collection_save_dir(collection);
     } else if (collection->filename) {
@@ -714,6 +718,16 @@ static level_t *collection_find_level_by_idx(collection_t *collection, int level
     }
 
     return p;
+}
+
+static void collection_check_gui_list_active_bounds(collection_t *collection)
+{
+    if (collection->gui_list_active < 0) {
+        collection->gui_list_active = 0;
+    }
+    if (collection->gui_list_active >= collection->level_count) {
+        collection->gui_list_active = collection->level_count - 1;
+    }
 }
 
 static void collection_move_level_earlier(collection_t *collection, int level_idx)
@@ -736,6 +750,11 @@ static void collection_move_level_earlier(collection_t *collection, int level_id
     collection->levels = first;
 
     collection_update_level_names(collection);
+
+    collection->gui_list_active = level_idx - 1;
+    collection_check_gui_list_active_bounds(collection);
+
+    collection->changed = true;
 }
 
 static void collection_move_level_later(collection_t *collection, int level_idx)
@@ -758,6 +777,11 @@ static void collection_move_level_later(collection_t *collection, int level_idx)
     collection->levels = first;
 
     collection_update_level_names(collection);
+
+    collection->gui_list_active = level_idx + 1;
+    collection_check_gui_list_active_bounds(collection);
+
+    collection->changed = true;
 }
 
 static void collection_draw_buttons(collection_t *collection, Rectangle collection_list_rect)

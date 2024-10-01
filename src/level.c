@@ -739,7 +739,7 @@ level_t *load_level_file(char *filename)
     return level;
 }
 
-void level_update_ui_name(level_t *level, UNUSED int idx)
+void level_update_ui_name(level_t *level)
 {
     assert_not_null(level);
 
@@ -1176,8 +1176,6 @@ void level_set_hover(level_t *level, IVector2 mouse_position)
 
     if (tile_pos_dragable(level->hover) && dragable_mode) {
         SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
-    } else {
-        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
     }
 }
 

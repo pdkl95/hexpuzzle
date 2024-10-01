@@ -46,6 +46,8 @@ struct collection {
     int gui_list_active;
     int gui_list_focus;
 
+    bool changed;
+
     struct collection *prev, *next;
 };
 typedef struct collection collection_t;

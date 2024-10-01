@@ -151,7 +151,7 @@ bool level_parse_string(level_t *level, char *str);
 level_t *load_level_string(char *filename, char *str);
 level_t *load_level_file(char *filename);
 
-void level_update_ui_name(level_t *level, int idx);
+void level_update_ui_name(level_t *level);
 
 bool level_check(level_t *level);
 void level_unload(void);

@@ -542,6 +542,7 @@ Rectangle edit_panel_rect;
 Rectangle radius_spinner_label_rect;
 Rectangle radius_spinner_rect;
 Rectangle close_button_rect;
+Rectangle save_button_rect;
 Rectangle edit_button_rect;
 Rectangle edit_mode_toggle_rect;
 Rectangle return_button_rect;
@@ -550,6 +551,10 @@ Rectangle open_file_button_rect;
 char close_button_text_str[] = "Quit";
 #define CLOSE_BUTTON_TEXT_LENGTH (6 + sizeof(close_button_text_str))
 char close_button_text[CLOSE_BUTTON_TEXT_LENGTH];
+
+char save_button_text_str[] = "Save";
+#define SAVE_BUTTON_TEXT_LENGTH (6 + sizeof(save_button_text_str))
+char save_button_text[SAVE_BUTTON_TEXT_LENGTH];
 
 char edit_button_text_str[] = "Edit";
 #define EDIT_BUTTON_TEXT_LENGTH (6 + sizeof(edit_button_text_str))
@@ -633,10 +638,11 @@ void gui_setup(void)
 
     int close_button_text_width  = MeasureText(close_button_text_str,  ICON_FONT_SIZE);
     int edit_button_text_width   = MeasureText(edit_button_text_str,   ICON_FONT_SIZE);
+    int save_button_text_width   = MeasureText(save_button_text_str,   ICON_FONT_SIZE);
     int return_button_text_width = MeasureText(return_button_text_str, ICON_FONT_SIZE);
-    close_button_text_width = edit_button_text_width = return_button_text_width =
+    close_button_text_width = edit_button_text_width = save_button_text_width = return_button_text_width =
         MAX(MAX(close_button_text_width, edit_button_text_width),
-            return_button_text_width);
+            MAX(save_button_text_width, return_button_text_width));
 
     close_button_rect.x      = window_size.x - WINDOW_MARGIN - ICON_BUTTON_SIZE - close_button_text_width;
     close_button_rect.y      = WINDOW_MARGIN;
@@ -652,8 +658,15 @@ void gui_setup(void)
     
     memcpy(edit_button_text,  GuiIconText(ICON_TOOLS, edit_button_text_str), EDIT_BUTTON_TEXT_LENGTH);
 
-    return_button_rect.x      = edit_button_rect.x;
-    return_button_rect.y      = edit_button_rect.y + edit_button_rect.height + WINDOW_MARGIN;
+    save_button_rect.x      = edit_button_rect.x;
+    save_button_rect.y      = edit_button_rect.y + edit_button_rect.height + WINDOW_MARGIN;
+    save_button_rect.width  = ICON_BUTTON_SIZE + save_button_text_width;
+    save_button_rect.height = ICON_BUTTON_SIZE;
+
+    memcpy(save_button_text,  GuiIconText(ICON_TOOLS, save_button_text_str), EDIT_BUTTON_TEXT_LENGTH);
+
+    return_button_rect.x      = save_button_rect.x;
+    return_button_rect.y      = save_button_rect.y + save_button_rect.height + WINDOW_MARGIN;
     return_button_rect.width  = ICON_BUTTON_SIZE + return_button_text_width;
     return_button_rect.height = ICON_BUTTON_SIZE;
 
@@ -686,8 +699,12 @@ static void draw_name_header(char *name)
         hover = false;
     }
 
-    if (hover && mouse_left_click) {
-        show_name_edit_dialog();
+    if (hover) {
+        if (mouse_left_click) {
+            show_name_edit_dialog();
+        } else {
+            SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+        }
     }
 
     Color bg   = hover ? panel_edge_color : panel_bg_color;
@@ -771,6 +788,12 @@ static void draw_gui_widgets(void)
         break;
 
     case GAME_MODE_EDIT_COLLECTION:
+        if (current_collection && current_collection->changed) {
+            if (GuiButton(save_button_rect, save_button_text)) {
+                show_ask_save_box = true;
+            }
+        }
+
         /* fall through */
 
     case GAME_MODE_PLAY_COLLECTION:
@@ -791,39 +814,38 @@ static void draw_gui_widgets(void)
 
 static void draw_name_edit_dialog(void)
 {
-    if (show_name_edit_box) {
-        Rectangle edit_box_rect = {
-            (float)GetScreenWidth()/2 - 120,
-            (float)GetScreenHeight()/2 - 60,
-            240,
-            140
-        };
+    Rectangle edit_box_rect = {
+        (float)GetScreenWidth()/2 - 120,
+        (float)GetScreenHeight()/2 - 60,
+        240,
+        140
+    };
 
-        GuiUnlock();
-        const char *icon = GuiIconText(ICON_PENCIL, "Edit Level Name");
-        int result = GuiTextInputBox(edit_box_rect,
-                                     icon,
-                                     "Level Name:",
-                                     cancel_ok_with_icons,
-                                     current_level->name,
-                                     NAME_MAXLEN,
-                                     NULL);
-        GuiLock();
+    GuiUnlock();
+    const char *icon = GuiIconText(ICON_PENCIL, "Edit Level Name");
+    int result = GuiTextInputBox(edit_box_rect,
+                                 icon,
+                                 "Level Name:",
+                                 cancel_ok_with_icons,
+                                 current_level->name,
+                                 NAME_MAXLEN,
+                                 NULL);
+    GuiLock();
 
-        if ((result == 2) || (modal_ui_result == UI_RESULT_OK)) {
-           /* accept edit / ok */
-            show_name_edit_box = false;
-            modal_ui_result = UI_RESULT_NULL;
+    if ((result == 2) || (modal_ui_result == UI_RESULT_OK)) {
+        /* accept edit / ok */
+        show_name_edit_box = false;
+        modal_ui_result = UI_RESULT_NULL;
+        level_update_ui_name(current_level);
+    }
+
+    if ((result == 1) || (modal_ui_result == UI_RESULT_CANCEL)) {
+        /* rollback edit / cancel */
+        if (current_level) {
+            memcpy(current_level->name, current_level->name_backup, NAME_MAXLEN);
         }
-
-        if ((result == 1) || (modal_ui_result == UI_RESULT_CANCEL)) {
-            /* rollback edit / cancel */
-            if (current_level) {
-                memcpy(current_level->name, current_level->name_backup, NAME_MAXLEN);
-            }
-            show_name_edit_box = false;
-            modal_ui_result = UI_RESULT_NULL;
-        }
+        show_name_edit_box = false;
+        modal_ui_result = UI_RESULT_NULL;
     }
 }
 
@@ -836,11 +858,27 @@ static void draw_ask_save_dialog(void)
         140
     };
 
+    char *icon_text, *desc_text;
+    switch (game_mode) {
+    case GAME_MODE_EDIT_COLLECTION:
+        icon_text = "Save Collection?";
+        desc_text = "Save changes to level collection?";
+        break;
+
+    case GAME_MODE_EDIT_LEVEL:
+        icon_text = "Save Level?";
+        desc_text = "Save changes to level?";
+        break;
+
+    default:
+        __builtin_unreachable();
+    }
+
     GuiUnlock();
-    const char *iconmsg = GuiIconText(ICON_FILE_SAVE_CLASSIC, "Save Level?");
+    const char *iconmsg = GuiIconText(ICON_FILE_SAVE_CLASSIC, icon_text);
     int result = GuiMessageBox(edit_box_rect,
                                iconmsg,
-                               "Save changes to level?",
+                               desc_text,
                                no_yes_with_icons);
     GuiLock();
 
@@ -849,8 +887,20 @@ static void draw_ask_save_dialog(void)
         printf("collection_save()\n");
         collection_save(current_collection);
         show_ask_save_box = false;
-        printf("return_from_level()\n");
-        return_from_level();
+
+        switch (game_mode) {
+        case GAME_MODE_EDIT_COLLECTION:
+            break;
+
+        case GAME_MODE_EDIT_LEVEL:
+            printf("return_from_level()\n");
+            return_from_level();
+            break;
+
+        default:
+            __builtin_unreachable();
+        }
+
         modal_ui_result = UI_RESULT_NULL;
     }
 
@@ -892,7 +942,7 @@ static void draw_popup_panels(void)
         modal_ui_result = UI_RESULT_NULL;
     }
 
-    if (show_ask_save_box) {
+    if (show_name_edit_box) {
         draw_name_edit_dialog();
     }
 
@@ -1062,6 +1112,8 @@ static void early_frame_setup(void)
 {
     double_current_time = GetTime();
     current_time = (float)double_current_time;
+
+    SetMouseCursor(MOUSE_CURSOR_DEFAULT);
 
     if (level_finished) {
         SetShaderValue(win_border_shader, win_border_shader_loc.time, &current_time, SHADER_UNIFORM_FLOAT);
