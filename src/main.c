@@ -829,73 +829,80 @@ static void draw_name_edit_dialog(void)
 
 static void draw_ask_save_dialog(void)
 {
-    if (show_ask_save_box) {
-        Rectangle edit_box_rect = {
-            (float)GetScreenWidth()/2 - 120,
-            (float)GetScreenHeight()/2 - 60,
-            240,
-            140
-        };
+    Rectangle edit_box_rect = {
+        (float)GetScreenWidth()/2 - 120,
+        (float)GetScreenHeight()/2 - 60,
+        240,
+        140
+    };
 
-        GuiUnlock();
-        const char *iconmsg = GuiIconText(ICON_FILE_SAVE_CLASSIC, "Save Level?");
-        int result = GuiMessageBox(edit_box_rect,
-                                   iconmsg,
-                                   "Save changes to level?",
-                                   no_yes_with_icons);
-        GuiLock();
+    GuiUnlock();
+    const char *iconmsg = GuiIconText(ICON_FILE_SAVE_CLASSIC, "Save Level?");
+    int result = GuiMessageBox(edit_box_rect,
+                               iconmsg,
+                               "Save changes to level?",
+                               no_yes_with_icons);
+    GuiLock();
 
-        if ((result == 2) || (modal_ui_result == UI_RESULT_OK)) {
-            /* yes */
-            printf("collection_save()\n");
-            collection_save(current_collection);
-            show_ask_save_box = false;
-            printf("return_from_level()\n");
-            return_from_level();
-            modal_ui_result = UI_RESULT_NULL;
-        }
+    if ((result == 2) || (modal_ui_result == UI_RESULT_OK)) {
+        /* yes */
+        printf("collection_save()\n");
+        collection_save(current_collection);
+        show_ask_save_box = false;
+        printf("return_from_level()\n");
+        return_from_level();
+        modal_ui_result = UI_RESULT_NULL;
+    }
 
-        if ((result == 1) || (modal_ui_result == UI_RESULT_CANCEL)) {
-            /* no */
-            show_ask_save_box = false;
-            return_from_level();
-            modal_ui_result = UI_RESULT_NULL;
-        }
+    if ((result == 1) || (modal_ui_result == UI_RESULT_CANCEL)) {
+        /* no */
+        show_ask_save_box = false;
+        return_from_level();
+        modal_ui_result = UI_RESULT_NULL;
     }
 }
 
 static void draw_open_file_dialog(void)
 {
-    if (modal_ui_result == UI_RESULT_CANCEL) {
-        show_open_file_box = false;
-        modal_ui_result = UI_RESULT_NULL;
-    }
+    open_file_box_state.windowActive = true;
 
-    if (show_open_file_box) {
-        open_file_box_state.windowActive = true;
+    GuiUnlock();
+    GuiWindowFileDialog(&open_file_box_state);
+    GuiLock();
 
-        GuiUnlock();
-        GuiWindowFileDialog(&open_file_box_state);
-        GuiLock();
-
-        if (open_file_box_state.SelectFilePressed) {
-            const char *path = concat_dir_and_filename(open_file_box_state.dirPathText,
+    if (open_file_box_state.SelectFilePressed) {
+        const char *path = concat_dir_and_filename(open_file_box_state.dirPathText,
                                                        open_file_box_state.fileNameText);
-            printf("open file \"%s\"\n", path);
-            show_open_file_box = false;
-        } else if (open_file_box_state.CancelFilePressed) {
-            show_open_file_box = false;
-        } else if (!open_file_box_state.windowActive) {
-            show_open_file_box = false;
-        }
+        printf("open file \"%s\"\n", path);
+        show_open_file_box = false;
+    } else if (open_file_box_state.CancelFilePressed) {
+        show_open_file_box = false;
+    } else if (!open_file_box_state.windowActive) {
+        show_open_file_box = false;
     }
 }
 
 static void draw_popup_panels(void)
 {
-    draw_name_edit_dialog();
-    draw_ask_save_dialog();
-    draw_open_file_dialog();
+    if (modal_ui_result == UI_RESULT_CANCEL) {
+        show_name_edit_box = false;
+        show_ask_save_box = false;
+        show_open_file_box = false;
+
+        modal_ui_result = UI_RESULT_NULL;
+    }
+
+    if (show_ask_save_box) {
+        draw_name_edit_dialog();
+    }
+
+    if (show_ask_save_box) {
+        draw_ask_save_dialog();
+    }
+
+    if (show_open_file_box) {
+        draw_open_file_dialog();
+    }
 }
 
 static void draw_popup_text(void)
