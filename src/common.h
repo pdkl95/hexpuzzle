@@ -136,6 +136,7 @@ extern game_mode_t game_mode;
 extern float current_time;
 extern double double_current_time;
 
+#define play_mode (game_mode == GAME_MODE_PLAY_LEVEL)
 #define edit_mode (game_mode == GAME_MODE_EDIT_LEVEL)
 
 #endif /*COMMON_H*/

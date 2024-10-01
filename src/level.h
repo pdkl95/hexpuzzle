@@ -115,6 +115,8 @@ typedef struct level level_t;
 #define edit_mode_unsolved ((edit_mode) && current_level && \
                             (current_level->currently_used_tiles == USED_TILES_UNSOLVED))
 
+#define dragable_mode (play_mode || edit_mode_unsolved)
+
 int hex_axial_to_idx(hex_axial_t axial);
 tile_pos_t *level_get_solved_tile_pos(level_t *level,  hex_axial_t axial);
 tile_pos_t *level_get_unsolved_tile_pos(level_t *level,  hex_axial_t axial);

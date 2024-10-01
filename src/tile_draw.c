@@ -71,9 +71,17 @@ Color path_type_highlight_color(path_type_t type)
         return path_highlight_color_green;
     }
 }
+static bool either_self_or_adjacent_is_hidden(tile_pos_t *pos)
+{
+    return pos->tile->hidden || pos->hover_adjacent->tile->hidden;
+}
 
 static void draw_adjacency_highlight(tile_pos_t *pos)
 {
+    if (either_self_or_adjacent_is_hidden(pos)) {
+        return;
+    }
+
     Vector2 mid = pos->midpoints[pos->hover_section];
     tile_section_t sec = pos->sections[pos->hover_section];
     Vector2 c0 = Vector2Lerp(sec.corners[0], mid, 0.35);
@@ -127,7 +135,9 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         DrawPoly(pos->center, 6, pos->size, 0.0f, bgcolor);
     }
 
-    if (edit_mode_solved && !drag && !pos->hover_center && !drag_target) {
+    bool edit_solved_not_center = edit_mode_solved && !pos->hover_center;
+
+    if (edit_solved_not_center && !drag && !drag_target) {
         if (pos->hover_adjacent || pos->hover) {
             /* section highlight */
             //tile_section_t sec = pos->sections[pos->hover_section];
@@ -196,12 +206,19 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
 #endif
     }
 
-    if (pos->hover_adjacent && !pos->hover_center && edit_mode_solved) {
+    if (edit_solved_not_center && pos->hover_adjacent
+        && !either_self_or_adjacent_is_hidden(pos)) {
         assert(pos->hover_section >= 0);
         assert(pos->hover_section < 6);
         Vector2 mid = pos->midpoints[pos->hover_section];
-        float thickness = 1.0;
-        DrawLineEx(pos->center, mid, thickness, WHITE);
+        float thickness = 3.0;
+        path_type_t next_path = pos->tile->path[pos->hover_section];
+        next_path = (1 + next_path) % PATH_TYPE_COUNT;
+        Color next_color = path_type_highlight_color(next_path);
+        if (next_path == PATH_TYPE_NONE) {
+            next_color = tile_bg_color;
+        }
+        DrawLineEx(pos->center, mid, thickness, next_color);
     }
 
     if (!pos->tile->fixed) {
@@ -240,7 +257,7 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         }
     }
 
-#if 1
+#if 0
     if (drag) {
         return;
     }

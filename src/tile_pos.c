@@ -129,8 +129,12 @@ void tile_pos_toggle_hidden(tile_pos_t *pos)
         tile_pos_t *neighbor = pos->neighbors[dir];
 
         if (pos->tile->hidden) {
+            pos->tile->saved_path[dir] =  pos->tile->path[dir];
+            pos->tile->path[dir] = PATH_TYPE_NONE;;
             neighbor->tile->path[opp_dir] = PATH_TYPE_NONE;
         } else {
+            pos->tile->path[dir] =  pos->tile->saved_path[dir];
+            pos->tile->saved_path[dir] = PATH_TYPE_NONE;;
             neighbor->tile->path[opp_dir] = pos->tile->path[dir];;
         }
     }

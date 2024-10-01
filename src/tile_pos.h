@@ -77,5 +77,10 @@ void tile_pos_modify_hovered_feature(tile_pos_t *tile_pos);
 
 void tile_pos_clear(tile_pos_t *pos, struct level *level);
 
+static inline bool tile_pos_dragable(tile_pos_t *pos)
+{
+    return pos && pos->tile && tile_dragable(pos->tile);
+}
+
 #endif /*TILE_POS_H*/
 

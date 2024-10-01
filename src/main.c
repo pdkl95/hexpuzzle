@@ -1125,7 +1125,7 @@ void gfx_init(void)
         infomsg("Target FPS: %d", options->max_fps);
     }
 
-    SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
+    //SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
 
     GuiLoadStyleDark();
     //GuiLoadStyleBiLightingFont();

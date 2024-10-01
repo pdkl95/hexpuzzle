@@ -1130,7 +1130,8 @@ void level_set_hover(level_t *level, IVector2 mouse_position)
             printf("}\n");
 #endif
 
-            if (level->hover_adjacent && level->hover_adjacent->tile && !level->hover_adjacent->tile->enabled) {
+            if (level->hover_adjacent && level->hover_adjacent->tile &&
+                (!level->hover_adjacent->tile->enabled || level->hover_adjacent->tile->hidden)) {
 #if 0
                 static int count = 0;
                 printf("<rollback count=%d>\n", count++);
@@ -1171,6 +1172,12 @@ void level_set_hover(level_t *level, IVector2 mouse_position)
                 }
             }
         }
+    }
+
+    if (tile_pos_dragable(level->hover) && dragable_mode) {
+        SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+    } else {
+        SetMouseCursor(MOUSE_CURSOR_DEFAULT);
     }
 }
 

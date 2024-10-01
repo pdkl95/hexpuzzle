@@ -114,6 +114,11 @@ tile_t *init_tile(tile_t *tile)
     tile->solved_pos   = NULL;
     tile->unsolved_pos = NULL;
 
+    for (hex_direction_t i=0; i<6; i++) {
+        tile->path[i] = PATH_TYPE_NONE;
+        tile->saved_path[i] = PATH_TYPE_NONE;
+    }
+
 #if 0
     for (int i=0; i<6; i++) {
         tile->path[i] = rand() % PATH_TYPE_COUNT;

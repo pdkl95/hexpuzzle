@@ -51,6 +51,7 @@ struct tile {
     bool fixed;
     bool hidden;
     path_type_t path[6];
+    path_type_t saved_path[6];
 
     struct tile_pos *solved_pos;
     struct tile_pos *unsolved_pos;
@@ -77,6 +78,11 @@ path_int_t tile_count_path_types(tile_t *tile);
 
 void tile_serialize(tile_t *tile, FILE *f);
 void tile_set_flag_from_char(tile_t *tile, char c);
+
+static inline bool tile_dragable(tile_t *tile)
+{
+    return tile->enabled && !tile->fixed && !tile->hidden;
+}
 
 #endif /*TILE_H*/
 
