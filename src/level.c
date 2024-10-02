@@ -1295,14 +1295,22 @@ void level_modify_hovered_feature(level_t *level)
     assert_not_null(level);
     if (level->hover) {
         tile_pos_t *pos = level->hover;
-        //printf("level modify tile: ");
-        //print_tile_pos(pos);
         if (pos->tile->enabled) {
             tile_pos_modify_hovered_feature(pos);
             level->changed = true;
         }
-        //} else {
-        //printf("modify tile called, but level->hover is NULL\n");
+    }
+}
+
+void level_set_hovered_feature(level_t *level, path_type_t type)
+{
+    assert_not_null(level);
+    if (level->hover) {
+        tile_pos_t *pos = level->hover;
+        if (pos->tile->enabled) {
+            tile_pos_set_hovered_feature(pos, type);
+            level->changed = true;
+        }
     }
 }
 

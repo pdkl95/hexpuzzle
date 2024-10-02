@@ -73,7 +73,8 @@ void tile_pos_set_hover(tile_pos_t *tile_pos, Vector2 mouse_pos);
 void tile_pos_unset_hover(tile_pos_t *tile_pos);
 
 void tile_pos_cycle_path_section(tile_pos_t *tile_pos, hex_direction_t section;);
-void tile_pos_modify_hovered_feature(tile_pos_t *tile_pos);
+void tile_pos_modify_hovered_feature(tile_pos_t *pos);
+void tile_pos_set_hovered_feature(tile_pos_t *pos, path_type_t type);
 
 void tile_pos_clear(tile_pos_t *pos, struct level *level);
 

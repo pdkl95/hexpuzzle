@@ -36,6 +36,8 @@ enum path_type {
 typedef enum path_type path_type_t;
 #define PATH_TYPE_COUNT (PATH_TYPE_GREEN + 1)
 
+char *path_type_name(path_type_t type);
+
 struct path_int {
     int path[PATH_TYPE_COUNT];
 };

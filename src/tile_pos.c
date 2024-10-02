@@ -140,16 +140,34 @@ void tile_pos_toggle_hidden(tile_pos_t *pos)
     }
 }
 
-void tile_pos_cycle_path_section(tile_pos_t *pos, hex_direction_t section)
+void tile_pos_set_path_section(tile_pos_t *pos, hex_direction_t section, path_type_t type)
 {
     assert_not_null(pos);
 
-    pos->tile->path[section] = (pos->tile->path[section] + 1) % PATH_TYPE_COUNT;
+    pos->tile->path[section] = type % PATH_TYPE_COUNT;
 
     if (pos->hover_adjacent) {
         hex_direction_t opposite_section =
             hex_opposite_direction(section);
         pos->hover_adjacent->tile->path[opposite_section] = pos->tile->path[section];
+    }
+}
+
+void tile_pos_cycle_path_section(tile_pos_t *pos, hex_direction_t section)
+{
+    assert_not_null(pos);
+
+    tile_pos_set_path_section(pos, section, pos->tile->path[section] + 1);
+}
+
+static void tile_pos_modify_center(tile_pos_t *pos)
+{
+    assert_not_null(pos);
+
+    if (is_any_shift_down()) {
+        tile_pos_toggle_hidden(pos);
+    } else {
+        tile_pos_toggle_fixed(pos);
     }
 }
 
@@ -161,13 +179,24 @@ void tile_pos_modify_hovered_feature(tile_pos_t *pos)
         tile_pos_toggle_hidden(pos);
     } else {
         if (pos->hover_center) {
-            if (is_any_shift_down()) {
-                tile_pos_toggle_hidden(pos);
-            } else {
-                tile_pos_toggle_fixed(pos);
-            }
+            tile_pos_modify_center(pos);
         } else {
             tile_pos_cycle_path_section(pos, pos->hover_section);
+        }
+    }
+}
+
+void tile_pos_set_hovered_feature(tile_pos_t *pos, path_type_t type)
+{
+    assert_not_null(pos);
+
+    if (pos->tile->hidden) {
+        tile_pos_toggle_hidden(pos);
+    } else {
+        if (pos->hover_center) {
+            tile_pos_modify_center(pos);
+        } else {
+            tile_pos_set_path_section(pos, pos->hover_section, type);
         }
     }
 }

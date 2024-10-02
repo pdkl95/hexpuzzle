@@ -93,6 +93,10 @@ bool show_open_file_box = false;
 
 GuiWindowFileDialogState open_file_box_state;
 
+bool edit_tool_cycle = true;
+bool edit_tool_erase = false;
+path_type_t edit_tool_state = PATH_TYPE_NONE;
+
 #define MOUSE_TEXT_MAX_LINES 8
 #define MOUSE_TEXT_MAX_LINE_LENGTH 60
 char mouse_text[MOUSE_TEXT_MAX_LINES][MOUSE_TEXT_MAX_LINE_LENGTH];
@@ -208,6 +212,14 @@ void toggle_edit_mode(void)
     default:
         /* do nothing */
         __builtin_unreachable();
+    }
+}
+
+static void set_edit_tool(path_type_t type)
+{
+    edit_tool_state = type;
+    if (options->verbose) {
+        infomsg("Using Edit Tool: %s", path_type_name(edit_tool_state));
     }
 }
 
@@ -463,7 +475,14 @@ handle_events(
             mouse_left_click = true;
             if (do_level_ui_interaction()) {
                 if (edit_mode_solved) {
-                    level_modify_hovered_feature(current_level);
+                    if (edit_tool_cycle) {
+                        level_modify_hovered_feature(current_level);
+                    } else if (edit_tool_erase) {
+                        level_set_hovered_feature(current_level, PATH_TYPE_NONE);
+                    } else {
+                        level_set_hovered_feature(current_level, edit_tool_state);
+                    }
+
                 //} else if (edit_mode_unsolved) {
                 //    level_drag_start(current_level);
                 } else {
@@ -547,6 +566,10 @@ Rectangle edit_button_rect;
 Rectangle edit_mode_toggle_rect;
 Rectangle return_button_rect;
 Rectangle open_file_button_rect;
+Rectangle tool_panel_rect;
+Rectangle edit_tool_label_rect;
+Rectangle cycle_tool_button_rect;
+Rectangle erase_tool_button_rect;
 
 char close_button_text_str[] = "Quit";
 #define CLOSE_BUTTON_TEXT_LENGTH (6 + sizeof(close_button_text_str))
@@ -567,6 +590,14 @@ char return_button_text[RETURN_BUTTON_TEXT_LENGTH];
 char open_file_button_text_str[] = "Open File";
 #define OPEN_FILE_BUTTON_TEXT_LENGTH (6 + sizeof(open_file_button_text_str))
 char open_file_button_text[OPEN_FILE_BUTTON_TEXT_LENGTH];
+
+char cycle_tool_button_text_str[] = "Cycle";
+#define CYCLE_TOOL_BUTTON_TEXT_LENGTH (6 + sizeof(cycle_tool_button_text_str))
+char cycle_tool_button_text[CYCLE_TOOL_BUTTON_TEXT_LENGTH];
+
+char erase_tool_button_text_str[] = "Erase";
+#define ERASE_TOOL_BUTTON_TEXT_LENGTH (6 + sizeof(erase_tool_button_text_str))
+char erase_tool_button_text[ERASE_TOOL_BUTTON_TEXT_LENGTH];
 
 char cancel_ok_with_icons[25];
 char no_yes_with_icons[25];
@@ -636,6 +667,20 @@ void gui_setup(void)
         + edit_mode_toggle_rect.height
         + (4 * PANEL_INNER_MARGIN);
 
+    memcpy(cycle_tool_button_text,  GuiIconText(ICON_MUTATE_FILL, cycle_tool_button_text_str), CYCLE_TOOL_BUTTON_TEXT_LENGTH);
+    memcpy(erase_tool_button_text,  GuiIconText(ICON_RUBBER, erase_tool_button_text_str), ERASE_TOOL_BUTTON_TEXT_LENGTH);
+
+    int cycle_tool_button_text_width = MeasureText(cycle_tool_button_text, ICON_FONT_SIZE);
+    int erase_tool_button_text_width = MeasureText(erase_tool_button_text, ICON_FONT_SIZE);
+
+    tool_panel_rect.x = edit_panel_rect.x;
+    tool_panel_rect.width = (2 * PANEL_INNER_MARGIN)
+        + ((PATH_TYPE_COUNT - 1) * (2 * ICON_BUTTON_SIZE))
+        + cycle_tool_button_text_width
+        + erase_tool_button_text_width;
+    tool_panel_rect.height = (2 * PANEL_INNER_MARGIN) + TOOL_BUTTON_HEIGHT;
+    tool_panel_rect.y = window_size.y - WINDOW_MARGIN - tool_panel_rect.height;
+
     int close_button_text_width  = MeasureText(close_button_text_str,  ICON_FONT_SIZE);
     int edit_button_text_width   = MeasureText(edit_button_text_str,   ICON_FONT_SIZE);
     int save_button_text_width   = MeasureText(save_button_text_str,   ICON_FONT_SIZE);
@@ -656,7 +701,7 @@ void gui_setup(void)
     edit_button_rect.width  = ICON_BUTTON_SIZE + edit_button_text_width;
     edit_button_rect.height = ICON_BUTTON_SIZE;
     
-    memcpy(edit_button_text,  GuiIconText(ICON_TOOLS, edit_button_text_str), EDIT_BUTTON_TEXT_LENGTH);
+    memcpy(edit_button_text,  GuiIconText(ICON_FILE_SAVE_CLASSIC, edit_button_text_str), EDIT_BUTTON_TEXT_LENGTH);
 
     save_button_rect.x      = edit_button_rect.x;
     save_button_rect.y      = edit_button_rect.y + edit_button_rect.height + WINDOW_MARGIN;
@@ -681,6 +726,15 @@ void gui_setup(void)
 
     memcpy(open_file_button_text,  GuiIconText(ICON_FILE_OPEN, open_file_button_text_str), OPEN_FILE_BUTTON_TEXT_LENGTH);
 
+    cycle_tool_button_rect.x = tool_panel_rect.x + PANEL_INNER_MARGIN;
+    cycle_tool_button_rect.y = tool_panel_rect.y + PANEL_INNER_MARGIN;
+    cycle_tool_button_rect.width  = cycle_tool_button_text_width;
+    cycle_tool_button_rect.height = TOOL_BUTTON_HEIGHT;
+
+    erase_tool_button_rect.x = cycle_tool_button_rect.x + cycle_tool_button_rect.width + ICON_BUTTON_SIZE;
+    erase_tool_button_rect.y = cycle_tool_button_rect.y;
+    erase_tool_button_rect.width  = erase_tool_button_text_width;
+    erase_tool_button_rect.height = cycle_tool_button_rect.height;
 }
 
 Color panel_bg_color   = { 0x72, 0x1C, 0xB8, 0xaa };
@@ -759,6 +813,58 @@ static void draw_edit_panel(void)
     }
 }
 
+static void draw_tool_panel(void)
+{
+    Color bg   = panel_bg_color;
+    Color edge = panel_edge_color;
+    DrawRectangleRounded(tool_panel_rect, PANEL_ROUNDNES, 0, bg);
+    DrawRectangleRoundedLines(tool_panel_rect, PANEL_ROUNDNES, 0, 1.0, edge);
+
+    DrawText("Edit Tool", edit_tool_label_rect.x, edit_tool_label_rect.y,
+             PANEL_LABEL_FONT_SIZE, panel_header_text_color);
+
+    GuiToggle(cycle_tool_button_rect, cycle_tool_button_text, &edit_tool_cycle);
+    if (edit_tool_cycle) {
+        edit_tool_erase = false;
+    }
+    GuiToggle(erase_tool_button_rect, erase_tool_button_text, &edit_tool_erase);
+    if (edit_tool_erase) {
+        edit_tool_cycle = false;
+    }
+
+    if (edit_tool_cycle || edit_tool_erase) {
+        edit_tool_state = PATH_TYPE_NONE;
+    }
+
+    Rectangle rect = {
+        .x = erase_tool_button_rect.x + erase_tool_button_rect.width + ICON_BUTTON_SIZE,
+        .y = erase_tool_button_rect.y,
+        .width  = TOOL_BUTTON_WIDTH,
+        .height = TOOL_BUTTON_HEIGHT
+    };
+
+    float line_thickness = 1.0;
+    for (path_type_t type = (PATH_TYPE_NONE + 1); type < PATH_TYPE_COUNT; type++) {
+        DrawRectangleRounded(rect, BUTTON_ROUNDNES, 0, path_type_color(type));
+        if (edit_tool_state == type) {
+            DrawRectangleRoundedLines(rect, BUTTON_ROUNDNES, 4, line_thickness, WHITE); 
+        }
+
+        bool hover = CheckCollisionPointRec(mouse_positionf, rect);
+        if (hover) {
+            if (mouse_left_click) {
+                edit_tool_cycle = false;
+                edit_tool_erase = false;
+                set_edit_tool(type);
+            } else {
+                SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+            }
+        }
+
+        rect.x += TOOL_BUTTON_WIDTH + ICON_BUTTON_SIZE;
+    }
+}
+
 static void draw_gui_widgets(void)
 {
     if (GuiButton(close_button_rect, close_button_text)) {
@@ -770,6 +876,9 @@ static void draw_gui_widgets(void)
         draw_name_header(current_level->name);
 
         draw_edit_panel();
+        if (edit_mode_solved) {
+            draw_tool_panel();
+        }
 
         if (GuiButton(return_button_rect, return_button_text)) {
             printf("return\n");

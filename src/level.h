@@ -173,6 +173,7 @@ void level_set_hover(level_t *level, IVector2 mouse_position);
 void level_drag_start(level_t *level);
 void level_drag_stop(level_t *level);
 void level_modify_hovered_feature(level_t *level);
+void level_set_hovered_feature(level_t *level, path_type_t type);
 void level_clear_hovered_tile(level_t *level);
 void level_serialize(level_t *level, FILE *f);
 char *level_serialize_memory(level_t *level);

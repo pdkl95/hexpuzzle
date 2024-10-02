@@ -89,6 +89,22 @@ static void draw_adjacency_highlight(tile_pos_t *pos)
     DrawTriangle(c0, c1, sec.corners[2], tile_bg_highlight_color_dim);
 }
 
+extern bool edit_tool_cycle;
+extern bool edit_tool_erase;
+extern path_type_t edit_tool_state;
+
+static path_type_t get_next_path(tile_pos_t *pos)
+{
+    if (edit_tool_cycle) {
+        path_type_t next_path = pos->tile->path[pos->hover_section];
+        return (1 + next_path) % PATH_TYPE_COUNT;
+    } else if (edit_tool_erase) {
+        return PATH_TYPE_NONE;
+    } else {
+        return edit_tool_state;
+    }
+}
+
 void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color finished_color, float finished_fade_in)
 {
     assert_not_null(pos);
@@ -212,8 +228,7 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         assert(pos->hover_section < 6);
         Vector2 mid = pos->midpoints[pos->hover_section];
         float thickness = 3.0;
-        path_type_t next_path = pos->tile->path[pos->hover_section];
-        next_path = (1 + next_path) % PATH_TYPE_COUNT;
+        path_type_t next_path = get_next_path(pos);
         Color next_color = path_type_highlight_color(next_path);
         if (next_path == PATH_TYPE_NONE) {
             next_color = tile_bg_color;
