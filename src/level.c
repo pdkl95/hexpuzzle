@@ -445,9 +445,11 @@ struct token_list {
 };
 typedef struct token_list token_list_t;
 
-static token_list_t level_tokenize_string(char *str)
+static token_list_t level_tokenize_string(const char *string)
 {
-    assert_not_null(str);
+    assert_not_null(string);
+
+    char *str = strdup(string);
 
     char *delim = " \n";
 
@@ -529,6 +531,8 @@ static token_list_t level_tokenize_string(char *str)
     }
 #endif
 
+    free(str);
+
     return list;
 }
 
@@ -540,7 +544,7 @@ static void level_free_tokens(token_list_t list)
     SAFEFREE(list.tokens);
 }
 
-void level_setup_tiles_from_serialized_strings(level_t *level, char *solved_addr_str, char *unsolved_addr_str, char *path, char *flags)
+void level_setup_tiles_from_serialized_strings(level_t *level, const char *solved_addr_str, const char *unsolved_addr_str, const char *path, const char *flags)
 {
     assert_not_null(level);
     assert_not_null(solved_addr_str);
@@ -553,6 +557,11 @@ void level_setup_tiles_from_serialized_strings(level_t *level, char *solved_addr
     assert(strlen(path)  == 6);
     assert(strlen(flags) == 3);
 
+#define ADDR_BUF_SIZE 64
+    assert(strlen(  solved_addr_str) < ADDR_BUF_SIZE);
+    assert(strlen(unsolved_addr_str) < ADDR_BUF_SIZE);
+    char addr_buf[ADDR_BUF_SIZE];
+
 #if 0
     printf("Creating tile from: solved_addr=\"%s\" unsolved_addr=\"%s\" path=\"%s\" flags=\"%s\"\n",
            solved_addr, unsolved_addr, path, flags);
@@ -560,13 +569,17 @@ void level_setup_tiles_from_serialized_strings(level_t *level, char *solved_addr
 
     hex_axial_t solved_addr = {0}, unsolved_addr = {0};
 
-    char *p = solved_addr_str;
-    solved_addr.q = (int)strtol(solved_addr_str, &p, 10);
+    snprintf(addr_buf, ADDR_BUF_SIZE, "%s", solved_addr_str);
+    char *p = &(addr_buf[0]);
+
+    solved_addr.q = (int)strtol(addr_buf, &p, 10);
     p++;
     solved_addr.r = (int)strtol(p, NULL, 10);
 
-    p = unsolved_addr_str;
-    unsolved_addr.q = (int)strtol(unsolved_addr_str, &p, 10);
+    snprintf(addr_buf, ADDR_BUF_SIZE, "%s", unsolved_addr_str);
+    p = &(addr_buf[0]);
+
+    unsolved_addr.q = (int)strtol(addr_buf, &p, 10);
     p++;
     unsolved_addr.r = (int)strtol(p, NULL, 10);
 
@@ -604,7 +617,7 @@ void level_setup_tiles_from_serialized_strings(level_t *level, char *solved_addr
     level->current_tile_write_idx++;
 }
 
-bool level_parse_string(level_t *level, char *str)
+bool level_parse_string(level_t *level, const char *str)
 {
     assert_not_null(level);
     assert_not_null(str);
@@ -655,7 +668,7 @@ bool level_parse_string(level_t *level, char *str)
     return false;
 }
 
-static char *read_file_into_string(char *filename)
+static char *read_file_into_string(const char *filename)
 {
     assert_not_null(filename);
 
@@ -687,13 +700,17 @@ static char *read_file_into_string(char *filename)
     return str;
 }
 
-void level_set_file_path(level_t *level, char *path)
+void level_set_file_path(level_t *level, const char *path)
 {
-    level->filename = strdup(basename(path));
-    level->dirpath  = strdup(dirname(path));
+    char *dirc  = strdup(path);
+    char *basec = strdup(path);
+    level->filename = strdup(basename(basec));
+    level->dirpath  = strdup(dirname(dirc));
+    free(basec);
+    free(dirc);
 }
 
-level_t *load_level_string(char *filename, char *str)
+level_t *load_level_string(const char *filename, const char *str, bool is_zip)
 {
     level_t *level = alloc_level();
 
@@ -710,7 +727,12 @@ level_t *load_level_string(char *filename, char *str)
 #endif
 
     if (level_parse_string(level, str)) {
-        level_set_file_path(level, filename);
+        if (is_zip) {
+            level->dirpath = "{" COLLECTION_FILENAME_EXT "}";
+            level->filename = strdup(filename);
+        } else {
+            level_set_file_path(level, filename);
+        }
         if (options->verbose) {
             infomsg("Successfully loaded level file \"%s/%s\"",
                     level->dirpath, level->filename);
@@ -719,22 +741,22 @@ level_t *load_level_string(char *filename, char *str)
     } else {
         errmsg("Error parsing level file \"%s\"",
                filename);
-        free(str);
         return NULL;
     }
 }
 
-level_t *load_level_file(char *filename)
+level_t *load_level_file(const char *filename)
 {
     assert_not_null(filename);
 
     char *str = read_file_into_string(filename);
     if (NULL == str) {
+        free(str);
         errmsg("Error reading level file \"%s\"", filename);
         return NULL;
     }
 
-    level_t *level = load_level_string(filename, str);
+    level_t *level = load_level_string(filename, str, false);
     free(str);
     return level;
 }
@@ -798,7 +820,7 @@ void level_edit(level_t *level)
     game_mode = GAME_MODE_EDIT_LEVEL;
 }
 
-void level_save_to_file(level_t *level, char *dirpath)
+void level_save_to_file(level_t *level, const char *dirpath)
 {
     assert_not_null(level);
 
@@ -849,7 +871,7 @@ void level_save_to_file(level_t *level, char *dirpath)
     level->changed = false;
 }
 
-void level_save_to_file_if_changed(level_t *level, char *dirpath)
+void level_save_to_file_if_changed(level_t *level, const char *dirpath)
 {
     assert_not_null(level);
 
@@ -857,6 +879,18 @@ void level_save_to_file_if_changed(level_t *level, char *dirpath)
         level_save_to_file(level, dirpath);
     } else {
         printf("level file \"%s\" hasn't changed - skipping save\n", level->name);
+    }
+}
+
+void level_save(level_t *level)
+{
+    assert_not_null(level);
+    if (level->collection && level->collection->is_zip) {
+        collection_save(level->collection);
+    } else if (level->filename && level->collection && level->collection->dirpath) {
+        level_save_to_file_if_changed(level, level->collection->dirpath);
+    } else {
+        errmsg("Not enough file metadata to save level!");
     }
 }
 

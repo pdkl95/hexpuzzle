@@ -36,6 +36,8 @@ struct collection {
     char *filename;
     int filename_seq;
 
+    bool is_zip;
+
     level_t *levels;
     int level_count;
 
@@ -53,11 +55,11 @@ struct collection {
 typedef struct collection collection_t;
 
 collection_t *create_collection(void);
-collection_t *load_collection_dir(char *dirpath);
-collection_t *load_collection_level_file(char *filename);
-collection_t *load_collection_zip_file(char *filename);
-collection_t *load_collection_file(char *filename);
-collection_t *load_collection_path(char *path);
+collection_t *load_collection_dir(const char *dirpath);
+collection_t *load_collection_level_file(const char *filename);
+collection_t *load_collection_zip_file(const char *filename);
+collection_t *load_collection_file(const char *filename);
+collection_t *load_collection_path(const char *path);
 
 void destroy_collection(collection_t *collection);
 
@@ -66,9 +68,9 @@ void collection_scan_dir(collection_t *collection);
 
 bool collection_level_name_exists(collection_t *collection, const char *name);
 void collection_add_level(collection_t *collection, level_t *level);
-bool collection_add_level_file(collection_t *collection, char *filename);
+bool collection_add_level_file(collection_t *collection, const char *filename);
 
-level_t *collection_find_level_by_filename(collection_t *collection, char *filename);
+level_t *collection_find_level_by_filename(collection_t *collection, const char *filename);
 
 void collection_draw(collection_t *collection);
 

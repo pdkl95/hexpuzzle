@@ -244,7 +244,7 @@ void create_new_level(void)
     level_edit(level);
 }
 
-void open_game_file(char *path)
+void open_game_file(const char *path)
 {
     if (options->verbose) {
         infomsg("Loading: \"%s\"", path);
@@ -418,6 +418,11 @@ handle_events(
         }
     }
 
+    if (IsKeyPressed(KEY_F11)) {
+        //ToggleFullscreen();
+        ToggleBorderlessWindowed();
+    }
+
     if (modal_ui_active) {
         if (IsKeyPressed(KEY_ESCAPE)) {
             modal_ui_result = UI_RESULT_CANCEL;
@@ -444,12 +449,6 @@ handle_events(
                current_collection->gui_list_active);
         printf("collection->gui_list_focus        = %d\n",
                current_collection->gui_list_focus);
-    }
-
-    if (IsKeyPressed(KEY_F8)) {
-        if (current_level) {
-            level_serialize(current_level, stdout);
-        }
     }
 
     //IVector2 old_mouse = mouse_position;
@@ -993,16 +992,19 @@ static void draw_ask_save_dialog(void)
 
     if ((result == 2) || (modal_ui_result == UI_RESULT_OK)) {
         /* yes */
-        printf("collection_save()\n");
-        collection_save(current_collection);
         show_ask_save_box = false;
 
         switch (game_mode) {
         case GAME_MODE_EDIT_COLLECTION:
+            if (current_collection) {
+                collection_save(current_collection);
+            }
             break;
 
         case GAME_MODE_EDIT_LEVEL:
-            printf("return_from_level()\n");
+            if (current_level) {
+                level_save(current_level);
+            }
             return_from_level();
             break;
 
@@ -1016,7 +1018,22 @@ static void draw_ask_save_dialog(void)
     if ((result == 1) || (modal_ui_result == UI_RESULT_CANCEL)) {
         /* no */
         show_ask_save_box = false;
-        return_from_level();
+
+        switch (game_mode) {
+        case GAME_MODE_EDIT_COLLECTION:
+            break;
+
+        case GAME_MODE_EDIT_LEVEL:
+            if (current_collection) {
+                current_collection->changed = true;
+            }
+            return_from_level();
+            break;
+
+        default:
+            __builtin_unreachable();
+        }
+
         modal_ui_result = UI_RESULT_NULL;
     }
 }
@@ -1032,7 +1049,10 @@ static void draw_open_file_dialog(void)
     if (open_file_box_state.SelectFilePressed) {
         const char *path = concat_dir_and_filename(open_file_box_state.dirPathText,
                                                        open_file_box_state.fileNameText);
-        printf("open file \"%s\"\n", path);
+        if (options->verbose) {
+            infomsg("Opening file \"%s\"\n", path);
+        }
+        open_game_file(path);
         show_open_file_box = false;
     } else if (open_file_box_state.CancelFilePressed) {
         show_open_file_box = false;

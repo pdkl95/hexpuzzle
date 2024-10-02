@@ -39,6 +39,7 @@ enum used_tiles {
 };
 typedef enum used_tiles used_tiles_t;
 
+struct collection;
 struct level;
 
 typedef void (*level_fade_finished_cb_t)(struct level *level, void *data);
@@ -106,6 +107,8 @@ struct level {
 
     struct win_anim *win_anim;
 
+    struct collection *collection;
+
     struct level *prev, *next;
 };
 typedef struct level level_t;
@@ -147,9 +150,9 @@ void level_toggle_currently_used_tiles(level_t *level);
 tile_t *level_get_tile(level_t *level,  hex_axial_t axial);
 tile_pos_t *level_get_current_tile_pos(level_t *level,  hex_axial_t axial);
 
-bool level_parse_string(level_t *level, char *str);
-level_t *load_level_string(char *filename, char *str);
-level_t *load_level_file(char *filename);
+bool level_parse_string(level_t *level, const char *str);
+level_t *load_level_string(const char *filename, const char *str, bool is_zip);
+level_t *load_level_file(const char *filename);
 
 void level_update_ui_name(level_t *level);
 
@@ -159,9 +162,10 @@ void level_load(level_t *level);
 void level_play(level_t *level);
 void level_edit(level_t *level);
 
-void level_set_file_path(level_t *level, char *path);
-void level_save_to_file(level_t *level, char *dirpath);
-void level_save_to_file_if_changed(level_t *level, char *dirpath);
+void level_set_file_path(level_t *level, const char *path);
+void level_save_to_file(level_t *level, const char *dirpath);
+void level_save_to_file_if_changed(level_t *level, const char *dirpath);
+void level_save(level_t *level);
 void level_serialize(level_t *level, FILE *f);
 
 tile_pos_t *level_find_solved_neighbor_tile_pos(level_t *level, tile_pos_t *tile, hex_direction_t section);

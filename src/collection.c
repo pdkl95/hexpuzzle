@@ -70,6 +70,7 @@ static collection_t *alloc_collection(void)
     collection->gui_list_focus = -1;
 
     collection->changed = false;
+    collection->is_zip = false;
 
     return collection;
 }
@@ -126,7 +127,7 @@ void collection_scan_dir(collection_t *collection)
     free(namelist);
 }
 
-collection_t *load_collection_dir(char *dirpath)
+collection_t *load_collection_dir(const char *dirpath)
 {
     assert_not_null(dirpath);
 
@@ -149,7 +150,7 @@ collection_t *load_collection_dir(char *dirpath)
     return collection;
 }
 
-collection_t *load_collection_level_file(char *filename)
+collection_t *load_collection_level_file(const char *filename)
 {
     collection_t *collection = create_collection();
 
@@ -161,7 +162,7 @@ collection_t *load_collection_level_file(char *filename)
     }
 }
 
-collection_t *load_collection_zip_file(char *filename)
+collection_t *load_collection_zip_file(const char *filename)
 {
     int errnum;
 
@@ -249,7 +250,7 @@ collection_t *load_collection_zip_file(char *filename)
                     continue;
                 }
 
-                level_t *level = load_level_string(filename, levelbuf);
+                level_t *level = load_level_string(filename, levelbuf, true);
                 collection_add_level(collection, level);
 
                 if (levelbuf) {
@@ -266,10 +267,12 @@ collection_t *load_collection_zip_file(char *filename)
     }
     zip_close(zip);
 
+    collection->is_zip = true;
+
     return collection;
 }
 
-collection_t *load_collection_file(char *filename)
+collection_t *load_collection_file(const char *filename)
 {
     assert_not_null(filename);
 
@@ -286,7 +289,7 @@ collection_t *load_collection_file(char *filename)
     }
 }
 
-collection_t *load_collection_path(char *path)
+collection_t *load_collection_path(const char *path)
 {
     assert_not_null(path);
 
@@ -509,9 +512,11 @@ void collection_add_level(collection_t *collection, level_t *level)
     if (collection->gui_list_active == -1) {
         collection->gui_list_active = 0;
     }
+
+    level->collection = collection;
 }
 
-bool collection_add_level_file(collection_t *collection, char *filename)
+bool collection_add_level_file(collection_t *collection, const char *filename)
 {
     assert_not_null(collection);
     assert_not_null(filename);
@@ -527,7 +532,7 @@ bool collection_add_level_file(collection_t *collection, char *filename)
     }
 }
 
-level_t *collection_find_level_by_filename(collection_t *collection, char *filename)
+level_t *collection_find_level_by_filename(collection_t *collection, const char *filename)
 {
     level_t *level = collection->levels;
     while (level) {

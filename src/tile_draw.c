@@ -73,7 +73,7 @@ Color path_type_highlight_color(path_type_t type)
 }
 static bool either_self_or_adjacent_is_hidden(tile_pos_t *pos)
 {
-    return pos->tile->hidden || pos->hover_adjacent->tile->hidden;
+    return pos->tile->hidden || (pos->hover_adjacent && pos->hover_adjacent->tile->hidden);
 }
 
 static void draw_adjacency_highlight(tile_pos_t *pos)
