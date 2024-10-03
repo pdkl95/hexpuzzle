@@ -154,7 +154,7 @@ bool level_parse_string(level_t *level, const char *str);
 level_t *load_level_string(const char *filename, const char *str, bool is_zip);
 level_t *load_level_file(const char *filename);
 
-void level_update_ui_name(level_t *level);
+void level_update_ui_name(level_t *level, int idx);
 
 bool level_check(level_t *level);
 void level_unload(void);

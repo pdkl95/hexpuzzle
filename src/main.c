@@ -932,7 +932,9 @@ static void draw_name_edit_dialog(void)
         /* accept edit / ok */
         show_name_edit_box = false;
         modal_ui_result = UI_RESULT_NULL;
-        level_update_ui_name(current_level);
+        if (current_collection) {
+            collection_update_level_names(current_collection);
+        }
     }
 
     if ((result == 1) || (modal_ui_result == UI_RESULT_CANCEL)) {

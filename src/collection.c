@@ -142,6 +142,7 @@ collection_t *load_collection_dir(const char *dirpath)
         }
 
         collection_scan_dir(collection);
+        collection_update_level_names(collection);
     } else {
         errmsg("Directory name is zero-length!");
     }
@@ -155,6 +156,7 @@ collection_t *load_collection_level_file(const char *filename)
     collection_t *collection = create_collection();
 
     if (collection_add_level_file(collection, filename)) {
+        collection_update_level_names(collection);
         return collection;
     } else {
         destroy_collection(collection);
@@ -268,6 +270,8 @@ collection_t *load_collection_zip_file(const char *filename)
     zip_close(zip);
 
     collection->is_zip = true;
+
+    collection_update_level_names(collection);
 
     return collection;
 }
@@ -449,7 +453,7 @@ void collection_update_level_names(collection_t *collection)
     while (lp) {
         assert(n < collection->level_name_count);
 
-        level_update_ui_name(lp);
+        level_update_ui_name(lp, n + 1);
         collection->level_names[n] = lp->ui_name;
 
         lp = lp->next;
@@ -506,8 +510,6 @@ void collection_add_level(collection_t *collection, level_t *level)
         memcpy(collection->level_names, old_ptr, old_count);
         free(old_ptr);
     }
-
-    collection_update_level_names(collection);
 
     if (collection->gui_list_active == -1) {
         collection->gui_list_active = 0;
@@ -954,8 +956,8 @@ void collection_draw(collection_t *collection)
 {
     assert_not_null(collection);
 
-    float width =  window_size.x * 0.4;
-    float height = window_size.y * 0.64;
+    float width =  window_size.x * 0.55;
+    float height = window_size.y * 0.6;
 
     Rectangle collection_list_rect = {
         .x = (window_size.x - width)  / 2.0f,

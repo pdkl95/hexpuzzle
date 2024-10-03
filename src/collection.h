@@ -71,6 +71,7 @@ void collection_add_level(collection_t *collection, level_t *level);
 bool collection_add_level_file(collection_t *collection, const char *filename);
 
 level_t *collection_find_level_by_filename(collection_t *collection, const char *filename);
+void collection_update_level_names(collection_t *collection);
 
 void collection_draw(collection_t *collection);
 

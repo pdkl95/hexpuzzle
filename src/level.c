@@ -761,7 +761,7 @@ level_t *load_level_file(const char *filename)
     return level;
 }
 
-void level_update_ui_name(level_t *level)
+void level_update_ui_name(level_t *level, int idx)
 {
     assert_not_null(level);
 
@@ -769,7 +769,7 @@ void level_update_ui_name(level_t *level)
         ? ICON_OK_TICK
         : ICON_CROSS_SMALL;
 
-    snprintf(level->ui_name, UI_NAME_MAXLEN, "%s", GuiIconText(icon, level->name));
+    snprintf(level->ui_name, UI_NAME_MAXLEN, "%s% 2d. %s", GuiIconText(icon, NULL), idx, level->name);
 }
 
 void level_unload(void)
