@@ -52,6 +52,15 @@ void printcolor(Color c);
 
 /*** misc stuff */
 
+static inline Vector2 getVector2FromRectangle(Rectangle rect)
+{
+    Vector2 vec = {
+        .x = rect.x,
+        .y = rect.y
+    };
+    return vec;
+}
+
 static inline bool is_any_shift_down(void)
 {
     return IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT);

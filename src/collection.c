@@ -824,6 +824,10 @@ static void collection_draw_buttons(collection_t *collection, Rectangle collecti
         GuiDisable();
     }
 
+    GuiSetFont(font20);
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 20);
+    GuiSetStyle(DEFAULT, TEXT_SPACING, 2);
+
     if (GuiButton(collection_play_button_rect, collection_play_button_text)) {
         level_t *level = collection->levels;
         int n = collection->gui_list_active;
@@ -855,6 +859,10 @@ static void collection_draw_buttons(collection_t *collection, Rectangle collecti
             create_new_level();
         }
     }
+
+    GuiSetFont(font16);
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 16);
+    GuiSetStyle(DEFAULT, TEXT_SPACING, 2);
 }
 
 void collection_draw_move_buttons(collection_t *collection, Rectangle bounds)

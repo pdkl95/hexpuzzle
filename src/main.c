@@ -97,6 +97,8 @@ bool edit_tool_cycle = true;
 bool edit_tool_erase = false;
 path_type_t edit_tool_state = PATH_TYPE_NONE;
 
+Font font16, font18, font20;
+
 #define MOUSE_TEXT_MAX_LINES 8
 #define MOUSE_TEXT_MAX_LINE_LENGTH 60
 char mouse_text[MOUSE_TEXT_MAX_LINES][MOUSE_TEXT_MAX_LINE_LENGTH];
@@ -765,7 +767,7 @@ static void draw_name_header(char *name)
     DrawRectangleRounded(name_panel_rect, PANEL_ROUNDNES, 0, bg);
     DrawRectangleRoundedLines(name_panel_rect, PANEL_ROUNDNES, 0, 1.0, edge);
 
-    DrawText(name, name_text_rect.x, name_text_rect.y, NAME_FONT_SIZE, panel_header_text_color);
+    DrawTextEx(NAME_FONT, name, getVector2FromRectangle(name_text_rect), NAME_FONT_SIZE, NAME_FONT_SPACING, panel_header_text_color);
 }
 
 static void draw_edit_panel(void)
@@ -1317,6 +1319,19 @@ void gfx_init(void)
 
     GuiLoadStyleDark();
     //GuiLoadStyleBiLightingFont();
+
+    font20 = LoadFont("fonts/terminus-20.png");
+    SetTextureFilter(font20.texture, TEXTURE_FILTER_POINT);
+
+    font18 = LoadFont("fonts/fira-18.png");
+    SetTextureFilter(font18.texture, TEXTURE_FILTER_BILINEAR);
+
+    font16 = LoadFont("fonts/sourcecodesanspro-semibold-16.png");
+    SetTextureFilter(font16.texture, TEXTURE_FILTER_TRILINEAR);
+
+    GuiSetFont(font16);
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 16);
+    GuiSetStyle(DEFAULT, TEXT_SPACING, 2);
 
     set_uniform_resolution();
 
