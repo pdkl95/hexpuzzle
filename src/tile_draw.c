@@ -280,8 +280,8 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
     /* show each hex's axial coordinates */
     int font_size = GuiGetStyle(DEFAULT, TEXT_SIZE);
     const char *coord_text = TextFormat("%d,%d", pos->position.q, pos->position.r);
-    int text_width = MeasureText(coord_text, font_size);
-    DrawTextDropShadow(coord_text, pos->center.x - (text_width/2), pos->center.y + 14, font_size, WHITE, BLACK);
+    Vector2 text_size = MeasureTextEx(DEFAULT_GUI_FONT, coord_text, font_size, 1.0);
+    DrawTextDropShadow(coord_text, pos->center.x - (text_size.x/2), pos->center.y + 14, font_size, WHITE, BLACK);
 #endif
 }
 

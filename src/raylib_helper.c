@@ -27,16 +27,30 @@ Color TEXT_DARK_SHADOW  = {    0,    0,    0, 0xAA };
 
 void DrawTextWindowCenter(const char *text, int posY, int fontSize, Color color)
 {
-    int text_width = MeasureText(text, fontSize);
-    int margin_left = (window_size.x - text_width) / 2;
-    DrawText(text, margin_left, posY, fontSize, color);
+    Font font = GuiGetFont();
+    Vector2 text_size = MeasureTextEx(font, text, (float)fontSize, 1.0);
+    int margin_left = (window_size.x - text_size.x) / 2;
+    Vector2 pos = {
+        .x = margin_left,
+        .y = posY
+    };
+    DrawTextEx(font, text, pos, fontSize, 1.0, color);
 }
 
 void DrawTextShadow(const char *text, int posX, int posY, int fontSize, Color color)
 {
-    DrawText(text, posX + 2, posY + 2, fontSize, TEXT_LIGHT_SHADOW);
-    DrawText(text, posX + 1, posY + 1, fontSize, TEXT_DARK_SHADOW);
-    DrawText(text, posX, posY, fontSize, color);
+    Font font = GuiGetFont();
+    Vector2 pos = {
+        .x = posX + 2,
+        .y = posY + 2
+    };
+    DrawTextEx(font, text, pos, fontSize, 1.0, TEXT_LIGHT_SHADOW);
+    pos.x -= 1;
+    pos.y -= 1;
+    DrawTextEx(font, text, pos, fontSize, 1.0, TEXT_DARK_SHADOW);
+    pos.x -= 1;
+    pos.y -= 1;
+    DrawTextEx(font, text, pos, fontSize, 1.0, color);
 }
 
 void DrawTextDropShadow(const char *text, int posX, int posY, int fontSize, Color fgcolor, Color bgcolor)
@@ -45,7 +59,6 @@ void DrawTextDropShadow(const char *text, int posX, int posY, int fontSize, Colo
     Vector2 shadow_pos = { .x = posX + 1, .y = posY + 1 };
     Vector2        pos = { .x = posX,     .y = posY     };
     DrawTextEx(font, text, shadow_pos, fontSize, 1.0, bgcolor);
-    //DrawText(text, posX + 1, posY + 1, fontSize, ColorLerp(fgcolor, bgcolor, 1.0));
     DrawTextEx(font, text,        pos, fontSize, 1.0, fgcolor);
 }
 

@@ -99,14 +99,26 @@ path_type_t edit_tool_state = PATH_TYPE_NONE;
 
 Font font16, font18, font20;
 
-#define MOUSE_TEXT_MAX_LINES 8
-#define MOUSE_TEXT_MAX_LINE_LENGTH 60
-char mouse_text[MOUSE_TEXT_MAX_LINES][MOUSE_TEXT_MAX_LINE_LENGTH];
-int mouse_text_idx = 0;
-int mouse_text_max_line_length = 0;
-int mouse_text_font_size = 20;
-
 void gui_setup(void);
+
+void set_default_gui_font(void)
+{
+    GuiSetFont(DEFAULT_GUI_FONT);
+    GuiSetStyle(DEFAULT, TEXT_SIZE, DEFAULT_GUI_FONT_SIZE);
+    GuiSetStyle(DEFAULT, TEXT_SPACING, 1);
+}
+
+#define def_set_gui_font(size)                  \
+    void set_gui_font##size(void)               \
+    {                                           \
+        GuiSetFont(font20);                     \
+        GuiSetStyle(DEFAULT, TEXT_SIZE, size);  \
+        GuiSetStyle(DEFAULT, TEXT_SPACING, 1);  \
+    }
+def_set_gui_font(16)
+def_set_gui_font(18)
+def_set_gui_font(20)
+#undef def_set_gui_font
 
 static inline bool do_level_ui_interaction(void)
 {
@@ -285,19 +297,6 @@ void open_game_file(const char *path)
         print_popup(__VA_ARGS__);               \
     } while(0)
 
-UNUSED static void add_mouse_text(const char *line)
-{
-    if (mouse_text_idx < MOUSE_TEXT_MAX_LINES) {
-        strncpy(mouse_text[mouse_text_idx], line, MOUSE_TEXT_MAX_LINE_LENGTH - 1);
-        mouse_text[mouse_text_idx][MOUSE_TEXT_MAX_LINE_LENGTH - 1] = '\0';
-
-        int width = MeasureText(mouse_text[mouse_text_idx], mouse_text_font_size);
-        mouse_text_max_line_length = MAX(width, mouse_text_max_line_length);
-
-        mouse_text_idx++;
-    }
-}
-
 static void
 schedule_resize(
     void
@@ -464,9 +463,6 @@ handle_events(
         level_set_hover(current_level, mouse_position);
     }
 
-    mouse_text_idx = 0;
-    mouse_text_max_line_length = 0;
-
     mouse_left_click   = false;;
     mouse_left_release = false;
     mouse_right_click  = false;;
@@ -528,33 +524,6 @@ handle_events(
     return true;
 }
 
-static void draw_mouse_text(void)
-{
-    if (mouse_text_idx) {
-        int vmargin = 4;
-        int hmargin = 8;
-        int font_size = mouse_text_font_size;
-        int line_height = font_size + 2;
-        int x = mouse_position.x + 30;
-        int y = mouse_position.y - ((mouse_text_idx / 2) * font_size) - 15;
-
-        Rectangle rec = {
-            .x      = x - hmargin,
-            .y      = y - vmargin,
-            .width  = mouse_text_max_line_length + (2 * hmargin),
-            .height = (mouse_text_idx * line_height) + (2 * vmargin)
-        };
-
-        DrawRectangleRounded(rec, 0.2, 0, ColorAlpha(DARKPURPLE, 0.333));
-        DrawRectangleRoundedLines(rec, 0.2, 0, 1.0, ColorAlpha(LIGHTGRAY, 0.666));
-
-        for (int i=0; i<mouse_text_idx; i++) {
-            DrawTextShadow(mouse_text[i], x, y, font_size, WHITE);
-            y += line_height;
-        }
-    }
-}
-
 Rectangle name_text_rect;
 Rectangle name_panel_rect;
 Rectangle name_edit_button_rect;
@@ -599,6 +568,8 @@ char cycle_tool_button_text[CYCLE_TOOL_BUTTON_TEXT_LENGTH];
 char erase_tool_button_text_str[] = "Erase";
 #define ERASE_TOOL_BUTTON_TEXT_LENGTH (6 + sizeof(erase_tool_button_text_str))
 char erase_tool_button_text[ERASE_TOOL_BUTTON_TEXT_LENGTH];
+
+char edit_tool_label_text[] = "Edit Tool";
 
 char cancel_ok_with_icons[25];
 char no_yes_with_icons[25];
@@ -671,21 +642,32 @@ void gui_setup(void)
     memcpy(cycle_tool_button_text,  GuiIconText(ICON_MUTATE_FILL, cycle_tool_button_text_str), CYCLE_TOOL_BUTTON_TEXT_LENGTH);
     memcpy(erase_tool_button_text,  GuiIconText(ICON_RUBBER, erase_tool_button_text_str), ERASE_TOOL_BUTTON_TEXT_LENGTH);
 
-    int cycle_tool_button_text_width = MeasureText(cycle_tool_button_text, ICON_FONT_SIZE);
-    int erase_tool_button_text_width = MeasureText(erase_tool_button_text, ICON_FONT_SIZE);
+    Vector2 edit_tool_label_text_size = MeasureTextEx(PANEL_LABEL_FONT,
+                                                      open_file_button_text_str,
+                                                      PANEL_LABEL_FONT_SIZE,
+                                                      PANEL_LABEL_FONT_SPACING);
+
+    Vector2 cycle_tool_button_text_size = MeasureGuiText(cycle_tool_button_text);
+    Vector2 erase_tool_button_text_size = MeasureGuiText(erase_tool_button_text);
 
     tool_panel_rect.x = edit_panel_rect.x;
-    tool_panel_rect.width = (2 * PANEL_INNER_MARGIN)
+    tool_panel_rect.width = (4 * PANEL_INNER_MARGIN)
         + ((PATH_TYPE_COUNT - 1) * (2 * ICON_BUTTON_SIZE))
-        + cycle_tool_button_text_width
-        + erase_tool_button_text_width;
+        + edit_tool_label_text_size.x
+        + cycle_tool_button_text_size.x
+        + erase_tool_button_text_size.x;
     tool_panel_rect.height = (2 * PANEL_INNER_MARGIN) + TOOL_BUTTON_HEIGHT;
     tool_panel_rect.y = window_size.y - WINDOW_MARGIN - tool_panel_rect.height;
 
-    int close_button_text_width  = MeasureText(close_button_text_str,  ICON_FONT_SIZE);
-    int edit_button_text_width   = MeasureText(edit_button_text_str,   ICON_FONT_SIZE);
-    int save_button_text_width   = MeasureText(save_button_text_str,   ICON_FONT_SIZE);
-    int return_button_text_width = MeasureText(return_button_text_str, ICON_FONT_SIZE);
+    Vector2 close_button_text_size  = MeasureGuiText(close_button_text_str);
+    Vector2 edit_button_text_size   = MeasureGuiText(edit_button_text_str);
+    Vector2 save_button_text_size   = MeasureGuiText(save_button_text_str);
+    Vector2 return_button_text_size = MeasureGuiText(return_button_text_str);
+
+    int close_button_text_width  = close_button_text_size.x;
+    int edit_button_text_width   = edit_button_text_size.x;
+    int save_button_text_width   = save_button_text_size.x;
+    int return_button_text_width = return_button_text_size.x;
     close_button_text_width = edit_button_text_width = save_button_text_width = return_button_text_width =
         MAX(MAX(close_button_text_width, edit_button_text_width),
             MAX(save_button_text_width, return_button_text_width));
@@ -718,23 +700,27 @@ void gui_setup(void)
 
     memcpy(return_button_text,  GuiIconText(ICON_UNDO_FILL, return_button_text_str), RETURN_BUTTON_TEXT_LENGTH);
 
-    int open_file_button_text_width = MeasureText(open_file_button_text_str, ICON_FONT_SIZE);
-
-    open_file_button_rect.x      = window_size.x - WINDOW_MARGIN - ICON_BUTTON_SIZE - open_file_button_text_width;
+    Vector2 open_file_button_text_size = MeasureGuiText(open_file_button_text_str);
+    open_file_button_rect.x      = window_size.x - WINDOW_MARGIN - ICON_BUTTON_SIZE - open_file_button_text_size.x;
     open_file_button_rect.y      = window_size.y - WINDOW_MARGIN - ICON_BUTTON_SIZE;
-    open_file_button_rect.width  = ICON_BUTTON_SIZE + open_file_button_text_width;
+    open_file_button_rect.width  = ICON_BUTTON_SIZE + open_file_button_text_size.x;
     open_file_button_rect.height = ICON_BUTTON_SIZE;
 
     memcpy(open_file_button_text,  GuiIconText(ICON_FILE_OPEN, open_file_button_text_str), OPEN_FILE_BUTTON_TEXT_LENGTH);
 
-    cycle_tool_button_rect.x = tool_panel_rect.x + PANEL_INNER_MARGIN;
-    cycle_tool_button_rect.y = tool_panel_rect.y + PANEL_INNER_MARGIN;
-    cycle_tool_button_rect.width  = cycle_tool_button_text_width;
-    cycle_tool_button_rect.height = TOOL_BUTTON_HEIGHT;
+    edit_tool_label_rect.x =  tool_panel_rect.x + PANEL_INNER_MARGIN;
+    edit_tool_label_rect.y =  tool_panel_rect.y + PANEL_INNER_MARGIN;
+    edit_tool_label_rect.width = edit_tool_label_text_size.x;
+    edit_tool_label_rect.height = TOOL_BUTTON_HEIGHT;
+
+    cycle_tool_button_rect.x = edit_tool_label_rect.x + edit_tool_label_rect.width + ICON_BUTTON_SIZE;
+    cycle_tool_button_rect.y = edit_tool_label_rect.y;
+    cycle_tool_button_rect.width  = cycle_tool_button_text_size.x;
+    cycle_tool_button_rect.height = edit_tool_label_rect.height;
 
     erase_tool_button_rect.x = cycle_tool_button_rect.x + cycle_tool_button_rect.width + ICON_BUTTON_SIZE;
     erase_tool_button_rect.y = cycle_tool_button_rect.y;
-    erase_tool_button_rect.width  = erase_tool_button_text_width;
+    erase_tool_button_rect.width  = erase_tool_button_text_size.x;
     erase_tool_button_rect.height = cycle_tool_button_rect.height;
 }
 
@@ -744,10 +730,10 @@ Color panel_header_text_color = { 0xD0, 0xC0, 0xFF, 0xff };
 
 static void draw_name_header(char *name)
 {
-    int textwidth = MeasureText(name, NAME_FONT_SIZE);
+    Vector2 textsize = MeasureTextEx(NAME_FONT, name, NAME_FONT_SIZE, NAME_FONT_SPACING);
 
-    name_text_rect.width  = textwidth;
-    name_panel_rect.width = textwidth + (2 * PANEL_INNER_MARGIN);
+    name_text_rect.width  = textsize.x;
+    name_panel_rect.width = textsize.x + (2 * PANEL_INNER_MARGIN);
 
     bool hover = CheckCollisionPointRec(mouse_positionf, name_text_rect);
     if (game_mode != GAME_MODE_EDIT_LEVEL) {
@@ -777,8 +763,8 @@ static void draw_edit_panel(void)
     DrawRectangleRounded(edit_panel_rect, PANEL_ROUNDNES, 0, bg);
     DrawRectangleRoundedLines(edit_panel_rect, PANEL_ROUNDNES, 0, 1.0, edge);
 
-    DrawText("Board Radius", radius_spinner_label_rect.x, radius_spinner_label_rect.y,
-             PANEL_LABEL_FONT_SIZE, panel_header_text_color);
+    DrawTextEx(PANEL_LABEL_FONT, "Board Radius", getVector2FromRectangle(radius_spinner_label_rect),
+               PANEL_LABEL_FONT_SIZE, PANEL_LABEL_FONT_SPACING, panel_header_text_color);
 
     int radius = 1;
     if (current_level) {
@@ -821,8 +807,8 @@ static void draw_tool_panel(void)
     DrawRectangleRounded(tool_panel_rect, PANEL_ROUNDNES, 0, bg);
     DrawRectangleRoundedLines(tool_panel_rect, PANEL_ROUNDNES, 0, 1.0, edge);
 
-    DrawText("Edit Tool", edit_tool_label_rect.x, edit_tool_label_rect.y,
-             PANEL_LABEL_FONT_SIZE, panel_header_text_color);
+    DrawTextEx(PANEL_LABEL_FONT, edit_tool_label_text, getVector2FromRectangle(edit_tool_label_rect),
+               PANEL_LABEL_FONT_SIZE, PANEL_LABEL_FONT_SPACING, panel_header_text_color);
 
     GuiToggle(cycle_tool_button_rect, cycle_tool_button_text, &edit_tool_cycle);
     if (edit_tool_cycle) {
@@ -1231,8 +1217,6 @@ render_frame(
         if (show_fps) {
             DrawTextShadow(TextFormat("FPS: %d", GetFPS()), 15, 10, 20, WHITE);
         }
-
-        draw_mouse_text();
     }
     EndDrawing();
 
@@ -1318,20 +1302,24 @@ void gfx_init(void)
     //SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
 
     GuiLoadStyleDark();
-    //GuiLoadStyleBiLightingFont();
 
-    font20 = LoadFont("fonts/terminus-20.png");
+    //font20 = LoadFont("fonts/terminus-20.png");
+    font20 = LoadFontEx("fonts/TerminusMedium-4.38.ttf", 20, NULL, 0);
     SetTextureFilter(font20.texture, TEXTURE_FILTER_POINT);
 
-    font18 = LoadFont("fonts/fira-18.png");
+    //font18 = LoadFont("fonts/fira-18.png");
+    font18 = LoadFontEx("fonts/FiraSansOT-Medium.otf", 36, NULL, 0);
     SetTextureFilter(font18.texture, TEXTURE_FILTER_BILINEAR);
 
-    font16 = LoadFont("fonts/sourcecodesanspro-semibold-16.png");
-    SetTextureFilter(font16.texture, TEXTURE_FILTER_TRILINEAR);
+    //font16 = LoadFont("fonts/sourcecodesanspro-semibold-16.png");
+    font16 = LoadFontEx("fonts/SourceSansPro-Semibold.ttf", 32, NULL, 0);
+    //font16 = LoadFontEx("fonts/TerminusMedium-4.38.ttf", 16, NULL, 0);
+    SetTextureFilter(font16.texture, TEXTURE_FILTER_BILINEAR);
 
-    GuiSetFont(font16);
-    GuiSetStyle(DEFAULT, TEXT_SIZE, 16);
-    GuiSetStyle(DEFAULT, TEXT_SPACING, 2);
+    set_default_gui_font();
+
+    GuiSetStyle(DEFAULT, TEXT_PADDING, 4);
+    GuiSetStyle(DEFAULT, BORDER_WIDTH, 1);
 
     set_uniform_resolution();
 

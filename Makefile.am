@@ -13,8 +13,6 @@ EXTRA_DIST = \
 	lib/gnugetopt.h \
 	lib/getopt.c \
 	lib/getopt1.c \
-	external/raygui/raygui.h \
-	external/raygui/gui_window_file_dialog.h \
 	shaders/win_border.frag.glsl
 
 bin_PROGRAMS = hexpuzzle
@@ -43,6 +41,7 @@ hexpuzzle_SOURCES =                                \
 	src/level.h           src/level.c          \
 	src/logging.h         src/logging.c        \
 	src/options.h         src/options.c        \
+	src/raygui_impl.c            		   \
 	src/raygui_file_dialog_impl.c              \
 	src/raylib_helper.h   src/raylib_helper.c  \
 	src/shader.h          src/shader.c         \
@@ -53,9 +52,11 @@ hexpuzzle_SOURCES =                                \
 	src/win_anim.h        src/win_anim.c       \
 	src/common.h          src/main.c
 
-hexpuzzle_SOURCES +=              \
-	external/zip-kuba/miniz.h \
-	external/zip-kuba/zip.h   \
+hexpuzzle_SOURCES +=             		  \
+	external/raygui/raygui.h  		  \
+	external/raygui/gui_window_file_dialog.h  \
+	external/zip-kuba/miniz.h 		  \
+	external/zip-kuba/zip.h  		  \
 	external/zip-kuba/zip.c
 
 dist_EXTRA_hexpuzzle_SOURCES = \
@@ -65,6 +66,8 @@ dist_EXTRA_hexpuzzle_SOURCES = \
 	$(AM_V_GEN)$(XXD) -i $^ > $@
 
 win_border.frag.h: win_border.frag.glsl
+
+src/hexpuzzle-raygui_impl.$(OBJEXT): CFLAGS += -Wno-unused-parameter
 
 BUILT_SOURCES = \
 	$(dist_EXTRA_hexpuzzle_SOURCES)

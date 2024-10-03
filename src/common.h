@@ -137,6 +137,17 @@ extern float current_time;
 extern double double_current_time;
 
 extern Font font20, font18, font16;
+void set_gui_font20(void);
+void set_gui_font18(void);
+void set_gui_font16(void);
+void set_default_gui_font(void);
+
+#define MeasureGuiText(str)                  \
+    MeasureTextEx(DEFAULT_GUI_FONT,          \
+                  str,                       \
+                  DEFAULT_GUI_FONT_SIZE,     \
+                  DEFAULT_GUI_FONT_SPACING)
+
 
 #define play_mode (game_mode == GAME_MODE_PLAY_LEVEL)
 #define edit_mode (game_mode == GAME_MODE_EDIT_LEVEL)

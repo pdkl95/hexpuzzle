@@ -818,15 +818,13 @@ static void collection_draw_buttons(collection_t *collection, Rectangle collecti
         .height = collection_play_button_rect.height
     };
 
-    char *collection_new_button_text = "New Level";
+    char *collection_new_button_text = "New\nLevel";
 
     if (collection->gui_list_active == -1) {
         GuiDisable();
     }
 
-    GuiSetFont(font20);
-    GuiSetStyle(DEFAULT, TEXT_SIZE, 20);
-    GuiSetStyle(DEFAULT, TEXT_SPACING, 2);
+    set_gui_font20();
 
     if (GuiButton(collection_play_button_rect, collection_play_button_text)) {
         level_t *level = collection->levels;
@@ -860,9 +858,7 @@ static void collection_draw_buttons(collection_t *collection, Rectangle collecti
         }
     }
 
-    GuiSetFont(font16);
-    GuiSetStyle(DEFAULT, TEXT_SIZE, 16);
-    GuiSetStyle(DEFAULT, TEXT_SPACING, 2);
+    set_default_gui_font();
 }
 
 void collection_draw_move_buttons(collection_t *collection, Rectangle bounds)
