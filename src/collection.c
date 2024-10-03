@@ -883,6 +883,14 @@ void collection_draw_move_buttons(collection_t *collection, Rectangle bounds)
     int startIndex = (scrollIndex == NULL)? 0 : *scrollIndex;
     if ((startIndex < 0) || (startIndex > (count - visibleItems))) startIndex = 0;
 
+    char btn_text[1024];
+
+    Rectangle defered_draw_btn_rect;
+    char defered_draw_btn_text[1024];
+    char *defered_draw_btn_tt   = NULL;
+
+    itemBounds.x -= 64;
+
     for (int i = 0; i < visibleItems; i++) {
         float ymargin = (itemBounds.height - RAYGUI_ICON_SIZE) / 2.0f;
         Rectangle up_btn_rect = {
@@ -899,15 +907,43 @@ void collection_draw_move_buttons(collection_t *collection, Rectangle bounds)
         };
 
         if (i > 0) {
-            if (GuiButton(up_btn_rect, GuiIconText(ICON_ARROW_UP, NULL))) {
+            strncpy(btn_text, GuiIconText(ICON_ARROW_UP, NULL), 1024);
+            btn_text[1023] = '\0';
+
+            if (CheckCollisionPointRec(mouse_positionf, up_btn_rect)) {
+                defered_draw_btn_rect = up_btn_rect;
+                memcpy(defered_draw_btn_text, btn_text, 1024);
+                defered_draw_btn_tt = "Move Up";
+            }
+
+            if (GuiButton(up_btn_rect, btn_text)) {
                 collection_move_level_earlier(collection, i);
             }
         }
 
         if (i < visibleItems - 1) {
-            if (GuiButton(down_btn_rect, GuiIconText(ICON_ARROW_DOWN, NULL))) {
+            strncpy(btn_text, GuiIconText(ICON_ARROW_DOWN, NULL), 1024);
+            btn_text[1023] = '\0';
+
+            if (CheckCollisionPointRec(mouse_positionf, down_btn_rect)) {
+                defered_draw_btn_rect = down_btn_rect;
+                memcpy(defered_draw_btn_text, btn_text, 1024);
+                defered_draw_btn_tt = "Move Down";
+            }
+
+            if (GuiButton(down_btn_rect, btn_text)) {
                 collection_move_level_later(collection, i);
             }
+        }
+
+        if (defered_draw_btn_tt) {
+            GuiEnableTooltip();
+            GuiSetTooltip(defered_draw_btn_tt);
+
+            GuiButton(defered_draw_btn_rect, defered_draw_btn_text);
+
+            GuiDisableTooltip();
+            GuiSetTooltip(NULL);
         }
 
         itemBounds.y += (GuiGetStyle(LISTVIEW, LIST_ITEMS_HEIGHT) + GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING));

@@ -133,6 +133,9 @@ typedef enum game_mode game_mode_t;
 
 extern game_mode_t game_mode;
 
+extern IVector2 mouse_position;
+extern Vector2 mouse_positionf;
+
 extern float current_time;
 extern double double_current_time;
 
