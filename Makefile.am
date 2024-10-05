@@ -37,6 +37,8 @@ hexpuzzle_SOURCES =                                    \
 	src/collection.h        src/collection.c       \
 	src/color.h             src/color.c            \
 	src/const.h                                    \
+	src/gui_browser.h       src/gui_browser.c      \
+	src/gui_options.h       src/gui_options.c      \
 	src/hex.h               src/hex.c              \
 	src/level.h             src/level.c            \
 	src/logging.h           src/logging.c          \
