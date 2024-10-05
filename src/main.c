@@ -38,6 +38,9 @@
 #include "collection.h"
 #include "shader.h"
 
+#include "gui_browser.h"
+#include "gui_options.h"
+
 #include "nvdata.h"
 #include "nvdata_finished.h"
 
@@ -84,6 +87,7 @@ const char *popup_text;
 Color popup_text_color = { 0xFF, 0xFA, 0xCD, 0xFF };
 
 game_mode_t game_mode = GAME_MODE_NULL;
+game_mode_t last_game_mode = GAME_MODE_NULL;
 
 bool level_finished = false;
 
@@ -182,6 +186,20 @@ void show_name_edit_dialog(void)
     }
 }
 
+void set_game_mode(game_mode_t new_mode)
+{
+    last_game_mode = game_mode;
+    game_mode = new_mode;
+}
+
+void prev_game_mode(void)
+{
+    game_mode_t tmp;
+    tmp = game_mode;
+    game_mode = last_game_mode;
+    last_game_mode = tmp;
+}
+
 char *game_mode_str(void)
 {
     switch (game_mode) {
@@ -199,6 +217,12 @@ char *game_mode_str(void)
 
     case GAME_MODE_EDIT_LEVEL:
         return "EDIT_LEVEL";
+
+    case GAME_MODE_BROWSER:
+        return "BROWSER";
+
+    case GAME_MODE_OPTIONS:
+        return "OPTIONS";
 
     default:
         __builtin_unreachable();
@@ -558,19 +582,30 @@ Rectangle edit_panel_rect;
 Rectangle radius_spinner_label_rect;
 Rectangle radius_spinner_rect;
 Rectangle close_button_rect;
-Rectangle save_button_rect;
-Rectangle edit_button_rect;
+/* Rectangle save_button_rect; */
+/* Rectangle edit_button_rect; */
+/* Rectangle return_button_rect; */
 Rectangle edit_mode_toggle_rect;
-Rectangle return_button_rect;
 Rectangle open_file_button_rect;
 Rectangle tool_panel_rect;
 Rectangle edit_tool_label_rect;
 Rectangle cycle_tool_button_rect;
 Rectangle erase_tool_button_rect;
 
+#define MAX_RIGHT_SIDE_BUTTONS 5
+Rectangle right_side_button_rect[MAX_RIGHT_SIDE_BUTTONS];
+
 char close_button_text_str[] = "Quit";
 #define CLOSE_BUTTON_TEXT_LENGTH (6 + sizeof(close_button_text_str))
 char close_button_text[CLOSE_BUTTON_TEXT_LENGTH];
+
+char options_button_text_str[] = "Options";
+#define OPTIONS_BUTTON_TEXT_LENGTH (6 + sizeof(options_button_text_str))
+char options_button_text[OPTIONS_BUTTON_TEXT_LENGTH];
+
+char browser_button_text_str[] = "Browse";
+#define BROWSER_BUTTON_TEXT_LENGTH (6 + sizeof(browser_button_text_str))
+char browser_button_text[BROWSER_BUTTON_TEXT_LENGTH];
 
 char save_button_text_str[] = "Save";
 #define SAVE_BUTTON_TEXT_LENGTH (6 + sizeof(save_button_text_str))
@@ -686,46 +721,48 @@ void gui_setup(void)
     tool_panel_rect.height = (2 * PANEL_INNER_MARGIN) + TOOL_BUTTON_HEIGHT;
     tool_panel_rect.y = window_size.y - WINDOW_MARGIN - tool_panel_rect.height;
 
-    Vector2 close_button_text_size  = MeasureGuiText(close_button_text_str);
-    Vector2 edit_button_text_size   = MeasureGuiText(edit_button_text_str);
-    Vector2 save_button_text_size   = MeasureGuiText(save_button_text_str);
-    Vector2 return_button_text_size = MeasureGuiText(return_button_text_str);
+    Vector2 close_button_text_size   = MeasureGuiText(close_button_text_str);
+    Vector2 edit_button_text_size    = MeasureGuiText(edit_button_text_str);
+    Vector2 save_button_text_size    = MeasureGuiText(save_button_text_str);
+    Vector2 return_button_text_size  = MeasureGuiText(return_button_text_str);
+    Vector2 browser_button_text_size = MeasureGuiText(browser_button_text_str);
+    Vector2 options_button_text_size = MeasureGuiText(options_button_text_str);
 
-    int close_button_text_width  = close_button_text_size.x;
-    int edit_button_text_width   = edit_button_text_size.x;
-    int save_button_text_width   = save_button_text_size.x;
-    int return_button_text_width = return_button_text_size.x;
-    close_button_text_width = edit_button_text_width = save_button_text_width = return_button_text_width =
-        MAX(MAX(close_button_text_width, edit_button_text_width),
-            MAX(save_button_text_width, return_button_text_width));
+    int close_button_text_width   = close_button_text_size.x;
+    int edit_button_text_width    = edit_button_text_size.x;
+    int save_button_text_width    = save_button_text_size.x;
+    int return_button_text_width  = return_button_text_size.x;
+    int browser_button_text_width = browser_button_text_size.x;
+    int options_button_text_width = options_button_text_size.x;
+
+    int right_side_button_text_width = close_button_text_width =
+        MAX(MAX(MAX(close_button_text_width, edit_button_text_width),
+                MAX(save_button_text_width, return_button_text_width)),
+            MAX(browser_button_text_width, options_button_text_width));
 
     close_button_rect.x      = window_size.x - WINDOW_MARGIN - ICON_BUTTON_SIZE - close_button_text_width;
     close_button_rect.y      = WINDOW_MARGIN;
     close_button_rect.width  = ICON_BUTTON_SIZE + close_button_text_width;
     close_button_rect.height = ICON_BUTTON_SIZE;
 
-    memcpy(close_button_text, GuiIconText(ICON_EXIT, close_button_text_str), CLOSE_BUTTON_TEXT_LENGTH);
+    memcpy(  close_button_text, GuiIconText(ICON_EXIT,               close_button_text_str),   CLOSE_BUTTON_TEXT_LENGTH);
+    memcpy(   edit_button_text, GuiIconText(ICON_FILE_SAVE_CLASSIC,   edit_button_text_str),    EDIT_BUTTON_TEXT_LENGTH);
+    memcpy(   save_button_text, GuiIconText(ICON_TOOLS,               save_button_text_str),    SAVE_BUTTON_TEXT_LENGTH);
+    memcpy( return_button_text, GuiIconText(ICON_UNDO_FILL,         return_button_text_str),  RETURN_BUTTON_TEXT_LENGTH);
+    memcpy(options_button_text, GuiIconText(ICON_GEAR,             options_button_text_str), OPTIONS_BUTTON_TEXT_LENGTH);
+    memcpy(browser_button_text, GuiIconText(ICON_FOLDER_FILE_OPEN, browser_button_text_str), BROWSER_BUTTON_TEXT_LENGTH);
 
-    edit_button_rect.x      = close_button_rect.x;
-    edit_button_rect.y      = close_button_rect.y + close_button_rect.height + WINDOW_MARGIN;
-    edit_button_rect.width  = ICON_BUTTON_SIZE + edit_button_text_width;
-    edit_button_rect.height = ICON_BUTTON_SIZE;
-    
-    memcpy(edit_button_text,  GuiIconText(ICON_FILE_SAVE_CLASSIC, edit_button_text_str), EDIT_BUTTON_TEXT_LENGTH);
+    right_side_button_rect[0].x      = close_button_rect.x;
+    right_side_button_rect[0].y      = close_button_rect.y + close_button_rect.height + (3 * WINDOW_MARGIN);
+    right_side_button_rect[0].width  = ICON_BUTTON_SIZE + right_side_button_text_width;
+    right_side_button_rect[0].height = ICON_BUTTON_SIZE;
 
-    save_button_rect.x      = edit_button_rect.x;
-    save_button_rect.y      = edit_button_rect.y + edit_button_rect.height + WINDOW_MARGIN;
-    save_button_rect.width  = ICON_BUTTON_SIZE + save_button_text_width;
-    save_button_rect.height = ICON_BUTTON_SIZE;
-
-    memcpy(save_button_text,  GuiIconText(ICON_TOOLS, save_button_text_str), EDIT_BUTTON_TEXT_LENGTH);
-
-    return_button_rect.x      = save_button_rect.x;
-    return_button_rect.y      = save_button_rect.y + save_button_rect.height + WINDOW_MARGIN;
-    return_button_rect.width  = ICON_BUTTON_SIZE + return_button_text_width;
-    return_button_rect.height = ICON_BUTTON_SIZE;
-
-    memcpy(return_button_text,  GuiIconText(ICON_UNDO_FILL, return_button_text_str), RETURN_BUTTON_TEXT_LENGTH);
+    for (int i=1; i<MAX_RIGHT_SIDE_BUTTONS; i++) {
+        right_side_button_rect[i].x      = right_side_button_rect[i-1].x;
+        right_side_button_rect[i].y      = right_side_button_rect[i-1].y + right_side_button_rect[i-1].height + WINDOW_MARGIN;
+        right_side_button_rect[i].width  = ICON_BUTTON_SIZE + right_side_button_text_width;
+        right_side_button_rect[i].height = ICON_BUTTON_SIZE;
+    }
 
     Vector2 open_file_button_text_size = MeasureGuiText(open_file_button_text_str);
     open_file_button_rect.x      = window_size.x - WINDOW_MARGIN - ICON_BUTTON_SIZE - open_file_button_text_size.x;
@@ -881,11 +918,28 @@ static void draw_tool_panel(void)
 
 static void draw_gui_widgets(void)
 {
+    int prev_align = GuiGetStyle(BUTTON, TEXT_ALIGNMENT);
+    GuiSetStyle(BUTTON, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
+
     if (GuiButton(close_button_rect, close_button_text)) {
         running = false;
     }
 
+    int rsb = 0;
+
     switch (game_mode) {
+    case GAME_MODE_BROWSER:
+        if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
+            prev_game_mode();
+        }
+        break;
+
+    case GAME_MODE_OPTIONS:
+        if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
+            prev_game_mode();
+        }
+        break;
+
     case GAME_MODE_EDIT_LEVEL:
         draw_name_header(current_level->name);
 
@@ -894,7 +948,7 @@ static void draw_gui_widgets(void)
             draw_tool_panel();
         }
 
-        if (GuiButton(return_button_rect, return_button_text)) {
+        if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
             printf("return\n");
             show_ask_save_box = true;
         }
@@ -903,24 +957,46 @@ static void draw_gui_widgets(void)
     case GAME_MODE_PLAY_LEVEL:
         draw_name_header(current_level->name);
 
-        // NOTE: not return_button_rect; when the edit button
-        //       isn't shown, move up into edit button's place.
-        if (GuiButton(edit_button_rect, return_button_text)) {
+        if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
             return_from_level();
         }
         break;
 
     case GAME_MODE_EDIT_COLLECTION:
+        if (GuiButton(right_side_button_rect[rsb++], options_button_text)) {
+            set_game_mode(GAME_MODE_OPTIONS);
+        }
+
+        if (GuiButton(right_side_button_rect[rsb++], browser_button_text)) {
+            set_game_mode(GAME_MODE_BROWSER);
+        }
+
+        if (GuiButton(right_side_button_rect[rsb++], edit_button_text)) {
+            toggle_edit_mode();
+        }
+
         if (current_collection && current_collection->changed) {
-            if (GuiButton(save_button_rect, save_button_text)) {
+            if (GuiButton(right_side_button_rect[rsb++], save_button_text)) {
                 show_ask_save_box = true;
             }
         }
 
-        /* fall through */
+        if (GuiButton(open_file_button_rect, open_file_button_text)) {
+            show_open_file_box = true;
+        }
+
+        break;
 
     case GAME_MODE_PLAY_COLLECTION:
-        if (GuiButton(edit_button_rect, edit_button_text)) {
+        if (GuiButton(right_side_button_rect[rsb++], options_button_text)) {
+            set_game_mode(GAME_MODE_OPTIONS);
+        }
+
+        if (GuiButton(right_side_button_rect[rsb++], browser_button_text)) {
+            set_game_mode(GAME_MODE_BROWSER);
+        }
+
+        if (GuiButton(right_side_button_rect[rsb++], edit_button_text)) {
             toggle_edit_mode();
         }
 
@@ -933,6 +1009,8 @@ static void draw_gui_widgets(void)
     default:
         break;
     }
+
+    GuiSetStyle(BUTTON, TEXT_ALIGNMENT, prev_align);
 }
 
 static void draw_name_edit_dialog(void)
@@ -1214,6 +1292,14 @@ render_frame(
         draw_cartesian_grid(false);
 
         switch (game_mode) {
+        case GAME_MODE_BROWSER:
+            draw_gui_browser();
+            break;
+
+        case GAME_MODE_OPTIONS:
+            draw_gui_options();
+            break;
+
         case GAME_MODE_PLAY_LEVEL:
             if (current_level) {
                 level_draw(current_level, level_finished);
@@ -1392,7 +1478,9 @@ static void game_init(void)
             infomsg("Created config dir \"%s\"", config_dir);
         }
     }
-
+\
+    init_gui_browser();
+    init_gui_options();
     init_nvdata();
 
     if (options->extra_argc == 1) {

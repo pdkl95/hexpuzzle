@@ -22,4 +22,11 @@
 #include "common.h"
 #include "gui_browser.h"
 
+void init_gui_browser(void)
+{
+}
+
+void draw_gui_browser(void)
+{
+}
 

@@ -133,15 +133,11 @@ void load_nvdata_finished_levels(void)
 
     while ((getline(&line, &len, f)) != -1) {
         line[strcspn(line, "\n")] = '\0';
-        printf("line: \"%s\"\n", line);
         if (strlen(line) >= 3) {
             if (current_collection) {
                 level_t *level = collection_find_level_by_id(current_collection, line);
                 if (level) {
                     level->finished = true;
-                    printf("load_nvdata_finished_levels() level[%s]->finished = true\n", level->id);
-                } else {
-                    printf("load_nvdata_finished_levels() SKIP\n");
                 }
             }
 

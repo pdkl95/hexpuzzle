@@ -22,9 +22,8 @@
 #ifndef GUI_OPTIONS_H
 #define GUI_OPTIONS_H
 
-struct gui_options {
-};
-typedef struct gui_options gui_options_t;
+void init_gui_options(void);
+void draw_gui_options(void);
 
 #endif /*GUI_OPTIONS_H*/
 

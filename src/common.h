@@ -132,7 +132,9 @@ enum game_mode {
     GAME_MODE_PLAY_COLLECTION,
     GAME_MODE_EDIT_COLLECTION,
     GAME_MODE_PLAY_LEVEL,
-    GAME_MODE_EDIT_LEVEL
+    GAME_MODE_EDIT_LEVEL,
+    GAME_MODE_BROWSER,
+    GAME_MODE_OPTIONS
 };
 typedef enum game_mode game_mode_t;
 
@@ -156,8 +158,9 @@ void set_default_gui_font(void);
                   DEFAULT_GUI_FONT_SIZE,     \
                   DEFAULT_GUI_FONT_SPACING)
 
-
-#define play_mode (game_mode == GAME_MODE_PLAY_LEVEL)
-#define edit_mode (game_mode == GAME_MODE_EDIT_LEVEL)
+#define play_mode    (game_mode == GAME_MODE_PLAY_LEVEL)
+#define edit_mode    (game_mode == GAME_MODE_EDIT_LEVEL)
+#define browser_mode (game_mode == GAME_MODE_BROWSER)
+#define options_mode (game_mode == GAME_MODE_OPTIONS)
 
 #endif /*COMMON_H*/

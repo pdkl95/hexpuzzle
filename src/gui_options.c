@@ -23,3 +23,11 @@
 #include "gui_options.h"
 
 
+void init_gui_options(void)
+{
+}
+
+void draw_gui_options(void)
+{
+}
+

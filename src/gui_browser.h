@@ -22,9 +22,8 @@
 #ifndef GUI_BROWSER_H
 #define GUI_BROWSER_H
 
-struct gui_browser {
-};
-typedef struct gui_browser gui_browser_t;
+void init_gui_browser(void);
+void draw_gui_browser(void);
 
 #endif /*GUI_BROWSER_H*/
 
