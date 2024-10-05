@@ -20,6 +20,7 @@
  ****************************************************************************/
 
 #include "common.h"
+#include "raygui/raygui.h"
 #include "raylib_helper.h"
 
 Color TEXT_LIGHT_SHADOW = { 0x11, 0x11, 0x11, 0x33 };
@@ -344,4 +345,84 @@ LoadRenderTextureWithFormat(
     }
 
     return target;
+}
+
+static Color GuiFade(Color color, float alpha)
+{
+    if (alpha < 0.0f) alpha = 0.0f;
+    else if (alpha > 1.0f) alpha = 1.0f;
+
+    Color result = { color.r, color.g, color.b, (unsigned char)(color.a*alpha) };
+
+    return result;
+}
+
+static void GuiDrawRectangle(Rectangle rec, int borderWidth, Color borderColor, Color color)
+{
+    if (color.a > 0)
+    {
+        // Draw rectangle filled with color
+        DrawRectangle((int)rec.x, (int)rec.y, (int)rec.width, (int)rec.height, GuiFade(color, GuiGetAlpha()));
+    }
+
+    if (borderWidth > 0)
+    {
+        float alpha = GuiGetAlpha();
+        // Draw rectangle border lines with color
+        DrawRectangle((int)rec.x, (int)rec.y, (int)rec.width, borderWidth, GuiFade(borderColor, alpha));
+        DrawRectangle((int)rec.x, (int)rec.y + borderWidth, borderWidth, (int)rec.height - 2*borderWidth, GuiFade(borderColor, alpha));
+        DrawRectangle((int)rec.x + (int)rec.width - borderWidth, (int)rec.y + borderWidth, borderWidth, (int)rec.height - 2*borderWidth, GuiFade(borderColor, alpha));
+        DrawRectangle((int)rec.x, (int)rec.y + (int)rec.height - borderWidth, (int)rec.width, borderWidth, GuiFade(borderColor, alpha));
+    }
+}
+
+void GuiSimpleTabBar(Rectangle bounds, const char **text, int count, int *active)
+{
+#define RAYGUI_TABBAR_ITEM_WIDTH    120
+
+    Rectangle tabBounds = { bounds.x, bounds.y, RAYGUI_TABBAR_ITEM_WIDTH, bounds.height };
+
+    if (*active < 0) *active = 0;
+    else if (*active > count - 1) *active = count - 1;
+
+    int offsetX = 0;    // Required in case tabs go out of screen
+    offsetX = (*active + 2)*RAYGUI_TABBAR_ITEM_WIDTH - GetScreenWidth();
+    if (offsetX < 0) offsetX = 0;
+
+    bool toggle = false;    // Required for individual toggles
+
+    // Draw control
+    //--------------------------------------------------------------------
+    for (int i = 0; i < count; i++)
+    {
+        tabBounds.x = bounds.x + (RAYGUI_TABBAR_ITEM_WIDTH + 4)*i - offsetX;
+
+        if (tabBounds.x < GetScreenWidth())
+        {
+            // Draw tabs as toggle controls
+            int textAlignment = GuiGetStyle(TOGGLE, TEXT_ALIGNMENT);
+            int textPadding = GuiGetStyle(TOGGLE, TEXT_PADDING);
+            GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
+            GuiSetStyle(TOGGLE, TEXT_PADDING, 8);
+
+            if (i == (*active))
+            {
+                toggle = true;
+                GuiToggle(tabBounds, text[i], &toggle);
+            }
+            else
+            {
+                toggle = false;
+                GuiToggle(tabBounds, text[i], &toggle);
+                if (toggle) *active = i;
+            }
+
+            GuiSetStyle(TOGGLE, TEXT_PADDING, textPadding);
+            GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, textAlignment);
+        }
+    }
+
+    // Draw tab-bar bottom line
+    GuiDrawRectangle((Rectangle){ bounds.x, bounds.y + bounds.height - 1, bounds.width, 1 }, 0, BLANK, GetColor(GuiGetStyle(TOGGLE, BORDER_COLOR_NORMAL)));
+    //--------------------------------------------------------------------
 }

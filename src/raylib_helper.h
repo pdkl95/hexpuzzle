@@ -139,6 +139,8 @@ void doublebuffer_swap_buffers(doublebuffer_t *db);
 Texture2D LoadTextureWithFormat(int width, int height, int format);
 RenderTexture2D LoadRenderTextureWithFormat(int width, int height, int pixel_format);
 
+/*** Custom RayGui widgets ***/
+void GuiSimpleTabBar(Rectangle bounds, const char **text, int count, int *active);
 
 #endif /*RAYLIB_HELPER_H*/
 

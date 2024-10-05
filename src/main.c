@@ -405,7 +405,10 @@ do_resize(
     if (current_level) {
         level_resize(current_level);
     }
+
     gui_setup();
+    resize_gui_browser();
+    resize_gui_options();
 
     window_size_changed = false;
     resize_time = 0;

@@ -59,6 +59,14 @@
         var = MIN(var, maxvalue);              \
     } while(0)
 
+#define MAXVAR(var, maxvalue) do { \
+        var = MIN(var, maxvalue);  \
+    } while(0)
+
+#define MINVAR(var, minvalue) do { \
+        var = MAX(var, minvalue);  \
+    } while(0)
+
 #define FREE(ptr) do { \
         free(ptr);     \
         ptr = NULL;    \

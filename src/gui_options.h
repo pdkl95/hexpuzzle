@@ -23,6 +23,7 @@
 #define GUI_OPTIONS_H
 
 void init_gui_options(void);
+void resize_gui_options(void);
 void draw_gui_options(void);
 
 #endif /*GUI_OPTIONS_H*/

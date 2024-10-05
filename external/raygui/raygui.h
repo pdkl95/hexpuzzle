@@ -669,6 +669,7 @@ RAYGUIAPI void GuiLock(void);                                   // Lock gui cont
 RAYGUIAPI void GuiUnlock(void);                                 // Unlock gui controls (global state)
 RAYGUIAPI bool GuiIsLocked(void);                               // Check if gui is locked (global state)
 RAYGUIAPI void GuiSetAlpha(float alpha);                        // Set gui controls alpha (global state), alpha goes from 0.0f to 1.0f
+RAYGUIAPI float GuiGetAlpha(void);
 RAYGUIAPI void GuiSetState(int state);                          // Set gui state (global state)
 RAYGUIAPI int GuiGetState(void);                                // Get gui state (global state)
 
@@ -1507,6 +1508,11 @@ void GuiSetAlpha(float alpha)
     else if (alpha > 1.0f) alpha = 1.0f;
 
     guiAlpha = alpha;
+}
+
+float GuiGetAlpha(void)
+{
+    return guiAlpha;
 }
 
 // Set gui state (global state)

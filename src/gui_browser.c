@@ -22,11 +22,30 @@
 #include "common.h"
 #include "gui_browser.h"
 
+Rectangle browser_panel_rect;
+
+char browser_panel_text[] = "Browser";
+
 void init_gui_browser(void)
 {
+    resize_gui_browser();
+}
+
+void resize_gui_browser(void)
+{
+    browser_panel_rect.width  = window_size.x * 0.7;
+    browser_panel_rect.height = window_size.y * 0.8;
+
+    MINVAR(browser_panel_rect.width,  400);
+    MINVAR(browser_panel_rect.height, 450);
+
+    browser_panel_rect.x = (window_size.x / 2) - (browser_panel_rect.width  / 2);
+    browser_panel_rect.y = (window_size.y / 2) - (browser_panel_rect.height / 2);
+
 }
 
 void draw_gui_browser(void)
 {
+    GuiPanel(browser_panel_rect, browser_panel_text);
 }
 
