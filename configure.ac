@@ -107,6 +107,7 @@ AC_CHECK_HEADERS([dirent.h], [], [ERR_NOT_FOUND([dirent.h])])
 AC_CHECK_HEADERS([libgen.h], [], [ERR_NOT_FOUND([libgen.h])])
 AC_CHECK_HEADERS([limits.h], [], [ERR_NOT_FOUND([limits.h])])
 AC_CHECK_HEADERS([math.h], [], [ERR_NOT_FOUND([math.h])])
+AC_CHECK_HEADERS([stdint.h], [], [ERR_NOT_FOUND([stdint.h])])
 AC_CHECK_HEADERS([stdlib.h], [], [ERR_NOT_FOUND([stdlib.h])])
 AC_CHECK_HEADERS([string.h], [], [ERR_NOT_FOUND([string.h])])
 AC_CHECK_HEADERS([unistd.h], [], [ERR_NOT_FOUND([unistd.h])])
@@ -123,8 +124,10 @@ dnl Checks for library functions.
 AC_FUNC_MALLOC
 AC_FUNC_MMAP
 AC_CHECK_FUNC([asprintf], [], [ERR_NOT_FOUND([asprintf])])
+AC_CHECK_FUNC([getline], [], [ERR_NOT_FOUND([getline])])
 AC_CHECK_FUNC([vasprintf], [], [ERR_NOT_FOUND([vasprintf])])
 AC_CHECK_FUNC([scandir], [], [ERR_NOT_FOUND([scandir])])
+AC_CHECK_FUNC([strcspn], [], [ERR_NOT_FOUND([strcspn])])
 AC_CHECK_FUNC([strpbrk], [], [ERR_NOT_FOUND([strpbrk])])
 AC_CHECK_FUNC([strsep], [], [ERR_NOT_FOUND([strsep])])
 AX_FUNC_GETOPT_LONG

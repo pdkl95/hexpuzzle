@@ -110,6 +110,8 @@ am_hexpuzzle_OBJECTS = src/hexpuzzle-anim_fsm.$(OBJEXT) \
 	src/hexpuzzle-collection.$(OBJEXT) \
 	src/hexpuzzle-color.$(OBJEXT) src/hexpuzzle-hex.$(OBJEXT) \
 	src/hexpuzzle-level.$(OBJEXT) src/hexpuzzle-logging.$(OBJEXT) \
+	src/hexpuzzle-nvdata.$(OBJEXT) \
+	src/hexpuzzle-nvdata_finished.$(OBJEXT) \
 	src/hexpuzzle-options.$(OBJEXT) \
 	src/hexpuzzle-raygui_impl.$(OBJEXT) \
 	src/hexpuzzle-raygui_file_dialog_impl.$(OBJEXT) \
@@ -337,13 +339,14 @@ hexpuzzle_LDADD = $(COMMON_PROG_LDADD)
 hexpuzzle_SOURCES = src/anim_fsm.h src/anim_fsm.c src/collection.h \
 	src/collection.c src/color.h src/color.c src/const.h src/hex.h \
 	src/hex.c src/level.h src/level.c src/logging.h src/logging.c \
-	src/options.h src/options.c src/raygui_impl.c \
-	src/raygui_file_dialog_impl.c src/raylib_helper.h \
-	src/raylib_helper.c src/shader.h src/shader.c src/tile.h \
-	src/tile.c src/tile_draw.h src/tile_draw.c src/tile_pos.h \
-	src/tile_pos.c src/util.h src/util.c src/win_anim.h \
-	src/win_anim.c src/common.h src/main.c \
-	external/raygui/raygui.h \
+	src/nvdata.h src/nvdata.c src/nvdata_finished.h \
+	src/nvdata_finished.c src/options.h src/options.c \
+	src/raygui_impl.c src/raygui_file_dialog_impl.c \
+	src/raylib_helper.h src/raylib_helper.c src/shader.h \
+	src/shader.c src/tile.h src/tile.c src/tile_draw.h \
+	src/tile_draw.c src/tile_pos.h src/tile_pos.c src/util.h \
+	src/util.c src/win_anim.h src/win_anim.c src/common.h \
+	src/main.c external/raygui/raygui.h \
 	external/raygui/gui_window_file_dialog.h \
 	external/zip-kuba/miniz.h external/zip-kuba/zip.h \
 	external/zip-kuba/zip.c
@@ -469,6 +472,10 @@ src/hexpuzzle-level.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-logging.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/hexpuzzle-nvdata.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
+src/hexpuzzle-nvdata_finished.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-options.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-raygui_impl.$(OBJEXT): src/$(am__dirstamp) \
@@ -521,6 +528,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-level.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-logging.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-nvdata.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-nvdata_finished.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-options.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raygui_file_dialog_impl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raygui_impl.Po@am__quote@
@@ -631,6 +640,34 @@ src/hexpuzzle-logging.obj: src/logging.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/logging.c' object='src/hexpuzzle-logging.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-logging.obj `if test -f 'src/logging.c'; then $(CYGPATH_W) 'src/logging.c'; else $(CYGPATH_W) '$(srcdir)/src/logging.c'; fi`
+
+src/hexpuzzle-nvdata.o: src/nvdata.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-nvdata.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-nvdata.Tpo -c -o src/hexpuzzle-nvdata.o `test -f 'src/nvdata.c' || echo '$(srcdir)/'`src/nvdata.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-nvdata.Tpo src/$(DEPDIR)/hexpuzzle-nvdata.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/nvdata.c' object='src/hexpuzzle-nvdata.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-nvdata.o `test -f 'src/nvdata.c' || echo '$(srcdir)/'`src/nvdata.c
+
+src/hexpuzzle-nvdata.obj: src/nvdata.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-nvdata.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-nvdata.Tpo -c -o src/hexpuzzle-nvdata.obj `if test -f 'src/nvdata.c'; then $(CYGPATH_W) 'src/nvdata.c'; else $(CYGPATH_W) '$(srcdir)/src/nvdata.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-nvdata.Tpo src/$(DEPDIR)/hexpuzzle-nvdata.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/nvdata.c' object='src/hexpuzzle-nvdata.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-nvdata.obj `if test -f 'src/nvdata.c'; then $(CYGPATH_W) 'src/nvdata.c'; else $(CYGPATH_W) '$(srcdir)/src/nvdata.c'; fi`
+
+src/hexpuzzle-nvdata_finished.o: src/nvdata_finished.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-nvdata_finished.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-nvdata_finished.Tpo -c -o src/hexpuzzle-nvdata_finished.o `test -f 'src/nvdata_finished.c' || echo '$(srcdir)/'`src/nvdata_finished.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-nvdata_finished.Tpo src/$(DEPDIR)/hexpuzzle-nvdata_finished.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/nvdata_finished.c' object='src/hexpuzzle-nvdata_finished.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-nvdata_finished.o `test -f 'src/nvdata_finished.c' || echo '$(srcdir)/'`src/nvdata_finished.c
+
+src/hexpuzzle-nvdata_finished.obj: src/nvdata_finished.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-nvdata_finished.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-nvdata_finished.Tpo -c -o src/hexpuzzle-nvdata_finished.obj `if test -f 'src/nvdata_finished.c'; then $(CYGPATH_W) 'src/nvdata_finished.c'; else $(CYGPATH_W) '$(srcdir)/src/nvdata_finished.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-nvdata_finished.Tpo src/$(DEPDIR)/hexpuzzle-nvdata_finished.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/nvdata_finished.c' object='src/hexpuzzle-nvdata_finished.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-nvdata_finished.obj `if test -f 'src/nvdata_finished.c'; then $(CYGPATH_W) 'src/nvdata_finished.c'; else $(CYGPATH_W) '$(srcdir)/src/nvdata_finished.c'; fi`
 
 src/hexpuzzle-options.o: src/options.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-options.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-options.Tpo -c -o src/hexpuzzle-options.o `test -f 'src/options.c' || echo '$(srcdir)/'`src/options.c
@@ -1168,6 +1205,7 @@ XXD ?= xxd
 win_border.frag.h: win_border.frag.glsl
 
 src/hexpuzzle-raygui_impl.$(OBJEXT): CFLAGS += -Wno-unused-parameter
+src/hexpuzzle-nvdata_finished.$(OBJEXT): CFLAGS += -Wno-unused-but-set-variable -Wno-unused-variable -Wno-incompatible-pointer-types
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

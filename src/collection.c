@@ -46,6 +46,26 @@ static void collection_alloc_level_names(collection_t *collection)
     collection->level_names = calloc(collection->level_name_count, sizeof(char *));
 }
 
+static void collection_update_id(collection_t *collection)
+{
+    SAFEFREE(collection->id);
+ \
+    char *p = NULL;
+
+    if (collection->is_zip) {
+        p = collection->filename;
+    } else {
+        collection->have_id = false;
+        printf("collection_update_id() SKIP!\n");
+        return;
+    }
+
+    collection->have_id = true;
+
+    asprintf(&collection->id, "%s", p);
+    printf("collection_update_id() -> \"%s\"\n", collection->id);
+}
+
 static collection_t *alloc_collection(void)
 {
     collection_t *collection = calloc(1, sizeof(collection_t));
@@ -53,8 +73,7 @@ static collection_t *alloc_collection(void)
     collection->level_name_count = INITIAL_LEVEL_NAME_COUNT;
     collection_alloc_level_names(collection);
 
-    //collection->name[0] = '\0';
-
+    collection->id = NULL;
     collection->dirpath = NULL;
     collection->filename = NULL;
     collection->levels = NULL;
@@ -71,6 +90,8 @@ static collection_t *alloc_collection(void)
 
     collection->changed = false;
     collection->is_zip = false;
+
+    collection_update_id(collection);
 
     return collection;
 }
@@ -143,6 +164,7 @@ collection_t *load_collection_dir(const char *dirpath)
 
         collection_scan_dir(collection);
         collection_update_level_names(collection);
+        collection_update_id(collection);
     } else {
         errmsg("Directory name is zero-length!");
     }
@@ -170,6 +192,9 @@ collection_t *load_collection_zip_file(const char *filename)
 
     collection_t *collection = create_collection();
     collection->filename = strdup(filename);
+    collection->is_zip = true;
+
+    collection_update_id(collection);
 
     struct zip_t *zip = zip_openwitherror(filename, 0, 'r', &errnum);
     if (NULL == zip) {
@@ -269,8 +294,6 @@ collection_t *load_collection_zip_file(const char *filename)
     }
     zip_close(zip);
 
-    collection->is_zip = true;
-
     collection_update_level_names(collection);
 
     return collection;
@@ -326,10 +349,11 @@ void destroy_collection(collection_t *collection)
 
         SAFEFREE(collection->dirpath);
         SAFEFREE(collection->filename);
+        SAFEFREE(collection->id);
     }
 }
 
-static const char *collection_path(collection_t *collection)
+const char *collection_path(collection_t *collection)
 {
     if (!collection->dirpath && !collection->filename) {
         return NULL;
@@ -344,7 +368,7 @@ static const char *collection_path(collection_t *collection)
     return concat_dir_and_filename(collection->dirpath, collection->filename);
 }
 
-static const char *collection_name(collection_t *collection)
+const char *collection_name(collection_t *collection)
 {
     const char *path = collection_path(collection);
     if (path) {
@@ -516,6 +540,7 @@ void collection_add_level(collection_t *collection, level_t *level)
     }
 
     level->collection = collection;
+    level_update_id(level);
 }
 
 bool collection_add_level_file(collection_t *collection, const char *filename)
@@ -532,6 +557,22 @@ bool collection_add_level_file(collection_t *collection, const char *filename)
                filename, collection_name(collection));
         return false;
     }
+}
+
+level_t *collection_find_level_by_id(collection_t *collection, const char *id)
+{
+    level_t *level = collection->levels;
+    while (level) {
+        if (level->id) {
+            if (0 == strcmp(id, level->id)) {
+                return level;
+            }
+        }
+
+        level = level->next;
+    }
+
+    return NULL;
 }
 
 level_t *collection_find_level_by_filename(collection_t *collection, const char *filename)

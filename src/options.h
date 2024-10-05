@@ -31,17 +31,20 @@
 #define OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH  800
 #define OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT 800
 
-#define OPTIONS_WINDOW_MIN_WIDTH  200
-#define OPTIONS_WINDOW_MIN_HEIGHT 150
-#define OPTIONS_WINDOW_MAX_WIDTH  1920
-#define OPTIONS_WINDOW_MAX_HEIGHT 1200
+#define OPTIONS_WINDOW_MIN_WIDTH  500
+#define OPTIONS_WINDOW_MIN_HEIGHT 500
+#define OPTIONS_WINDOW_MAX_WIDTH  (MAX(GetScreenWidth(),  OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH ))
+#define OPTIONS_WINDOW_MAX_HEIGHT (MAX(GetScreenHeight(), OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT))
 
 struct options {
+    bool safe_mode;
     bool verbose;
     bool wait_events;
     long max_fps;
     long initial_window_width;
     long initial_window_height;
+
+    char *nvdata_dir;
 
     char **extra_argv;
     int extra_argc;

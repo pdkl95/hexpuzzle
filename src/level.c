@@ -249,6 +249,8 @@ static level_t *alloc_level()
 
     level->name[0] = '\0';
 
+    level->have_id = false;
+
     level->id = NULL;
     level->filename = NULL;
     level->changed = false;
@@ -358,20 +360,37 @@ void level_reset(level_t *level)
     level_use_null_tile_pos(level);
 }
 
-level_t *create_level(void *collection)
+void level_update_id(level_t *level)
 {
-    collection_t *c = (collection_t *)collection;
+    SAFEFREE(level->id);
+
+    if (level->collection && level->collection->have_id) {
+        level->have_id = true;
+        asprintf(&level->id, "%s:%s", level->collection->id, level->name);
+
+        printf("level_update_id() -> \"%s\"\n", level->id);
+    } else {
+        level->have_id = false;
+    }
+}
+
+level_t *create_level(struct collection *collection)
+{
     level_t *level = alloc_level();
+
+    level->collection = collection;
 
     static int seq = 0;
     do {
         seq++;
         snprintf(level->name, NAME_MAXLEN, "%s-%d", LEVEL_DEFAULT_NAME, seq);
-    } while (c && collection_level_name_exists(c, level->name));
+    } while (collection && collection_level_name_exists(collection, level->name));
 
     level->radius = LEVEL_DEFAULT_RADIUS;
 
     level->changed = true;
+
+    level_update_id(level);
 
     return level;
 }
@@ -642,6 +661,8 @@ bool level_parse_string(level_t *level, const char *str)
     CMP(7, "begin_tiles");
 
     snprintf(level->name, NAME_MAXLEN, "%s", list.tokens[4]);
+    level_update_id(level);
+
     level->radius     = (int)strtol(list.tokens[6], NULL, 10);
     level->tile_count = (int)strtol(list.tokens[8], NULL, 10);
 
@@ -658,7 +679,6 @@ bool level_parse_string(level_t *level, const char *str)
 
         level_setup_tiles_from_serialized_strings(level, solved_addr, unsolved_addr, path, flags);
     }
-
 
     level_free_tokens(list);
     return true;
@@ -1577,6 +1597,8 @@ void level_win(level_t *level)
     }
 
     win_anim_start(level->win_anim);
+
+    level->finished = true;
 }
 
 void level_unwin(level_t *level)
@@ -1586,6 +1608,8 @@ void level_unwin(level_t *level)
     }
 
     win_anim_stop(level->win_anim);
+
+    level->finished = false;
 }
 
 bool level_update_fade(level_t *level)

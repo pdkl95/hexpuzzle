@@ -32,25 +32,27 @@ COMMON_PROG_LDADD = \
 hexpuzzle_CFLAGS = $(COMMON_PROG_CFLAGS)
 hexpuzzle_LDADD = $(COMMON_PROG_LDADD)
 
-hexpuzzle_SOURCES =                                \
-	src/anim_fsm.h        src/anim_fsm.c       \
-	src/collection.h      src/collection.c     \
-	src/color.h           src/color.c          \
-	src/const.h                                \
-	src/hex.h             src/hex.c            \
-	src/level.h           src/level.c          \
-	src/logging.h         src/logging.c        \
-	src/options.h         src/options.c        \
-	src/raygui_impl.c            		   \
-	src/raygui_file_dialog_impl.c              \
-	src/raylib_helper.h   src/raylib_helper.c  \
-	src/shader.h          src/shader.c         \
-	src/tile.h            src/tile.c           \
-	src/tile_draw.h       src/tile_draw.c      \
-	src/tile_pos.h        src/tile_pos.c       \
-	src/util.h            src/util.c           \
-	src/win_anim.h        src/win_anim.c       \
-	src/common.h          src/main.c
+hexpuzzle_SOURCES =                                    \
+	src/anim_fsm.h          src/anim_fsm.c         \
+	src/collection.h        src/collection.c       \
+	src/color.h             src/color.c            \
+	src/const.h                                    \
+	src/hex.h               src/hex.c              \
+	src/level.h             src/level.c            \
+	src/logging.h           src/logging.c          \
+	src/nvdata.h            src/nvdata.c           \
+	src/nvdata_finished.h   src/nvdata_finished.c  \
+	src/options.h           src/options.c          \
+	src/raygui_impl.c            		       \
+	src/raygui_file_dialog_impl.c                  \
+	src/raylib_helper.h     src/raylib_helper.c    \
+	src/shader.h            src/shader.c           \
+	src/tile.h              src/tile.c             \
+	src/tile_draw.h         src/tile_draw.c        \
+	src/tile_pos.h          src/tile_pos.c         \
+	src/util.h              src/util.c             \
+	src/win_anim.h          src/win_anim.c         \
+	src/common.h            src/main.c
 
 hexpuzzle_SOURCES +=             		  \
 	external/raygui/raygui.h  		  \
@@ -68,6 +70,7 @@ dist_EXTRA_hexpuzzle_SOURCES = \
 win_border.frag.h: win_border.frag.glsl
 
 src/hexpuzzle-raygui_impl.$(OBJEXT): CFLAGS += -Wno-unused-parameter
+src/hexpuzzle-nvdata_finished.$(OBJEXT): CFLAGS += -Wno-unused-but-set-variable -Wno-unused-variable -Wno-incompatible-pointer-types
 
 BUILT_SOURCES = \
 	$(dist_EXTRA_hexpuzzle_SOURCES)

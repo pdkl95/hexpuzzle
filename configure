@@ -4864,6 +4864,20 @@ fi
 
 done
 
+for ac_header in stdint.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "stdint.h" "ac_cv_header_stdint_h" "$ac_includes_default"
+if test "x$ac_cv_header_stdint_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_STDINT_H 1
+_ACEOF
+
+else
+  as_fn_error 1 "stdint.h not found" "$LINENO" 5
+fi
+
+done
+
 for ac_header in stdlib.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "stdlib.h" "ac_cv_header_stdlib_h" "$ac_includes_default"
@@ -5486,6 +5500,13 @@ else
   as_fn_error 1 "asprintf not found" "$LINENO" 5
 fi
 
+ac_fn_c_check_func "$LINENO" "getline" "ac_cv_func_getline"
+if test "x$ac_cv_func_getline" = xyes; then :
+
+else
+  as_fn_error 1 "getline not found" "$LINENO" 5
+fi
+
 ac_fn_c_check_func "$LINENO" "vasprintf" "ac_cv_func_vasprintf"
 if test "x$ac_cv_func_vasprintf" = xyes; then :
 
@@ -5498,6 +5519,13 @@ if test "x$ac_cv_func_scandir" = xyes; then :
 
 else
   as_fn_error 1 "scandir not found" "$LINENO" 5
+fi
+
+ac_fn_c_check_func "$LINENO" "strcspn" "ac_cv_func_strcspn"
+if test "x$ac_cv_func_strcspn" = xyes; then :
+
+else
+  as_fn_error 1 "strcspn not found" "$LINENO" 5
 fi
 
 ac_fn_c_check_func "$LINENO" "strpbrk" "ac_cv_func_strpbrk"

@@ -34,9 +34,11 @@
 #include "options.h"
 
 /* command line options */
-static char short_options[] = "F:H:t:wvVW:hj";
+static char short_options[] = "Cc:F:H:t:wvVW:hj";
 
 static struct option long_options[] = {
+    {   "no-config", required_argument, 0, 'C' },
+    {  "config-dir", required_argument, 0, 'c' },
     {         "fps", required_argument, 0, 'F' },
     {      "height", required_argument, 0, 'H' },
     {       "width", required_argument, 0, 'W' },
@@ -57,6 +59,11 @@ static char help_text[] =
     "A hex-tile based puzzle game.\n"
     "\n"
     "OPTIONS\n"
+    "  -c, --config-dir=DIRECTORY  Directory to save/load persistant data.\n"
+    "                              (default: ${XDG_CONFIG_HOME}/" PACKAGE_NAME "/\n"
+    "                                which is usually ~/.config/" PACKAGE_NAME "/)\n"
+    "  -C, --no-config             Skip loading of all config files (\"Save Mode\")\n"
+    "\n"
     "  -W, --width=NUMBER          Window width (default: " STR(OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH) ")\n"
     "  -H, --height=NUMBER         Window height (default: " STR(OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT) ")\n"
     "  -F, --fps=NUMBER            Maximum FPS (default: " STR(OPTIONS_DEFAULT_MAX_FPS) ")\n"
@@ -109,6 +116,9 @@ alloc_options(
     void
 ) {
     options_t *options = calloc(1, sizeof(options_t));
+
+    options->nvdata_dir = NULL;
+
     return options;
 }
 
@@ -117,7 +127,8 @@ free_options(
     options_t *options
 ) {
     if (options) {
-        free(options);
+        SAFEFREE(options->nvdata_dir);
+        FREE(options);
     }
 }
 
@@ -139,6 +150,21 @@ destroy_options(
     if (options) {
         free_options(options);
     }
+}
+
+static void
+options_set_string(
+    char **opt,
+    const char *src
+) {
+    assert_not_null(opt);
+    assert_not_null(src);
+
+    if (*opt != NULL) {
+        FREE(*opt);
+    }
+
+    *opt = strdup(src);
 }
 
 static void
@@ -179,6 +205,12 @@ options_set_defaults(
     options->max_fps               = OPTIONS_DEFAULT_MAX_FPS;
     options->initial_window_width  = OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH;
     options->initial_window_height = OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT;
+
+    options->safe_mode = false;
+
+    if (options->nvdata_dir) {
+        options->nvdata_dir = NULL;
+    }
 }
 
 bool
@@ -199,6 +231,14 @@ options_parse_args(
         }
 
         switch (c) {
+        case 'C':
+            options->safe_mode = true;
+            break;
+
+        case 'c':
+            options_set_string(&options->nvdata_dir, optarg);
+            break;
+
         case 'F':
             options_set_long(&options->max_fps, optarg);
             break;

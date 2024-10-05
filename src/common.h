@@ -54,6 +54,11 @@
 #define MAX(a,b) ((a) > (b) ? (a) : (b))
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 
+#define CLAMPVAR(var, minvalue, maxvalue) do { \
+        var = MAX(var, minvalue);              \
+        var = MIN(var, maxvalue);              \
+    } while(0)
+
 #define FREE(ptr) do { \
         free(ptr);     \
         ptr = NULL;    \

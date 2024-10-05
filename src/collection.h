@@ -30,7 +30,8 @@
 #include "level.h"
 
 struct collection {
-    //char name[NAME_MAXLEN];
+    char *id;
+    bool have_id;
 
     char *dirpath;
     char *filename;
@@ -54,6 +55,8 @@ struct collection {
 };
 typedef struct collection collection_t;
 
+extern collection_t *current_collection;
+
 collection_t *create_collection(void);
 collection_t *load_collection_dir(const char *dirpath);
 collection_t *load_collection_level_file(const char *filename);
@@ -66,10 +69,14 @@ void destroy_collection(collection_t *collection);
 void collection_clear_levels(collection_t *collection);
 void collection_scan_dir(collection_t *collection);
 
+const char *collection_path(collection_t *collection);
+const char *collection_name(collection_t *collection);
+
 bool collection_level_name_exists(collection_t *collection, const char *name);
 void collection_add_level(collection_t *collection, level_t *level);
 bool collection_add_level_file(collection_t *collection, const char *filename);
 
+level_t *collection_find_level_by_id(collection_t *collection, const char *id);
 level_t *collection_find_level_by_filename(collection_t *collection, const char *filename);
 void collection_update_level_names(collection_t *collection);
 

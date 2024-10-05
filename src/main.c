@@ -38,6 +38,9 @@
 #include "collection.h"
 #include "shader.h"
 
+#include "nvdata.h"
+#include "nvdata_finished.h"
+
 #if defined(PLATFORM_DESKTOP)
 /* good */
 #else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
@@ -46,6 +49,8 @@
 
 const char *progversion = PACKAGE_VERSION;
 const char *progname    = PACKAGE_NAME;
+
+#define DEBUG_RESIZE 1
 
 #define CONFIG_SUBDIR_NAME PACKAGE_NAME
 char *config_dir;
@@ -287,6 +292,18 @@ void open_game_file(const char *path)
     }
 }
 
+static void reset_window_to_center(void)
+{
+    SetWindowSize(OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH,
+                  OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT);
+
+    int m = GetCurrentMonitor();
+    int x = (GetMonitorWidth(m)  / 2) - (OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH  / 2);
+    int y = (GetMonitorHeight(m) / 2) - (OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT / 2);
+
+    SetWindowPosition(x, y);
+}
+
 #define print_popup(...) {                                          \
         popup_text = TextFormat(__VA_ARGS__);                       \
         popup_text_active_until = GetTime() + popup_text_fade_time; \
@@ -419,6 +436,10 @@ handle_events(
         }
     }
 
+    if (IsKeyPressed(KEY_R) && is_any_shift_down()) {
+        reset_window_to_center();
+    }
+
     if (IsKeyPressed(KEY_F11)) {
         //ToggleFullscreen();
         ToggleBorderlessWindowed();
@@ -511,11 +532,17 @@ handle_events(
 
     if (current_level) {
         if (level_check(current_level)) {
-            level_finished = true;
-            level_win(current_level);
+            if (!level_finished) {
+                level_finished = true;
+                level_win(current_level);
+                nvdata_mark_finished(current_level);
+            }
         } else {
-            level_finished = false;
-            level_unwin(current_level);
+            if (level_finished) {
+                level_finished = false;
+                level_unwin(current_level);
+                nvdata_unmark_finished(current_level);
+            }
         }
     } else {
         level_finished = false;
@@ -1295,6 +1322,7 @@ void gfx_init(void)
     SetWindowMaxSize(OPTIONS_WINDOW_MAX_WIDTH,
                      OPTIONS_WINDOW_MAX_HEIGHT);
 
+
     SetExitKey(KEY_NULL); // handle ESC ourself
     SetTargetFPS(options->max_fps);
     if (options->verbose) {
@@ -1365,14 +1393,19 @@ static void game_init(void)
         }
     }
 
+    init_nvdata();
+
     if (options->extra_argc == 1) {
         char *filename = options->extra_argv[0];
         open_game_file(filename);
     }
+
+    load_nvdata();
 }
 
 static void game_cleanup(void)
 {
+    save_nvdata();
 }
 
 int

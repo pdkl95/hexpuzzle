@@ -46,6 +46,8 @@ typedef void (*level_fade_finished_cb_t)(struct level *level, void *data);
 
 struct level {
     char *id;
+    bool have_id;
+
     char name[NAME_MAXLEN];
     char name_backup[NAME_MAXLEN];
 
@@ -124,9 +126,11 @@ int hex_axial_to_idx(hex_axial_t axial);
 tile_pos_t *level_get_solved_tile_pos(level_t *level,  hex_axial_t axial);
 tile_pos_t *level_get_unsolved_tile_pos(level_t *level,  hex_axial_t axial);
 
-level_t *create_level(void *collection);
+level_t *create_level(struct collection *collection);
 void destroy_level(level_t *level);
 void level_reset(level_t *level);
+
+void level_update_id(level_t *level);
 
 bool level_eq_tiles(level_t *level, level_t *other);
 void level_sort_tiles(level_t *level);
