@@ -1206,17 +1206,19 @@ static void draw_cartesian_grid(bool draw_labels)
         .y = window_size.y / 2.0
     };
 
-    rlTranslatef(hwin.x,
-                 hwin.y,
-                 0.0);
+    if (options->animate_bg) {
+        rlTranslatef(hwin.x,
+                     hwin.y,
+                     0.0);
 
-    float rot_x = 2.0 * sinf(current_time / 10.0);
-    //float rot_x = rot * (360.0 / TAU) * level->fade_rotate_speed;
-    rlRotatef(rot_x, 0.0, 0.0, 1.0);
+        float rot_x = 2.0 * sinf(current_time / 10.0);
+        //float rot_x = rot * (360.0 / TAU) * level->fade_rotate_speed;
+        rlRotatef(rot_x, 0.0, 0.0, 1.0);
 
-    rlTranslatef(-hwin.x,
-                 -hwin.y,
-                 0.0);
+        rlTranslatef(-hwin.x,
+                     -hwin.y,
+                     0.0);
+    }
 
     Color minor_color = ColorAlpha(purple, 0.5);
 
@@ -1236,7 +1238,7 @@ static void draw_cartesian_grid(bool draw_labels)
     static int dir_lerp_frames = 0;
 #define TOTAL_LERP_FRAMES options->max_fps
 
-    if (!options->wait_events) {
+    if (!options->wait_events && options->animate_bg) {
         if ((frame_count % (3 * options->max_fps)) == 0) {
             oldspeed = speed;
             newspeed = 1.0 + (2.0 * drand48());

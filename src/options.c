@@ -37,16 +37,20 @@
 static char short_options[] = "Cc:F:H:t:wvVW:hj";
 
 static struct option long_options[] = {
-    {   "no-config", required_argument, 0, 'C' },
-    {  "config-dir", required_argument, 0, 'c' },
-    {         "fps", required_argument, 0, 'F' },
-    {      "height", required_argument, 0, 'H' },
-    {       "width", required_argument, 0, 'W' },
-    { "wait-events",       no_argument, 0, 'w' },
-    {     "verbose",       no_argument, 0, 'v' },
-    {     "version",       no_argument, 0, 'V' },
-    {        "help",       no_argument, 0, 'h' },
-    {             0,                 0, 0,  0  }
+    {      "no-config", required_argument, 0, 'C' },
+    {     "config-dir", required_argument, 0, 'c' },
+    {            "fps", required_argument, 0, 'F' },
+    {         "height", required_argument, 0, 'H' },
+    {          "width", required_argument, 0, 'W' },
+    {     "animate-bg",       no_argument, 0, 'b' },
+    {  "no-animate-bg",       no_argument, 0, 'B' },
+    {    "animate-win",       no_argument, 0, 'i' },
+    { "no-animate-win",       no_argument, 0, 'I' },
+    {    "wait-events",       no_argument, 0, 'w' },
+    {        "verbose",       no_argument, 0, 'v' },
+    {        "version",       no_argument, 0, 'V' },
+    {           "help",       no_argument, 0, 'h' },
+    {                0,                 0, 0,  0  }
 };
 
 static char usage_args[] = "[<file>." LEVEL_FILENAME_EXT  " | <file>." COLLECTION_FILENAME_EXT "]";
@@ -63,6 +67,11 @@ static char help_text[] =
     "                              (default: ${XDG_CONFIG_HOME}/" PACKAGE_NAME "/\n"
     "                                which is usually ~/.config/" PACKAGE_NAME "/)\n"
     "  -C, --no-config             Skip loading of all config files (\"Save Mode\")\n"
+    "\n"
+    "      --animate-bg\n"
+    "   --no-animate-bg\n"
+    "      --animate-win\n"
+    "   --no-animate-win\n"
     "\n"
     "  -W, --width=NUMBER          Window width (default: " STR(OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH) ")\n"
     "  -H, --height=NUMBER         Window height (default: " STR(OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT) ")\n"
@@ -202,6 +211,8 @@ options_set_defaults(
 
     options->verbose               = OPTIONS_DEFAULT_VERBOSE;
     options->wait_events           = OPTIONS_DEFAULT_WAIT_EVENTS;
+    options->animate_bg            = OPTIONS_DEFAULT_ANIMATE_BG;
+    options->animate_win           = OPTIONS_DEFAULT_ANIMATE_WIN;
     options->max_fps               = OPTIONS_DEFAULT_MAX_FPS;
     options->initial_window_width  = OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH;
     options->initial_window_height = OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT;
@@ -249,6 +260,22 @@ options_parse_args(
 
         case 'H':
             options_set_long(&options->initial_window_height, optarg);
+            break;
+
+        case 'b':
+            options->animate_bg = true;
+            break;
+
+        case 'B':
+            options->animate_bg = false;
+            break;
+
+        case 'i':
+            options->animate_win = true;
+            break;
+
+        case 'I':
+            options->animate_win = false;
             break;
 
         case 'w':
