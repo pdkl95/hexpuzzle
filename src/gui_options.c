@@ -98,8 +98,13 @@ void resize_gui_options(void)
 
 void draw_gui_graphics_options(void)
 {
+    int prev_align = GuiGetStyle(TOGGLE, TEXT_ALIGNMENT);
+    GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
+
     GuiToggle(options_anim_bg_rect,  options_anim_bg_text,  &options->animate_bg);
     GuiToggle(options_anim_win_rect, options_anim_win_text, &options->animate_win);
+
+    GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, prev_align);
 }
 
 void draw_gui_data_options(void)

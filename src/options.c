@@ -217,6 +217,9 @@ options_set_defaults(
     options->initial_window_width  = OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH;
     options->initial_window_height = OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT;
 
+    options->load_state_animate_bg  = true;
+    options->load_state_animate_win = true;
+
     options->safe_mode = false;
 
     if (options->nvdata_dir) {
@@ -264,18 +267,22 @@ options_parse_args(
 
         case 'b':
             options->animate_bg = true;
+            options->load_state_animate_bg = false;
             break;
 
         case 'B':
             options->animate_bg = false;
+            options->load_state_animate_bg = false;
             break;
 
         case 'i':
             options->animate_win = true;
+            options->load_state_animate_win = false;
             break;
 
         case 'I':
             options->animate_win = false;
+            options->load_state_animate_win = false;
             break;
 
         case 'w':

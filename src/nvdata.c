@@ -24,6 +24,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <stdint.h>
+#include <arpa/inet.h>
 
 #include "options.h"
 #include "nvdata.h"
@@ -80,13 +81,48 @@ static void find_nvdata_dir(void)
     }
 }
 
+/* increment when struct nvdata_state changes to invalidate
+   any old (incompatable) state file loading */
+uint16_t state_version = 2;
+
 struct nvdata_state {
-    int32_t window_size_width;
-    int32_t window_size_height;
-    int32_t window_position_x;
-    int32_t window_position_y;
+    uint16_t window_size_width;
+    uint16_t window_size_height;
+    uint16_t window_position_x;
+    uint16_t window_position_y;
+
+    uint16_t animate_bg;
+    uint16_t animate_win;
 };
 typedef struct nvdata_state nvdata_state_t;
+
+static nvdata_state_t nvdata_state_hton(nvdata_state_t hstate)
+{
+    nvdata_state_t nstate;
+
+    nstate.window_size_width  = htons(hstate.window_size_width);
+    nstate.window_size_height = htons(hstate.window_size_height);
+    nstate.window_position_x  = htons(hstate.window_position_x);
+    nstate.window_position_y  = htons(hstate.window_position_y);
+    nstate.animate_bg         = htons(hstate.animate_bg);
+    nstate.animate_win        = htons(hstate.animate_win);
+
+    return nstate;
+}
+
+static nvdata_state_t nvdata_state_ntoh(nvdata_state_t nstate)
+{
+    nvdata_state_t hstate;
+
+    hstate.window_size_width  = ntohs(nstate.window_size_width);
+    hstate.window_size_height = ntohs(nstate.window_size_height);
+    hstate.window_position_x  = ntohs(nstate.window_position_x);
+    hstate.window_position_y  = ntohs(nstate.window_position_y);
+    hstate.animate_bg         = ntohs(nstate.animate_bg);
+    hstate.animate_win        = ntohs(nstate.animate_win);
+
+    return hstate;
+}
 
 static void nvdata_limit_state(nvdata_state_t *state)
 {
@@ -106,18 +142,38 @@ static void load_nvdata_program_state(void)
         return;
     }
 
-    int size;
-    unsigned char *data = LoadFileData(nvdata_state_file_path, &size);
-    if (size != sizeof(nvdata_state_t)) {
-        errmsg("Ignoring state file \"%s\" - size was %d bytes; expected %d bytes.",
-               nvdata_state_file_path, size, sizeof(nvdata_state_t));
+    FILE *f = fopen(nvdata_state_file_path, "r");
+    if (NULL == f) {
+        errmsg("error opening \"%s\": %s", nvdata_state_file_path, strerror(errno));
         return;
     }
 
-    nvdata_state_t state;
-    memcpy(&state, data, sizeof(nvdata_state_t));
-    UnloadFileData(data);
+    uint16_t nfile_state_version;
+    size_t rdsize = sizeof(nfile_state_version);
+    if (rdsize != fread(&nfile_state_version, 1, rdsize, f)) {
+        errmsg("fread(state_version) failed: %s", strerror(errno));
+        fclose(f);
+        return;
+    }
 
+    uint16_t file_state_version = ntohs(nfile_state_version);
+
+    if (file_state_version != state_version) {
+        warnmsg("Cannot load old version %d state file \"%s\"; expected version %d",
+                file_state_version, nvdata_state_file_path, state_version);
+        fclose(f);
+        return;
+    }
+
+    nvdata_state_t nstate;
+    rdsize = sizeof(nstate);
+    if (rdsize != fread(&nstate, 1, rdsize, f)) {
+        errmsg("fread(state) failed: %s", strerror(errno));
+        fclose(f);
+        return;
+    }
+
+    nvdata_state_t state = nvdata_state_ntoh(nstate);
     nvdata_limit_state(&state);
 
     SetWindowPosition( state.window_position_x,
@@ -125,32 +181,62 @@ static void load_nvdata_program_state(void)
 
     SetWindowSize( state.window_size_width,
                    state.window_size_height );
+
+    if (options->load_state_animate_bg) {
+        options->animate_bg  = state.animate_bg;
+    }
+    if (options->load_state_animate_win) {
+        options->animate_win = state.animate_win;
+    }
 }
 
 static void save_nvdata_program_state(void)
 {
-    nvdata_state_t state;
+    nvdata_state_t hstate;
 
     Vector2 wpos = GetWindowPosition();
-    state.window_position_x = (int32_t)wpos.x;
-    state.window_position_y = (int32_t)wpos.y;
+    hstate.window_position_x = (int32_t)wpos.x;
+    hstate.window_position_y = (int32_t)wpos.y;
 
-    state.window_size_width  = GetScreenWidth();
-    state.window_size_height = GetScreenHeight();
+    hstate.window_size_width  = GetScreenWidth();
+    hstate.window_size_height = GetScreenHeight();
 
-    nvdata_limit_state(&state);
+    hstate.animate_bg  = options->animate_bg;
+    hstate.animate_win = options->animate_win;
+
+    nvdata_limit_state(&hstate);
+    nvdata_state_t nstate = nvdata_state_hton(hstate);
 
     if (options->verbose) {
         infomsg("Saving program state to \"%s\": ", nvdata_state_file_path);
     }
-    bool saveok = SaveFileData(nvdata_state_file_path, &state, sizeof(state));
-    if (saveok) {
-        if (options->verbose) {
-            infomsg("Successfully saved state to \"%s\"", nvdata_state_file_path);
-        }
-    } else {
-        errmsg("Failed to save state to \"%s\"", nvdata_state_file_path);
+
+    FILE *f = fopen(nvdata_state_file_path, "w");
+    if (NULL == f) {
+        errmsg("Failed to save state to \"%s\": %s",
+               nvdata_state_file_path, strerror(errno));
+        return;
     }
+
+    uint16_t nstate_version = htons(state_version);
+    size_t wrsize = sizeof(nstate_version);
+    if (wrsize != fwrite(&nstate_version, 1, wrsize, f)) {
+        errmsg("fwrite(state_version) failed: %s", strerror(errno));
+        goto cleanup;
+    }
+
+    wrsize = sizeof(nstate);
+    if (wrsize != fwrite(&nstate, 1, wrsize, f)) {
+        errmsg("fwrite(state) failed: %s", strerror(errno));
+        goto cleanup;
+    }
+
+    if (options->verbose) {
+        infomsg("Successfully saved state to \"%s\"", nvdata_state_file_path);
+    }
+
+  cleanup:
+    fclose(f);
 }
 
 static void load_nvdata_game_metadata(void)

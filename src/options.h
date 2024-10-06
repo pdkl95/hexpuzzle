@@ -42,8 +42,11 @@ struct options {
     bool safe_mode;
     bool verbose;
     bool wait_events;
+
     bool animate_bg;
     bool animate_win;
+    bool load_state_animate_bg;
+    bool load_state_animate_win;
 
     long max_fps;
     long initial_window_width;

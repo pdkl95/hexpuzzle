@@ -111,6 +111,7 @@ AC_CHECK_HEADERS([stdint.h], [], [ERR_NOT_FOUND([stdint.h])])
 AC_CHECK_HEADERS([stdlib.h], [], [ERR_NOT_FOUND([stdlib.h])])
 AC_CHECK_HEADERS([string.h], [], [ERR_NOT_FOUND([string.h])])
 AC_CHECK_HEADERS([unistd.h], [], [ERR_NOT_FOUND([unistd.h])])
+AC_CHECK_HEADERS([arpa/inet.h], [], [ERR_NOT_FOUND([arpa/inet/h.h])])
 AC_HEADER_ASSERT
 AC_HEADER_DIRENT
 

@@ -3,6 +3,9 @@
 /* Defined to 1 when --enable-debug is active */
 #undef DEBUG_BUILD
 
+/* Define to 1 if you have the <arpa/inet.h> header file. */
+#undef HAVE_ARPA_INET_H
+
 /* Define to 1 if you have the <dirent.h> header file, and it defines `DIR'.
    */
 #undef HAVE_DIRENT_H
