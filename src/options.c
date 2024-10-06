@@ -49,7 +49,7 @@ static struct option long_options[] = {
     {             0,                 0, 0,  0  }
 };
 
-static char usage_args[] = "";
+static char usage_args[] = "[<file>." LEVEL_FILENAME_EXT  " | <file>." COLLECTION_FILENAME_EXT "]";
 
 static char help_text[] =
     "\n"
