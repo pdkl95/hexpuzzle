@@ -106,6 +106,7 @@
 
 #define NVDATA_STATE_FILE_NAME "state.dat"
 #define NVDATA_FINISHED_LEVEL_FILE_NAME "finished_levels.dat"
+#define NVDATA_DEFAULT_BROWSE_PATH_NAME "levels"
 
 #endif /*CONST_H*/
 

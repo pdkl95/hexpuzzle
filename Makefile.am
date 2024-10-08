@@ -8,11 +8,19 @@ AM_CPPFLAGS = -Wall -Wextra
 
 XXD ?= xxd
 
+CLASSICS_LEVELS = \
+	levels/classics/1-red.hexlevelpack \
+	levels/classics/2-blue.hexlevelpack \
+	levels/classics/3-green.hexlevelpack \
+	levels/classics/4-yellow.hexlevelpack
+
+
 EXTRA_DIST = \
 	README.md \
 	lib/gnugetopt.h \
 	lib/getopt.c \
 	lib/getopt1.c \
+	$(CLASSICS_LEVELS) \
 	shaders/win_border.frag.glsl
 
 bin_PROGRAMS = hexpuzzle
@@ -34,6 +42,7 @@ hexpuzzle_LDADD = $(COMMON_PROG_LDADD)
 
 hexpuzzle_SOURCES =                                    \
 	src/anim_fsm.h          src/anim_fsm.c         \
+	src/classics.h          src/classics.c         \
 	src/collection.h        src/collection.c       \
 	src/color.h             src/color.c            \
 	src/const.h                                    \
@@ -64,12 +73,19 @@ hexpuzzle_SOURCES +=             		  \
 	external/zip-kuba/zip.c
 
 dist_EXTRA_hexpuzzle_SOURCES = \
+	src/classics_levels.h  \
 	shaders/win_border.frag.h
 
 .glsl.h:
 	$(AM_V_GEN)$(XXD) -i $^ > $@
 
 win_border.frag.h: win_border.frag.glsl
+
+src/classics_levels.h: $(CLASSICS_LEVELS)
+	$(AM_V_at)rm -f $@
+	$(AM_V_GEN)cd $(top_srcdir) && for file in $^ ; do \
+	    $(XXD) -i "$${file}" >> $@ ; \
+	done
 
 src/hexpuzzle-raygui_impl.$(OBJEXT): CFLAGS += -Wno-unused-parameter
 src/hexpuzzle-nvdata_finished.$(OBJEXT): CFLAGS += -Wno-unused-but-set-variable -Wno-unused-variable -Wno-incompatible-pointer-types

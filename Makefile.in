@@ -107,6 +107,7 @@ am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__dirstamp = $(am__leading_dot)dirstamp
 am_hexpuzzle_OBJECTS = src/hexpuzzle-anim_fsm.$(OBJEXT) \
+	src/hexpuzzle-classics.$(OBJEXT) \
 	src/hexpuzzle-collection.$(OBJEXT) \
 	src/hexpuzzle-color.$(OBJEXT) \
 	src/hexpuzzle-gui_browser.$(OBJEXT) \
@@ -317,11 +318,18 @@ AUTOMAKE_OPTIONS = subdir-objects
 SUFFIXES = .glsl
 ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -Wall -Wextra
+CLASSICS_LEVELS = \
+	levels/classics/1-red.hexlevelpack \
+	levels/classics/2-blue.hexlevelpack \
+	levels/classics/3-green.hexlevelpack \
+	levels/classics/4-yellow.hexlevelpack
+
 EXTRA_DIST = \
 	README.md \
 	lib/gnugetopt.h \
 	lib/getopt.c \
 	lib/getopt1.c \
+	$(CLASSICS_LEVELS) \
 	shaders/win_border.frag.glsl
 
 COMMON_PROG_CFLAGS = \
@@ -338,13 +346,14 @@ COMMON_PROG_LDADD = \
 
 hexpuzzle_CFLAGS = $(COMMON_PROG_CFLAGS)
 hexpuzzle_LDADD = $(COMMON_PROG_LDADD)
-hexpuzzle_SOURCES = src/anim_fsm.h src/anim_fsm.c src/collection.h \
-	src/collection.c src/color.h src/color.c src/const.h \
-	src/gui_browser.h src/gui_browser.c src/gui_options.h \
-	src/gui_options.c src/hex.h src/hex.c src/level.h src/level.c \
-	src/logging.h src/logging.c src/nvdata.h src/nvdata.c \
-	src/nvdata_finished.h src/nvdata_finished.c src/options.h \
-	src/options.c src/raygui_impl.c src/raygui_file_dialog_impl.c \
+hexpuzzle_SOURCES = src/anim_fsm.h src/anim_fsm.c src/classics.h \
+	src/classics.c src/collection.h src/collection.c src/color.h \
+	src/color.c src/const.h src/gui_browser.h src/gui_browser.c \
+	src/gui_options.h src/gui_options.c src/hex.h src/hex.c \
+	src/level.h src/level.c src/logging.h src/logging.c \
+	src/nvdata.h src/nvdata.c src/nvdata_finished.h \
+	src/nvdata_finished.c src/options.h src/options.c \
+	src/raygui_impl.c src/raygui_file_dialog_impl.c \
 	src/raylib_helper.h src/raylib_helper.c src/shader.h \
 	src/shader.c src/tile.h src/tile.c src/tile_draw.h \
 	src/tile_draw.c src/tile_pos.h src/tile_pos.c src/util.h \
@@ -354,6 +363,7 @@ hexpuzzle_SOURCES = src/anim_fsm.h src/anim_fsm.c src/collection.h \
 	external/zip-kuba/miniz.h external/zip-kuba/zip.h \
 	external/zip-kuba/zip.c
 dist_EXTRA_hexpuzzle_SOURCES = \
+	src/classics_levels.h  \
 	shaders/win_border.frag.h
 
 BUILT_SOURCES = \
@@ -465,6 +475,8 @@ src/$(DEPDIR)/$(am__dirstamp):
 	@: > src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-anim_fsm.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/hexpuzzle-classics.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-collection.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-color.$(OBJEXT): src/$(am__dirstamp) \
@@ -529,6 +541,7 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@external/zip-kuba/$(DEPDIR)/hexpuzzle-zip.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-anim_fsm.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-classics.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-collection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-color.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-gui_browser.Po@am__quote@
@@ -579,6 +592,20 @@ src/hexpuzzle-anim_fsm.obj: src/anim_fsm.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/anim_fsm.c' object='src/hexpuzzle-anim_fsm.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-anim_fsm.obj `if test -f 'src/anim_fsm.c'; then $(CYGPATH_W) 'src/anim_fsm.c'; else $(CYGPATH_W) '$(srcdir)/src/anim_fsm.c'; fi`
+
+src/hexpuzzle-classics.o: src/classics.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-classics.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-classics.Tpo -c -o src/hexpuzzle-classics.o `test -f 'src/classics.c' || echo '$(srcdir)/'`src/classics.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-classics.Tpo src/$(DEPDIR)/hexpuzzle-classics.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/classics.c' object='src/hexpuzzle-classics.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-classics.o `test -f 'src/classics.c' || echo '$(srcdir)/'`src/classics.c
+
+src/hexpuzzle-classics.obj: src/classics.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-classics.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-classics.Tpo -c -o src/hexpuzzle-classics.obj `if test -f 'src/classics.c'; then $(CYGPATH_W) 'src/classics.c'; else $(CYGPATH_W) '$(srcdir)/src/classics.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-classics.Tpo src/$(DEPDIR)/hexpuzzle-classics.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/classics.c' object='src/hexpuzzle-classics.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-classics.obj `if test -f 'src/classics.c'; then $(CYGPATH_W) 'src/classics.c'; else $(CYGPATH_W) '$(srcdir)/src/classics.c'; fi`
 
 src/hexpuzzle-collection.o: src/collection.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-collection.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-collection.Tpo -c -o src/hexpuzzle-collection.o `test -f 'src/collection.c' || echo '$(srcdir)/'`src/collection.c
@@ -1240,6 +1267,12 @@ XXD ?= xxd
 	$(AM_V_GEN)$(XXD) -i $^ > $@
 
 win_border.frag.h: win_border.frag.glsl
+
+src/classics_levels.h: $(CLASSICS_LEVELS)
+	$(AM_V_at)rm -f $@
+	$(AM_V_GEN)cd $(top_srcdir) && for file in $^ ; do \
+	    $(XXD) -i "$${file}" >> $@ ; \
+	done
 
 src/hexpuzzle-raygui_impl.$(OBJEXT): CFLAGS += -Wno-unused-parameter
 src/hexpuzzle-nvdata_finished.$(OBJEXT): CFLAGS += -Wno-unused-but-set-variable -Wno-unused-variable -Wno-incompatible-pointer-types

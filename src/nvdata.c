@@ -33,6 +33,20 @@
 char *local_config_dir = NULL;
 char *nvdata_dir = NULL;
 char *nvdata_state_file_path = NULL;
+char *nvdata_default_browse_path = NULL;
+
+static void find_or_create_dir(const char *path, const char *desc)
+{
+    if (DirectoryExists(path)) {
+        infomsg("Found %s dir: \"%s\"", desc, path);
+    } else {
+        warnmsg("Creating %s dir: \"%s\"", desc, path);
+
+        if (-1 == mkdir(path, CREATE_DIR_MODE)) {
+            errmsg("Error creating \"%s\" in mkdir(2): %s", path, strerror(errno));
+        }
+    }
+}
 
 static void find_local_config_dir(void)
 {
@@ -70,15 +84,7 @@ static void find_nvdata_dir(void)
 
     asprintf(&nvdata_dir, "%s/%s", local_config_dir, PACKAGE_NAME);
 
-    if (DirectoryExists(nvdata_dir)) {
-        infomsg("Found local config dir: \"%s\"", nvdata_dir);
-    } else {
-        warnmsg("Creating config storage dir: \"%s\"", nvdata_dir);
-
-        if (-1 == mkdir(nvdata_dir, CREATE_DIR_MODE)) {
-            errmsg("Error in mkdir(2): %s", strerror(errno));
-        }
-    }
+    find_or_create_dir(nvdata_dir, "local storage");
 }
 
 /* increment when struct nvdata_state changes to invalidate
@@ -270,6 +276,13 @@ void init_nvdata(void)
         asprintf(&nvdata_state_finished_levels_file_path, "%s/%s",
                  nvdata_dir, NVDATA_FINISHED_LEVEL_FILE_NAME);
     }
+
+    if (nvdata_default_browse_path == NULL) {
+        asprintf(&nvdata_default_browse_path, "%s/%s",
+                 nvdata_dir, NVDATA_DEFAULT_BROWSE_PATH_NAME);
+    }
+
+    find_or_create_dir(nvdata_default_browse_path, "level file");
 
 
     init_nvdata_finished();

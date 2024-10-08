@@ -42,8 +42,6 @@ int active_tab;
 
 void init_gui_options(void)
 {
-    /* options_tabbar_text[0] = GuiIconText(ICON_MONITOR, "Graphics"); */
-    /* options_tabbar_text[1] = GuiIconText(ICON_SUITCASE, "Data"); */
     options_tabbar_text[0] = "Graphics";
     options_tabbar_text[1] = "Data";
 

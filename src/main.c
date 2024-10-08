@@ -1484,9 +1484,9 @@ static void game_init(void)
         }
     }
 \
-    init_gui_browser();
     init_gui_options();
     init_nvdata();
+    init_gui_browser();
 
     if (options->extra_argc == 1) {
         char *filename = options->extra_argv[0];
