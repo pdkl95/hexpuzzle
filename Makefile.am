@@ -68,9 +68,8 @@ hexpuzzle_SOURCES =                                    \
 hexpuzzle_SOURCES +=             		  \
 	external/raygui/raygui.h  		  \
 	external/raygui/gui_window_file_dialog.h  \
-	external/zip-kuba/miniz.h 		  \
-	external/zip-kuba/zip.h  		  \
-	external/zip-kuba/zip.c
+	external/cJSON/cJSON.c                    \
+	external/cJSON/cJSON.h
 
 dist_EXTRA_hexpuzzle_SOURCES = \
 	src/classics_levels.h  \

@@ -22,6 +22,8 @@
 #ifndef LEVEL_H
 #define LEVEL_H
 
+#include "cJSON/cJSON.h"
+
 #include "const.h"
 
 #define IS_LEVEL_FILENAME(filename)                             \
@@ -170,6 +172,7 @@ void level_set_file_path(level_t *level, const char *path);
 void level_save_to_file(level_t *level, const char *dirpath);
 void level_save_to_file_if_changed(level_t *level, const char *dirpath);
 void level_save(level_t *level);
+cJSON *level_json(level_t *level);
 void level_serialize(level_t *level, FILE *f);
 
 tile_pos_t *level_find_solved_neighbor_tile_pos(level_t *level, tile_pos_t *tile, hex_direction_t section);

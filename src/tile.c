@@ -19,6 +19,8 @@
  *                                                                          *
  ****************************************************************************/
 
+#include "cJSON/cJSON.h"
+
 #include "common.h"
 #include "raylib_helper.h"
 #include "tile.h"
@@ -267,6 +269,70 @@ path_int_t tile_count_path_types(tile_t *tile)
     }
 
     return rv;
+}
+
+static cJSON *tile_json_addr(hex_axial_t addr)
+{
+    cJSON *json = cJSON_CreateObject();
+
+    if (cJSON_AddNumberToObject(json, "q", addr.q) == NULL) {
+        goto json_addr_err;
+    }
+
+
+    if (cJSON_AddNumberToObject(json, "r", addr.r) == NULL) {
+        goto json_addr_err;
+    }
+
+    return json;
+
+  json_addr_err:
+    cJSON_Delete(json);
+    return NULL;
+}
+
+cJSON *tile_json(tile_t *tile)
+{
+    cJSON *json = cJSON_CreateObject();
+
+    cJSON   *solved_addr = tile_json_addr(tile->solved_pos->position);
+    if (!solved_addr) {
+        goto json_tile_err;
+    }
+    if (!cJSON_AddItemToObject(json, "solved", solved_addr)) {
+        goto json_tile_err;
+    }
+
+    cJSON *unsolved_addr = tile_json_addr(tile->unsolved_pos->position); \
+    if (!unsolved_addr) {
+        goto json_tile_err;
+    }
+    if (!cJSON_AddItemToObject(json, "unsolved", unsolved_addr)) {
+        goto json_tile_err;
+    }
+
+    cJSON *path = cJSON_CreateIntArray((const int *)tile->path, 6);
+    if (!cJSON_AddItemToObject(json, "path", path)) {
+        goto json_tile_err;
+    }
+
+    if (cJSON_AddBoolToObject(json, "enabled", tile->enabled) == NULL) {
+        goto json_tile_err;
+    }
+
+    if (cJSON_AddBoolToObject(json, "hidden", tile->hidden) == NULL) {
+        goto json_tile_err;
+    }
+
+    if (cJSON_AddBoolToObject(json, "fixed", tile->fixed) == NULL) {
+        goto json_tile_err;
+    }
+
+    return json;
+
+  json_tile_err:
+    cJSON_Delete(json);
+    return NULL;
 }
 
 void tile_serialize(tile_t *tile, FILE *f)

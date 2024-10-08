@@ -28,13 +28,13 @@
 #include <unistd.h>
 #include <dirent.h>
 
+#include "cJSON/cJSON.h"
+
 #include "sglib/sglib.h"
 
 #include "options.h"
 #include "raylib_helper.h"
 #include "collection.h"
-
-#include "zip-kuba/zip.h"
 
 //#define INITIAL_LEVEL_NAME_COUNT 64
 #define INITIAL_LEVEL_NAME_COUNT 4
@@ -49,7 +49,7 @@ static void collection_alloc_level_names(collection_t *collection)
 static void collection_update_id(collection_t *collection)
 {
     SAFEFREE(collection->id);
- \
+
     char *p = NULL;
 
     if (collection->is_zip) {
@@ -188,13 +188,14 @@ collection_t *load_collection_level_file(const char *filename)
 
 collection_t *load_collection_zip_file(const char *filename)
 {
-    int errnum;
-
     collection_t *collection = create_collection();
     collection->filename = strdup(filename);
     collection->is_zip = true;
 
     collection_update_id(collection);
+
+#if 0
+    int errnum;
 
     struct zip_t *zip = zip_openwitherror(filename, 0, 'r', &errnum);
     if (NULL == zip) {
@@ -293,7 +294,7 @@ collection_t *load_collection_zip_file(const char *filename)
         free(indexbuf);
     }
     zip_close(zip);
-
+#endif
     collection_update_level_names(collection);
 
     return collection;
@@ -646,6 +647,7 @@ void collection_save_zip(collection_t *collection)
         infomsg("Writing level collection to \"%s\"", tmpname);
     }
 
+#if 0
     int errnum;
     struct zip_t *zip = zip_openwitherror(tmpname, ZIP_DEFAULT_COMPRESSION_LEVEL, 'w', &errnum);
     if (NULL == zip) {
@@ -739,6 +741,7 @@ void collection_save_zip(collection_t *collection)
   close_zip:
     zip_close(zip);
     goto cleanup;
+#endif
 }
 
 void collection_save(collection_t *collection)

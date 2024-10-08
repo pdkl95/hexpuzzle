@@ -26,6 +26,8 @@
 #include <time.h>
 #include <sys/stat.h>
 
+#include "cJSON/cJSON.h"
+
 #include "raygui/style/dark_alt.h"
 #include "raygui/gui_window_file_dialog.h"
 
@@ -491,13 +493,13 @@ handle_events(
     }
 
     if (IsKeyPressed(KEY_F1)) {
-        printf("game_mode = %s\n", game_mode_str());
-        printf("collection->gui_list_scroll_index = %d\n",
-               current_collection->gui_list_scroll_index);
-        printf("collection->gui_list_active       = %d\n",
-               current_collection->gui_list_active);
-        printf("collection->gui_list_focus        = %d\n",
-               current_collection->gui_list_focus);
+        if (current_level) {
+            cJSON *json = level_json(current_level);
+            char *json_str = cJSON_PrintUnformatted(json);
+            printf("JSON>>>\n%s\n<<<JSON\n", json_str);
+            free(json_str);
+            cJSON_Delete(json);
+        }
     }
 
     //IVector2 old_mouse = mouse_position;

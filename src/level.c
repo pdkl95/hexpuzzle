@@ -23,6 +23,7 @@
 
 #include <libgen.h>
 
+#include "cJSON/cJSON.h"
 #include "raygui/raygui.h"
 
 #include "raylib_helper.h"
@@ -924,6 +925,44 @@ static int level_count_enabled_tiles(level_t *level)
         }
     }
     return count;
+}
+
+#define LEVEL_JSON_VERSION 1
+cJSON *level_json(level_t *level)
+{
+    cJSON *json = cJSON_CreateObject();
+
+    if (cJSON_AddNumberToObject(json, "version", LEVEL_JSON_VERSION) == NULL) {
+        goto json_err;
+    }
+
+    if (cJSON_AddStringToObject(json, "name", level->name) == NULL) {
+        goto json_err;
+    }
+
+    if (cJSON_AddNumberToObject(json, "radius", level->radius) == NULL) {
+        goto json_err;
+    }
+
+    cJSON *tiles = cJSON_AddArrayToObject(json, "tiles");
+    if (tiles == NULL) {
+        goto json_err;
+    }
+
+    for (int i=0; i < LEVEL_MAXTILES; i++) {
+        tile_t *tile = level->sorted_tiles[i];
+        cJSON *tjson = tile_json(tile);
+        if (tjson == NULL) {
+            goto json_err;
+        }
+        cJSON_AddItemToArray(tiles, tjson);
+    }
+
+    return json;
+
+  json_err:
+    cJSON_Delete(json);
+    return NULL;
 }
 
 void level_serialize(level_t *level, FILE *f)

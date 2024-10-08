@@ -22,6 +22,8 @@
 #ifndef TILE_H
 #define TILE_H
 
+#include "cJSON/cJSON.h"
+
 #include "hex.h"
 
 struct tile_pos;
@@ -78,6 +80,7 @@ void tile_swap_attributes(tile_t *a, tile_t *b);
 
 path_int_t tile_count_path_types(tile_t *tile);
 
+cJSON *tile_json(tile_t *tile);
 void tile_serialize(tile_t *tile, FILE *f);
 void tile_set_flag_from_char(tile_t *tile, char c);
 
