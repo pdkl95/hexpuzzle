@@ -517,7 +517,7 @@ void level_set_file_path(level_t *level, const char *path)
     free(dirc);
 }
 
-level_t *load_level_string(const char *filename, const char *str, bool is_zip)
+level_t *load_level_string(const char *filename, const char *str, bool is_pack)
 {
     level_t *level = alloc_level();
 
@@ -534,7 +534,7 @@ level_t *load_level_string(const char *filename, const char *str, bool is_zip)
 #endif
 
     if (level_parse_string(level, str)) {
-        if (is_zip) {
+        if (is_pack) {
             level->dirpath = "{" COLLECTION_FILENAME_EXT "}";
             level->filename = strdup(filename);
         } else {
@@ -547,6 +547,29 @@ level_t *load_level_string(const char *filename, const char *str, bool is_zip)
         return level;
     } else {
         errmsg("Error parsing level file \"%s\"",
+               filename);
+        return NULL;
+    }
+}
+
+level_t *load_level_json(const char *filename, cJSON *json, bool is_pack)
+{
+    level_t *level = alloc_level();
+
+    if (level_from_json(level, json)) {
+        if (is_pack) {
+            level->dirpath = "{" COLLECTION_FILENAME_EXT "}";
+            level->filename = strdup(filename);
+        } else {
+            level_set_file_path(level, filename);
+        }
+        if (options->verbose) {
+            infomsg("Successfully loaded level file \"%s/%s\"",
+                    level->dirpath, level->filename);
+        }
+        return level;
+    } else {
+        errmsg("Error parsing level JSON \"%s\"",
                filename);
         return NULL;
     }
@@ -736,7 +759,7 @@ bool level_from_json(level_t *level, cJSON *json)
         errmsg("Error parsing level JSON: 'name' is not a String");
         return false;
     }
-    snprintf(level->name, NAME_MAXLEN, "%s", name_json->string);
+    snprintf(level->name, NAME_MAXLEN, "%s", name_json->valuestring);
     level_update_id(level);
 
     cJSON *radius_json = cJSON_GetObjectItemCaseSensitive(json, "radius");

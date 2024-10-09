@@ -157,7 +157,8 @@ tile_t *level_get_tile(level_t *level,  hex_axial_t axial);
 tile_pos_t *level_get_current_tile_pos(level_t *level,  hex_axial_t axial);
 
 bool level_parse_string(level_t *level, const char *str);
-level_t *load_level_string(const char *filename, const char *str, bool is_zip);
+level_t *load_level_string(const char *filename, const char *str, bool is_pack);
+level_t *load_level_json(const char *filename, cJSON *json, bool is_pack);
 level_t *load_level_file(const char *filename);
 
 void level_update_ui_name(level_t *level, int idx);

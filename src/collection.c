@@ -36,6 +36,8 @@
 #include "raylib_helper.h"
 #include "collection.h"
 
+#define COLLECTION_JSON_VERSION 1
+
 #define INITIAL_LEVEL_NAME_COUNT 64
 //#define INITIAL_LEVEL_NAME_COUNT 4
 
@@ -169,113 +171,82 @@ collection_t *load_collection_level_file(const char *filename)
     }
 }
 
-collection_t *load_collection_zip_file(const char *filename)
+bool collection_from_json(collection_t *collection, cJSON *json)
 {
+    assert_not_null(collection);
+    assert_not_null(json);
+
+    if (!cJSON_IsObject(json)) {
+        errmsg("Error parsing pack JSON: not an Object");
+        return false;
+    }
+
+    cJSON *version_json = cJSON_GetObjectItemCaseSensitive(json, "version");
+    if (!cJSON_IsNumber(version_json)) {
+        errmsg("Error parsing pack JSON: 'version' is not a Number");
+        return false;
+    }
+
+    if (version_json->valueint != COLLECTION_JSON_VERSION) {
+        errmsg("Error parsing pack JSON: 'version' is %d, expected %d",
+               version_json->valueint, COLLECTION_JSON_VERSION);
+        return false;
+    }
+
+    cJSON *id_json = cJSON_GetObjectItemCaseSensitive(json, "id");
+    if (!cJSON_IsString(id_json)) {
+        errmsg("Error parsing pack JSON: 'id' is not a String");
+        return false;
+    }
+    snprintf(collection->id, COLLECTION_ID_LENGTH, "%s", id_json->valuestring);
+
+    cJSON *levels_json = cJSON_GetObjectItemCaseSensitive(json, "levelss");
+    if (!cJSON_IsObject(levels_json)) {
+        errmsg("Error parsing pack JSON: 'levels' is not an Object");
+        return false;
+    }
+
+    cJSON *level_json;
+    cJSON_ArrayForEach(level_json, levels_json) {
+        if (!cJSON_IsObject(level_json)) {
+            errmsg("Error parsing pack JSON: child of 'levels' named \"%s\" is not an Object",
+                   level_json->string);
+            return false;
+        }
+
+        level_t *level = load_level_json(level_json->string, level_json, true);
+        collection_add_level(collection, level);
+    }
+
+    return true;
+}
+
+collection_t *load_collection_pack_file(const char *filename)
+{
+    assert_not_null(filename);
+
+    char *pack_str = LoadFileText(filename);
+    if (NULL == pack_str) {
+        errmsg("Error loading pack file \"%s\"", filename);
+        return NULL;
+    }
+
+    cJSON *json = cJSON_Parse(pack_str);
+    if (NULL == json) {
+        errmsg("Error parsing pack file \"%s\" as JSON", filename);
+        UnloadFileText(pack_str);
+        return NULL;
+    }
+
     collection_t *collection = create_collection();
     collection->filename = strdup(filename);
     collection->is_pack = true;
 
-#if 0
-    int errnum;
+    collection_from_json(collection, json);
 
-    struct zip_t *zip = zip_openwitherror(filename, 0, 'r', &errnum);
-    if (NULL == zip) {
-        errmsg("Cannot open level collection \"%s\" - %s", filename, zip_strerror(errnum));
+    cJSON_Delete(json);
+    UnloadFileText(pack_str);
 
-      fail_collection:
-        destroy_collection(collection);
-        return NULL;
-    } else {
-        if (options->verbose) {
-            infomsg("Decompressing and extracting level files from: \"%s\"", filename);
-            infomsg("Reading filenames from \"%s\"", COLLECTION_ZIP_INDEX_FILENAME);
-        }
-
-        char *indexbuf = NULL;
-
-        errnum = zip_entry_open(zip, COLLECTION_ZIP_INDEX_FILENAME);
-        if (errnum < 0) {
-            errmsg("Cannot open level collection index file \"%s\" - %s",
-                   COLLECTION_ZIP_INDEX_FILENAME, zip_strerror(errnum));
-            goto fail_collection;
-        } else {
-            size_t bufsize = zip_entry_size(zip);
-            indexbuf = calloc(bufsize + 11, sizeof(char));
-            errnum = zip_entry_noallocread(zip, (void *)indexbuf, bufsize);
-            if (errnum < 0) {
-                errmsg("Error reading the collection index file \"%s\" - %s",
-                   COLLECTION_ZIP_INDEX_FILENAME, zip_strerror(errnum));
-
-              fail_indexbuf_and_collection:
-                free(indexbuf);
-                goto fail_collection;
-            }
-            indexbuf[bufsize] = '\0';
-        }
-        errnum = zip_entry_close(zip);
-        if (errnum < 0) {
-            errmsg("Error closing the collection index file \"%s\" in collection \"%s\" - %s",
-                   COLLECTION_ZIP_INDEX_FILENAME, collection->filename, zip_strerror(errnum));
-            goto fail_indexbuf_and_collection;
-        }
-
-        char *delim = "\n";
-        int n=0;
-        char *filename = indexbuf, *end = indexbuf;
-        while (filename != NULL) {
-            strsep(&end, delim);
-
-            if (filename && strlen(filename) > 0) {
-                if (options->verbose) {
-                    infomsg("Unpacking level file \"%s\"", filename);
-                }
-
-                char *levelbuf = NULL;
-
-                errnum = zip_entry_open(zip, filename);
-                if (errnum < 0) {
-                    errmsg("Cannot open the level file \"%s\" in collection \"%s\" - %s",
-                           filename, collection->filename, zip_strerror(errnum));
-                    free(levelbuf);
-                    continue;
-
-                } else {
-                    size_t bufsize = zip_entry_size(zip);
-                    levelbuf = calloc(bufsize + 11, sizeof(char));
-                    errnum = zip_entry_noallocread(zip, (void *)levelbuf,  bufsize);
-                    if (errnum < 0) {
-                        errmsg("Error reading the level file \"%s\" in collection \"%s\" - %s",
-                               filename, collection->filename, zip_strerror(errnum));
-                        free(levelbuf);
-                        continue;
-                    }
-                    levelbuf[bufsize] = '\0';
-                }
-                errnum = zip_entry_close(zip);
-                if (errnum < 0) {
-                    errmsg("Error closing the level file \"%s\" in collection \"%s\" - %s",
-                           filename, collection->filename, zip_strerror(errnum));
-                    free(levelbuf);
-                    continue;
-                }
-
-                level_t *level = load_level_string(filename, levelbuf, true);
-                collection_add_level(collection, level);
-
-                if (levelbuf) {
-                    free(levelbuf);
-                }
-
-                n++;
-            }
-
-            filename = end;
-        }
-
-        free(indexbuf);
-    }
-    zip_close(zip);
-#endif
     collection_update_level_names(collection);
 
     return collection;
@@ -290,7 +261,7 @@ collection_t *load_collection_file(const char *filename)
     if (strcmp(ext, LEVEL_FILENAME_EXT) == 0) {
         return load_collection_level_file(filename);
     } else if (strcmp(ext, COLLECTION_FILENAME_EXT) == 0) {
-        return load_collection_zip_file(filename);
+        return load_collection_pack_file(filename);
     } else {
         errmsg("cannot open \"%s\" - don't understand .%s files",
                filename, ext);
@@ -615,8 +586,6 @@ void collection_save_dir(collection_t *collection)
   close_file:
     fclose(f);
 }
-
-#define COLLECTION_JSON_VERSION 1
 
 cJSON *collection_to_json(collection_t *collection)
 {
