@@ -27,6 +27,7 @@
 #include "hex.h"
 
 struct tile_pos;
+struct level;
 
 enum path_type {
     PATH_TYPE_NONE   = 0,
@@ -80,9 +81,8 @@ void tile_swap_attributes(tile_t *a, tile_t *b);
 
 path_int_t tile_count_path_types(tile_t *tile);
 
-cJSON *tile_json(tile_t *tile);
-void tile_serialize(tile_t *tile, FILE *f);
-void tile_set_flag_from_char(tile_t *tile, char c);
+bool tile_from_json(tile_t *tile, struct level *level, cJSON *json);
+cJSON *tile_to_json(tile_t *tile);
 
 static inline bool tile_dragable(tile_t *tile)
 {

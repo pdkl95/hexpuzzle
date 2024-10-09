@@ -25,6 +25,7 @@
 #include "raylib_helper.h"
 #include "tile.h"
 #include "tile_pos.h"
+#include "level.h"
 
 char *tile_flag_string(tile_t *tile)
 {
@@ -134,24 +135,6 @@ tile_t *create_tile(void)
 {
     tile_t *tile = calloc(1, sizeof(tile_t));
     return init_tile(tile);
-}
-
-void tile_set_flag_from_char(tile_t *tile, char c)
-{
-    assert_not_null(tile);
-
-    switch (c) {
-    case 'e': tile->enabled = false;  break;
-    case 'E': tile->enabled = true;   break;
-    case 'f': tile->fixed   = false;  break;
-    case 'F': tile->fixed   = true;   break;
-    case 'h': tile->hidden  = false;  break;
-    case 'H': tile->hidden  = true;   break;
-
-    default:
-        warnmsg("Invalid flag character: '%c'", c);
-        break;
-    }
 }
 
 void destroy_tile(tile_t *tile)
@@ -271,7 +254,114 @@ path_int_t tile_count_path_types(tile_t *tile)
     return rv;
 }
 
-static cJSON *tile_json_addr(hex_axial_t addr)
+void tile_set_positions(tile_t *tile, level_t *level, hex_axial_t solved_addr, hex_axial_t unsolved_addr)
+{
+    tile->solved_pos = level_get_solved_tile_pos(level, solved_addr);
+    tile->unsolved_pos = level_get_unsolved_tile_pos(level, unsolved_addr);
+
+    tile->solved_pos->tile = tile;
+    tile->unsolved_pos->tile = tile;
+}
+
+bool tile_from_json_addr(cJSON *json, hex_axial_t *addr)
+{
+    addr->q = 0;
+    addr->r = 0;
+
+    if (!cJSON_IsObject(json)) {
+        errmsg("Error parsing tile addr JSON: is not an Object");
+        return false;
+    }
+
+    cJSON *q_json = cJSON_GetObjectItemCaseSensitive(json, "q");
+    cJSON *r_json = cJSON_GetObjectItemCaseSensitive(json, "r");
+
+    if (!cJSON_IsNumber(q_json)) {
+        errmsg("Error parsing tile addr JSON: Object missing Number 'q'");
+        return false;
+    }
+    if (!cJSON_IsNumber(r_json)) {
+        errmsg("Error parsing tile addr JSON: Object missing Number 'r'");
+        return false;
+    }
+
+    addr->q = q_json->valueint;
+    addr->r = r_json->valueint;
+
+    return true;
+}
+
+bool tile_from_json(tile_t *tile, level_t *level, cJSON *json)
+{
+    if (!cJSON_IsObject(json)) {
+        errmsg("Error parsing tile JSON: not an Object");
+        return false;
+    }
+
+    cJSON   *solved_json = cJSON_GetObjectItemCaseSensitive(json, "solved");
+    cJSON *unsolved_json = cJSON_GetObjectItemCaseSensitive(json, "unsolved");
+    cJSON     *path_json = cJSON_GetObjectItemCaseSensitive(json, "path");
+    cJSON  *enabled_json = cJSON_GetObjectItemCaseSensitive(json, "enabled");
+    cJSON   *hidden_json = cJSON_GetObjectItemCaseSensitive(json, "hidden");
+    cJSON    *fixed_json = cJSON_GetObjectItemCaseSensitive(json, "fixed");
+
+    hex_axial_t solved_addr, unsolved_addr;
+
+    if (!tile_from_json_addr(solved_json, &solved_addr)) {
+        errmsg("Error parsing tile JSON: Cannot parse 'solved' address");
+        return false;
+    }
+
+    if (!tile_from_json_addr(unsolved_json, &unsolved_addr)) {
+        errmsg("Error parsing tile JSON: Cannot parse 'unsolved' address");
+        return false;
+    }
+
+    if (!cJSON_IsArray(path_json)) {
+        errmsg("Error parsing tile JSON: Object missing Array 'path'");
+        return false;
+    }
+
+    if (!cJSON_IsBool(enabled_json)) {
+        errmsg("Error parsing tile JSON: Object missing Bool 'enabled'");
+        return false;
+    }
+
+    if (!cJSON_IsBool(hidden_json)) {
+        errmsg("Error parsing tile JSON: Object missing Bool 'hidden'");
+        return false;
+    }
+
+    if (!cJSON_IsBool(fixed_json)) {
+        errmsg("Error parsing tile JSON: Object missing Bool 'fixed'");
+        return false;
+    }
+
+    for (hex_direction_t i=0; i<6; i++) {
+        cJSON *p_json = cJSON_GetArrayItem(path_json, i);
+        if (NULL == p_json) {
+            errmsg("Error parsing tile JSON: Array 'path' is missing item %d", i);
+            return false;
+        }
+
+        if (!cJSON_IsNumber(p_json)) {
+            errmsg("Error parsing tile JSON: Array 'path' item %d is not a Number", i);
+            return false;
+        }
+
+        tile->path[i] = p_json->valueint;
+    }
+
+    tile->enabled = cJSON_IsTrue(enabled_json);
+    tile->hidden  = cJSON_IsTrue(hidden_json);
+    tile->fixed   = cJSON_IsTrue(fixed_json);
+
+    tile_set_positions(tile, level, solved_addr, unsolved_addr);
+
+    return true;
+}
+
+static cJSON *tile_to_json_addr(hex_axial_t addr)
 {
     cJSON *json = cJSON_CreateObject();
 
@@ -291,11 +381,11 @@ static cJSON *tile_json_addr(hex_axial_t addr)
     return NULL;
 }
 
-cJSON *tile_json(tile_t *tile)
+cJSON *tile_to_json(tile_t *tile)
 {
     cJSON *json = cJSON_CreateObject();
 
-    cJSON   *solved_addr = tile_json_addr(tile->solved_pos->position);
+    cJSON   *solved_addr = tile_to_json_addr(tile->solved_pos->position);
     if (!solved_addr) {
         goto json_tile_err;
     }
@@ -303,7 +393,7 @@ cJSON *tile_json(tile_t *tile)
         goto json_tile_err;
     }
 
-    cJSON *unsolved_addr = tile_json_addr(tile->unsolved_pos->position); \
+    cJSON *unsolved_addr = tile_to_json_addr(tile->unsolved_pos->position); \
     if (!unsolved_addr) {
         goto json_tile_err;
     }
@@ -333,24 +423,4 @@ cJSON *tile_json(tile_t *tile)
   json_tile_err:
     cJSON_Delete(json);
     return NULL;
-}
-
-void tile_serialize(tile_t *tile, FILE *f)
-{
-    fprintf(f, "tile %d,%d %d,%d %d%d%d%d%d%d %s%s%s\n",
-            tile->solved_pos->position.q,
-            tile->solved_pos->position.r,
-            tile->unsolved_pos->position.q,
-            tile->unsolved_pos->position.r,
-
-            tile->path[0],
-            tile->path[1],
-            tile->path[2],
-            tile->path[3],
-            tile->path[4],
-            tile->path[5],
-
-            tile->enabled ? "E" : "e",
-            tile->fixed   ? "F" : "f",
-            tile->hidden  ? "H" : "h");
 }

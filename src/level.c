@@ -221,10 +221,8 @@ void level_toggle_currently_used_tiles(level_t *level)
     }
 }
 
-static level_t *alloc_level()
+static level_t *init_level(level_t *level)
 {
-    level_t *level = calloc(1, sizeof(level_t));
-
     int i=0;
     for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
         for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
@@ -332,6 +330,13 @@ static level_t *alloc_level()
 
     level_reset(level);
 
+    return level;
+}
+
+static level_t *alloc_level(void)
+{
+    level_t *level = calloc(1, sizeof(level_t));
+    init_level(level);
     return level;
 }
 
@@ -459,234 +464,15 @@ tile_t *level_get_tile(level_t *level,  hex_axial_t axial)
     return pos->tile;
 }
 
-struct token_list {
-    int token_count;
-    char **tokens;
-};
-typedef struct token_list token_list_t;
-
-static token_list_t level_tokenize_string(const char *string)
-{
-    assert_not_null(string);
-
-    char *str = strdup(string);
-
-    char *delim = " \n";
-
-    int token_count = 0;
-    char *scan = str;
-
-    while (true) {
-        scan = strpbrk(scan, delim);
-        if (scan) {
-            scan++;
-            token_count++;
-        } else {
-            break;
-        }
-    }
-
-    char **tokens = calloc(token_count + 1, sizeof(char *));
-
-    int n=0;
-    char *combine = NULL;
-    char *free_after_use = NULL;
-    char *tok = str, *end = str;
-    while (tok != NULL) {
-        strsep(&end, delim);
-
-        if (combine) {
-            char *tmp;
-            asprintf(&tmp, "%s %s", combine, tok);
-            free(combine);
-            combine = tmp;
-            tok = NULL;
-
-            int lastidx = strlen(combine) - 1;
-            if (combine[lastidx] == '"') {
-                combine[lastidx] = '\0';
-                tok = combine;
-                free_after_use = combine;
-                combine = NULL;
-            }
-        } else if (tok[0] == '"') {
-            tok++;
-            int lastidx = strlen(tok) - 1;
-            if (tok[lastidx] == '"') {
-                tok[lastidx] = '\0';
-                tokens[n] = strdup(tok);
-                n++;
-                tok = NULL;
-            } else {
-                combine = strdup(tok);
-                tok = NULL;
-            }
-        }
-
-        if (tok) {
-            if (strlen(tok) > 0) {
-                tokens[n] = strdup(tok);
-                n++;
-            }
-
-            if (free_after_use) {
-                free(free_after_use);
-                free_after_use = NULL;
-            }
-        }
-
-        tok = end;
-    }
-
-    tokens[n] = NULL;
-
-    token_list_t list = {
-        .tokens = tokens,
-        .token_count = n
-    };
-
-#if 0
-    for (int i=0; i<n; i++) {
-        printf("token[%d] = \"%s\"\n", i, tokens[i]);
-    }
-#endif
-
-    free(str);
-
-    return list;
-}
-
-static void level_free_tokens(token_list_t list)
-{
-    for (int i=0; i<list.token_count; i++) {
-        SAFEFREE(list.tokens[i]);
-    }
-    SAFEFREE(list.tokens);
-}
-
-void level_setup_tiles_from_serialized_strings(level_t *level, const char *solved_addr_str, const char *unsolved_addr_str, const char *path, const char *flags)
-{
-    assert_not_null(level);
-    assert_not_null(solved_addr_str);
-    assert_not_null(unsolved_addr_str);
-    assert_not_null(path);
-    assert_not_null(flags);
-
-    assert(strlen(solved_addr_str)   >= 3);
-    assert(strlen(unsolved_addr_str) >= 3);
-    assert(strlen(path)  == 6);
-    assert(strlen(flags) == 3);
-
-#define ADDR_BUF_SIZE 64
-    assert(strlen(  solved_addr_str) < ADDR_BUF_SIZE);
-    assert(strlen(unsolved_addr_str) < ADDR_BUF_SIZE);
-    char addr_buf[ADDR_BUF_SIZE];
-
-#if 0
-    printf("Creating tile from: solved_addr=\"%s\" unsolved_addr=\"%s\" path=\"%s\" flags=\"%s\"\n",
-           solved_addr, unsolved_addr, path, flags);
-#endif
-
-    hex_axial_t solved_addr = {0}, unsolved_addr = {0};
-
-    snprintf(addr_buf, ADDR_BUF_SIZE, "%s", solved_addr_str);
-    char *p = &(addr_buf[0]);
-
-    solved_addr.q = (int)strtol(addr_buf, &p, 10);
-    p++;
-    solved_addr.r = (int)strtol(p, NULL, 10);
-
-    snprintf(addr_buf, ADDR_BUF_SIZE, "%s", unsolved_addr_str);
-    p = &(addr_buf[0]);
-
-    unsolved_addr.q = (int)strtol(addr_buf, &p, 10);
-    p++;
-    unsolved_addr.r = (int)strtol(p, NULL, 10);
-
-    tile_pos_t   *solved_pos = level_get_solved_tile_pos(  level,   solved_addr);
-    tile_pos_t *unsolved_pos = level_get_unsolved_tile_pos(level, unsolved_addr);
-
-    if (!solved_pos) {
-        errmsg("Cannot find tile with solved_address (%d, %d)\n", solved_addr.q, solved_addr.r);
-        return;
-    }
-    if (!unsolved_pos) {
-        errmsg("Cannot find tile with unsolved_address (%d, %d)\n", unsolved_addr.q, unsolved_addr.r);
-        return;
-    }
-
-    tile_t *tile = &(level->tiles[level->current_tile_write_idx]);
-    tile->solved_pos = solved_pos;
-    tile->unsolved_pos = unsolved_pos;
-    solved_pos->tile = tile;
-    unsolved_pos->tile = tile;
-
-    for (int i=0; i<6; i++) {
-        char digit[2];
-        digit[0] = path[i];
-        digit[1] = '\0';
-
-        path_type_t ptype = (int)strtol(digit, NULL, 10);
-        tile->path[i] = ptype;
-    }
-
-    for (int i=0; i<3; i++) {
-        tile_set_flag_from_char(tile, flags[i]);
-    }
-
-    level->current_tile_write_idx++;
-}
-
 bool level_parse_string(level_t *level, const char *str)
 {
     assert_not_null(level);
     assert_not_null(str);
 
-    token_list_t list = level_tokenize_string(str);
-
-#define CMPSTR(test, expected) do {                                  \
-        if (0 != strncmp(test, expected, strlen(expected))) {        \
-            fprintf(stderr,                                          \
-                    "Parse failed: expected \"%s\", found \"%s\"\n", \
-                    expected, test);                                 \
-            goto fail;                                               \
-        }                                                            \
-    } while(0)
-#define CMP(idx, expected) \
-    CMPSTR(list.tokens[idx], expected)
-
-    CMP(0, "hexlevel");
-    CMP(1, "version");
-    CMP(3, "name");
-    CMP(5, "radius");
-    CMP(7, "begin_tiles");
-
-    snprintf(level->name, NAME_MAXLEN, "%s", list.tokens[4]);
-    level_update_id(level);
-
-    level->radius     = (int)strtol(list.tokens[6], NULL, 10);
-    level->tile_count = (int)strtol(list.tokens[8], NULL, 10);
-
-    //printf("c=%d, r=%d, n=\"%s\"\n", level->tile_count, level->radius, level->name);
-
-    level->current_tile_write_idx = 0;
-
-    for(int i = 9; i<(list.token_count - 2); i += 5) {
-        CMP(i, "tile");
-        char *solved_addr   = list.tokens[i+1];
-        char *unsolved_addr = list.tokens[i+2];
-        char *path          = list.tokens[i+3];
-        char *flags         = list.tokens[i+4];
-
-        level_setup_tiles_from_serialized_strings(level, solved_addr, unsolved_addr, path, flags);
-    }
-
-    level_free_tokens(list);
-    return true;
-
-  fail:
-    level_free_tokens(list);
-    return false;
+    cJSON *json = cJSON_Parse(str);
+    bool rv = level_from_json(level, json);
+    cJSON_Delete(json);
+    return rv;
 }
 
 static char *read_file_into_string(const char *filename)
@@ -772,7 +558,6 @@ level_t *load_level_file(const char *filename)
 
     char *str = read_file_into_string(filename);
     if (NULL == str) {
-        free(str);
         errmsg("Error reading level file \"%s\"", filename);
         return NULL;
     }
@@ -871,16 +656,14 @@ void level_save_to_file(level_t *level, const char *dirpath)
         infomsg("saving level \"%s\" to: \"%s\"", level->name, filepath);
     }
 
-    FILE *f = fopen(pathbuf, "w");
-    if (!f) {
-        errmsg("cannot save level \"%s\" to \"%s\": $a",
-               level->name, pathbuf, strerror(errno));
-        return;
-    }
+    cJSON *json = level_to_json(current_level);
+    char *json_str = cJSON_PrintUnformatted(json);
 
-    level_serialize(level, f);
+    SaveFileText(pathbuf, json_str);
 
-    fclose(f);
+    free(json_str);
+    cJSON_Delete(json);
+
     if (options->verbose) {
         infomsg("save to \"%s\" finished", pathbuf);
     }
@@ -915,20 +698,63 @@ void level_save(level_t *level)
     }
 }
 
-static int level_count_enabled_tiles(level_t *level)
+#define LEVEL_JSON_VERSION 1
+
+bool level_from_json(level_t *level, cJSON *json)
 {
-    int count = 0;
-    for (int i=0; i < TILE_LEVEL_WIDTH; i++) {
-        tile_t *tile = &(level->tiles[i]);
-        if (tile->enabled) {
-            count++;
-        }
+    if (!cJSON_IsObject(json)) {
+        errmsg("Error parsing level JSON: not an Object");
+        return false;
     }
-    return count;
+
+    cJSON *version_json = cJSON_GetObjectItemCaseSensitive(json, "version");
+    if (!cJSON_IsNumber(version_json)) {
+        errmsg("Error parsing level JSON: 'version' is not a Number");
+        return false;
+    }
+
+    if (version_json->valueint != LEVEL_JSON_VERSION) {
+        errmsg("Error parsing level JSON: 'version' is %d, expected %d",
+               version_json->valueint, LEVEL_JSON_VERSION);
+        return false;
+    }
+
+    cJSON *name_json = cJSON_GetObjectItemCaseSensitive(json, "name");
+    if (!cJSON_IsString(name_json)) {
+        errmsg("Error parsing level JSON: 'name' is not a String");
+        return false;
+    }
+    snprintf(level->name, NAME_MAXLEN, "%s", name_json->string);
+    level_update_id(level);
+
+    cJSON *radius_json = cJSON_GetObjectItemCaseSensitive(json, "radius");
+    if (!cJSON_IsNumber(radius_json)) {
+        errmsg("Error parsing level JSON: 'radius' is not a Number");
+        return false;
+    }
+    level->radius = radius_json->valueint;
+
+    cJSON *tiles_json = cJSON_GetObjectItemCaseSensitive(json, "tiles");
+    if (!cJSON_IsArray(tiles_json)) {
+        errmsg("Error parsing level JSON: 'tiles' is not an Array");
+        return false;
+    }
+
+    level->current_tile_write_idx = 0;
+    cJSON *tile_json;
+    cJSON_ArrayForEach(tile_json, tiles_json) {
+        tile_t *tile = &(level->tiles[level->current_tile_write_idx]);
+        if (!tile_from_json(tile, level, tile_json)) {
+            errmsg("Error parsing level JSON: parsing tike %d failed", level->current_tile_write_idx);
+            return false;
+        }
+        level->current_tile_write_idx++;
+    }
+
+    return true;
 }
 
-#define LEVEL_JSON_VERSION 1
-cJSON *level_json(level_t *level)
+cJSON *level_to_json(level_t *level)
 {
     cJSON *json = cJSON_CreateObject();
 
@@ -949,9 +775,11 @@ cJSON *level_json(level_t *level)
         goto json_err;
     }
 
+    level_sort_tiles(level);
+
     for (int i=0; i < LEVEL_MAXTILES; i++) {
         tile_t *tile = level->sorted_tiles[i];
-        cJSON *tjson = tile_json(tile);
+        cJSON *tjson = tile_to_json(tile);
         if (tjson == NULL) {
             goto json_err;
         }
@@ -963,33 +791,6 @@ cJSON *level_json(level_t *level)
   json_err:
     cJSON_Delete(json);
     return NULL;
-}
-
-void level_serialize(level_t *level, FILE *f)
-{
-    level_sort_tiles(level);
-
-    fprintf(f, "hexlevel version 1\n");
-    fprintf(f, "name \"%s\"\n", level->name);
-    fprintf(f, "radius %d\n", level->radius);
-    int total_tiles = level_count_enabled_tiles(level);
-    fprintf(f, "begin_tiles %d\n", total_tiles);
-    for (int i=0; i < LEVEL_MAXTILES; i++) {
-        tile_t *tile = level->sorted_tiles[i];
-        tile_serialize(tile, f);
-    }
-    fprintf(f, "end_tiles\n");
-}
-
-char *level_serialize_memory(level_t *level)
-{
-    static char buf[LEVEL_SERIALIZE_BUFSIZE];
-
-    FILE *f = fmemopen(buf, LEVEL_SERIALIZE_BUFSIZE, "w");
-    level_serialize(level, f);
-    fclose(f);
-
-    return buf;
 }
 
 static void level_add_to_bounding_box(level_t *level, tile_pos_t *pos)

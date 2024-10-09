@@ -494,7 +494,7 @@ handle_events(
 
     if (IsKeyPressed(KEY_F1)) {
         if (current_level) {
-            cJSON *json = level_json(current_level);
+            cJSON *json = level_to_json(current_level);
             char *json_str = cJSON_PrintUnformatted(json);
             printf("JSON>>>\n%s\n<<<JSON\n", json_str);
             free(json_str);
