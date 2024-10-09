@@ -29,15 +29,16 @@
 
 #include "level.h"
 
+#define COLLECTION_ID_LENGTH 37
 struct collection {
-    char *id;
+    char id[COLLECTION_ID_LENGTH];
     bool have_id;
 
     char *dirpath;
     char *filename;
     int filename_seq;
 
-    bool is_zip;
+    bool is_pack;
 
     level_t *levels;
     int level_count;
@@ -60,7 +61,7 @@ extern collection_t *current_collection;
 collection_t *create_collection(void);
 collection_t *load_collection_dir(const char *dirpath);
 collection_t *load_collection_level_file(const char *filename);
-collection_t *load_collection_zip_file(const char *filename);
+collection_t *load_collection_pack_file(const char *filename);
 collection_t *load_collection_file(const char *filename);
 collection_t *load_collection_path(const char *path);
 

@@ -652,20 +652,32 @@ void level_save_to_file(level_t *level, const char *dirpath)
         filepath = &(pathbuf[0]);
     }
 
+    char *tmpname;
+    asprintf(&tmpname, "%s.tmp", filepath);
+
     if (options->verbose) {
-        infomsg("saving level \"%s\" to: \"%s\"", level->name, filepath);
+        infomsg("saving level \"%s\" to: \"%s\"", level->name, tmpname);
     }
 
-    cJSON *json = level_to_json(current_level);
+    cJSON *json = level_to_json(level);
     char *json_str = cJSON_PrintUnformatted(json);
 
-    SaveFileText(pathbuf, json_str);
+    SaveFileText(tmpname, json_str);
 
     free(json_str);
     cJSON_Delete(json);
 
     if (options->verbose) {
-        infomsg("save to \"%s\" finished", pathbuf);
+        infomsg("save to \"%s\" finished", tmpname);
+    }
+
+    if (tmpname) {
+        if (-1 == rename(tmpname, filepath)) {
+            errmsg("Error trying to rename \"%s\" to \"%s\" - ",
+                   tmpname, filepath);
+        }
+
+        free(tmpname);
     }
 
     if (pathbuf) {
@@ -689,7 +701,7 @@ void level_save_to_file_if_changed(level_t *level, const char *dirpath)
 void level_save(level_t *level)
 {
     assert_not_null(level);
-    if (level->collection && level->collection->is_zip) {
+    if (level->collection && level->collection->is_pack) {
         collection_save(level->collection);
     } else if (level->filename && level->collection && level->collection->dirpath) {
         level_save_to_file_if_changed(level, level->collection->dirpath);

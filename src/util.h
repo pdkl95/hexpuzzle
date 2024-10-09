@@ -30,6 +30,8 @@ char *strcat_alloc(const char *first, const char *second);
 
 char *strdup_xxd_include(unsigned char *buf, unsigned int len);
 
+const char *gen_unique_id(void);
+
 /********************
  * easing functions *
  ********************/

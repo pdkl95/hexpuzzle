@@ -95,6 +95,23 @@ char *strdup_xxd_include(unsigned char *buf, unsigned int len)
     return str;
 }
 
+static uint32_t rand32(void)
+{
+    return ((rand() & 0x3) << 30) | ((rand() & 0x7fff) << 15) | (rand() & 0x7fff);
+}
+
+const char *gen_unique_id(void)
+{
+    static char buf[37];
+    snprintf(buf, 37, "%08x-%04x-%04x-%04x-%04x%08x",
+             rand32(),
+             rand32() & 0xffff,
+             ((rand32() & 0x0fff) | 0x4000),
+             (rand32() & 0x3fff) + 0x8000,
+             rand32() & 0xffff, rand32());
+    return buf;
+}
+
 float ease_circular_in(float t) {
     return 1.0f - sqrtf(1.0f - (t * t));
 }

@@ -36,8 +36,8 @@
 #include "raylib_helper.h"
 #include "collection.h"
 
-//#define INITIAL_LEVEL_NAME_COUNT 64
-#define INITIAL_LEVEL_NAME_COUNT 4
+#define INITIAL_LEVEL_NAME_COUNT 64
+//#define INITIAL_LEVEL_NAME_COUNT 4
 
 void create_new_level(void);
 
@@ -46,24 +46,9 @@ static void collection_alloc_level_names(collection_t *collection)
     collection->level_names = calloc(collection->level_name_count, sizeof(char *));
 }
 
-static void collection_update_id(collection_t *collection)
+static void collection_set_id(collection_t *collection, const char *new_id)
 {
-    SAFEFREE(collection->id);
-
-    char *p = NULL;
-
-    if (collection->is_zip) {
-        p = collection->filename;
-    } else {
-        collection->have_id = false;
-        printf("collection_update_id() SKIP!\n");
-        return;
-    }
-
-    collection->have_id = true;
-
-    asprintf(&collection->id, "%s", p);
-    printf("collection_update_id() -> \"%s\"\n", collection->id);
+    memcpy(collection->id, new_id, COLLECTION_ID_LENGTH);
 }
 
 static collection_t *alloc_collection(void)
@@ -73,7 +58,8 @@ static collection_t *alloc_collection(void)
     collection->level_name_count = INITIAL_LEVEL_NAME_COUNT;
     collection_alloc_level_names(collection);
 
-    collection->id = NULL;
+    collection_set_id(collection, gen_unique_id());
+
     collection->dirpath = NULL;
     collection->filename = NULL;
     collection->levels = NULL;
@@ -89,9 +75,7 @@ static collection_t *alloc_collection(void)
     collection->gui_list_focus = -1;
 
     collection->changed = false;
-    collection->is_zip = false;
-
-    collection_update_id(collection);
+    collection->is_pack = false;
 
     return collection;
 }
@@ -164,7 +148,6 @@ collection_t *load_collection_dir(const char *dirpath)
 
         collection_scan_dir(collection);
         collection_update_level_names(collection);
-        collection_update_id(collection);
     } else {
         errmsg("Directory name is zero-length!");
     }
@@ -190,9 +173,7 @@ collection_t *load_collection_zip_file(const char *filename)
 {
     collection_t *collection = create_collection();
     collection->filename = strdup(filename);
-    collection->is_zip = true;
-
-    collection_update_id(collection);
+    collection->is_pack = true;
 
 #if 0
     int errnum;
@@ -350,7 +331,6 @@ void destroy_collection(collection_t *collection)
 
         SAFEFREE(collection->dirpath);
         SAFEFREE(collection->filename);
-        SAFEFREE(collection->id);
     }
 }
 
@@ -636,7 +616,47 @@ void collection_save_dir(collection_t *collection)
     fclose(f);
 }
 
-void collection_save_zip(collection_t *collection)
+#define COLLECTION_JSON_VERSION 1
+
+cJSON *collection_to_json(collection_t *collection)
+{
+    cJSON *json = cJSON_CreateObject();
+
+    if (cJSON_AddNumberToObject(json, "version", COLLECTION_JSON_VERSION) == NULL) {
+        goto json_err;
+    }
+
+    if (cJSON_AddStringToObject(json, "id", collection->id) == NULL) {
+        goto json_err;
+    }
+
+    cJSON *levels_json = cJSON_AddObjectToObject(json, "tiles");
+    if (levels_json == NULL) {
+        goto json_err;
+    }
+
+    level_t *level = collection->levels;
+    while (level) {
+        assert_not_null(level->filename);
+
+        cJSON *level_json = level_to_json(level);
+        if (level_json == NULL) {
+            goto json_err;
+        }
+
+        cJSON_AddItemToObject(levels_json, level->filename, level_json);
+
+        level = level->next;
+    }
+
+    return json;
+
+  json_err:
+    cJSON_Delete(json);
+    return NULL;
+}
+
+void collection_save_pack(collection_t *collection)
 {
     assert_not_null(collection);
 
@@ -647,101 +667,20 @@ void collection_save_zip(collection_t *collection)
         infomsg("Writing level collection to \"%s\"", tmpname);
     }
 
-#if 0
-    int errnum;
-    struct zip_t *zip = zip_openwitherror(tmpname, ZIP_DEFAULT_COMPRESSION_LEVEL, 'w', &errnum);
-    if (NULL == zip) {
-        errmsg("Cannot open \"%s\" for writing - %s", tmpname, zip_strerror(errnum));
-        goto cleanup;
-    }
+    cJSON *json = collection_to_json(collection);
+    char *json_str = cJSON_PrintUnformatted(json);
 
-    errnum = zip_entry_open(zip, COLLECTION_ZIP_INDEX_FILENAME);
-    if (errnum < 0) {
-        errmsg("Cannot open level collection index file \"%s\" for writing - %s",
-               COLLECTION_ZIP_INDEX_FILENAME, zip_strerror(errnum));
-        goto close_zip;
-    } else {
-        level_t *level = collection->levels;
-        bool first = true;
-        while (level) {
-            assert_not_null(level->filename);
+    SaveFileText(tmpname, json_str);
 
-            if (first) {
-                first = false;
-            } else {
-                errnum = zip_entry_write(zip, "\n", 1);
-                if (errnum < 0) {
-                    errmsg("Error writing index file \"%s\" in collection \"%s\" - %s",
-                           COLLECTION_ZIP_INDEX_FILENAME, collection->filename, zip_strerror(errnum));
-                    goto close_zip;
-                }
-            }
-            errnum = zip_entry_write(zip, level->filename, strlen(level->filename));
-            if (errnum < 0) {
-                errmsg("Error writing index file \"%s\" in collection \"%s\" - %s",
-                       COLLECTION_ZIP_INDEX_FILENAME, collection->filename, zip_strerror(errnum));
-                goto close_zip;
-            }
-
-            level = level->next;
-        }
-    }
-    errnum = zip_entry_close(zip);
-    if (errnum < 0) {
-        errmsg("Error closing the collection index file \"%s\" in collection \"%s\" - %s",
-               COLLECTION_ZIP_INDEX_FILENAME, collection->filename, zip_strerror(errnum));
-        goto close_zip;
-    }
-
-    level_t *level = collection->levels;
-    while (level) {
-        errnum = zip_entry_open(zip, level->filename);
-        if (errnum < 0) {
-            errmsg("Cannot open level collection level file \"%s\" for writing - %s",
-                   level->filename, zip_strerror(errnum));
-            goto close_zip;
-        } else {
-
-            char *str = level_serialize_memory(level);
-            assert_not_null(str);
-
-            errnum = zip_entry_write(zip, str, strlen(str));
-            if (errnum < 0) {
-                errmsg("Error writing level file \"%s\" in collection \"%s\" - %s",
-                       level->filename, collection->filename, zip_strerror(errnum));
-                goto close_zip;
-            }
-
-            errnum = zip_entry_close(zip);
-            if (errnum < 0) {
-                errmsg("Error closing level file \"%s\" in collection \"%s\" - %s",
-                       level->filename, collection->filename, zip_strerror(errnum));
-                goto close_zip;
-            }
-        }
-
-        level = level->next;
-    }
-
-    zip_close(zip);
-
-    if (options->verbose) {
-        infomsg("Renaming \"%s\" to \"%s\"", tmpname, collection->filename);
-    }
+    free(json_str);
+    cJSON_Delete(json);
 
     if (-1 == rename(tmpname, collection->filename)) {
         errmsg("Error trying to rename \"%s\" to \"%s\" - ",
-               tmpname, collection->filename, strerror(errno));
+               tmpname, collection->filename);
     }
 
-  cleanup:
     free(tmpname);
-    return;
-
-  close_zip:
-    zip_close(zip);
-    goto cleanup;
-#endif
 }
 
 void collection_save(collection_t *collection)
@@ -753,7 +692,7 @@ void collection_save(collection_t *collection)
     if (collection->dirpath) {
         collection_save_dir(collection);
     } else if (collection->filename) {
-        collection_save_zip(collection);
+        collection_save_pack(collection);
     } else {
         errmsg("Cannot save collection; a filename or directory path is required");
     }
