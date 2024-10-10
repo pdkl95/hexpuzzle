@@ -29,7 +29,7 @@
 #include "cJSON/cJSON.h"
 
 #include "raygui/style/dark_alt.h"
-#include "raygui/gui_window_file_dialog.h"
+#include "tinyfiledialogs/tinyfiledialogs.h"
 
 #include "options.h"
 #include "color.h"
@@ -42,6 +42,7 @@
 
 #include "gui_browser.h"
 #include "gui_options.h"
+#include "gui_random.h"
 
 #include "nvdata.h"
 #include "nvdata_finished.h"
@@ -102,13 +103,16 @@ bool show_name_edit_box = false;
 bool show_ask_save_box = false;
 bool show_open_file_box = false;
 
-GuiWindowFileDialogState open_file_box_state;
-
 bool edit_tool_cycle = true;
 bool edit_tool_erase = false;
 path_type_t edit_tool_state = PATH_TYPE_NONE;
 
 Font font16, font18, font20;
+
+char const * file_filter_patterns[2] = {
+    "*." COLLECTION_FILENAME_EXT,
+    "*." LEVEL_FILENAME_EXT
+};
 
 void gui_setup(void);
 
@@ -226,6 +230,9 @@ char *game_mode_str(void)
     case GAME_MODE_OPTIONS:
         return "OPTIONS";
 
+    case GAME_MODE_RANDOM:
+        return "RANDOM";
+
     default:
         __builtin_unreachable();
     }
@@ -316,6 +323,17 @@ void open_game_file(const char *path)
     } else {
         assert(0);
     }
+}
+
+const char *default_open_file_path(void)
+{
+    static char path[MAX_FILEPATH_LENGTH];
+    const char *wd = GetWorkingDirectory();
+    strcpy(path, wd);
+    int len = strlen(path);
+    path[len]     = '/';
+    path[len + 1] = '\0';
+    return path;
 }
 
 static void reset_window_to_center(void)
@@ -411,6 +429,7 @@ do_resize(
     gui_setup();
     resize_gui_browser();
     resize_gui_options();
+    resize_gui_random();
 
     window_size_changed = false;
     resize_time = 0;
@@ -612,6 +631,10 @@ char browser_button_text_str[] = "Browse";
 #define BROWSER_BUTTON_TEXT_LENGTH (6 + sizeof(browser_button_text_str))
 char browser_button_text[BROWSER_BUTTON_TEXT_LENGTH];
 
+char random_button_text_str[] = "Random";
+#define RANDOM_BUTTON_TEXT_LENGTH (6 + sizeof(random_button_text_str))
+char random_button_text[RANDOM_BUTTON_TEXT_LENGTH];
+
 char save_button_text_str[] = "Save";
 #define SAVE_BUTTON_TEXT_LENGTH (6 + sizeof(save_button_text_str))
 char save_button_text[SAVE_BUTTON_TEXT_LENGTH];
@@ -710,7 +733,7 @@ void gui_setup(void)
     memcpy(erase_tool_button_text,  GuiIconText(ICON_RUBBER, erase_tool_button_text_str), ERASE_TOOL_BUTTON_TEXT_LENGTH);
 
     Vector2 edit_tool_label_text_size = MeasureTextEx(PANEL_LABEL_FONT,
-                                                      open_file_button_text_str,
+                                                      edit_tool_label_text,
                                                       PANEL_LABEL_FONT_SIZE,
                                                       PANEL_LABEL_FONT_SPACING);
 
@@ -756,6 +779,7 @@ void gui_setup(void)
     memcpy( return_button_text, GuiIconText(ICON_UNDO_FILL,         return_button_text_str),  RETURN_BUTTON_TEXT_LENGTH);
     memcpy(options_button_text, GuiIconText(ICON_GEAR,             options_button_text_str), OPTIONS_BUTTON_TEXT_LENGTH);
     memcpy(browser_button_text, GuiIconText(ICON_FOLDER_FILE_OPEN, browser_button_text_str), BROWSER_BUTTON_TEXT_LENGTH);
+    memcpy( random_button_text, GuiIconText(ICON_SHUFFLE_FILL,      random_button_text_str),  RANDOM_BUTTON_TEXT_LENGTH);
 
     right_side_button_rect[0].x      = close_button_rect.x;
     right_side_button_rect[0].y      = close_button_rect.y + close_button_rect.height + (3 * WINDOW_MARGIN);
@@ -792,10 +816,6 @@ void gui_setup(void)
     erase_tool_button_rect.width  = erase_tool_button_text_size.x;
     erase_tool_button_rect.height = cycle_tool_button_rect.height;
 }
-
-Color panel_bg_color   = { 0x72, 0x1C, 0xB8, 0xaa };
-Color panel_edge_color = { 0x94, 0x83, 0xA2, 0xcc };
-Color panel_header_text_color = { 0xD0, 0xC0, 0xFF, 0xff };
 
 static void draw_name_header(char *name)
 {
@@ -934,14 +954,32 @@ static void draw_gui_widgets(void)
 
     switch (game_mode) {
     case GAME_MODE_BROWSER:
-        if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
-            prev_game_mode();
+        if (GuiButton(right_side_button_rect[rsb++], options_button_text)) {
+            set_game_mode(GAME_MODE_OPTIONS);
+        }
+
+        if (GuiButton(right_side_button_rect[rsb++], random_button_text)) {
+            set_game_mode(GAME_MODE_RANDOM);
+        }
+
+        if (GuiButton(open_file_button_rect, open_file_button_text)) {
+            show_open_file_box = true;
         }
         break;
 
     case GAME_MODE_OPTIONS:
         if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
             prev_game_mode();
+        }
+        break;
+
+    case GAME_MODE_RANDOM:
+        if (GuiButton(right_side_button_rect[rsb++], options_button_text)) {
+            set_game_mode(GAME_MODE_OPTIONS);
+        }
+
+        if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
+            set_game_mode(GAME_MODE_BROWSER);
         }
         break;
 
@@ -985,11 +1023,6 @@ static void draw_gui_widgets(void)
                 show_ask_save_box = true;
             }
         }
-
-        if (GuiButton(open_file_button_rect, open_file_button_text)) {
-            show_open_file_box = true;
-        }
-
         break;
 
     case GAME_MODE_PLAY_COLLECTION:
@@ -1005,10 +1038,6 @@ static void draw_gui_widgets(void)
             toggle_edit_mode();
         }
 
-        if (GuiButton(open_file_button_rect, open_file_button_text)) {
-            show_open_file_box = true;
-        }
-
         break;
 
     default:
@@ -1020,80 +1049,64 @@ static void draw_gui_widgets(void)
 
 static void draw_name_edit_dialog(void)
 {
-    Rectangle edit_box_rect = {
-        (float)GetScreenWidth()/2 - 120,
-        (float)GetScreenHeight()/2 - 60,
-        240,
-        140
-    };
+    char *default_input = "";
+    if (current_level) {
+        default_input = current_level->name;
+    }
 
-    GuiUnlock();
-    const char *icon = GuiIconText(ICON_PENCIL, "Edit Level Name");
-    int result = GuiTextInputBox(edit_box_rect,
-                                 icon,
-                                 "Level Name:",
-                                 cancel_ok_with_icons,
-                                 current_level->name,
-                                 NAME_MAXLEN,
-                                 NULL);
-    GuiLock();
-
-    if ((result == 2) || (modal_ui_result == UI_RESULT_OK)) {
+    char *result = tinyfd_inputBox("Edit Name",
+                                   "Name?",
+                                   default_input);
+    if (result) {
         /* accept edit / ok */
-        show_name_edit_box = false;
+        memcpy(current_level->name, result, strlen(result) + 1);
         modal_ui_result = UI_RESULT_NULL;
         if (current_collection) {
             collection_update_level_names(current_collection);
         }
-    }
-
-    if ((result == 1) || (modal_ui_result == UI_RESULT_CANCEL)) {
+    } else {
         /* rollback edit / cancel */
         if (current_level) {
             memcpy(current_level->name, current_level->name_backup, NAME_MAXLEN);
         }
-        show_name_edit_box = false;
         modal_ui_result = UI_RESULT_NULL;
     }
+
+    show_name_edit_box = false;
 }
 
 static void draw_ask_save_dialog(void)
 {
-    Rectangle edit_box_rect = {
-        (float)GetScreenWidth()/2 - 120,
-        (float)GetScreenHeight()/2 - 60,
-        240,
-        140
-    };
-
-    char *icon_text, *desc_text;
+    char *title_text, *desc_text;
     switch (game_mode) {
     case GAME_MODE_EDIT_COLLECTION:
-        icon_text = "Save Collection?";
-        desc_text = "Save changes to level collection?";
+        title_text = "Save Collection?";
+        desc_text  = "Save changes to level collection?";
         break;
 
     case GAME_MODE_EDIT_LEVEL:
-        icon_text = "Save Level?";
-        desc_text = "Save changes to level?";
+        title_text = "Save Level?";
+        desc_text  = "Save changes to level?";
         break;
 
     default:
         __builtin_unreachable();
     }
 
-    GuiUnlock();
-    const char *iconmsg = GuiIconText(ICON_FILE_SAVE_CLASSIC, icon_text);
-    int result = GuiMessageBox(edit_box_rect,
-                               iconmsg,
-                               desc_text,
-                               no_yes_with_icons);
-    GuiLock();
+    int result = tinyfd_messageBox(title_text,
+                                   desc_text,
+                                   "yesnocancel",
+                                   "question",
+                                   1);
 
-    if ((result == 2) || (modal_ui_result == UI_RESULT_OK)) {
+    switch (result) {
+    case 0:
+        /* fall through */
+    default:
+        break;
+
+    case 1:
         /* yes */
-        show_ask_save_box = false;
-
         switch (game_mode) {
         case GAME_MODE_EDIT_COLLECTION:
             if (current_collection) {
@@ -1113,12 +1126,10 @@ static void draw_ask_save_dialog(void)
         }
 
         modal_ui_result = UI_RESULT_NULL;
-    }
+        break;
 
-    if ((result == 1) || (modal_ui_result == UI_RESULT_CANCEL)) {
+    case 2:
         /* no */
-        show_ask_save_box = false;
-
         switch (game_mode) {
         case GAME_MODE_EDIT_COLLECTION:
             break;
@@ -1135,30 +1146,29 @@ static void draw_ask_save_dialog(void)
         }
 
         modal_ui_result = UI_RESULT_NULL;
+        break;
     }
+
+    show_ask_save_box = false;
 }
 
 static void draw_open_file_dialog(void)
 {
-    open_file_box_state.windowActive = true;
+    char *path = tinyfd_openFileDialog("Open Level Pack",
+                                       default_open_file_path(),
+                                       2,
+                                       file_filter_patterns,
+                                       "",
+                                       false);
 
-    GuiUnlock();
-    GuiWindowFileDialog(&open_file_box_state);
-    GuiLock();
-
-    if (open_file_box_state.SelectFilePressed) {
-        const char *path = concat_dir_and_filename(open_file_box_state.dirPathText,
-                                                       open_file_box_state.fileNameText);
+    if (path) {
         if (options->verbose) {
             infomsg("Opening file \"%s\"\n", path);
         }
         open_game_file(path);
-        show_open_file_box = false;
-    } else if (open_file_box_state.CancelFilePressed) {
-        show_open_file_box = false;
-    } else if (!open_file_box_state.windowActive) {
-        show_open_file_box = false;
     }
+
+    show_open_file_box = false;
 }
 
 static void draw_popup_panels(void)
@@ -1305,6 +1315,10 @@ render_frame(
 
         case GAME_MODE_OPTIONS:
             draw_gui_options();
+            break;
+
+        case GAME_MODE_RANDOM:
+            draw_gui_random();
             break;
 
         case GAME_MODE_PLAY_LEVEL:
@@ -1456,8 +1470,6 @@ void gfx_init(void)
 
     prepare_global_colors();
 
-    open_file_box_state = InitGuiWindowFileDialog(GetWorkingDirectory());
-
     load_shaders();
 }
 
@@ -1485,10 +1497,14 @@ static void game_init(void)
             infomsg("Created config dir \"%s\"", config_dir);
         }
     }
-\
+
     init_gui_options();
     init_nvdata();
     init_gui_browser();
+    init_gui_random();
+
+    //set_game_mode(GAME_MODE_BROWSER);
+    set_game_mode(GAME_MODE_RANDOM);
 
     if (options->extra_argc == 1) {
         char *filename = options->extra_argv[0];

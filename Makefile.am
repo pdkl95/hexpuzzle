@@ -48,6 +48,7 @@ hexpuzzle_SOURCES =                                    \
 	src/const.h                                    \
 	src/gui_browser.h       src/gui_browser.c      \
 	src/gui_options.h       src/gui_options.c      \
+	src/gui_random.h        src/gui_random.c       \
 	src/hex.h               src/hex.c              \
 	src/level.h             src/level.c            \
 	src/logging.h           src/logging.c          \
@@ -55,7 +56,6 @@ hexpuzzle_SOURCES =                                    \
 	src/nvdata_finished.h   src/nvdata_finished.c  \
 	src/options.h           src/options.c          \
 	src/raygui_impl.c            		       \
-	src/raygui_file_dialog_impl.c                  \
 	src/raylib_helper.h     src/raylib_helper.c    \
 	src/shader.h            src/shader.c           \
 	src/tile.h              src/tile.c             \
@@ -65,10 +65,11 @@ hexpuzzle_SOURCES =                                    \
 	src/win_anim.h          src/win_anim.c         \
 	src/common.h            src/main.c
 
-hexpuzzle_SOURCES +=             		  \
-	external/raygui/raygui.h  		  \
-	external/raygui/gui_window_file_dialog.h  \
-	external/cJSON/cJSON.c                    \
+hexpuzzle_SOURCES +=             		   \
+	external/raygui/raygui.h  		   \
+	external/tinyfiledialogs/tinyfiledialogs.c \
+	external/tinyfiledialogs/tinyfiledialogs.h \
+	external/cJSON/cJSON.c                     \
 	external/cJSON/cJSON.h
 
 dist_EXTRA_hexpuzzle_SOURCES = \

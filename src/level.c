@@ -636,7 +636,7 @@ void level_play(level_t *level)
     level_load(level);
     level_use_unsolved_tile_pos(level);
     level_fade_in(level, NULL, NULL);
-    game_mode = GAME_MODE_PLAY_LEVEL;
+    set_game_mode(GAME_MODE_PLAY_LEVEL);
 }
 
 void level_edit(level_t *level)
@@ -646,7 +646,7 @@ void level_edit(level_t *level)
     level_load(level);
     level_use_solved_tile_pos(level);
     level_fade_in(level, NULL, NULL);
-    game_mode = GAME_MODE_EDIT_LEVEL;
+    set_game_mode(GAME_MODE_EDIT_LEVEL);
 }
 
 void level_save_to_file(level_t *level, const char *dirpath)

@@ -112,17 +112,18 @@ am_hexpuzzle_OBJECTS = src/hexpuzzle-anim_fsm.$(OBJEXT) \
 	src/hexpuzzle-color.$(OBJEXT) \
 	src/hexpuzzle-gui_browser.$(OBJEXT) \
 	src/hexpuzzle-gui_options.$(OBJEXT) \
-	src/hexpuzzle-hex.$(OBJEXT) src/hexpuzzle-level.$(OBJEXT) \
-	src/hexpuzzle-logging.$(OBJEXT) src/hexpuzzle-nvdata.$(OBJEXT) \
+	src/hexpuzzle-gui_random.$(OBJEXT) src/hexpuzzle-hex.$(OBJEXT) \
+	src/hexpuzzle-level.$(OBJEXT) src/hexpuzzle-logging.$(OBJEXT) \
+	src/hexpuzzle-nvdata.$(OBJEXT) \
 	src/hexpuzzle-nvdata_finished.$(OBJEXT) \
 	src/hexpuzzle-options.$(OBJEXT) \
 	src/hexpuzzle-raygui_impl.$(OBJEXT) \
-	src/hexpuzzle-raygui_file_dialog_impl.$(OBJEXT) \
 	src/hexpuzzle-raylib_helper.$(OBJEXT) \
 	src/hexpuzzle-shader.$(OBJEXT) src/hexpuzzle-tile.$(OBJEXT) \
 	src/hexpuzzle-tile_draw.$(OBJEXT) \
 	src/hexpuzzle-tile_pos.$(OBJEXT) src/hexpuzzle-util.$(OBJEXT) \
 	src/hexpuzzle-win_anim.$(OBJEXT) src/hexpuzzle-main.$(OBJEXT) \
+	external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.$(OBJEXT) \
 	external/cJSON/hexpuzzle-cJSON.$(OBJEXT)
 hexpuzzle_OBJECTS = $(am_hexpuzzle_OBJECTS)
 am__DEPENDENCIES_1 =
@@ -349,17 +350,18 @@ hexpuzzle_LDADD = $(COMMON_PROG_LDADD)
 hexpuzzle_SOURCES = src/anim_fsm.h src/anim_fsm.c src/classics.h \
 	src/classics.c src/collection.h src/collection.c src/color.h \
 	src/color.c src/const.h src/gui_browser.h src/gui_browser.c \
-	src/gui_options.h src/gui_options.c src/hex.h src/hex.c \
-	src/level.h src/level.c src/logging.h src/logging.c \
-	src/nvdata.h src/nvdata.c src/nvdata_finished.h \
-	src/nvdata_finished.c src/options.h src/options.c \
-	src/raygui_impl.c src/raygui_file_dialog_impl.c \
-	src/raylib_helper.h src/raylib_helper.c src/shader.h \
-	src/shader.c src/tile.h src/tile.c src/tile_draw.h \
-	src/tile_draw.c src/tile_pos.h src/tile_pos.c src/util.h \
-	src/util.c src/win_anim.h src/win_anim.c src/common.h \
-	src/main.c external/raygui/raygui.h \
-	external/raygui/gui_window_file_dialog.h \
+	src/gui_options.h src/gui_options.c src/gui_random.h \
+	src/gui_random.c src/hex.h src/hex.c src/level.h src/level.c \
+	src/logging.h src/logging.c src/nvdata.h src/nvdata.c \
+	src/nvdata_finished.h src/nvdata_finished.c src/options.h \
+	src/options.c src/raygui_impl.c src/raylib_helper.h \
+	src/raylib_helper.c src/shader.h src/shader.c src/tile.h \
+	src/tile.c src/tile_draw.h src/tile_draw.c src/tile_pos.h \
+	src/tile_pos.c src/util.h src/util.c src/win_anim.h \
+	src/win_anim.c src/common.h src/main.c \
+	external/raygui/raygui.h \
+	external/tinyfiledialogs/tinyfiledialogs.c \
+	external/tinyfiledialogs/tinyfiledialogs.h \
 	external/cJSON/cJSON.c external/cJSON/cJSON.h
 dist_EXTRA_hexpuzzle_SOURCES = \
 	src/classics_levels.h  \
@@ -484,6 +486,8 @@ src/hexpuzzle-gui_browser.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-gui_options.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/hexpuzzle-gui_random.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-hex.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-level.$(OBJEXT): src/$(am__dirstamp) \
@@ -497,8 +501,6 @@ src/hexpuzzle-nvdata_finished.$(OBJEXT): src/$(am__dirstamp) \
 src/hexpuzzle-options.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-raygui_impl.$(OBJEXT): src/$(am__dirstamp) \
-	src/$(DEPDIR)/$(am__dirstamp)
-src/hexpuzzle-raygui_file_dialog_impl.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-raylib_helper.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
@@ -516,6 +518,15 @@ src/hexpuzzle-win_anim.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-main.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+external/tinyfiledialogs/$(am__dirstamp):
+	@$(MKDIR_P) external/tinyfiledialogs
+	@: > external/tinyfiledialogs/$(am__dirstamp)
+external/tinyfiledialogs/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) external/tinyfiledialogs/$(DEPDIR)
+	@: > external/tinyfiledialogs/$(DEPDIR)/$(am__dirstamp)
+external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.$(OBJEXT):  \
+	external/tinyfiledialogs/$(am__dirstamp) \
+	external/tinyfiledialogs/$(DEPDIR)/$(am__dirstamp)
 external/cJSON/$(am__dirstamp):
 	@$(MKDIR_P) external/cJSON
 	@: > external/cJSON/$(am__dirstamp)
@@ -533,18 +544,21 @@ hexpuzzle$(EXEEXT): $(hexpuzzle_OBJECTS) $(hexpuzzle_DEPENDENCIES) $(EXTRA_hexpu
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 	-rm -f external/cJSON/*.$(OBJEXT)
+	-rm -f external/tinyfiledialogs/*.$(OBJEXT)
 	-rm -f src/*.$(OBJEXT)
 
 distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@external/cJSON/$(DEPDIR)/hexpuzzle-cJSON.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-anim_fsm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-classics.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-collection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-color.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-gui_browser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-gui_options.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-gui_random.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-hex.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-level.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-logging.Po@am__quote@
@@ -552,7 +566,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-nvdata.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-nvdata_finished.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-options.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raygui_file_dialog_impl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raygui_impl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raylib_helper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-shader.Po@am__quote@
@@ -662,6 +675,20 @@ src/hexpuzzle-gui_options.obj: src/gui_options.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-gui_options.obj `if test -f 'src/gui_options.c'; then $(CYGPATH_W) 'src/gui_options.c'; else $(CYGPATH_W) '$(srcdir)/src/gui_options.c'; fi`
 
+src/hexpuzzle-gui_random.o: src/gui_random.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-gui_random.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-gui_random.Tpo -c -o src/hexpuzzle-gui_random.o `test -f 'src/gui_random.c' || echo '$(srcdir)/'`src/gui_random.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-gui_random.Tpo src/$(DEPDIR)/hexpuzzle-gui_random.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/gui_random.c' object='src/hexpuzzle-gui_random.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-gui_random.o `test -f 'src/gui_random.c' || echo '$(srcdir)/'`src/gui_random.c
+
+src/hexpuzzle-gui_random.obj: src/gui_random.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-gui_random.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-gui_random.Tpo -c -o src/hexpuzzle-gui_random.obj `if test -f 'src/gui_random.c'; then $(CYGPATH_W) 'src/gui_random.c'; else $(CYGPATH_W) '$(srcdir)/src/gui_random.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-gui_random.Tpo src/$(DEPDIR)/hexpuzzle-gui_random.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/gui_random.c' object='src/hexpuzzle-gui_random.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-gui_random.obj `if test -f 'src/gui_random.c'; then $(CYGPATH_W) 'src/gui_random.c'; else $(CYGPATH_W) '$(srcdir)/src/gui_random.c'; fi`
+
 src/hexpuzzle-hex.o: src/hex.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-hex.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-hex.Tpo -c -o src/hexpuzzle-hex.o `test -f 'src/hex.c' || echo '$(srcdir)/'`src/hex.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-hex.Tpo src/$(DEPDIR)/hexpuzzle-hex.Po
@@ -759,20 +786,6 @@ src/hexpuzzle-raygui_impl.obj: src/raygui_impl.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/raygui_impl.c' object='src/hexpuzzle-raygui_impl.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-raygui_impl.obj `if test -f 'src/raygui_impl.c'; then $(CYGPATH_W) 'src/raygui_impl.c'; else $(CYGPATH_W) '$(srcdir)/src/raygui_impl.c'; fi`
-
-src/hexpuzzle-raygui_file_dialog_impl.o: src/raygui_file_dialog_impl.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-raygui_file_dialog_impl.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-raygui_file_dialog_impl.Tpo -c -o src/hexpuzzle-raygui_file_dialog_impl.o `test -f 'src/raygui_file_dialog_impl.c' || echo '$(srcdir)/'`src/raygui_file_dialog_impl.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-raygui_file_dialog_impl.Tpo src/$(DEPDIR)/hexpuzzle-raygui_file_dialog_impl.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/raygui_file_dialog_impl.c' object='src/hexpuzzle-raygui_file_dialog_impl.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-raygui_file_dialog_impl.o `test -f 'src/raygui_file_dialog_impl.c' || echo '$(srcdir)/'`src/raygui_file_dialog_impl.c
-
-src/hexpuzzle-raygui_file_dialog_impl.obj: src/raygui_file_dialog_impl.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-raygui_file_dialog_impl.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-raygui_file_dialog_impl.Tpo -c -o src/hexpuzzle-raygui_file_dialog_impl.obj `if test -f 'src/raygui_file_dialog_impl.c'; then $(CYGPATH_W) 'src/raygui_file_dialog_impl.c'; else $(CYGPATH_W) '$(srcdir)/src/raygui_file_dialog_impl.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-raygui_file_dialog_impl.Tpo src/$(DEPDIR)/hexpuzzle-raygui_file_dialog_impl.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/raygui_file_dialog_impl.c' object='src/hexpuzzle-raygui_file_dialog_impl.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-raygui_file_dialog_impl.obj `if test -f 'src/raygui_file_dialog_impl.c'; then $(CYGPATH_W) 'src/raygui_file_dialog_impl.c'; else $(CYGPATH_W) '$(srcdir)/src/raygui_file_dialog_impl.c'; fi`
 
 src/hexpuzzle-raylib_helper.o: src/raylib_helper.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-raylib_helper.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-raylib_helper.Tpo -c -o src/hexpuzzle-raylib_helper.o `test -f 'src/raylib_helper.c' || echo '$(srcdir)/'`src/raylib_helper.c
@@ -885,6 +898,20 @@ src/hexpuzzle-main.obj: src/main.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/main.c' object='src/hexpuzzle-main.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-main.obj `if test -f 'src/main.c'; then $(CYGPATH_W) 'src/main.c'; else $(CYGPATH_W) '$(srcdir)/src/main.c'; fi`
+
+external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.o: external/tinyfiledialogs/tinyfiledialogs.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.o -MD -MP -MF external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Tpo -c -o external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.o `test -f 'external/tinyfiledialogs/tinyfiledialogs.c' || echo '$(srcdir)/'`external/tinyfiledialogs/tinyfiledialogs.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Tpo external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/tinyfiledialogs/tinyfiledialogs.c' object='external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.o `test -f 'external/tinyfiledialogs/tinyfiledialogs.c' || echo '$(srcdir)/'`external/tinyfiledialogs/tinyfiledialogs.c
+
+external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.obj: external/tinyfiledialogs/tinyfiledialogs.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.obj -MD -MP -MF external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Tpo -c -o external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.obj `if test -f 'external/tinyfiledialogs/tinyfiledialogs.c'; then $(CYGPATH_W) 'external/tinyfiledialogs/tinyfiledialogs.c'; else $(CYGPATH_W) '$(srcdir)/external/tinyfiledialogs/tinyfiledialogs.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Tpo external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/tinyfiledialogs/tinyfiledialogs.c' object='external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.obj `if test -f 'external/tinyfiledialogs/tinyfiledialogs.c'; then $(CYGPATH_W) 'external/tinyfiledialogs/tinyfiledialogs.c'; else $(CYGPATH_W) '$(srcdir)/external/tinyfiledialogs/tinyfiledialogs.c'; fi`
 
 external/cJSON/hexpuzzle-cJSON.o: external/cJSON/cJSON.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT external/cJSON/hexpuzzle-cJSON.o -MD -MP -MF external/cJSON/$(DEPDIR)/hexpuzzle-cJSON.Tpo -c -o external/cJSON/hexpuzzle-cJSON.o `test -f 'external/cJSON/cJSON.c' || echo '$(srcdir)/'`external/cJSON/cJSON.c
@@ -1158,6 +1185,8 @@ distclean-generic:
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
 	-rm -f external/cJSON/$(DEPDIR)/$(am__dirstamp)
 	-rm -f external/cJSON/$(am__dirstamp)
+	-rm -f external/tinyfiledialogs/$(DEPDIR)/$(am__dirstamp)
+	-rm -f external/tinyfiledialogs/$(am__dirstamp)
 	-rm -f src/$(DEPDIR)/$(am__dirstamp)
 	-rm -f src/$(am__dirstamp)
 
@@ -1172,7 +1201,7 @@ clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf external/cJSON/$(DEPDIR) src/$(DEPDIR)
+	-rm -rf external/cJSON/$(DEPDIR) external/tinyfiledialogs/$(DEPDIR) src/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-tags
@@ -1220,7 +1249,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf external/cJSON/$(DEPDIR) src/$(DEPDIR)
+	-rm -rf external/cJSON/$(DEPDIR) external/tinyfiledialogs/$(DEPDIR) src/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

@@ -46,8 +46,6 @@ struct path_int {
 };
 typedef struct path_int path_int_t;
 
-Color path_type_color(path_type_t type);
-
 struct tile {
     /*
      * game attr

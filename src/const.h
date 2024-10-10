@@ -108,5 +108,13 @@
 #define NVDATA_FINISHED_LEVEL_FILE_NAME "finished_levels.dat"
 #define NVDATA_DEFAULT_BROWSE_PATH_NAME "levels"
 
+#ifndef MAX_FILEPATH_LENGTH
+    #if defined(_WIN32)
+        #define MAX_FILEPATH_LENGTH      256
+    #else
+        #define MAX_FILEPATH_LENGTH     4096
+    #endif
+#endif
+
 #endif /*CONST_H*/
 

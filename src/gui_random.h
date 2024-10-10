@@ -1,6 +1,6 @@
 /****************************************************************************
  *                                                                          *
- * raygui_file_dialog_impl.c                                                *
+ * gui_random.h                                                             *
  *                                                                          *
  * This file is part of hexpuzzle.                                          *
  *                                                                          *
@@ -19,17 +19,12 @@
  *                                                                          *
  ****************************************************************************/
 
-//#include "common.h"
-//#include "raylib.h"
-//#include "raygui/raygui.h"
+#ifndef GUI_RANDOM_H
+#define GUI_RANDOM_H
 
-#if !defined(RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT)
-#define RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT        24
-#endif
+void init_gui_random(void);
+void resize_gui_random(void);
+void draw_gui_random(void);
 
-#include <stdlib.h>
-
-#define GUI_WINDOW_FILE_DIALOG_IMPLEMENTATION
-#include "raygui/gui_window_file_dialog.h"
-
+#endif /*GUI_RANDOM_H*/
 
