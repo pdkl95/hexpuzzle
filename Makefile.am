@@ -67,6 +67,8 @@ hexpuzzle_SOURCES =                                    \
 
 hexpuzzle_SOURCES +=             		   \
 	external/raygui/raygui.h  		   \
+	external/pcg/pcg_basic.c                   \
+	external/pcg/pcg_basic.h                   \
 	external/tinyfiledialogs/tinyfiledialogs.c \
 	external/tinyfiledialogs/tinyfiledialogs.h \
 	external/cJSON/cJSON.c                     \

@@ -386,11 +386,15 @@ level_t *create_level(struct collection *collection)
 
     level->collection = collection;
 
-    static int seq = 0;
-    do {
-        seq++;
-        snprintf(level->name, NAME_MAXLEN, "%s-%d", LEVEL_DEFAULT_NAME, seq);
-    } while (collection && collection_level_name_exists(collection, level->name));
+    if (collection) {
+        static int seq = 0;
+        do {
+            seq++;
+            snprintf(level->name, NAME_MAXLEN, "%s-%d", LEVEL_DEFAULT_NAME, seq);
+        } while (collection && collection_level_name_exists(collection, level->name));
+    } else {
+        snprintf(level->name, NAME_MAXLEN, "%s-%d", LEVEL_DEFAULT_NAME, 0);
+    }
 
     level->radius = LEVEL_DEFAULT_RADIUS;
 
@@ -430,6 +434,40 @@ bool level_eq_tiles(level_t *level, level_t *other)
 void level_sort_tiles(level_t *level)
 {
     qsort(level->sorted_tiles, LEVEL_MAXTILES, sizeof(level_t *), compare_tiles);
+}
+
+int level_get_enabled_tiles(level_t *level)
+{
+    memset(level->enabled_tiles, 0, sizeof(level->enabled_tiles));
+
+    int num_enabled = 0;
+
+    for (int i=0; i<LEVEL_MAXTILES; i++) {
+        tile_t *tile = &(level->tiles[i]);
+        if (tile->enabled) {
+            level->enabled_tiles[num_enabled] = tile;
+            num_enabled++;
+        }
+    }
+
+    return num_enabled;
+}
+
+int level_get_enabled_positions(level_t *level)
+{
+    memset(level->enabled_positions, 0, sizeof(level->enabled_positions));
+
+    int num_enabled = 0;
+
+    for (int i=0; i<LEVEL_MAXTILES; i++) {
+        tile_t *tile = &(level->tiles[i]);
+        if (tile->enabled) {
+            level->enabled_positions[num_enabled] = tile->unsolved_pos;
+            num_enabled++;
+        }
+    }
+
+    return num_enabled;
 }
 
 tile_pos_t *level_get_center_tile_pos(level_t *level)
@@ -603,23 +641,7 @@ void level_update_ui_name(level_t *level, int idx)
 
 void level_unload(void)
 {
-    if (current_level) {
-        // unload level?
-        current_level = NULL;
-
-        switch (game_mode) {
-        case GAME_MODE_PLAY_LEVEL:
-            game_mode = GAME_MODE_PLAY_COLLECTION;
-            break;
-
-        case GAME_MODE_EDIT_LEVEL:
-            game_mode = GAME_MODE_EDIT_COLLECTION;
-            break;
-
-        default:
-            assert(false && "shouldn't be called in this game mode");
-        }
-    }
+    current_level = NULL;
 }
 
 void level_load(level_t *level)
@@ -1454,6 +1476,9 @@ void level_set_radius(level_t *level, int new_radius)
 
     //printf("change level radius from %d to %d\n", level->radius, new_radius);
 
+    used_tiles_t save_used_tiles = level->currently_used_tiles;
+    level_use_solved_tile_pos(level);
+
     while (new_radius > level->radius) {
         level->radius++;
         level_enable_ring(level, level->radius );
@@ -1463,6 +1488,7 @@ void level_set_radius(level_t *level, int new_radius)
         level->radius--;
         level_disable_ring(level, level->radius + 1);
     }
+    level->currently_used_tiles = save_used_tiles;
 }
 
 void level_win(level_t *level)

@@ -123,6 +123,7 @@ am_hexpuzzle_OBJECTS = src/hexpuzzle-anim_fsm.$(OBJEXT) \
 	src/hexpuzzle-tile_draw.$(OBJEXT) \
 	src/hexpuzzle-tile_pos.$(OBJEXT) src/hexpuzzle-util.$(OBJEXT) \
 	src/hexpuzzle-win_anim.$(OBJEXT) src/hexpuzzle-main.$(OBJEXT) \
+	external/pcg/hexpuzzle-pcg_basic.$(OBJEXT) \
 	external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.$(OBJEXT) \
 	external/cJSON/hexpuzzle-cJSON.$(OBJEXT)
 hexpuzzle_OBJECTS = $(am_hexpuzzle_OBJECTS)
@@ -359,7 +360,8 @@ hexpuzzle_SOURCES = src/anim_fsm.h src/anim_fsm.c src/classics.h \
 	src/tile.c src/tile_draw.h src/tile_draw.c src/tile_pos.h \
 	src/tile_pos.c src/util.h src/util.c src/win_anim.h \
 	src/win_anim.c src/common.h src/main.c \
-	external/raygui/raygui.h \
+	external/raygui/raygui.h external/pcg/pcg_basic.c \
+	external/pcg/pcg_basic.h \
 	external/tinyfiledialogs/tinyfiledialogs.c \
 	external/tinyfiledialogs/tinyfiledialogs.h \
 	external/cJSON/cJSON.c external/cJSON/cJSON.h
@@ -518,6 +520,15 @@ src/hexpuzzle-win_anim.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-main.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+external/pcg/$(am__dirstamp):
+	@$(MKDIR_P) external/pcg
+	@: > external/pcg/$(am__dirstamp)
+external/pcg/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) external/pcg/$(DEPDIR)
+	@: > external/pcg/$(DEPDIR)/$(am__dirstamp)
+external/pcg/hexpuzzle-pcg_basic.$(OBJEXT):  \
+	external/pcg/$(am__dirstamp) \
+	external/pcg/$(DEPDIR)/$(am__dirstamp)
 external/tinyfiledialogs/$(am__dirstamp):
 	@$(MKDIR_P) external/tinyfiledialogs
 	@: > external/tinyfiledialogs/$(am__dirstamp)
@@ -544,6 +555,7 @@ hexpuzzle$(EXEEXT): $(hexpuzzle_OBJECTS) $(hexpuzzle_DEPENDENCIES) $(EXTRA_hexpu
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 	-rm -f external/cJSON/*.$(OBJEXT)
+	-rm -f external/pcg/*.$(OBJEXT)
 	-rm -f external/tinyfiledialogs/*.$(OBJEXT)
 	-rm -f src/*.$(OBJEXT)
 
@@ -551,6 +563,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@external/cJSON/$(DEPDIR)/hexpuzzle-cJSON.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@external/pcg/$(DEPDIR)/hexpuzzle-pcg_basic.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-anim_fsm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-classics.Po@am__quote@
@@ -899,6 +912,20 @@ src/hexpuzzle-main.obj: src/main.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-main.obj `if test -f 'src/main.c'; then $(CYGPATH_W) 'src/main.c'; else $(CYGPATH_W) '$(srcdir)/src/main.c'; fi`
 
+external/pcg/hexpuzzle-pcg_basic.o: external/pcg/pcg_basic.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT external/pcg/hexpuzzle-pcg_basic.o -MD -MP -MF external/pcg/$(DEPDIR)/hexpuzzle-pcg_basic.Tpo -c -o external/pcg/hexpuzzle-pcg_basic.o `test -f 'external/pcg/pcg_basic.c' || echo '$(srcdir)/'`external/pcg/pcg_basic.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/pcg/$(DEPDIR)/hexpuzzle-pcg_basic.Tpo external/pcg/$(DEPDIR)/hexpuzzle-pcg_basic.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/pcg/pcg_basic.c' object='external/pcg/hexpuzzle-pcg_basic.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o external/pcg/hexpuzzle-pcg_basic.o `test -f 'external/pcg/pcg_basic.c' || echo '$(srcdir)/'`external/pcg/pcg_basic.c
+
+external/pcg/hexpuzzle-pcg_basic.obj: external/pcg/pcg_basic.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT external/pcg/hexpuzzle-pcg_basic.obj -MD -MP -MF external/pcg/$(DEPDIR)/hexpuzzle-pcg_basic.Tpo -c -o external/pcg/hexpuzzle-pcg_basic.obj `if test -f 'external/pcg/pcg_basic.c'; then $(CYGPATH_W) 'external/pcg/pcg_basic.c'; else $(CYGPATH_W) '$(srcdir)/external/pcg/pcg_basic.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/pcg/$(DEPDIR)/hexpuzzle-pcg_basic.Tpo external/pcg/$(DEPDIR)/hexpuzzle-pcg_basic.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/pcg/pcg_basic.c' object='external/pcg/hexpuzzle-pcg_basic.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o external/pcg/hexpuzzle-pcg_basic.obj `if test -f 'external/pcg/pcg_basic.c'; then $(CYGPATH_W) 'external/pcg/pcg_basic.c'; else $(CYGPATH_W) '$(srcdir)/external/pcg/pcg_basic.c'; fi`
+
 external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.o: external/tinyfiledialogs/tinyfiledialogs.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.o -MD -MP -MF external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Tpo -c -o external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.o `test -f 'external/tinyfiledialogs/tinyfiledialogs.c' || echo '$(srcdir)/'`external/tinyfiledialogs/tinyfiledialogs.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Tpo external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Po
@@ -1185,6 +1212,8 @@ distclean-generic:
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
 	-rm -f external/cJSON/$(DEPDIR)/$(am__dirstamp)
 	-rm -f external/cJSON/$(am__dirstamp)
+	-rm -f external/pcg/$(DEPDIR)/$(am__dirstamp)
+	-rm -f external/pcg/$(am__dirstamp)
 	-rm -f external/tinyfiledialogs/$(DEPDIR)/$(am__dirstamp)
 	-rm -f external/tinyfiledialogs/$(am__dirstamp)
 	-rm -f src/$(DEPDIR)/$(am__dirstamp)
@@ -1201,7 +1230,7 @@ clean-am: clean-binPROGRAMS clean-generic mostlyclean-am
 
 distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf external/cJSON/$(DEPDIR) external/tinyfiledialogs/$(DEPDIR) src/$(DEPDIR)
+	-rm -rf external/cJSON/$(DEPDIR) external/pcg/$(DEPDIR) external/tinyfiledialogs/$(DEPDIR) src/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-tags
@@ -1249,7 +1278,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf external/cJSON/$(DEPDIR) external/tinyfiledialogs/$(DEPDIR) src/$(DEPDIR)
+	-rm -rf external/cJSON/$(DEPDIR) external/pcg/$(DEPDIR) external/tinyfiledialogs/$(DEPDIR) src/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 

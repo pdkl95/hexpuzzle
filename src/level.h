@@ -62,9 +62,11 @@ struct level {
     int current_tile_write_idx;
     tile_t tiles[LEVEL_MAXTILES];
     tile_t *sorted_tiles[LEVEL_MAXTILES];
+    tile_t *enabled_tiles[LEVEL_MAXTILES];
 
     tile_pos_t solved_positions[LEVEL_MAXTILES];
     tile_pos_t unsolved_positions[LEVEL_MAXTILES];
+    tile_pos_t *enabled_positions[LEVEL_MAXTILES];
 
     hex_axial_t center;
 
@@ -136,6 +138,8 @@ void level_update_id(level_t *level);
 
 bool level_eq_tiles(level_t *level, level_t *other);
 void level_sort_tiles(level_t *level);
+int level_get_enabled_tiles(level_t *level);
+int level_get_enabled_positions(level_t *level);
 
 inline static bool level_using_solved_tiles(level_t *level)
 {
@@ -182,6 +186,7 @@ tile_pos_t *level_find_current_neighbor_tile_pos(level_t *level, tile_pos_t *pos
 
 void level_resize(level_t *level);
 void level_set_hover(level_t *level, IVector2 mouse_position);
+void level_swap_tile_pos(level_t *level, tile_pos_t *a, tile_pos_t *b);
 void level_drag_start(level_t *level);
 void level_drag_stop(level_t *level);
 void level_modify_hovered_feature(level_t *level);

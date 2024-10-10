@@ -192,23 +192,9 @@ void show_name_edit_dialog(void)
     }
 }
 
-void set_game_mode(game_mode_t new_mode)
+char *game_mode_t_str(game_mode_t mode)
 {
-    last_game_mode = game_mode;
-    game_mode = new_mode;
-}
-
-void prev_game_mode(void)
-{
-    game_mode_t tmp;
-    tmp = game_mode;
-    game_mode = last_game_mode;
-    last_game_mode = tmp;
-}
-
-char *game_mode_str(void)
-{
-    switch (game_mode) {
+    switch (mode) {
     case GAME_MODE_NULL:
         return "NULL";
 
@@ -238,6 +224,37 @@ char *game_mode_str(void)
     }
 }
 
+void set_game_mode(game_mode_t new_mode)
+{
+    last_game_mode = game_mode;
+    game_mode = new_mode;
+
+#if 0
+    printf("SET: game_mode = %s (prev = %s)\n",
+           game_mode_t_str(game_mode),
+           game_mode_t_str(last_game_mode));
+#endif
+}
+
+void prev_game_mode(void)
+{
+    game_mode_t tmp;
+    tmp = game_mode;
+    game_mode = last_game_mode;
+    last_game_mode = tmp;
+
+#if 0
+    printf("POP: game_mode = %s (prev = %s)\n",
+           game_mode_t_str(game_mode),
+           game_mode_t_str(last_game_mode));
+#endif
+}
+
+char *game_mode_str(void)
+{
+    return game_mode_t_str(game_mode);
+}
+
 void toggle_edit_mode(void)
 {
     switch (game_mode) {
@@ -246,19 +263,19 @@ void toggle_edit_mode(void)
         break;
 
     case GAME_MODE_PLAY_COLLECTION:
-        game_mode = GAME_MODE_EDIT_COLLECTION;
+        set_game_mode(GAME_MODE_EDIT_COLLECTION);
         break;
 
     case GAME_MODE_EDIT_COLLECTION:
-        game_mode = GAME_MODE_PLAY_COLLECTION;
+        set_game_mode(GAME_MODE_PLAY_COLLECTION);
         break;
 
     case GAME_MODE_PLAY_LEVEL:
-        game_mode = GAME_MODE_EDIT_LEVEL;
+        set_game_mode(GAME_MODE_EDIT_LEVEL);
         break;
 
     case GAME_MODE_EDIT_LEVEL:
-        game_mode = GAME_MODE_PLAY_LEVEL;
+        set_game_mode(GAME_MODE_PLAY_LEVEL);
         break;
 
     default:
@@ -280,6 +297,7 @@ static void return_from_level_callback(UNUSED level_t *level, UNUSED void *data)
     if (current_level) {
         level_unload();
     }
+    prev_game_mode();
 }
 
 void return_from_level(void)
@@ -317,9 +335,9 @@ void open_game_file(const char *path)
             level_play(level);
         }
     } else if (IS_COLLECTION_FILENAME(path)) {
-        game_mode = GAME_MODE_PLAY_COLLECTION;
+        set_game_mode(GAME_MODE_PLAY_COLLECTION);
     } else if (current_collection->dirpath) {
-        game_mode = GAME_MODE_PLAY_COLLECTION;
+        set_game_mode(GAME_MODE_PLAY_COLLECTION);
     } else {
         assert(0);
     }
