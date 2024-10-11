@@ -34,6 +34,10 @@ Rectangle gui_random_area_rect;
 Rectangle gui_random_play_button_rect;
 Rectangle gui_random_radius_rect;
 Rectangle gui_random_color_label_rect;
+Rectangle gui_random_gen_style_label_rect;
+Rectangle gui_random_gen_style_rect;
+Rectangle gui_random_difficulty_label_rect;
+Rectangle gui_random_difficulty_rect;
 Rectangle gui_random_seed_rect;
 Rectangle gui_random_enter_seed_rect;
 Rectangle gui_random_rng_seed_rect;
@@ -44,9 +48,32 @@ char gui_random_panel_text[] = "Random Level";
 char gui_random_play_button_text[] = "Play";
 char gui_random_radius_text[] = "Tile Radius  ";
 char gui_random_color_label_text[] = "Colors";
+char gui_random_gen_style_label_text[] = "Gen. Method";
+char gui_random_difficulty_label_text[] = "Difficulty";
 char gui_random_seed_text[] = "RNG Seed";
 char gui_random_enter_seed_text[] = "Enter Seed";
 char gui_random_rng_seed_text[] = "Randomize Seed";
+
+const char *gui_random_gen_styles[] = {
+    "Density / Scatter",
+    "Hamiltonian Path - DFS"
+};
+char *gui_random_gen_style_text = NULL;
+#define NUM_GEN_STYLES (sizeof(gui_random_gen_styles)/sizeof(char *))
+bool gui_random_gen_style_edit_mode = false;
+
+int gen_style = 1;
+
+const char *gui_random_difficulties[] = {
+    "Easy    (~2 paths/tile)",
+    "Medium (3~4 paths/tile)",
+    "Hard   (4~6 paths/tile)"
+};
+char *gui_random_difficulty_text = NULL;
+#define NUM_DIFFICULTIES (sizeof(gui_random_difficulties)/sizeof(char *))
+bool gui_random_difficulty_edit_mode = false;
+
+int difficulty = 1;
 
 int gui_random_radius = LEVEL_MIN_RADIUS;
 bool gui_random_color[PATH_TYPE_COUNT];
@@ -262,11 +289,54 @@ static level_t *generate_random_level(void)
     level_set_radius(level, gui_random_radius);
     int n = level_get_enabled_tiles(level);
 
-    generate_dfs_path(level, n);
-    generate_random_paths(level, n);
+    switch (difficulty) {
+    case 0: /* easy */
+        gui_random_min_path = 2;
+        gui_random_max_path = 3;
+        break;
+
+    case 1: /* medium */
+        gui_random_min_path = 3;
+        gui_random_max_path = 5;
+        break;
+
+    case 2: /* hard */
+        gui_random_min_path = 4;
+        gui_random_max_path = 6;
+        break;
+
+    default:
+        __builtin_unreachable();
+        assert(false && "should never reach here");
+    }
+
+    switch (gen_style) {
+    case 0:
+        generate_random_paths(level, n);
+        break;
+
+    case 1:
+        generate_dfs_path(level, n);
+        generate_random_paths(level, n);
+        break;
+
+    default:
+        __builtin_unreachable();
+        assert(false && "should never reach here");
+    }
+
     shuffle_tiles(level);
 
     return level;
+}
+
+static void regen_level(void)
+{
+    if (gui_random_level) {
+        destroy_level(gui_random_level);
+    }
+
+    gui_random_level = generate_random_level();
 }
 
 void init_gui_random(void)
@@ -279,6 +349,14 @@ void init_gui_random(void)
     }
 
     new_random_seed();
+
+    const char *join_str = TextJoin(gui_random_gen_styles,   NUM_GEN_STYLES,   ";");
+    gui_random_gen_style_text  = strdup(join_str);
+
+    join_str = TextJoin(gui_random_difficulties, NUM_DIFFICULTIES, ";");
+    gui_random_difficulty_text = strdup(join_str);
+
+    regen_level();
 }
 
 void resize_gui_random(void)
@@ -318,6 +396,36 @@ void resize_gui_random(void)
 
     gui_random_area_rect.y      += gui_random_color_label_rect.height + RAYGUI_ICON_SIZE;
     gui_random_area_rect.height -= gui_random_color_label_rect.height + RAYGUI_ICON_SIZE;
+
+    Vector2 gui_random_gen_style_label_text_size = MeasureGuiText(gui_random_gen_style_label_text);
+
+    gui_random_gen_style_label_rect.x      = gui_random_area_rect.x;
+    gui_random_gen_style_label_rect.y      = gui_random_area_rect.y;
+    gui_random_gen_style_label_rect.width  = gui_random_gen_style_label_text_size.x;
+    gui_random_gen_style_label_rect.height = TOOL_BUTTON_HEIGHT;;
+
+    gui_random_gen_style_rect.x      = gui_random_gen_style_label_rect.x + gui_random_gen_style_label_rect.width + RAYGUI_ICON_SIZE;
+    gui_random_gen_style_rect.y      = gui_random_gen_style_label_rect.y;
+    gui_random_gen_style_rect.width  = gui_random_area_rect.width - (gui_random_gen_style_rect.x - gui_random_gen_style_label_rect.x);
+    gui_random_gen_style_rect.height = gui_random_gen_style_label_rect.height;
+
+    gui_random_area_rect.y      += gui_random_gen_style_rect.height + RAYGUI_ICON_SIZE;
+    gui_random_area_rect.height -= gui_random_gen_style_rect.height + RAYGUI_ICON_SIZE;
+
+    Vector2 gui_random_difficulty_label_text_size = MeasureGuiText(gui_random_difficulty_label_text);
+
+    gui_random_difficulty_label_rect.x      = gui_random_area_rect.x;
+    gui_random_difficulty_label_rect.y      = gui_random_area_rect.y;
+    gui_random_difficulty_label_rect.width  = gui_random_difficulty_label_text_size.x;
+    gui_random_difficulty_label_rect.height = TOOL_BUTTON_HEIGHT;
+
+    gui_random_difficulty_rect.x      = gui_random_difficulty_label_rect.x + gui_random_difficulty_label_rect.width + RAYGUI_ICON_SIZE;
+    gui_random_difficulty_rect.y      = gui_random_difficulty_label_rect.y;
+    gui_random_difficulty_rect.width  = gui_random_area_rect.width - (gui_random_difficulty_rect.x - gui_random_difficulty_label_rect.x);
+    gui_random_difficulty_rect.height = gui_random_difficulty_label_rect.height;
+
+    gui_random_area_rect.y      += gui_random_difficulty_rect.height + RAYGUI_ICON_SIZE;
+    gui_random_area_rect.height -= gui_random_difficulty_rect.height + RAYGUI_ICON_SIZE;
 
     Vector2 gui_random_seed_text_size = MeasureGuiText(gui_random_seed_text);
 
@@ -427,16 +535,20 @@ void draw_gui_random(void)
     }
 
     if (GuiButton(gui_random_play_button_rect, gui_random_play_button_text)) {
-        if (gui_random_level) {
-            destroy_level(gui_random_level);
-        }
-
-        gui_random_level = generate_random_level();
-
         level_play(gui_random_level);
     }
 
     if (!colors_ok) {
         GuiEnable();
+    }
+
+    GuiLabel(gui_random_difficulty_label_rect, gui_random_difficulty_label_text);
+    if (GuiDropdownBox(gui_random_difficulty_rect, gui_random_difficulty_text, &difficulty, gui_random_difficulty_edit_mode)) {
+        gui_random_difficulty_edit_mode = !gui_random_difficulty_edit_mode;
+    }
+
+    GuiLabel(gui_random_gen_style_label_rect, gui_random_gen_style_label_text);
+    if (GuiDropdownBox(gui_random_gen_style_rect, gui_random_gen_style_text, &gen_style, gui_random_gen_style_edit_mode)) {
+        gui_random_gen_style_edit_mode = !gui_random_gen_style_edit_mode;
     }
 }
