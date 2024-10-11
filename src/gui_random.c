@@ -29,6 +29,8 @@
 
 #include "pcg/pcg_basic.h"
 
+//#define RANDOM_GEN_DEBUG
+
 Rectangle gui_random_panel_rect;
 Rectangle gui_random_area_rect;
 Rectangle gui_random_play_button_rect;
@@ -325,7 +327,9 @@ static level_t *generate_random_level(void)
         assert(false && "should never reach here");
     }
 
+#ifndef RANDOM_GEN_DEBUG
     shuffle_tiles(level);
+#endif
 
     return level;
 }
@@ -341,7 +345,11 @@ static void regen_level(void)
 
 void init_gui_random(void)
 {
+#ifdef RANDOM_GEN_DEBUG
+    gui_random_radius = 4;
+#else
     gui_random_radius = LEVEL_MIN_RADIUS;
+#endif
     gui_random_level = NULL;
 
     for (path_type_t type = (PATH_TYPE_NONE + 1); type < PATH_TYPE_COUNT; type++) {
@@ -495,6 +503,7 @@ static void draw_gui_random_colors(void)
         if (hover) {
             if (mouse_left_click) {
                 toggle_color(type);
+                regen_level();
             } else {
                 SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
             }
@@ -508,7 +517,11 @@ void draw_gui_random(void)
 {
     GuiPanel(gui_random_panel_rect, gui_random_panel_text);
 
+    int old_radius = gui_random_radius;
     GuiSpinner(gui_random_radius_rect, gui_random_radius_text, &gui_random_radius, LEVEL_MIN_RADIUS, LEVEL_MAX_RADIUS, false);
+    if (old_radius != gui_random_radius) {
+        regen_level();
+    }
 
     draw_gui_random_colors();
 
@@ -523,11 +536,13 @@ void draw_gui_random(void)
                PANEL_LABEL_FONT_SIZE, PANEL_LABEL_FONT_SPACING, panel_header_text_color);
 
 
-    if (GuiButton(gui_random_enter_seed_rect, gui_random_enter_seed_text)) { 
+    if (GuiButton(gui_random_enter_seed_rect, gui_random_enter_seed_text)) {
+        regen_level();
     }
 
     if (GuiButton(gui_random_rng_seed_rect, gui_random_rng_seed_text)) {
         new_random_seed();
+        regen_level();
     }
 
     if (!colors_ok) {
@@ -545,10 +560,12 @@ void draw_gui_random(void)
     GuiLabel(gui_random_difficulty_label_rect, gui_random_difficulty_label_text);
     if (GuiDropdownBox(gui_random_difficulty_rect, gui_random_difficulty_text, &difficulty, gui_random_difficulty_edit_mode)) {
         gui_random_difficulty_edit_mode = !gui_random_difficulty_edit_mode;
+        regen_level();
     }
 
     GuiLabel(gui_random_gen_style_label_rect, gui_random_gen_style_label_text);
     if (GuiDropdownBox(gui_random_gen_style_rect, gui_random_gen_style_text, &gen_style, gui_random_gen_style_edit_mode)) {
         gui_random_gen_style_edit_mode = !gui_random_gen_style_edit_mode;
+        regen_level();
     }
 }

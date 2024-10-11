@@ -47,6 +47,7 @@ tile_pos_t *init_tile_pos(tile_pos_t *pos, tile_t *tile, hex_axial_t addr)
     pos->tile = tile;
 
     pos->position = addr;
+    pos->swap_target = NULL;
     pos->hover_adjacent = NULL;
     pos->hover = false;
     pos->hover_center = false;
@@ -108,6 +109,12 @@ void tile_pos_unset_hover(tile_pos_t *pos)
     pos->hover_center = false;
 
     pos->hover_adjacent = NULL;
+
+    if (pos->swap_target) {
+        pos->swap_target->swap_target = NULL;
+        tile_pos_unset_hover(pos->swap_target);
+        pos->swap_target = NULL;
+    }
 }
 
 void tile_pos_toggle_fixed(tile_pos_t *pos)

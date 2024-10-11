@@ -111,8 +111,8 @@ void tile_draw_path(tile_pos_t *pos, bool finished)
         /* colored strips */
         Vector2 mid = pos->midpoints[i];
 
-
-        Color pcolor = path_type_color(pos->tile->path[i]);
+        tile_t *tile = pos->swap_target ? pos->swap_target->tile : pos->tile;
+        Color pcolor = path_type_color(tile->path[i]);
         if (!ColorEq(pcolor, path_color_none)) {
             if (finished) {
                 pcolor = ColorAlpha(pcolor, 0.666);
@@ -135,6 +135,21 @@ void tile_draw_path(tile_pos_t *pos, bool finished)
         tile_pos_t *n = pos->neighbors[i];
         DrawTextShadow(TextFormat("%d,%d", n->position.q, n->position.r), mlabel.x - 11, mlabel.y - 4, 16, RAYWHITE);
 #endif
+    }
+}
+
+void tile_draw_path_ghost(tile_pos_t *pos)
+{
+    for (hex_direction_t i=0; i<6; i++) {
+        /* colored strips */
+        Vector2 mid = pos->midpoints[i];
+
+        Color pcolor = path_type_color(pos->tile->path[i]);
+        if (!ColorEq(pcolor, path_color_none)) {
+            pcolor = ColorAlpha(pcolor, 0.666);
+
+            DrawLineEx(pos->center, mid, pos->line_width, pcolor);
+        }
     }
 }
 
@@ -186,7 +201,13 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
     }
 
     bool drag = (pos == drag_target) && !edit_mode_solved;
-    bool dragged_over = (!drag && drag_target && pos->hover);
+    bool dragged_over;
+
+    if (pos->swap_target) {
+        if (pos->swap_target == drag_target) {
+            dragged_over = true;
+        }
+    }
 
     if (pos->tile->hidden) {
         if (edit_mode) {
@@ -206,11 +227,14 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
 
     if (!pos->tile->fixed) {
         /* background */
-        Color bgcolor = drag
-            ? tile_bg_drag_color
-            : ((pos->hover && !edit_mode_solved)
-               ? tile_bg_hover_color
-               : tile_bg_color);
+        Color bgcolor = tile_bg_color;
+        if (dragged_over || (pos->hover && !edit_mode_solved)) {
+            bgcolor = tile_bg_hover_color;
+        }
+
+        if (drag) {
+            bgcolor = tile_bg_drag_color;
+        }
 
         if (finished) {
             float alpha = (1.0f + sinf(current_time * 0.666)) / 2.0f;
@@ -299,6 +323,14 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
     Vector2 text_size = MeasureTextEx(DEFAULT_GUI_FONT, coord_text, font_size, 1.0);
     DrawTextDropShadow(coord_text, pos->center.x - (text_size.x/2), pos->center.y + 14, font_size, WHITE, BLACK);
 #endif
+}
+
+void tile_draw_ghost(tile_pos_t *pos)
+{
+    DrawPoly(pos->center, 6, pos->size, 0.0f, ColorAlpha(tile_bg_color, 0.4));
+    tile_draw_path_ghost(pos);
+    DrawCircleV(pos->center, pos->center_circle_draw_radius, ColorAlpha(tile_center_color, 0.666));
+    DrawPolyLinesEx(pos->center, 6, pos->size, 0.0f, 2.0, ColorAlpha(tile_edge_drag_color, 0.7));
 }
 
 static float tile_draw_hash_wave(tile_pos_t *pos)

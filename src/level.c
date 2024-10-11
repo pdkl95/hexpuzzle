@@ -1063,8 +1063,15 @@ void level_set_hover(level_t *level, IVector2 mouse_position)
            level->hover);
 #endif
 
-    if (level->hover) {
-        if (level->hover->tile->enabled &&edit_mode_solved) {
+    if (level->hover && level->hover->tile && level->hover->tile->enabled) {
+        if (level->drag_target && (level->drag_target != level->hover)) {
+            level->hover->swap_target = level->drag_target;
+            level->drag_target->swap_target = level->hover;
+        } else {
+            level->hover->swap_target = NULL;
+        }
+
+        if (edit_mode_solved) {
             tile_pos_set_hover(level->hover, Vector2Subtract(level->mouse_pos, level->px_offset));
             level->hover_section  = level->hover->hover_section;
             level->hover_adjacent = level->hover->neighbors[level->hover_section];
@@ -1352,7 +1359,12 @@ void level_draw(level_t *level, bool finished)
 
             if (pos->tile->enabled) {
                 if (level->drag_target && pos->tile == level->drag_target->tile) {
-                    // defer until after bg tiles are drawn
+                    if (pos->swap_target) {
+                        // preview the swap
+                        tile_draw(pos, level->drag_target, finished, finished_color, finished_fade_in);
+                    } else {
+                        // defer until after bg tiles are drawn
+                    }
                 } else {
                     if (do_fade) {
                         rlPushMatrix();
@@ -1401,7 +1413,7 @@ void level_draw(level_t *level, bool finished)
                      level->drag_offset.y,
                      0.0);
 
-        tile_draw(level->drag_target, level->drag_target, finished, finished_color, finished_fade_in);
+        tile_draw_ghost(level->drag_target);
 
         /* if (finished) { */
         /*     BeginShaderMode(win_border_shader); */

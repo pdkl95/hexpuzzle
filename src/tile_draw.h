@@ -32,6 +32,7 @@ Color path_type_color(path_type_t type);
 Color path_type_highlight_color(path_type_t type);
 
 void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color finished_color, float finished_fade_in);
+void tile_draw_ghost(tile_pos_t *pos);
 void tile_draw_win_anim(tile_pos_t *pos, struct level *level);
 
 #endif /*TILE_DRAW_H*/

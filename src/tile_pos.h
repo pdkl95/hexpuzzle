@@ -54,8 +54,9 @@ struct tile_pos {
     bool hover_center;
     hex_direction_t hover_section;
 
-    struct tile_pos *hover_adjacent;
+    struct tile_pos *swap_target;
 
+    struct tile_pos *hover_adjacent;
 };
 typedef struct tile_pos tile_pos_t;
 

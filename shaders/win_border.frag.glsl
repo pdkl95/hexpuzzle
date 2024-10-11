@@ -52,27 +52,38 @@ void main()
     float path_highlight = fragColor.a;
 
     float spin_fade = 1.0;
+    float saturate = 0.0;
     if (path_highlight > 0.5) {
         float theta = atan(position.y/ position.x);
-        float spin = (theta * TAU) + (time * 3.57);
-        spin_fade = (sin(spin) + 1.0) / 2.0;
+        float spin = (theta * TAU) + (time * 3.57) - (dist_center * TAU * 2.0);
+        spin_fade = (sin(spin) + 1.0) * 0.5 + 0.3;
+        if (spin_fade > 1.0) {
+            saturate = fract(spin_fade);
+            spin_fade = 1.0;
+        }
     }
 
     float hue = fade.y;
     float fade_in_override = fade.z;
+    saturate *= fade_in_override;
 
     float wave_mix = (sin(1.0 * time) + 1.0) / 2.0;
 
     float wave = (radial_wave * 0.5) + (perlin_noise * 0.5);
     wave = mix(wave, radial_wave, wave_mix);
 
+    float base_wave = wave;
     wave *= spin_fade;
 
     vec3 hsv = vec3(hue, 0.7, clamp(wave, 0.0, 1.0));
     color = hsv2rgb(hsv);
 
     vec3 blank_color = vec3(0.19607843137254902);
-    color = mix(blank_color, color, fade_in_override + (1.0 - spin_fade));
+    float spin_extra = (1.0 - spin_fade) * fade_in_override;
+    color = mix(blank_color, color, fade_in_override + spin_extra);
+
+    vec3 saturate_color = vec3(1.0);
+    color = mix(color, saturate_color, min(saturate, (1.0-base_wave)));
 
     finalColor = clamp(vec4(color, 1.0), 0.0, 1.0);
 }
