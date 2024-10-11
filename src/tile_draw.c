@@ -105,6 +105,77 @@ static path_type_t get_next_path(tile_pos_t *pos)
     }
 }
 
+void tile_draw_path(tile_pos_t *pos, bool finished)
+{
+    for (hex_direction_t i=0; i<6; i++) {
+        /* colored strips */
+        Vector2 mid = pos->midpoints[i];
+
+
+        Color pcolor = path_type_color(pos->tile->path[i]);
+        if (!ColorEq(pcolor, path_color_none)) {
+            if (finished) {
+                pcolor = ColorAlpha(pcolor, 0.666);
+            }
+
+            DrawLineEx(pos->center, mid, pos->line_width, pcolor);
+        }
+
+#if 0
+        /* section index label */
+        Vector2 offset = Vector2Scale(Vector2Subtract(pos->center, mid), 0.2);;
+        Vector2 mlabel = Vector2Add(mid, offset);
+        DrawTextShadow(TextFormat("%d", i), mlabel.x - 5, mlabel.y - 9, 18, RAYWHITE);
+#endif
+
+#if 0
+        /* neighbor hex address label */
+        Vector2 offset = Vector2Scale(Vector2Subtract(pos->center, mid), 0.32);;
+        Vector2 mlabel = Vector2Add(mid, offset);
+        tile_pos_t *n = pos->neighbors[i];
+        DrawTextShadow(TextFormat("%d,%d", n->position.q, n->position.r), mlabel.x - 11, mlabel.y - 4, 16, RAYWHITE);
+#endif
+    }
+}
+
+void tile_draw_path_highlight(tile_pos_t *pos, bool finished, Color finished_color)
+{
+    for (hex_direction_t i=0; i<6; i++) {
+        /* colored strips */
+        Vector2 mid = pos->midpoints[i];
+
+        if (pos->tile->path[i] != PATH_TYPE_NONE) {
+            tile_pos_t *neighbor = pos->neighbors[i];
+            if (neighbor) {
+                hex_direction_t opposite = hex_opposite_direction(i);
+                if (neighbor->tile->path[opposite] == pos->tile->path[i]) {
+                    Color highlight_color;
+                    float line_width = 1.5;
+                    if (finished) {
+                        highlight_color = ColorAlpha(finished_color, 1.0);
+                        line_width = 2.5;
+                    } else {
+                        highlight_color = path_type_highlight_color(pos->tile->path[i]);
+                    }
+                    Vector2 path = Vector2Subtract(mid, pos->center);
+                    Vector2 perp = Vector2Normalize((Vector2){ path.y, -path.x});
+                    Vector2 shift = Vector2Scale(perp, pos->line_width / 2.0);
+
+                    Vector2 s1 = Vector2Add(pos->center, shift);
+                    Vector2 e1 = Vector2Add(mid,         shift);
+                    shift = Vector2Negate(shift);
+                    Vector2 s2 = Vector2Add(pos->center, shift);
+                    Vector2 e2 = Vector2Add(mid,         shift);
+
+                    highlight_color = ColorLerp(highlight_color, WHITE, 0.4);
+                    DrawLineEx(s1, e1, line_width, highlight_color);
+                    DrawLineEx(s2, e2, line_width, highlight_color);
+                }
+            }
+        }
+    }
+}
+
 void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color finished_color, float finished_fade_in)
 {
     assert_not_null(pos);
@@ -162,64 +233,9 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         }
     }
 
-    for (hex_direction_t i=0; i<6; i++) {
-        /* colored strips */
-        Vector2 mid = pos->midpoints[i];
-
-
-        Color pcolor = path_type_color(pos->tile->path[i]);
-        if (!ColorEq(pcolor, path_color_none)) {
-            if (finished) {
-                pcolor = ColorAlpha(pcolor, 0.666);
-            }
-
-            DrawLineEx(pos->center, mid, pos->line_width, pcolor);
-        }
-
-        if (pos->tile->path[i] != PATH_TYPE_NONE) {
-            tile_pos_t *neighbor = pos->neighbors[i];
-            if (neighbor) {
-                hex_direction_t opposite = hex_opposite_direction(i);
-                if (neighbor->tile->path[opposite] == pos->tile->path[i]) {
-                    Color highlight_color;
-                    float line_width = 1.5;
-                    if (finished) {
-                        highlight_color = ColorAlpha(finished_color, 0.9);
-                        line_width = 2.5;
-                    } else {
-                        highlight_color = path_type_highlight_color(pos->tile->path[i]);
-                    }
-                    Vector2 path = Vector2Subtract(mid, pos->center);
-                    Vector2 perp = Vector2Normalize((Vector2){ path.y, -path.x});
-                    Vector2 shift = Vector2Scale(perp, pos->line_width / 2.0);
-
-                    Vector2 s1 = Vector2Add(pos->center, shift);
-                    Vector2 e1 = Vector2Add(mid,         shift);
-                    shift = Vector2Negate(shift);
-                    Vector2 s2 = Vector2Add(pos->center, shift);
-                    Vector2 e2 = Vector2Add(mid,         shift);
-
-                    highlight_color = ColorLerp(highlight_color, WHITE, 0.4);
-                    DrawLineEx(s1, e1, line_width, highlight_color);
-                    DrawLineEx(s2, e2, line_width, highlight_color);
-                }
-            }
-        }
-
-#if 0
-        /* section index label */
-        Vector2 offset = Vector2Scale(Vector2Subtract(pos->center, mid), 0.2);;
-        Vector2 mlabel = Vector2Add(mid, offset);
-        DrawTextShadow(TextFormat("%d", i), mlabel.x - 5, mlabel.y - 9, 18, RAYWHITE);
-#endif
-
-#if 0
-        /* neighbor hex address label */
-        Vector2 offset = Vector2Scale(Vector2Subtract(pos->center, mid), 0.32);;
-        Vector2 mlabel = Vector2Add(mid, offset);
-        tile_pos_t *n = pos->neighbors[i];
-        DrawTextShadow(TextFormat("%d,%d", n->position.q, n->position.r), mlabel.x - 11, mlabel.y - 4, 16, RAYWHITE);
-#endif
+    tile_draw_path(pos, finished);
+    if (!finished) {
+        tile_draw_path_highlight(pos, finished, finished_color);
     }
 
     if (edit_solved_not_center && pos->hover_adjacent
@@ -306,6 +322,9 @@ void tile_draw_win_anim(tile_pos_t *pos, level_t *level)
     color.r = (255/3) * offset;
     color.g = (255 * tile_radius) / level->radius;
     color.b = (unsigned char)(255.0f * tile_draw_hash_wave(pos));
+    color.a = 0.0;
+
+    tile_draw_path_highlight(pos, true, color);
 
     float line_width = 2.0;
 

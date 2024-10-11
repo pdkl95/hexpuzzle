@@ -47,8 +47,16 @@ void main()
 
     vec3 color = vec3(0);
 
-    float tile_radius  = fragColor.r;
-    float perlin_noise = fragColor.b;
+    //float tile_radius    = fragColor.g;
+    float perlin_noise   = fragColor.b;
+    float path_highlight = fragColor.a;
+
+    float spin_fade = 1.0;
+    if (path_highlight > 0.5) {
+        float theta = atan(position.y/ position.x);
+        float spin = (theta * TAU) + (time * 3.57);
+        spin_fade = (sin(spin) + 1.0) / 2.0;
+    }
 
     float hue = fade.y;
     float fade_in_override = fade.z;
@@ -58,11 +66,13 @@ void main()
     float wave = (radial_wave * 0.5) + (perlin_noise * 0.5);
     wave = mix(wave, radial_wave, wave_mix);
 
+    wave *= spin_fade;
+
     vec3 hsv = vec3(hue, 0.7, clamp(wave, 0.0, 1.0));
     color = hsv2rgb(hsv);
 
     vec3 blank_color = vec3(0.19607843137254902);
-    color = mix(blank_color, color, fade_in_override);
+    color = mix(blank_color, color, fade_in_override + (1.0 - spin_fade));
 
     finalColor = clamp(vec4(color, 1.0), 0.0, 1.0);
 }

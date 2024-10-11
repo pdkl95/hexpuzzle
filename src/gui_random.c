@@ -51,7 +51,7 @@ char gui_random_rng_seed_text[] = "Randomize Seed";
 int gui_random_radius = LEVEL_MIN_RADIUS;
 bool gui_random_color[PATH_TYPE_COUNT];
 int gui_random_color_count = PATH_TYPE_COUNT - 1;
-int gui_random_min_path = 3;
+int gui_random_min_path = 2;
 int gui_random_max_path = 6;
 
 level_t *gui_random_level = NULL;
