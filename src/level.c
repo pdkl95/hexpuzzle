@@ -462,7 +462,7 @@ int level_get_enabled_positions(level_t *level)
     for (int i=0; i<LEVEL_MAXTILES; i++) {
         tile_t *tile = &(level->tiles[i]);
         if (tile->enabled) {
-            level->enabled_positions[num_enabled] = tile->unsolved_pos;
+            level->enabled_positions[num_enabled] = tile->unsolved_pos; 
             num_enabled++;
         }
     }

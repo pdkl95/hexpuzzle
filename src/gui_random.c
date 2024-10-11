@@ -50,6 +50,7 @@ char gui_random_rng_seed_text[] = "Randomize Seed";
 
 int gui_random_radius = LEVEL_MIN_RADIUS;
 bool gui_random_color[PATH_TYPE_COUNT];
+int gui_random_color_count = PATH_TYPE_COUNT - 1;
 int gui_random_min_path = 3;
 int gui_random_max_path = 6;
 
@@ -100,9 +101,15 @@ static int rng_color_count(void)
     return count;
 }
 
-static path_type_t rng_color(int count)
+static void toggle_color(path_type_t type)
 {
-    int skip = rng_get(count);
+    gui_random_color[type] = !gui_random_color[type];
+    gui_random_color_count = rng_color_count();
+}
+
+static path_type_t rng_color(void)
+{
+    int skip = rng_get(gui_random_color_count);
 
     for (path_type_t type = (PATH_TYPE_NONE + 1); type < PATH_TYPE_COUNT; type++) {
         if (gui_random_color[type]) {
@@ -123,8 +130,6 @@ static path_type_t rng_color(int count)
 
 static void generate_random_paths(level_t *level, int num_tiles)
 {
-    int color_count = rng_color_count();
-
     for (int i=0; i<num_tiles; i++) {
         int path_delta = gui_random_min_path - gui_random_min_path;
         int path_rand  = rng_get(path_delta);
@@ -138,7 +143,7 @@ static void generate_random_paths(level_t *level, int num_tiles)
                 num_paths--;
             } else {
                 tile_pos_t *neighbor = pos->neighbors[dir];
-                if (!neighbor->tile->enabled) {
+                if (neighbor && neighbor->tile && !neighbor->tile->enabled) {
                     num_paths--;
                 }
             }
@@ -157,9 +162,9 @@ static void generate_random_paths(level_t *level, int num_tiles)
                 }
 
                 tile_pos_t *neighbor = pos->neighbors[idx];
-                if (neighbor->tile->enabled) {
+                if (neighbor && neighbor->tile && neighbor->tile->enabled) {
                     hex_direction_t opp_idx = hex_opposite_direction(idx);
-                    tile->path[idx] = rng_color(color_count);
+                    tile->path[idx] = rng_color();
                     neighbor->tile->path[opp_idx] = tile->path[idx];
                     num_paths--;
                     break;
@@ -167,6 +172,64 @@ static void generate_random_paths(level_t *level, int num_tiles)
             }
         }
     }
+}
+
+static void set_all_hover(level_t *level, bool value)
+{
+    for (int i=0; i<LEVEL_MAXTILES; i++) {
+        tile_t *tile = &(level->tiles[i]);
+        tile->unsolved_pos->hover = value;
+    }
+}
+
+static void dfs_tile_pos(tile_pos_t *pos)
+{
+    bool todo[PATH_TYPE_COUNT] = {0};
+    int todo_count = 0;
+
+    pos->hover = true;
+
+    for (hex_direction_t dir=0; dir<6; dir++) {
+        tile_pos_t *neighbor = pos->neighbors[dir];
+        if (neighbor && neighbor->tile && neighbor->tile->enabled && !neighbor->hover) {
+            todo[dir] = true;
+            todo_count++;
+        }
+    }
+
+    while (todo_count > 0) {
+        int offset = rng_get(6);
+        for (hex_direction_t dir=0; dir<6; dir++) {
+            hex_direction_t idx = (dir + offset) % 6;
+            if (todo[idx]) {
+                todo[idx] = false;
+
+                tile_pos_t *neighbor = pos->neighbors[idx];
+
+                if (neighbor && neighbor->tile && neighbor->tile->enabled && !neighbor->hover) {
+                    hex_direction_t opp_idx = hex_opposite_direction(idx);
+                    pos->tile->path[idx] = rng_color();
+                    neighbor->tile->path[opp_idx] = pos->tile->path[idx];
+
+                    dfs_tile_pos(neighbor);
+                }
+                break;
+            }
+        }
+
+        todo_count--;
+    }
+}
+
+static void generate_dfs_path(level_t *level, int num_tiles)
+{
+    int start_idx = rng_get(num_tiles);
+    tile_t *start = level->enabled_tiles[start_idx];
+    tile_pos_t *start_pos = start->solved_pos;
+
+    set_all_hover(level, false);
+    dfs_tile_pos(start_pos);
+    set_all_hover(level, false);
 }
 
 static void shuffle_tiles(level_t *level)
@@ -199,6 +262,7 @@ static level_t *generate_random_level(void)
     level_set_radius(level, gui_random_radius);
     int n = level_get_enabled_tiles(level);
 
+    generate_dfs_path(level, n);
     generate_random_paths(level, n);
     shuffle_tiles(level);
 
@@ -322,7 +386,7 @@ static void draw_gui_random_colors(void)
 
         if (hover) {
             if (mouse_left_click) {
-                gui_random_color[type] = !gui_random_color[type];
+                toggle_color(type);
             } else {
                 SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
             }
