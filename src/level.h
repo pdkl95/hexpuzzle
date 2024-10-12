@@ -200,6 +200,7 @@ void level_enable_ring(level_t *level, int radius);
 void level_disable_ring(level_t *level, int radius);
 void level_set_radius(level_t *level, int new_radius);
 void level_draw(level_t *level, bool finished);
+void level_preview(level_t *level, Rectangle rect);
 void level_win(level_t *level);
 void level_unwin(level_t *level);
 bool level_update_fade(level_t *level);

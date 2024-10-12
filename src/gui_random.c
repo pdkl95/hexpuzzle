@@ -41,8 +41,10 @@ Rectangle gui_random_gen_style_rect;
 Rectangle gui_random_difficulty_label_rect;
 Rectangle gui_random_difficulty_rect;
 Rectangle gui_random_seed_rect;
+Rectangle gui_random_seed_bg_rect;
 Rectangle gui_random_enter_seed_rect;
 Rectangle gui_random_rng_seed_rect;
+Rectangle gui_random_preview_rect;
 
 Vector2 seed_text_location;
 
@@ -53,8 +55,9 @@ char gui_random_color_label_text[] = "Colors";
 char gui_random_gen_style_label_text[] = "Gen. Method";
 char gui_random_difficulty_label_text[] = "Difficulty";
 char gui_random_seed_text[] = "RNG Seed";
-char gui_random_enter_seed_text[] = "Enter Seed";
-char gui_random_rng_seed_text[] = "Randomize Seed";
+char gui_random_rng_seed_text[] = "Randomize";
+char gui_random_enter_seed_text_str[] = "Enter";
+char *gui_random_enter_seed_text = NULL;
 
 const char *gui_random_gen_styles[] = {
     "Density / Scatter",
@@ -86,6 +89,8 @@ int gui_random_max_path = 6;
 level_t *gui_random_level = NULL;
 uint64_t gui_random_seed;
 char *gui_random_seed_str = NULL;
+
+Color seed_bg_color;
 
 pcg32_random_t rng;
 
@@ -287,6 +292,8 @@ static level_t *generate_random_level(void)
     rng_seed();
 
     level_t *level = create_level(NULL);
+    level_reset(level);
+
     snprintf(level->name, NAME_MAXLEN, "%s", TextFormat("%d", gui_random_seed));
     level_set_radius(level, gui_random_radius);
     int n = level_get_enabled_tiles(level);
@@ -331,6 +338,11 @@ static level_t *generate_random_level(void)
     shuffle_tiles(level);
 #endif
 
+    level_use_unsolved_tile_pos(level);
+
+    level->fade_value       = 1.0f;
+    level->fade_value_eased = 1.0f;
+
     return level;
 }
 
@@ -358,6 +370,15 @@ void init_gui_random(void)
 
     new_random_seed();
 
+    seed_bg_color = ColorBrightness(tile_bg_color, -0.15);
+
+    SAFEFREE(gui_random_enter_seed_text);
+    SAFEFREE(gui_random_gen_style_text);
+    SAFEFREE(gui_random_difficulty_text);
+
+    //gui_random_enter_seed_text = strdup(GuiIconText(ICON_PENCIL, gui_random_enter_seed_text_str));
+    gui_random_enter_seed_text = strdup(GuiIconText(ICON_PENCIL, NULL));
+
     const char *join_str = TextJoin(gui_random_gen_styles,   NUM_GEN_STYLES,   ";");
     gui_random_gen_style_text  = strdup(join_str);
 
@@ -372,8 +393,8 @@ void resize_gui_random(void)
     gui_random_panel_rect.width  = window_size.x * 0.4;
     gui_random_panel_rect.height = window_size.y * 0.45;
 
-    MINVAR(gui_random_panel_rect.width,  400);
-    MINVAR(gui_random_panel_rect.height, 450);
+    MINVAR(gui_random_panel_rect.width,  350);
+    MINVAR(gui_random_panel_rect.height, 500);
 
     gui_random_panel_rect.x = (window_size.x / 2) - (gui_random_panel_rect.width  / 2);
     gui_random_panel_rect.y = (window_size.y / 2) - (gui_random_panel_rect.height / 2);
@@ -445,25 +466,37 @@ void resize_gui_random(void)
     seed_text_location.x = gui_random_seed_rect.x + gui_random_seed_rect.width + RAYGUI_ICON_SIZE;
     seed_text_location.y = gui_random_seed_rect.y;
 
-    Vector2 gui_random_enter_seed_text_size = MeasureGuiText(gui_random_enter_seed_text);
     Vector2 gui_random_rng_seed_text_size   = MeasureGuiText(gui_random_rng_seed_text);
-    float max_seed_text_width = MAX(gui_random_enter_seed_text_size.x,
-                                    gui_random_rng_seed_text_size.x);
 
-    gui_random_enter_seed_rect.x      = seed_text_location.x;
-    gui_random_enter_seed_rect.y      = seed_text_location.y + gui_random_seed_rect.height + RAYGUI_ICON_SIZE;
-    gui_random_enter_seed_rect.width  = max_seed_text_width;
-    gui_random_enter_seed_rect.height = TOOL_BUTTON_HEIGHT;
-
-    gui_random_rng_seed_rect.x      = seed_text_location.x;
-    gui_random_rng_seed_rect.y      = gui_random_enter_seed_rect.y + gui_random_enter_seed_rect.height + RAYGUI_ICON_SIZE;
-    gui_random_rng_seed_rect.width  = max_seed_text_width;
+    gui_random_rng_seed_rect.y      = seed_text_location.y;
+    gui_random_rng_seed_rect.width  = gui_random_rng_seed_text_size.x;
     gui_random_rng_seed_rect.height = TOOL_BUTTON_HEIGHT;
+    gui_random_rng_seed_rect.x      = gui_random_area_rect.x + gui_random_area_rect.width - gui_random_rng_seed_rect.width;
+
+    gui_random_enter_seed_rect.y      = seed_text_location.y;
+    gui_random_enter_seed_rect.width  = TOOL_BUTTON_WIDTH;
+    gui_random_enter_seed_rect.height = TOOL_BUTTON_HEIGHT;
+    gui_random_enter_seed_rect.x      = gui_random_rng_seed_rect.x - RAYGUI_ICON_SIZE - gui_random_enter_seed_rect.width;
+
+    gui_random_seed_bg_rect.x      = seed_text_location.x - 6;
+    gui_random_seed_bg_rect.y      = seed_text_location.y - 2;
+    gui_random_seed_bg_rect.width  = 2 + gui_random_enter_seed_rect.x - gui_random_seed_bg_rect.x - RAYGUI_ICON_SIZE;
+    gui_random_seed_bg_rect.height = 3 + gui_random_enter_seed_rect.height;
+
+    gui_random_area_rect.y      += gui_random_rng_seed_rect.height + RAYGUI_ICON_SIZE;
+    gui_random_area_rect.height -= gui_random_rng_seed_rect.height + RAYGUI_ICON_SIZE;
 
     gui_random_play_button_rect.height = 3 * RAYGUI_ICON_SIZE;
     gui_random_play_button_rect.width  = gui_random_area_rect.width;
     gui_random_play_button_rect.x      = gui_random_area_rect.x;
     gui_random_play_button_rect.y      = gui_random_area_rect.y + gui_random_area_rect.height - gui_random_play_button_rect.height;
+
+    gui_random_area_rect.height -= gui_random_play_button_rect.height + RAYGUI_ICON_SIZE;
+
+    gui_random_preview_rect.height = gui_random_area_rect.height;
+    gui_random_preview_rect.width  = MIN(gui_random_preview_rect.height, gui_random_area_rect.width);
+    gui_random_preview_rect.y      = gui_random_area_rect.y;
+    gui_random_preview_rect.x      = gui_random_area_rect.x + (gui_random_area_rect.width / 2) - (gui_random_preview_rect.width / 2);
 }
 
 static void draw_gui_random_colors(void)
@@ -532,6 +565,7 @@ void draw_gui_random(void)
 
     GuiLabel(gui_random_seed_rect, gui_random_seed_text);
 
+    DrawRectangleRec(gui_random_seed_bg_rect, seed_bg_color);
     DrawTextEx(PANEL_LABEL_FONT, gui_random_seed_str, seed_text_location,
                PANEL_LABEL_FONT_SIZE, PANEL_LABEL_FONT_SPACING, panel_header_text_color);
 
@@ -555,6 +589,11 @@ void draw_gui_random(void)
 
     if (!colors_ok) {
         GuiEnable();
+    }
+
+    if (gui_random_level) {
+        DrawRectangleRec(gui_random_preview_rect, BLACK);
+        level_preview(gui_random_level, gui_random_preview_rect);
     }
 
     GuiLabel(gui_random_difficulty_label_rect, gui_random_difficulty_label_text);

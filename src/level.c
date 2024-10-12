@@ -1440,6 +1440,23 @@ void level_draw(level_t *level, bool finished)
 #endif
 }
 
+void level_preview(level_t *level, Rectangle rect)
+{
+    rlPushMatrix();
+
+    rlTranslatef(rect.x,
+                 rect.y,
+                 0.0f);
+
+    rlScalef(rect.width  / window_size.x,
+             rect.height / window_size.y,
+             1.0f);
+
+    level_draw(level, false);
+
+    rlPopMatrix();
+}
+
 void level_enable_spiral(level_t *level, int radius)
 {
     tile_pos_t *pos = level_get_center_tile_pos(level);
