@@ -172,7 +172,9 @@ dnl =================================
 dnl ===  pkg-config dependencies  ===
 dnl =================================
 
-#PKG_CHECK_MODULES([GL],     [gl     >= 10.0.4])
+AS_IF([test "x$enable_web" != "xyes"], [
+    PKG_CHECK_MODULES([GL],     [gl     >= 10.0.4])
+])
 PKG_CHECK_MODULES([RAYLIB], [raylib >=  5.0.0])
  
 ALL_PKG_CFLAGS="$GL_CFLAGS $RAYLIB_CFLAGS"
