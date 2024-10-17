@@ -22,7 +22,7 @@
 #include "common.h"
 #include "shader.h"
 
-#include "win_border.frag.h"
+#include "data_shaders.h"
 
 Shader win_border_shader;
 win_border_shader_loc_t win_border_shader_loc;

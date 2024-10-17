@@ -320,7 +320,6 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = subdir-objects
-SUFFIXES = .glsl
 ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -Wall -Wextra
 CLASSICS_LEVELS = \
@@ -329,13 +328,22 @@ CLASSICS_LEVELS = \
 	levels/classics/3-green.hexlevelpack \
 	levels/classics/4-yellow.hexlevelpack
 
+FONTS = \
+	fonts/FiraSansOT-Medium.otf \
+	fonts/SourceSansPro-Semibold.ttf \
+	fonts/TerminusMedium-4.38.ttf
+
+SHADERS = \
+	shaders/win_border.frag.glsl
+
 EXTRA_DIST = \
 	README.md \
 	lib/gnugetopt.h \
 	lib/getopt.c \
 	lib/getopt1.c \
 	$(CLASSICS_LEVELS) \
-	shaders/win_border.frag.glsl
+	$(FONTS) \
+	$(SHADERS)
 
 @BUILD_WEB_FALSE@COMMON_PROG_CFLAGS = -DPLATFORM=PLATFORM_DESKTOP \
 @BUILD_WEB_FALSE@	-DPLATFORM_DESKTOP -I$(top_srcdir)/src \
@@ -372,8 +380,9 @@ hexpuzzle_SOURCES = src/anim_fsm.h src/anim_fsm.c src/classics.h \
 	external/tinyfiledialogs/tinyfiledialogs.h \
 	external/cJSON/cJSON.c external/cJSON/cJSON.h
 dist_EXTRA_hexpuzzle_SOURCES = \
-	src/classics_levels.h  \
-	shaders/win_border.frag.h
+	src/data_classics_levels.h  \
+	src/data_fonts.h            \
+	src/data_shaders.h
 
 BUILT_SOURCES = \
 	$(dist_EXTRA_hexpuzzle_SOURCES)
@@ -385,7 +394,7 @@ all: $(BUILT_SOURCES) config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
-.SUFFIXES: .glsl .c .h .o .obj
+.SUFFIXES: .c .o .obj
 am--refresh: Makefile
 	@:
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
@@ -1347,12 +1356,19 @@ XXD ?= xxd
 @BUILD_WEB_TRUE@clean-local:
 @BUILD_WEB_TRUE@	rm -f hexpuzzle.js hexpuzzle.wasm
 
-.glsl.h:
-	$(AM_V_GEN)$(XXD) -i $^ > $@
+src/data_classics_levels.h: $(CLASSICS_LEVELS)
+	$(AM_V_at)rm -f $@
+	$(AM_V_GEN)cd $(top_srcdir) && for file in $^ ; do \
+	    $(XXD) -i "$${file}" >> $@ ; \
+	done
 
-win_border.frag.h: win_border.frag.glsl
+src/data_fonts.h: $(FONTS)
+	$(AM_V_at)rm -f $@
+	$(AM_V_GEN)cd $(top_srcdir) && for file in $^ ; do \
+	    $(XXD) -i "$${file}" >> $@ ; \
+	done
 
-src/classics_levels.h: $(CLASSICS_LEVELS)
+src/data_shaders.h: $(SHADERS)
 	$(AM_V_at)rm -f $@
 	$(AM_V_GEN)cd $(top_srcdir) && for file in $^ ; do \
 	    $(XXD) -i "$${file}" >> $@ ; \

@@ -2,6 +2,7 @@
 
 #ifdef GL_ES
 precision mediump float;
+#define in
 #endif
 
 // Input vertex attributes (from vertex shader)

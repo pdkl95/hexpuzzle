@@ -21,24 +21,30 @@
 
 #include "common.h"
 #include "fonts.h"
+#include "data_fonts.h"
 
-Font font16;
-Font font18;
 Font font20;
+Font font18;
+Font font16;
 
 void load_fonts(void)
 {
-    //font20 = LoadFont("fonts/terminus-20.png");
-    font20 = LoadFontEx("fonts/TerminusMedium-4.38.ttf", 20, NULL, 0);
+    font20 = LoadFontFromMemory(".ttf",
+                                fonts_TerminusMedium_4_38_ttf,
+                                fonts_TerminusMedium_4_38_ttf_len,
+                                20, NULL, 0);
     SetTextureFilter(font20.texture, TEXTURE_FILTER_POINT);
 
-    //font18 = LoadFont("fonts/fira-18.png");
-    font18 = LoadFontEx("fonts/FiraSansOT-Medium.otf", 36, NULL, 0);
+    font18 = LoadFontFromMemory(".otf",
+                                fonts_FiraSansOT_Medium_otf,
+                                fonts_FiraSansOT_Medium_otf_len,
+                                36, NULL, 0);
     SetTextureFilter(font18.texture, TEXTURE_FILTER_BILINEAR);
 
-    //font16 = LoadFont("fonts/sourcecodesanspro-semibold-16.png");
-    font16 = LoadFontEx("fonts/SourceSansPro-Semibold.ttf", 32, NULL, 0);
-    //font16 = LoadFontEx("fonts/TerminusMedium-4.38.ttf", 16, NULL, 0);
+    font16 = LoadFontFromMemory(".ttf",
+                                fonts_SourceSansPro_Semibold_ttf,
+                                fonts_SourceSansPro_Semibold_ttf_len,
+                                32, NULL, 0);
     SetTextureFilter(font16.texture, TEXTURE_FILTER_BILINEAR);
 }
 

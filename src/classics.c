@@ -21,7 +21,7 @@
 
 #include "common.h"
 #include "classics.h"
-#include "classics_levels.h"
+#include "data_classics_levels.h"
 
 void open_classics_game_pack(int n)
 {

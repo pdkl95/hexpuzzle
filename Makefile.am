@@ -1,7 +1,5 @@
 AUTOMAKE_OPTIONS = subdir-objects
 
-SUFFIXES = .glsl
-
 ACLOCAL_AMFLAGS = -I m4
 
 AM_CPPFLAGS = -Wall -Wextra
@@ -14,6 +12,13 @@ CLASSICS_LEVELS = \
 	levels/classics/3-green.hexlevelpack \
 	levels/classics/4-yellow.hexlevelpack
 
+FONTS = \
+	fonts/FiraSansOT-Medium.otf \
+	fonts/SourceSansPro-Semibold.ttf \
+	fonts/TerminusMedium-4.38.ttf
+
+SHADERS = \
+	shaders/win_border.frag.glsl
 
 EXTRA_DIST = \
 	README.md \
@@ -21,7 +26,8 @@ EXTRA_DIST = \
 	lib/getopt.c \
 	lib/getopt1.c \
 	$(CLASSICS_LEVELS) \
-	shaders/win_border.frag.glsl
+	$(FONTS) \
+	$(SHADERS)
 
 if BUILD_WEB
 COMMON_PROG_CFLAGS = \
@@ -103,16 +109,24 @@ hexpuzzle_SOURCES +=             		   \
 	external/cJSON/cJSON.c                     \
 	external/cJSON/cJSON.h
 
-dist_EXTRA_hexpuzzle_SOURCES = \
-	src/classics_levels.h  \
-	shaders/win_border.frag.h
+dist_EXTRA_hexpuzzle_SOURCES =      \
+	src/data_classics_levels.h  \
+	src/data_fonts.h            \
+	src/data_shaders.h
 
-.glsl.h:
-	$(AM_V_GEN)$(XXD) -i $^ > $@
+src/data_classics_levels.h: $(CLASSICS_LEVELS)
+	$(AM_V_at)rm -f $@
+	$(AM_V_GEN)cd $(top_srcdir) && for file in $^ ; do \
+	    $(XXD) -i "$${file}" >> $@ ; \
+	done
 
-win_border.frag.h: win_border.frag.glsl
+src/data_fonts.h: $(FONTS)
+	$(AM_V_at)rm -f $@
+	$(AM_V_GEN)cd $(top_srcdir) && for file in $^ ; do \
+	    $(XXD) -i "$${file}" >> $@ ; \
+	done
 
-src/classics_levels.h: $(CLASSICS_LEVELS)
+src/data_shaders.h: $(SHADERS)
 	$(AM_V_at)rm -f $@
 	$(AM_V_GEN)cd $(top_srcdir) && for file in $^ ; do \
 	    $(XXD) -i "$${file}" >> $@ ; \
