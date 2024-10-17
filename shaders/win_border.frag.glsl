@@ -1,8 +1,12 @@
-#version 330
+#version 100
+
+#ifdef GL_ES
+precision mediump float;
+#endif
 
 // Input vertex attributes (from vertex shader)
-in vec2 fragTexCoord;
-in vec4 fragColor;
+varying in vec2 fragTexCoord;
+varying in vec4 fragColor;
 
 // Input uniform values
 uniform vec2 resolution;
@@ -10,7 +14,7 @@ uniform float time;
 uniform vec4 fade;
 
 // Output fragment color
-out vec4 finalColor;
+//out vec4 finalColor;
 
 #define TAU 6.283185307179586
 
@@ -85,5 +89,5 @@ void main()
     vec3 saturate_color = vec3(1.0);
     color = mix(color, saturate_color, min(saturate, (1.0-base_wave)));
 
-    finalColor = clamp(vec4(color, 1.0), 0.0, 1.0);
+    gl_FragColor = clamp(vec4(color, 1.0), 0.0, 1.0);
 }

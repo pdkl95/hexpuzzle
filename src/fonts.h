@@ -1,6 +1,6 @@
 /****************************************************************************
  *                                                                          *
- * gui_random.h                                                             *
+ * fonts.h                                                                  *
  *                                                                          *
  * This file is part of hexpuzzle.                                          *
  *                                                                          *
@@ -19,13 +19,26 @@
  *                                                                          *
  ****************************************************************************/
 
-#ifndef GUI_RANDOM_H
-#define GUI_RANDOM_H
+#ifndef FONTS_H
+#define FONTS_H
 
-void init_gui_random(void);
-void cleanup_gui_random(void);
-void resize_gui_random(void);
-void draw_gui_random(void);
+extern Font font16;
+extern Font font18;
+extern Font font20;
 
-#endif /*GUI_RANDOM_H*/
+void load_fonts(void);
+void unload_fonts(void);
+
+void set_gui_font20(void);
+void set_gui_font18(void);
+void set_gui_font16(void);
+void set_default_gui_font(void);
+
+#define MeasureGuiText(str)                  \
+    MeasureTextEx(DEFAULT_GUI_FONT,          \
+                  str,                       \
+                  DEFAULT_GUI_FONT_SIZE,     \
+                  DEFAULT_GUI_FONT_SPACING)
+
+#endif /*FONTS_H*/
 

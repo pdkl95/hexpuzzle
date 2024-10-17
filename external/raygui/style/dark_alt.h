@@ -556,6 +556,8 @@ static const GlyphInfo darkFontGlyphs[95] = {
     { 126, 1, 8, 7, { 0 }},
 };
 
+Font font = { 0 };
+
 // Style loading function: dark
 static void GuiLoadStyleDark(void)
 {
@@ -572,7 +574,7 @@ static void GuiLoadStyleDark(void)
     unsigned char *data = DecompressData(darkFontData, DARK_STYLE_FONT_ATLAS_COMP_SIZE, &darkFontDataSize);
     Image imFont = { data, 256, 256, 1, 2 };
 
-    Font font = { 0 };
+
     font.baseSize = 16;
     font.glyphCount = 95;
 
@@ -601,4 +603,9 @@ static void GuiLoadStyleDark(void)
 
     // TODO: Custom user style setup: Set specific properties here (if required)
     // i.e. Controls specific BORDER_WIDTH, TEXT_PADDING, TEXT_ALIGNMENT
+}
+
+static void GuiUnloadStyleDark(void)
+{
+    UnloadFont(font);
 }

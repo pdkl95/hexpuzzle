@@ -50,6 +50,10 @@ void init_gui_options(void)
     resize_gui_options();
 }
 
+void cleanup_gui_options(void)
+{
+}
+
 void resize_gui_options(void)
 {
     options_panel_rect.width  = window_size.x * 0.65;

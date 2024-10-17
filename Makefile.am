@@ -74,6 +74,7 @@ hexpuzzle_SOURCES =                                    \
 	src/collection.h        src/collection.c       \
 	src/color.h             src/color.c            \
 	src/const.h                                    \
+	src/fonts.h             src/fonts.c            \
 	src/gui_browser.h       src/gui_browser.c      \
 	src/gui_options.h       src/gui_options.c      \
 	src/gui_random.h        src/gui_random.c       \

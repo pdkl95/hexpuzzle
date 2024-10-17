@@ -23,6 +23,7 @@
 #define GUI_BROWSER_H
 
 void init_gui_browser(void);
+void cleanup_gui_browser(void);
 void resize_gui_browser(void);
 void draw_gui_browser(void);
 

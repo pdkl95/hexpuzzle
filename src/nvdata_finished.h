@@ -44,6 +44,7 @@ struct finished_levels {
 typedef struct finished_levels finished_levels_t;
 
 void init_nvdata_finished(void);
+void cleanup_nvdata_finished(void);
 void nvdata_mark_id_finished(char *id);
 void nvdata_mark_finished(struct level *level);
 void nvdata_unmark_finished(struct level *level);

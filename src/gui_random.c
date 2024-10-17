@@ -218,7 +218,7 @@ static void set_all_hover(level_t *level, bool value)
 
 static void dfs_tile_pos(tile_pos_t *pos)
 {
-    bool todo[PATH_TYPE_COUNT] = {0};
+    bool todo[6] = {0};
     int todo_count = 0;
 
     pos->hover = true;
@@ -386,6 +386,20 @@ void init_gui_random(void)
     gui_random_difficulty_text = strdup(join_str);
 
     regen_level();
+}
+
+void cleanup_gui_random(void)
+{
+    if (gui_random_level) {
+        destroy_level(gui_random_level);
+        gui_random_level = NULL;
+    }
+
+    SAFEFREE(gui_random_seed_str);
+
+    SAFEFREE(gui_random_enter_seed_text);
+    SAFEFREE(gui_random_gen_style_text);
+    SAFEFREE(gui_random_difficulty_text);
 }
 
 void resize_gui_random(void)

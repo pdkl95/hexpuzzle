@@ -107,33 +107,12 @@ bool edit_tool_cycle = true;
 bool edit_tool_erase = false;
 path_type_t edit_tool_state = PATH_TYPE_NONE;
 
-Font font16, font18, font20;
-
 char const * file_filter_patterns[2] = {
     "*." COLLECTION_FILENAME_EXT,
     "*." LEVEL_FILENAME_EXT
 };
 
 void gui_setup(void);
-
-void set_default_gui_font(void)
-{
-    GuiSetFont(DEFAULT_GUI_FONT);
-    GuiSetStyle(DEFAULT, TEXT_SIZE, DEFAULT_GUI_FONT_SIZE);
-    GuiSetStyle(DEFAULT, TEXT_SPACING, 1);
-}
-
-#define def_set_gui_font(size)                  \
-    void set_gui_font##size(void)               \
-    {                                           \
-        GuiSetFont(font20);                     \
-        GuiSetStyle(DEFAULT, TEXT_SIZE, size);  \
-        GuiSetStyle(DEFAULT, TEXT_SPACING, 1);  \
-    }
-def_set_gui_font(16)
-def_set_gui_font(18)
-def_set_gui_font(20)
-#undef def_set_gui_font
 
 static inline bool do_level_ui_interaction(void)
 {
@@ -1233,7 +1212,7 @@ static void draw_cartesian_grid(bool draw_labels)
 {
     rlPushMatrix();
 
-   Vector2 hwin = {
+    Vector2 hwin = {
         .x = window_size.x / 2.0,
         .y = window_size.y / 2.0
     };
@@ -1459,20 +1438,9 @@ void gfx_init(void)
 
     //SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
 
+    load_fonts();
+
     GuiLoadStyleDark();
-
-    //font20 = LoadFont("fonts/terminus-20.png");
-    font20 = LoadFontEx("fonts/TerminusMedium-4.38.ttf", 20, NULL, 0);
-    SetTextureFilter(font20.texture, TEXTURE_FILTER_POINT);
-
-    //font18 = LoadFont("fonts/fira-18.png");
-    font18 = LoadFontEx("fonts/FiraSansOT-Medium.otf", 36, NULL, 0);
-    SetTextureFilter(font18.texture, TEXTURE_FILTER_BILINEAR);
-
-    //font16 = LoadFont("fonts/sourcecodesanspro-semibold-16.png");
-    font16 = LoadFontEx("fonts/SourceSansPro-Semibold.ttf", 32, NULL, 0);
-    //font16 = LoadFontEx("fonts/TerminusMedium-4.38.ttf", 16, NULL, 0);
-    SetTextureFilter(font16.texture, TEXTURE_FILTER_BILINEAR);
 
     set_default_gui_font();
 
@@ -1500,6 +1468,10 @@ gfx_cleanup(
 ) {
     unload_shaders();
     unload_textures();
+
+    GuiUnloadStyleDark();
+
+    unload_fonts();
     CloseWindow();
 }
 
@@ -1538,6 +1510,11 @@ static void game_init(void)
 static void game_cleanup(void)
 {
     save_nvdata();
+
+    cleanup_gui_random();
+    cleanup_gui_browser();
+    cleanup_nvdata();
+    cleanup_gui_options();
 }
 
 int

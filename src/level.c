@@ -408,6 +408,11 @@ level_t *create_level(struct collection *collection)
 void destroy_level(level_t *level)
 {
     if (level) {
+        if (level->win_anim) {
+            destroy_win_anim(level->win_anim);
+            level->win_anim = NULL;
+        }
+
         SAFEFREE(level->id);
         SAFEFREE(level->filename);
         SAFEFREE(level);

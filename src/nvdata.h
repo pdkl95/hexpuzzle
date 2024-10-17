@@ -23,6 +23,7 @@
 #define NVDATA_H
 
 void init_nvdata(void);
+void cleanup_nvdata(void);
 void load_nvdata(void);
 void save_nvdata(void);
 

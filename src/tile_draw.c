@@ -201,7 +201,7 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
     }
 
     bool drag = (pos == drag_target) && !edit_mode_solved;
-    bool dragged_over;
+    bool dragged_over = false;
 
     if (pos->swap_target) {
         if (pos->swap_target == drag_target) {

@@ -288,6 +288,17 @@ void init_nvdata(void)
     init_nvdata_finished();
 }
 
+void cleanup_nvdata(void)
+{
+    cleanup_nvdata_finished();
+
+    SAFEFREE(local_config_dir);
+    SAFEFREE(nvdata_dir);
+    SAFEFREE(nvdata_state_file_path);
+    SAFEFREE(nvdata_default_browse_path);
+
+}
+
 void load_nvdata(void)
 {
     load_nvdata_program_state();

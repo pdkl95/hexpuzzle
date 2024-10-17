@@ -134,6 +134,16 @@ void init_gui_browser(void)
     resize_gui_browser();
 }
 
+void cleanup_gui_browser(void)
+{
+    if (local_files.names) {
+        FREE(local_files.names);
+        UnloadDirectoryFiles(browse_file_list);
+    };
+
+    SAFEFREE(browse_path);
+}
+
 void resize_gui_browser(void)
 {
     browser_panel_rect.width  = window_size.x * 0.7;

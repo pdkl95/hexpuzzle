@@ -44,6 +44,30 @@ void init_nvdata_finished(void)
     finished_levels.tree = NULL;
 }
 
+void destroy_finished_level(struct finished_level *node)
+{
+    if (node) {
+        if (node->left) {
+            destroy_finished_level(node->left);
+        }
+
+        if (node->right) {
+            destroy_finished_level(node->right);
+        }
+
+        FREE(node);
+    }
+}
+
+void cleanup_nvdata_finished(void)
+{
+    if (finished_levels.tree) {
+        destroy_finished_level(finished_levels.tree);
+    }
+
+    SAFEFREE(nvdata_state_finished_levels_file_path);
+}
+
 void nvdata_mark_id_finished(char *id)
 {
     assert_not_null(id);
