@@ -47,11 +47,11 @@
 #include "nvdata.h"
 #include "nvdata_finished.h"
 
-#if defined(PLATFORM_DESKTOP)
-/* good */
-#else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB
-# error "Only PLATFORM_DESKTOP (GLSL 330) supported!"
-#endif
+/* #if defined(PLATFORM_DESKTOP) */
+/* /\* good *\/ */
+/* #else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB */
+/* # error "Only PLATFORM_DESKTOP (GLSL 330) supported!" */
+/* #endif */
 
 const char *progversion = PACKAGE_VERSION;
 const char *progname    = PACKAGE_NAME;
@@ -506,10 +506,12 @@ handle_events(
         reset_window_to_center();
     }
 
+#if defined(PLATFORM_DESKTOP)
     if (IsKeyPressed(KEY_F11)) {
         //ToggleFullscreen();
         ToggleBorderlessWindowed();
     }
+#endif
 
     if (modal_ui_active) {
         if (IsKeyPressed(KEY_ESCAPE)) {
@@ -1442,11 +1444,12 @@ void gfx_init(void)
     SetConfigFlags(flags);
 
     InitWindow(window_size.x, window_size.y, "Hex Puzzle");
+#if defined(PLATFORM_DESKTOP)
     SetWindowMinSize(OPTIONS_WINDOW_MIN_WIDTH,
                      OPTIONS_WINDOW_MIN_HEIGHT);
     SetWindowMaxSize(OPTIONS_WINDOW_MAX_WIDTH,
                      OPTIONS_WINDOW_MAX_HEIGHT);
-
+#endif
 
     SetExitKey(KEY_NULL); // handle ESC ourself
     SetTargetFPS(options->max_fps);

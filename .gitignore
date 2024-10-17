@@ -1,4 +1,8 @@
 hexpuzzle
+hexpuzzle.html
+hexpuzzle.js
+hexpuzzle.wasm
+a.wasm
 stuff/
 test*.hexlevel
 test*.hexlevelpack
@@ -40,4 +44,3 @@ GTAGS
 GRTAGS
 GPATH
 .gdb_history
-

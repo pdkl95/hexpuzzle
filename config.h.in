@@ -149,6 +149,9 @@
 /* Version number of package */
 #undef VERSION
 
+/* Defined to 1 when --enable-web is active */
+#undef WEB_BUILD
+
 /* We want GNU extensions */
 #undef _GNU_SOURCE
 

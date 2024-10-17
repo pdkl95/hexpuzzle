@@ -60,7 +60,7 @@ char *tile_path_string(tile_t *tile)
 
 char *tile_our_pos_string(struct tile_pos *pos)
 {
-    static char buf[20];
+    static char buf[30];
     if (pos) {
         snprintf(buf, 29, "(%d, %d)", pos->position.q, pos->position.r);
     } else {

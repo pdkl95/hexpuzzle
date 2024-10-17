@@ -38,14 +38,14 @@ char options_reset_finished_text[] = "Reset Level Finished Data";
 #define NUM_TABS 2
 const char *options_tabbar_text[NUM_TABS];
 
-int active_tab;
+int options_active_tab;
 
 void init_gui_options(void)
 {
     options_tabbar_text[0] = "Graphics";
     options_tabbar_text[1] = "Data";
 
-    active_tab = 0;
+    options_active_tab = 0;
 
     resize_gui_options();
 }
@@ -116,9 +116,9 @@ void draw_gui_options(void)
 {
     GuiPanel(options_panel_rect, options_panel_text);
 
-    GuiSimpleTabBar(options_tabbar_rect, options_tabbar_text, 2, &active_tab);
+    GuiSimpleTabBar(options_tabbar_rect, options_tabbar_text, 2, &options_active_tab);
 
-    switch (active_tab) {
+    switch (options_active_tab) {
     case 0:
         draw_gui_graphics_options();
         break;

@@ -23,11 +23,19 @@ EXTRA_DIST = \
 	$(CLASSICS_LEVELS) \
 	shaders/win_border.frag.glsl
 
-bin_PROGRAMS = hexpuzzle
-
+if BUILD_WEB
+COMMON_PROG_CFLAGS = \
+	-DPLATFORM=PLATFORM_WEB \
+	-DPLATFORM_WEB
+else
 COMMON_PROG_CFLAGS = \
 	-DPLATFORM=PLATFORM_DESKTOP \
-	-DPLATFORM_DESKTOP \
+	-DPLATFORM_DESKTOP
+endif
+
+bin_PROGRAMS = hexpuzzle
+
+COMMON_PROG_CFLAGS += \
 	-I$(top_srcdir)/src \
 	$(ALL_PKG_CFLAGS) \
 	$(APP_CFLAGS)
@@ -39,6 +47,26 @@ COMMON_PROG_LDADD = \
 
 hexpuzzle_CFLAGS = $(COMMON_PROG_CFLAGS)
 hexpuzzle_LDADD = $(COMMON_PROG_LDADD)
+
+if BUILD_WEB
+hexpuzzle_LDFLAGS = \
+	-s USE_GLFW=3 \
+	-s WASM=1 \
+	-s ASYNCIFY \
+	-s GL_ENABLE_GET_PROC_ADDRESS=1 \
+	-s ALLOW_MEMORY_GROWTH=1
+
+if BUILD_DEBUG
+hexpuzzle_LDFLAGS += \
+	-s ASSERTIONS=1
+endif
+
+hexpuzzle_LDFLAGS += \
+	--shell-file minshell.html
+
+clean-local:
+	rm -f hexpuzzle.js hexpuzzle.wasm
+endif
 
 hexpuzzle_SOURCES =                                    \
 	src/anim_fsm.h          src/anim_fsm.c         \

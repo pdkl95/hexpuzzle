@@ -41,25 +41,51 @@ dnl =======================
 dnl ===  early options  ===
 dnl =======================
 
+OPTMODE="-O2"
+
 dnl >>> Build in debug mode
 
 AC_ARG_ENABLE([debug],
     AS_HELP_STRING([--enable-debug], [Enable normal debug features (-g, -O0)]))
 
+
 AS_IF([test "x$enable_debug" = "xyes"], [
-     CFLAGS="$CFLAGS -ggdb3 -O0"
+     CFLAGS="$CFLAGS -ggdb3"
      LDFLAGS="$LDFLAGS -ggdb3"
+     OPTMODE="-O0"
 ])
+
+AM_CONDITIONAL([BUILD_DEBUG], [test "x$enable_debug" = "xyes"])
 
 AH_TEMPLATE([DEBUG_BUILD], [Defined to 1 when --enable-debug is active])
 AS_IF([test "x$enable_debug" = "xyes"],[AC_DEFINE([DEBUG_BUILD],[1])])
 
 
+dnl >>> Build web targets instead of an executable binary
+
+AC_ARG_ENABLE([web],
+    AS_HELP_STRING([--enable-web], [Build html/js/wasm for web (run configure with emconfigure!)]))
+
+AS_IF([test "x$enable_web" = "xyes"], [
+    AS_IF([test "x$enable_debug" = "xyes"], [
+        OPTMODE="-O0"
+    ],[
+        OPTMODE="-Os"
+    ])
+])
+
+AM_CONDITIONAL([BUILD_WEB], [test "x$enable_web" = "xyes"])
+
+AH_TEMPLATE([WEB_BUILD], [Defined to 1 when --enable-web is active])
+AS_IF([test "x$enable_web" = "xyes"],[AC_DEFINE([WEB_BUILD],[1])])
+
+CFLAGS="$CFLAGS $OPTMODE"
+
 dnl ========================================
 dnl ===  Compiler/Language Dependencies  ===
 dnl ========================================
 
-AC_PROG_CC 
+AC_PROG_CC
 AM_PROG_CC_C_O
 
 AC_USE_SYSTEM_EXTENSIONS
@@ -146,7 +172,7 @@ dnl =================================
 dnl ===  pkg-config dependencies  ===
 dnl =================================
 
-PKG_CHECK_MODULES([GL],     [gl     >= 10.0.4])
+#PKG_CHECK_MODULES([GL],     [gl     >= 10.0.4])
 PKG_CHECK_MODULES([RAYLIB], [raylib >=  5.0.0])
  
 ALL_PKG_CFLAGS="$GL_CFLAGS $RAYLIB_CFLAGS"
@@ -156,6 +182,11 @@ ALL_PKG_LIBS="$GL_LIBS $RAYLIB_LIBS"
 dnl ================
 dnl ===  Output  ===
 dnl ================
+
+AS_IF([test "x$enable_web" = "xyes"], [
+    EXEEXT=".html"
+    AC_SUBST(EXEEXT)
+])
 
 AC_SUBST(ALL_PKG_CFLAGS)
 AC_SUBST(ALL_PKG_LIBS)
