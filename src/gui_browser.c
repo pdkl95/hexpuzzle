@@ -81,6 +81,7 @@ const char *browser_tabbar_text[NUM_TABS];
 
 int active_tab = 0;
 
+#if defined(PLATFORM_DESKTOP)
 void setup_browse_dir(void)
 {
     assert_not_null(browse_path);
@@ -121,15 +122,21 @@ void change_gui_browser_path(char *dir)
     browse_path = strdup(dir);
     setup_browse_dir();
 }
+#endif
 
 void init_gui_browser(void)
 {
     browser_tabbar_text[0] = "Clsssics";
+#if defined(PLATFORM_DESKTOP)
     browser_tabbar_text[1] = "Local Level Files";
     browser_tabbar_text[2] = "Add File";
 
     assert_not_null(nvdata_default_browse_path);
     change_gui_browser_path(nvdata_default_browse_path);
+#else
+    browser_tabbar_text[1] = NULL;
+    browser_tabbar_text[2] = NULL;
+#endif
 
     resize_gui_browser();
 }
@@ -213,7 +220,8 @@ void draw_gui_browser_classics(void)
     }
 }
 
-void draw_gui_browser_local_level_filee(void)
+#if defined(PLATFORM_DESKTOP)
+void draw_gui_browser_local_level_file(void)
 {
     int selected = draw_gui_browser_list(&local_files);
 
@@ -223,9 +231,10 @@ void draw_gui_browser_local_level_filee(void)
     }
 }
 
-void draw_gui_browser_add_filee(void)
+void draw_gui_browser_add_file(void)
 {
 }
+#endif
 
 void draw_gui_browser(void)
 {
@@ -240,13 +249,15 @@ void draw_gui_browser(void)
             draw_gui_browser_classics();
             break;
 
+#if defined(PLATFORM_DESKTOP)
         case 1:
-            draw_gui_browser_local_level_filee();
+            draw_gui_browser_local_level_file();
             break;
 
         case 2:
-            draw_gui_browser_add_filee();
+            draw_gui_browser_add_file();
             break;
+#endif
         }
     }
 }

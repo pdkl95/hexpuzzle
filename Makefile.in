@@ -87,6 +87,7 @@ NORMAL_UNINSTALL = :
 PRE_UNINSTALL = :
 POST_UNINSTALL = :
 bin_PROGRAMS = hexpuzzle$(EXEEXT)
+#	-s ASYNCIFY
 @BUILD_DEBUG_TRUE@@BUILD_WEB_TRUE@am__append_1 = \
 @BUILD_DEBUG_TRUE@@BUILD_WEB_TRUE@	-s ASSERTIONS=1
 
@@ -373,7 +374,7 @@ EXTRA_DIST = \
 @BUILD_WEB_FALSE@	-DPLATFORM_DESKTOP -I$(top_srcdir)/src \
 @BUILD_WEB_FALSE@	$(ALL_PKG_CFLAGS) $(APP_CFLAGS)
 @BUILD_WEB_TRUE@COMMON_PROG_CFLAGS = -DPLATFORM=PLATFORM_WEB \
-@BUILD_WEB_TRUE@	-DPLATFORM_WEB -I$(top_srcdir)/src \
+@BUILD_WEB_TRUE@	-DPLATFORM_WEB -flto -I$(top_srcdir)/src \
 @BUILD_WEB_TRUE@	$(ALL_PKG_CFLAGS) $(APP_CFLAGS)
 COMMON_PROG_LDADD = \
 	$(ALL_PKG_LIBS) \
@@ -382,9 +383,11 @@ COMMON_PROG_LDADD = \
 
 hexpuzzle_CFLAGS = $(COMMON_PROG_CFLAGS)
 hexpuzzle_LDADD = $(COMMON_PROG_LDADD)
-@BUILD_WEB_TRUE@hexpuzzle_LDFLAGS = -s MAX_WEBGL_VERSION=1 \
-@BUILD_WEB_TRUE@	$(am__append_1) -lidbfs.js --shell-file \
-@BUILD_WEB_TRUE@	minshell.html
+@BUILD_WEB_TRUE@hexpuzzle_LDFLAGS = -flto -s MAX_WEBGL_VERSION=1 -s \
+@BUILD_WEB_TRUE@	USE_GLFW=3 -s WASM=1 -s \
+@BUILD_WEB_TRUE@	GL_ENABLE_GET_PROC_ADDRESS=1 -s \
+@BUILD_WEB_TRUE@	ALLOW_MEMORY_GROWTH=1 $(am__append_1) \
+@BUILD_WEB_TRUE@	-lidbfs.js --shell-file minshell.html
 hexpuzzle_SOURCES = src/anim_fsm.h src/anim_fsm.c src/classics.h \
 	src/classics.c src/collection.h src/collection.c src/color.h \
 	src/color.c src/const.h src/fonts.h src/fonts.c \
@@ -1391,11 +1394,6 @@ uninstall-am: uninstall-binPROGRAMS
 
 
 XXD ?= xxd
-@BUILD_WEB_TRUE@	-s USE_GLFW=3 \
-@BUILD_WEB_TRUE@	-s WASM=1 \
-@BUILD_WEB_TRUE@	-s ASYNCIFY \
-@BUILD_WEB_TRUE@	-s GL_ENABLE_GET_PROC_ADDRESS=1 \
-@BUILD_WEB_TRUE@	-s ALLOW_MEMORY_GROWTH=1
 
 @BUILD_WEB_TRUE@clean-local:
 @BUILD_WEB_TRUE@	rm -f hexpuzzle.js hexpuzzle.wasm
