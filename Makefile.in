@@ -90,6 +90,10 @@ bin_PROGRAMS = hexpuzzle$(EXEEXT)
 @BUILD_DEBUG_TRUE@@BUILD_WEB_TRUE@am__append_1 = \
 @BUILD_DEBUG_TRUE@@BUILD_WEB_TRUE@	-s ASSERTIONS=1
 
+@BUILD_WEB_FALSE@am__append_2 = \
+@BUILD_WEB_FALSE@	external/tinyfiledialogs/tinyfiledialogs.c \
+@BUILD_WEB_FALSE@	external/tinyfiledialogs/tinyfiledialogs.h
+
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_c___attribute__.m4 \
@@ -108,7 +112,26 @@ CONFIG_CLEAN_FILES = lib/getopt.h
 CONFIG_CLEAN_VPATH_FILES =
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
+am__hexpuzzle_SOURCES_DIST = src/anim_fsm.h src/anim_fsm.c \
+	src/classics.h src/classics.c src/collection.h \
+	src/collection.c src/color.h src/color.c src/const.h \
+	src/fonts.h src/fonts.c src/game_mode.h src/game_mode.c \
+	src/gui_browser.h src/gui_browser.c src/gui_options.h \
+	src/gui_options.c src/gui_random.h src/gui_random.c src/hex.h \
+	src/hex.c src/level.h src/level.c src/logging.h src/logging.c \
+	src/nvdata.h src/nvdata.c src/nvdata_finished.h \
+	src/nvdata_finished.c src/options.h src/options.c \
+	src/raygui_impl.c src/raylib_helper.h src/raylib_helper.c \
+	src/shader.h src/shader.c src/tile.h src/tile.c \
+	src/tile_draw.h src/tile_draw.c src/tile_pos.h src/tile_pos.c \
+	src/util.h src/util.c src/win_anim.h src/win_anim.c \
+	src/common.h src/main.c external/raygui/raygui.h \
+	external/pcg/pcg_basic.c external/pcg/pcg_basic.h \
+	external/cJSON/cJSON.c external/cJSON/cJSON.h \
+	external/tinyfiledialogs/tinyfiledialogs.c \
+	external/tinyfiledialogs/tinyfiledialogs.h
 am__dirstamp = $(am__leading_dot)dirstamp
+@BUILD_WEB_FALSE@am__objects_1 = external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.$(OBJEXT)
 am_hexpuzzle_OBJECTS = src/hexpuzzle-anim_fsm.$(OBJEXT) \
 	src/hexpuzzle-classics.$(OBJEXT) \
 	src/hexpuzzle-collection.$(OBJEXT) \
@@ -128,8 +151,7 @@ am_hexpuzzle_OBJECTS = src/hexpuzzle-anim_fsm.$(OBJEXT) \
 	src/hexpuzzle-tile_pos.$(OBJEXT) src/hexpuzzle-util.$(OBJEXT) \
 	src/hexpuzzle-win_anim.$(OBJEXT) src/hexpuzzle-main.$(OBJEXT) \
 	external/pcg/hexpuzzle-pcg_basic.$(OBJEXT) \
-	external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.$(OBJEXT) \
-	external/cJSON/hexpuzzle-cJSON.$(OBJEXT)
+	external/cJSON/hexpuzzle-cJSON.$(OBJEXT) $(am__objects_1)
 hexpuzzle_OBJECTS = $(am_hexpuzzle_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
@@ -169,7 +191,8 @@ am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
 SOURCES = $(hexpuzzle_SOURCES) $(dist_EXTRA_hexpuzzle_SOURCES)
-DIST_SOURCES = $(hexpuzzle_SOURCES) $(dist_EXTRA_hexpuzzle_SOURCES)
+DIST_SOURCES = $(am__hexpuzzle_SOURCES_DIST) \
+	$(dist_EXTRA_hexpuzzle_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -377,9 +400,7 @@ hexpuzzle_SOURCES = src/anim_fsm.h src/anim_fsm.c src/classics.h \
 	src/util.h src/util.c src/win_anim.h src/win_anim.c \
 	src/common.h src/main.c external/raygui/raygui.h \
 	external/pcg/pcg_basic.c external/pcg/pcg_basic.h \
-	external/tinyfiledialogs/tinyfiledialogs.c \
-	external/tinyfiledialogs/tinyfiledialogs.h \
-	external/cJSON/cJSON.c external/cJSON/cJSON.h
+	external/cJSON/cJSON.c external/cJSON/cJSON.h $(am__append_2)
 dist_EXTRA_hexpuzzle_SOURCES = \
 	src/data_classics_levels.h  \
 	src/data_fonts.h            \
@@ -549,15 +570,6 @@ external/pcg/$(DEPDIR)/$(am__dirstamp):
 external/pcg/hexpuzzle-pcg_basic.$(OBJEXT):  \
 	external/pcg/$(am__dirstamp) \
 	external/pcg/$(DEPDIR)/$(am__dirstamp)
-external/tinyfiledialogs/$(am__dirstamp):
-	@$(MKDIR_P) external/tinyfiledialogs
-	@: > external/tinyfiledialogs/$(am__dirstamp)
-external/tinyfiledialogs/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) external/tinyfiledialogs/$(DEPDIR)
-	@: > external/tinyfiledialogs/$(DEPDIR)/$(am__dirstamp)
-external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.$(OBJEXT):  \
-	external/tinyfiledialogs/$(am__dirstamp) \
-	external/tinyfiledialogs/$(DEPDIR)/$(am__dirstamp)
 external/cJSON/$(am__dirstamp):
 	@$(MKDIR_P) external/cJSON
 	@: > external/cJSON/$(am__dirstamp)
@@ -567,6 +579,15 @@ external/cJSON/$(DEPDIR)/$(am__dirstamp):
 external/cJSON/hexpuzzle-cJSON.$(OBJEXT):  \
 	external/cJSON/$(am__dirstamp) \
 	external/cJSON/$(DEPDIR)/$(am__dirstamp)
+external/tinyfiledialogs/$(am__dirstamp):
+	@$(MKDIR_P) external/tinyfiledialogs
+	@: > external/tinyfiledialogs/$(am__dirstamp)
+external/tinyfiledialogs/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) external/tinyfiledialogs/$(DEPDIR)
+	@: > external/tinyfiledialogs/$(DEPDIR)/$(am__dirstamp)
+external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.$(OBJEXT):  \
+	external/tinyfiledialogs/$(am__dirstamp) \
+	external/tinyfiledialogs/$(DEPDIR)/$(am__dirstamp)
 
 hexpuzzle$(EXEEXT): $(hexpuzzle_OBJECTS) $(hexpuzzle_DEPENDENCIES) $(EXTRA_hexpuzzle_DEPENDENCIES) 
 	@rm -f hexpuzzle$(EXEEXT)
@@ -976,20 +997,6 @@ external/pcg/hexpuzzle-pcg_basic.obj: external/pcg/pcg_basic.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o external/pcg/hexpuzzle-pcg_basic.obj `if test -f 'external/pcg/pcg_basic.c'; then $(CYGPATH_W) 'external/pcg/pcg_basic.c'; else $(CYGPATH_W) '$(srcdir)/external/pcg/pcg_basic.c'; fi`
 
-external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.o: external/tinyfiledialogs/tinyfiledialogs.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.o -MD -MP -MF external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Tpo -c -o external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.o `test -f 'external/tinyfiledialogs/tinyfiledialogs.c' || echo '$(srcdir)/'`external/tinyfiledialogs/tinyfiledialogs.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Tpo external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/tinyfiledialogs/tinyfiledialogs.c' object='external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.o `test -f 'external/tinyfiledialogs/tinyfiledialogs.c' || echo '$(srcdir)/'`external/tinyfiledialogs/tinyfiledialogs.c
-
-external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.obj: external/tinyfiledialogs/tinyfiledialogs.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.obj -MD -MP -MF external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Tpo -c -o external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.obj `if test -f 'external/tinyfiledialogs/tinyfiledialogs.c'; then $(CYGPATH_W) 'external/tinyfiledialogs/tinyfiledialogs.c'; else $(CYGPATH_W) '$(srcdir)/external/tinyfiledialogs/tinyfiledialogs.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Tpo external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/tinyfiledialogs/tinyfiledialogs.c' object='external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.obj `if test -f 'external/tinyfiledialogs/tinyfiledialogs.c'; then $(CYGPATH_W) 'external/tinyfiledialogs/tinyfiledialogs.c'; else $(CYGPATH_W) '$(srcdir)/external/tinyfiledialogs/tinyfiledialogs.c'; fi`
-
 external/cJSON/hexpuzzle-cJSON.o: external/cJSON/cJSON.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT external/cJSON/hexpuzzle-cJSON.o -MD -MP -MF external/cJSON/$(DEPDIR)/hexpuzzle-cJSON.Tpo -c -o external/cJSON/hexpuzzle-cJSON.o `test -f 'external/cJSON/cJSON.c' || echo '$(srcdir)/'`external/cJSON/cJSON.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/cJSON/$(DEPDIR)/hexpuzzle-cJSON.Tpo external/cJSON/$(DEPDIR)/hexpuzzle-cJSON.Po
@@ -1003,6 +1010,20 @@ external/cJSON/hexpuzzle-cJSON.obj: external/cJSON/cJSON.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/cJSON/cJSON.c' object='external/cJSON/hexpuzzle-cJSON.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o external/cJSON/hexpuzzle-cJSON.obj `if test -f 'external/cJSON/cJSON.c'; then $(CYGPATH_W) 'external/cJSON/cJSON.c'; else $(CYGPATH_W) '$(srcdir)/external/cJSON/cJSON.c'; fi`
+
+external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.o: external/tinyfiledialogs/tinyfiledialogs.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.o -MD -MP -MF external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Tpo -c -o external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.o `test -f 'external/tinyfiledialogs/tinyfiledialogs.c' || echo '$(srcdir)/'`external/tinyfiledialogs/tinyfiledialogs.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Tpo external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/tinyfiledialogs/tinyfiledialogs.c' object='external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.o `test -f 'external/tinyfiledialogs/tinyfiledialogs.c' || echo '$(srcdir)/'`external/tinyfiledialogs/tinyfiledialogs.c
+
+external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.obj: external/tinyfiledialogs/tinyfiledialogs.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.obj -MD -MP -MF external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Tpo -c -o external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.obj `if test -f 'external/tinyfiledialogs/tinyfiledialogs.c'; then $(CYGPATH_W) 'external/tinyfiledialogs/tinyfiledialogs.c'; else $(CYGPATH_W) '$(srcdir)/external/tinyfiledialogs/tinyfiledialogs.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Tpo external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/tinyfiledialogs/tinyfiledialogs.c' object='external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.obj `if test -f 'external/tinyfiledialogs/tinyfiledialogs.c'; then $(CYGPATH_W) 'external/tinyfiledialogs/tinyfiledialogs.c'; else $(CYGPATH_W) '$(srcdir)/external/tinyfiledialogs/tinyfiledialogs.c'; fi`
 
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique

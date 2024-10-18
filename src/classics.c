@@ -29,7 +29,7 @@ void open_classics_game_pack(int n)
     assert(n <= 4);
 
     unsigned char *data;
-    unsigned int ulen;
+    unsigned int ulen = 0;
 
     switch (n) {
     case 1:

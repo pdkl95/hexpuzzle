@@ -107,10 +107,14 @@ hexpuzzle_SOURCES +=             		   \
 	external/raygui/raygui.h  		   \
 	external/pcg/pcg_basic.c                   \
 	external/pcg/pcg_basic.h                   \
-	external/tinyfiledialogs/tinyfiledialogs.c \
-	external/tinyfiledialogs/tinyfiledialogs.h \
 	external/cJSON/cJSON.c                     \
 	external/cJSON/cJSON.h
+
+if ! BUILD_WEB
+hexpuzzle_SOURCES += 				   \
+	external/tinyfiledialogs/tinyfiledialogs.c \
+	external/tinyfiledialogs/tinyfiledialogs.h
+endif
 
 dist_EXTRA_hexpuzzle_SOURCES =      \
 	src/data_classics_levels.h  \
