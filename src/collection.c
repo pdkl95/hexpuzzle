@@ -511,8 +511,18 @@ bool collection_add_level_file(collection_t *collection, const char *filename)
     }
 }
 
+level_t *collection_get_level_after(collection_t *collection, level_t *level)
+{
+    assert_not_null(collection);
+    assert_not_null(level);
+
+    return level->next;
+}
+
 level_t *collection_find_level_by_id(collection_t *collection, const char *id)
 {
+    assert_not_null(collection);
+
     level_t *level = collection->levels;
     while (level) {
         if (level->id) {
@@ -529,6 +539,8 @@ level_t *collection_find_level_by_id(collection_t *collection, const char *id)
 
 level_t *collection_find_level_by_filename(collection_t *collection, const char *filename)
 {
+    assert_not_null(collection);
+
     level_t *level = collection->levels;
     while (level) {
         if (level->filename) {

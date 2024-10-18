@@ -54,6 +54,7 @@ static void find_local_config_dir(void)
         FREE(local_config_dir);
     }
 
+#if defined(PLATFORM_DESKTOP)
     char *xdg_config_home = getenv("XDG_CONFIG_HOME");
     if (xdg_config_home && DirectoryExists(xdg_config_home)) {
         local_config_dir = strdup(xdg_config_home);
@@ -62,11 +63,18 @@ static void find_local_config_dir(void)
 
     char *home = getenv("HOME");
     if (!home) {
-        errmsg("cannot fine nvdata directory - env variable HOME is missing?!");
+        errmsg("cannot find nvdata directory - env variable HOME is missing?!");
         return;
     }
 
     asprintf(&local_config_dir, "%s/.config", PACKAGE_NAME);
+#else
+# if defined(PLATFORM_WEB)
+    asprintf(&local_config_dir, "/%s", progname);
+# else
+#  error "Unsupported platform! (no file layout information)"
+# endif
+#endif
 }
 
 static void find_nvdata_dir(void)

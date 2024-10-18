@@ -56,6 +56,7 @@ hexpuzzle_LDADD = $(COMMON_PROG_LDADD)
 
 if BUILD_WEB
 hexpuzzle_LDFLAGS = \
+	-s MAX_WEBGL_VERSION=1
 	-s USE_GLFW=3 \
 	-s WASM=1 \
 	-s ASYNCIFY \
@@ -68,6 +69,7 @@ hexpuzzle_LDFLAGS += \
 endif
 
 hexpuzzle_LDFLAGS += \
+	-lidbfs.js \
 	--shell-file minshell.html
 
 clean-local:
@@ -81,6 +83,7 @@ hexpuzzle_SOURCES =                                    \
 	src/color.h             src/color.c            \
 	src/const.h                                    \
 	src/fonts.h             src/fonts.c            \
+	src/game_mode.h         src/game_mode.c        \
 	src/gui_browser.h       src/gui_browser.c      \
 	src/gui_options.h       src/gui_options.c      \
 	src/gui_random.h        src/gui_random.c       \

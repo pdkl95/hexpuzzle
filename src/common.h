@@ -135,20 +135,6 @@ static inline Vector2 ivector2_to_vector2(IVector2 ivec)
 
 extern IVector2 window_size;
 
-enum game_mode {
-    GAME_MODE_NULL = 0,
-    GAME_MODE_PLAY_COLLECTION,
-    GAME_MODE_EDIT_COLLECTION,
-    GAME_MODE_PLAY_LEVEL,
-    GAME_MODE_EDIT_LEVEL,
-    GAME_MODE_BROWSER,
-    GAME_MODE_OPTIONS,
-    GAME_MODE_RANDOM
-};
-typedef enum game_mode game_mode_t;
-
-extern game_mode_t game_mode;
-
 extern IVector2 mouse_position;
 extern Vector2 mouse_positionf;
 extern bool mouse_left_click;
@@ -158,15 +144,7 @@ extern bool mouse_right_click;
 extern float current_time;
 extern double double_current_time;
 
-#define play_mode    (game_mode == GAME_MODE_PLAY_LEVEL)
-#define edit_mode    (game_mode == GAME_MODE_EDIT_LEVEL)
-#define browser_mode (game_mode == GAME_MODE_BROWSER)
-#define options_mode (game_mode == GAME_MODE_OPTIONS)
-#define random_mode  (game_mode == GAME_MODE_RANDOM)
-
-void set_game_mode(game_mode_t new_mode);
-void prev_game_mode(void);
-
 #include "fonts.h"
+#include "game_mode.h"
 
 #endif /*COMMON_H*/

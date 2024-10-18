@@ -19,6 +19,10 @@
  *                                                                            *
  ******************************************************************************/
 
+#if defined(PLATFORM_WEB)
+#include <emscripten/emscripten.h>
+#endif
+
 #include "common.h"
 
 #include <getopt.h>
@@ -88,9 +92,6 @@ float popup_text_fade_time = 2.5f;
 float popup_text_active_until = 0.0f;
 const char *popup_text;
 Color popup_text_color = { 0xFF, 0xFA, 0xCD, 0xFF };
-
-game_mode_t game_mode = GAME_MODE_NULL;
-game_mode_t last_game_mode = GAME_MODE_NULL;
 
 bool level_finished = false;
 
@@ -168,98 +169,6 @@ void show_name_edit_dialog(void)
                current_level->name,
                NAME_MAXLEN);
         show_name_edit_box = true;
-    }
-}
-
-char *game_mode_t_str(game_mode_t mode)
-{
-    switch (mode) {
-    case GAME_MODE_NULL:
-        return "NULL";
-
-    case GAME_MODE_PLAY_COLLECTION:
-        return "PLAY_COLLECTION";
-
-    case GAME_MODE_EDIT_COLLECTION:
-        return "EDIT_COLLECTION";
-
-    case GAME_MODE_PLAY_LEVEL:
-        return "PLAY_LEVEL";
-
-    case GAME_MODE_EDIT_LEVEL:
-        return "EDIT_LEVEL";
-
-    case GAME_MODE_BROWSER:
-        return "BROWSER";
-
-    case GAME_MODE_OPTIONS:
-        return "OPTIONS";
-
-    case GAME_MODE_RANDOM:
-        return "RANDOM";
-
-    default:
-        __builtin_unreachable();
-    }
-}
-
-void set_game_mode(game_mode_t new_mode)
-{
-    last_game_mode = game_mode;
-    game_mode = new_mode;
-
-#if 0
-    printf("SET: game_mode = %s (prev = %s)\n",
-           game_mode_t_str(game_mode),
-           game_mode_t_str(last_game_mode));
-#endif
-}
-
-void prev_game_mode(void)
-{
-    game_mode_t tmp;
-    tmp = game_mode;
-    game_mode = last_game_mode;
-    last_game_mode = tmp;
-
-#if 0
-    printf("POP: game_mode = %s (prev = %s)\n",
-           game_mode_t_str(game_mode),
-           game_mode_t_str(last_game_mode));
-#endif
-}
-
-char *game_mode_str(void)
-{
-    return game_mode_t_str(game_mode);
-}
-
-void toggle_edit_mode(void)
-{
-    switch (game_mode) {
-    case GAME_MODE_NULL:
-        warnmsg("Trying to toggle edit mode in NULL game mode?!");
-        break;
-
-    case GAME_MODE_PLAY_COLLECTION:
-        set_game_mode(GAME_MODE_EDIT_COLLECTION);
-        break;
-
-    case GAME_MODE_EDIT_COLLECTION:
-        set_game_mode(GAME_MODE_PLAY_COLLECTION);
-        break;
-
-    case GAME_MODE_PLAY_LEVEL:
-        set_game_mode(GAME_MODE_EDIT_LEVEL);
-        break;
-
-    case GAME_MODE_EDIT_LEVEL:
-        set_game_mode(GAME_MODE_PLAY_LEVEL);
-        break;
-
-    default:
-        /* do nothing */
-        __builtin_unreachable();
     }
 }
 
@@ -614,6 +523,9 @@ Rectangle tool_panel_rect;
 Rectangle edit_tool_label_rect;
 Rectangle cycle_tool_button_rect;
 Rectangle erase_tool_button_rect;
+Rectangle goto_next_level_panel_rect;
+Rectangle goto_next_level_label_rect;
+Rectangle goto_next_level_button_rect;
 
 #define MAX_RIGHT_SIDE_BUTTONS 5
 Rectangle right_side_button_rect[MAX_RIGHT_SIDE_BUTTONS];
@@ -621,6 +533,10 @@ Rectangle right_side_button_rect[MAX_RIGHT_SIDE_BUTTONS];
 char close_button_text_str[] = "Quit";
 #define CLOSE_BUTTON_TEXT_LENGTH (6 + sizeof(close_button_text_str))
 char close_button_text[CLOSE_BUTTON_TEXT_LENGTH];
+
+char goto_next_level_button_text_str[] = "Next";
+#define GOTO_NEXT_LEVEL_BUTTON_TEXT_LENGTH (6 + sizeof(goto_next_level_button_text_str))
+char goto_next_level_button_text[GOTO_NEXT_LEVEL_BUTTON_TEXT_LENGTH];
 
 char options_button_text_str[] = "Options";
 #define OPTIONS_BUTTON_TEXT_LENGTH (6 + sizeof(options_button_text_str))
@@ -659,6 +575,7 @@ char erase_tool_button_text_str[] = "Erase";
 char erase_tool_button_text[ERASE_TOOL_BUTTON_TEXT_LENGTH];
 
 char edit_tool_label_text[] = "Edit Tool";
+char goto_next_level_label_text[] = "Next level?";
 
 char cancel_ok_with_icons[25];
 char no_yes_with_icons[25];
@@ -814,6 +731,31 @@ void gui_setup(void)
     erase_tool_button_rect.y = cycle_tool_button_rect.y;
     erase_tool_button_rect.width  = erase_tool_button_text_size.x;
     erase_tool_button_rect.height = cycle_tool_button_rect.height;
+
+    memcpy(goto_next_level_button_text, GuiIconText(ICON_ARROW_RIGHT_FILL, goto_next_level_button_text_str), GOTO_NEXT_LEVEL_BUTTON_TEXT_LENGTH);
+
+    Vector2 goto_next_level_label_text_size = MeasureTextEx(PANEL_LABEL_FONT,
+                                                      goto_next_level_label_text,
+                                                      PANEL_LABEL_FONT_SIZE,
+                                                      PANEL_LABEL_FONT_SPACING);
+
+    Vector2 goto_next_level_button_text_size = MeasureGuiText(goto_next_level_button_text_str);
+
+    goto_next_level_panel_rect.y      = tool_panel_rect.y;
+
+    goto_next_level_button_rect.y      = goto_next_level_panel_rect.y + PANEL_INNER_MARGIN;
+    goto_next_level_button_rect.width  = goto_next_level_button_text_size.x;
+    goto_next_level_button_rect.height = TOOL_BUTTON_HEIGHT;
+    goto_next_level_button_rect.x      = window_size.x - WINDOW_MARGIN - goto_next_level_button_rect.width - PANEL_INNER_MARGIN;
+
+    goto_next_level_label_rect.y      = goto_next_level_button_rect.y;
+    goto_next_level_label_rect.width  = goto_next_level_label_text_size.x;
+    goto_next_level_label_rect.height = TOOL_BUTTON_HEIGHT;
+    goto_next_level_label_rect.x      = goto_next_level_button_rect.x - goto_next_level_label_rect.width - ICON_BUTTON_SIZE;
+
+    goto_next_level_panel_rect.width  = goto_next_level_button_rect.width + goto_next_level_label_rect.width + ICON_BUTTON_SIZE + (2 * PANEL_INNER_MARGIN);
+    goto_next_level_panel_rect.height = goto_next_level_button_rect.height + (2 * PANEL_INNER_MARGIN);
+    goto_next_level_panel_rect.x      = window_size.x - WINDOW_MARGIN - goto_next_level_panel_rect.width;
 }
 
 static void draw_name_header(char *name)
@@ -940,14 +882,49 @@ static void draw_tool_panel(void)
     }
 }
 
+static void draw_goto_next_level_panel(void)
+{
+    assert_not_null(current_collection);
+    assert_not_null(current_level);
+
+    level_t *next_level = collection_get_level_after(current_collection, current_level);
+
+    DrawRectangleRounded(goto_next_level_panel_rect, PANEL_ROUNDNES, 0, panel_bg_color);
+    DrawRectangleRoundedLines(goto_next_level_panel_rect, PANEL_ROUNDNES, 0, 1.0, panel_edge_color);
+
+    DrawTextEx(PANEL_LABEL_FONT, goto_next_level_label_text, getVector2FromRectangle(goto_next_level_label_rect),
+               PANEL_LABEL_FONT_SIZE, PANEL_LABEL_FONT_SPACING, panel_header_text_color);
+
+    if (!next_level) {
+        GuiDisable();
+    }
+
+    if (GuiButton(goto_next_level_button_rect, goto_next_level_button_text)) {
+        level_play(next_level);
+    }
+
+    if (!next_level) {
+        GuiEnable();
+    }
+}
+
+static void draw_win_panels(void)
+{
+    if (current_collection && current_level) {
+        draw_goto_next_level_panel();
+    }
+}
+
 static void draw_gui_widgets(void)
 {
     int prev_align = GuiGetStyle(BUTTON, TEXT_ALIGNMENT);
     GuiSetStyle(BUTTON, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
 
+#if defined(PLATFORM_DESKTOP)
     if (GuiButton(close_button_rect, close_button_text)) {
         running = false;
     }
+#endif
 
     int rsb = 0;
 
@@ -998,6 +975,15 @@ static void draw_gui_widgets(void)
 
     case GAME_MODE_PLAY_LEVEL:
         draw_name_header(current_level->name);
+
+        if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
+            return_from_level();
+        }
+        break;
+
+    case GAME_MODE_WIN_LEVEL:
+        draw_name_header(current_level->name);
+        draw_win_panels();
 
         if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
             return_from_level();
@@ -1381,6 +1367,34 @@ static void early_frame_setup(void)
     }
 }
 
+bool do_one_frame(void)
+{
+    early_frame_setup();
+
+    if (window_size_changed) {
+        resize();
+    }
+
+    if (!handle_events()) {
+        return false;
+    }
+
+    if (!render_frame()) {
+        return false;
+    }
+
+    frame_count += 1;
+
+    return true;
+
+}
+
+#if defined(PLATFORM_WEB)
+void em_do_one_frame(void)
+{
+    do_one_frame();
+}
+#else
 static bool
 main_event_loop(
     void
@@ -1388,25 +1402,14 @@ main_event_loop(
     //infomsg("Entering main event loop...");
 
     while (running) {
-        early_frame_setup();
-
-        if (window_size_changed) {
-            resize();
-        }
-
-        if (!handle_events()) {
+        if (!do_one_frame()) {
             return false;
         }
-
-        if (!render_frame()) {
-            return false;
-        }
-
-        frame_count += 1;
     };
 
     return true;
 }
+#endif
 
 void gfx_init(void)
 {
@@ -1431,10 +1434,12 @@ void gfx_init(void)
 #endif
 
     SetExitKey(KEY_NULL); // handle ESC ourself
+#if defined(PLATFORM_DESKTOP)
     SetTargetFPS(options->max_fps);
     if (options->verbose) {
         infomsg("Target FPS: %d", options->max_fps);
     }
+#endif
 
     //SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
 
@@ -1522,10 +1527,11 @@ main(
     int   argc,
     char *argv[]
 ) {
-    progname = basename(argv[0]);
-
     srand48((long int)time(NULL));
     srand(time(NULL));
+
+#if defined(PLATFORM_DESKTOP)
+    progname = basename(argv[0]);
 
     char *xdg_config_dir = getenv("XDG_CONFIG_HOME");
     char *home_dir       = getenv("HOME");
@@ -1534,6 +1540,24 @@ main(
     } else {
         asprintf(&config_dir, "%s/.config/%s", home_dir, CONFIG_SUBDIR_NAME);
     }
+#endif
+
+#if defined(PLATFORM_WEB)
+    progname = PACKAGE_NAME;
+
+    EM_ASM({
+            const mountdir = '/' + UTF8ToString($0);
+            FS.mkdir(mountdir);
+            FS.mount(IDBFS,
+                     { autoPersist: true },
+                     mountdir);
+
+            FS.syncfs(true, function (err) {
+                    assert(!err);
+                    //ccall('test', 'v');
+                });
+        }, progname);
+#endif
 
     options = create_options();
 
@@ -1542,6 +1566,8 @@ main(
         fprintf(stderr, "ERROR: bad args");
         return EXIT_FAILURE;
     }
+
+    options->wait_events = true;
 
     window_size.x = options->initial_window_width;
     window_size.y = options->initial_window_height;
@@ -1552,6 +1578,10 @@ main(
     game_init();
     do_resize();
 
+#if defined(PLATFORM_WEB)
+    emscripten_set_main_loop(em_do_one_frame, 0, 1);
+    return EXIT_SUCCESS;
+#else
     if (options->verbose) {
         infomsg("Entering Main Loop...");
     }
@@ -1572,5 +1602,6 @@ main(
     } else {
         return EXIT_FAILURE;
     }
+#endif
 }
 
