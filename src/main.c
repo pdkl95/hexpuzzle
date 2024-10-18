@@ -162,6 +162,7 @@ void disable_automatic_events(void)
     }
 }
 
+#if defined(PLATFORM_DESKTOP)
 void show_name_edit_dialog(void)
 {
     if (current_level) {
@@ -171,6 +172,7 @@ void show_name_edit_dialog(void)
         show_name_edit_box = true;
     }
 }
+#endif
 
 static void set_edit_tool(path_type_t type)
 {
@@ -202,6 +204,7 @@ void create_new_level(void)
     level_edit(level);
 }
 
+#if defined(PLATFORM_DESKTOP)
 void open_game_file(const char *path)
 {
     if (options->verbose) {
@@ -253,6 +256,7 @@ static void reset_window_to_center(void)
 
     SetWindowPosition(x, y);
 }
+#endif
 
 #define print_popup(...) {                                          \
         popup_text = TextFormat(__VA_ARGS__);                       \
@@ -376,11 +380,13 @@ static bool
 handle_events(
     void
 ) {
+#if defined(PLATFORM_DESKTOP)
     if (WindowShouldClose()) {
         //infomsg("Window Closed");
         running = false;
         return true;
     }
+#endif
 
     if (IsWindowResized()) {
         if (skip_next_resize_event) {
@@ -390,11 +396,11 @@ handle_events(
         }
     }
 
+#if defined(PLATFORM_DESKTOP)
     if (IsKeyPressed(KEY_R) && is_any_shift_down()) {
         reset_window_to_center();
     }
 
-#if defined(PLATFORM_DESKTOP)
     if (IsKeyPressed(KEY_F11)) {
         //ToggleFullscreen();
         ToggleBorderlessWindowed();
@@ -413,6 +419,7 @@ handle_events(
         return true;
     }
 
+#if defined(PLATFORM_DESKTOP)
     if (IsKeyPressed(KEY_ESCAPE)) {
         infomsg("etc - quit");
         running = false;
@@ -428,6 +435,7 @@ handle_events(
             cJSON_Delete(json);
         }
     }
+#endif
 
     //IVector2 old_mouse = mouse_position;
     mouse_position.x = GetMouseX();
@@ -765,6 +773,7 @@ static void draw_name_header(char *name)
     name_text_rect.width  = textsize.x;
     name_panel_rect.width = textsize.x + (2 * PANEL_INNER_MARGIN);
 
+#if defined(PLATFORM_DESKTOP)
     bool hover = CheckCollisionPointRec(mouse_positionf, name_text_rect);
     if (game_mode != GAME_MODE_EDIT_LEVEL) {
         hover = false;
@@ -777,6 +786,9 @@ static void draw_name_header(char *name)
             SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
         }
     }
+#else
+    bool hover = false;
+#endif
 
     Color bg   = hover ? panel_edge_color : panel_bg_color;
     Color edge = hover ? panel_bg_color : panel_edge_color;
@@ -938,9 +950,11 @@ static void draw_gui_widgets(void)
             set_game_mode(GAME_MODE_RANDOM);
         }
 
+#if defined(PLATFORM_DESKTOP)
         if (GuiButton(open_file_button_rect, open_file_button_text)) {
             show_open_file_box = true;
         }
+#endif
         break;
 
     case GAME_MODE_OPTIONS:
@@ -1003,11 +1017,13 @@ static void draw_gui_widgets(void)
             toggle_edit_mode();
         }
 
+#if defined(PLATFORM_DESKTOP)
         if (current_collection && current_collection->changed) {
             if (GuiButton(right_side_button_rect[rsb++], save_button_text)) {
                 show_ask_save_box = true;
             }
         }
+#endif
         break;
 
     case GAME_MODE_PLAY_COLLECTION:
@@ -1032,6 +1048,7 @@ static void draw_gui_widgets(void)
     GuiSetStyle(BUTTON, TEXT_ALIGNMENT, prev_align);
 }
 
+#if defined(PLATFORM_DESKTOP)
 static void draw_name_edit_dialog(void)
 {
     char *default_input = "";
@@ -1178,6 +1195,7 @@ static void draw_popup_panels(void)
         draw_open_file_dialog();
     }
 }
+#endif
 
 static void draw_popup_text(void)
 {
@@ -1196,6 +1214,8 @@ static void draw_popup_text(void)
 
 static void draw_cartesian_grid(bool draw_labels)
 {
+    bool animate_bg = !options->wait_events && options->animate_bg;
+
     rlPushMatrix();
 
     Vector2 hwin = {
@@ -1203,7 +1223,7 @@ static void draw_cartesian_grid(bool draw_labels)
         .y = window_size.y / 2.0
     };
 
-    if (options->animate_bg) {
+    if (animate_bg) {
         rlTranslatef(hwin.x,
                      hwin.y,
                      0.0);
@@ -1235,7 +1255,8 @@ static void draw_cartesian_grid(bool draw_labels)
     static int dir_lerp_frames = 0;
 #define TOTAL_LERP_FRAMES options->max_fps
 
-    if (!options->wait_events && options->animate_bg) {
+
+    if (animate_bg) {
         if ((frame_count % (3 * options->max_fps)) == 0) {
             oldspeed = speed;
             newspeed = 1.0 + (2.0 * drand48());
@@ -1332,12 +1353,16 @@ render_frame(
         }
 
         draw_gui_widgets();
+#if defined(PLATFORM_DESKTOP)
         draw_popup_panels();
+#endif
         draw_popup_text();
 
+#if defined(PLATFORM_DESKTOP)
         if (show_fps) {
             DrawTextShadow(TextFormat("FPS: %d", GetFPS()), 15, 10, 20, WHITE);
         }
+#endif
     }
     EndDrawing();
 
@@ -1355,6 +1380,7 @@ static void early_frame_setup(void)
         SetShaderValue(win_border_shader, win_border_shader_loc.time, &current_time, SHADER_UNIFORM_FLOAT);
     }
 
+#if defined(PLATFORM_DESKTOP)
     if (show_name_edit_box ||
         show_ask_save_box ||
         show_open_file_box
@@ -1365,6 +1391,7 @@ static void early_frame_setup(void)
         modal_ui_active = false;
         GuiUnlock();
     }
+#endif
 }
 
 bool do_one_frame(void)
@@ -1386,7 +1413,6 @@ bool do_one_frame(void)
     frame_count += 1;
 
     return true;
-
 }
 
 #if defined(PLATFORM_WEB)
@@ -1504,10 +1530,12 @@ static void game_init(void)
     //set_game_mode(GAME_MODE_BROWSER);
     set_game_mode(GAME_MODE_RANDOM);
 
+#if defined(PLATFORM_DESKTOP)
     if (options->extra_argc == 1) {
         char *filename = options->extra_argv[0];
         open_game_file(filename);
     }
+#endif
 
     load_nvdata();
 }
@@ -1567,7 +1595,9 @@ main(
         return EXIT_FAILURE;
     }
 
+#if defined(PLATFORM_WEB)
     options->wait_events = true;
+#endif
 
     window_size.x = options->initial_window_width;
     window_size.y = options->initial_window_height;
