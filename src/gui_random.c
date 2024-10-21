@@ -340,8 +340,8 @@ static level_t *generate_random_level(void)
 
     level_use_unsolved_tile_pos(level);
 
-    level->fade_value       = 1.0f;
-    level->fade_value_eased = 1.0f;
+    /* level->fade_value       = 1.0f; */
+    /* level->fade_value_eased = 1.0f; */
 
     return level;
 }
@@ -408,7 +408,7 @@ void resize_gui_random(void)
     gui_random_panel_rect.height = window_size.y * 0.45;
 
     MINVAR(gui_random_panel_rect.width,  350);
-    MINVAR(gui_random_panel_rect.height, 500);
+    MINVAR(gui_random_panel_rect.height, 550);
 
     gui_random_panel_rect.x = (window_size.x / 2) - (gui_random_panel_rect.width  / 2);
     gui_random_panel_rect.y = (window_size.y / 2) - (gui_random_panel_rect.height / 2);

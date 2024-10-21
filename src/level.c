@@ -1449,15 +1449,36 @@ void level_preview(level_t *level, Rectangle rect)
 {
     rlPushMatrix();
 
-    rlTranslatef(rect.x,
-                 rect.y,
+    float scale_factor = 1.2;
+    float half_scale_factor = 0.5 * scale_factor;
+    Vector2 new_size = {
+        .x = half_scale_factor * rect.width,
+        .y = half_scale_factor * rect.height
+    };
+    Vector2 old_size = {
+        .x = 0.5 * rect.width,
+        .y = 0.5 * rect.height
+    };
+    Vector2 delta = Vector2Subtract(new_size, old_size);
+
+    rlTranslatef(rect.x - delta.x,
+                 rect.y - delta.y,
                  0.0f);
 
-    rlScalef(rect.width  / window_size.x,
-             rect.height / window_size.y,
+    rlScalef(scale_factor * (rect.width  / window_size.x),
+             scale_factor * (rect.height / window_size.y),
              1.0f);
 
+    float save_fade_value = level->fade_value;
+    float save_fade_rotate_speed = level->fade_rotate_speed;
+
+    level->fade_value = 1.9;
+    level->fade_rotate_speed = 0.0;
+
     level_draw(level, false);
+
+    level->fade_value = save_fade_value;
+    level->fade_rotate_speed = save_fade_rotate_speed;
 
     rlPopMatrix();
 }
