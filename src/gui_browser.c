@@ -300,26 +300,23 @@ void change_gui_browser_path_up(void)
     }
 
     const char *parent = GetPrevDirectoryPath(browse_path);
-    printf("path> \"%s\"\n", browse_path);
-    printf("prev> \"%s\"\n", parent);
     change_gui_browser_path(parent);
 }
 
 void change_gui_browser_path_to_home(void)
 {
     assert_not_null(nvdata_default_browse_path);
-    //change_gui_browser_path(nvdata_default_browse_path);
-    change_gui_browser_path(GetApplicationDirectory());
+    change_gui_browser_path(nvdata_default_browse_path);
 }
 
 void open_entry(gui_list_entry_t *entry)
 {
     switch (entry->type) {
-    case ENTRY_TYPE_DIR:
-        if (DirectoryExists(entry->path)) {
-            change_gui_browser_path(entry->path);
-        }
-        break;
+    /* case ENTRY_TYPE_DIR: */
+    /*     if (DirectoryExists(entry->path)) { */
+    /*         change_gui_browser_path(entry->path); */
+    /*     } */
+    /*     break; */
 
     case ENTRY_TYPE_COLLECTION_DIR:
         /* fall through */
