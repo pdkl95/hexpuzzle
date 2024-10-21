@@ -1448,7 +1448,7 @@ void gfx_init(void)
     unsigned int flags = 0;
     flags |= FLAG_VSYNC_HINT;
     flags |= FLAG_WINDOW_RESIZABLE;
-    flags |= FLAG_MSAA_4X_HINT;
+    //flags |= FLAG_MSAA_4X_HINT;
     SetConfigFlags(flags);
 
     InitWindow(window_size.x, window_size.y, "Hex Puzzle");
@@ -1527,8 +1527,8 @@ static void game_init(void)
     init_gui_browser();
     init_gui_random();
 
-    //set_game_mode(GAME_MODE_BROWSER);
-    set_game_mode(GAME_MODE_RANDOM);
+    set_game_mode(GAME_MODE_BROWSER);
+    //set_game_mode(GAME_MODE_RANDOM);
 
 #if defined(PLATFORM_DESKTOP)
     if (options->extra_argc == 1) {

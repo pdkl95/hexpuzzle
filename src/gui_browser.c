@@ -20,14 +20,27 @@
  ****************************************************************************/
 
 #include "common.h"
+#include "options.h"
 #include "collection.h"
 #include "gui_browser.h"
 
 void open_game_file(const char *path);
 void open_classics_game_pack(int n);
 
+struct gui_list_entry {
+    const char *name;
+    const char *path;
+
+    int icon;
+
+    char *icon_name;
+};
+typedef struct gui_list_entry gui_list_entry_t;
+
 struct gui_list_vars {
-    const char **names;
+    char **names;
+    gui_list_entry_t *entries;
+
     int count;
 
     int scroll_index;
@@ -41,20 +54,33 @@ Rectangle browser_tabbar_rect;
 Rectangle browser_area_rect;
 Rectangle browser_list_rect;
 Rectangle browser_play_button_rect;
+Rectangle local_files_list_rect;
+Rectangle local_files_dir_label_rect;
+Rectangle local_files_dir_rect;
+Rectangle local_files_up_button_rect;
+Rectangle local_files_home_button_rect;
 
 char browser_panel_text[] = "Browser";
 char browser_play_button_text[] = "Play";
 
-const char *classics_names[] = {
-    "01 - 10 (red)",
-    "11 - 20 (blue)",
-    "21 - 30 (green)",
-    "31 - 40 (yellow)"
+char local_files_dir_label_text[] = "Directory";
+char local_files_up_button_text_str[] = "Up";
+char local_files_home_button_text_str[] = "Home";
+
+char *local_files_up_button_text = NULL;
+char *local_files_home_button_text = NULL;
+
+gui_list_entry_t classics_entries[] = {
+    { .name = "01 - 10 (red)",    .path = NULL, .icon = ICON_SUITCASE, .icon_name = NULL },
+    { .name = "11 - 20 (blue)",   .path = NULL, .icon = ICON_SUITCASE, .icon_name = NULL },
+    { .name = "21 - 30 (green)",  .path = NULL, .icon = ICON_SUITCASE, .icon_name = NULL },
+    { .name = "31 - 40 (yellow)", .path = NULL, .icon = ICON_SUITCASE, .icon_name = NULL }
 };
-#define NUM_CLASSICS_NAMES (sizeof(classics_names)/sizeof(char *))
+#define NUM_CLASSICS_NAMES (sizeof(classics_entries)/sizeof(gui_list_entry_t))
 
 gui_list_vars_t classics = {
-    .names        = classics_names,
+    .names        = NULL,
+    .entries      = classics_entries,
     .count        = NUM_CLASSICS_NAMES,
     .scroll_index = -1,
     .active       = -1,
@@ -68,13 +94,12 @@ FilePathList browse_file_list;
 
 gui_list_vars_t local_files = {
     .names        = NULL,
+    .entries      = NULL,
     .count        = 0,
     .scroll_index = -1,
     .active       = -1,
     .focus        = -1
 };
-
-char ext[] = "Reset Level Finished Data";
 
 #define NUM_TABS 3
 const char *browser_tabbar_text[NUM_TABS];
@@ -82,6 +107,67 @@ const char *browser_tabbar_text[NUM_TABS];
 int active_tab = 0;
 
 #if defined(PLATFORM_DESKTOP)
+static void free_local_files_data(void)
+{
+    for (int i=0; i<local_files.count; i++) {
+        SAFEFREE(local_files.entries[i].icon_name);
+    }
+
+    SAFEFREE(local_files.names);
+    SAFEFREE(local_files.entries);
+
+    UnloadDirectoryFiles(browse_file_list);
+}
+
+int compare_entries(const void *p1, const void *p2)
+{
+    gui_list_entry_t *e1 = (gui_list_entry_t *)p1;
+    gui_list_entry_t *e2 = (gui_list_entry_t *)p2;
+
+    assert_not_null(e1);
+    assert_not_null(e2);
+    assert_not_null(e1->name);
+    assert_not_null(e1->name);
+
+    int rv = e1->icon - e2->icon;
+    if (rv) { return rv; }
+
+    return strcmp(e1->name, e2->name);
+}
+
+static void prepare_gui_list_names(gui_list_vars_t *list)
+{
+    assert_not_null(list);
+    assert_not_null(list->entries);
+    assert(list->count >= 0);
+
+    SAFEFREE(list->names);
+    list->names = calloc(list->count, sizeof(char *));
+
+    for (int i=0; i<list->count; i++) {
+        gui_list_entry_t *entry = &(list->entries[i]);
+        const char *icon_name = GuiIconText(entry->icon, entry->name);
+        entry->icon_name = strdup(icon_name);
+    }
+
+    qsort(list->entries, list->count, sizeof(gui_list_entry_t), compare_entries);
+
+    for (int i=0; i<list->count; i++) {
+        gui_list_entry_t *entry = &(list->entries[i]);
+        list->names[i] = entry->icon_name;
+    }
+}
+
+static bool should_skip_file(const char *name)
+{
+    // skip hidden files
+    if (name[0] == '.') {
+        return true;
+    }
+
+    return false;
+}
+
 void setup_browse_dir(void)
 {
     assert_not_null(browse_path);
@@ -91,52 +177,128 @@ void setup_browse_dir(void)
         return;
     }
 
+    int len = strlen(browse_path);
+    assert(len > 0);
+    int last = len - 1;
+    if ((last > 0) && ((browse_path[last] == '\\') || (browse_path[last] == '/'))) {
+        browse_path[last] = '\0';
+    }
+
     if (local_files.names) {
-        FREE(local_files.names);
-        UnloadDirectoryFiles(browse_file_list);
-    };
+        free_local_files_data();
+    }
 
-    browse_file_list = LoadDirectoryFilesEx(browse_path, ext, false);
-    local_files.names = calloc(browse_file_list.count, sizeof(char *));
+    if (options->verbose) {
+        infomsg("Scanning directory: \"%s\"", browse_path);
+    }
 
+    browse_file_list = LoadDirectoryFilesEx(browse_path, NULL, false);
+    local_files.entries = calloc(browse_file_list.count, sizeof(gui_list_entry_t));
+
+    local_files.count = 0;
+    int icon = ICON_NONE;
     for (int i=0; i<(int)browse_file_list.count; i++) {
-        char *p = browse_file_list.paths[i];
-        local_files.names[i] = p;
-        while (*p) {
-            if (*p == '/') {
-                local_files.names[i] = p + 1;
+        gui_list_entry_t *entry = &(local_files.entries[local_files.count]);
+        char *path = browse_file_list.paths[i];
+        const char *name = GetFileName(path);
+
+        if (should_skip_file(name)) {
+            if (options->verbose) {
+                infomsg("SCAN> %s (SKIP, FLAGGED)", name);
             }
-            p++;
+            continue;
         }
+
+        char *fd, *type;
+        if (IsPathFile(path)) {
+            fd = "FILE";
+
+            if (IsFileExtension(name, "." COLLECTION_FILENAME_EXT)) {
+                type = "COLLECTION";
+                icon = ICON_SUITCASE;
+            } else if (IsFileExtension(name, "." LEVEL_FILENAME_EXT)) {
+                type = "LEVEL";
+                icon = ICON_FILE;
+            } else {
+                if (options->verbose) {
+                    infomsg("SCAN> %s (SKIP, UNKNOWN EXT)", name);
+                }
+                continue;
+            }
+        } else {
+            fd = "DIR";
+
+            const char *index_file = TextFormat("%s/%s", path, COLLECTION_ZIP_INDEX_FILENAME);
+            if (FileExists(index_file)) {
+                type = "COLLECTION";
+                icon = ICON_SUITCASE;
+            } else {
+                type = "DIR";
+                icon = ICON_FOLDER;
+            }
+        }
+
+        if (options->verbose) {
+            infomsg("SCAN> %s (%s, %s)", name, fd, type);
+        }
+
+        entry->name = name;
+        entry->path = path;
+        entry->icon = icon;
+
+        local_files.count++;
     }
 
     local_files.scroll_index = -1;
     local_files.active       = -1;
     local_files.focus        = -1;
+
+    prepare_gui_list_names(&local_files);
 }
 
-void change_gui_browser_path(char *dir)
+void change_gui_browser_path(const char *dir)
 {
     SAFEFREE(browse_path);
 
     browse_path = strdup(dir);
     setup_browse_dir();
 }
+
+void change_gui_browser_path_up(void)
+{
+    if (!browse_path) {
+        return;
+    }
+
+    const char *parent = GetPrevDirectoryPath(browse_path);
+    printf("path> \"%s\"\n", browse_path);
+    printf("prev> \"%s\"\n", parent);
+    change_gui_browser_path(parent);
+}
+
+void change_gui_browser_path_to_home(void)
+{
+    assert_not_null(nvdata_default_browse_path);
+    //change_gui_browser_path(nvdata_default_browse_path);
+    change_gui_browser_path(GetApplicationDirectory());
+}
 #endif
 
 void init_gui_browser(void)
 {
-    browser_tabbar_text[0] = "Clsssics";
+    browser_tabbar_text[0] = "Classics";
 #if defined(PLATFORM_DESKTOP)
     browser_tabbar_text[1] = "Local Level Files";
     browser_tabbar_text[2] = "Add File";
 
-    assert_not_null(nvdata_default_browse_path);
-    change_gui_browser_path(nvdata_default_browse_path);
+    change_gui_browser_path_to_home();
+
 #else
     browser_tabbar_text[1] = NULL;
     browser_tabbar_text[2] = NULL;
 #endif
+
+    prepare_gui_list_names(&classics);
 
     resize_gui_browser();
 }
@@ -144,9 +306,8 @@ void init_gui_browser(void)
 void cleanup_gui_browser(void)
 {
     if (local_files.names) {
-        FREE(local_files.names);
-        UnloadDirectoryFiles(browse_file_list);
-    };
+        free_local_files_data();
+    }
 
     SAFEFREE(browse_path);
 }
@@ -188,19 +349,56 @@ void resize_gui_browser(void)
     browser_list_rect.y      = browser_area_rect.y;
     browser_list_rect.width  = browser_area_rect.width;
     browser_list_rect.height = area_bottom - browser_list_rect.y;
+
+    Vector2 local_files_dir_label_text_size = MeasureGuiText(local_files_dir_label_text);
+
+    local_files_dir_label_rect.x      = browser_area_rect.x;
+    local_files_dir_label_rect.y      = browser_area_rect.y;
+    local_files_dir_label_rect.width  = local_files_dir_label_text_size.x;
+    local_files_dir_label_rect.height = TOOL_BUTTON_HEIGHT;
+
+    local_files_dir_rect.x      = local_files_dir_label_rect.x + local_files_dir_label_rect.width + RAYGUI_ICON_SIZE;
+    local_files_dir_rect.y      = local_files_dir_label_rect.y;
+    local_files_dir_rect.width  = browser_area_rect.width - local_files_dir_label_rect.width - RAYGUI_ICON_SIZE;
+    local_files_dir_rect.height = local_files_dir_label_rect.height;
+
+    browser_area_rect.y      += local_files_dir_label_rect.height + RAYGUI_ICON_SIZE;
+    browser_area_rect.height -= local_files_dir_label_rect.height + RAYGUI_ICON_SIZE;
+
+    local_files_up_button_text   = strdup(GuiIconText(ICON_ARROW_LEFT, local_files_up_button_text_str));
+    local_files_home_button_text = strdup(GuiIconText(ICON_HOUSE,      local_files_home_button_text_str));
+    Vector2 local_files_up_button_text_size   = MeasureGuiText(local_files_up_button_text);
+    Vector2 local_files_home_button_text_size = MeasureGuiText(local_files_home_button_text);
+
+    local_files_up_button_rect.x      = browser_area_rect.x;
+    local_files_up_button_rect.y      = browser_area_rect.y;
+    local_files_up_button_rect.width  = local_files_up_button_text_size.x;
+    local_files_up_button_rect.height = TOOL_BUTTON_HEIGHT;
+
+    local_files_home_button_rect.width  = local_files_home_button_text_size.x;
+    local_files_home_button_rect.x      = browser_area_rect.x + browser_area_rect.width - local_files_home_button_rect.width;
+    local_files_home_button_rect.y      = local_files_up_button_rect.y;
+    local_files_home_button_rect.height = local_files_up_button_rect.height;
+
+    browser_area_rect.y      += local_files_up_button_rect.height + RAYGUI_ICON_SIZE;
+    browser_area_rect.height -= local_files_up_button_rect.height + RAYGUI_ICON_SIZE;
+
+    local_files_list_rect.x      = browser_area_rect.x;
+    local_files_list_rect.y      = browser_area_rect.y;
+    local_files_list_rect.width  = browser_area_rect.width;
+    local_files_list_rect.height = area_bottom - local_files_list_rect.y;
 }
 
-int draw_gui_browser_list(gui_list_vars_t *list)
+int draw_gui_browser_list(gui_list_vars_t *list, Rectangle list_rect)
 {
     GuiSetStyle(LISTVIEW, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
 
-    GuiListViewEx(browser_list_rect,
-                  list->names,
+    GuiListViewEx(list_rect,
+                  (const char **)list->names,
                   list->count,
                   &list->scroll_index,
                   &list->active,
                   &list->focus);
-
 
     if (GuiButton(browser_play_button_rect, browser_play_button_text)) {
         if (list->active >= 0 && list->active < list->count) {
@@ -213,7 +411,7 @@ int draw_gui_browser_list(gui_list_vars_t *list)
 
 void draw_gui_browser_classics(void)
 {
-    int selected = draw_gui_browser_list(&classics);
+    int selected = draw_gui_browser_list(&classics, browser_list_rect);
 
     if (selected > -1) {
         open_classics_game_pack(selected);
@@ -223,16 +421,25 @@ void draw_gui_browser_classics(void)
 #if defined(PLATFORM_DESKTOP)
 void draw_gui_browser_local_level_file(void)
 {
-    int selected = draw_gui_browser_list(&local_files);
+    GuiLabel(local_files_dir_label_rect, local_files_dir_label_text);
+    GuiStatusBar(local_files_dir_rect, browse_path);
+
+    if (GuiButton(local_files_up_button_rect, local_files_up_button_text)) {
+        change_gui_browser_path_up();
+    }
+
+    if (GuiButton(local_files_home_button_rect, local_files_home_button_text)) {
+        change_gui_browser_path_to_home();
+    }
+
+    int selected = draw_gui_browser_list(&local_files, local_files_list_rect);
 
     if (selected > -1) {
         char *path = browse_file_list.paths[selected];
-        open_game_file(path);
+        if (path) {
+            open_game_file(path);
+        }
     }
-}
-
-void draw_gui_browser_add_file(void)
-{
 }
 #endif
 
@@ -240,25 +447,18 @@ void draw_gui_browser(void)
 {
     GuiPanel(browser_panel_rect, browser_panel_text);
 
-    int old_active_tab = active_tab;
     GuiSimpleTabBar(browser_tabbar_rect, browser_tabbar_text, 2, &active_tab);
 
-    if (old_active_tab != active_tab) {
-        switch (active_tab) {
-        case 0:
-            draw_gui_browser_classics();
-            break;
+    switch (active_tab) {
+    case 0:
+        draw_gui_browser_classics();
+        break;
 
 #if defined(PLATFORM_DESKTOP)
-        case 1:
-            draw_gui_browser_local_level_file();
-            break;
-
-        case 2:
-            draw_gui_browser_add_file();
-            break;
+    case 1:
+        draw_gui_browser_local_level_file();
+        break;
 #endif
-        }
     }
 }
 
