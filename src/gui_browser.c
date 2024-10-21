@@ -27,6 +27,15 @@
 void open_game_file(const char *path);
 void open_classics_game_pack(int n);
 
+enum gui_list_entry_type {
+    ENTRY_TYPE_NULL = 0,
+    ENTRY_TYPE_DIR,
+    ENTRY_TYPE_LEVEL_FILE,
+    ENTRY_TYPE_COLLECTION_FILE,
+    ENTRY_TYPE_COLLECTION_DIR
+};
+typedef enum gui_list_entry_type gui_list_entry_type_t;
+
 struct gui_list_entry {
     const char *name;
     const char *path;
@@ -34,6 +43,8 @@ struct gui_list_entry {
     int icon;
 
     char *icon_name;
+
+    gui_list_entry_type_t type;
 };
 typedef struct gui_list_entry gui_list_entry_t;
 
@@ -105,6 +116,22 @@ gui_list_vars_t local_files = {
 const char *browser_tabbar_text[NUM_TABS];
 
 int active_tab = 0;
+
+const char *entry_type_str(gui_list_entry_type_t type)
+{
+    switch (type) {
+    case ENTRY_TYPE_DIR:
+        return "DIR";
+    case ENTRY_TYPE_LEVEL_FILE:
+        return "LEVEL_FILE";
+    case ENTRY_TYPE_COLLECTION_FILE:
+        return "COLLECTION_FILE";
+    case ENTRY_TYPE_COLLECTION_DIR:
+        return "COLLECTION_DIR";
+    default:
+        return "NULL";
+    }
+}
 
 #if defined(PLATFORM_DESKTOP)
 static void free_local_files_data(void)
@@ -209,15 +236,16 @@ void setup_browse_dir(void)
             continue;
         }
 
-        char *fd, *type;
+        char *fd;
+        gui_list_entry_type_t type = ENTRY_TYPE_NULL;
         if (IsPathFile(path)) {
             fd = "FILE";
 
             if (IsFileExtension(name, "." COLLECTION_FILENAME_EXT)) {
-                type = "COLLECTION";
+                type = ENTRY_TYPE_COLLECTION_FILE;
                 icon = ICON_SUITCASE;
             } else if (IsFileExtension(name, "." LEVEL_FILENAME_EXT)) {
-                type = "LEVEL";
+                type = ENTRY_TYPE_LEVEL_FILE;
                 icon = ICON_FILE;
             } else {
                 if (options->verbose) {
@@ -230,21 +258,22 @@ void setup_browse_dir(void)
 
             const char *index_file = TextFormat("%s/%s", path, COLLECTION_ZIP_INDEX_FILENAME);
             if (FileExists(index_file)) {
-                type = "COLLECTION";
+                type = ENTRY_TYPE_COLLECTION_DIR;
                 icon = ICON_SUITCASE;
             } else {
-                type = "DIR";
+                type = ENTRY_TYPE_DIR;
                 icon = ICON_FOLDER;
             }
         }
 
         if (options->verbose) {
-            infomsg("SCAN> %s (%s, %s)", name, fd, type);
+            infomsg("SCAN> %s (%s, %s)", name, fd, entry_type_str(type));
         }
 
         entry->name = name;
         entry->path = path;
         entry->icon = icon;
+        entry->type = type;
 
         local_files.count++;
     }
@@ -281,6 +310,30 @@ void change_gui_browser_path_to_home(void)
     assert_not_null(nvdata_default_browse_path);
     //change_gui_browser_path(nvdata_default_browse_path);
     change_gui_browser_path(GetApplicationDirectory());
+}
+
+void open_entry(gui_list_entry_t *entry)
+{
+    switch (entry->type) {
+    case ENTRY_TYPE_DIR:
+        if (DirectoryExists(entry->path)) {
+            change_gui_browser_path(entry->path);
+        }
+        break;
+
+    case ENTRY_TYPE_COLLECTION_DIR:
+        /* fall through */
+    case ENTRY_TYPE_LEVEL_FILE:
+        /* fall through */
+    case ENTRY_TYPE_COLLECTION_FILE:
+        if (FileExists(entry->path)) {
+            open_game_file(entry->path);
+        }
+        break;
+
+    default:
+        errmsg("Cannot open \"%s\": NULL entr6y type.", entry->path);
+    }
 }
 #endif
 
@@ -435,9 +488,9 @@ void draw_gui_browser_local_level_file(void)
     int selected = draw_gui_browser_list(&local_files, local_files_list_rect);
 
     if (selected > -1) {
-        char *path = browse_file_list.paths[selected];
-        if (path) {
-            open_game_file(path);
+        gui_list_entry_t *entry = &(local_files.entries[selected]);
+        if (entry) {
+            open_entry(entry);
         }
     }
 }
