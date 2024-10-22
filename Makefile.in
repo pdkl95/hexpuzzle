@@ -123,12 +123,13 @@ am__hexpuzzle_SOURCES_DIST = src/anim_fsm.h src/anim_fsm.c \
 	src/nvdata.h src/nvdata.c src/nvdata_finished.h \
 	src/nvdata_finished.c src/options.h src/options.c \
 	src/raygui_impl.c src/raylib_helper.h src/raylib_helper.c \
-	src/shader.h src/shader.c src/tile.h src/tile.c \
-	src/tile_draw.h src/tile_draw.c src/tile_pos.h src/tile_pos.c \
-	src/util.h src/util.c src/win_anim.h src/win_anim.c \
-	src/common.h src/main.c external/raygui/raygui.h \
-	external/pcg/pcg_basic.c external/pcg/pcg_basic.h \
-	external/cJSON/cJSON.c external/cJSON/cJSON.h \
+	src/startup_action.h src/startup_action.c src/shader.h \
+	src/shader.c src/tile.h src/tile.c src/tile_draw.h \
+	src/tile_draw.c src/tile_pos.h src/tile_pos.c src/util.h \
+	src/util.c src/win_anim.h src/win_anim.c src/common.h \
+	src/main.c external/raygui/raygui.h external/pcg/pcg_basic.c \
+	external/pcg/pcg_basic.h external/cJSON/cJSON.c \
+	external/cJSON/cJSON.h \
 	external/tinyfiledialogs/tinyfiledialogs.c \
 	external/tinyfiledialogs/tinyfiledialogs.h
 am__dirstamp = $(am__leading_dot)dirstamp
@@ -147,6 +148,7 @@ am_hexpuzzle_OBJECTS = src/hexpuzzle-anim_fsm.$(OBJEXT) \
 	src/hexpuzzle-options.$(OBJEXT) \
 	src/hexpuzzle-raygui_impl.$(OBJEXT) \
 	src/hexpuzzle-raylib_helper.$(OBJEXT) \
+	src/hexpuzzle-startup_action.$(OBJEXT) \
 	src/hexpuzzle-shader.$(OBJEXT) src/hexpuzzle-tile.$(OBJEXT) \
 	src/hexpuzzle-tile_draw.$(OBJEXT) \
 	src/hexpuzzle-tile_pos.$(OBJEXT) src/hexpuzzle-util.$(OBJEXT) \
@@ -398,12 +400,13 @@ hexpuzzle_SOURCES = src/anim_fsm.h src/anim_fsm.c src/classics.h \
 	src/nvdata.h src/nvdata.c src/nvdata_finished.h \
 	src/nvdata_finished.c src/options.h src/options.c \
 	src/raygui_impl.c src/raylib_helper.h src/raylib_helper.c \
-	src/shader.h src/shader.c src/tile.h src/tile.c \
-	src/tile_draw.h src/tile_draw.c src/tile_pos.h src/tile_pos.c \
-	src/util.h src/util.c src/win_anim.h src/win_anim.c \
-	src/common.h src/main.c external/raygui/raygui.h \
-	external/pcg/pcg_basic.c external/pcg/pcg_basic.h \
-	external/cJSON/cJSON.c external/cJSON/cJSON.h $(am__append_2)
+	src/startup_action.h src/startup_action.c src/shader.h \
+	src/shader.c src/tile.h src/tile.c src/tile_draw.h \
+	src/tile_draw.c src/tile_pos.h src/tile_pos.c src/util.h \
+	src/util.c src/win_anim.h src/win_anim.c src/common.h \
+	src/main.c external/raygui/raygui.h external/pcg/pcg_basic.c \
+	external/pcg/pcg_basic.h external/cJSON/cJSON.c \
+	external/cJSON/cJSON.h $(am__append_2)
 dist_EXTRA_hexpuzzle_SOURCES = \
 	src/data_classics_levels.h  \
 	src/data_fonts.h            \
@@ -550,6 +553,8 @@ src/hexpuzzle-raygui_impl.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-raylib_helper.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/hexpuzzle-startup_action.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-shader.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-tile.$(OBJEXT): src/$(am__dirstamp) \
@@ -628,6 +633,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raygui_impl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raylib_helper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-shader.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-startup_action.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-tile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-tile_draw.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-tile_pos.Po@am__quote@
@@ -887,6 +893,20 @@ src/hexpuzzle-raylib_helper.obj: src/raylib_helper.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/raylib_helper.c' object='src/hexpuzzle-raylib_helper.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-raylib_helper.obj `if test -f 'src/raylib_helper.c'; then $(CYGPATH_W) 'src/raylib_helper.c'; else $(CYGPATH_W) '$(srcdir)/src/raylib_helper.c'; fi`
+
+src/hexpuzzle-startup_action.o: src/startup_action.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-startup_action.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-startup_action.Tpo -c -o src/hexpuzzle-startup_action.o `test -f 'src/startup_action.c' || echo '$(srcdir)/'`src/startup_action.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-startup_action.Tpo src/$(DEPDIR)/hexpuzzle-startup_action.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/startup_action.c' object='src/hexpuzzle-startup_action.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-startup_action.o `test -f 'src/startup_action.c' || echo '$(srcdir)/'`src/startup_action.c
+
+src/hexpuzzle-startup_action.obj: src/startup_action.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-startup_action.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-startup_action.Tpo -c -o src/hexpuzzle-startup_action.obj `if test -f 'src/startup_action.c'; then $(CYGPATH_W) 'src/startup_action.c'; else $(CYGPATH_W) '$(srcdir)/src/startup_action.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-startup_action.Tpo src/$(DEPDIR)/hexpuzzle-startup_action.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/startup_action.c' object='src/hexpuzzle-startup_action.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-startup_action.obj `if test -f 'src/startup_action.c'; then $(CYGPATH_W) 'src/startup_action.c'; else $(CYGPATH_W) '$(srcdir)/src/startup_action.c'; fi`
 
 src/hexpuzzle-shader.o: src/shader.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-shader.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-shader.Tpo -c -o src/hexpuzzle-shader.o `test -f 'src/shader.c' || echo '$(srcdir)/'`src/shader.c

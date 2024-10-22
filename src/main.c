@@ -982,7 +982,6 @@ static void draw_gui_widgets(void)
         }
 
         if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
-            printf("return\n");
             show_ask_save_box = true;
         }
         break;
@@ -1612,6 +1611,14 @@ main(
     emscripten_set_main_loop(em_do_one_frame, 0, 1);
     return EXIT_SUCCESS;
 #else
+    if (run_startup_action()) {
+        if (startup_action_ok) {
+            return EXIT_SUCCESS;
+        } else {
+            return EXIT_FAILURE;
+        }
+    }
+
     if (options->verbose) {
         infomsg("Entering Main Loop...");
     }

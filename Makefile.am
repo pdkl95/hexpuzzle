@@ -97,6 +97,7 @@ hexpuzzle_SOURCES =                                    \
 	src/options.h           src/options.c          \
 	src/raygui_impl.c            		       \
 	src/raylib_helper.h     src/raylib_helper.c    \
+	src/startup_action.h    src/startup_action.c   \
 	src/shader.h            src/shader.c           \
 	src/tile.h              src/tile.c             \
 	src/tile_draw.h         src/tile_draw.c        \

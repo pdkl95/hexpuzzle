@@ -23,7 +23,11 @@
 #define OPTIONS_H
 
 #include "common.h"
+#include "startup_action.h"
 
+#define OPTIONS_DEFAULT_STARTUP_ACTION STARTUP_ACTION_NONE
+#define OPTIONS_DEFAULT_CREATE_LEVEL_MODE CREATE_LEVEL_MODE_DFS
+#define OPTIONS_DEFAULT_CREATE_LEVEL_MODE_STR "dfs"
 #define OPTIONS_DEFAULT_VERBOSE false
 #define OPTIONS_DEFAULT_WAIT_EVENTS false
 #define OPTIONS_DEFAULT_ANIMATE_BG  true
@@ -39,6 +43,9 @@
 #define OPTIONS_WINDOW_MAX_HEIGHT (MAX(GetScreenHeight(), OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT))
 
 struct options {
+    startup_action_t startup_action;
+    create_level_mode_t create_level_mode;
+
     bool safe_mode;
     bool verbose;
     bool wait_events;

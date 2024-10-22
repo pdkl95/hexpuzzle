@@ -34,7 +34,7 @@
 #include "options.h"
 
 /* command line options */
-static char short_options[] = "Cc:F:H:t:wvVW:hj";
+static char short_options[] = "Cc:F:H:t:wvVW:P:U:L::hj";
 
 static struct option long_options[] = {
     {      "no-config", required_argument, 0, 'C' },
@@ -42,6 +42,9 @@ static struct option long_options[] = {
     {            "fps", required_argument, 0, 'F' },
     {         "height", required_argument, 0, 'H' },
     {          "width", required_argument, 0, 'W' },
+    {   "create-level", optional_argument, 0, 'L' },
+    {           "pack",       no_argument, 0, 'P' },
+    {         "unpack",       no_argument, 0, 'U' },
     {     "animate-bg",       no_argument, 0, 'b' },
     {  "no-animate-bg",       no_argument, 0, 'B' },
     {    "animate-win",       no_argument, 0, 'i' },
@@ -68,6 +71,12 @@ static char help_text[] =
     "                                which is usually ~/.config/" PACKAGE_NAME "/)\n"
     "  -C, --no-config             Skip loading of all config files (\"Save Mode\")\n"
     "\n"
+    "  -v, --verbose               More logging output (including raylib)\n"
+    "\n"
+    "  -V, --version               Show version information and exit\n"
+    "  -h, --help                  Show this help and exit\n"
+    "\n"
+    "GRAPHICS OPTIONS\n"
     "      --animate-bg\n"
     "   --no-animate-bg\n"
     "      --animate-win\n"
@@ -82,10 +91,14 @@ static char help_text[] =
     "                              every frame. Less CPU usage, but might\n"
     "                              not awaken immediately during resize events.\n"
     "\n"
-    "  -v, --verbose               More logging output (including raylib)\n"
-    "\n"
-    "  -V, --version               Show version information and exit\n"
-    "  -h, --help                  Show this help and exit\n"
+    "ACTIONS\n"
+    "  -L, --create-level[=MODE] <NAME> Create a new random level file.\n"
+    "                                Modes: [dfs, scatter]\n"
+    "                                Default: " OPTIONS_DEFAULT_CREATE_LEVEL_MODE_STR "\n"
+    "  -P, --pack <dir>            Packasge a directory of ." LEVEL_FILENAME_EXT " files\n"
+    "                                into a ." COLLECTION_FILENAME_EXT "\n"
+    "  -U, --unpack <file." COLLECTION_FILENAME_EXT "> Unpack a " COLLECTION_FILENAME_EXT " file\n"
+    "                                into a directory of ." LEVEL_FILENAME_EXT "\n"
     ;
 
 
@@ -209,6 +222,8 @@ options_set_defaults(
 ) {
     assert_this(options);
 
+    options->startup_action        = OPTIONS_DEFAULT_STARTUP_ACTION;
+    options->create_level_mode     = OPTIONS_DEFAULT_CREATE_LEVEL_MODE;
     options->verbose               = OPTIONS_DEFAULT_VERBOSE;
     options->wait_events           = OPTIONS_DEFAULT_WAIT_EVENTS;
     options->animate_bg            = OPTIONS_DEFAULT_ANIMATE_BG;
@@ -245,6 +260,19 @@ options_parse_args(
         }
 
         switch (c) {
+        case 'L':
+            printf("optarg=\"%s\"\n", optarg);
+            exit(1);
+            break;
+
+        case 'P':
+            options->startup_action = STARTUP_ACTION_PACK_COLLECTION;
+            break;
+
+        case 'U':
+            options->startup_action = STARTUP_ACTION_UNPACK_COLLECTION;
+            break;
+
         case 'C':
             options->safe_mode = true;
             break;
