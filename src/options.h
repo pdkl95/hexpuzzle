@@ -47,6 +47,7 @@ struct options {
     create_level_mode_t create_level_mode;
 
     bool safe_mode;
+    bool force;
     bool verbose;
     bool wait_events;
 

@@ -84,6 +84,7 @@ void collection_update_level_names(collection_t *collection);
 
 void collection_draw(collection_t *collection);
 
+void collection_save_pack(collection_t *collection, const char *filename);
 void collection_save(collection_t *collection);
 
 void collection_extract_level_from_grid(collection_t *collection, level_t *level);

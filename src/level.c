@@ -676,6 +676,40 @@ void level_edit(level_t *level)
     set_game_mode(GAME_MODE_EDIT_LEVEL);
 }
 
+void level_save_to_filename(level_t *level, const char *filepath)
+{
+    assert_not_null(level);
+    assert_not_null(filepath);
+
+    char *tmpname;
+    asprintf(&tmpname, "%s.tmp", filepath);
+
+    /* if (options->verbose) { */
+    /*     infomsg("saving level \"%s\" to: \"%s\"", level->name, tmpname); */
+    /* } */
+
+    cJSON *json = level_to_json(level);
+    char *json_str = cJSON_PrintUnformatted(json);
+
+    SaveFileText(tmpname, json_str);
+
+    free(json_str);
+    cJSON_Delete(json);
+
+    /* if (options->verbose) { */
+    /*     infomsg("save to \"%s\" finished", tmpname); */
+    /* } */
+
+    if (tmpname) {
+        if (-1 == rename(tmpname, filepath)) {
+            errmsg("Error trying to rename \"%s\" to \"%s\" - ",
+                   tmpname, filepath);
+        }
+
+        free(tmpname);
+    }
+}
+
 void level_save_to_file(level_t *level, const char *dirpath)
 {
     assert_not_null(level);
@@ -702,33 +736,7 @@ void level_save_to_file(level_t *level, const char *dirpath)
         filepath = &(pathbuf[0]);
     }
 
-    char *tmpname;
-    asprintf(&tmpname, "%s.tmp", filepath);
-
-    if (options->verbose) {
-        infomsg("saving level \"%s\" to: \"%s\"", level->name, tmpname);
-    }
-
-    cJSON *json = level_to_json(level);
-    char *json_str = cJSON_PrintUnformatted(json);
-
-    SaveFileText(tmpname, json_str);
-
-    free(json_str);
-    cJSON_Delete(json);
-
-    if (options->verbose) {
-        infomsg("save to \"%s\" finished", tmpname);
-    }
-
-    if (tmpname) {
-        if (-1 == rename(tmpname, filepath)) {
-            errmsg("Error trying to rename \"%s\" to \"%s\" - ",
-                   tmpname, filepath);
-        }
-
-        free(tmpname);
-    }
+    level_save_to_filename(level, filepath);
 
     if (pathbuf) {
         free(pathbuf);

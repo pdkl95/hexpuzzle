@@ -46,11 +46,22 @@ bool file_exists(const char *file)
     return (stat(file, &sb) == 0);
 }
 
+const char *directory_without_end_separator(const char *path)
+{
+    static char buf[PATH_MAX];
+    snprintf(buf, PATH_MAX, "%s", path);
+    int last = strlen(buf) - 1;
+    if (is_dir_separator(buf[last])) {
+        buf[last] = '\0';
+    }
+    return buf;
+}
+
 const char *concat_dir_and_filename(const char *dir, const char *filename)
 {
     static char buf[PATH_MAX];
     int dirlast = strlen(dir) - 1;
-    if (dir[dirlast] == '/') {
+    if (is_dir_separator(dir[dirlast])) {
         snprintf(buf, PATH_MAX, "%s%s", dir, filename);
     } else {
         snprintf(buf, PATH_MAX, "%s/%s", dir, filename);

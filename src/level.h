@@ -174,6 +174,7 @@ void level_play(level_t *level);
 void level_edit(level_t *level);
 
 void level_set_file_path(level_t *level, const char *path);
+void level_save_to_filename(level_t *level, const char *filepath);
 void level_save_to_file(level_t *level, const char *dirpath);
 void level_save_to_file_if_changed(level_t *level, const char *dirpath);
 void level_save(level_t *level);

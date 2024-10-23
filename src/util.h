@@ -24,6 +24,17 @@
 
 char last_char(char *str);
 bool file_exists(const char *file);
+
+static inline bool is_dir_separator(char c)
+{
+#if defined(_WIN32)
+    return (c == '\\');
+#else
+    return (c == '/');
+#endif
+}
+
+const char *directory_without_end_separator(const char *path);
 const char *concat_dir_and_filename(const char *dir, const char *filename);
 const char *filename_ext(const char *filename);
 char *strcat_alloc(const char *first, const char *second);

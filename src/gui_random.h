@@ -27,5 +27,7 @@ void cleanup_gui_random(void);
 void resize_gui_random(void);
 void draw_gui_random(void);
 
+struct level *generate_random_level(void);
+
 #endif /*GUI_RANDOM_H*/
 

@@ -22,6 +22,9 @@
 #include "common.h"
 #include "startup_action.h"
 #include "options.h"
+#include "level.h"
+#include "collection.h"
+#include "gui_random.h"
 
 bool startup_action_ok = false;
 
@@ -43,14 +46,33 @@ void action_create_random_level(void)
 {
     for (int arg=0; arg < options->extra_argc; arg++) {
         char *name = options->extra_argv[arg];
+        char *filename = NULL;
 
-        infomsg("CREATE LEVEL: \"%s\"", name);
+        const char *ext = GetFileExtension(name);
+        if (0 == strcmp(ext, "." LEVEL_FILENAME_EXT)) {
+            filename = strdup(name);
+        } else {
+            safe_asprintf(&filename, "%s.%s", name, LEVEL_FILENAME_EXT);
+        }
+
+        infomsg("CREATE LEVEL: \"%s\"", filename);
+
+        if (!options->force && FileExists(filename)) {
+            errmsg("File already exists: \"%s\"", filename);
+            return;
+        }
+
+        level_t *level = generate_random_level();
+        level_save_to_filename(level, filename);
+        destroy_level(level);
+
+        free(name);
     }
 
     startup_action_ok = true;
 }
 
-void action_pack_colllecti9on(void)
+void action_pack_colllection(void)
 {
     for (int arg=0; arg < options->extra_argc; arg++) {
         char *path = options->extra_argv[arg];
@@ -59,13 +81,33 @@ void action_pack_colllecti9on(void)
             return;
         }
 
-        infomsg("PACK: \"%s\"", path);
+        const char *dir = directory_without_end_separator(path);
+        char *filename = NULL;
+        safe_asprintf(&filename, "%s.%s", dir, COLLECTION_FILENAME_EXT);
+
+        infomsg("PACK: \"%s\" -> \"%s\"", path, filename);
+
+        if (!options->force && FileExists(filename)) {
+            errmsg("File already exists: \"%s\"", filename);
+            return;
+        }
+
+        collection_t *collection = load_collection_dir(path);
+        if (!collection) {
+            errmsg("Couldn't parse dir \"%s\" as a collection", path);
+            return;
+        }
+
+        collection_save_pack(collection, filename);
+        destroy_collection(collection);
+
+        free(filename);
     }
 
     startup_action_ok = true;
 }
 
-void action_unpack_colllecti9on(void)
+void action_unpack_colllection(void)
 {
     for (int arg=0; arg < options->extra_argc; arg++) {
         char *path = options->extra_argv[arg];
@@ -88,11 +130,11 @@ bool run_startup_action(void)
         return true;
 
     case STARTUP_ACTION_PACK_COLLECTION:
-        action_pack_colllecti9on();
+        action_pack_colllection();
         return true;
 
     case STARTUP_ACTION_UNPACK_COLLECTION:
-        action_unpack_colllecti9on();
+        action_unpack_colllection();
         return true;
 
     case STARTUP_ACTION_NONE:

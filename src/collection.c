@@ -99,10 +99,41 @@ void collection_clear_levels(collection_t *collection)
     }
 }
 
-static int level_file_filter(UNUSED const struct dirent *file)
+static void collection_scan_index_file(collection_t *collection, const char *index_file)
 {
-    const char *ext = filename_ext(file->d_name);
-    return strcmp(ext, LEVEL_FILENAME_EXT) == 0;
+    char *index_str = LoadFileText(index_file);
+
+    char *p = index_str;
+    char *filename = p;
+    while (*p) {
+        if (*p == '\n') {
+            *p = '\0';
+            collection_add_level_file(collection, filename);
+            p++;
+            filename = p;
+        } else {
+            p++;
+        }
+    }
+    if ((*p != '\0') && (*p != '\n')) {
+        collection_add_level_file(collection, filename);
+    }
+
+    free(index_str);
+}
+
+static void collection_scan_dir_by_file_ext(collection_t *collection)
+{
+    FilePathList list = LoadDirectoryFilesEx(collection->dirpath, "." LEVEL_FILENAME_EXT, false);
+
+    for (int i=0; i < (int)list.count; i++) {
+        char *filename = list.paths[i];
+        if (FileExists(filename)) {
+            collection_add_level_file(collection, filename);
+        }
+    }
+
+    UnloadDirectoryFiles(list);
 }
 
 void collection_scan_dir(collection_t *collection)
@@ -112,26 +143,12 @@ void collection_scan_dir(collection_t *collection)
 
     collection_clear_levels(collection);
 
-    struct dirent **namelist;
-    int n = scandir(collection->dirpath, &namelist, level_file_filter, versionsort);
-    if (n == -1) {
-        errmsg("cannot scan directory \"%s\": %s",
-               collection->dirpath, strerror(errno));
-        return;
+    const char *index_file = concat_dir_and_filename(collection->dirpath, COLLECTION_ZIP_INDEX_FILENAME);
+    if (FileExists(index_file)) {
+        collection_scan_index_file(collection, index_file);
+    } else {
+        collection_scan_dir_by_file_ext(collection);
     }
-
-    while (n--) {
-        char *filepath;
-        asprintf(&filepath, "%s/%s",
-                 collection->dirpath, namelist[n]->d_name);
-
-        collection_add_level_file(collection, filepath);
-
-        free(filepath);
-        free(namelist[n]);
-    }
-
-    free(namelist);
 }
 
 collection_t *load_collection_dir(const char *dirpath)
@@ -144,7 +161,7 @@ collection_t *load_collection_dir(const char *dirpath)
     int last_idx = strlen(collection->dirpath);
     if (last_idx > 0) {
         last_idx--;
-        if (collection->dirpath[last_idx] == '/') {
+        if (is_dir_separator(collection->dirpath[last_idx])) {
             collection->dirpath[last_idx] = '\0';
         }
 
@@ -225,17 +242,23 @@ collection_t *load_collection_pack_file(const char *filename)
 {
     assert_not_null(filename);
 
-    char *pack_str = LoadFileText(filename);
-    if (NULL == pack_str) {
+    int compsize = 0;
+    unsigned char *compressed = LoadFileData(filename, &compsize);
+    int pack_str_size = 0;
+    unsigned char *pack_str_data = DecompressData(compressed, compsize, &pack_str_size);
+    char *pack_str = (char *)pack_str_data;
+
+    collection_t *rv = NULL;
+
+    if ((NULL == pack_str) || (pack_str_size != ((int)strlen(pack_str) + 1))) {
         errmsg("Error loading pack file \"%s\"", filename);
-        return NULL;
+        goto cleanup_pack_str;
     }
 
     cJSON *json = cJSON_Parse(pack_str);
     if (NULL == json) {
         errmsg("Error parsing pack file \"%s\" as JSON", filename);
-        UnloadFileText(pack_str);
-        return NULL;
+        goto cleanup_pack_str;
     }
 
     collection_t *collection = create_collection();
@@ -249,7 +272,12 @@ collection_t *load_collection_pack_file(const char *filename)
 
     collection_update_level_names(collection);
 
-    return collection;
+    rv = collection;
+
+  cleanup_pack_str:
+    MemFree(pack_str_data);
+    UnloadFileData(compressed);
+    return rv;
 }
 
 collection_t *load_collection_file(const char *filename)
@@ -637,12 +665,13 @@ cJSON *collection_to_json(collection_t *collection)
     return NULL;
 }
 
-void collection_save_pack(collection_t *collection)
+void collection_save_pack(collection_t *collection, const char *filename)
 {
     assert_not_null(collection);
+    assert_not_null(filename);
 
     char *tmpname;
-    asprintf(&tmpname, "%s.tmp", collection->filename);
+    asprintf(&tmpname, "%s.tmp", filename);
 
     if (options->verbose) {
         infomsg("Writing level collection to \"%s\"", tmpname);
@@ -651,14 +680,17 @@ void collection_save_pack(collection_t *collection)
     cJSON *json = collection_to_json(collection);
     char *json_str = cJSON_PrintUnformatted(json);
 
-    SaveFileText(tmpname, json_str);
+    int newsize = 0;
+    unsigned char *compressed = CompressData((const unsigned char *)json_str, strlen(json_str) + 1, &newsize);
+    SaveFileData(tmpname, compressed, newsize);
+    MemFree(compressed);
 
     free(json_str);
     cJSON_Delete(json);
 
-    if (-1 == rename(tmpname, collection->filename)) {
+    if (-1 == rename(tmpname, filename)) {
         errmsg("Error trying to rename \"%s\" to \"%s\" - ",
-               tmpname, collection->filename);
+               tmpname, filename);
     }
 
     free(tmpname);
@@ -673,7 +705,7 @@ void collection_save(collection_t *collection)
     if (collection->dirpath) {
         collection_save_dir(collection);
     } else if (collection->filename) {
-        collection_save_pack(collection);
+        collection_save_pack(collection, collection->filename);
     } else {
         errmsg("Cannot save collection; a filename or directory path is required");
     }

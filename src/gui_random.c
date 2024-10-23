@@ -285,7 +285,7 @@ static void shuffle_tiles(level_t *level)
     }
 }
 
-static level_t *generate_random_level(void)
+struct level *generate_random_level(void)
 {
     assert(rng_color_count() > 0);
 

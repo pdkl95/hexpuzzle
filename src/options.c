@@ -43,6 +43,7 @@ static struct option long_options[] = {
     {         "height", required_argument, 0, 'H' },
     {          "width", required_argument, 0, 'W' },
     {   "create-level", optional_argument, 0, 'L' },
+    {          "force",       no_argument, 0, '!' },
     {           "pack",       no_argument, 0, 'P' },
     {         "unpack",       no_argument, 0, 'U' },
     {     "animate-bg",       no_argument, 0, 'b' },
@@ -99,6 +100,9 @@ static char help_text[] =
     "                                into a ." COLLECTION_FILENAME_EXT "\n"
     "  -U, --unpack <file." COLLECTION_FILENAME_EXT "> Unpack a " COLLECTION_FILENAME_EXT " file\n"
     "                                into a directory of ." LEVEL_FILENAME_EXT "\n"
+    "\n"
+    "ACTION OPTIONS\n"
+    "     --force                  Allow files to be overwritten (dangerous!)\n"
     ;
 
 
@@ -236,6 +240,7 @@ options_set_defaults(
     options->load_state_animate_win = true;
 
     options->safe_mode = false;
+    options->force = false;
 
     if (options->nvdata_dir) {
         options->nvdata_dir = NULL;
@@ -260,6 +265,10 @@ options_parse_args(
         }
 
         switch (c) {
+        case '!':
+            options->force = true;
+            break;
+
         case 'L':
             printf("optarg=\"%s\"\n", optarg);
             exit(1);
