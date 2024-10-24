@@ -684,9 +684,9 @@ void level_save_to_filename(level_t *level, const char *filepath)
     char *tmpname;
     asprintf(&tmpname, "%s.tmp", filepath);
 
-    /* if (options->verbose) { */
-    /*     infomsg("saving level \"%s\" to: \"%s\"", level->name, tmpname); */
-    /* } */
+    if (options->verbose) {
+        infomsg("saving level \"%s\" to: \"%s\"", level->name, tmpname);
+    }
 
     cJSON *json = level_to_json(level);
     char *json_str = cJSON_PrintUnformatted(json);
@@ -695,10 +695,6 @@ void level_save_to_filename(level_t *level, const char *filepath)
 
     free(json_str);
     cJSON_Delete(json);
-
-    /* if (options->verbose) { */
-    /*     infomsg("save to \"%s\" finished", tmpname); */
-    /* } */
 
     if (tmpname) {
         if (-1 == rename(tmpname, filepath)) {

@@ -44,12 +44,21 @@ create_level_mode_t parse_create_level_mode(const char *str)
 
 void action_create_random_level(void)
 {
+    infomsg("ACTION: create random level");
+
+    init_gui_random_minimal();
+
     for (int arg=0; arg < options->extra_argc; arg++) {
         char *name = options->extra_argv[arg];
         char *filename = NULL;
 
         const char *ext = GetFileExtension(name);
-        if (0 == strcmp(ext, "." LEVEL_FILENAME_EXT)) {
+        if (!ext) {
+            ext = ".";
+        }
+        const char *level_ext = "." LEVEL_FILENAME_EXT;
+
+        if (0 == strcmp(ext, level_ext)) {
             filename = strdup(name);
         } else {
             safe_asprintf(&filename, "%s.%s", name, LEVEL_FILENAME_EXT);
@@ -72,8 +81,10 @@ void action_create_random_level(void)
     startup_action_ok = true;
 }
 
-void action_pack_colllection(void)
+void action_pack_collection(void)
 {
+    infomsg("ACTION: pack");
+
     for (int arg=0; arg < options->extra_argc; arg++) {
         char *path = options->extra_argv[arg];
         if (!DirectoryExists(path)) {
@@ -107,8 +118,10 @@ void action_pack_colllection(void)
     startup_action_ok = true;
 }
 
-void action_unpack_colllection(void)
+void action_unpack_collection(void)
 {
+    infomsg("ACTION: unpack");
+
     for (int arg=0; arg < options->extra_argc; arg++) {
         char *path = options->extra_argv[arg];
         if (!FileExists(path)) {
@@ -116,7 +129,30 @@ void action_unpack_colllection(void)
             return;
         }
 
-        infomsg("UNPACK: \"%s\"", path);
+        const char *dir = GetFileNameWithoutExt(path);
+
+        infomsg("UNPACK: \"%s\" -> \"%s\"", path, dir);
+
+        if (DirectoryExists(dir)) {
+            if (options->force) {
+                warnmsg("Unpacking into existing directory: \"%s\"", dir);
+            } else {
+                errmsg("Directory already exists: \"%s\"", dir);
+                return;
+            }
+        } else if (FileExists(dir)) {
+            errmsg("Existing file is blocking destination directory \"%s\"", dir);
+            return;
+        }
+
+        collection_t *collection = load_collection_file(path);
+        if (!collection) {
+            errmsg("Couldn't parse collection pack file \"%s\"", path);
+            return;
+        }
+
+        collection_save_dir(collection, dir, false);
+        destroy_collection(collection);
     }
 
     startup_action_ok = true;
@@ -124,17 +160,21 @@ void action_unpack_colllection(void)
 
 bool run_startup_action(void)
 {
+    if (options->startup_action != STARTUP_ACTION_NONE) {
+        // options->verbose = true;
+    }
+
     switch (options->startup_action) {
     case STARTUP_ACTION_CREATE_RANDOM_LEVEL:
         action_create_random_level();
         return true;
 
     case STARTUP_ACTION_PACK_COLLECTION:
-        action_pack_colllection();
+        action_pack_collection();
         return true;
 
     case STARTUP_ACTION_UNPACK_COLLECTION:
-        action_unpack_colllection();
+        action_unpack_collection();
         return true;
 
     case STARTUP_ACTION_NONE:

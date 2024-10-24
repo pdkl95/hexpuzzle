@@ -25,9 +25,6 @@
 #include "common.h"
 #include "startup_action.h"
 
-#define OPTIONS_DEFAULT_STARTUP_ACTION STARTUP_ACTION_NONE
-#define OPTIONS_DEFAULT_CREATE_LEVEL_MODE CREATE_LEVEL_MODE_DFS
-#define OPTIONS_DEFAULT_CREATE_LEVEL_MODE_STR "dfs"
 #define OPTIONS_DEFAULT_VERBOSE false
 #define OPTIONS_DEFAULT_WAIT_EVENTS false
 #define OPTIONS_DEFAULT_ANIMATE_BG  true
@@ -37,17 +34,28 @@
 #define OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH  800
 #define OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT 800
 
+#define OPTIONS_DEFAULT_STARTUP_ACTION STARTUP_ACTION_NONE
+
+#define OPTIONS_DEFAULT_CREATE_LEVEL_MODE CREATE_LEVEL_MODE_DFS
+#define OPTIONS_DEFAULT_CREATE_LEVEL_MODE_STR "dfs"
+#define OPTIONS_DEFAULT_CREATE_LEVEL_RADIUS 2
+#define OPTIONS_DEFAULT_CREATE_LEVEL_EASY_MIN_PATH 2
+#define OPTIONS_DEFAULT_CREATE_LEVEL_EASY_MAX_PATH 3
+#define OPTIONS_DEFAULT_CREATE_LEVEL_MEDIUM_MIN_PATH 3
+#define OPTIONS_DEFAULT_CREATE_LEVEL_MEDIUM_MAX_PATH 5
+#define OPTIONS_DEFAULT_CREATE_LEVEL_HARD_MIN_PATH 4
+#define OPTIONS_DEFAULT_CREATE_LEVEL_HARD_MAX_PATH 6
+#define OPTIONS_DEFAULT_CREATE_LEVEL_MIN_PATH OPTIONS_DEFAULT_CREATE_LEVEL_MEDIUM_MIN_PATH
+#define OPTIONS_DEFAULT_CREATE_LEVEL_MAX_PATH OPTIONS_DEFAULT_CREATE_LEVEL_MEDIUM_MAX_PATH
+
 #define OPTIONS_WINDOW_MIN_WIDTH  500
 #define OPTIONS_WINDOW_MIN_HEIGHT 500
 #define OPTIONS_WINDOW_MAX_WIDTH  (MAX(GetScreenWidth(),  OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH ))
 #define OPTIONS_WINDOW_MAX_HEIGHT (MAX(GetScreenHeight(), OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT))
 
 struct options {
-    startup_action_t startup_action;
-    create_level_mode_t create_level_mode;
 
     bool safe_mode;
-    bool force;
     bool verbose;
     bool wait_events;
 
@@ -62,6 +70,18 @@ struct options {
 
     char *nvdata_dir;
 
+    /* action */
+    startup_action_t startup_action;
+
+    /* action options */
+    bool force;
+
+    create_level_mode_t create_level_mode;
+    long create_level_radius;
+    long create_level_min_path;
+    long create_level_max_path;
+
+    /* remaining args */
     char **extra_argv;
     int extra_argc;
 };

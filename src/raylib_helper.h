@@ -31,6 +31,7 @@ void printcolor(Color c);
 #define psize(var) printf(QUOTE(var) "\t= % 9zd\n", (var));
 #define pint(var) printf(QUOTE(var) "\t= % 9d\n", (var));
 #define pfloat(var) printf(QUOTE(var) "\t= % 12.2f\n", (var));
+#define pstr(var) printf(QUOTE(var) "\t= \"%s\"\n", (var));
 
 #define pvec2(var) do { \
         Vector2 vtmp = (var); \

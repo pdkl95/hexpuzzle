@@ -84,6 +84,7 @@ void collection_update_level_names(collection_t *collection);
 
 void collection_draw(collection_t *collection);
 
+void collection_save_dir(collection_t *collection, const char *dirpath, bool changed_only);
 void collection_save_pack(collection_t *collection, const char *filename);
 void collection_save(collection_t *collection);
 

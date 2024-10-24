@@ -22,8 +22,22 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#include <libgen.h>
+
+#ifndef strdupa
+# define strdupa(s)                                         \
+    (__extension__                                          \
+     ({                                                     \
+         const char *__old = (s);                           \
+         size_t __len = strlen (__old) + 1;                 \
+         char *__new = (char *) __builtin_alloca (__len);   \
+         (char *) memcpy (__new, __old, __len);             \
+     }))
+#endif
+
 char last_char(char *str);
 bool file_exists(const char *file);
+int mkdir_p(const char *dir, mode_t mode);
 
 static inline bool is_dir_separator(char c)
 {

@@ -34,7 +34,7 @@
 #include "options.h"
 
 /* command line options */
-static char short_options[] = "Cc:F:H:t:wvVW:P:U:L::hj";
+static char short_options[] = "Cc:F:H:t:wvVW:PUL::hj";
 
 static struct option long_options[] = {
     {      "no-config", required_argument, 0, 'C' },
@@ -43,6 +43,9 @@ static struct option long_options[] = {
     {         "height", required_argument, 0, 'H' },
     {          "width", required_argument, 0, 'W' },
     {   "create-level", optional_argument, 0, 'L' },
+    {   "level-radius", required_argument, 0, 'R' },
+    { "level-min-path", required_argument, 0, '<' },
+    { "level-max-path", required_argument, 0, '>' },
     {          "force",       no_argument, 0, '!' },
     {           "pack",       no_argument, 0, 'P' },
     {         "unpack",       no_argument, 0, 'U' },
@@ -94,8 +97,7 @@ static char help_text[] =
     "\n"
     "ACTIONS\n"
     "  -L, --create-level[=MODE] <NAME> Create a new random level file.\n"
-    "                                Modes: [dfs, scatter]\n"
-    "                                Default: " OPTIONS_DEFAULT_CREATE_LEVEL_MODE_STR "\n"
+    "                                Modes: [dfs, scatter] Default: " OPTIONS_DEFAULT_CREATE_LEVEL_MODE_STR "\n"
     "  -P, --pack <dir>            Packasge a directory of ." LEVEL_FILENAME_EXT " files\n"
     "                                into a ." COLLECTION_FILENAME_EXT "\n"
     "  -U, --unpack <file." COLLECTION_FILENAME_EXT "> Unpack a " COLLECTION_FILENAME_EXT " file\n"
@@ -103,6 +105,12 @@ static char help_text[] =
     "\n"
     "ACTION OPTIONS\n"
     "     --force                  Allow files to be overwritten (dangerous!)\n"
+    "     --level-radius=NUMBER    Tile radius of created levels.\n"
+    "                                Min: " STR(LEVEL_MIN_RADIUS) ", Max: " STR(LEVEL_MAX_RADIUS) ", Default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_RADIUS) "\n"
+    "     --level-min-path=NUMBER  Minimum number of paths on each created tile.\n"
+    "                                Min: 0, Max: 6, Default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MIN_PATH) "\n"
+    "     --level-max-path=NUMBER  Maximum number of paths on each created tile.\n"
+    "                                Min: 1, Max: 6, Default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MAX_PATH) "\n"
     ;
 
 
@@ -180,11 +188,11 @@ destroy_options(
 
 static void
 options_set_string(
-    char **opt,
-    const char *src
+    char **opt
 ) {
     assert_not_null(opt);
-    assert_not_null(src);
+    assert_not_null(optarg);
+    const char *src = optarg;
 
     if (*opt != NULL) {
         FREE(*opt);
@@ -195,12 +203,12 @@ options_set_string(
 
 static void
 options_set_long(
-    long *opt,
-    const char *src
+    long *opt
 ) {
     assert_not_null(opt);
-    assert_not_null(src);
+    assert_not_null(optarg);
 
+    const char *src = optarg;
     char *endptr;
 
     errno = 0;
@@ -220,14 +228,28 @@ options_set_long(
     }
 }
 
+static bool
+options_set_long_bounds(
+    long *opt,
+    long min,
+    long max
+) {
+    long value = 0;
+    options_set_long(&value);
+    if ((value < min) || (value > max)) {
+        return false;
+    } else {
+        *opt = value;
+        return true;
+    }
+}
+
 void
 options_set_defaults(
     options_t *options
 ) {
     assert_this(options);
 
-    options->startup_action        = OPTIONS_DEFAULT_STARTUP_ACTION;
-    options->create_level_mode     = OPTIONS_DEFAULT_CREATE_LEVEL_MODE;
     options->verbose               = OPTIONS_DEFAULT_VERBOSE;
     options->wait_events           = OPTIONS_DEFAULT_WAIT_EVENTS;
     options->animate_bg            = OPTIONS_DEFAULT_ANIMATE_BG;
@@ -240,7 +262,14 @@ options_set_defaults(
     options->load_state_animate_win = true;
 
     options->safe_mode = false;
+
     options->force = false;
+
+    options->startup_action        = OPTIONS_DEFAULT_STARTUP_ACTION;
+    options->create_level_mode     = OPTIONS_DEFAULT_CREATE_LEVEL_MODE;
+    options->create_level_radius   = OPTIONS_DEFAULT_CREATE_LEVEL_RADIUS;
+    options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_MIN_PATH;
+    options->create_level_max_path = OPTIONS_DEFAULT_CREATE_LEVEL_MAX_PATH;
 
     if (options->nvdata_dir) {
         options->nvdata_dir = NULL;
@@ -270,8 +299,34 @@ options_parse_args(
             break;
 
         case 'L':
-            printf("optarg=\"%s\"\n", optarg);
-            exit(1);
+            if (optarg) {
+                options->create_level_mode = parse_create_level_mode(optarg);
+            } else {
+                options->create_level_mode = CREATE_LEVEL_MODE_DFS;
+            }
+            options->startup_action = STARTUP_ACTION_CREATE_RANDOM_LEVEL;
+            break;
+
+        case 'R':
+            if (!options_set_long_bounds(&options->create_level_radius, LEVEL_MIN_RADIUS, LEVEL_MAX_RADIUS)) {
+                errmsg("bad value for --level-radius (expected %d - %d)",
+                       LEVEL_MIN_RADIUS, LEVEL_MAX_RADIUS);
+                return false;
+            }
+            break;
+
+        case '<':
+            if (!options_set_long_bounds(&options->create_level_min_path, 0, 6)) {
+                errmsg("bad value for --level-min-path (expected %d - %d)", 0, 6);
+                return false;
+            }
+            break;
+
+        case '>':
+            if (!options_set_long_bounds(&options->create_level_max_path, 1, 6)) {
+                errmsg("bad value for --level-max-path (expected %d - %d)", 1, 6);
+                return false;
+            }
             break;
 
         case 'P':
@@ -287,19 +342,19 @@ options_parse_args(
             break;
 
         case 'c':
-            options_set_string(&options->nvdata_dir, optarg);
+            options_set_string(&options->nvdata_dir);
             break;
 
         case 'F':
-            options_set_long(&options->max_fps, optarg);
+            options_set_long(&options->max_fps);
             break;
 
         case 'W':
-            options_set_long(&options->initial_window_width, optarg);
+            options_set_long(&options->initial_window_width);
             break;
 
         case 'H':
-            options_set_long(&options->initial_window_height, optarg);
+            options_set_long(&options->initial_window_height);
             break;
 
         case 'b':
@@ -341,7 +396,7 @@ options_parse_args(
             break;
 
         default:
-            fprintf(stderr, "ERROR: getopt returned character code 0%o", c);
+            errmsg("getopt returned character code 0%o", c);
             return false;
         }
     }

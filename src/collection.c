@@ -217,7 +217,7 @@ bool collection_from_json(collection_t *collection, cJSON *json)
     }
     snprintf(collection->id, COLLECTION_ID_LENGTH, "%s", id_json->valuestring);
 
-    cJSON *levels_json = cJSON_GetObjectItemCaseSensitive(json, "levelss");
+    cJSON *levels_json = cJSON_GetObjectItemCaseSensitive(json, "levels");
     if (!cJSON_IsObject(levels_json)) {
         errmsg("Error parsing pack JSON: 'levels' is not an Object");
         return false;
@@ -249,13 +249,14 @@ collection_t *load_collection_pack_file(const char *filename)
     char *pack_str = (char *)pack_str_data;
 
     collection_t *rv = NULL;
+    cJSON *json = NULL;
 
     if ((NULL == pack_str) || (pack_str_size != ((int)strlen(pack_str) + 1))) {
         errmsg("Error loading pack file \"%s\"", filename);
         goto cleanup_pack_str;
     }
 
-    cJSON *json = cJSON_Parse(pack_str);
+    json = cJSON_Parse(pack_str);
     if (NULL == json) {
         errmsg("Error parsing pack file \"%s\" as JSON", filename);
         goto cleanup_pack_str;
@@ -265,18 +266,20 @@ collection_t *load_collection_pack_file(const char *filename)
     collection->filename = strdup(filename);
     collection->is_pack = true;
 
-    collection_from_json(collection, json);
-
-    cJSON_Delete(json);
-    UnloadFileText(pack_str);
+    if (collection_from_json(collection, json)) {
+        rv = collection;
+    }
 
     collection_update_level_names(collection);
 
-    rv = collection;
-
   cleanup_pack_str:
-    MemFree(pack_str_data);
-    UnloadFileData(compressed);
+    if (json) {
+        cJSON_Delete(json);
+    }
+    SAFEFREE(pack_str_data);
+    if (compressed) {
+        UnloadFileData(compressed);
+    }
     return rv;
 }
 
@@ -583,17 +586,22 @@ level_t *collection_find_level_by_filename(collection_t *collection, const char 
     return NULL;
 }
 
-void collection_save_dir(collection_t *collection)
+void collection_save_dir(collection_t *collection, const char *dirpath, bool changed_only)
 {
     assert_not_null(collection);
-    assert_not_null(collection->dirpath);
+    assert_not_null(dirpath);
+
+    mkdir_p(dirpath, CREATE_DIR_MODE);
 
     SGLIB_DL_LIST_MAP_ON_ELEMENTS(level_t, collection->levels, level, prev, next, {
-            printf("trying to save level \"%s\"\n", level->name);
-            level_save_to_file_if_changed(level, collection->dirpath);
+            if (changed_only) {
+                level_save_to_file_if_changed(level, dirpath);
+            } else {
+                level_save_to_file(level, dirpath);
+            }
         });
 
-    const char *path = concat_dir_and_filename(collection->dirpath, COLLECTION_ZIP_INDEX_FILENAME);
+    const char *path = concat_dir_and_filename(dirpath, COLLECTION_ZIP_INDEX_FILENAME);
     FILE *f = fopen(path, "w");
     if (NULL == f) {
         errmsg("Could not open \"%s\" for writing: %s", path, strerror(errno));
@@ -639,7 +647,7 @@ cJSON *collection_to_json(collection_t *collection)
         goto json_err;
     }
 
-    cJSON *levels_json = cJSON_AddObjectToObject(json, "tiles");
+    cJSON *levels_json = cJSON_AddObjectToObject(json, "levels");
     if (levels_json == NULL) {
         goto json_err;
     }
@@ -703,7 +711,7 @@ void collection_save(collection_t *collection)
     collection->changed = false;
 
     if (collection->dirpath) {
-        collection_save_dir(collection);
+        collection_save_dir(collection, collection->dirpath, true);
     } else if (collection->filename) {
         collection_save_pack(collection, collection->filename);
     } else {

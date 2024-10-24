@@ -20,6 +20,7 @@
  ****************************************************************************/
 
 #include "common.h"
+#include "options.h"
 #include "gui_random.h"
 #include "color.h"
 #include "tile.h"
@@ -80,11 +81,8 @@ bool gui_random_difficulty_edit_mode = false;
 
 int difficulty = 1;
 
-int gui_random_radius = LEVEL_MIN_RADIUS;
 bool gui_random_color[PATH_TYPE_COUNT];
 int gui_random_color_count = PATH_TYPE_COUNT - 1;
-int gui_random_min_path = 2;
-int gui_random_max_path = 6;
 
 level_t *gui_random_level = NULL;
 uint64_t gui_random_seed;
@@ -110,7 +108,7 @@ static void new_random_seed(void)
 
 static void rng_seed(void)
 {
-    pcg32_srandom_r(&rng, gui_random_seed, (uint64_t)gui_random_radius);
+    pcg32_srandom_r(&rng, gui_random_seed, (uint64_t)options->create_level_radius);
 }
 
 static int rng_get(int bound)
@@ -165,9 +163,9 @@ static path_type_t rng_color(void)
 static void generate_random_paths(level_t *level, int num_tiles)
 {
     for (int i=0; i<num_tiles; i++) {
-        int path_delta = gui_random_min_path - gui_random_min_path;
+        int path_delta = options->create_level_max_path - options->create_level_min_path;
         int path_rand  = rng_get(path_delta);
-        int num_paths  = path_rand + gui_random_min_path;
+        int num_paths  = path_rand + options->create_level_min_path;
 
         tile_t *tile = level->enabled_tiles[i];
         tile_pos_t *pos = tile->solved_pos;
@@ -295,23 +293,23 @@ struct level *generate_random_level(void)
     level_reset(level);
 
     snprintf(level->name, NAME_MAXLEN, "%s", TextFormat("%d", gui_random_seed));
-    level_set_radius(level, gui_random_radius);
+    level_set_radius(level, options->create_level_radius);
     int n = level_get_enabled_tiles(level);
 
     switch (difficulty) {
     case 0: /* easy */
-        gui_random_min_path = 2;
-        gui_random_max_path = 3;
+        options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_EASY_MIN_PATH;
+        options->create_level_max_path = OPTIONS_DEFAULT_CREATE_LEVEL_EASY_MAX_PATH;
         break;
 
     case 1: /* medium */
-        gui_random_min_path = 3;
-        gui_random_max_path = 5;
+        options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_MEDIUM_MIN_PATH;
+        options->create_level_max_path = OPTIONS_DEFAULT_CREATE_LEVEL_MEDIUM_MAX_PATH;
         break;
 
     case 2: /* hard */
-        gui_random_min_path = 4;
-        gui_random_max_path = 6;
+        options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_HARD_MIN_PATH;
+        options->create_level_max_path = OPTIONS_DEFAULT_CREATE_LEVEL_HARD_MAX_PATH;
         break;
 
     default:
@@ -340,9 +338,6 @@ struct level *generate_random_level(void)
 
     level_use_unsolved_tile_pos(level);
 
-    /* level->fade_value       = 1.0f; */
-    /* level->fade_value_eased = 1.0f; */
-
     return level;
 }
 
@@ -355,13 +350,8 @@ static void regen_level(void)
     gui_random_level = generate_random_level();
 }
 
-void init_gui_random(void)
+void init_gui_random_minimal(void)
 {
-#ifdef RANDOM_GEN_DEBUG
-    gui_random_radius = 4;
-#else
-    gui_random_radius = LEVEL_MIN_RADIUS;
-#endif
     gui_random_level = NULL;
 
     for (path_type_t type = (PATH_TYPE_NONE + 1); type < PATH_TYPE_COUNT; type++) {
@@ -369,6 +359,11 @@ void init_gui_random(void)
     }
 
     new_random_seed();
+}
+
+void init_gui_random(void)
+{
+    init_gui_random_minimal();
 
     seed_bg_color = ColorBrightness(tile_bg_color, -0.15);
 
@@ -564,9 +559,13 @@ void draw_gui_random(void)
 {
     GuiPanel(gui_random_panel_rect, gui_random_panel_text);
 
-    int old_radius = gui_random_radius;
-    GuiSpinner(gui_random_radius_rect, gui_random_radius_text, &gui_random_radius, LEVEL_MIN_RADIUS, LEVEL_MAX_RADIUS, false);
-    if (old_radius != gui_random_radius) {
+    int old_radius = options->create_level_radius;
+
+    int radius = (int)options->create_level_radius;
+    GuiSpinner(gui_random_radius_rect, gui_random_radius_text, &radius, LEVEL_MIN_RADIUS, LEVEL_MAX_RADIUS, false);
+    options->create_level_radius = (long)radius;
+
+    if (old_radius != options->create_level_radius) {
         regen_level();
     }
 

@@ -46,6 +46,23 @@ bool file_exists(const char *file)
     return (stat(file, &sb) == 0);
 }
 
+int mkdir_p(const char *dir, mode_t mode)
+{
+	struct stat sb;
+
+	if (!dir) {
+		errno = EINVAL;
+		return -1;
+	}
+
+	if (!stat(dir, &sb))
+		return 0;
+
+	mkdir_p(dirname(strdupa(dir)), mode);
+
+	return mkdir(dir, mode);
+}
+
 const char *directory_without_end_separator(const char *path)
 {
     static char buf[PATH_MAX];

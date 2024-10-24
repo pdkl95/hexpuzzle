@@ -1594,6 +1594,16 @@ main(
         return EXIT_FAILURE;
     }
 
+#if defined(PLATFORM_DESKTOP)
+    if (run_startup_action()) {
+        if (startup_action_ok) {
+            return EXIT_SUCCESS;
+        } else {
+            return EXIT_FAILURE;
+        }
+    }
+#endif
+
 #if defined(PLATFORM_WEB)
     options->wait_events = true;
 #endif
@@ -1611,14 +1621,6 @@ main(
     emscripten_set_main_loop(em_do_one_frame, 0, 1);
     return EXIT_SUCCESS;
 #else
-    if (run_startup_action()) {
-        if (startup_action_ok) {
-            return EXIT_SUCCESS;
-        } else {
-            return EXIT_FAILURE;
-        }
-    }
-
     if (options->verbose) {
         infomsg("Entering Main Loop...");
     }

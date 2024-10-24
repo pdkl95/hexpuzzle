@@ -22,6 +22,7 @@
 #ifndef GUI_RANDOM_H
 #define GUI_RANDOM_H
 
+void init_gui_random_minimal(void);
 void init_gui_random(void);
 void cleanup_gui_random(void);
 void resize_gui_random(void);
