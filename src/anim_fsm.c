@@ -22,25 +22,41 @@
 #include "common.h"
 #include "anim_fsm.h"
 
+#define DEBUG_ANIM_FSM_CALLS
+
+#ifdef DEBUG_ANIM_FSM_CALLS
+# define debug_call(source, callback_name)                              \
+    printf("anim_fsm_call(state=\"%s\" type=\"%s\" cb_name=\"%s\"\n",   \
+           anim_fsm->current_state->name,                               \
+           source,                                                      \
+           STR(callback_name));
+#else
+# define debug_call(source, callback_name)
+#endif
+
 #define anim_fsm_call(anim_fsm, callback_name) do {                     \
         anim_fsm_callbacks_t *state_cb =                                \
             (anim_fsm)->current_state->callbacks;                       \
         anim_fsm_callbacks_t *common_cb =                               \
             (anim_fsm)->callbacks;                                      \
         if (state_cb && state_cb->callback_name) {                      \
+            debug_call("STATE", callback_name);                         \
             state_cb->callback_name(anim_fsm, (anim_fsm)->data);        \
         } else {                                                        \
             if (common_cb && common_cb->callback_name) {                \
+                debug_call("COMMON", callback_name);                    \
                 common_cb->callback_name(anim_fsm, (anim_fsm)->data);   \
+            } else {                                                    \
+                debug_call("NULL", callback_name);                      \
             }                                                           \
         }                                                               \
     } while(0)
 
 anim_fsm_callbacks_t null_callbacks = {
-    .update      = NULL,
-    .draw        = NULL,
-    .enter_state = NULL,
-    .exit_state  = NULL,
+    .update = NULL,
+    .draw   = NULL,
+    .enter  = NULL,
+    .exit   = NULL,
 };
 
 void init_anim_fsm(anim_fsm_t *anim_fsm, anim_fsm_state_t *states, anim_fsm_callbacks_t *callbacks, void *data)
@@ -116,15 +132,21 @@ void anim_fsm_change_state(anim_fsm_t *anim_fsm, int state_index)
 {
     assert_not_null(anim_fsm);
 
+    anim_fsm_state_t *next_state =  &(anim_fsm->states[state_index]);
+
     if (anim_fsm->current_state) {
-        anim_fsm_call(anim_fsm, exit_state);
+        if (next_state == anim_fsm->current_state) {
+            return;
+        } else {
+            anim_fsm_call(anim_fsm, exit);
+        }
     }
 
     anim_fsm->current_state_index = state_index;
     if (state_index == anim_fsm->stop_state_index) {
         anim_fsm->current_state = NULL;
     } else {
-        anim_fsm->current_state = &(anim_fsm->states[state_index]);
+        anim_fsm->current_state = next_state;
 
         anim_fsm->state_progress = 0.0f;
         anim_fsm->state_elapsed_time = 0.0;
@@ -132,7 +154,7 @@ void anim_fsm_change_state(anim_fsm_t *anim_fsm, int state_index)
         anim_fsm->state_end_time = anim_fsm->state_start_time \
             + anim_fsm->current_state->length;
 
-        anim_fsm_call(anim_fsm, enter_state);
+        anim_fsm_call(anim_fsm, enter);
     }
 }
 

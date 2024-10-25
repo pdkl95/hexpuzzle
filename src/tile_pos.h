@@ -57,6 +57,8 @@ struct tile_pos {
     struct tile_pos *swap_target;
 
     struct tile_pos *hover_adjacent;
+
+    struct PhysicsBodyData *physics_body;
 };
 typedef struct tile_pos tile_pos_t;
 
@@ -78,6 +80,10 @@ void tile_pos_modify_hovered_feature(tile_pos_t *pos);
 void tile_pos_set_hovered_feature(tile_pos_t *pos, path_type_t type);
 
 void tile_pos_clear(tile_pos_t *pos, struct level *level);
+
+void tile_pos_create_physics_body(tile_pos_t *pos);
+void tile_pos_destroy_physics_body(tile_pos_t *pos);
+void tile_pos_update_physics_forces(tile_pos_t *pos);
 
 static inline bool tile_pos_dragable(tile_pos_t *pos)
 {

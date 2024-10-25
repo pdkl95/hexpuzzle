@@ -26,14 +26,14 @@ struct anim_fsm;
 
 typedef void (*anim_fsm_update_cb_t)(struct anim_fsm *anim_fsm, void *data);
 typedef void (*anim_fsm_draw_cb_t)(struct anim_fsm *anim_fsm, void *data);
-typedef void (*anim_fsm_enter_state_cb_t)(struct anim_fsm *anim_fsm, void *data);
-typedef void (*anim_fsm_exit_state_cb_t)(struct anim_fsm *anim_fsm, void *data);
+typedef void (*anim_fsm_enter_cb_t)(struct anim_fsm *anim_fsm, void *data);
+typedef void (*anim_fsm_exit_cb_t)(struct anim_fsm *anim_fsm, void *data);
 
 struct anim_fsm_callbacks {
-    anim_fsm_update_cb_t      update;
-    anim_fsm_draw_cb_t        draw;
-    anim_fsm_enter_state_cb_t enter_state;
-    anim_fsm_exit_state_cb_t  exit_state;
+    anim_fsm_update_cb_t update;
+    anim_fsm_draw_cb_t   draw;
+    anim_fsm_enter_cb_t  enter;
+    anim_fsm_exit_cb_t   exit;
 };
 typedef struct anim_fsm_callbacks anim_fsm_callbacks_t;
 

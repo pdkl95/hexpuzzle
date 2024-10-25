@@ -108,6 +108,8 @@ extern const char *progversion;
 #include "util.h"
 #include "logging.h"
 
+void enable_physics(void);
+void disable_physics(void);
 void disable_automatic_events(void);
 void enable_automatic_events(void);
 
@@ -134,6 +136,7 @@ static inline Vector2 ivector2_to_vector2(IVector2 ivec)
 }
 
 extern IVector2 window_size;
+extern Vector2 window_center;
 
 extern IVector2 mouse_position;
 extern Vector2 mouse_positionf;

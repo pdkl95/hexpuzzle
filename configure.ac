@@ -163,7 +163,7 @@ dnl Checks for other declarations
 dnl AC_CHECK_DECLS([])
 
 dnl Export any extra build options
-APP_CFLAGS="-I\$(top_srcdir)/external -I\$(top_srcdir)/shaders"
+APP_CFLAGS="-I\$(top_srcdir)/external"
 APP_LIBS=""
 AC_SUBST(APP_CFLAGS)
 AC_SUBST(APP_LIBS)

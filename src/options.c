@@ -53,6 +53,8 @@ static struct option long_options[] = {
     {  "no-animate-bg",       no_argument, 0, 'B' },
     {    "animate-win",       no_argument, 0, 'i' },
     { "no-animate-win",       no_argument, 0, 'I' },
+    {        "physics",       no_argument, 0, 'y' },
+    {     "no-physics",       no_argument, 0, 'Y' },
     {    "wait-events",       no_argument, 0, 'w' },
     {        "verbose",       no_argument, 0, 'v' },
     {        "version",       no_argument, 0, 'V' },
@@ -85,6 +87,8 @@ static char help_text[] =
     "   --no-animate-bg\n"
     "      --animate-win\n"
     "   --no-animate-win\n"
+    "      --physics-effects\n"
+    "   --no-physics-effects\n"
     "\n"
     "  -W, --width=NUMBER          Window width (default: " STR(OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH) ")\n"
     "  -H, --height=NUMBER         Window height (default: " STR(OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT) ")\n"
@@ -252,6 +256,7 @@ options_set_defaults(
 
     options->verbose               = OPTIONS_DEFAULT_VERBOSE;
     options->wait_events           = OPTIONS_DEFAULT_WAIT_EVENTS;
+    options->physics_effects       = OPTIONS_DEFAULT_PHYSICS_EFFECTS;
     options->animate_bg            = OPTIONS_DEFAULT_ANIMATE_BG;
     options->animate_win           = OPTIONS_DEFAULT_ANIMATE_WIN;
     options->max_fps               = OPTIONS_DEFAULT_MAX_FPS;
@@ -260,6 +265,7 @@ options_set_defaults(
 
     options->load_state_animate_bg  = true;
     options->load_state_animate_win = true;
+    options->load_state_physics_effects = true;
 
     options->safe_mode = false;
 
@@ -375,6 +381,16 @@ options_parse_args(
         case 'I':
             options->animate_win = false;
             options->load_state_animate_win = false;
+            break;
+
+        case 'y':
+            options->physics_effects = true;
+            options->load_state_physics_effects = false;
+            break;
+
+        case 'Y':
+            options->physics_effects = false;
+            options->load_state_physics_effects = false;
             break;
 
         case 'w':

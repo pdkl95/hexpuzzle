@@ -95,7 +95,8 @@ hexpuzzle_SOURCES =                                    \
 	src/nvdata.h            src/nvdata.c           \
 	src/nvdata_finished.h   src/nvdata_finished.c  \
 	src/options.h           src/options.c          \
-	src/raygui_impl.c            		       \
+	src/physac_impl.c 			       \
+	src/raygui_impl.c 			       \
 	src/raylib_helper.h     src/raylib_helper.c    \
 	src/startup_action.h    src/startup_action.c   \
 	src/shader.h            src/shader.c           \
@@ -107,6 +108,7 @@ hexpuzzle_SOURCES =                                    \
 	src/common.h            src/main.c
 
 hexpuzzle_SOURCES +=             		   \
+	external/physac/physac.h                   \
 	external/raygui/raygui.h  		   \
 	external/pcg/pcg_basic.c                   \
 	external/pcg/pcg_basic.h                   \
@@ -142,6 +144,7 @@ src/data_shaders.h: $(SHADERS)
 	    $(XXD) -i "$${file}" >> $@ ; \
 	done
 
+src/hexpuzzle-physac_impl.$(OBJEXT): CFLAGS += -Wno-sign-compare
 src/hexpuzzle-raygui_impl.$(OBJEXT): CFLAGS += -Wno-unused-parameter
 src/hexpuzzle-nvdata_finished.$(OBJEXT): CFLAGS += -Wno-unused-but-set-variable -Wno-unused-variable -Wno-incompatible-pointer-types
 

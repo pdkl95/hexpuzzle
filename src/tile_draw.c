@@ -196,7 +196,9 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
     assert_not_null(pos);
     /* drag_target CAN be NULL */
 
-    if (!pos->tile->enabled) {
+    tile_t *tile = pos->tile;
+
+    if (!tile->enabled) {
         return;
     }
 
@@ -209,7 +211,7 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         }
     }
 
-    if (pos->tile->hidden) {
+    if (tile->hidden) {
         if (edit_mode) {
             float hiddensize = pos->size - (pos->size * 0.08);
             DrawPoly(pos->center, 6, hiddensize, 0.0f,
@@ -225,7 +227,7 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         return;
     }
 
-    if (!pos->tile->fixed) {
+    if (!tile->fixed) {
         /* background */
         Color bgcolor = tile_bg_color;
         if (dragged_over || (pos->hover && !edit_mode_solved)) {
@@ -276,7 +278,7 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         DrawLineEx(pos->center, mid, thickness, next_color);
     }
 
-    if (!pos->tile->fixed) {
+    if (!tile->fixed) {
         /* border */
         Color border_color = tile_edge_drag_color;
         float line_width = 2.0f;

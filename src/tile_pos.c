@@ -20,6 +20,8 @@
  ****************************************************************************/
 
 #include "common.h"
+#include "physac/physac.h"
+
 #include "raylib_helper.h"
 #include "tile.h"
 #include "tile_pos.h"
@@ -51,6 +53,7 @@ tile_pos_t *init_tile_pos(tile_pos_t *pos, tile_t *tile, hex_axial_t addr)
     pos->hover_adjacent = NULL;
     pos->hover = false;
     pos->hover_center = false;
+    pos->physics_body = NULL;
 
     return pos;
 }
@@ -260,3 +263,44 @@ void tile_pos_set_size(tile_pos_t *pos, float tile_pos_size)
     tile_pos_rebuild(pos);
 }
 
+void tile_pos_create_physics_body(tile_pos_t *pos)
+{
+    assert_not_null(pos);
+    assert(NULL == pos->physics_body);
+
+    tile_t *tile =pos->tile;
+
+    float density = TILE_BASE_DENSITY;
+    for (hex_direction_t i=0; i<6; i++) {
+        if (tile->path[i] != PATH_TYPE_NONE) {
+            density += TILE_PATH_DENDITY;
+        }
+    }
+
+    PhysicsBody body = CreatePhysicsBodyPolygon(pos->center, pos->size, 6, density);
+    body->orient          = 0.0f;
+    body->restitution     = TILE_RESTITUTION;
+    body->staticFriction  = TILE_STATIC_FRICTION;
+    body->dynamicFriction = TILE_DYNAMIC_FRICTION;
+
+    pos->physics_body = body;
+}
+
+void tile_pos_destroy_physics_body(tile_pos_t *pos)
+{
+    assert_not_null(pos);
+    assert_not_null(pos->physics_body);
+
+    DestroyPhysicsBody(pos->physics_body);
+    pos->physics_body = NULL;
+}
+
+void tile_pos_update_physics_forces(tile_pos_t *pos)
+{
+    PhysicsBody body = pos->physics_body;
+    Vector2 force = Vector2Normalize(Vector2Subtract(window_center, body->position));
+    force = Vector2Rotate(force, TAU/4.0);
+    force = Vector2Scale(force, 30.0f);
+    PhysicsAddForce(body, force);
+
+}

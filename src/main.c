@@ -20,7 +20,7 @@
  ******************************************************************************/
 
 #if defined(PLATFORM_WEB)
-#include <emscripten/emscripten.h>
+# include <emscripten/emscripten.h>
 #endif
 
 #include "common.h"
@@ -33,7 +33,11 @@
 #include "cJSON/cJSON.h"
 
 #include "raygui/style/dark_alt.h"
-#include "tinyfiledialogs/tinyfiledialogs.h"
+#include "physac/physac.h"
+
+#if defined(PLATFORM_DESKTOP)
+# include "tinyfiledialogs/tinyfiledialogs.h"
+#endif
 
 #include "options.h"
 #include "color.h"
@@ -60,12 +64,14 @@
 const char *progversion = PACKAGE_VERSION;
 const char *progname    = PACKAGE_NAME;
 
-#define DEBUG_RESIZE 1
+//#define DEBUG_SEMAPHORES
+//#define DEBUG_RESIZE
 
 #define CONFIG_SUBDIR_NAME PACKAGE_NAME
 char *config_dir;
 
 bool running = true;
+int physics_enabled_semaphore = 0;
 int automatic_event_polling_semaphore = 0;
 options_t *options = NULL;
 bool event_waiting_active = false;
@@ -75,6 +81,7 @@ bool skip_next_resize_event = false;
 double resize_delay = 0.5;
 double resize_time = 0.0;
 IVector2 window_size;
+Vector2 window_center;
 IVector2 mouse_position;
 Vector2 mouse_positionf;
 bool mouse_left_click  = false;
@@ -118,13 +125,54 @@ void gui_setup(void);
 static inline bool do_level_ui_interaction(void)
 {
     return current_level && !modal_ui_active;
-};
+}
+
+static inline bool do_physics(void)
+{
+    return physics_enabled_semaphore > 0;
+}
+
+void enable_physics(void)
+{
+    if (options->physics_effects) {
+        if (0 == physics_enabled_semaphore) {
+#ifdef DEBUG_SEMAPHORES
+            if (options->verbose) {
+                infomsg("Enabling automatic event polling.");
+            }
+#endif
+        }
+        physics_enabled_semaphore++;
+#ifdef DEBUG_SEMAPHORES
+        printf("physics_enabled_semaphore++ = %d\n", physics_enabled_semaphore);
+#endif
+    }
+}
+
+void disable_physics(void)
+{
+    if (options->physics_effects) {
+        automatic_event_polling_semaphore--;
+
+        if (0 == physics_enabled_semaphore) {
+#ifdef DEBUG_SEMAPHORES
+            if (options->verbose) {
+                infomsg("Disabling automatic event polling.");
+            }
+#endif
+        }
+
+#ifdef DEBUG_SEMAPHORES
+        printf("physics_enabled_semaphore-- = %d\n", physics_enabled_semaphore);
+#endif
+    }
+}
 
 void enable_automatic_events(void)
 {
     if (options->wait_events) {
         if (0 == automatic_event_polling_semaphore) {
-#ifdef DEBUG_EVENT_POLLING
+#ifdef DEBUG_SEMAPHORES
             if (options->verbose) {
                 infomsg("Enabling automatic event polling.");
             }
@@ -134,8 +182,8 @@ void enable_automatic_events(void)
             //PollInputEvents();
         }
         automatic_event_polling_semaphore++;
-#ifdef DEBUG_EVENT_POLLING
-        printf("semaphore++ = %d\n", automatic_event_polling_semaphore);
+#ifdef DEBUG_SEMAPHORES
+        printf("automatic_event_polling_semaphore++ = %d\n", automatic_event_polling_semaphore);
 #endif
     }
 }
@@ -148,7 +196,7 @@ void disable_automatic_events(void)
         assert(automatic_event_polling_semaphore >= 0);
 
         if (0 == automatic_event_polling_semaphore) {
-#ifdef DEBUG_EVENT_POLLING
+#ifdef DEBUG_SEMAPHORES
             if (options->verbose) {
                 infomsg("Disabling automatic event polling.");
             }
@@ -156,8 +204,8 @@ void disable_automatic_events(void)
             EnableEventWaiting();
             event_waiting_active = true;
         }
-#ifdef DEBUG_EVENT_POLLING
-        printf("semaphore-- = %d\n", automatic_event_polling_semaphore);
+#ifdef DEBUG_SEMAPHORES
+        printf("automatic_event_polling_semaphore-- = %d\n", automatic_event_polling_semaphore);
 #endif
     }
 }
@@ -325,6 +373,9 @@ do_resize(
 ) {
     window_size.x = GetScreenWidth();
     window_size.y = GetScreenHeight();
+
+    window_center.x = 0.5f * (float)window_size.x;
+    window_center.y = 0.5f * (float)window_size.y;
 
 #ifdef DEBUG_RESIZE
     warnmsg("RESIZE to: %d x %d", window_size.x, window_size.y);
@@ -513,6 +564,15 @@ handle_events(
     }
 
     return true;
+}
+
+static void update_physics(void)
+{
+    if (current_level) {
+        level_update_physics_forces(current_level);
+    }
+
+    UpdatePhysics();
 }
 
 Rectangle name_text_rect;
@@ -1405,6 +1465,10 @@ bool do_one_frame(void)
         return false;
     }
 
+    if (do_physics()) {
+        update_physics();
+    }
+
     if (!render_frame()) {
         return false;
     }
@@ -1503,6 +1567,17 @@ gfx_cleanup(
 
     unload_fonts();
     CloseWindow();
+}
+
+static void physics_init(void)
+{
+    InitPhysics();
+    SetPhysicsGravity(0.0, 0.0);
+}
+
+static void physics_cleanup(void)
+{
+    ClosePhysics();
 }
 
 static void game_init(void)
@@ -1614,6 +1689,7 @@ main(
     frame_delay = (1000 / options->max_fps);
 
     gfx_init();
+    physics_init();
     game_init();
     do_resize();
 
@@ -1632,6 +1708,7 @@ main(
     }
 
     game_cleanup();
+    physics_cleanup();
     gfx_cleanup();
 
     destroy_options(options);

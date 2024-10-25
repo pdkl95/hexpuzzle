@@ -111,6 +111,8 @@ struct level {
     void *fade_finished_data;
     float fade_rotate_speed;
 
+    bool have_physics_body;
+
     struct win_anim *win_anim;
 
     struct collection *collection;
@@ -208,6 +210,10 @@ bool level_update_fade(level_t *level);
 void level_fade_in(level_t *level, level_fade_finished_cb_t callback, void *data);
 void level_fade_out(level_t *level, level_fade_finished_cb_t callback, void *data);
 
+void level_create_physics_body(level_t *level);
+void level_reset_physics_body_positions(level_t *level);
+void level_destroy_physics_body(level_t *level);
+void level_update_physics_forces(level_t *level);
 
 extern level_t *current_level;
 

@@ -27,6 +27,7 @@
 
 #define OPTIONS_DEFAULT_VERBOSE false
 #define OPTIONS_DEFAULT_WAIT_EVENTS false
+#define OPTIONS_DEFAULT_PHYSICS_EFFECTS true
 #define OPTIONS_DEFAULT_ANIMATE_BG  true
 #define OPTIONS_DEFAULT_ANIMATE_WIN true
 #define OPTIONS_DEFAULT_FPS 30
@@ -58,6 +59,9 @@ struct options {
     bool safe_mode;
     bool verbose;
     bool wait_events;
+
+    bool physics_effects;
+    bool load_state_physics_effects;
 
     bool animate_bg;
     bool animate_win;

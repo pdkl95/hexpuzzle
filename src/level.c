@@ -25,6 +25,7 @@
 
 #include "cJSON/cJSON.h"
 #include "raygui/raygui.h"
+#include "physac/physac.h"
 
 #include "raylib_helper.h"
 #include "options.h"
@@ -265,6 +266,7 @@ static level_t *init_level(level_t *level)
 
     level->radius = LEVEL_MIN_RADIUS;
 
+    level->have_physics_body = false;
 
     for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
         for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
@@ -408,6 +410,8 @@ level_t *create_level(struct collection *collection)
 void destroy_level(level_t *level)
 {
     if (level) {
+        level_destroy_physics_body(level);
+
         if (level->win_anim) {
             destroy_win_anim(level->win_anim);
             level->win_anim = NULL;
@@ -464,12 +468,33 @@ int level_get_enabled_positions(level_t *level)
 
     int num_enabled = 0;
 
-    for (int i=0; i<LEVEL_MAXTILES; i++) {
-        tile_t *tile = &(level->tiles[i]);
-        if (tile->enabled) {
-            level->enabled_positions[num_enabled] = tile->unsolved_pos; 
-            num_enabled++;
+    switch (level->currently_used_tiles) {
+    case USED_TILES_NULL:
+        if (options->verbose) {
+            errmsg("level_toggle_currently_used_tiles() No tile set in use!");
         }
+        assert(false && "null tile set");
+        break;
+
+    case USED_TILES_SOLVED:
+        for (int i=0; i<LEVEL_MAXTILES; i++) {
+            tile_t *tile = &(level->tiles[i]);
+            if (tile->enabled) {
+                level->enabled_positions[num_enabled] = tile->solved_pos;
+                num_enabled++;
+            }
+        }
+        break;
+
+    case USED_TILES_UNSOLVED:
+        for (int i=0; i<LEVEL_MAXTILES; i++) {
+            tile_t *tile = &(level->tiles[i]);
+            if (tile->enabled) {
+                level->enabled_positions[num_enabled] = tile->unsolved_pos;
+                num_enabled++;
+            }
+        }
+        break;
     }
 
     return num_enabled;
@@ -646,6 +671,10 @@ void level_update_ui_name(level_t *level, int idx)
 
 void level_unload(void)
 {
+    if (current_level && current_level->have_physics_body) {
+        level_destroy_physics_body(current_level);
+    }
+
     current_level = NULL;
 }
 
@@ -662,6 +691,11 @@ void level_play(level_t *level)
 
     level_load(level);
     level_use_unsolved_tile_pos(level);
+
+    if (!level->have_physics_body) {
+        level_create_physics_body(level);
+    }
+
     level_fade_in(level, NULL, NULL);
     set_game_mode(GAME_MODE_PLAY_LEVEL);
 }
@@ -1311,6 +1345,15 @@ static void level_set_fade_transition(level_t *level, tile_pos_t *pos)
                  0.0);
 }
 
+static void level_set_physics_transformation(tile_pos_t *pos)
+{
+    PhysicsBody body = pos->physics_body;
+    Vector2 offset = Vector2Subtract(body->position, pos->center);
+    rlTranslatef(offset.x,
+                 offset.y,
+                 0.0);
+}
+
 void level_draw(level_t *level, bool finished)
 {
     assert_not_null(level);
@@ -1380,6 +1423,11 @@ void level_draw(level_t *level, bool finished)
                         level_set_fade_transition(level, pos);
                         tile_draw(pos, level->drag_target, finished, finished_color, finished_fade_in);
                         rlPopMatrix();
+                    } else if (pos->physics_body) {
+                        rlPushMatrix();
+                        level_set_physics_transformation(pos);
+                        tile_draw(pos, level->drag_target, finished, finished_color, finished_fade_in);
+                        rlPopMatrix();
                     } else {
                         tile_draw(pos, level->drag_target, finished, finished_color, finished_fade_in);
                     }
@@ -1402,6 +1450,11 @@ void level_draw(level_t *level, bool finished)
                     if (do_fade) {
                         rlPushMatrix();
                         level_set_fade_transition(level, pos);
+                        tile_draw_win_anim(pos, level);
+                        rlPopMatrix();
+                    } else if (pos->physics_body) {
+                        rlPushMatrix();
+                        level_set_physics_transformation(pos);
                         tile_draw_win_anim(pos, level);
                         rlPopMatrix();
                     } else {
@@ -1644,5 +1697,105 @@ void level_fade_out(level_t *level, level_fade_finished_cb_t callback, void *dat
 #endif
     level->fade_target = 0.0f;
     level_fade_transition(level, callback, data);
+}
+
+void level_create_physics_body(level_t *level)
+{
+    assert_not_null(level);
+
+    if (!level->have_physics_body) {
+        if (options->verbose) {
+            infomsg("Creating tile physics objects");
+        }
+
+        used_tiles_t save_currently_used_tiles = level->currently_used_tiles;
+        level_use_unsolved_tile_pos(level);
+
+        for (int i=0; i<LEVEL_MAXTILES; i++) {
+            tile_t *tile = &(level->tiles[i]);
+
+            if (tile->enabled) {
+                tile_pos_t *pos = tile->unsolved_pos;
+                tile_pos_create_physics_body(pos);
+            }
+        }
+
+        level->have_physics_body = true;
+
+        level->currently_used_tiles = save_currently_used_tiles;
+
+        UpdatePhysics();
+    }
+}
+
+void level_reset_physics_body_positions(level_t *level)
+{
+    assert_not_null(level);
+    assert(level->have_physics_body);
+
+    if (options->verbose) {
+        infomsg("Resetting tile physics object positions");
+    }
+
+    used_tiles_t save_currently_used_tiles = level->currently_used_tiles;
+    level_use_unsolved_tile_pos(level);
+
+    for (int i=0; i<LEVEL_MAXTILES; i++) {
+        tile_t *tile = &(level->tiles[i]);
+
+        if (tile->enabled) {
+            tile_pos_t *pos = tile->unsolved_pos;
+            pos->physics_body->position = pos->center;
+            pos->physics_body->orient = 0.0;
+        }
+    }
+
+    level->currently_used_tiles = save_currently_used_tiles;
+}
+
+void level_destroy_physics_body(level_t *level)
+{
+    assert_not_null(level);
+
+    if (level->have_physics_body) {
+        if (options->verbose) {
+            infomsg("Destroying tile physics objects");
+        }
+
+        used_tiles_t save_currently_used_tiles = level->currently_used_tiles;
+        level_use_unsolved_tile_pos(level);
+
+        for (int i=0; i<LEVEL_MAXTILES; i++) {
+            tile_t *tile = &(level->tiles[i]);
+
+            if (tile->enabled) {
+                tile_pos_t *pos = tile->unsolved_pos;
+                tile_pos_destroy_physics_body(pos);
+            }
+        }
+
+        level->have_physics_body = false;
+
+        level->currently_used_tiles = save_currently_used_tiles;
+    }
+}
+
+void level_update_physics_forces(level_t *level)
+{
+    used_tiles_t save_currently_used_tiles = level->currently_used_tiles;
+    level_use_unsolved_tile_pos(level);
+
+    for (int i=0; i<LEVEL_MAXTILES; i++) {
+        tile_t *tile = &(level->tiles[i]);
+
+        if (tile->enabled) {
+            tile_pos_t *pos = tile->unsolved_pos;
+            if (pos->physics_body) {
+                tile_pos_update_physics_forces(pos);
+            }
+        }
+    }
+
+    level->currently_used_tiles = save_currently_used_tiles;
 }
 

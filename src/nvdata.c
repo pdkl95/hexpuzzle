@@ -97,7 +97,7 @@ static void find_nvdata_dir(void)
 
 /* increment when struct nvdata_state changes to invalidate
    any old (incompatable) state file loading */
-uint16_t state_version = 2;
+uint16_t state_version = 3;
 
 struct nvdata_state {
     uint16_t window_size_width;
@@ -107,6 +107,7 @@ struct nvdata_state {
 
     uint16_t animate_bg;
     uint16_t animate_win;
+    uint16_t physics_effects;
 };
 typedef struct nvdata_state nvdata_state_t;
 
@@ -120,6 +121,7 @@ static nvdata_state_t nvdata_state_hton(nvdata_state_t hstate)
     nstate.window_position_y  = htons(hstate.window_position_y);
     nstate.animate_bg         = htons(hstate.animate_bg);
     nstate.animate_win        = htons(hstate.animate_win);
+    nstate.physics_effects    = htons(hstate.physics_effects);
 
     return nstate;
 }
@@ -134,6 +136,7 @@ static nvdata_state_t nvdata_state_ntoh(nvdata_state_t nstate)
     hstate.window_position_y  = ntohs(nstate.window_position_y);
     hstate.animate_bg         = ntohs(nstate.animate_bg);
     hstate.animate_win        = ntohs(nstate.animate_win);
+    hstate.physics_effects    = ntohs(nstate.physics_effects);
 
     return hstate;
 }
@@ -202,6 +205,9 @@ static void load_nvdata_program_state(void)
     if (options->load_state_animate_win) {
         options->animate_win = state.animate_win;
     }
+    if (options->load_state_physics_effects) {
+        options->physics_effects = state.physics_effects;
+    }
 }
 
 static void save_nvdata_program_state(void)
@@ -217,6 +223,8 @@ static void save_nvdata_program_state(void)
 
     hstate.animate_bg  = options->animate_bg;
     hstate.animate_win = options->animate_win;
+
+    hstate.physics_effects = options->physics_effects;
 
     nvdata_limit_state(&hstate);
     nvdata_state_t nstate = nvdata_state_hton(hstate);
