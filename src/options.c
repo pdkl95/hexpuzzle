@@ -34,7 +34,7 @@
 #include "options.h"
 
 /* command line options */
-static char short_options[] = "Cc:F:H:t:wvVW:PUL::hj";
+static char short_options[] = "Cc:e:F:H:p:t:wvVW:PUL::hj";
 
 static struct option long_options[] = {
     {      "no-config", required_argument, 0, 'C' },
@@ -46,6 +46,9 @@ static struct option long_options[] = {
     {   "level-radius", required_argument, 0, 'R' },
     { "level-min-path", required_argument, 0, '<' },
     { "level-max-path", required_argument, 0, '>' },
+    {           "play", required_argument, 0, 'p' },
+    {           "edit", required_argument, 0, 'e' },
+    {  "cheat-autowin",       no_argument, 0, 'A' },
     {          "force",       no_argument, 0, '!' },
     {           "pack",       no_argument, 0, 'P' },
     {         "unpack",       no_argument, 0, 'U' },
@@ -277,6 +280,10 @@ options_set_defaults(
     options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_MIN_PATH;
     options->create_level_max_path = OPTIONS_DEFAULT_CREATE_LEVEL_MAX_PATH;
 
+    options->file_path = NULL;
+
+    options->cheat_autowin = false;
+
     if (options->nvdata_dir) {
         options->nvdata_dir = NULL;
     }
@@ -300,8 +307,23 @@ options_parse_args(
         }
 
         switch (c) {
+        case 'p':
+            options_set_string(&options->file_path);
+            options->startup_action = STARTUP_ACTION_PLAY;
+            break;
+
+        case 'e':
+            options_set_string(&options->file_path);
+            options->startup_action = STARTUP_ACTION_EDIT;
+            break;
+
         case '!':
             options->force = true;
+            break;
+
+        case 'A':
+            options->cheat_autowin = true;
+            warnmsg("CHEAT ENABLED: auto-win levels");
             break;
 
         case 'L':

@@ -1010,6 +1010,10 @@ bool level_check(level_t *level)
 {
     assert_not_null(level);
 
+    if (options->cheat_autowin) {
+        return true;
+    }
+
     path_int_t total = {0};
 
     for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
@@ -1348,6 +1352,9 @@ static void level_set_fade_transition(level_t *level, tile_pos_t *pos)
 static void level_set_physics_transformation(tile_pos_t *pos)
 {
     PhysicsBody body = pos->physics_body;
+
+    rlRotatef(body->orient, 0.0, 0.0, 1.0);
+
     Vector2 offset = Vector2Subtract(body->position, pos->center);
     rlTranslatef(offset.x,
                  offset.y,

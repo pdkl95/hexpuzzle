@@ -253,7 +253,7 @@ void create_new_level(void)
 }
 
 #if defined(PLATFORM_DESKTOP)
-void open_game_file(const char *path)
+void open_game_file(const char *path, bool edit)
 {
     if (options->verbose) {
         infomsg("Loading: \"%s\"", path);
@@ -268,18 +268,57 @@ void open_game_file(const char *path)
     }
     current_collection = collection;
 
+    game_mode_t collection_mode = GAME_MODE_PLAY_COLLECTION;
+    if (edit) {
+        collection_mode = GAME_MODE_EDIT_COLLECTION;
+    }
+
     if (IS_LEVEL_FILENAME(path)) {
         level_t *level = collection_find_level_by_filename(current_collection, path);
         if (level) {
-            level_play(level);
+            if (edit) {
+                if (options->verbose) {
+                    infomsg("Editing level file \"%s\"", path);
+                }
+                level_edit(level);
+            } else {
+                if (options->verbose) {
+                    infomsg("Playing level file \"%s\"", path);
+                }
+                level_play(level);
+            }
+        } else {
+            errmsg("Failed to open file \"%s\"", path);
         }
     } else if (IS_COLLECTION_FILENAME(path)) {
-        set_game_mode(GAME_MODE_PLAY_COLLECTION);
+        if (options->verbose) {
+            infomsg("%s collection file \"%s\"", edit ? "Editing" : "Playing", path);
+        }
+        set_game_mode(collection_mode);
     } else if (current_collection->dirpath) {
-        set_game_mode(GAME_MODE_PLAY_COLLECTION);
+        if (options->verbose) {
+            infomsg("%s collection directory \"%s\"", edit ? "Editing" : "Playing", path);
+        }
+        set_game_mode(collection_mode);
     } else {
         assert(0);
     }
+}
+
+static void play_game_file(const char *path)
+{
+    if (options->verbose) {
+        infomsg("ACTION: play file \"%s\"", path);
+    }
+    open_game_file(path, false);
+}
+
+static void edit_game_file(const char *path)
+{
+    if (options->verbose) {
+        infomsg("ACTION: edit file \"%s\"", path);
+    }
+    open_game_file(path, true);
 }
 
 const char *default_open_file_path(void)
@@ -1226,7 +1265,7 @@ static void draw_open_file_dialog(void)
         if (options->verbose) {
             infomsg("Opening file \"%s\"\n", path);
         }
-        open_game_file(path);
+        open_game_file(path, false);
     }
 
     show_open_file_box = false;
@@ -1604,14 +1643,26 @@ static void game_init(void)
     set_game_mode(GAME_MODE_BROWSER);
     //set_game_mode(GAME_MODE_RANDOM);
 
+    load_nvdata();
+
 #if defined(PLATFORM_DESKTOP)
-    if (options->extra_argc == 1) {
-        char *filename = options->extra_argv[0];
-        open_game_file(filename);
+    switch (options->startup_action) {
+    case STARTUP_ACTION_PLAY:
+        play_game_file(options->file_path);
+        break;
+
+    case STARTUP_ACTION_EDIT:
+        edit_game_file(options->file_path);
+        break;
+
+    default:
+        if (options->extra_argc == 1) {
+            char *filename = options->extra_argv[0];
+            open_game_file(filename, false);
+        }
+        break;
     }
 #endif
-
-    load_nvdata();
 }
 
 static void game_cleanup(void)
@@ -1665,7 +1716,7 @@ main(
 
     /* configure options */
     if (!options_parse_args(options, argc, argv)) {
-        fprintf(stderr, "ERROR: bad args");
+        errmsg("bad args");
         return EXIT_FAILURE;
     }
 

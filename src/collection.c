@@ -568,9 +568,12 @@ level_t *collection_find_level_by_id(collection_t *collection, const char *id)
     return NULL;
 }
 
-level_t *collection_find_level_by_filename(collection_t *collection, const char *filename)
+level_t *collection_find_level_by_filename(collection_t *collection, const char *filepath)
 {
     assert_not_null(collection);
+    assert_not_null(filepath);
+
+    const char *filename = GetFileName(filepath);
 
     level_t *level = collection->levels;
     while (level) {

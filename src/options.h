@@ -85,6 +85,11 @@ struct options {
     long create_level_min_path;
     long create_level_max_path;
 
+    char *file_path;
+
+    /* cheat (debug) options */
+    bool cheat_autowin;
+
     /* remaining args */
     char **extra_argv;
     int extra_argc;

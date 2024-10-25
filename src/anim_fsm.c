@@ -22,7 +22,7 @@
 #include "common.h"
 #include "anim_fsm.h"
 
-#define DEBUG_ANIM_FSM_CALLS
+//#define DEBUG_ANIM_FSM_CALLS
 
 #ifdef DEBUG_ANIM_FSM_CALLS
 # define debug_call(source, callback_name)                              \
