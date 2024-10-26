@@ -20,6 +20,7 @@
  ****************************************************************************/
 
 #include "common.h"
+#include "physac/physac.h"
 #include "level.h"
 #include "win_anim.h"
 #include "shader.h"
@@ -59,12 +60,22 @@ static void win_anim_fall_enter(UNUSED struct anim_fsm *anim_fsm, void *data)
     level_reset_physics_body_positions(win_anim->level);
     enable_physics();
 
+    if (win_anim->level->physics_floor) {
+        SetPhysicsGravity(0.0, 10.0);
+    }
+
     win_anim->fade[2] = 1.0f;
     //win_anim_common_update(anim_fsm, data);
 }
 
-static void win_anim_fall_exit(UNUSED struct anim_fsm *anim_fsm, UNUSED void *data)
+static void win_anim_fall_exit(UNUSED struct anim_fsm *anim_fsm, void *data)
 {
+    win_anim_t *win_anim = (win_anim_t *)data;
+
+    if (win_anim->level->physics_floor) {
+        SetPhysicsGravity(0.0, 0.0);
+    }
+
     disable_physics();
 
     //win_anim_common_update(anim_fsm, data);

@@ -31,29 +31,38 @@ struct tile_section {
 };
 typedef struct tile_section tile_section_t;
 
+struct tile_coord {
+    Vector2 center;
+    Vector2 corners[7];
+    Vector2 midpoints[7];
+    tile_section_t sections[6];
+};
+typedef struct tile_coord tile_coord_t;
+
 struct tile_pos {
     tile_t *tile;
 
     hex_axial_t position;
 
     /*
-     * drawing/ui attr
+     * drawing
      */
     float size;
     float line_width;
     float center_circle_draw_radius;
-    float center_circle_hover_radius;
 
-    Vector2 center;
-    Vector2 corners[7];
-    Vector2 midpoints[7];
-    tile_section_t sections[6];
-    struct tile_pos *neighbors[6];
+    tile_coord_t win; // window coordinates
+    tile_coord_t rel; // tile-center relative coordinates
 
+    /*
+     * ui
+     */
     bool hover;
     bool hover_center;
     hex_direction_t hover_section;
+    float center_circle_hover_radius;
 
+    struct tile_pos *neighbors[6];
     struct tile_pos *swap_target;
 
     struct tile_pos *hover_adjacent;

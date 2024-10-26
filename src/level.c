@@ -898,7 +898,7 @@ static void level_add_to_bounding_box(level_t *level, tile_pos_t *pos)
     assert_not_null(level);
     assert_not_null(pos);
 
-    Vector2 *corners = pos->corners;
+    Vector2 *corners = pos->win.corners;
     for (int i=0; i<6; i++) {
         level->px_min.x = MIN(level->px_min.x, corners[i].x);
         level->px_min.y = MIN(level->px_min.y, corners[i].y);
@@ -1338,7 +1338,7 @@ static void level_set_fade_transition(level_t *level, tile_pos_t *pos)
         return;
     }
 
-    Vector2 radial = Vector2Subtract(pos->center, center_pos->center);
+    Vector2 radial = Vector2Subtract(pos->win.center, center_pos->win.center);
     Vector2 modded = Vector2Scale(radial, 5.0);
     Vector2 faded  = Vector2Lerp(modded, radial, level->fade_value_eased);
 
@@ -1353,9 +1353,18 @@ static void level_set_physics_transformation(tile_pos_t *pos)
 {
     PhysicsBody body = pos->physics_body;
 
-    rlRotatef(body->orient, 0.0, 0.0, 1.0);
+    rlTranslatef(pos->win.center.x,
+                 pos->win.center.y,
+                 0.0);
 
-    Vector2 offset = Vector2Subtract(body->position, pos->center);
+
+    rlRotatef(TO_DEGREES(body->orient), 0.0, 0.0, 1.0);
+
+    rlTranslatef(-pos->win.center.x,
+                 -pos->win.center.y,
+                 0.0);
+
+    Vector2 offset = Vector2Subtract(body->position, pos->win.center);
     rlTranslatef(offset.x,
                  offset.y,
                  0.0);
@@ -1386,20 +1395,16 @@ void level_draw(level_t *level, bool finished)
         rlEnableColorBlend();
 
         float rot = (1.0 - ease_circular_out(level->fade_value)) * (TAU/2.0);
-        Vector2 hwin = {
-            .x = window_size.x / 2.0,
-            .y = window_size.y / 2.0
-        };
 
-        rlTranslatef(hwin.x,
-                     hwin.y,
+        rlTranslatef(window_center.x,
+                     window_center.y,
                      0.0);
 
         float rot_x = rot * (360.0 / TAU) * level->fade_rotate_speed;
         rlRotatef(rot_x, 0.0, 0.0, 1.0);
 
-        rlTranslatef(-hwin.x,
-                     -hwin.y,
+        rlTranslatef(-window_center.x,
+                     -window_center.y,
                      0.0);
     }
 
@@ -1434,6 +1439,8 @@ void level_draw(level_t *level, bool finished)
                         rlPushMatrix();
                         level_set_physics_transformation(pos);
                         tile_draw(pos, level->drag_target, finished, finished_color, finished_fade_in);
+                        const char *postxt = TextFormat("%4f, %4f", pos->physics_body->position.x, pos->physics_body->position.y);
+                        DrawTextEx(font16, postxt, pos->win.center, 16, 2.0, RAYWHITE);
                         rlPopMatrix();
                     } else {
                         tile_draw(pos, level->drag_target, finished, finished_color, finished_fade_in);
@@ -1493,6 +1500,11 @@ void level_draw(level_t *level, bool finished)
         /* } */
 
         rlPopMatrix();
+    }
+
+    if (level->physics_floor) {
+        DrawRectangleRounded(level->floor_rect, 0.2, 12, ColorAlpha(BLUE, 0.333));
+        DrawRectangleRoundedLines(level->floor_rect, 0.2, 12, 2.0, ColorAlpha(YELLOW, 0.333));
     }
 
     //DrawRectangleLinesEx(level->px_bounding_box, 5.0, LIME);
@@ -1715,6 +1727,27 @@ void level_create_physics_body(level_t *level)
             infomsg("Creating tile physics objects");
         }
 
+        Vector2 floor_pos = {
+            .x = window_center.x - level->px_offset.x,
+            .y = window_size.y - level->px_offset.y
+        };
+        pvec2(window_center);
+
+        level->floor_rect.x = floor_pos.x;
+        level->floor_rect.y = floor_pos.y;
+        level->floor_rect.width = 4.0f * (float)window_center.x;
+        level->floor_rect.height = 100.0f;
+        level->floor_rect.x -= 0.5 * level->floor_rect.width;
+        prect(level->floor_rect);
+        PhysicsBody floor = CreatePhysicsBodyRectangle(
+            floor_pos,
+            level->floor_rect.width,
+            level->floor_rect.height,
+            10);
+        floor->enabled = false;
+        floor->restitution = 0;
+        level->physics_floor = floor;
+
         used_tiles_t save_currently_used_tiles = level->currently_used_tiles;
         level_use_unsolved_tile_pos(level);
 
@@ -1752,7 +1785,7 @@ void level_reset_physics_body_positions(level_t *level)
 
         if (tile->enabled) {
             tile_pos_t *pos = tile->unsolved_pos;
-            pos->physics_body->position = pos->center;
+            pos->physics_body->position = pos->win.center;
             pos->physics_body->orient = 0.0;
         }
     }
@@ -1779,6 +1812,11 @@ void level_destroy_physics_body(level_t *level)
                 tile_pos_t *pos = tile->unsolved_pos;
                 tile_pos_destroy_physics_body(pos);
             }
+        }
+
+        if (level->physics_floor) {
+            DestroyPhysicsBody(level->physics_floor);
+            level->physics_floor = NULL;
         }
 
         level->have_physics_body = false;

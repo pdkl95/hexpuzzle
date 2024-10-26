@@ -112,6 +112,8 @@ struct level {
     float fade_rotate_speed;
 
     bool have_physics_body;
+    struct PhysicsBodyData *physics_floor;
+    Rectangle floor_rect;
 
     struct win_anim *win_anim;
 

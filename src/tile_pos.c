@@ -91,7 +91,7 @@ void tile_pos_set_hover(tile_pos_t *pos, Vector2 mouse_pos)
 {
     assert_not_null(pos);
 
-    Vector2 relvec = Vector2Subtract(mouse_pos, pos->center);
+    Vector2 relvec = Vector2Subtract(mouse_pos, pos->win.center);
     float theta = atan2f(-relvec.y, -relvec.x);
     theta += TAU/2.0;
     theta = TAU - theta;
@@ -99,7 +99,7 @@ void tile_pos_set_hover(tile_pos_t *pos, Vector2 mouse_pos)
     pos->hover_section = (int)(theta/TO_RADIANS(60.0));
     //printf("tile_pos->hover_section = %d (theta = %f)\n", pos->hover_section, theta);
     pos->hover_center =
-        (Vector2DistanceSqr(mouse_pos, pos->center)
+        (Vector2DistanceSqr(mouse_pos, pos->win.center)
          < (pos->center_circle_hover_radius *
             pos->center_circle_hover_radius));
 }
@@ -230,27 +230,36 @@ void tile_pos_rebuild(tile_pos_t *pos)
     pos->line_width = pos->size / 6.0;
     pos->center_circle_draw_radius = pos->line_width * 1.2;
     pos->center_circle_hover_radius = pos->line_width * 1.6;
-    pos->center = hex_axial_to_pixel(pos->position, pos->size);
+    pos->win.center = hex_axial_to_pixel(pos->position, pos->size);
 
-    Vector2 *corners = hex_pixel_corners(pos->center, pos->size);
-    memcpy(pos->corners, corners, 7 * sizeof(Vector2));
+    pos->rel.center = Vector2Zero();
+
+    Vector2 *corners = hex_pixel_corners(pos->win.center, pos->size);
+    memcpy(pos->win.corners, corners, 7 * sizeof(Vector2));
 
     for (int i=0; i<6; i++) {
-        Vector2 c0 = pos->corners[i];
-        Vector2 c1 = pos->corners[i + 1];
+        Vector2 c0 = pos->win.corners[i];
+        Vector2 c1 = pos->win.corners[i + 1];
 
-        pos->midpoints[i] = Vector2Lerp(c0, c1, 0.5);
+        pos->win.midpoints[i] = Vector2Lerp(c0, c1, 0.5);
+
+        pos->rel.corners[i]   = Vector2Subtract(pos->win.corners[i],   pos->win.center);
+        pos->rel.midpoints[i] = Vector2Subtract(pos->win.midpoints[i], pos->win.center);
     }
 
-    Vector2 cent = Vector2Lerp(pos->midpoints[0], pos->midpoints[3], 0.5);
+    Vector2 cent = Vector2Lerp(pos->win.midpoints[0], pos->win.midpoints[3], 0.5);
 
     for (int i=0; i<6; i++) {
-        Vector2 c0 = pos->corners[i];
-        Vector2 c1 = pos->corners[i + 1];
+        Vector2 c0 = pos->win.corners[i];
+        Vector2 c1 = pos->win.corners[i + 1];
 
-        pos->sections[i].corners[0] = c0;
-        pos->sections[i].corners[1] = c1;
-        pos->sections[i].corners[2] = cent;
+        pos->win.sections[i].corners[0] = c0;
+        pos->win.sections[i].corners[1] = c1;
+        pos->win.sections[i].corners[2] = cent;
+
+        pos->rel.sections[i].corners[0] = Vector2Subtract(pos->win.sections[i].corners[0], pos->win.center);
+        pos->rel.sections[i].corners[1] = Vector2Subtract(pos->win.sections[i].corners[1], pos->win.center);
+        pos->rel.sections[i].corners[2] = Vector2Subtract(pos->win.sections[i].corners[2], pos->win.center);
     }
 }
 
@@ -277,7 +286,7 @@ void tile_pos_create_physics_body(tile_pos_t *pos)
         }
     }
 
-    PhysicsBody body = CreatePhysicsBodyPolygon(pos->center, pos->size, 6, density);
+    PhysicsBody body = CreatePhysicsBodyPolygon(pos->win.center, pos->size, 6, density);
     body->orient          = 0.0f;
     body->restitution     = TILE_RESTITUTION;
     body->staticFriction  = TILE_STATIC_FRICTION;
@@ -299,8 +308,7 @@ void tile_pos_update_physics_forces(tile_pos_t *pos)
 {
     PhysicsBody body = pos->physics_body;
     Vector2 force = Vector2Normalize(Vector2Subtract(window_center, body->position));
-    force = Vector2Rotate(force, TAU/4.0);
-    force = Vector2Scale(force, 30.0f);
-    PhysicsAddForce(body, force);
-
+    force = Vector2Rotate(force, TO_DEGREES(TAU/8.0));
+    force = Vector2Scale(force, 500.0f);
+    //PhysicsAddForce(body, force);
 }

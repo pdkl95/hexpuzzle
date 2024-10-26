@@ -61,6 +61,8 @@
 /* # error "Only PLATFORM_DESKTOP (GLSL 330) supported!" */
 /* #endif */
 
+#define DEBUG_RESIZE
+
 const char *progversion = PACKAGE_VERSION;
 const char *progname    = PACKAGE_NAME;
 
@@ -417,7 +419,9 @@ do_resize(
     window_center.y = 0.5f * (float)window_size.y;
 
 #ifdef DEBUG_RESIZE
-    warnmsg("RESIZE to: %d x %d", window_size.x, window_size.y);
+    warnmsg("RESIZE to: %d x %d, CENTER: %4f x %4f",
+            window_size.x, window_size.y,
+            window_center.x, window_center.y);
 #endif
 
     set_uniform_resolution();
@@ -1644,8 +1648,11 @@ static void game_init(void)
     //set_game_mode(GAME_MODE_RANDOM);
 
     load_nvdata();
+}
 
 #if defined(PLATFORM_DESKTOP)
+static void start_given_file(void)
+{
     switch (options->startup_action) {
     case STARTUP_ACTION_PLAY:
         play_game_file(options->file_path);
@@ -1662,8 +1669,9 @@ static void game_init(void)
         }
         break;
     }
-#endif
 }
+#endif
+
 
 static void game_cleanup(void)
 {
@@ -1748,6 +1756,9 @@ main(
     emscripten_set_main_loop(em_do_one_frame, 0, 1);
     return EXIT_SUCCESS;
 #else
+
+    start_given_file();
+
     if (options->verbose) {
         infomsg("Entering Main Loop...");
     }
