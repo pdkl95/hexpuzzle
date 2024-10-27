@@ -110,7 +110,7 @@
 
 #define CREATE_DIR_MODE (S_IRWXU | S_IRWXG | (S_IROTH | S_IXOTH))
 
-#define NVDATA_STATE_FILE_NAME "state.dat"
+#define NVDATA_STATE_FILE_NAME "state.json"
 #define NVDATA_FINISHED_LEVEL_FILE_NAME "finished_levels.dat"
 #define NVDATA_DEFAULT_BROWSE_PATH_NAME "levels"
 

@@ -137,6 +137,15 @@ static inline Vector2 ivector2_to_vector2(IVector2 ivec)
     return vec;
 }
 
+static inline IVector2 vector2_to_ivector2(Vector2 vec)
+{
+    IVector2 ivec = {
+        .x = (int)vec.x,
+        .y = (int)vec.y
+    };
+    return ivec;
+}
+
 extern IVector2 window_size;
 extern Vector2 window_center;
 extern float window_corner_dist;
