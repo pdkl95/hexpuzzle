@@ -114,6 +114,7 @@ struct level {
     bool have_physics_body;
     struct PhysicsBodyData *physics_floor;
     Rectangle floor_rect;
+    Vector2 physics_rotate_center;
 
     struct win_anim *win_anim;
 

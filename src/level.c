@@ -970,6 +970,8 @@ void level_resize(level_t *level)
     level->px_offset.x -= level->px_bounding_box.x;
     level->px_offset.y -= level->px_bounding_box.y;
 
+    level->physics_rotate_center = Vector2Subtract(window_center, level->px_offset);
+
 #if 0
     printf("-- px --\n");
     printf("window_size = (%d x %d)\n", window_size.x, window_size.y);
@@ -1353,21 +1355,22 @@ static void level_set_physics_transformation(tile_pos_t *pos)
 {
     PhysicsBody body = pos->physics_body;
 
-    rlTranslatef(pos->win.center.x,
-                 pos->win.center.y,
-                 0.0);
-
-
-    rlRotatef(TO_DEGREES(body->orient), 0.0, 0.0, 1.0);
-
-    rlTranslatef(-pos->win.center.x,
-                 -pos->win.center.y,
-                 0.0);
 
     Vector2 offset = Vector2Subtract(body->position, pos->win.center);
     rlTranslatef(offset.x,
                  offset.y,
                  0.0);
+
+    /* rlTranslatef(pos->win.center.x, */
+    /*              pos->win.center.y, */
+    /*              0.0); */
+
+
+    rlRotatef(TO_DEGREES(body->orient), 0.0, 0.0, 1.0);
+
+    /* rlTranslatef(-pos->win.center.x, */
+    /*              -pos->win.center.y, */
+    /*              0.0); */
 }
 
 void level_draw(level_t *level, bool finished)
@@ -1425,26 +1428,58 @@ void level_draw(level_t *level, bool finished)
                 if (level->drag_target && pos->tile == level->drag_target->tile) {
                     if (pos->swap_target) {
                         // preview the swap
+                        rlPushMatrix();
+                        rlTranslatef(pos->win.center.x,
+                                     pos->win.center.y,
+                                     0.0);
+
                         tile_draw(pos, level->drag_target, finished, finished_color, finished_fade_in);
+
+                        rlPopMatrix();
                     } else {
                         // defer until after bg tiles are drawn
                     }
                 } else {
+                    rlPushMatrix();
+
+                    rlTranslatef(pos->win.center.x,
+                                 pos->win.center.y,
+                                 0.0);
+
                     if (do_fade) {
-                        rlPushMatrix();
                         level_set_fade_transition(level, pos);
-                        tile_draw(pos, level->drag_target, finished, finished_color, finished_fade_in);
-                        rlPopMatrix();
                     } else if (pos->physics_body) {
-                        rlPushMatrix();
                         level_set_physics_transformation(pos);
-                        tile_draw(pos, level->drag_target, finished, finished_color, finished_fade_in);
-                        const char *postxt = TextFormat("%4f, %4f", pos->physics_body->position.x, pos->physics_body->position.y);
-                        DrawTextEx(font16, postxt, pos->win.center, 16, 2.0, RAYWHITE);
-                        rlPopMatrix();
-                    } else {
-                        tile_draw(pos, level->drag_target, finished, finished_color, finished_fade_in);
                     }
+
+                    tile_draw(pos, level->drag_target, finished, finished_color, finished_fade_in);
+
+                    rlPopMatrix();
+
+#ifdef DEBUG_PHYSICS_VECTORS
+                    if (pos->physics_body) {
+                        rlPushMatrix();
+                        /* rlTranslatef(pos->win.center.x, */
+                        /*              pos->win.center.y, */
+                        /*              0.0); */
+
+                        /* Vector2 offset = Vector2Subtract(body->position, pos->win.center); */
+                        /* rlTranslatef(offset.x, */
+                        /*              offset.y, */
+                        /*              0.0); */
+                        rlTranslatef(pos->physics_body->position.x,
+                                     pos->physics_body->position.y,
+                                     0.0f);
+
+                        //const char *postxt = TextFormat("%4f, %4f", pos->physics_body->position.x, pos->physics_body->position.y);
+                        //DrawTextEx(font16, postxt, pos->rel.center, 16, 2.0, RAYWHITE);
+                        //DrawCircleLinesV(pos->rel.center, pos->physics_size, WHITE);
+                        DrawLineV(pos->rel.center, pos->debug_cent_vec, LIME);
+                        DrawLineV(pos->rel.center, pos->debug_rot_vec, PINK);
+                        DrawLineV(pos->rel.center, pos->physics_body->force, YELLOW);
+                        rlPopMatrix();
+                    }
+#endif
                 }
             }
         }
@@ -1461,19 +1496,20 @@ void level_draw(level_t *level, bool finished)
                     };
                     tile_pos_t *pos = level_get_current_tile_pos(level, addr);
 
+                    rlPushMatrix();
+
+                    rlTranslatef(pos->win.center.x,
+                                 pos->win.center.y,
+                                 0.0);
+
                     if (do_fade) {
-                        rlPushMatrix();
                         level_set_fade_transition(level, pos);
-                        tile_draw_win_anim(pos, level);
-                        rlPopMatrix();
                     } else if (pos->physics_body) {
-                        rlPushMatrix();
                         level_set_physics_transformation(pos);
-                        tile_draw_win_anim(pos, level);
-                        rlPopMatrix();
-                    } else {
-                        tile_draw_win_anim(pos, level);
                     }
+
+                    tile_draw_win_anim(pos, level);
+                    rlPopMatrix();
                 }
             }
         }
@@ -1489,6 +1525,10 @@ void level_draw(level_t *level, bool finished)
                      level->drag_offset.y,
                      0.0);
 
+        rlTranslatef(level->drag_target->win.center.x,
+                     level->drag_target->win.center.y,
+                     0.0);
+
         tile_draw_ghost(level->drag_target);
 
         /* if (finished) { */
@@ -1502,10 +1542,11 @@ void level_draw(level_t *level, bool finished)
         rlPopMatrix();
     }
 
-    if (level->physics_floor) {
-        DrawRectangleRounded(level->floor_rect, 0.2, 12, ColorAlpha(BLUE, 0.333));
-        DrawRectangleRoundedLines(level->floor_rect, 0.2, 12, 2.0, ColorAlpha(YELLOW, 0.333));
-    }
+    /* if (level->physics_floor) { */
+    /*     DrawCircleV(level->physics_rotate_center, 22, LIME); */
+    /*     DrawRectangleRounded(level->floor_rect, 0.2, 12, ColorAlpha(BLUE, 0.333)); */
+    /*     DrawRectangleRoundedLines(level->floor_rect, 0.2, 12, 2.0, ColorAlpha(YELLOW, 0.333)); */
+    /* } */
 
     //DrawRectangleLinesEx(level->px_bounding_box, 5.0, LIME);
     rlSetBlendMode(RL_BLEND_ALPHA);
@@ -1731,21 +1772,21 @@ void level_create_physics_body(level_t *level)
             .x = window_center.x - level->px_offset.x,
             .y = window_size.y - level->px_offset.y
         };
-        pvec2(window_center);
+        floor_pos.y += 50.0;
 
         level->floor_rect.x = floor_pos.x;
         level->floor_rect.y = floor_pos.y;
         level->floor_rect.width = 4.0f * (float)window_center.x;
         level->floor_rect.height = 100.0f;
         level->floor_rect.x -= 0.5 * level->floor_rect.width;
-        prect(level->floor_rect);
+
         PhysicsBody floor = CreatePhysicsBodyRectangle(
             floor_pos,
             level->floor_rect.width,
             level->floor_rect.height,
             10);
         floor->enabled = false;
-        floor->restitution = 0;
+        floor->restitution = 1;
         level->physics_floor = floor;
 
         used_tiles_t save_currently_used_tiles = level->currently_used_tiles;
@@ -1836,7 +1877,7 @@ void level_update_physics_forces(level_t *level)
         if (tile->enabled) {
             tile_pos_t *pos = tile->unsolved_pos;
             if (pos->physics_body) {
-                tile_pos_update_physics_forces(pos);
+                tile_pos_update_physics_forces(pos, level);
             }
         }
     }

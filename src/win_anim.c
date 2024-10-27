@@ -61,7 +61,7 @@ static void win_anim_fall_enter(UNUSED struct anim_fsm *anim_fsm, void *data)
     enable_physics();
 
     if (win_anim->level->physics_floor) {
-        SetPhysicsGravity(0.0, 10.0);
+        //SetPhysicsGravity(0.0, 80.0);
     }
 
     win_anim->fade[2] = 1.0f;

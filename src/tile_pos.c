@@ -285,8 +285,10 @@ void tile_pos_create_physics_body(tile_pos_t *pos)
             density += TILE_PATH_DENDITY;
         }
     }
+    pos->physics_size = pos->size;// * 0.86;
 
-    PhysicsBody body = CreatePhysicsBodyPolygon(pos->win.center, pos->size, 6, density);
+    PhysicsBody body = CreatePhysicsBodyPolygon(pos->win.center, pos->physics_size, 6, density);
+    //PhysicsBody body = CreatePhysicsBodyCircle(pos->win.center, pos->physics_size, density);
     body->orient          = 0.0f;
     body->restitution     = TILE_RESTITUTION;
     body->staticFriction  = TILE_STATIC_FRICTION;
@@ -304,11 +306,31 @@ void tile_pos_destroy_physics_body(tile_pos_t *pos)
     pos->physics_body = NULL;
 }
 
-void tile_pos_update_physics_forces(tile_pos_t *pos)
+void tile_pos_update_physics_forces(tile_pos_t *pos, struct level *level)
 {
+    float maxdist = window_corner_dist * 0.5;
+    float mindist = window_corner_dist * 0.1;
     PhysicsBody body = pos->physics_body;
-    Vector2 force = Vector2Normalize(Vector2Subtract(window_center, body->position));
-    force = Vector2Rotate(force, TO_DEGREES(TAU/8.0));
-    force = Vector2Scale(force, 500.0f);
-    //PhysicsAddForce(body, force);
+    Vector2 force = Vector2Subtract(level->physics_rotate_center, body->position);
+    float len = Vector2Length(force);
+    len -= mindist;
+    len = Clamp(len, mindist, maxdist);
+
+    float theta = TAU/4.0;
+    float centfade = (len / maxdist);
+    float rotfade = 1.0 - centfade;
+    rotfade -= 0.2;
+
+    Vector2 cent_force = Vector2Normalize(force);
+    Vector2 rot_force  = Vector2Rotate(cent_force, theta);
+
+    rot_force  = Vector2Scale( rot_force,  50.0f *  rotfade);
+    cent_force = Vector2Scale(cent_force, 240.0f * centfade);
+
+#ifdef DEBUG_PHYSICS_VECTORS
+    pos->debug_cent_vec = cent_force; //Vector2Scale(cent_force, pos->physics_size * centfade);
+    pos->debug_rot_vec  =  rot_force; //Vector2Scale( rot_force, pos->physics_size *  rotfade);
+#endif
+
+    PhysicsAddForce(body, Vector2Add(rot_force, cent_force));
 }

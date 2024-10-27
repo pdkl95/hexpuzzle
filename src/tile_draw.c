@@ -82,8 +82,8 @@ static void draw_adjacency_highlight(tile_pos_t *pos)
         return;
     }
 
-    Vector2 mid = pos->win.midpoints[pos->hover_section];
-    tile_section_t sec = pos->win.sections[pos->hover_section];
+    Vector2 mid = pos->rel.midpoints[pos->hover_section];
+    tile_section_t sec = pos->rel.sections[pos->hover_section];
     Vector2 c0 = Vector2Lerp(sec.corners[0], mid, 0.35);
     Vector2 c1 = Vector2Lerp(sec.corners[1], mid, 0.35);
     DrawTriangle(c0, c1, sec.corners[2], tile_bg_highlight_color_dim);
@@ -109,7 +109,7 @@ void tile_draw_path(tile_pos_t *pos, bool finished)
 {
     for (hex_direction_t i=0; i<6; i++) {
         /* colored strips */
-        Vector2 mid = pos->win.midpoints[i];
+        Vector2 mid = pos->rel.midpoints[i];
 
         tile_t *tile = pos->swap_target ? pos->swap_target->tile : pos->tile;
         Color pcolor = path_type_color(tile->path[i]);
@@ -118,19 +118,19 @@ void tile_draw_path(tile_pos_t *pos, bool finished)
                 pcolor = ColorAlpha(pcolor, 0.666);
             }
 
-            DrawLineEx(pos->win.center, mid, pos->line_width, pcolor);
+            DrawLineEx(pos->rel.center, mid, pos->line_width, pcolor);
         }
 
 #if 0
         /* section index label */
-        Vector2 offset = Vector2Scale(Vector2Subtract(pos->win.center, mid), 0.2);;
+        Vector2 offset = Vector2Scale(Vector2Subtract(pos->rel.center, mid), 0.2);;
         Vector2 mlabel = Vector2Add(mid, offset);
         DrawTextShadow(TextFormat("%d", i), mlabel.x - 5, mlabel.y - 9, 18, RAYWHITE);
 #endif
 
 #if 0
         /* neighbor hex address label */
-        Vector2 offset = Vector2Scale(Vector2Subtract(pos->win.center, mid), 0.32);;
+        Vector2 offset = Vector2Scale(Vector2Subtract(pos->rel.center, mid), 0.32);;
         Vector2 mlabel = Vector2Add(mid, offset);
         tile_pos_t *n = pos->neighbors[i];
         DrawTextShadow(TextFormat("%d,%d", n->position.q, n->position.r), mlabel.x - 11, mlabel.y - 4, 16, RAYWHITE);
@@ -142,13 +142,13 @@ void tile_draw_path_ghost(tile_pos_t *pos)
 {
     for (hex_direction_t i=0; i<6; i++) {
         /* colored strips */
-        Vector2 mid = pos->win.midpoints[i];
+        Vector2 mid = pos->rel.midpoints[i];
 
         Color pcolor = path_type_color(pos->tile->path[i]);
         if (!ColorEq(pcolor, path_color_none)) {
             pcolor = ColorAlpha(pcolor, 0.666);
 
-            DrawLineEx(pos->win.center, mid, pos->line_width, pcolor);
+            DrawLineEx(pos->rel.center, mid, pos->line_width, pcolor);
         }
     }
 }
@@ -157,7 +157,7 @@ void tile_draw_path_highlight(tile_pos_t *pos, bool finished, Color finished_col
 {
     for (hex_direction_t i=0; i<6; i++) {
         /* colored strips */
-        Vector2 mid = pos->win.midpoints[i];
+        Vector2 mid = pos->rel.midpoints[i];
 
         if (pos->tile->path[i] != PATH_TYPE_NONE) {
             tile_pos_t *neighbor = pos->neighbors[i];
@@ -172,14 +172,14 @@ void tile_draw_path_highlight(tile_pos_t *pos, bool finished, Color finished_col
                     } else {
                         highlight_color = path_type_highlight_color(pos->tile->path[i]);
                     }
-                    Vector2 path = Vector2Subtract(mid, pos->win.center);
+                    Vector2 path = Vector2Subtract(mid, pos->rel.center);
                     Vector2 perp = Vector2Normalize((Vector2){ path.y, -path.x});
                     Vector2 shift = Vector2Scale(perp, pos->line_width / 2.0);
 
-                    Vector2 s1 = Vector2Add(pos->win.center, shift);
+                    Vector2 s1 = Vector2Add(pos->rel.center, shift);
                     Vector2 e1 = Vector2Add(mid,             shift);
                     shift = Vector2Negate(shift);
-                    Vector2 s2 = Vector2Add(pos->win.center, shift);
+                    Vector2 s2 = Vector2Add(pos->rel.center, shift);
                     Vector2 e2 = Vector2Add(mid,             shift);
 
                     highlight_color = ColorLerp(highlight_color, WHITE, 0.4);
@@ -214,11 +214,11 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
     if (tile->hidden) {
         if (edit_mode) {
             float hiddensize = pos->size - (pos->size * 0.08);
-            DrawPoly(pos->win.center, 6, hiddensize, 0.0f,
+            DrawPoly(pos->rel.center, 6, hiddensize, 0.0f,
                      dragged_over
                      ? tile_bg_hover_color
                      : tile_bg_hidden_color);
-            DrawPolyLinesEx(pos->win.center, 6, hiddensize, 0.0f, 2.0f,
+            DrawPolyLinesEx(pos->rel.center, 6, hiddensize, 0.0f, 2.0f,
                             dragged_over
                             ? tile_edge_hover_color
                             : tile_edge_hidden_color);
@@ -245,7 +245,7 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
             bgcolor = ColorLerp(bgcolor, new_bgcolor, finished_fade_in);
         }
 
-        DrawPoly(pos->win.center, 6, pos->size, 0.0f, bgcolor);
+        DrawPoly(pos->rel.center, 6, pos->size, 0.0f, bgcolor);
     }
 
     bool edit_solved_not_center = edit_mode_solved && !pos->hover_center;
@@ -268,14 +268,14 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         && !either_self_or_adjacent_is_hidden(pos)) {
         assert(pos->hover_section >= 0);
         assert(pos->hover_section < 6);
-        Vector2 mid = pos->win.midpoints[pos->hover_section];
+        Vector2 mid = pos->rel.midpoints[pos->hover_section];
         float thickness = 3.0;
         path_type_t next_path = get_next_path(pos);
         Color next_color = path_type_highlight_color(next_path);
         if (next_path == PATH_TYPE_NONE) {
             next_color = tile_bg_color;
         }
-        DrawLineEx(pos->win.center, mid, thickness, next_color);
+        DrawLineEx(pos->rel.center, mid, thickness, next_color);
     }
 
     if (!tile->fixed) {
@@ -298,19 +298,19 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         if (finished) {
             /* skip */
         } else {
-            DrawPolyLinesEx(pos->win.center, 6, pos->size, 0.0f, line_width, border_color);
+            DrawPolyLinesEx(pos->rel.center, 6, pos->size, 0.0f, line_width, border_color);
         }
     }
 
     if (finished) {
         Color cent_color = ColorLerp(tile_center_color, finished_color, 0.5);
         cent_color = ColorBrightness(cent_color, -0.6);
-        DrawCircleV(pos->win.center, pos->center_circle_draw_radius, cent_color);
+        DrawCircleV(pos->rel.center, pos->center_circle_draw_radius, cent_color);
     } else {
-        DrawCircleV(pos->win.center, pos->center_circle_draw_radius, tile_center_color);
+        DrawCircleV(pos->rel.center, pos->center_circle_draw_radius, tile_center_color);
 
         if (edit_mode_solved && pos->hover_center) {
-            DrawCircleV(pos->win.center, pos->center_circle_draw_radius, tile_bg_highlight_color);
+            DrawCircleV(pos->rel.center, pos->center_circle_draw_radius, tile_bg_highlight_color);
         }
     }
 
@@ -323,16 +323,16 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
     int font_size = GuiGetStyle(DEFAULT, TEXT_SIZE);
     const char *coord_text = TextFormat("%d,%d", pos->position.q, pos->position.r);
     Vector2 text_size = MeasureTextEx(DEFAULT_GUI_FONT, coord_text, font_size, 1.0);
-    DrawTextDropShadow(coord_text, pos->win.center.x - (text_size.x/2), pos->win.center.y + 14, font_size, WHITE, BLACK);
+    DrawTextDropShadow(coord_text, pos->rel.center.x - (text_size.x/2), pos->rel.center.y + 14, font_size, WHITE, BLACK);
 #endif
 }
 
 void tile_draw_ghost(tile_pos_t *pos)
 {
-    DrawPoly(pos->win.center, 6, pos->size, 0.0f, ColorAlpha(tile_bg_color, 0.4));
+    DrawPoly(pos->rel.center, 6, pos->size, 0.0f, ColorAlpha(tile_bg_color, 0.4));
     tile_draw_path_ghost(pos);
-    DrawCircleV(pos->win.center, pos->center_circle_draw_radius, ColorAlpha(tile_center_color, 0.666));
-    DrawPolyLinesEx(pos->win.center, 6, pos->size, 0.0f, 2.0, ColorAlpha(tile_edge_drag_color, 0.7));
+    DrawCircleV(pos->rel.center, pos->center_circle_draw_radius, ColorAlpha(tile_center_color, 0.666));
+    DrawPolyLinesEx(pos->rel.center, 6, pos->size, 0.0f, 2.0, ColorAlpha(tile_edge_drag_color, 0.7));
 }
 
 static float tile_draw_hash_wave(tile_pos_t *pos)
@@ -362,5 +362,5 @@ void tile_draw_win_anim(tile_pos_t *pos, level_t *level)
 
     float line_width = 2.0;
 
-    DrawPolyLinesEx(pos->win.center, 6, pos->size, 0.0f, line_width, color);
+    DrawPolyLinesEx(pos->rel.center, 6, pos->size, 0.0f, line_width, color);
 }

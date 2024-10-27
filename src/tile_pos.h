@@ -67,6 +67,13 @@ struct tile_pos {
 
     struct tile_pos *hover_adjacent;
 
+    float physics_size;
+
+#ifdef DEBUG_PHYSICS_VECTORS
+    Vector2 debug_cent_vec;
+    Vector2 debug_rot_vec;
+#endif
+
     struct PhysicsBodyData *physics_body;
 };
 typedef struct tile_pos tile_pos_t;
@@ -92,7 +99,7 @@ void tile_pos_clear(tile_pos_t *pos, struct level *level);
 
 void tile_pos_create_physics_body(tile_pos_t *pos);
 void tile_pos_destroy_physics_body(tile_pos_t *pos);
-void tile_pos_update_physics_forces(tile_pos_t *pos);
+void tile_pos_update_physics_forces(tile_pos_t *pos, struct level *level);
 
 static inline bool tile_pos_dragable(tile_pos_t *pos)
 {

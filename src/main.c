@@ -84,6 +84,7 @@ double resize_delay = 0.5;
 double resize_time = 0.0;
 IVector2 window_size;
 Vector2 window_center;
+float window_corner_dist;
 IVector2 mouse_position;
 Vector2 mouse_positionf;
 bool mouse_left_click  = false;
@@ -418,6 +419,8 @@ do_resize(
     window_center.x = 0.5f * (float)window_size.x;
     window_center.y = 0.5f * (float)window_size.y;
 
+    window_corner_dist = Vector2Length(window_center);
+
 #ifdef DEBUG_RESIZE
     warnmsg("RESIZE to: %d x %d, CENTER: %4f x %4f",
             window_size.x, window_size.y,
@@ -611,11 +614,11 @@ handle_events(
 
 static void update_physics(void)
 {
+    UpdatePhysics();
+
     if (current_level) {
         level_update_physics_forces(current_level);
     }
-
-    UpdatePhysics();
 }
 
 Rectangle name_text_rect;

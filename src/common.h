@@ -103,6 +103,8 @@ extern const char *progversion;
 # define UNUSED_FUNCTION(x) UNUSED_ ##x
 #endif
 
+//#define DEBUG_PHYSICS_VECTORS
+
 #include "const.h"
 #include "raylib_helper.h"
 #include "util.h"
@@ -137,6 +139,7 @@ static inline Vector2 ivector2_to_vector2(IVector2 ivec)
 
 extern IVector2 window_size;
 extern Vector2 window_center;
+extern float window_corner_dist;
 
 extern IVector2 mouse_position;
 extern Vector2 mouse_positionf;
