@@ -61,8 +61,6 @@
 /* # error "Only PLATFORM_DESKTOP (GLSL 330) supported!" */
 /* #endif */
 
-#define DEBUG_RESIZE
-
 const char *progversion = PACKAGE_VERSION;
 const char *progname    = PACKAGE_NAME;
 
