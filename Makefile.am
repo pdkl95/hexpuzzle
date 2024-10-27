@@ -25,6 +25,7 @@ EXTRA_DIST = \
 	lib/gnugetopt.h \
 	lib/getopt.c \
 	lib/getopt1.c \
+	external/sglib/LICENSE \
 	$(CLASSICS_LEVELS) \
 	$(FONTS) \
 	$(SHADERS)
@@ -109,7 +110,10 @@ hexpuzzle_SOURCES =                                    \
 
 hexpuzzle_SOURCES +=             		   \
 	external/physac/physac.h                   \
-	external/raygui/raygui.h  		   \
+	external/raygui/raygui.h 		   \
+	external/raygui/style/dark_alt.h           \
+	external/stb/stb_perlin.h                  \
+	external/sglib/sglib.h                     \
 	external/pcg/pcg_basic.c                   \
 	external/pcg/pcg_basic.h                   \
 	external/cJSON/cJSON.c                     \

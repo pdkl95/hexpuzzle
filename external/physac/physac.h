@@ -396,7 +396,7 @@ PhysicsBody CreatePhysicsBodyCircle(Vector2 pos, float radius, float density)
 PhysicsBody CreatePhysicsBodyRectangle(Vector2 pos, float width, float height, float density)
 {
     // NOTE: Make sure body data is initialized to 0
-    PhysicsBody body = (PhysicsBody)PHYSAC_CALLOC(sizeof(PhysicsBodyData), 1);
+    PhysicsBody body = (PhysicsBody)PHYSAC_CALLOC(1, sizeof(PhysicsBodyData));
     usedMemory += sizeof(PhysicsBodyData);
 
     int id = FindAvailableBodyIndex();

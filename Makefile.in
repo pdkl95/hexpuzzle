@@ -128,9 +128,10 @@ am__hexpuzzle_SOURCES_DIST = src/anim_fsm.h src/anim_fsm.c \
 	src/tile_draw.h src/tile_draw.c src/tile_pos.h src/tile_pos.c \
 	src/util.h src/util.c src/win_anim.h src/win_anim.c \
 	src/common.h src/main.c external/physac/physac.h \
-	external/raygui/raygui.h external/pcg/pcg_basic.c \
-	external/pcg/pcg_basic.h external/cJSON/cJSON.c \
-	external/cJSON/cJSON.h \
+	external/raygui/raygui.h external/raygui/style/dark_alt.h \
+	external/stb/stb_perlin.h external/sglib/sglib.h \
+	external/pcg/pcg_basic.c external/pcg/pcg_basic.h \
+	external/cJSON/cJSON.c external/cJSON/cJSON.h \
 	external/tinyfiledialogs/tinyfiledialogs.c \
 	external/tinyfiledialogs/tinyfiledialogs.h
 am__dirstamp = $(am__leading_dot)dirstamp
@@ -370,6 +371,7 @@ EXTRA_DIST = \
 	lib/gnugetopt.h \
 	lib/getopt.c \
 	lib/getopt1.c \
+	external/sglib/LICENSE \
 	$(CLASSICS_LEVELS) \
 	$(FONTS) \
 	$(SHADERS)
@@ -407,9 +409,10 @@ hexpuzzle_SOURCES = src/anim_fsm.h src/anim_fsm.c src/classics.h \
 	src/tile_draw.h src/tile_draw.c src/tile_pos.h src/tile_pos.c \
 	src/util.h src/util.c src/win_anim.h src/win_anim.c \
 	src/common.h src/main.c external/physac/physac.h \
-	external/raygui/raygui.h external/pcg/pcg_basic.c \
-	external/pcg/pcg_basic.h external/cJSON/cJSON.c \
-	external/cJSON/cJSON.h $(am__append_2)
+	external/raygui/raygui.h external/raygui/style/dark_alt.h \
+	external/stb/stb_perlin.h external/sglib/sglib.h \
+	external/pcg/pcg_basic.c external/pcg/pcg_basic.h \
+	external/cJSON/cJSON.c external/cJSON/cJSON.h $(am__append_2)
 dist_EXTRA_hexpuzzle_SOURCES = \
 	src/data_classics_levels.h  \
 	src/data_fonts.h            \
