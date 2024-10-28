@@ -61,6 +61,7 @@ extern collection_t *current_collection;
 collection_t *create_collection(void);
 collection_t *load_collection_dir(const char *dirpath);
 collection_t *load_collection_level_file(const char *filename);
+collection_t *load_collection_pack_compressed_data(const char *name, unsigned char *compressed, int compsize);
 collection_t *load_collection_pack_file(const char *filename);
 collection_t *load_collection_file(const char *filename);
 collection_t *load_collection_path(const char *path);
@@ -68,7 +69,7 @@ collection_t *load_collection_path(const char *path);
 void destroy_collection(collection_t *collection);
 
 void collection_clear_levels(collection_t *collection);
-void collection_scan_dir(collection_t *collection);
+bool collection_scan_dir(collection_t *collection);
 
 const char *collection_path(collection_t *collection);
 const char *collection_name(collection_t *collection);

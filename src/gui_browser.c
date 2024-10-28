@@ -464,7 +464,7 @@ void draw_gui_browser_classics(void)
     int selected = draw_gui_browser_list(&classics, browser_list_rect);
 
     if (selected > -1) {
-        open_classics_game_pack(selected);
+        open_classics_game_pack(selected + 1);
     }
 }
 

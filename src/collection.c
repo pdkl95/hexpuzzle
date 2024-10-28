@@ -99,8 +99,10 @@ void collection_clear_levels(collection_t *collection)
     }
 }
 
-static void collection_scan_index_file(collection_t *collection, const char *index_file)
+static bool collection_scan_index_file(collection_t *collection, const char *index_file)
 {
+    bool ret = true;
+
     char *index_str = LoadFileText(index_file);
 
     char *p = index_str;
@@ -108,7 +110,11 @@ static void collection_scan_index_file(collection_t *collection, const char *ind
     while (*p) {
         if (*p == '\n') {
             *p = '\0';
-            collection_add_level_file(collection, filename);
+            const char *filepath = concat_dir_and_filename(collection->dirpath, filename);
+            if (!collection_add_level_file(collection, filepath)) {
+                ret = false;
+                goto scan_index_file_cleanup;
+            }
             p++;
             filename = p;
         } else {
@@ -116,27 +122,39 @@ static void collection_scan_index_file(collection_t *collection, const char *ind
         }
     }
     if ((*p != '\0') && (*p != '\n')) {
-        collection_add_level_file(collection, filename);
+        const char *filepath = concat_dir_and_filename(collection->dirpath, filename);
+        if (!collection_add_level_file(collection, filepath)) {
+            ret = false;
+            goto scan_index_file_cleanup;
+        }
     }
 
+  scan_index_file_cleanup:
     free(index_str);
+    return ret;
 }
 
-static void collection_scan_dir_by_file_ext(collection_t *collection)
+static bool collection_scan_dir_by_file_ext(collection_t *collection)
 {
     FilePathList list = LoadDirectoryFilesEx(collection->dirpath, "." LEVEL_FILENAME_EXT, false);
 
     for (int i=0; i < (int)list.count; i++) {
         char *filename = list.paths[i];
         if (FileExists(filename)) {
-            collection_add_level_file(collection, filename);
+            if (!collection_add_level_file(collection, filename)) {
+                return false;
+            }
+        } else {
+            return false;
         }
     }
 
     UnloadDirectoryFiles(list);
+
+    return true;
 }
 
-void collection_scan_dir(collection_t *collection)
+bool collection_scan_dir(collection_t *collection)
 {
     assert_not_null(collection);
     assert_not_null(collection->dirpath);
@@ -145,9 +163,9 @@ void collection_scan_dir(collection_t *collection)
 
     const char *index_file = concat_dir_and_filename(collection->dirpath, COLLECTION_ZIP_INDEX_FILENAME);
     if (FileExists(index_file)) {
-        collection_scan_index_file(collection, index_file);
+        return collection_scan_index_file(collection, index_file);
     } else {
-        collection_scan_dir_by_file_ext(collection);
+        return collection_scan_dir_by_file_ext(collection);
     }
 }
 
@@ -165,7 +183,11 @@ collection_t *load_collection_dir(const char *dirpath)
             collection->dirpath[last_idx] = '\0';
         }
 
-        collection_scan_dir(collection);
+        if (!collection_scan_dir(collection)) {
+            destroy_collection(collection);
+            return NULL;
+        }
+
         collection_update_level_names(collection);
     } else {
         errmsg("Directory name is zero-length!");
@@ -238,12 +260,12 @@ bool collection_from_json(collection_t *collection, cJSON *json)
     return true;
 }
 
-collection_t *load_collection_pack_file(const char *filename)
+collection_t *load_collection_pack_compressed_data(const char *filename, unsigned char *compressed, int compsize)
 {
     assert_not_null(filename);
+    assert_not_null(compressed);
+    assert(compsize > 0);
 
-    int compsize = 0;
-    unsigned char *compressed = LoadFileData(filename, &compsize);
     int pack_str_size = 0;
     unsigned char *pack_str_data = DecompressData(compressed, compsize, &pack_str_size);
     char *pack_str = (char *)pack_str_data;
@@ -252,13 +274,13 @@ collection_t *load_collection_pack_file(const char *filename)
     cJSON *json = NULL;
 
     if ((NULL == pack_str) || (pack_str_size != ((int)strlen(pack_str) + 1))) {
-        errmsg("Error loading pack file \"%s\"", filename);
+        errmsg("Error loading " COLLECTION_FILENAME_EXT "\"%s\"", filename);
         goto cleanup_pack_str;
     }
 
     json = cJSON_Parse(pack_str);
     if (NULL == json) {
-        errmsg("Error parsing pack file \"%s\" as JSON", filename);
+        errmsg("Error parsing " COLLECTION_FILENAME_EXT " \"%s\" as JSON", filename);
         goto cleanup_pack_str;
     }
 
@@ -277,10 +299,24 @@ collection_t *load_collection_pack_file(const char *filename)
         cJSON_Delete(json);
     }
     SAFEFREE(pack_str_data);
+
+    return rv;
+}
+
+collection_t *load_collection_pack_file(const char *filename)
+{
+    assert_not_null(filename);
+
+    int compsize = 0;
+    unsigned char *compressed = LoadFileData(filename, &compsize);
+
+    collection_t *collection = load_collection_pack_compressed_data(filename, compressed, compsize);
+
     if (compressed) {
         UnloadFileData(compressed);
     }
-    return rv;
+
+    return collection;
 }
 
 collection_t *load_collection_file(const char *filename)
