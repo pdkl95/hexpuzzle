@@ -29,16 +29,63 @@ Rectangle options_area_rect;
 Rectangle options_anim_bg_rect;
 Rectangle options_anim_win_rect;
 Rectangle options_reset_finished_rect;
+Rectangle options_physics_effects_rect;
 
 char options_panel_text[] = "Options";
 char options_anim_bg_text[]  = "Animate Background";
 char options_anim_win_text[] = "Animate Winning Levels";
+char options_physics_effects_text[] = "Physics Effects";
 char options_reset_finished_text[] = "Reset Level Finished Data";
+
+struct options_status {
+    char *text;
+    char *icon_text;
+    Vector2 text_size;
+    Vector2 icon_text_size;
+    Color color;
+};
+typedef struct options_status options_status_t;
+
+options_status_t options_status_on = {
+    .text  = "On",
+    .color = GREEN
+};
+options_status_t options_status_off = {
+    .text  = "Off",
+    .color = RED
+};
+
 
 #define NUM_TABS 2
 const char *options_tabbar_text[NUM_TABS];
 
 int options_active_tab;
+
+#define STATUS_LABEL_ROUNDNESS 0.2
+#define STATUS_LABEL_SEGMENTS 12
+#define STATUS_LABEL_LINE_THICKNESS 2.0
+void show_status(options_status_t *status, Rectangle status_rect)
+{
+    GuiDrawText(status->icon_text, GetTextBounds(LABEL, status_rect), TEXT_ALIGN_LEFT, status->color);
+}
+
+void show_status_beside(bool status_value, Rectangle neighbor)
+{
+    options_status_t *status =
+        status_value
+        ? &options_status_on
+        : &options_status_off;
+
+    Rectangle status_rect = {
+        .x      = neighbor.x + neighbor.width + RAYGUI_ICON_SIZE,
+        .y      = neighbor.y,
+        .width  = status->icon_text_size.x,
+        .height = neighbor.height
+    };
+
+
+    show_status(status, status_rect);
+}
 
 void init_gui_options(void)
 {
@@ -85,7 +132,10 @@ void resize_gui_options(void)
 
     Vector2 options_anim_bg_text_size = MeasureGuiText(options_anim_bg_text);
     Vector2 options_anim_win_text_size = MeasureGuiText(options_anim_win_text);
-    float anim_text_size = MAX(options_anim_bg_text_size.x, options_anim_win_text_size.x);
+    Vector2 options_physics_effects_text_size = MeasureGuiText(options_physics_effects_text);
+    float anim_text_size = MAX(MAX(options_anim_bg_text_size.x,
+                                   options_anim_win_text_size.x),
+                               options_physics_effects_text_size.x);
 
     options_anim_bg_rect.x = options_area_rect.x;
     options_anim_bg_rect.y = options_area_rect.y;
@@ -96,6 +146,30 @@ void resize_gui_options(void)
     options_anim_win_rect.y = options_anim_bg_rect.y + options_anim_bg_rect.height + RAYGUI_ICON_SIZE;
     options_anim_win_rect.width = anim_text_size;
     options_anim_win_rect.height = TOOL_BUTTON_HEIGHT;
+
+    options_physics_effects_rect.x = options_area_rect.x;
+    options_physics_effects_rect.y = options_anim_win_rect.y + options_anim_win_rect.height + RAYGUI_ICON_SIZE;
+    options_physics_effects_rect.width = anim_text_size;
+    options_physics_effects_rect.height = TOOL_BUTTON_HEIGHT;
+
+    options_status_on.text_size  = MeasureGuiText(options_status_on.text);
+    options_status_off.text_size = MeasureGuiText(options_status_off.text);
+
+    options_status_on.text_size.x = options_status_off.text_size.x =
+        MAX(options_status_on.text_size.x, options_status_off.text_size.x);
+    options_status_on.text_size.y = options_status_off.text_size.y =
+        MAX(options_status_on.text_size.y, options_status_off.text_size.y);
+
+    options_status_on.icon_text  = strdup(GuiIconText(ICON_OK_TICK,  options_status_on.text));
+    options_status_off.icon_text = strdup(GuiIconText(ICON_CROSS, options_status_off.text));
+
+    options_status_on.icon_text_size  = MeasureGuiText(options_status_on.icon_text);
+    options_status_off.icon_text_size = MeasureGuiText(options_status_off.icon_text);
+
+    options_status_on.icon_text_size.x = options_status_off.icon_text_size.x =
+        MAX(options_status_on.icon_text_size.x, options_status_off.icon_text_size.x);
+    options_status_on.icon_text_size.y = options_status_off.icon_text_size.y =
+        MAX(options_status_on.icon_text_size.y, options_status_off.icon_text_size.y);
 }
 
 void draw_gui_graphics_options(void)
@@ -103,8 +177,13 @@ void draw_gui_graphics_options(void)
     int prev_align = GuiGetStyle(TOGGLE, TEXT_ALIGNMENT);
     GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
 
-    GuiToggle(options_anim_bg_rect,  options_anim_bg_text,  &options->animate_bg);
-    GuiToggle(options_anim_win_rect, options_anim_win_text, &options->animate_win);
+    GuiToggle(options_anim_bg_rect,         options_anim_bg_text,         &options->animate_bg);
+    GuiToggle(options_anim_win_rect,        options_anim_win_text,        &options->animate_win);
+    GuiToggle(options_physics_effects_rect, options_physics_effects_text, &options->physics_effects);
+
+    show_status_beside(options->animate_bg,      options_anim_bg_rect);
+    show_status_beside(options->animate_win,     options_anim_win_rect);
+    show_status_beside(options->physics_effects, options_physics_effects_rect);
 
     GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, prev_align);
 }

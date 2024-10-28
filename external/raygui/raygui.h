@@ -745,6 +745,11 @@ RAYGUIAPI int GuiColorPickerHSV(Rectangle bounds, const char *text, Vector3 *col
 RAYGUIAPI int GuiColorPanelHSV(Rectangle bounds, const char *text, Vector3 *colorHsv);                 // Color Panel control that returns HSV color value, used by GuiColorPickerHSV()
 //----------------------------------------------------------------------------------------------------------
 
+int GetTextWidth(const char *text);                      // Gui get text width using gui font and style
+Rectangle GetTextBounds(int control, Rectangle bounds);  // Get text bounds considering control bounds
+const char *GetTextIcon(const char *text, int *iconId);  // Get text icon if provided and move text cursor
+
+void GuiDrawText(const char *text, Rectangle textBounds, int alignment, Color tint);     // Gui draw text using default font
 
 #if !defined(RAYGUI_NO_ICONS)
 
@@ -1465,11 +1470,6 @@ static void DrawRectangleGradientV(int posX, int posY, int width, int height, Co
 //----------------------------------------------------------------------------------
 static void GuiLoadStyleFromMemory(const unsigned char *fileData, int dataSize);    // Load style from memory (binary only)
 
-static int GetTextWidth(const char *text);                      // Gui get text width using gui font and style
-static Rectangle GetTextBounds(int control, Rectangle bounds);  // Get text bounds considering control bounds
-static const char *GetTextIcon(const char *text, int *iconId);  // Get text icon if provided and move text cursor
-
-static void GuiDrawText(const char *text, Rectangle textBounds, int alignment, Color tint);     // Gui draw text using default font
 static void GuiDrawRectangle(Rectangle rec, int borderWidth, Color borderColor, Color color);   // Gui draw rectangle using default raygui style
 
 static const char **GuiTextSplit(const char *text, char delimiter, int *count, int *textRow);   // Split controls text into multiple strings
@@ -4549,7 +4549,7 @@ static void GuiLoadStyleFromMemory(const unsigned char *fileData, int dataSize)
 }
 
 // Gui get text width considering icon
-static int GetTextWidth(const char *text)
+int GetTextWidth(const char *text)
 {
     #if !defined(ICON_TEXT_PADDING)
         #define ICON_TEXT_PADDING   4
@@ -4611,7 +4611,7 @@ static int GetTextWidth(const char *text)
 }
 
 // Get text bounds considering control bounds
-static Rectangle GetTextBounds(int control, Rectangle bounds)
+Rectangle GetTextBounds(int control, Rectangle bounds)
 {
     Rectangle textBounds = bounds;
 
@@ -4646,7 +4646,7 @@ static Rectangle GetTextBounds(int control, Rectangle bounds)
 
 // Get text icon if provided and move text cursor
 // NOTE: We support up to 999 values for iconId
-static const char *GetTextIcon(const char *text, int *iconId)
+const char *GetTextIcon(const char *text, int *iconId)
 {
 #if !defined(RAYGUI_NO_ICONS)
     *iconId = -1;
@@ -4738,7 +4738,7 @@ static float GetNextSpaceWidth(const char *text, int *nextSpaceIndex)
 }
 
 // Gui draw text using default font
-static void GuiDrawText(const char *text, Rectangle textBounds, int alignment, Color tint)
+void GuiDrawText(const char *text, Rectangle textBounds, int alignment, Color tint)
 {
     #define TEXT_VALIGN_PIXEL_OFFSET(h)  ((int)h%2)     // Vertical alignment for pixel perfect
 
