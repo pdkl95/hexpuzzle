@@ -37,32 +37,33 @@
 static char short_options[] = "Cc:e:F:H:p:t:wvVW:PUL::hj";
 
 static struct option long_options[] = {
-    {      "no-config", required_argument, 0, 'C' },
-    {     "config-dir", required_argument, 0, 'c' },
-    {            "fps", required_argument, 0, 'F' },
-    {         "height", required_argument, 0, 'H' },
-    {          "width", required_argument, 0, 'W' },
-    {   "create-level", optional_argument, 0, 'L' },
-    {   "level-radius", required_argument, 0, 'R' },
-    { "level-min-path", required_argument, 0, '<' },
-    { "level-max-path", required_argument, 0, '>' },
-    {           "play", required_argument, 0, 'p' },
-    {           "edit", required_argument, 0, 'e' },
-    {  "cheat-autowin",       no_argument, 0, 'A' },
-    {          "force",       no_argument, 0, '!' },
-    {           "pack",       no_argument, 0, 'P' },
-    {         "unpack",       no_argument, 0, 'U' },
-    {     "animate-bg",       no_argument, 0, 'b' },
-    {  "no-animate-bg",       no_argument, 0, 'B' },
-    {    "animate-win",       no_argument, 0, 'i' },
-    { "no-animate-win",       no_argument, 0, 'I' },
-    {        "physics",       no_argument, 0, 'y' },
-    {     "no-physics",       no_argument, 0, 'Y' },
-    {    "wait-events",       no_argument, 0, 'w' },
-    {        "verbose",       no_argument, 0, 'v' },
-    {        "version",       no_argument, 0, 'V' },
-    {           "help",       no_argument, 0, 'h' },
-    {                0,                 0, 0,  0  }
+    { "create-random-level", optional_argument, 0, 'L' },
+    {  "create-blank-level",       no_argument, 0, 'K' },
+    {           "no-config", required_argument, 0, 'C' },
+    {          "config-dir", required_argument, 0, 'c' },
+    {                 "fps", required_argument, 0, 'F' },
+    {              "height", required_argument, 0, 'H' },
+    {               "width", required_argument, 0, 'W' },
+    {        "level-radius", required_argument, 0, 'R' },
+    {      "level-min-path", required_argument, 0, '<' },
+    {      "level-max-path", required_argument, 0, '>' },
+    {                "play", required_argument, 0, 'p' },
+    {                "edit", required_argument, 0, 'e' },
+    {       "cheat-autowin",       no_argument, 0, 'A' },
+    {               "force",       no_argument, 0, '!' },
+    {                "pack",       no_argument, 0, 'P' },
+    {              "unpack",       no_argument, 0, 'U' },
+    {          "animate-bg",       no_argument, 0, 'b' },
+    {       "no-animate-bg",       no_argument, 0, 'B' },
+    {         "animate-win",       no_argument, 0, 'i' },
+    {      "no-animate-win",       no_argument, 0, 'I' },
+    {             "physics",       no_argument, 0, 'y' },
+    {          "no-physics",       no_argument, 0, 'Y' },
+    {         "wait-events",       no_argument, 0, 'w' },
+    {             "verbose",       no_argument, 0, 'v' },
+    {             "version",       no_argument, 0, 'V' },
+    {                "help",       no_argument, 0, 'h' },
+    {                     0,                 0, 0,  0  }
 };
 
 static char usage_args[] = "[<file>." LEVEL_FILENAME_EXT  " | <file>." COLLECTION_FILENAME_EXT "]";
@@ -105,8 +106,8 @@ static char help_text[] =
     "ACTIONS\n"
     "  -p, --play <file>           Play the givem ." LEVEL_FILENAME_EXT " or ." COLLECTION_FILENAME_EXT " file\n"
     "  -e, --edit <file>           Edit the givem ." LEVEL_FILENAME_EXT " or ." COLLECTION_FILENAME_EXT " file\n"
-    "  -L, --create-level[=MODE] <NAME> Create a new random level file.\n"
-    "                                Modes: [dfs, scatter] Default: " OPTIONS_DEFAULT_CREATE_LEVEL_MODE_STR "\n"
+    "  -L, --create-level[=MODE] <NAME>  Create a new random level file.\n"
+    "                                Modes: [dfs, scatter, blank] Default: " OPTIONS_DEFAULT_CREATE_LEVEL_MODE_STR "\n"
     "  -P, --pack <dir>            Packasge a directory of ." LEVEL_FILENAME_EXT " files\n"
     "                                into a ." COLLECTION_FILENAME_EXT "\n"
     "  -U, --unpack <file." COLLECTION_FILENAME_EXT "> Unpack a " COLLECTION_FILENAME_EXT " file\n"
@@ -334,7 +335,7 @@ options_parse_args(
             } else {
                 options->create_level_mode = CREATE_LEVEL_MODE_DFS;
             }
-            options->startup_action = STARTUP_ACTION_CREATE_RANDOM_LEVEL;
+            options->startup_action = STARTUP_ACTION_CREATE_LEVEL;
             break;
 
         case 'R':

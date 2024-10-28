@@ -31,6 +31,9 @@ bool startup_action_ok = false;
 create_level_mode_t parse_create_level_mode(const char *str)
 {
     if (str) {
+        if (0 == strcmp(str, "blank")) {
+            return CREATE_LEVEL_MODE_BLANK;
+        }
         if (0 == strcmp(str, "dfs")) {
             return CREATE_LEVEL_MODE_DFS;
         }
@@ -42,7 +45,17 @@ create_level_mode_t parse_create_level_mode(const char *str)
     return CREATE_LEVEL_MODE_NULL;
 }
 
-void action_create_random_level(void)
+level_t *generate_blank_level(void)
+{
+    level_t *level = create_level(NULL);
+    level_reset(level);
+
+    level_set_radius(level, options->create_level_radius);
+
+    return level;
+}
+
+void action_create_level(void)
 {
     infomsg("ACTION: create random level");
 
@@ -71,11 +84,32 @@ void action_create_random_level(void)
             return;
         }
 
-        level_t *level = generate_random_level();
-        level_save_to_filename(level, filename);
-        destroy_level(level);
+        level_t *level = NULL;
+        switch (options->create_level_mode) {
+        case CREATE_LEVEL_MODE_BLANK:
+            level = generate_blank_level();
+            break;
 
-        free(name);
+        case CREATE_LEVEL_MODE_DFS:
+            //* fall through */
+        case CREATE_LEVEL_MODE_SCATTER:
+            level = generate_random_level();
+            break;
+
+        default:
+            /* do nothing */
+            break;
+        }
+
+        if (level) {
+            level_save_to_filename(level, filename);
+            destroy_level(level);
+        } else {
+            errmsg("Failed to create level \"%s\"", filename);
+            return;
+        }
+
+        free(filename);
     }
 
     startup_action_ok = true;
@@ -170,8 +204,8 @@ bool run_startup_action(void)
     case STARTUP_ACTION_EDIT:
         return false;
 
-    case STARTUP_ACTION_CREATE_RANDOM_LEVEL:
-        action_create_random_level();
+    case STARTUP_ACTION_CREATE_LEVEL:
+        action_create_level();
         return true;
 
     case STARTUP_ACTION_PACK_COLLECTION:
