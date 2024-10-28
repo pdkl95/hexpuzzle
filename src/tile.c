@@ -128,6 +128,8 @@ tile_t *init_tile(tile_t *tile)
     }
 #endif
 
+    tile_update_path_count(tile);
+
     return tile;
 }
 
@@ -241,6 +243,16 @@ void tile_swap_attributes(tile_t *a, tile_t *b)
     tile_copy_attributes(&tmp, a);
     tile_copy_attributes(a, b);
     tile_copy_attributes(b, &tmp);
+}
+
+void tile_update_path_count(tile_t *tile)
+{
+    tile->path_count = 0;
+    for (hex_direction_t i=0; i<6; i++) {
+        if (tile->path[i]) {
+            tile->path_count++;
+        }
+    }
 }
 
 path_int_t tile_count_path_types(tile_t *tile)
@@ -357,6 +369,8 @@ bool tile_from_json(tile_t *tile, level_t *level, cJSON *json)
     tile->fixed   = cJSON_IsTrue(fixed_json);
 
     tile_set_positions(tile, level, solved_addr, unsolved_addr);
+
+    tile_update_path_count(tile);
 
     return true;
 }

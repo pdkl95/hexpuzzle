@@ -302,15 +302,17 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         }
     }
 
-    if (finished) {
-        Color cent_color = ColorLerp(tile_center_color, finished_color, 0.5);
-        cent_color = ColorBrightness(cent_color, -0.6);
-        DrawCircleV(pos->rel.center, pos->center_circle_draw_radius, cent_color);
-    } else {
-        DrawCircleV(pos->rel.center, pos->center_circle_draw_radius, tile_center_color);
+    if ((tile->path_count > 0) || edit_mode_solved) {
+        if (finished) {
+            Color cent_color = ColorLerp(tile_center_color, finished_color, 0.5);
+            cent_color = ColorBrightness(cent_color, -0.6);
+            DrawCircleV(pos->rel.center, pos->center_circle_draw_radius, cent_color);
+        } else {
+            DrawCircleV(pos->rel.center, pos->center_circle_draw_radius, tile_center_color);
 
-        if (edit_mode_solved && pos->hover_center) {
-            DrawCircleV(pos->rel.center, pos->center_circle_draw_radius, tile_bg_highlight_color);
+            if (edit_mode_solved && pos->hover_center) {
+                DrawCircleV(pos->rel.center, pos->center_circle_draw_radius, tile_bg_highlight_color);
+            }
         }
     }
 

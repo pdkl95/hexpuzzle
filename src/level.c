@@ -253,6 +253,7 @@ static level_t *init_level(level_t *level)
 
     level->id = NULL;
     level->filename = NULL;
+    level->savepath = NULL;
     level->changed = false;
 
     level->next = NULL;
@@ -543,38 +544,6 @@ bool level_parse_string(level_t *level, const char *str)
     return rv;
 }
 
-static char *read_file_into_string(const char *filename)
-{
-    assert_not_null(filename);
-
-    FILE *f = fopen(filename, "rb");
-
-    if (!f) {
-        fprintf(stderr, "Could not open level file \"%s\": %s",
-                filename, strerror(errno));
-        return NULL;
-    }
-
-    fseek(f, 0L, SEEK_END);
-    size_t size = ftell(f);
-    rewind(f);
-
-    char *str = calloc(1, size + 1);
-
-    if (1 != fread(str, size, 1, f)) {
-        fclose(f);
-        free(str);
-        fprintf(stderr, "Reading from file \"%s\" failed.", filename);
-        exit(1);
-    }
-
-    fclose(f);
-
-    //fprintf(stderr, "Successfully read %zd characters from file \"%s\"\n", size, filename);
-
-    return str;
-}
-
 void level_set_file_path(level_t *level, const char *path)
 {
     char *dirc  = strdup(path);
@@ -647,13 +616,14 @@ level_t *load_level_file(const char *filename)
 {
     assert_not_null(filename);
 
-    char *str = read_file_into_string(filename);
+    char *str = LoadFileText(filename);
     if (NULL == str) {
         errmsg("Error reading level file \"%s\"", filename);
         return NULL;
     }
 
     level_t *level = load_level_string(filename, str, false);
+    level->savepath = strdup(filename);
     free(str);
     return level;
 }
@@ -750,7 +720,9 @@ void level_save_to_file(level_t *level, const char *dirpath)
 
     char *filepath = level->filename;
     char *pathbuf = NULL;
-    if (dirpath) {
+    if (level->savepath) {
+        filepath = level->savepath;
+    } else if (dirpath) {
         int len = strlen(level->filename)
             + strlen(dirpath)
             + 1   // "/"
@@ -791,10 +763,18 @@ void level_save(level_t *level)
     assert_not_null(level);
     if (level->collection && level->collection->is_pack) {
         collection_save(level->collection);
+    } else if (level->savepath) {
+        level_save_to_file_if_changed(level, NULL);
     } else if (level->filename && level->collection && level->collection->dirpath) {
         level_save_to_file_if_changed(level, level->collection->dirpath);
     } else {
         errmsg("Not enough file metadata to save level!");
+        pstr(level->filename);
+        if (level->collection) {
+            pstr(level->collection->dirpath);
+        } else {
+            printf("level->collection == NULL\n");
+        }
     }
 }
 

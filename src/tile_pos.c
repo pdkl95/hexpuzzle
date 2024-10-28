@@ -148,6 +148,8 @@ void tile_pos_toggle_hidden(tile_pos_t *pos)
             neighbor->tile->path[opp_dir] = pos->tile->path[dir];;
         }
     }
+
+    tile_update_path_count(pos->tile);
 }
 
 void tile_pos_set_path_section(tile_pos_t *pos, hex_direction_t section, path_type_t type)
@@ -156,10 +158,13 @@ void tile_pos_set_path_section(tile_pos_t *pos, hex_direction_t section, path_ty
 
     pos->tile->path[section] = type % PATH_TYPE_COUNT;
 
+    tile_update_path_count(pos->tile);
+
     if (pos->hover_adjacent) {
         hex_direction_t opposite_section =
             hex_opposite_direction(section);
         pos->hover_adjacent->tile->path[opposite_section] = pos->tile->path[section];
+        tile_update_path_count(pos->hover_adjacent->tile);
     }
 }
 

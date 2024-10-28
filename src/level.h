@@ -96,6 +96,7 @@ struct level {
     int drag_reset_total_frames;
     Vector2 drag_reset_vector;
 
+    char *savepath;
     char *filename;
     char *dirpath;
     bool changed;

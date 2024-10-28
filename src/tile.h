@@ -53,6 +53,7 @@ struct tile {
     bool enabled;
     bool fixed;
     bool hidden;
+    int path_count;
     path_type_t path[6];
     path_type_t saved_path[6];
 
@@ -77,6 +78,7 @@ void tile_copy_attributes(tile_t *dst, tile_t *src);
 void tile_copy_attributes_except_enabled(tile_t *dst, tile_t *src);
 void tile_swap_attributes(tile_t *a, tile_t *b);
 
+void tile_update_path_count(tile_t *tile);
 path_int_t tile_count_path_types(tile_t *tile);
 
 bool tile_from_json(tile_t *tile, struct level *level, cJSON *json);
