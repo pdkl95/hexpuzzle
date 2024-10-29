@@ -40,7 +40,5 @@ void set_default_gui_font(void);
                   DEFAULT_GUI_FONT_SIZE,     \
                   DEFAULT_GUI_FONT_SPACING)
 
-void DrawTextGui(Rectangle rect, const char *text, Color color);
-
 #endif /*FONTS_H*/
 

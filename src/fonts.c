@@ -73,14 +73,3 @@ def_set_gui_font(16)
 def_set_gui_font(18)
 def_set_gui_font(20)
 #undef def_set_gui_font
-
-void DrawTextGui(Rectangle rect, const char *text, Color color)
-{
-    Vector2 pos = { .x = rect.x, .y = rect.y };
-    DrawTextEx(DEFAULT_GUI_FONT,
-               text,
-               pos,
-               DEFAULT_GUI_FONT_SIZE,
-               DEFAULT_GUI_FONT_SPACING,
-               color);
-}

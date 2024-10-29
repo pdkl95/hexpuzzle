@@ -322,6 +322,19 @@ static void edit_game_file(const char *path)
     open_game_file(path, true);
 }
 
+static void play_next_level(void)
+{
+    if (current_level) {
+        if (current_level->next) {
+            level_play(current_level->next);
+        } else {
+            errmsg("Cannot play next level - current_level->next is NULL");
+        }
+    } else {
+            errmsg("Cannot play next level - current_level is NULL");
+    }
+}
+
 const char *default_open_file_path(void)
 {
     static char path[MAX_FILEPATH_LENGTH];
@@ -1104,6 +1117,12 @@ static void draw_gui_widgets(void)
 
         if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
             return_from_level();
+        }
+
+        if (level_finished && current_level && current_level->next) {
+            if (GuiButton(right_side_button_rect[rsb++], goto_next_level_button_text)) {
+                play_next_level();
+            }
         }
         break;
 
