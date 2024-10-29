@@ -324,14 +324,15 @@ static void edit_game_file(const char *path)
 
 static void play_next_level(void)
 {
-    if (current_level) {
-        if (current_level->next) {
-            level_play(current_level->next);
+    if (current_collection && current_level) {
+        level_t *next_level = collection_get_level_after(current_collection, current_level);
+        if (next_level) {
+            level_play(next_level);
         } else {
             errmsg("Cannot play next level - current_level->next is NULL");
         }
     } else {
-            errmsg("Cannot play next level - current_level is NULL");
+            errmsg("Cannot play next level - current_collection/current_level is NULL");
     }
 }
 
@@ -881,6 +882,10 @@ void gui_setup(void)
     goto_next_level_panel_rect.width  = goto_next_level_button_rect.width + goto_next_level_label_rect.width + ICON_BUTTON_SIZE + (2 * PANEL_INNER_MARGIN);
     goto_next_level_panel_rect.height = goto_next_level_button_rect.height + (2 * PANEL_INNER_MARGIN);
     goto_next_level_panel_rect.x      = window_size.x - WINDOW_MARGIN - goto_next_level_panel_rect.width;
+
+    prect(goto_next_level_button_rect);
+    prect(goto_next_level_label_rect);
+    prect(goto_next_level_panel_rect);
 }
 
 static void draw_name_header(char *name)
@@ -1098,6 +1103,10 @@ static void draw_gui_widgets(void)
             draw_tool_panel();
         }
 
+        if (GuiButton(right_side_button_rect[rsb++], options_button_text)) {
+            set_game_mode(GAME_MODE_OPTIONS);
+        }
+
         if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
             show_ask_save_box = true;
         }
@@ -1105,6 +1114,10 @@ static void draw_gui_widgets(void)
 
     case GAME_MODE_PLAY_LEVEL:
         draw_name_header(current_level->name);
+
+        if (GuiButton(right_side_button_rect[rsb++], options_button_text)) {
+            set_game_mode(GAME_MODE_OPTIONS);
+        }
 
         if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
             return_from_level();
@@ -1114,6 +1127,10 @@ static void draw_gui_widgets(void)
     case GAME_MODE_WIN_LEVEL:
         draw_name_header(current_level->name);
         draw_win_panels();
+
+        if (GuiButton(right_side_button_rect[rsb++], options_button_text)) {
+            set_game_mode(GAME_MODE_OPTIONS);
+        }
 
         if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
             return_from_level();
@@ -1449,6 +1466,8 @@ render_frame(
             draw_gui_random();
             break;
 
+        case GAME_MODE_WIN_LEVEL:
+            /* fall thrugh */
         case GAME_MODE_PLAY_LEVEL:
             if (current_level) {
                 level_draw(current_level, level_finished);

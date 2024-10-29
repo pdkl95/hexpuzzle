@@ -21,6 +21,7 @@
 
 #include "common.h"
 #include "options.h"
+#include "level.h"
 #include "gui_options.h"
 
 Rectangle options_panel_rect;
@@ -177,6 +178,8 @@ void draw_gui_graphics_options(void)
     int prev_align = GuiGetStyle(TOGGLE, TEXT_ALIGNMENT);
     GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
 
+    int old_physics_effects = options->physics_effects;
+
     GuiToggle(options_anim_bg_rect,         options_anim_bg_text,         &options->animate_bg);
     GuiToggle(options_anim_win_rect,        options_anim_win_text,        &options->animate_win);
     GuiToggle(options_physics_effects_rect, options_physics_effects_text, &options->physics_effects);
@@ -186,6 +189,14 @@ void draw_gui_graphics_options(void)
     show_status_beside(options->physics_effects, options_physics_effects_rect);
 
     GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, prev_align);
+
+    if (old_physics_effects != options->physics_effects) {
+        if (options->physics_effects) {
+            if (current_level) {
+                level_reset_physics_body_positions(current_level);
+            }
+        }
+    }
 }
 
 void draw_gui_data_options(void)

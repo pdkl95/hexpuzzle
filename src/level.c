@@ -1652,6 +1652,7 @@ void level_win(level_t *level)
     win_anim_start(level->win_anim);
 
     level->finished = true;
+    set_game_mode(GAME_MODE_WIN_LEVEL);
 }
 
 void level_unwin(level_t *level)
@@ -1663,7 +1664,9 @@ void level_unwin(level_t *level)
     win_anim_stop(level->win_anim);
 
     level->finished = false;
+    set_game_mode(GAME_MODE_PLAY_LEVEL);
 }
+
 
 bool level_update_fade(level_t *level)
 {

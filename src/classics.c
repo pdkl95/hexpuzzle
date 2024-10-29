@@ -27,7 +27,6 @@
 
 void open_classics_game_pack(int n)
 {
-    pint(n);
     assert(n >= 1);
     assert(n <= 4);
 
