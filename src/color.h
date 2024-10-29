@@ -66,6 +66,11 @@ extern Color path_highlight_color_green;
 extern Color panel_bg_color;
 extern Color panel_edge_color;
 extern Color panel_header_text_color;
+extern Color panel_bg_hover_color;
+extern Color panel_edge_hover_color;
+extern Color panel_header_text_hover_color;
+
+extern Color text_shadow_color;
 
 void prepare_global_colors();
 

@@ -64,7 +64,7 @@
 const char *progversion = PACKAGE_VERSION;
 const char *progname    = PACKAGE_NAME;
 
-//#define DEBUG_SEMAPHORES
+#define DEBUG_SEMAPHORES
 //#define DEBUG_RESIZE
 
 #define CONFIG_SUBDIR_NAME PACKAGE_NAME
@@ -139,7 +139,7 @@ void enable_physics(void)
         if (0 == physics_enabled_semaphore) {
 #ifdef DEBUG_SEMAPHORES
             if (options->verbose) {
-                infomsg("Enabling automatic event polling.");
+                infomsg("Enabling physics effects");
             }
 #endif
         }
@@ -153,12 +153,12 @@ void enable_physics(void)
 void disable_physics(void)
 {
     if (options->physics_effects) {
-        automatic_event_polling_semaphore--;
+        physics_enabled_semaphore--;
 
         if (0 == physics_enabled_semaphore) {
 #ifdef DEBUG_SEMAPHORES
             if (options->verbose) {
-                infomsg("Disabling automatic event polling.");
+                infomsg("Disabling physics effects");
             }
 #endif
         }
@@ -320,20 +320,6 @@ static void edit_game_file(const char *path)
         infomsg("ACTION: edit file \"%s\"", path);
     }
     open_game_file(path, true);
-}
-
-static void play_next_level(void)
-{
-    if (current_collection && current_level) {
-        level_t *next_level = collection_get_level_after(current_collection, current_level);
-        if (next_level) {
-            level_play(next_level);
-        } else {
-            errmsg("Cannot play next level - current_level->next is NULL");
-        }
-    } else {
-            errmsg("Cannot play next level - current_collection/current_level is NULL");
-    }
 }
 
 const char *default_open_file_path(void)
@@ -626,6 +612,10 @@ handle_events(
 
 static void update_physics(void)
 {
+    if (!options->physics_effects) {
+        return;
+    }
+
     UpdatePhysics();
 
     if (current_level) {
@@ -659,10 +649,6 @@ Rectangle right_side_button_rect[MAX_RIGHT_SIDE_BUTTONS];
 char close_button_text_str[] = "Quit";
 #define CLOSE_BUTTON_TEXT_LENGTH (6 + sizeof(close_button_text_str))
 char close_button_text[CLOSE_BUTTON_TEXT_LENGTH];
-
-char goto_next_level_button_text_str[] = "Next";
-#define GOTO_NEXT_LEVEL_BUTTON_TEXT_LENGTH (6 + sizeof(goto_next_level_button_text_str))
-char goto_next_level_button_text[GOTO_NEXT_LEVEL_BUTTON_TEXT_LENGTH];
 
 char options_button_text_str[] = "Options";
 #define OPTIONS_BUTTON_TEXT_LENGTH (6 + sizeof(options_button_text_str))
@@ -858,32 +844,22 @@ void gui_setup(void)
     erase_tool_button_rect.width  = erase_tool_button_text_size.x;
     erase_tool_button_rect.height = cycle_tool_button_rect.height;
 
-    memcpy(goto_next_level_button_text, GuiIconText(ICON_ARROW_RIGHT_FILL, goto_next_level_button_text_str), GOTO_NEXT_LEVEL_BUTTON_TEXT_LENGTH);
-
-    Vector2 goto_next_level_label_text_size = MeasureTextEx(PANEL_LABEL_FONT,
+    Vector2 goto_next_level_label_text_size = MeasureTextEx(NAME_FONT,
                                                       goto_next_level_label_text,
-                                                      PANEL_LABEL_FONT_SIZE,
-                                                      PANEL_LABEL_FONT_SPACING);
-
-    Vector2 goto_next_level_button_text_size = MeasureGuiText(goto_next_level_button_text_str);
+                                                      NAME_FONT_SIZE,
+                                                      NAME_FONT_SPACING);
 
     goto_next_level_panel_rect.y      = tool_panel_rect.y;
 
-    goto_next_level_button_rect.y      = goto_next_level_panel_rect.y + PANEL_INNER_MARGIN;
-    goto_next_level_button_rect.width  = goto_next_level_button_text_size.x;
-    goto_next_level_button_rect.height = TOOL_BUTTON_HEIGHT;
-    goto_next_level_button_rect.x      = window_size.x - WINDOW_MARGIN - goto_next_level_button_rect.width - PANEL_INNER_MARGIN;
-
-    goto_next_level_label_rect.y      = goto_next_level_button_rect.y;
+    goto_next_level_label_rect.y      = goto_next_level_panel_rect.y + PANEL_INNER_MARGIN;
     goto_next_level_label_rect.width  = goto_next_level_label_text_size.x;
     goto_next_level_label_rect.height = TOOL_BUTTON_HEIGHT;
-    goto_next_level_label_rect.x      = goto_next_level_button_rect.x - goto_next_level_label_rect.width - ICON_BUTTON_SIZE;
+    goto_next_level_label_rect.x      = window_size.x - WINDOW_MARGIN - goto_next_level_label_rect.width - PANEL_INNER_MARGIN;
 
-    goto_next_level_panel_rect.width  = goto_next_level_button_rect.width + goto_next_level_label_rect.width + ICON_BUTTON_SIZE + (2 * PANEL_INNER_MARGIN);
-    goto_next_level_panel_rect.height = goto_next_level_button_rect.height + (2 * PANEL_INNER_MARGIN);
+    goto_next_level_panel_rect.width  = goto_next_level_label_rect.width + (2 * PANEL_INNER_MARGIN);
+    goto_next_level_panel_rect.height = goto_next_level_label_rect.height + (2 * PANEL_INNER_MARGIN);
     goto_next_level_panel_rect.x      = window_size.x - WINDOW_MARGIN - goto_next_level_panel_rect.width;
 
-    prect(goto_next_level_button_rect);
     prect(goto_next_level_label_rect);
     prect(goto_next_level_panel_rect);
 }
@@ -912,12 +888,21 @@ static void draw_name_header(char *name)
     bool hover = false;
 #endif
 
-    Color bg   = hover ? panel_edge_color : panel_bg_color;
-    Color edge = hover ? panel_bg_color : panel_edge_color;
-    DrawRectangleRounded(name_panel_rect, PANEL_ROUNDNES, 0, bg);
-    DrawRectangleRoundedLines(name_panel_rect, PANEL_ROUNDNES, 0, 1.0, edge);
+    Color bg_color   = hover ? panel_bg_hover_color : panel_bg_color;
+    Color edge_color = hover ? panel_edge_hover_color : panel_edge_color;
+    Color text_color = hover ? panel_header_text_hover_color : panel_header_text_color;
 
-    DrawTextEx(NAME_FONT, name, getVector2FromRectangle(name_text_rect), NAME_FONT_SIZE, NAME_FONT_SPACING, panel_header_text_color);
+    DrawRectangleRounded(name_panel_rect, PANEL_ROUNDNES, 0, bg_color);
+    DrawRectangleRoundedLines(name_panel_rect, PANEL_ROUNDNES, 0, 1.0, edge_color);
+
+    Vector2 text_pos = getVector2FromRectangle(name_text_rect);
+    Vector2 text_shadow_pos = {
+        .x = text_pos.x + 1,
+        .y = text_pos.y + 1
+    };
+
+    DrawTextEx(NAME_FONT, name, text_shadow_pos, NAME_FONT_SIZE, NAME_FONT_SPACING, text_shadow_color);
+    DrawTextEx(NAME_FONT, name, text_pos, NAME_FONT_SIZE, NAME_FONT_SPACING, text_color);
 }
 
 static void draw_edit_panel(void)
@@ -1023,22 +1008,51 @@ static void draw_goto_next_level_panel(void)
 
     level_t *next_level = collection_get_level_after(current_collection, current_level);
 
-    DrawRectangleRounded(goto_next_level_panel_rect, PANEL_ROUNDNES, 0, panel_bg_color);
-    DrawRectangleRoundedLines(goto_next_level_panel_rect, PANEL_ROUNDNES, 0, 1.0, panel_edge_color);
-
-    DrawTextEx(PANEL_LABEL_FONT, goto_next_level_label_text, getVector2FromRectangle(goto_next_level_label_rect),
-               PANEL_LABEL_FONT_SIZE, PANEL_LABEL_FONT_SPACING, panel_header_text_color);
-
     if (!next_level) {
-        GuiDisable();
+        return;
     }
 
-    if (GuiButton(goto_next_level_button_rect, goto_next_level_button_text)) {
-        level_play(next_level);
+    bool hover = CheckCollisionPointRec(mouse_positionf, goto_next_level_panel_rect);
+
+    Color bg_color   = panel_bg_color;
+    Color edge_color = panel_edge_color;
+    Color text_color = panel_header_text_color;
+
+    if (hover) {
+        bg_color   = panel_bg_hover_color;
+        edge_color = panel_edge_hover_color;
+        text_color = panel_header_text_hover_color;
     }
 
-    if (!next_level) {
-        GuiEnable();
+    DrawRectangleRounded(goto_next_level_panel_rect, PANEL_ROUNDNES, 0, bg_color);
+    DrawRectangleRoundedLines(goto_next_level_panel_rect, PANEL_ROUNDNES, 0, 2.0, edge_color);
+
+    Vector2 text_pos = getVector2FromRectangle(goto_next_level_label_rect);
+    Vector2 text_shadow_pos = {
+        .x = text_pos.x + 1,
+        .y = text_pos.y + 1
+    };
+
+    DrawTextEx(NAME_FONT,
+               goto_next_level_label_text,
+               text_shadow_pos,
+               NAME_FONT_SIZE,
+               NAME_FONT_SPACING,
+               text_shadow_color);
+
+    DrawTextEx(NAME_FONT,
+               goto_next_level_label_text,
+               getVector2FromRectangle(goto_next_level_label_rect),
+               NAME_FONT_SIZE,
+               NAME_FONT_SPACING,
+               text_color);
+
+    if (hover) {
+        if (mouse_left_click) {
+            level_play(next_level);
+        } else {
+            SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+        }
     }
 }
 
@@ -1134,12 +1148,6 @@ static void draw_gui_widgets(void)
 
         if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
             return_from_level();
-        }
-
-        if (level_finished && current_level && current_level->next) {
-            if (GuiButton(right_side_button_rect[rsb++], goto_next_level_button_text)) {
-                play_next_level();
-            }
         }
         break;
 

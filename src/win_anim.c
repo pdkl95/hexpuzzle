@@ -163,14 +163,18 @@ void win_anim_start(win_anim_t *win_anim)
 {
     assert_not_null(win_anim);
 
-    anim_fsm_start(&win_anim->anim_fsm);
-    win_anim->running = true;
+    if (!win_anim->running) {
+        anim_fsm_start(&win_anim->anim_fsm);
+        win_anim->running = true;
+    }
 }
 
 void win_anim_stop(win_anim_t *win_anim)
 {
     assert_not_null(win_anim);
 
-    win_anim->running = false;
-    anim_fsm_stop(&win_anim->anim_fsm);
+    if (win_anim->running) {
+        win_anim->running = false;
+        anim_fsm_stop(&win_anim->anim_fsm);
+    }
 }

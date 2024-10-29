@@ -62,9 +62,14 @@ Color path_highlight_color_blue   = { 70,  166, 255, 255 };
 Color path_highlight_color_yellow = { 255, 253, 127, 255 };
 Color path_highlight_color_green  = {  67, 255, 105, 255 };
 
-Color panel_bg_color   = { 0x72, 0x1C, 0xB8, 0xaa };
-Color panel_edge_color = { 0x94, 0x83, 0xA2, 0xcc };
-Color panel_header_text_color = { 0xD0, 0xC0, 0xFF, 0xff };
+Color panel_bg_color                = { 0x72, 0x1C, 0xB8, 0xaa };
+Color panel_edge_color              = { 0x94, 0x83, 0xA2, 0xcc };
+Color panel_header_text_color       = { 0xD0, 0xC0, 0xFF, 0xff };
+Color panel_bg_hover_color          = { 0x72, 0x1C, 0xB8, 0xaa };
+Color panel_edge_hover_color        = { 0x94, 0x83, 0xA2, 0xcc };
+Color panel_header_text_hover_color = { 0xD0, 0xC0, 0xFF, 0xff };
+
+Color text_shadow_color = BLACK;
 
 void prepare_global_colors()
 {
@@ -81,5 +86,10 @@ void prepare_global_colors()
     path_color_yellow = ColorBrightness(path_color_yellow, dim_factor);
     path_color_green  = ColorBrightness(path_color_green,  dim_factor);
 
+    panel_bg_hover_color          = ColorBrightness(panel_bg_color,   -0.3);
+    panel_edge_hover_color        = ColorBrightness(panel_edge_color,  0.3);
+    panel_header_text_hover_color = WHITE;
+
+    text_shadow_color = ColorAlpha(BLACK, 0.8);
 }
 

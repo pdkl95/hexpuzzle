@@ -641,8 +641,14 @@ void level_update_ui_name(level_t *level, int idx)
 
 void level_unload(void)
 {
-    if (current_level && current_level->have_physics_body) {
-        level_destroy_physics_body(current_level);
+    if (current_level) {
+        if (current_level->win_anim) {
+            win_anim_stop(current_level->win_anim);
+        }
+
+        if (current_level->have_physics_body) {
+            level_destroy_physics_body(current_level);
+        }
     }
 
     current_level = NULL;
