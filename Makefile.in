@@ -116,24 +116,23 @@ PROGRAMS = $(bin_PROGRAMS)
 am__hexpuzzle_SOURCES_DIST = src/anim_fsm.h src/anim_fsm.c \
 	src/classics.h src/classics.c src/collection.h \
 	src/collection.c src/color.h src/color.c src/const.h \
-	src/deserialize.h src/deserialize.c src/fonts.h src/fonts.c \
-	src/game_mode.h src/game_mode.c src/gui_browser.h \
-	src/gui_browser.c src/gui_options.h src/gui_options.c \
-	src/gui_random.h src/gui_random.c src/hex.h src/hex.c \
-	src/level.h src/level.c src/level_draw.h src/level_draw.c \
-	src/logging.h src/logging.c src/nvdata.h src/nvdata.c \
-	src/nvdata_finished.h src/nvdata_finished.c src/options.h \
-	src/options.c src/physac_impl.c src/raygui_impl.c \
-	src/raylib_helper.h src/raylib_helper.c src/serialize.h \
-	src/serialize.c src/startup_action.h src/startup_action.c \
-	src/shader.h src/shader.c src/tile.h src/tile.c \
-	src/tile_draw.h src/tile_draw.c src/tile_pos.h src/tile_pos.c \
-	src/util.h src/util.c src/win_anim.h src/win_anim.c \
-	src/common.h src/main.c external/physac/physac.h \
-	external/raygui/raygui.h external/raygui/style/dark_alt.h \
-	external/stb/stb_perlin.h external/sglib/sglib.h \
-	external/pcg/pcg_basic.c external/pcg/pcg_basic.h \
-	external/cJSON/cJSON.c external/cJSON/cJSON.h \
+	src/fonts.h src/fonts.c src/game_mode.h src/game_mode.c \
+	src/gui_browser.h src/gui_browser.c src/gui_options.h \
+	src/gui_options.c src/gui_random.h src/gui_random.c src/hex.h \
+	src/hex.c src/level.h src/level.c src/level_draw.h \
+	src/level_draw.c src/logging.h src/logging.c src/nvdata.h \
+	src/nvdata.c src/nvdata_finished.h src/nvdata_finished.c \
+	src/options.h src/options.c src/physac_impl.c \
+	src/raygui_impl.c src/raylib_helper.h src/raylib_helper.c \
+	src/startup_action.h src/startup_action.c src/shader.h \
+	src/shader.c src/tile.h src/tile.c src/tile_draw.h \
+	src/tile_draw.c src/tile_pos.h src/tile_pos.c src/util.h \
+	src/util.c src/win_anim.h src/win_anim.c src/common.h \
+	src/main.c external/physac/physac.h external/raygui/raygui.h \
+	external/raygui/style/dark_alt.h external/stb/stb_perlin.h \
+	external/sglib/sglib.h external/pcg/pcg_basic.c \
+	external/pcg/pcg_basic.h external/cJSON/cJSON.c \
+	external/cJSON/cJSON.h \
 	external/tinyfiledialogs/tinyfiledialogs.c \
 	external/tinyfiledialogs/tinyfiledialogs.h
 am__dirstamp = $(am__leading_dot)dirstamp
@@ -141,9 +140,7 @@ am__dirstamp = $(am__leading_dot)dirstamp
 am_hexpuzzle_OBJECTS = src/hexpuzzle-anim_fsm.$(OBJEXT) \
 	src/hexpuzzle-classics.$(OBJEXT) \
 	src/hexpuzzle-collection.$(OBJEXT) \
-	src/hexpuzzle-color.$(OBJEXT) \
-	src/hexpuzzle-deserialize.$(OBJEXT) \
-	src/hexpuzzle-fonts.$(OBJEXT) \
+	src/hexpuzzle-color.$(OBJEXT) src/hexpuzzle-fonts.$(OBJEXT) \
 	src/hexpuzzle-game_mode.$(OBJEXT) \
 	src/hexpuzzle-gui_browser.$(OBJEXT) \
 	src/hexpuzzle-gui_options.$(OBJEXT) \
@@ -156,7 +153,6 @@ am_hexpuzzle_OBJECTS = src/hexpuzzle-anim_fsm.$(OBJEXT) \
 	src/hexpuzzle-physac_impl.$(OBJEXT) \
 	src/hexpuzzle-raygui_impl.$(OBJEXT) \
 	src/hexpuzzle-raylib_helper.$(OBJEXT) \
-	src/hexpuzzle-serialize.$(OBJEXT) \
 	src/hexpuzzle-startup_action.$(OBJEXT) \
 	src/hexpuzzle-shader.$(OBJEXT) src/hexpuzzle-tile.$(OBJEXT) \
 	src/hexpuzzle-tile_draw.$(OBJEXT) \
@@ -402,16 +398,15 @@ hexpuzzle_LDADD = $(COMMON_PROG_LDADD)
 @BUILD_WEB_TRUE@	-lidbfs.js --shell-file minshell.html
 hexpuzzle_SOURCES = src/anim_fsm.h src/anim_fsm.c src/classics.h \
 	src/classics.c src/collection.h src/collection.c src/color.h \
-	src/color.c src/const.h src/deserialize.h src/deserialize.c \
-	src/fonts.h src/fonts.c src/game_mode.h src/game_mode.c \
-	src/gui_browser.h src/gui_browser.c src/gui_options.h \
-	src/gui_options.c src/gui_random.h src/gui_random.c src/hex.h \
-	src/hex.c src/level.h src/level.c src/level_draw.h \
-	src/level_draw.c src/logging.h src/logging.c src/nvdata.h \
-	src/nvdata.c src/nvdata_finished.h src/nvdata_finished.c \
-	src/options.h src/options.c src/physac_impl.c \
-	src/raygui_impl.c src/raylib_helper.h src/raylib_helper.c \
-	src/serialize.h src/serialize.c src/startup_action.h \
+	src/color.c src/const.h src/fonts.h src/fonts.c \
+	src/game_mode.h src/game_mode.c src/gui_browser.h \
+	src/gui_browser.c src/gui_options.h src/gui_options.c \
+	src/gui_random.h src/gui_random.c src/hex.h src/hex.c \
+	src/level.h src/level.c src/level_draw.h src/level_draw.c \
+	src/logging.h src/logging.c src/nvdata.h src/nvdata.c \
+	src/nvdata_finished.h src/nvdata_finished.c src/options.h \
+	src/options.c src/physac_impl.c src/raygui_impl.c \
+	src/raylib_helper.h src/raylib_helper.c src/startup_action.h \
 	src/startup_action.c src/shader.h src/shader.c src/tile.h \
 	src/tile.c src/tile_draw.h src/tile_draw.c src/tile_pos.h \
 	src/tile_pos.c src/util.h src/util.c src/win_anim.h \
@@ -541,8 +536,6 @@ src/hexpuzzle-collection.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-color.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
-src/hexpuzzle-deserialize.$(OBJEXT): src/$(am__dirstamp) \
-	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-fonts.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-game_mode.$(OBJEXT): src/$(am__dirstamp) \
@@ -572,8 +565,6 @@ src/hexpuzzle-physac_impl.$(OBJEXT): src/$(am__dirstamp) \
 src/hexpuzzle-raygui_impl.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-raylib_helper.$(OBJEXT): src/$(am__dirstamp) \
-	src/$(DEPDIR)/$(am__dirstamp)
-src/hexpuzzle-serialize.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-startup_action.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
@@ -640,7 +631,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-classics.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-collection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-color.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-deserialize.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-fonts.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-game_mode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-gui_browser.Po@am__quote@
@@ -657,7 +647,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-physac_impl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raygui_impl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raylib_helper.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-serialize.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-shader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-startup_action.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-tile.Po@am__quote@
@@ -737,20 +726,6 @@ src/hexpuzzle-color.obj: src/color.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/color.c' object='src/hexpuzzle-color.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-color.obj `if test -f 'src/color.c'; then $(CYGPATH_W) 'src/color.c'; else $(CYGPATH_W) '$(srcdir)/src/color.c'; fi`
-
-src/hexpuzzle-deserialize.o: src/deserialize.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-deserialize.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-deserialize.Tpo -c -o src/hexpuzzle-deserialize.o `test -f 'src/deserialize.c' || echo '$(srcdir)/'`src/deserialize.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-deserialize.Tpo src/$(DEPDIR)/hexpuzzle-deserialize.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/deserialize.c' object='src/hexpuzzle-deserialize.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-deserialize.o `test -f 'src/deserialize.c' || echo '$(srcdir)/'`src/deserialize.c
-
-src/hexpuzzle-deserialize.obj: src/deserialize.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-deserialize.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-deserialize.Tpo -c -o src/hexpuzzle-deserialize.obj `if test -f 'src/deserialize.c'; then $(CYGPATH_W) 'src/deserialize.c'; else $(CYGPATH_W) '$(srcdir)/src/deserialize.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-deserialize.Tpo src/$(DEPDIR)/hexpuzzle-deserialize.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/deserialize.c' object='src/hexpuzzle-deserialize.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-deserialize.obj `if test -f 'src/deserialize.c'; then $(CYGPATH_W) 'src/deserialize.c'; else $(CYGPATH_W) '$(srcdir)/src/deserialize.c'; fi`
 
 src/hexpuzzle-fonts.o: src/fonts.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-fonts.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-fonts.Tpo -c -o src/hexpuzzle-fonts.o `test -f 'src/fonts.c' || echo '$(srcdir)/'`src/fonts.c
@@ -961,20 +936,6 @@ src/hexpuzzle-raylib_helper.obj: src/raylib_helper.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/raylib_helper.c' object='src/hexpuzzle-raylib_helper.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-raylib_helper.obj `if test -f 'src/raylib_helper.c'; then $(CYGPATH_W) 'src/raylib_helper.c'; else $(CYGPATH_W) '$(srcdir)/src/raylib_helper.c'; fi`
-
-src/hexpuzzle-serialize.o: src/serialize.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-serialize.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-serialize.Tpo -c -o src/hexpuzzle-serialize.o `test -f 'src/serialize.c' || echo '$(srcdir)/'`src/serialize.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-serialize.Tpo src/$(DEPDIR)/hexpuzzle-serialize.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/serialize.c' object='src/hexpuzzle-serialize.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-serialize.o `test -f 'src/serialize.c' || echo '$(srcdir)/'`src/serialize.c
-
-src/hexpuzzle-serialize.obj: src/serialize.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-serialize.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-serialize.Tpo -c -o src/hexpuzzle-serialize.obj `if test -f 'src/serialize.c'; then $(CYGPATH_W) 'src/serialize.c'; else $(CYGPATH_W) '$(srcdir)/src/serialize.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-serialize.Tpo src/$(DEPDIR)/hexpuzzle-serialize.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/serialize.c' object='src/hexpuzzle-serialize.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-serialize.obj `if test -f 'src/serialize.c'; then $(CYGPATH_W) 'src/serialize.c'; else $(CYGPATH_W) '$(srcdir)/src/serialize.c'; fi`
 
 src/hexpuzzle-startup_action.o: src/startup_action.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-startup_action.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-startup_action.Tpo -c -o src/hexpuzzle-startup_action.o `test -f 'src/startup_action.c' || echo '$(srcdir)/'`src/startup_action.c
