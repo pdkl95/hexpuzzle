@@ -22,6 +22,8 @@
 #include "common.h"
 #include "game_mode.h"
 
+#define DEBUG_GAME_MODE
+
 game_mode_t game_mode = GAME_MODE_NULL;
 game_mode_t last_game_mode = GAME_MODE_NULL;
 
@@ -65,8 +67,19 @@ void set_game_mode(game_mode_t new_mode)
     last_game_mode = game_mode;
     game_mode = new_mode;
 
-#if 0
+#ifdef DEBUG_GAME_MODE
     printf("SET: game_mode = %s (prev = %s)\n",
+           game_mode_t_str(game_mode),
+           game_mode_t_str(last_game_mode));
+#endif
+}
+
+void set_game_mode_save_prev(game_mode_t new_mode)
+{
+    game_mode = new_mode;
+
+#ifdef DEBUG_GAME_MODE
+    printf("SET: game_mode = %s (prev = %s) [saved prev]\n",
            game_mode_t_str(game_mode),
            game_mode_t_str(last_game_mode));
 #endif
@@ -79,7 +92,7 @@ void prev_game_mode(void)
     game_mode = last_game_mode;
     last_game_mode = tmp;
 
-#if 0
+#ifdef DEBUG_GAME_MODE
     printf("POP: game_mode = %s (prev = %s)\n",
            game_mode_t_str(game_mode),
            game_mode_t_str(last_game_mode));

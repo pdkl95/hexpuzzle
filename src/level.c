@@ -241,6 +241,9 @@ static level_t *init_level(level_t *level)
             level->tiles[i].solved_pos   = &level->solved_positions[i];
             level->tiles[i].unsolved_pos = &level->unsolved_positions[i];
 
+            level->solved_positions[i].solved = true;
+            level->unsolved_positions[i].solved = false;
+
             i++;
         }
     }
@@ -260,6 +263,7 @@ static level_t *init_level(level_t *level)
 
     level->finished_hue = 0.0f;
 
+    level->fade_active = false;
     level->fade_value        = 0.0f;
     level->fade_value_eased  = 0.0f;
     level->fade_delta        = 0.0f;
@@ -343,6 +347,25 @@ static level_t *alloc_level(void)
     return level;
 }
 
+void level_backup_unsolved_tiles(level_t *level)
+{
+    for (int i = 0; i < LEVEL_MAXTILES; i++) {
+        tile_pos_t *pos = &level->unsolved_positions[i];
+        pos->orig_tile = pos->tile;
+    }
+}
+
+static void level_reset_unsolved_tiles(level_t *level)
+{
+    assert_not_null(level);
+
+    for (int i = 0; i < LEVEL_MAXTILES; i++) {
+        tile_pos_t *pos = &level->unsolved_positions[i];
+        pos->tile = pos->orig_tile;
+        pos->tile->unsolved_pos = pos;
+   }
+}
+
 void level_reset(level_t *level)
 {
     assert_not_null(level);
@@ -367,6 +390,13 @@ void level_reset(level_t *level)
     level_enable_spiral(level, level->radius);
 
     level_use_null_tile_pos(level);
+}
+
+void level_reset_tile_positions(level_t *level)
+{
+    used_tiles_t save_currently_used_tiles = level->currently_used_tiles;
+    level_reset_unsolved_tiles(level);
+    level->currently_used_tiles = save_currently_used_tiles;
 }
 
 void level_update_id(level_t *level)
@@ -837,6 +867,8 @@ bool level_from_json(level_t *level, cJSON *json)
         level->current_tile_write_idx++;
     }
 
+    level_backup_unsolved_tiles(level);
+
     return true;
 }
 
@@ -1209,8 +1241,8 @@ void level_swap_tile_pos(level_t *level, tile_pos_t *a, tile_pos_t *b)
     tile_t *old_b_tile = b->tile;
 
 #ifdef DEBUG_DRAG_AND_DROP
-    printf("swap_tile_pos(): a=(%d, %d)\n", a->position.q, a->position.r);
-    printf("                 b=(%d, %d)\n", b->position.q, b->position.r);
+    printf("swap_tile_pos(): a=(%d, %d) %p %s\n", a->position.q, a->position.r, a, a->solved ? "Solved" : "UNsolved");
+    printf("                 b=(%d, %d) %p %s\n", b->position.q, b->position.r, b, b->solved ? "Solved" : "UNsolved");
 #endif
 
     a->tile = old_b_tile;
@@ -1651,6 +1683,8 @@ void level_set_radius(level_t *level, int new_radius)
 
 void level_win(level_t *level)
 {
+    assert_not_null(level);
+
     if (win_anim_running(level->win_anim)) {
         return;
     }
@@ -1658,11 +1692,15 @@ void level_win(level_t *level)
     win_anim_start(level->win_anim);
 
     level->finished = true;
-    set_game_mode(GAME_MODE_WIN_LEVEL);
+    if (game_mode == GAME_MODE_PLAY_LEVEL) {
+        set_game_mode_save_prev(GAME_MODE_WIN_LEVEL);
+    }
 }
 
 void level_unwin(level_t *level)
 {
+    assert_not_null(level);
+
     if (!win_anim_running(level->win_anim)) {
         return;
     }
@@ -1670,13 +1708,21 @@ void level_unwin(level_t *level)
     win_anim_stop(level->win_anim);
 
     level->finished = false;
-    set_game_mode(GAME_MODE_PLAY_LEVEL);
+    if (game_mode == GAME_MODE_WIN_LEVEL) {
+        set_game_mode_save_prev(GAME_MODE_PLAY_LEVEL);
+    }
 }
 
+bool level_is_fading(level_t *level)
+{
+    return level->fade_active;
+}
 
 bool level_update_fade(level_t *level)
 {
-    if (level->fade_value != level->fade_target) {
+    assert_not_null(level);
+
+    if (level->fade_active && (level->fade_value != level->fade_target)) {
         if (fabs(level->fade_value - level->fade_target) <= LEVEL_FADE_DELTA) {
             level->fade_value       = level->fade_target;
             level->fade_value_eased = level->fade_target;
@@ -1687,6 +1733,7 @@ bool level_update_fade(level_t *level)
             if (level->fade_finished_callback) {
                 level->fade_finished_callback(level, level->fade_finished_data);
             }
+            level->fade_active = false;
 
         } else {
 #ifdef DEBUG_LEVEL_FADE
@@ -1707,6 +1754,8 @@ bool level_update_fade(level_t *level)
 
 static void level_fade_transition(level_t *level, level_fade_finished_cb_t callback, void *data)
 {
+    assert_not_null(level);
+
     level->fade_finished_callback = callback;
     level->fade_finished_data = data;
 
@@ -1717,8 +1766,10 @@ static void level_fade_transition(level_t *level, level_fade_finished_cb_t callb
 
     if (level->fade_value < level->fade_target) {
         level->fade_delta = LEVEL_FADE_DELTA;
+        level->fade_active = true;
     } else if (level->fade_value > level->fade_target) {
         level->fade_delta = -LEVEL_FADE_DELTA;
+        level->fade_active = true;
     } else {
         /* equal */
     }
@@ -1732,6 +1783,13 @@ static void level_fade_transition(level_t *level, level_fade_finished_cb_t callb
 
 void level_fade_in(level_t *level, level_fade_finished_cb_t callback, void *data)
 {
+    assert_not_null(level);
+
+    if (level_is_fading(level)) {
+        warnmsg("level_fade_in() called while fade is already running");
+        return;
+    }
+
 #ifdef DEBUG_LEVEL_FADE
     printf("level_fade_in()\n");
 #endif
@@ -1741,6 +1799,13 @@ void level_fade_in(level_t *level, level_fade_finished_cb_t callback, void *data
 
 void level_fade_out(level_t *level, level_fade_finished_cb_t callback, void *data)
 {
+    assert_not_null(level);
+
+    if (level_is_fading(level)) {
+        warnmsg("level_fade_out() called while fade is already running");
+        return;
+    }
+
 #ifdef DEBUG_LEVEL_FADE
     printf("level_fade_out()\n");
 #endif
@@ -1857,6 +1922,8 @@ void level_destroy_physics_body(level_t *level)
 
 void level_update_physics_forces(level_t *level)
 {
+    assert_not_null(level);
+
     used_tiles_t save_currently_used_tiles = level->currently_used_tiles;
     level_use_unsolved_tile_pos(level);
 

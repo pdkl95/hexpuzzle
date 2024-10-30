@@ -104,6 +104,7 @@ struct level {
     bool finished;
     float finished_hue;
 
+    bool  fade_active;
     float fade_value;
     float fade_value_eased;
     float fade_delta;
@@ -139,6 +140,8 @@ tile_pos_t *level_get_unsolved_tile_pos(level_t *level,  hex_axial_t axial);
 level_t *create_level(struct collection *collection);
 void destroy_level(level_t *level);
 void level_reset(level_t *level);
+void level_backup_unsolved_tiles(level_t *level);
+void level_reset_tile_positions(level_t *level);
 
 void level_update_id(level_t *level);
 

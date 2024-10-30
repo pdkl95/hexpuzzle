@@ -49,6 +49,8 @@ tile_pos_t *init_tile_pos(tile_pos_t *pos, tile_t *tile, hex_axial_t addr)
     pos->tile = tile;
 
     pos->position = addr;
+    pos->orig_position = addr;
+
     pos->swap_target = NULL;
     pos->hover_adjacent = NULL;
     pos->hover = false;

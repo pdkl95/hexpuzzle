@@ -337,6 +337,7 @@ struct level *generate_random_level(void)
 #endif
 
     level_use_unsolved_tile_pos(level);
+    level_backup_unsolved_tiles(level);
 
     return level;
 }

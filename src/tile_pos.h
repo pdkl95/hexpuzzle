@@ -41,8 +41,12 @@ typedef struct tile_coord tile_coord_t;
 
 struct tile_pos {
     tile_t *tile;
+    tile_t *orig_tile;
 
     hex_axial_t position;
+    hex_axial_t orig_position;
+
+    bool solved;
 
     /*
      * drawing
@@ -83,6 +87,7 @@ tile_pos_t *init_tile_pos(tile_pos_t *pos, tile_t *tile, hex_axial_t addr);
 tile_pos_t *create_tile_pos(hex_axial_t addr, tile_t *tile);
 void destroy_tile_pos(tile_pos_t *tile_pos);
 
+void tile_pos_reset(tile_pos_t *tile_pos);
 bool tile_pos_check(tile_pos_t *tile_pos);
 void tile_pos_rebuild(tile_pos_t *pos);
 void tile_pos_set_size(tile_pos_t *tile_pos, float tile_size);

@@ -64,7 +64,7 @@
 const char *progversion = PACKAGE_VERSION;
 const char *progname    = PACKAGE_NAME;
 
-#define DEBUG_SEMAPHORES
+//#define DEBUG_SEMAPHORES
 //#define DEBUG_RESIZE
 
 #define CONFIG_SUBDIR_NAME PACKAGE_NAME
@@ -236,6 +236,7 @@ static void return_from_level_callback(UNUSED level_t *level, UNUSED void *data)
     if (current_level) {
         level_unload();
     }
+
     prev_game_mode();
 }
 
@@ -331,6 +332,20 @@ const char *default_open_file_path(void)
     path[len]     = '/';
     path[len + 1] = '\0';
     return path;
+}
+
+static void reset_current_level(void)
+{
+    if (current_level) {
+        if (options->verbose) {
+            infomsg("Resetting level tile positions");
+        }
+
+        level_unwin(current_level);
+        level_reset_tile_positions(current_level);
+    } else {
+        warnmsg("Cannot reset level - current_level is NULL");
+    }
 }
 
 static void reset_window_to_center(void)
@@ -670,6 +685,10 @@ char edit_button_text_str[] = "Edit";
 #define EDIT_BUTTON_TEXT_LENGTH (6 + sizeof(edit_button_text_str))
 char edit_button_text[EDIT_BUTTON_TEXT_LENGTH];
 
+char reset_button_text_str[] = "Reset";
+#define RESET_BUTTON_TEXT_LENGTH (6 + sizeof(reset_button_text_str))
+char reset_button_text[RESET_BUTTON_TEXT_LENGTH];
+
 char return_button_text_str[] = "Back";
 #define RETURN_BUTTON_TEXT_LENGTH (6 + sizeof(return_button_text_str))
 char return_button_text[RETURN_BUTTON_TEXT_LENGTH];
@@ -780,6 +799,7 @@ void gui_setup(void)
     Vector2 close_button_text_size   = MeasureGuiText(close_button_text_str);
     Vector2 edit_button_text_size    = MeasureGuiText(edit_button_text_str);
     Vector2 save_button_text_size    = MeasureGuiText(save_button_text_str);
+    Vector2 reset_button_text_size   = MeasureGuiText(reset_button_text_str);
     Vector2 return_button_text_size  = MeasureGuiText(return_button_text_str);
     Vector2 browser_button_text_size = MeasureGuiText(browser_button_text_str);
     Vector2 options_button_text_size = MeasureGuiText(options_button_text_str);
@@ -787,6 +807,7 @@ void gui_setup(void)
     int close_button_text_width   = close_button_text_size.x;
     int edit_button_text_width    = edit_button_text_size.x;
     int save_button_text_width    = save_button_text_size.x;
+    int reset_button_text_width   = reset_button_text_size.x;
     int return_button_text_width  = return_button_text_size.x;
     int browser_button_text_width = browser_button_text_size.x;
     int options_button_text_width = options_button_text_size.x;
@@ -794,7 +815,8 @@ void gui_setup(void)
     int right_side_button_text_width = close_button_text_width =
         MAX(MAX(MAX(close_button_text_width, edit_button_text_width),
                 MAX(save_button_text_width, return_button_text_width)),
-            MAX(browser_button_text_width, options_button_text_width));
+            MAX(MAX(browser_button_text_width, options_button_text_width),
+                reset_button_text_width));
 
     close_button_rect.x      = window_size.x - WINDOW_MARGIN - ICON_BUTTON_SIZE - close_button_text_width;
     close_button_rect.y      = WINDOW_MARGIN;
@@ -804,6 +826,7 @@ void gui_setup(void)
     memcpy(  close_button_text, GuiIconText(ICON_EXIT,               close_button_text_str),   CLOSE_BUTTON_TEXT_LENGTH);
     memcpy(   edit_button_text, GuiIconText(ICON_FILE_SAVE_CLASSIC,   edit_button_text_str),    EDIT_BUTTON_TEXT_LENGTH);
     memcpy(   save_button_text, GuiIconText(ICON_TOOLS,               save_button_text_str),    SAVE_BUTTON_TEXT_LENGTH);
+    memcpy(  reset_button_text, GuiIconText(ICON_EXPLOSION,          reset_button_text_str),   RESET_BUTTON_TEXT_LENGTH);
     memcpy( return_button_text, GuiIconText(ICON_UNDO_FILL,         return_button_text_str),  RETURN_BUTTON_TEXT_LENGTH);
     memcpy(options_button_text, GuiIconText(ICON_GEAR,             options_button_text_str), OPTIONS_BUTTON_TEXT_LENGTH);
     memcpy(browser_button_text, GuiIconText(ICON_FOLDER_FILE_OPEN, browser_button_text_str), BROWSER_BUTTON_TEXT_LENGTH);
@@ -859,13 +882,18 @@ void gui_setup(void)
     goto_next_level_panel_rect.width  = goto_next_level_label_rect.width + (2 * PANEL_INNER_MARGIN);
     goto_next_level_panel_rect.height = goto_next_level_label_rect.height + (2 * PANEL_INNER_MARGIN);
     goto_next_level_panel_rect.x      = window_size.x - WINDOW_MARGIN - goto_next_level_panel_rect.width;
-
-    prect(goto_next_level_label_rect);
-    prect(goto_next_level_panel_rect);
 }
 
-static void draw_name_header(char *name)
+static void draw_name_header(void)
 {
+    if (!current_level) {
+        return;
+    }
+
+    assert_not_null(current_level->name);
+
+    char *name = current_level->name;
+
     Vector2 textsize = MeasureTextEx(NAME_FONT, name, NAME_FONT_SIZE, NAME_FONT_SPACING);
 
     name_text_rect.width  = textsize.x;
@@ -1110,7 +1138,7 @@ static void draw_gui_widgets(void)
         break;
 
     case GAME_MODE_EDIT_LEVEL:
-        draw_name_header(current_level->name);
+        draw_name_header();
 
         draw_edit_panel();
         if (edit_mode_solved) {
@@ -1127,10 +1155,14 @@ static void draw_gui_widgets(void)
         break;
 
     case GAME_MODE_PLAY_LEVEL:
-        draw_name_header(current_level->name);
+        draw_name_header();
 
         if (GuiButton(right_side_button_rect[rsb++], options_button_text)) {
             set_game_mode(GAME_MODE_OPTIONS);
+        }
+
+        if (GuiButton(right_side_button_rect[rsb++], reset_button_text)) {
+            reset_current_level();
         }
 
         if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
@@ -1139,11 +1171,15 @@ static void draw_gui_widgets(void)
         break;
 
     case GAME_MODE_WIN_LEVEL:
-        draw_name_header(current_level->name);
+        draw_name_header();
         draw_win_panels();
 
         if (GuiButton(right_side_button_rect[rsb++], options_button_text)) {
             set_game_mode(GAME_MODE_OPTIONS);
+        }
+
+        if (GuiButton(right_side_button_rect[rsb++], reset_button_text)) {
+            reset_current_level();
         }
 
         if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
