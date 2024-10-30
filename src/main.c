@@ -45,6 +45,7 @@
 #include "tile_draw.h"
 
 #include "level.h"
+#include "level_draw.h"
 #include "collection.h"
 #include "shader.h"
 
@@ -343,6 +344,9 @@ static void reset_current_level(void)
 
         level_unwin(current_level);
         level_reset_tile_positions(current_level);
+        if (current_level->have_physics_body) {
+            level_reset_physics_body_positions(current_level);
+        }
     } else {
         warnmsg("Cannot reset level - current_level is NULL");
     }

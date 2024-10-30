@@ -193,6 +193,7 @@ cJSON *level_to_json(level_t *level);
 tile_pos_t *level_find_solved_neighbor_tile_pos(level_t *level, tile_pos_t *tile, hex_direction_t section);
 tile_pos_t *level_find_unsolved_neighbor_tile_pos(level_t *level, tile_pos_t *tile, hex_direction_t section);
 tile_pos_t *level_find_current_neighbor_tile_pos(level_t *level, tile_pos_t *pos, hex_direction_t section);
+tile_pos_t *level_get_center_tile_pos(level_t *leve);
 
 void level_resize(level_t *level);
 void level_set_hover(level_t *level, IVector2 mouse_position);

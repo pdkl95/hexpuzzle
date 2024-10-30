@@ -92,6 +92,7 @@ hexpuzzle_SOURCES =                                    \
 	src/gui_random.h        src/gui_random.c       \
 	src/hex.h               src/hex.c              \
 	src/level.h             src/level.c            \
+	src/level_draw.h        src/level_draw.c       \
 	src/logging.h           src/logging.c          \
 	src/nvdata.h            src/nvdata.c           \
 	src/nvdata_finished.h   src/nvdata_finished.c  \
