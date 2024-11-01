@@ -36,6 +36,7 @@
 #include "win_anim.h"
 
 //#define DEBUG_DRAG_AND_DROP 1
+//#define DEBUG_LEVEL_FADE
 
 void print_tiles(level_t *level)
 {

@@ -35,7 +35,7 @@
 static void level_set_fade_transition(level_t *level, tile_pos_t *pos)
 {
     tile_pos_t *center_pos = level_get_center_tile_pos(level);
-    if (center_pos == pos) {
+    if (!level->fade_active && center_pos == pos) {
         return;
     }
 
@@ -277,14 +277,17 @@ void level_preview(level_t *level, Rectangle rect)
              1.0f);
 
     float save_fade_value = level->fade_value;
+    float save_fade_value_eased = level->fade_value_eased;
     float save_fade_rotate_speed = level->fade_rotate_speed;
 
-    level->fade_value = 1.9;
+    level->fade_value = 1.0;
+    level->fade_value_eased = 1.0;
     level->fade_rotate_speed = 0.0;
 
     level_draw(level, false);
 
     level->fade_value = save_fade_value;
+    level->fade_value_eased = save_fade_value_eased;
     level->fade_rotate_speed = save_fade_rotate_speed;
 
     rlPopMatrix();
