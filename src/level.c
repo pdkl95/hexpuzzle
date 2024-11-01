@@ -701,6 +701,11 @@ void level_play(level_t *level)
         level_create_physics_body(level);
     }
 
+    if (level->finished) {
+        level_reset_tile_positions(level);
+        level_unwin(level);
+    }
+
     level_fade_in(level, NULL, NULL);
     set_game_mode(GAME_MODE_PLAY_LEVEL);
 }

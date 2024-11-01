@@ -22,7 +22,7 @@
 #include "common.h"
 #include "game_mode.h"
 
-#define DEBUG_GAME_MODE
+//#define DEBUG_GAME_MODE
 
 game_mode_t game_mode = GAME_MODE_NULL;
 game_mode_t last_game_mode = GAME_MODE_NULL;
