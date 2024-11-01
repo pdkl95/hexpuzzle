@@ -107,7 +107,7 @@ static bool program_state_from_json(cJSON *json)
     cJSON *version_json = cJSON_GetObjectItemCaseSensitive(json, "version");
     if (version_json) {
         if (!cJSON_IsNumber(version_json)) {
-            errmsg("Error parsing level JSON: 'version' is not a Number");
+            errmsg("Error parsing level JSON['version'] is not a Number");
             return false;
         }
 
@@ -135,10 +135,10 @@ static bool program_state_from_json(cJSON *json)
             bool w_ok = cJSON_IsNumber(width_json);
             bool h_ok = cJSON_IsNumber(height_json);
             if (!w_ok) {
-                errmsg("Program state JSON['window'] \"width\" is not a NUMBER");
+                errmsg("Program state JSON['window']['width'] is not a NUMBER");
             }
             if (!h_ok) {
-                errmsg("Program state JSON['window'] \"height\" is not a NUMBER");
+                errmsg("Program state JSON['window']['height'] is not a NUMBER");
             }
             if (w_ok && h_ok) {
                 int scr_width  = width_json->valueint;
@@ -167,10 +167,10 @@ static bool program_state_from_json(cJSON *json)
             bool x_ok = cJSON_IsNumber(position_x_json);
             bool y_ok = cJSON_IsNumber(position_y_json);
             if (!x_ok) {
-                errmsg("Program state JSON['window'] \"position_x\" is not a NUMBER");
+                errmsg("Program state JSON['window']['position_x'] is not a NUMBER");
             }
             if (!y_ok) {
-                errmsg("Program state JSON['window'] \"position_y\" is not a NUMBER");
+                errmsg("Program state JSON['window']['position_y'] is not a NUMBER");
             }
             if (x_ok && y_ok) {
                 IVector2 wpos = {
@@ -188,6 +188,30 @@ static bool program_state_from_json(cJSON *json)
         }
     }
 
+    printf("\n\nstart\n");
+    if (options->load_color_opt) {
+        printf("inside opt\n");
+        cJSON *colors_json = cJSON_GetObjectItemCaseSensitive(json, "colors");
+        if (colors_json) {
+            for (int i=1; i<PATH_TYPE_COUNT; i++) {
+                const char *field = TextFormat("path_%d", i);
+                cJSON *path_json = cJSON_GetObjectItemCaseSensitive(colors_json, field);
+                if (path_json) {
+                    if (!cJSON_IsString(path_json)) {
+                        errmsg("Program state JSON['colors']['%s'] is not a STRING", field);
+                        return false;
+                    }
+
+                    printf("\t%s = \"%s\"\n", field, path_json->valuestring);
+                    color_option_set_string(&(options->path_color[i]), path_json->valuestring);
+                } else {
+                    warnmsg("Program state JSON['window'] is missing \"%s\"", field);
+                }
+            }
+        }
+    }
+    printf("\nend\n\n");
+
     cJSON *graphics_json = cJSON_GetObjectItemCaseSensitive(json, "graphics");
     if (graphics_json) {
         cJSON *bool_json = NULL;
@@ -202,7 +226,7 @@ static bool program_state_from_json(cJSON *json)
                 options->field = false;                                     \
             }                                                               \
         } else {                                                            \
-            errmsg("Program state JSON['graphics'] \"%s\" is not a BOOL",   \
+            errmsg("Program state JSON['graphics']['%s'] is not a BOOL",    \
                    STR(name));                                              \
         }                                                                   \
     } else {                                                                \
@@ -304,6 +328,20 @@ static cJSON *program_state_to_json(void)
     if (cJSON_AddNumberToObject(window_json, "height", scr_height) == NULL) {
         errmsg("Error adding \"height\" to JSON.window");
         goto to_json_error;
+    }
+
+    cJSON *colors_json = cJSON_AddObjectToObject(json, "colors");
+    if (!colors_json) {
+        errmsg("Error adding \"colors\" object to JSON");
+        goto to_json_error;
+    }
+
+    for (int i=1; i<PATH_TYPE_COUNT; i++) {
+        const char *field = TextFormat("path_%d", i);
+        if (cJSON_AddStringToObject(colors_json, field, options->path_color[i].rgb_string) == NULL) {
+            errmsg("Error adding \"height\" to JSON.window");
+            goto to_json_error;
+        }
     }
 
     cJSON *graphics_json = cJSON_AddObjectToObject(json, "graphics");

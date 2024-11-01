@@ -274,6 +274,7 @@ options_set_defaults(
     options->load_state_animate_bg  = true;
     options->load_state_animate_win = true;
     options->load_state_physics_effects = true;
+    options->load_color_opt = true;
 
     options->safe_mode = false;
 
@@ -285,15 +286,16 @@ options_set_defaults(
     options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_MIN_PATH;
     options->create_level_max_path = OPTIONS_DEFAULT_CREATE_LEVEL_MAX_PATH;
 
-    options->path_color[0].color           = OPTIONS_DEFAULT_PATH_COLOR_0;
+    color_option_set(&(options->path_color[0]), OPTIONS_DEFAULT_PATH_COLOR_0);
+    color_option_set(&(options->path_color[1]), OPTIONS_DEFAULT_PATH_COLOR_1);
+    color_option_set(&(options->path_color[2]), OPTIONS_DEFAULT_PATH_COLOR_2);
+    color_option_set(&(options->path_color[3]), OPTIONS_DEFAULT_PATH_COLOR_3);
+    color_option_set(&(options->path_color[4]), OPTIONS_DEFAULT_PATH_COLOR_4);
+
     options->path_color[0].highlight_color = OPTIONS_DEFAULT_PATH_HL_COLOR_0;
-    options->path_color[1].color           = OPTIONS_DEFAULT_PATH_COLOR_1;
     options->path_color[1].highlight_color = OPTIONS_DEFAULT_PATH_HL_COLOR_1;
-    options->path_color[2].color           = OPTIONS_DEFAULT_PATH_COLOR_2;
     options->path_color[2].highlight_color = OPTIONS_DEFAULT_PATH_HL_COLOR_2;
-    options->path_color[3].color           = OPTIONS_DEFAULT_PATH_COLOR_3;
     options->path_color[3].highlight_color = OPTIONS_DEFAULT_PATH_HL_COLOR_3;
-    options->path_color[4].color           = OPTIONS_DEFAULT_PATH_COLOR_4;
     options->path_color[4].highlight_color = OPTIONS_DEFAULT_PATH_HL_COLOR_4;
 
     float dim_factor = -0.25;
