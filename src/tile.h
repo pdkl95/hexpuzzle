@@ -25,26 +25,10 @@
 #include "cJSON/cJSON.h"
 
 #include "hex.h"
+#include "path.h"
 
 struct tile_pos;
 struct level;
-
-enum path_type {
-    PATH_TYPE_NONE   = 0,
-    PATH_TYPE_RED    = 1,
-    PATH_TYPE_BLUE   = 2,
-    PATH_TYPE_YELLOW = 3,
-    PATH_TYPE_GREEN  = 4
-};
-typedef enum path_type path_type_t;
-#define PATH_TYPE_COUNT (PATH_TYPE_GREEN + 1)
-
-char *path_type_name(path_type_t type);
-
-struct path_int {
-    int path[PATH_TYPE_COUNT];
-};
-typedef struct path_int path_int_t;
 
 struct tile {
     /*

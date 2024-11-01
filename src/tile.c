@@ -83,29 +83,6 @@ void print_tile(tile_t *tile)
     }
 }
 
-char *path_type_name(path_type_t type)
-{
-    switch (type) {
-    default:
-        return "(BAD VALUE)";
-
-    case PATH_TYPE_NONE:
-        return "NONE";
-
-    case PATH_TYPE_RED:
-        return "RED";
-
-    case PATH_TYPE_BLUE:
-        return "BLUE";
-
-    case PATH_TYPE_YELLOW:
-        return "YELLOW";
-
-    case PATH_TYPE_GREEN:
-        return "GREEN";
-    }
-}
-
 tile_t *init_tile(tile_t *tile)
 {
     assert_not_null(tile);

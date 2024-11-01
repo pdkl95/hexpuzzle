@@ -1,6 +1,6 @@
 /****************************************************************************
  *                                                                          *
- * tile_draw.h                                                              *
+ * path.h                                                                   *
  *                                                                          *
  * This file is part of hexpuzzle.                                          *
  *                                                                          *
@@ -15,20 +15,45 @@
  * Public License for more details.                                         *
  *                                                                          *
  * You should have received a copy of the GNU General Public License along  *
- * with hexpuzzle. If not, see <https://www.gnu.org/licenses/>.             *
+ * with rocks. If not, see <https://www.gnu.org/licenses/>.                 *
  *                                                                          *
  ****************************************************************************/
 
-#ifndef TILE_DRAW_H
-#define TILE_DRAW_H
+#ifndef PATH_H
+#define PATH_H
 
-#include "tile.h"
-#include "tile_pos.h"
-#include "level.h"
+#include "const.h"
+#include "options.h"
 
-void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color finished_color, float finished_fade_in);
-void tile_draw_ghost(tile_pos_t *pos);
-void tile_draw_win_anim(tile_pos_t *pos, struct level *level);
+typedef struct path path_t;
+enum path_type {
+    PATH_TYPE_NONE   = 0,
+    PATH_TYPE_RED    = 1,
+    PATH_TYPE_BLUE   = 2,
+    PATH_TYPE_YELLOW = 3,
+    PATH_TYPE_GREEN  = 4
+};
+typedef enum path_type path_type_t;
+#if (PATH_TYPE_COUNT <= PATH_TYPE_GREEN)
+# error "PATH_TYPE_COUNT does not match enum path_type"
+#endif
 
-#endif /*TILE_DRAW_H*/
+char *path_type_name(path_type_t type);
+
+struct path_int {
+    int path[PATH_TYPE_COUNT];
+};
+typedef struct path_int path_int_t;
+
+static inline Color path_type_color(path_type_t type)
+{
+    return options->path_color[type].color;
+}
+
+static inline Color path_type_highlight_color(path_type_t type)
+{
+    return options->path_color[type].highlight_color;
+}
+
+#endif /*PATH_H*/
 

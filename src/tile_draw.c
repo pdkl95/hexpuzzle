@@ -22,6 +22,7 @@
 #include "common.h"
 #include "color.h"
 
+#include "path.h"
 #include "tile.h"
 #include "tile_pos.h"
 #include "tile_draw.h"
@@ -32,45 +33,6 @@
 
 extern Shader win_border_shader;
 
-Color path_type_color(path_type_t type)
-{
-    switch (type) {
-    default:
-        return path_color_none;
-
-    case PATH_TYPE_RED:
-        return path_color_red;
-
-    case PATH_TYPE_BLUE:
-        return path_color_blue;
-
-    case PATH_TYPE_YELLOW:
-        return path_color_yellow;
-
-    case PATH_TYPE_GREEN:
-        return path_color_green;
-    }
-}
-
-Color path_type_highlight_color(path_type_t type)
-{
-    switch (type) {
-    default:
-        return path_color_none;
-
-    case PATH_TYPE_RED:
-        return path_highlight_color_red;
-
-    case PATH_TYPE_BLUE:
-        return path_highlight_color_blue;
-
-    case PATH_TYPE_YELLOW:
-        return path_highlight_color_yellow;
-
-    case PATH_TYPE_GREEN:
-        return path_highlight_color_green;
-    }
-}
 static bool either_self_or_adjacent_is_hidden(tile_pos_t *pos)
 {
     return pos->tile->hidden || (pos->hover_adjacent && pos->hover_adjacent->tile->hidden);

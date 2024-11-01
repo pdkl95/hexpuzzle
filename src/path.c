@@ -1,6 +1,6 @@
 /****************************************************************************
  *                                                                          *
- * tile_draw.h                                                              *
+ * path.c                                                                   *
  *                                                                          *
  * This file is part of hexpuzzle.                                          *
  *                                                                          *
@@ -15,20 +15,33 @@
  * Public License for more details.                                         *
  *                                                                          *
  * You should have received a copy of the GNU General Public License along  *
- * with hexpuzzle. If not, see <https://www.gnu.org/licenses/>.             *
+ * with rocks. If not, see <https://www.gnu.org/licenses/>.                 *
  *                                                                          *
  ****************************************************************************/
 
-#ifndef TILE_DRAW_H
-#define TILE_DRAW_H
+#include "common.h"
+#include "options.h"
+#include "path.h"
 
-#include "tile.h"
-#include "tile_pos.h"
-#include "level.h"
+char *path_type_name(path_type_t type)
+{
+    switch (type) {
+    default:
+        return "(BAD VALUE)";
 
-void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color finished_color, float finished_fade_in);
-void tile_draw_ghost(tile_pos_t *pos);
-void tile_draw_win_anim(tile_pos_t *pos, struct level *level);
+    case PATH_TYPE_NONE:
+        return "NONE";
 
-#endif /*TILE_DRAW_H*/
+    case PATH_TYPE_RED:
+        return "RED";
 
+    case PATH_TYPE_BLUE:
+        return "BLUE";
+
+    case PATH_TYPE_YELLOW:
+        return "YELLOW";
+
+    case PATH_TYPE_GREEN:
+        return "GREEN";
+    }
+}

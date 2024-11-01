@@ -74,7 +74,6 @@ char *config_dir;
 bool running = true;
 int physics_enabled_semaphore = 0;
 int automatic_event_polling_semaphore = 0;
-options_t *options = NULL;
 bool event_waiting_active = false;
 bool window_size_changed = false;
 bool first_resize = true;

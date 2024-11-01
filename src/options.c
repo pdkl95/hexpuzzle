@@ -33,6 +33,8 @@
 
 #include "options.h"
 
+options_t *options = NULL;
+
 /* command line options */
 static char short_options[] = "Cc:e:F:H:p:t:wvVW:PUL::hj";
 
@@ -282,6 +284,24 @@ options_set_defaults(
     options->create_level_radius   = OPTIONS_DEFAULT_CREATE_LEVEL_RADIUS;
     options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_MIN_PATH;
     options->create_level_max_path = OPTIONS_DEFAULT_CREATE_LEVEL_MAX_PATH;
+
+    options->path_color[0].color           = OPTIONS_DEFAULT_PATH_COLOR_0;
+    options->path_color[0].highlight_color = OPTIONS_DEFAULT_PATH_HL_COLOR_0;
+    options->path_color[1].color           = OPTIONS_DEFAULT_PATH_COLOR_1;
+    options->path_color[1].highlight_color = OPTIONS_DEFAULT_PATH_HL_COLOR_1;
+    options->path_color[2].color           = OPTIONS_DEFAULT_PATH_COLOR_2;
+    options->path_color[2].highlight_color = OPTIONS_DEFAULT_PATH_HL_COLOR_2;
+    options->path_color[3].color           = OPTIONS_DEFAULT_PATH_COLOR_3;
+    options->path_color[3].highlight_color = OPTIONS_DEFAULT_PATH_HL_COLOR_3;
+    options->path_color[4].color           = OPTIONS_DEFAULT_PATH_COLOR_4;
+    options->path_color[4].highlight_color = OPTIONS_DEFAULT_PATH_HL_COLOR_4;
+
+    float dim_factor = -0.25;
+    for (int i=0; i<PATH_TYPE_COUNT; i++) {
+        options->path_color[i].color =
+            ColorBrightness(options->path_color[i].color, dim_factor);
+        options->path_color[i].default_color = options->path_color[i].color;
+    }
 
     options->file_path = NULL;
 

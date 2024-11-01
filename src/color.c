@@ -20,6 +20,7 @@
  ****************************************************************************/
 
 #include "common.h"
+#include "options.h"
 #include "color.h"
 
 Color TRANSPARENT_BLACK  = { 0, 0, 0, 0 };
@@ -52,16 +53,6 @@ Color tile_edge_finished_color = { 0x9b, 0xff, 0x9b, 0x80 };
 Color tile_bg_highlight_color     = { 0xfd, 0xf9, 0x00, 0x4c };
 Color tile_bg_highlight_color_dim = { 0xfd, 0xf9, 0x00, 0x2c };
 
-Color path_color_none   = { 0, 0, 0, 0 };
-Color path_color_red    = RED;
-Color path_color_blue   = BLUE;
-Color path_color_yellow = YELLOW;
-Color path_color_green  = GREEN;
-Color path_highlight_color_red    = { 255,  65,  81, 255 };
-Color path_highlight_color_blue   = { 70,  166, 255, 255 };
-Color path_highlight_color_yellow = { 255, 253, 127, 255 };
-Color path_highlight_color_green  = {  67, 255, 105, 255 };
-
 Color panel_bg_color                = { 0x72, 0x1C, 0xB8, 0xaa };
 Color panel_edge_color              = { 0x94, 0x83, 0xA2, 0xcc };
 Color panel_header_text_color       = { 0xD0, 0xC0, 0xFF, 0xff };
@@ -70,6 +61,8 @@ Color panel_edge_hover_color        = { 0x94, 0x83, 0xA2, 0xcc };
 Color panel_header_text_hover_color = { 0xD0, 0xC0, 0xFF, 0xff };
 
 Color text_shadow_color = BLACK;
+
+Color path_color_none = OPTIONS_DEFAULT_PATH_COLOR_0;
 
 void prepare_global_colors()
 {
@@ -80,12 +73,6 @@ void prepare_global_colors()
     cursor_inner_color = DEEP_PINK;
     cursor_inner_color = ColorAlpha(cursor_inner_color, 0.65);
 
-    float dim_factor = -0.25;
-    path_color_red    = ColorBrightness(path_color_red,    dim_factor);
-    path_color_blue   = ColorBrightness(path_color_blue,   dim_factor);
-    path_color_yellow = ColorBrightness(path_color_yellow, dim_factor);
-    path_color_green  = ColorBrightness(path_color_green,  dim_factor);
-
     panel_bg_hover_color          = ColorBrightness(panel_bg_color,   -0.3);
     panel_edge_hover_color        = ColorBrightness(panel_edge_color,  0.3);
     panel_header_text_hover_color = WHITE;
@@ -93,3 +80,81 @@ void prepare_global_colors()
     text_shadow_color = ColorAlpha(BLACK, 0.8);
 }
 
+void color_option_set(color_option_t *c_opt, Color new_color)
+{
+    assert_not_null(c_opt);
+
+    c_opt->color = new_color;
+    snprintf(c_opt->string,
+             COLOR_OPTION_STRING_LENGTH,
+             "#%02x%02x%02x%02x",
+             new_color.r,
+             new_color.g,
+             new_color.b,
+             new_color.a);
+};
+
+static unsigned char parse_hex_byte(const char *p)
+{
+    char buf[5] = {'0', 'x', p[0], p[1], '\0'};
+    return strtol(buf, NULL, 0);
+}
+
+static unsigned char parse_hex_nibble(const char *p)
+{
+    char buf[5] = {'0', 'x', p[0], p[0], '\0'};
+    return strtol(buf, NULL, 0);
+}
+
+bool color_option_set_string(color_option_t *c_opt, const char *new_color_text)
+{
+    assert_not_null(c_opt);
+    assert_not_null(new_color_text);
+
+    const char *p = new_color_text;
+    if (p[0] == '#') {
+        p++;
+    } else {
+        //errmsg("Cannot parse \"%s\" as a color - missing leading '#'");
+        return false;
+    }
+
+    Color color = BLACK;
+
+    switch (strlen(p)) {
+    case 3:  // RGB
+        color.r = parse_hex_nibble(p);
+        color.g = parse_hex_nibble(p + 1);
+        color.b = parse_hex_nibble(p + 2);
+        break;
+
+    case 4:  // RGBA
+        color.r = parse_hex_nibble(p);
+        color.g = parse_hex_nibble(p + 1);
+        color.b = parse_hex_nibble(p + 2);
+        color.a = parse_hex_nibble(p + 3);
+        break;
+
+    case 6:  // RRGGBB
+        color.r = parse_hex_byte(p);
+        color.g = parse_hex_byte(p + 2);
+        color.b = parse_hex_byte(p + 4);
+        color.a = 0xff;
+        break;
+
+    case 8:  // RRGGBBAA
+        color.r = parse_hex_byte(p);
+        color.g = parse_hex_byte(p + 2);
+        color.b = parse_hex_byte(p + 4);
+        color.a = parse_hex_byte(p + 6);
+        break;
+
+    default:
+        //errmsg("Cannot parse \"%s\" as a color - bad length");
+        return false;
+    }
+
+    color_option_set(c_opt, color);
+
+    return true;
+}

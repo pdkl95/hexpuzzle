@@ -23,6 +23,8 @@
 #define OPTIONS_H
 
 #include "common.h"
+#include "color.h"
+//#include "path.h"
 #include "startup_action.h"
 
 #define OPTIONS_DEFAULT_VERBOSE false
@@ -49,6 +51,17 @@
 #define OPTIONS_DEFAULT_CREATE_LEVEL_MIN_PATH OPTIONS_DEFAULT_CREATE_LEVEL_MEDIUM_MIN_PATH
 #define OPTIONS_DEFAULT_CREATE_LEVEL_MAX_PATH OPTIONS_DEFAULT_CREATE_LEVEL_MEDIUM_MAX_PATH
 
+#define OPTIONS_DEFAULT_PATH_COLOR_0 (Color){ 0, 0, 0, 0 }
+#define OPTIONS_DEFAULT_PATH_COLOR_1 RED
+#define OPTIONS_DEFAULT_PATH_COLOR_2 BLUE
+#define OPTIONS_DEFAULT_PATH_COLOR_3 YELLOW
+#define OPTIONS_DEFAULT_PATH_COLOR_4 GREEN
+#define OPTIONS_DEFAULT_PATH_HL_COLOR_0 (Color){ 0, 0, 0, 0 }
+#define OPTIONS_DEFAULT_PATH_HL_COLOR_1 (Color){ 255,  65,  81, 255 }
+#define OPTIONS_DEFAULT_PATH_HL_COLOR_2 (Color){ 70,  166, 255, 255 }
+#define OPTIONS_DEFAULT_PATH_HL_COLOR_3 (Color){ 255, 253, 127, 255 }
+#define OPTIONS_DEFAULT_PATH_HL_COLOR_4 (Color){  67, 255, 105, 255 }
+
 #define OPTIONS_WINDOW_MIN_WIDTH  500
 #define OPTIONS_WINDOW_MIN_HEIGHT 500
 #define OPTIONS_WINDOW_MAX_WIDTH  (MAX(GetScreenWidth(),  OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH ))
@@ -59,6 +72,10 @@ struct options {
     bool safe_mode;
     bool verbose;
     bool wait_events;
+
+    color_option_t path_color[PATH_TYPE_COUNT];
+
+    bool load_color_opt;
 
     bool physics_effects;
     bool load_state_physics_effects;
@@ -95,6 +112,8 @@ struct options {
     int extra_argc;
 };
 typedef struct options options_t;
+
+extern options_t *options;
 
 options_t *create_options();
 void destroy_options(options_t *options);

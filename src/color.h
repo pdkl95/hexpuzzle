@@ -22,6 +22,20 @@
 #ifndef COLOR_H
 #define COLOR_H
 
+//             rrggbbaa
+//      e.g. "#abcdef12"             4x(2 chars) + '#' + '\0'
+#define COLOR_OPTION_STRING_LENGTH 10
+struct color_option {
+    Color color;
+    Color highlight_color;
+    Color default_color;
+    char string[COLOR_OPTION_STRING_LENGTH];
+};
+typedef struct color_option color_option_t;
+
+void color_option_set(color_option_t *c_opt, Color new_color);
+bool color_option_set_string(color_option_t *c_opt, const char *new_color_text);
+
 extern Color TRANSPARENT_BLACK;
 extern Color LIGHT_ORANGE;
 extern Color CHARTREUSE;
@@ -53,16 +67,6 @@ extern Color tile_edge_finished_color;
 extern Color tile_bg_highlight_color;
 extern Color tile_bg_highlight_color_dim;
 
-extern Color path_color_none;
-extern Color path_color_red;
-extern Color path_color_blue;
-extern Color path_color_yellow;
-extern Color path_color_green;
-extern Color path_highlight_color_red;
-extern Color path_highlight_color_blue;
-extern Color path_highlight_color_yellow;
-extern Color path_highlight_color_green;
-
 extern Color panel_bg_color;
 extern Color panel_edge_color;
 extern Color panel_header_text_color;
@@ -71,6 +75,8 @@ extern Color panel_edge_hover_color;
 extern Color panel_header_text_hover_color;
 
 extern Color text_shadow_color;
+
+extern Color path_color_none;
 
 void prepare_global_colors();
 
