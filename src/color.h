@@ -29,7 +29,9 @@ struct color_option {
     Color color;
     Color highlight_color;
     Color default_color;
-    char string[COLOR_OPTION_STRING_LENGTH];
+    char rgb_string[COLOR_OPTION_STRING_LENGTH];
+    char rgba_string[COLOR_OPTION_STRING_LENGTH];
+    unsigned char rgba[4];
 };
 typedef struct color_option color_option_t;
 
@@ -79,7 +81,7 @@ extern Color text_shadow_color;
 extern Color path_color_none;
 
 void prepare_global_colors();
-
+bool color_eq(Color a, Color b);
 
 #endif /*COLOR_H*/
 

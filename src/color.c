@@ -85,13 +85,27 @@ void color_option_set(color_option_t *c_opt, Color new_color)
     assert_not_null(c_opt);
 
     c_opt->color = new_color;
-    snprintf(c_opt->string,
+    c_opt->highlight_color = ColorBrightness(new_color, -0.25);
+
+    c_opt->rgba[0] = new_color.r;
+    c_opt->rgba[1] = new_color.g;
+    c_opt->rgba[2] = new_color.b;
+    c_opt->rgba[3] = new_color.a;
+
+    snprintf(c_opt->rgba_string,
              COLOR_OPTION_STRING_LENGTH,
              "#%02x%02x%02x%02x",
              new_color.r,
              new_color.g,
              new_color.b,
              new_color.a);
+
+    snprintf(c_opt->rgb_string,
+             COLOR_OPTION_STRING_LENGTH,
+             "#%02x%02x%02x",
+             new_color.r,
+             new_color.g,
+             new_color.b);
 };
 
 static unsigned char parse_hex_byte(const char *p)
@@ -157,4 +171,12 @@ bool color_option_set_string(color_option_t *c_opt, const char *new_color_text)
     color_option_set(c_opt, color);
 
     return true;
+}
+
+bool color_eq(Color a, Color b)
+{
+    return ((a.r == b.r) &&
+            (a.g == b.g) &&
+            (a.b == b.b) &&
+            (a.a == b.a));
 }
