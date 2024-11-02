@@ -1640,7 +1640,7 @@ void gfx_init(void)
     unsigned int flags = 0;
     flags |= FLAG_VSYNC_HINT;
     flags |= FLAG_WINDOW_RESIZABLE;
-    //flags |= FLAG_MSAA_4X_HINT;
+    flags |= FLAG_MSAA_4X_HINT;
     SetConfigFlags(flags);
 
     InitWindow(window_size.x, window_size.y, "Hex Puzzle");
@@ -1683,12 +1683,17 @@ void gfx_init(void)
     prepare_global_colors();
 
     load_shaders();
+
+    rlSetBlendFactors(RL_CONSTANT_ALPHA, RL_ONE_MINUS_CONSTANT_ALPHA, RL_FUNC_ADD);
+    rlEnableColorBlend();
 }
 
 static void
 gfx_cleanup(
     void
 ) {
+    rlDisableColorBlend();
+
     unload_shaders();
     unload_textures();
 

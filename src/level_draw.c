@@ -63,6 +63,24 @@ static void level_set_physics_transformation(tile_pos_t *pos)
     rlRotatef(TO_DEGREES(body->orient), 0.0, 0.0, 1.0);
 }
 
+static void level_set_transition(level_t *level, tile_pos_t *pos, bool do_fade)
+{
+    rlTranslatef(pos->win.center.x,
+                 pos->win.center.y,
+                 0.0);
+
+    if (pos->physics_body) {
+        if (do_fade) {
+            level_set_physics_transformation(pos);
+            level_set_fade_transition(level, pos);
+        } else {
+            level_set_physics_transformation(pos);
+        }
+    } else if (do_fade) {
+        level_set_fade_transition(level, pos);
+    }
+}
+
 void level_draw(level_t *level, bool finished)
 {
     assert_not_null(level);
@@ -83,9 +101,7 @@ void level_draw(level_t *level, bool finished)
     if (do_fade) {
         float blend_amount = level->fade_value;// * (1.0f - finished_fade_in);
         glBlendColor(0.0f, 0.0f, 0.0f, blend_amount);
-        rlSetBlendFactors(RL_CONSTANT_ALPHA, RL_ONE_MINUS_CONSTANT_ALPHA, RL_FUNC_ADD);
         rlSetBlendMode(RL_BLEND_CUSTOM);
-        rlEnableColorBlend();
 
         float rot = (1.0 - ease_circular_out(level->fade_value)) * (TAU/2.0);
 
@@ -132,16 +148,7 @@ void level_draw(level_t *level, bool finished)
                 } else {
                     rlPushMatrix();
 
-                    rlTranslatef(pos->win.center.x,
-                                 pos->win.center.y,
-                                 0.0);
-
-                    if (do_fade) {
-                        level_set_fade_transition(level, pos);
-                    } else if (pos->physics_body) {
-                        level_set_physics_transformation(pos);
-                    }
-
+                    level_set_transition(level, pos, do_fade);
                     tile_draw(pos, level->drag_target, finished, finished_color, finished_fade_in);
 
                     rlPopMatrix();
@@ -188,17 +195,9 @@ void level_draw(level_t *level, bool finished)
 
                     rlPushMatrix();
 
-                    rlTranslatef(pos->win.center.x,
-                                 pos->win.center.y,
-                                 0.0);
-
-                    if (do_fade) {
-                        level_set_fade_transition(level, pos);
-                    } else if (pos->physics_body) {
-                        level_set_physics_transformation(pos);
-                    }
-
+                    level_set_transition(level, pos, do_fade);
                     tile_draw_win_anim(pos, level);
+
                     rlPopMatrix();
                 }
             }

@@ -268,6 +268,12 @@ static level_t *init_level(level_t *level)
     level->fade_delta        = 0.0f;
     level->fade_target       = 0.0f;
 
+    if (rand() & 0x00000001) {
+        level->spin_direction = -1.0;
+    } else {
+        level->spin_direction = 1.0;
+    }
+
     level->radius = LEVEL_MIN_RADIUS;
 
     level->have_physics_body = false;

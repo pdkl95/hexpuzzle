@@ -112,6 +112,7 @@ struct level {
     level_fade_finished_cb_t fade_finished_callback;
     void *fade_finished_data;
     float fade_rotate_speed;
+    float spin_direction;
 
     bool have_physics_body;
     struct PhysicsBodyData *physics_floor;

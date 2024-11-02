@@ -323,13 +323,13 @@ void tile_pos_update_physics_forces(tile_pos_t *pos, struct level *level)
     len -= mindist;
     len = Clamp(len, mindist, maxdist);
 
-    float theta = TAU/4.0;
+    float theta = -TAU/4.0;
     float centfade = (len / maxdist);
     float rotfade = 1.0 - centfade;
     rotfade -= 0.2;
 
     Vector2 cent_force = Vector2Normalize(force);
-    Vector2 rot_force  = Vector2Rotate(cent_force, theta);
+    Vector2 rot_force  = Vector2Rotate(cent_force, theta * level->spin_direction);
 
     rot_force  = Vector2Scale( rot_force,  50.0f *  rotfade);
     cent_force = Vector2Scale(cent_force, 240.0f * centfade);
