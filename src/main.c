@@ -1670,8 +1670,6 @@ void gfx_init(void)
     GuiSetStyle(DEFAULT, TEXT_PADDING, 4);
     GuiSetStyle(DEFAULT, BORDER_WIDTH, 1);
 
-    set_uniform_resolution();
-
     if (options->wait_events) {
         if (options->verbose) {
             infomsg("Disabling automatic event polling.");
@@ -1683,6 +1681,8 @@ void gfx_init(void)
     prepare_global_colors();
 
     load_shaders();
+
+    set_uniform_resolution();
 
     rlSetBlendFactors(RL_CONSTANT_ALPHA, RL_ONE_MINUS_CONSTANT_ALPHA, RL_FUNC_ADD);
     rlEnableColorBlend();
@@ -1735,8 +1735,8 @@ static void game_init(void)
     init_gui_browser();
     init_gui_random();
 
-    set_game_mode(GAME_MODE_BROWSER);
-    //set_game_mode(GAME_MODE_RANDOM);
+    //set_game_mode(GAME_MODE_BROWSER);
+    set_game_mode(GAME_MODE_RANDOM);
 
     load_nvdata();
 }

@@ -81,6 +81,18 @@ void tile_draw_path(tile_pos_t *pos, bool finished)
             }
 
             DrawLineEx(pos->rel.center, mid, pos->line_width, pcolor);
+#if 0
+            float absx= fabs(pos->rel.center.x - mid.x);
+            float absy= fabs(pos->rel.center.y - mid.y);
+//            if ((absx >= pos->size) || (absy >= pos->size)) {
+                printf("DrawLineEx(<%3f,%3f>, <%3f,%3f>, %2f, #%02x%02x%02x%02x) %f\n",
+                       pos->rel.center.x, pos->rel.center.y,
+                       mid.x, mid.y,
+                       pos->line_width,
+                       pcolor.r, pcolor.g, pcolor.b, pcolor.a,
+                       pos->size);
+//            }
+#endif
         }
 
 #if 0
@@ -111,6 +123,18 @@ void tile_draw_path_ghost(tile_pos_t *pos)
             pcolor = ColorAlpha(pcolor, 0.666);
 
             DrawLineEx(pos->rel.center, mid, pos->line_width, pcolor);
+#if 0
+            float absx= fabs(pos->rel.center.x - mid.x);
+            float absy= fabs(pos->rel.center.y - mid.y);
+            if ((absx >= pos->size) || (absy >= pos->size)) {
+                printf("DrawLineEx(<%3f,%3f>, <%3f,%3f>, %2f, #%02x%02x%02x%02x) %f\n",
+                       pos->rel.center.x, pos->rel.center.y,
+                       mid.x, mid.y,
+                       pos->line_width,
+                       pcolor.r, pcolor.g, pcolor.b, pcolor.a,
+                       pos->size);
+            }
+#endif
         }
     }
 }
