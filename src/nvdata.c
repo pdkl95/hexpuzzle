@@ -188,9 +188,7 @@ static bool program_state_from_json(cJSON *json)
         }
     }
 
-    printf("\n\nstart\n");
     if (options->load_color_opt) {
-        printf("inside opt\n");
         cJSON *colors_json = cJSON_GetObjectItemCaseSensitive(json, "colors");
         if (colors_json) {
             for (int i=1; i<PATH_TYPE_COUNT; i++) {
@@ -202,7 +200,6 @@ static bool program_state_from_json(cJSON *json)
                         return false;
                     }
 
-                    printf("\t%s = \"%s\"\n", field, path_json->valuestring);
                     color_option_set_string(&(options->path_color[i]), path_json->valuestring);
                 } else {
                     warnmsg("Program state JSON['window'] is missing \"%s\"", field);
@@ -210,7 +207,6 @@ static bool program_state_from_json(cJSON *json)
             }
         }
     }
-    printf("\nend\n\n");
 
     cJSON *graphics_json = cJSON_GetObjectItemCaseSensitive(json, "graphics");
     if (graphics_json) {
