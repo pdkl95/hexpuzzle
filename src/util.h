@@ -22,7 +22,9 @@
 #ifndef UTIL_H
 #define UTIL_H
 
+#if defined(PLATFORM_DESKTOP)
 #include <libgen.h>
+#endif
 
 #ifndef strdupa
 # define strdupa(s)                                         \
@@ -36,8 +38,10 @@
 #endif
 
 char last_char(char *str);
+#if defined(PLATFORM_DESKTOP)
 bool file_exists(const char *file);
 int mkdir_p(const char *dir, mode_t mode);
+#endif
 
 static inline bool is_dir_separator(char c)
 {

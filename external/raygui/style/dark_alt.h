@@ -605,7 +605,9 @@ static void GuiLoadStyleDark(void)
     // i.e. Controls specific BORDER_WIDTH, TEXT_PADDING, TEXT_ALIGNMENT
 }
 
+#if !defined(PLATFORM_WEB)
 static void GuiUnloadStyleDark(void)
 {
     UnloadFont(font);
 }
+#endif

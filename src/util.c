@@ -40,6 +40,7 @@ char last_char(char *str)
     return str[idx - 1];
 }
 
+#if defined(PLATFORM_DESKTOP)
 bool file_exists(const char *file)
 {
     struct stat sb;
@@ -62,6 +63,7 @@ int mkdir_p(const char *dir, mode_t mode)
 
 	return mkdir(dir, mode);
 }
+#endif
 
 const char *directory_without_end_separator(const char *path)
 {

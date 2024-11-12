@@ -145,7 +145,7 @@ static void free_local_files_data(void)
 
     UnloadDirectoryFiles(browse_file_list);
 }
-
+#endif
 int compare_entries(const void *p1, const void *p2)
 {
     gui_list_entry_t *e1 = (gui_list_entry_t *)p1;
@@ -185,6 +185,7 @@ static void prepare_gui_list_names(gui_list_vars_t *list)
     }
 }
 
+#if defined(PLATFORM_DESKTOP)
 static bool should_skip_file(const char *name)
 {
     // skip hidden files
@@ -355,9 +356,11 @@ void init_gui_browser(void)
 
 void cleanup_gui_browser(void)
 {
+#if defined(PLATFORM_DESKTOP)
     if (local_files.names) {
         free_local_files_data();
     }
+#endif
 
     SAFEFREE(browse_path);
 }

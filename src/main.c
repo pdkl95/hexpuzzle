@@ -334,6 +334,19 @@ const char *default_open_file_path(void)
     return path;
 }
 
+static void reset_window_to_center(void)
+{
+    SetWindowSize(OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH,
+                  OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT);
+
+    int m = GetCurrentMonitor();
+    int x = (GetMonitorWidth(m)  / 2) - (OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH  / 2);
+    int y = (GetMonitorHeight(m) / 2) - (OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT / 2);
+
+    SetWindowPosition(x, y);
+}
+#endif
+
 static void reset_current_level(void)
 {
     if (current_level) {
@@ -350,19 +363,6 @@ static void reset_current_level(void)
         warnmsg("Cannot reset level - current_level is NULL");
     }
 }
-
-static void reset_window_to_center(void)
-{
-    SetWindowSize(OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH,
-                  OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT);
-
-    int m = GetCurrentMonitor();
-    int x = (GetMonitorWidth(m)  / 2) - (OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH  / 2);
-    int y = (GetMonitorHeight(m) / 2) - (OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT / 2);
-
-    SetWindowPosition(x, y);
-}
-#endif
 
 #define print_popup(...) {                                          \
         popup_text = TextFormat(__VA_ARGS__);                       \
@@ -1688,6 +1688,7 @@ void gfx_init(void)
     rlEnableColorBlend();
 }
 
+#if !defined(PLATFORM_WEB)
 static void
 gfx_cleanup(
     void
@@ -1702,6 +1703,7 @@ gfx_cleanup(
     unload_fonts();
     CloseWindow();
 }
+#endif
 
 static void physics_init(void)
 {
@@ -1709,10 +1711,12 @@ static void physics_init(void)
     SetPhysicsGravity(0.0, 0.0);
 }
 
+#if !defined(PLATFORM_WEB)
 static void physics_cleanup(void)
 {
     ClosePhysics();
 }
+#endif
 
 static void game_init(void)
 {
@@ -1764,6 +1768,7 @@ static void start_given_file(void)
 #endif
 
 
+#if !defined(PLATFORM_WEB)
 static void game_cleanup(void)
 {
     save_nvdata();
@@ -1773,6 +1778,7 @@ static void game_cleanup(void)
     cleanup_nvdata();
     cleanup_gui_options();
 }
+#endif
 
 int
 main(

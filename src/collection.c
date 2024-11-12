@@ -412,6 +412,7 @@ static bool collection_level_filename_exists_in_collection(collection_t *collect
     return false;
 }
 
+#if defined(PLATFORM_DESKTOP)
 static bool collection_level_filename_exists_as_existing_file(collection_t *collection, const char *name)
 {
     if (collection->dirpath) {
@@ -421,6 +422,12 @@ static bool collection_level_filename_exists_as_existing_file(collection_t *coll
         return false;
     }
 }
+#else
+static bool collection_level_filename_exists_as_existing_file(UNUSED collection_t *collection, UNUSED const char *name)
+{
+    return false;
+}
+#endif
 
 static bool collection_level_filename_exists(collection_t *collection, const char *name)
 {
@@ -625,6 +632,7 @@ level_t *collection_find_level_by_filename(collection_t *collection, const char 
     return NULL;
 }
 
+#if defined(PLATFORM_DESKTOP)
 void collection_save_dir(collection_t *collection, const char *dirpath, bool changed_only)
 {
     assert_not_null(collection);
@@ -673,6 +681,7 @@ void collection_save_dir(collection_t *collection, const char *dirpath, bool cha
   close_file:
     fclose(f);
 }
+#endif
 
 cJSON *collection_to_json(collection_t *collection)
 {
@@ -712,6 +721,7 @@ cJSON *collection_to_json(collection_t *collection)
     return NULL;
 }
 
+#if defined(PLATFORM_DESKTOP)
 void collection_save_pack(collection_t *collection, const char *filename)
 {
     assert_not_null(collection);
@@ -742,6 +752,7 @@ void collection_save_pack(collection_t *collection, const char *filename)
 
     free(tmpname);
 }
+#endif
 
 void collection_save(collection_t *collection)
 {
@@ -749,6 +760,7 @@ void collection_save(collection_t *collection)
 
     collection->changed = false;
 
+#if defined(PLATFORM_DESKTOP)
     if (collection->dirpath) {
         collection_save_dir(collection, collection->dirpath, true);
     } else if (collection->filename) {
@@ -756,6 +768,9 @@ void collection_save(collection_t *collection)
     } else {
         errmsg("Cannot save collection; a filename or directory path is required");
     }
+#else
+    errmsg("Saving only supported on PLATFORM_DESKTOP; sorry");
+#endif
 }
 
 static level_t *collection_find_level_by_idx(collection_t *collection, int level_idx)
