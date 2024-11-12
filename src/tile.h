@@ -41,6 +41,8 @@ struct tile {
     path_type_t path[6];
     path_type_t saved_path[6];
 
+    path_type_t start_for_path_type;
+
     struct tile_pos *solved_pos;
     struct tile_pos *unsolved_pos;
 };

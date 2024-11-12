@@ -224,6 +224,12 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
             bgcolor = tile_bg_drag_color;
         }
 
+#ifdef RANDOM_GEN_DEBUG
+        if (tile->start_for_path_type != PATH_TYPE_NONE) {
+            bgcolor = ColorLerp(bgcolor, path_type_color(tile->start_for_path_type), 0.12);
+        }
+#endif
+
         if (finished) {
             float alpha = (1.0f + sinf(current_time * 0.666)) / 2.0f;
             alpha = (alpha * 0.7) + 0.3;

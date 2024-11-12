@@ -105,6 +105,8 @@ tile_t *init_tile(tile_t *tile)
     }
 #endif
 
+    tile->start_for_path_type = PATH_TYPE_NONE;
+
     tile_update_path_count(tile);
 
     return tile;

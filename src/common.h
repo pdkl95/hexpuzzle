@@ -104,6 +104,7 @@ extern const char *progversion;
 #endif
 
 //#define DEBUG_PHYSICS_VECTORS
+//#define RANDOM_GEN_DEBUG
 
 #include "const.h"
 #include "raylib_helper.h"

@@ -20,6 +20,9 @@
  ****************************************************************************/
 
 #include "common.h"
+
+#include <limits.h>
+
 #include "options.h"
 #include "gui_random.h"
 #include "color.h"
@@ -29,8 +32,6 @@
 #include "level.h"
 
 #include "pcg/pcg_basic.h"
-
-//#define RANDOM_GEN_DEBUG
 
 Rectangle gui_random_panel_rect;
 Rectangle gui_random_area_rect;
@@ -62,17 +63,18 @@ char *gui_random_enter_seed_text = NULL;
 
 const char *gui_random_gen_styles[] = {
     "Density / Scatter",
-    "Hamiltonian Path - DFS"
+    "Hamiltonian Path - DFS",
+    "Separate DFS Per-Color"
 };
 char *gui_random_gen_style_text = NULL;
 #define NUM_GEN_STYLES (sizeof(gui_random_gen_styles)/sizeof(char *))
 bool gui_random_gen_style_edit_mode = false;
 
-int gen_style = 1;
+int gen_style = 2;
 
 const char *gui_random_difficulties[] = {
     "Easy    (~2 paths/tile)",
-    "Medium (3~4 paths/tile)",
+    "Medium  (~3 paths/tile)",
     "Hard   (4~6 paths/tile)"
 };
 char *gui_random_difficulty_text = NULL;
@@ -111,12 +113,29 @@ static void rng_seed(void)
     pcg32_srandom_r(&rng, gui_random_seed, (uint64_t)options->create_level_radius);
 }
 
+
+
 static int rng_get(int bound)
 {
     if (bound <= 1) {
         return 0;
     } else {
         return (int)pcg32_boundedrand_r(&rng, (uint32_t)bound);
+    }
+}
+
+static bool rng_bool(int true_chances, int false_chances)
+{
+    int total_chances = true_chances + false_chances;
+    return rng_get(total_chances) <= true_chances;
+}
+
+static int rng_sign(int pos_chances, int neg_chances)
+{
+    if (rng_bool(pos_chances, neg_chances)) {
+        return 1;
+    } else {
+        return -1;
     }
 }
 
@@ -210,6 +229,7 @@ static void set_all_hover(level_t *level, bool value)
 {
     for (int i=0; i<LEVEL_MAXTILES; i++) {
         tile_t *tile = &(level->tiles[i]);
+        tile->solved_pos->hover = value;
         tile->unsolved_pos->hover = value;
     }
 }
@@ -253,15 +273,178 @@ static void dfs_tile_pos(tile_pos_t *pos)
     }
 }
 
+static tile_pos_t *rng_get_start_pos(level_t *level, int num_tiles)
+{
+    while (true) {
+        int start_idx = rng_get(num_tiles);
+        tile_t *start = level->enabled_tiles[start_idx];
+        tile_pos_t *start_pos = start->solved_pos;
+
+        if (start->start_for_path_type == PATH_TYPE_NONE) {
+            return start_pos;
+        }
+    }
+}
+
 static void generate_dfs_path(level_t *level, int num_tiles)
 {
-    int start_idx = rng_get(num_tiles);
-    tile_t *start = level->enabled_tiles[start_idx];
-    tile_pos_t *start_pos = start->solved_pos;
+    tile_pos_t *start_pos = rng_get_start_pos(level, num_tiles);
 
     set_all_hover(level, false);
     dfs_tile_pos(start_pos);
     set_all_hover(level, false);
+}
+
+static int limited_dfs_neighbor_score(tile_pos_t *neighbor, path_type_t type)
+{
+    assert_not_null(neighbor);
+    assert_not_null(neighbor->tile);
+    assert(type != PATH_TYPE_NONE);
+
+    int score = 0;
+
+    tile_t *tile = neighbor->tile;
+    if (!tile->enabled) {
+        return INT_MAX;
+    }
+
+    for (hex_direction_t dir=0; dir<6; dir++) {
+        if (tile->path[dir] == type) {
+            score += 10;
+        } else if (tile->path[dir] != PATH_TYPE_NONE) {
+            score += 2;
+        }
+    }
+
+    score += rng_get(6);
+    score += rng_get(3);
+
+    return score;
+}
+
+static void limited_dfs_tile_pos(tile_pos_t *pos, path_type_t type, int color_count, int min_path, int max_path)
+{
+    assert_not_null(pos);
+
+    int todo_count = 0;
+    tile_pos_t *todo[6];
+    hex_direction_t todo_dir[6];
+
+    memset(todo, 0, sizeof(todo));
+    if (min_path < 1) {
+        //min_path = 1;
+        return;
+    }
+    if (max_path < 1) {
+        //max_path = 1;
+        //printf("STOP max_path == %d", max_path);
+        return;
+    }
+
+    pos->hover = true;
+
+    int pathcount = rng_get(max_path - min_path) + min_path;
+
+    for (hex_direction_t _dir=0; _dir<6; _dir++) {
+        hex_direction_t dir = _dir;
+        tile_pos_t *neighbor = pos->neighbors[dir];
+
+        if (neighbor && neighbor->tile && neighbor->tile->enabled) {
+            if (neighbor->hover) {
+                //printf("SKIP marked tile\n");
+            } else {
+                for (int i=0; i<todo_count; i++) {
+                    int cur_score = limited_dfs_neighbor_score( todo[i], type);
+                    int new_score = limited_dfs_neighbor_score(neighbor, type);
+                    if (new_score > cur_score) {
+                        tile_pos_t *tmp = neighbor;
+                        neighbor = todo[i];
+                        todo[i] = tmp;
+
+                        hex_direction_t dirtmp = dir;
+                        dir = todo_dir[i];
+                        todo_dir[i] = dirtmp;
+                    }
+                }
+
+                todo[todo_count] = neighbor;
+                todo_dir[todo_count] = dir;
+                todo_count++;
+            }
+#ifdef RANDOM_GEN_DEBUG
+        } else {
+            if (neighbor && neighbor->tile) {
+                //printf("neighbor->tile is NOT ENABLED\n");
+            } else if (neighbor) {
+                printf("neighbor->tile is NULL\n");
+            } else {
+                printf("neighbor is NULL\n");
+            }
+#endif
+        }
+    }
+
+#ifdef RANDOM_GEN_DEBUG
+    if (todo_count < 1) {
+        printf("STOP todo_count = %d\n", todo_count);
+    }
+
+    if (pathcount < 1) {
+        printf("STOP pathcount = %d\n", pathcount);
+    }
+#endif
+
+    while ((todo_count > 0) && (pathcount > 0)) {
+        //printf("\t\ttodo_count = %d, pathcount = %d\n", todo_count, pathcount);
+
+        todo_count--;
+
+        tile_pos_t *neighbor = todo[todo_count];
+        hex_direction_t dir = todo_dir[todo_count];
+
+        hex_direction_t opp_dir = hex_opposite_direction(dir);
+
+#ifdef RANDOM_GEN_DEBUG
+        printf("\ttile<%d, %d>[%d, %s] = %s\n",
+               pos->position.q, pos->position.r,
+               dir, hex_direction_name(dir),
+               path_type_name(type));
+#endif
+
+        if ((pos->tile->path[dir] == PATH_TYPE_NONE) || (rng_bool(color_count + 1, 7))) {
+            pos->tile->path[dir] = type;
+            neighbor->tile->path[opp_dir] = pos->tile->path[dir];
+
+            int dmin = rng_sign(1, 5);
+            int dmax = rng_sign(1, 7);
+//            dmin = -1;
+//            dmax = -1;
+            limited_dfs_tile_pos(neighbor, type, color_count, min_path + dmin, max_path + dmax);
+        }
+
+        pathcount--;
+    }
+}
+
+static void generate_limited_single_color_path(level_t *level, int num_tiles, path_type_t type, int color_count, int min_path, int max_path)
+{
+    tile_pos_t *start_pos = rng_get_start_pos(level, num_tiles);
+    start_pos->tile->start_for_path_type = type;
+    //printf(">>> Generating %s from <%d, %d>\n", path_type_name(type), start_pos->position.q, start_pos->position.r);
+
+    set_all_hover(level, false);
+    limited_dfs_tile_pos(start_pos, type, color_count, min_path, max_path);
+}
+
+static void generate_separate_limited_paths_per_color(level_t *level, int num_tiles, int min_path, int max_path)
+{
+    int color_count = 0;
+    for (path_type_t type = (PATH_TYPE_NONE + 1); type < PATH_TYPE_COUNT; type++) {
+        if (gui_random_color[type]) {
+            generate_limited_single_color_path(level, num_tiles, type, color_count, min_path, max_path);
+            color_count++;
+        }
+    }
 }
 
 static void shuffle_tiles(level_t *level)
@@ -325,6 +508,10 @@ struct level *generate_random_level(void)
     case 1:
         generate_dfs_path(level, n);
         generate_random_paths(level, n);
+        break;
+
+    case 2:
+        generate_separate_limited_paths_per_color(level, n, options->create_level_min_path, options->create_level_max_path);
         break;
 
     default:
