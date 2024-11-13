@@ -94,14 +94,14 @@ tile_t *init_tile(tile_t *tile)
     tile->solved_pos   = NULL;
     tile->unsolved_pos = NULL;
 
-    for (hex_direction_t i=0; i<6; i++) {
-        tile->path[i] = PATH_TYPE_NONE;
-        tile->saved_path[i] = PATH_TYPE_NONE;
+    each_direction {
+        tile->path[dir] = PATH_TYPE_NONE;
+        tile->saved_path[dir] = PATH_TYPE_NONE;
     }
 
 #if 0
-    for (int i=0; i<6; i++) {
-        tile->path[i] = rand() % PATH_TYPE_COUNT;
+    each_direction {
+        tile->path[dir] = rand() % PATH_TYPE_COUNT;
     }
 #endif
 
@@ -195,8 +195,8 @@ void tile_copy_attributes(tile_t *dst, tile_t *src)
     dst->fixed   = src->fixed;
     dst->hidden  = src->hidden;
 
-    for (int i=0; i<6; i++) {
-        dst->path[i] = src->path[i];
+    each_direction {
+        dst->path[dir] = src->path[dir];
     }
 }
 
@@ -208,8 +208,8 @@ void tile_copy_attributes_except_enabled(tile_t *dst, tile_t *src)
     dst->fixed   = src->fixed;
     dst->hidden  = src->hidden;
 
-    for (int i=0; i<6; i++) {
-        dst->path[i] = src->path[i];
+    each_direction {
+        dst->path[dir] = src->path[dir];
     }
 }
 
@@ -227,8 +227,9 @@ void tile_swap_attributes(tile_t *a, tile_t *b)
 void tile_update_path_count(tile_t *tile)
 {
     tile->path_count = 0;
-    for (hex_direction_t i=0; i<6; i++) {
-        if (tile->path[i]) {
+
+    each_direction {
+        if (tile->path[dir]) {
             tile->path_count++;
         }
     }
@@ -238,12 +239,24 @@ path_int_t tile_count_path_types(tile_t *tile)
 {
     path_int_t rv = {0};
 
-    for (hex_direction_t i=0; i<6; i++) {
-        rv.path[tile->path[i]] += 1;
+    each_direction {
+        rv.path[tile->path[dir]] += 1;
     }
 
     return rv;
 }
+
+bool tile_has_path_type(tile_t *tile, path_type_t type)
+{
+    each_direction {
+        if (tile->path[dir] == type) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 
 void tile_set_positions(tile_t *tile, level_t *level, hex_axial_t solved_addr, hex_axial_t unsolved_addr)
 {
@@ -328,19 +341,19 @@ bool tile_from_json(tile_t *tile, level_t *level, cJSON *json)
         return false;
     }
 
-    for (hex_direction_t i=0; i<6; i++) {
-        cJSON *p_json = cJSON_GetArrayItem(path_json, i);
+    each_direction {
+        cJSON *p_json = cJSON_GetArrayItem(path_json, dir);
         if (NULL == p_json) {
-            errmsg("Error parsing tile JSON: Array 'path' is missing item %d", i);
+            errmsg("Error parsing tile JSON: Array 'path' is missing item %d", dir);
             return false;
         }
 
         if (!cJSON_IsNumber(p_json)) {
-            errmsg("Error parsing tile JSON: Array 'path' item %d is not a Number", i);
+            errmsg("Error parsing tile JSON: Array 'path' item %d is not a Number", dir);
             return false;
         }
 
-        tile->path[i] = p_json->valueint;
+        tile->path[dir] = p_json->valueint;
     }
 
     tile->enabled = cJSON_IsTrue(enabled_json);

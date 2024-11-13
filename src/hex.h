@@ -40,6 +40,9 @@ enum hex_direction {
 };
 typedef enum hex_direction hex_direction_t;
 
+#define for_each_direction(var) for (hex_direction_t var=0; var<6; var++)
+#define each_direction for_each_direction(dir)
+
 const char *hex_direction_name(hex_direction_t dir);
 
 inline static hex_direction_t hex_opposite_direction(hex_direction_t dir)

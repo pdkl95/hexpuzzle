@@ -69,12 +69,12 @@ static path_type_t get_next_path(tile_pos_t *pos)
 
 void tile_draw_path(tile_pos_t *pos, bool finished)
 {
-    for (hex_direction_t i=0; i<6; i++) {
+    each_direction {
         /* colored strips */
-        Vector2 mid = pos->rel.midpoints[i];
+        Vector2 mid = pos->rel.midpoints[dir];
 
         tile_t *tile = pos->swap_target ? pos->swap_target->tile : pos->tile;
-        Color pcolor = path_type_color(tile->path[i]);
+        Color pcolor = path_type_color(tile->path[dir]);
         if (!ColorEq(pcolor, path_color_none)) {
             if (finished) {
                 pcolor = ColorAlpha(pcolor, 0.666);
@@ -99,7 +99,7 @@ void tile_draw_path(tile_pos_t *pos, bool finished)
         /* section index label */
         Vector2 offset = Vector2Scale(Vector2Subtract(pos->rel.center, mid), 0.2);;
         Vector2 mlabel = Vector2Add(mid, offset);
-        DrawTextShadow(TextFormat("%d", i), mlabel.x - 5, mlabel.y - 9, 18, RAYWHITE);
+        DrawTextShadow(TextFormat("%d", dir), mlabel.x - 5, mlabel.y - 9, 18, RAYWHITE);
 #endif
 
 #if 0
@@ -114,11 +114,11 @@ void tile_draw_path(tile_pos_t *pos, bool finished)
 
 void tile_draw_path_ghost(tile_pos_t *pos)
 {
-    for (hex_direction_t i=0; i<6; i++) {
+    each_direction {
         /* colored strips */
-        Vector2 mid = pos->rel.midpoints[i];
+        Vector2 mid = pos->rel.midpoints[dir];
 
-        Color pcolor = path_type_color(pos->tile->path[i]);
+        Color pcolor = path_type_color(pos->tile->path[dir]);
         if (!ColorEq(pcolor, path_color_none)) {
             pcolor = ColorAlpha(pcolor, 0.666);
 
@@ -141,22 +141,22 @@ void tile_draw_path_ghost(tile_pos_t *pos)
 
 void tile_draw_path_highlight(tile_pos_t *pos, bool finished, Color finished_color)
 {
-    for (hex_direction_t i=0; i<6; i++) {
+    each_direction {
         /* colored strips */
-        Vector2 mid = pos->rel.midpoints[i];
+        Vector2 mid = pos->rel.midpoints[dir];
 
-        if (pos->tile->path[i] != PATH_TYPE_NONE) {
-            tile_pos_t *neighbor = pos->neighbors[i];
+        if (pos->tile->path[dir] != PATH_TYPE_NONE) {
+            tile_pos_t *neighbor = pos->neighbors[dir];
             if (neighbor) {
-                hex_direction_t opposite = hex_opposite_direction(i);
-                if (neighbor->tile->path[opposite] == pos->tile->path[i]) {
+                hex_direction_t opposite = hex_opposite_direction(dir);
+                if (neighbor->tile->path[opposite] == pos->tile->path[dir]) {
                     Color highlight_color;
                     float line_width = 1.5;
                     if (finished) {
                         highlight_color = ColorAlpha(finished_color, 1.0);
                         line_width = 2.5;
                     } else {
-                        highlight_color = path_type_highlight_color(pos->tile->path[i]);
+                        highlight_color = path_type_highlight_color(pos->tile->path[dir]);
                     }
                     Vector2 path = Vector2Subtract(mid, pos->rel.center);
                     Vector2 perp = Vector2Normalize((Vector2){ path.y, -path.x});

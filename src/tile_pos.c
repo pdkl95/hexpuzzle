@@ -74,12 +74,12 @@ void destroy_tile_pos(tile_pos_t *pos)
 
 bool tile_pos_check(tile_pos_t *pos)
 {
-    for (hex_direction_t i=0; i<6; i++) {
-        if (pos->tile->path[i] != PATH_TYPE_NONE) {
-            hex_direction_t opp_i = hex_opposite_direction(i);
-            tile_pos_t *neighbor = pos->neighbors[i];
+    each_direction {
+        if (pos->tile->path[dir] != PATH_TYPE_NONE) {
+            hex_direction_t opp_i = hex_opposite_direction(dir);
+            tile_pos_t *neighbor = pos->neighbors[dir];
             if (neighbor) {
-                if (pos->tile->path[i] != neighbor->tile->path[opp_i]) {
+                if (pos->tile->path[dir] != neighbor->tile->path[opp_i]) {
                     return false;
                 }
             }
@@ -135,7 +135,7 @@ void tile_pos_toggle_hidden(tile_pos_t *pos)
 
     pos->tile->hidden = !pos->tile->hidden;
 
-    for (hex_direction_t dir=0; dir<6; dir++) {
+    each_direction {
         hex_direction_t opp_dir =
             hex_opposite_direction(dir);
         tile_pos_t *neighbor = pos->neighbors[dir];
@@ -220,11 +220,11 @@ void tile_pos_set_hovered_feature(tile_pos_t *pos, path_type_t type)
 
 void tile_pos_clear(tile_pos_t *pos, struct level *level)
 {
-    for (hex_direction_t i=0; i<6; i++) {
-        pos->tile->path[i] = PATH_TYPE_NONE;
-        tile_pos_t *neighbor = level_find_current_neighbor_tile_pos(level, pos, i);
+    each_direction {
+        pos->tile->path[dir] = PATH_TYPE_NONE;
+        tile_pos_t *neighbor = level_find_current_neighbor_tile_pos(level, pos, dir);
         if (neighbor) {
-            hex_direction_t opp_i = hex_opposite_direction(i);
+            hex_direction_t opp_i = hex_opposite_direction(dir);
             neighbor->tile->path[opp_i] = PATH_TYPE_NONE;
         }
     }
@@ -244,29 +244,29 @@ void tile_pos_rebuild(tile_pos_t *pos)
     Vector2 *corners = hex_pixel_corners(pos->win.center, pos->size);
     memcpy(pos->win.corners, corners, 7 * sizeof(Vector2));
 
-    for (int i=0; i<6; i++) {
-        Vector2 c0 = pos->win.corners[i];
-        Vector2 c1 = pos->win.corners[i + 1];
+    each_direction {
+        Vector2 c0 = pos->win.corners[dir];
+        Vector2 c1 = pos->win.corners[dir + 1];
 
-        pos->win.midpoints[i] = Vector2Lerp(c0, c1, 0.5);
+        pos->win.midpoints[dir] = Vector2Lerp(c0, c1, 0.5);
 
-        pos->rel.corners[i]   = Vector2Subtract(pos->win.corners[i],   pos->win.center);
-        pos->rel.midpoints[i] = Vector2Subtract(pos->win.midpoints[i], pos->win.center);
+        pos->rel.corners[dir]   = Vector2Subtract(pos->win.corners[dir],   pos->win.center);
+        pos->rel.midpoints[dir] = Vector2Subtract(pos->win.midpoints[dir], pos->win.center);
     }
 
     Vector2 cent = Vector2Lerp(pos->win.midpoints[0], pos->win.midpoints[3], 0.5);
 
-    for (int i=0; i<6; i++) {
-        Vector2 c0 = pos->win.corners[i];
-        Vector2 c1 = pos->win.corners[i + 1];
+    each_direction {
+        Vector2 c0 = pos->win.corners[dir];
+        Vector2 c1 = pos->win.corners[dir + 1];
 
-        pos->win.sections[i].corners[0] = c0;
-        pos->win.sections[i].corners[1] = c1;
-        pos->win.sections[i].corners[2] = cent;
+        pos->win.sections[dir].corners[0] = c0;
+        pos->win.sections[dir].corners[1] = c1;
+        pos->win.sections[dir].corners[2] = cent;
 
-        pos->rel.sections[i].corners[0] = Vector2Subtract(pos->win.sections[i].corners[0], pos->win.center);
-        pos->rel.sections[i].corners[1] = Vector2Subtract(pos->win.sections[i].corners[1], pos->win.center);
-        pos->rel.sections[i].corners[2] = Vector2Subtract(pos->win.sections[i].corners[2], pos->win.center);
+        pos->rel.sections[dir].corners[0] = Vector2Subtract(pos->win.sections[dir].corners[0], pos->win.center);
+        pos->rel.sections[dir].corners[1] = Vector2Subtract(pos->win.sections[dir].corners[1], pos->win.center);
+        pos->rel.sections[dir].corners[2] = Vector2Subtract(pos->win.sections[dir].corners[2], pos->win.center);
     }
 }
 
@@ -287,8 +287,8 @@ void tile_pos_create_physics_body(tile_pos_t *pos)
     tile_t *tile =pos->tile;
 
     float density = TILE_BASE_DENSITY;
-    for (hex_direction_t i=0; i<6; i++) {
-        if (tile->path[i] != PATH_TYPE_NONE) {
+    each_direction {
+        if (tile->path[dir] != PATH_TYPE_NONE) {
             density += TILE_PATH_DENDITY;
         }
     }

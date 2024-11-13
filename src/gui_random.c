@@ -189,7 +189,7 @@ static void generate_random_paths(level_t *level, int num_tiles)
         tile_t *tile = level->enabled_tiles[i];
         tile_pos_t *pos = tile->solved_pos;
 
-        for (hex_direction_t dir=0; dir<6; dir++) {
+        each_direction {
             if (tile->path[dir]) {
                 num_paths--;
             } else {
@@ -205,7 +205,7 @@ static void generate_random_paths(level_t *level, int num_tiles)
 
         while (num_paths > 0) {
             int offset = rng_get(6);
-            for (hex_direction_t dir=0; dir<6; dir++) {
+            each_direction {
                 hex_direction_t idx = (dir + offset) % 6;
 
                 if (tile->path[idx]) {
@@ -241,7 +241,7 @@ static void dfs_tile_pos(tile_pos_t *pos)
 
     pos->hover = true;
 
-    for (hex_direction_t dir=0; dir<6; dir++) {
+    each_direction {
         tile_pos_t *neighbor = pos->neighbors[dir];
         if (neighbor && neighbor->tile && neighbor->tile->enabled && !neighbor->hover) {
             todo[dir] = true;
@@ -251,7 +251,7 @@ static void dfs_tile_pos(tile_pos_t *pos)
 
     while (todo_count > 0) {
         int offset = rng_get(6);
-        for (hex_direction_t dir=0; dir<6; dir++) {
+        each_direction {
             hex_direction_t idx = (dir + offset) % 6;
             if (todo[idx]) {
                 todo[idx] = false;
@@ -308,7 +308,7 @@ static int limited_dfs_neighbor_score(tile_pos_t *neighbor, path_type_t type)
         return INT_MAX;
     }
 
-    for (hex_direction_t dir=0; dir<6; dir++) {
+    each_direction {
         if (tile->path[dir] == type) {
             score += 10;
         } else if (tile->path[dir] != PATH_TYPE_NONE) {
@@ -345,7 +345,7 @@ static void limited_dfs_tile_pos(tile_pos_t *pos, path_type_t type, int color_co
 
     int pathcount = rng_get(max_path - min_path) + min_path;
 
-    for (hex_direction_t _dir=0; _dir<6; _dir++) {
+    for_each_direction(_dir) {
         hex_direction_t dir = _dir;
         tile_pos_t *neighbor = pos->neighbors[dir];
 

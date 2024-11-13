@@ -509,6 +509,10 @@ handle_events(
         }
     }
 
+    if (IsKeyPressed(KEY_F)) {
+        show_fps = !show_fps;
+    }
+
 #if defined(PLATFORM_DESKTOP)
     if (IsKeyPressed(KEY_R) && is_any_shift_down()) {
         reset_window_to_center();
@@ -1546,11 +1550,11 @@ render_frame(
 #endif
         draw_popup_text();
 
-#if defined(PLATFORM_DESKTOP)
+//#if defined(PLATFORM_DESKTOP)
         if (show_fps) {
-            DrawTextShadow(TextFormat("FPS: %d", GetFPS()), 15, 10, 20, WHITE);
+            DrawTextShadow(TextFormat("FPS: %d", GetFPS()), 15, 10, DEFAULT_GUI_FONT_SIZE, WHITE);
         }
-#endif
+//#endif
     }
     EndDrawing();
 

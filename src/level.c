@@ -927,12 +927,12 @@ static void level_add_to_bounding_box(level_t *level, tile_pos_t *pos)
     assert_not_null(pos);
 
     Vector2 *corners = pos->win.corners;
-    for (int i=0; i<6; i++) {
-        level->px_min.x = MIN(level->px_min.x, corners[i].x);
-        level->px_min.y = MIN(level->px_min.y, corners[i].y);
+    each_direction {
+        level->px_min.x = MIN(level->px_min.x, corners[dir].x);
+        level->px_min.y = MIN(level->px_min.y, corners[dir].y);
 
-        level->px_max.x = MAX(level->px_max.x, corners[i].x);
-        level->px_max.y = MAX(level->px_max.y, corners[i].y);
+        level->px_max.x = MAX(level->px_max.x, corners[dir].x);
+        level->px_max.y = MAX(level->px_max.y, corners[dir].y);
    }
 }
 

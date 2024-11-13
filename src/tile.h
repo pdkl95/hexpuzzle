@@ -59,6 +59,8 @@ tile_t *init_tile(tile_t *tile);
 tile_t *create_tile(void);
 void destroy_tile(tile_t *tile);
 
+bool tile_has_path_type(tile_t *tile, path_type_t type);
+
 bool tile_eq(tile_t *dst, tile_t *other);
 void tile_copy_attributes(tile_t *dst, tile_t *src);
 void tile_copy_attributes_except_enabled(tile_t *dst, tile_t *src);
