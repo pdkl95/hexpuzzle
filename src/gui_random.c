@@ -616,27 +616,45 @@ static void draw_path_between_tiles(level_t *level, tile_pos_t *a, tile_pos_t *b
     assert(connection_count > 0);
 }
 
-static void generate_connect_to_point(level_t *level)
+static bool generate_connect_to_point_once(level_t *level)
 {
     assert_not_null(level);
 
+    tile_pos_t *blank_pos = find_random_tile_empty_first(level, NULL);
+    if (!blank_pos) {
+        //printf("out of blank tiles?!\n");
+        return true;;
+    }
+
+    path_type_t type = rng_color();
+
+    tile_pos_t *nearest_pos = find_nearest_matching_color_tile(level, blank_pos, type);
+    if (!nearest_pos) {
+        return true;
+    }
+    //assert_not_null(nearest_pos);
+    assert(nearest_pos != blank_pos);
+
+    draw_path_between_tiles(level, blank_pos, nearest_pos, type);
+
+    return false;
+}
+
+static void generate_connect_to_point(level_t *level)
+{
+    assert_not_null(level);
     while (level_has_empty_tiles(level)) {
-        tile_pos_t *blank_pos = find_random_tile_empty_first(level, NULL);
-        if (!blank_pos) {
-            //printf("out of blank tiles?!\n");
+        if (generate_connect_to_point_once(level)) {
             break;
         }
+    }
 
-        path_type_t type = rng_color();
+    int extra = options->create_level_expoints * level->radius;
 
-        tile_pos_t *nearest_pos = find_nearest_matching_color_tile(level, blank_pos, type);
-        if (!nearest_pos) {
-            break;
+    for (int i=0; i<extra; i++) {
+        if (generate_connect_to_point_once(level)) {
+            //break;
         }
-        //assert_not_null(nearest_pos);
-        assert(nearest_pos != blank_pos);
-
-        draw_path_between_tiles(level, blank_pos, nearest_pos, type);
     }
 }
 
@@ -676,17 +694,20 @@ struct level *generate_random_level(void)
     case 0: /* easy */
         options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_EASY_MIN_PATH;
         options->create_level_max_path = OPTIONS_DEFAULT_CREATE_LEVEL_EASY_MAX_PATH;
+        options->create_level_expoints = OPTIONS_DEFAULT_CREATE_LEVEL_EASY_EXPOINTS;
         break;
 
     case 1: /* medium */
         options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_MEDIUM_MIN_PATH;
         options->create_level_max_path = OPTIONS_DEFAULT_CREATE_LEVEL_MEDIUM_MAX_PATH;
+        options->create_level_expoints = OPTIONS_DEFAULT_CREATE_LEVEL_MEDIUM_EXPOINTS;
         break;
 
     case 2: /* hard */
         options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_HARD_MIN_PATH;
         options->create_level_max_path = OPTIONS_DEFAULT_CREATE_LEVEL_HARD_MAX_PATH;
-        break;
+        options->create_level_expoints = OPTIONS_DEFAULT_CREATE_LEVEL_HARD_EXPOINTS;
+       break;
 
     default:
         __builtin_unreachable();

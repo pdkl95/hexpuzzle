@@ -1496,6 +1496,57 @@ static void draw_cartesian_grid(bool draw_labels)
     rlPopMatrix();
 }
 
+static void draw_cursor(void)
+{
+    if (IsCursorOnScreen()) {
+        int iconid = ICON_CURSOR_POINTER;
+        IVector2 icon_pos = mouse_position;
+        int icon_scale = options->cursor_scale;
+
+        switch (current_mouse_cursor) {
+        case MOUSE_CURSOR_POINTING_HAND:
+            iconid = ICON_CURSOR_HAND;
+            break;
+
+        default:
+            // do nothing */
+            break;
+        }
+
+#if 0
+        Vector2 center = mouse_positionf;
+
+        cursor_spin += cursor_spin_step;
+        while (cursor_spin >= 360.0) {
+            cursor_spin -= 360.0;
+        }
+        float spinosc = 0.5 * (sinf(3.0f * cursor_spin * M_PI / 180.0f) + 1.0);
+
+#define CURSOR_NUM_SECTORS 3
+#define CURSOR_SECTOR_SIZE (360.0f / CURSOR_NUM_SECTORS)
+#define CURSOR_RADIUS 12.0f
+#define CURSOR_INNER_RADIUS 4.0f
+
+        DrawRing(center,
+                 CURSOR_RADIUS,
+                 CURSOR_RADIUS + 1.5f,
+                 0.0f, 360.0f,
+                 0, cursor_outer_color);
+
+        for (int i=0; i<CURSOR_NUM_SECTORS; i++) {
+            float start_angle = ((float)i) * CURSOR_SECTOR_SIZE;
+            start_angle += cursor_spin;
+            float wedgesize = 2.5f + spinosc; // * 0.5;
+            float end_angle = start_angle + (CURSOR_SECTOR_SIZE/wedgesize);
+            DrawRing(center, CURSOR_INNER_RADIUS, CURSOR_RADIUS, start_angle, end_angle, 8, cursor_inner_color);
+        }
+#endif
+
+        GuiDrawIcon(iconid, icon_pos.x + 1, icon_pos.y + 1, icon_scale, ColorAlpha(BLACK, 0.5));
+        GuiDrawIcon(iconid, icon_pos.x, icon_pos.y, icon_scale, RAYWHITE);
+    }
+}
+
 static bool
 render_frame(
     void
@@ -1556,6 +1607,8 @@ render_frame(
             DrawTextShadow(TextFormat("FPS: %d", GetFPS()), 15, 10, DEFAULT_GUI_FONT_SIZE, WHITE);
         }
 //#endif
+
+        draw_cursor();
     }
     EndDrawing();
 
@@ -1665,6 +1718,7 @@ void gfx_init(void)
 #endif
 
     //set_mouse_cursor(MOUSE_CURSOR_CROSSHAIR);
+    HideCursor();
 
     load_fonts();
 

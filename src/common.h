@@ -160,10 +160,7 @@ extern int current_mouse_cursor;
 
 static inline void set_mouse_cursor(int cursor)
 {
-    if (cursor != current_mouse_cursor) {
-        SetMouseCursor(cursor);
-        current_mouse_cursor = cursor;
-    }
+    current_mouse_cursor = cursor;
 }
 
 

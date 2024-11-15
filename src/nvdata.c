@@ -210,6 +210,20 @@ static bool program_state_from_json(cJSON *json)
 
     cJSON *graphics_json = cJSON_GetObjectItemCaseSensitive(json, "graphics");
     if (graphics_json) {
+        cJSON *cursor_size_json = cJSON_GetObjectItemCaseSensitive(graphics_json, "cursor_size");
+        if (cursor_size_json) {
+            if (cJSON_IsNumber(cursor_size_json)) {
+                int value = cursor_size_json->valueint;
+                CLAMPVAR(value, CURSOR_MIN_SCALE, CURSOR_MAX_SCALE);
+                printf("cursor_scalw = %d\n", value);
+                options->cursor_scale = value;
+            } else {
+                errmsg("Program state JSON['graphics']['cursor_size'] is not a NUMBER");
+            }
+        } else {
+            warnmsg("Program state JSON['graphics'] is missing \"cursor_size\"");
+        }
+
         cJSON *bool_json = NULL;
 
 #define mk_bool_json(field, name)                                           \
@@ -226,7 +240,7 @@ static bool program_state_from_json(cJSON *json)
                    STR(name));                                              \
         }                                                                   \
     } else {                                                                \
-        warnmsg("Program state JSON['graphgics'] is missing \"%s\"",        \
+        warnmsg("Program state JSON['graphics'] is missing \"%s\"",         \
                 STR(name));                                                 \
     }
 
@@ -346,6 +360,11 @@ static cJSON *program_state_to_json(void)
         goto to_json_error;
     }
 
+    if (cJSON_AddNumberToObject(graphics_json, "cursor_size", options->cursor_scale) == NULL) {
+        errmsg("Error adding \"cursor_size\" to JSON.graphics");
+        goto to_json_error;
+    }
+
     cJSON *bool_json = NULL;
 
 #define mk_bool_json(field, name)                                       \
@@ -355,7 +374,7 @@ static cJSON *program_state_to_json(void)
         bool_json = cJSON_AddFalseToObject(graphics_json, STR(name));   \
     }                                                                   \
     if (!bool_json) {                                                   \
-        errmsg("Error adding bool \"%s\" to JSON", STR(name));          \
+        errmsg("Error adding bool \"%s\" to JSON.graphics", STR(name));          \
         goto to_json_error;                                             \
     }
 

@@ -270,6 +270,7 @@ options_set_defaults(
     options->max_fps               = OPTIONS_DEFAULT_MAX_FPS;
     options->initial_window_width  = OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH;
     options->initial_window_height = OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT;
+    options->cursor_scale          = OPTIONS_DEFAULT_CURSOR_SCALE;
 
     options->load_state_animate_bg  = true;
     options->load_state_animate_win = true;
@@ -285,6 +286,7 @@ options_set_defaults(
     options->create_level_radius   = OPTIONS_DEFAULT_CREATE_LEVEL_RADIUS;
     options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_MIN_PATH;
     options->create_level_max_path = OPTIONS_DEFAULT_CREATE_LEVEL_MAX_PATH;
+    options->create_level_max_path = OPTIONS_DEFAULT_CREATE_LEVEL_EXPOINTS;
 
     color_option_set(&(options->path_color[0]), OPTIONS_DEFAULT_PATH_COLOR_0);
     color_option_set(&(options->path_color[1]), OPTIONS_DEFAULT_PATH_COLOR_1);

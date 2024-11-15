@@ -100,6 +100,9 @@
 #endif
 #define DEFAULT_GUI_FONT_SPACING 2.0
 
+#define CURSOR_MIN_SCALE 1
+#define CURSOR_MAX_SCALE 4
+
 #define PANEL_LABEL_FONT         font16
 #define PANEL_LABEL_FONT_SIZE    16
 #define PANEL_LABEL_FONT_SPACING 2.0

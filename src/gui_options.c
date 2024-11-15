@@ -33,12 +33,14 @@
 Rectangle options_panel_rect;
 Rectangle options_tabbar_rect;
 Rectangle options_area_rect;
+Rectangle options_icon_scale_rect;
 Rectangle options_anim_bg_rect;
 Rectangle options_anim_win_rect;
 Rectangle options_reset_finished_rect;
 Rectangle options_physics_effects_rect;
 
 char options_panel_text[] = "Options";
+char options_icon_scale_text[] = "Cursor Size";
 char options_anim_bg_text[]  = "Animate Background";
 char options_anim_win_text[] = "Animate Winning Levels";
 char options_physics_effects_text[] = "Physics Effects";
@@ -151,6 +153,8 @@ resize_gui_options();
 
 void cleanup_gui_options(void)
 {
+    SAFEFREE(options_status_on.icon_text);
+    SAFEFREE(options_status_off.icon_text);
 }
 
 void resize_gui_options(void)
@@ -204,6 +208,12 @@ void resize_gui_options(void)
     options_physics_effects_rect.width = anim_text_size;
     options_physics_effects_rect.height = TOOL_BUTTON_HEIGHT;
 
+    Vector2 options_icon_scale_text_size = MeasureGuiText(options_icon_scale_text);
+    options_icon_scale_rect.x = options_physics_effects_rect.x + options_icon_scale_text_size.x;
+    options_icon_scale_rect.y = options_physics_effects_rect.y + options_physics_effects_rect.height + RAYGUI_ICON_SIZE;
+    options_icon_scale_rect.width = 90;
+    options_icon_scale_rect.height = TOOL_BUTTON_HEIGHT;
+
     options_status_on.text_size  = MeasureGuiText(options_status_on.text);
     options_status_off.text_size = MeasureGuiText(options_status_off.text);
 
@@ -212,6 +222,8 @@ void resize_gui_options(void)
     options_status_on.text_size.y = options_status_off.text_size.y =
         MAX(options_status_on.text_size.y, options_status_off.text_size.y);
 
+    SAFEFREE(options_status_on.icon_text);
+    SAFEFREE(options_status_off.icon_text);
     options_status_on.icon_text  = strdup(GuiIconText(ICON_OK_TICK,  options_status_on.text));
     options_status_off.icon_text = strdup(GuiIconText(ICON_CROSS, options_status_off.text));
 
@@ -285,6 +297,13 @@ void draw_gui_graphics_options(void)
     show_status_beside(options->animate_bg,      options_anim_bg_rect);
     show_status_beside(options->animate_win,     options_anim_win_rect);
     show_status_beside(options->physics_effects, options_physics_effects_rect);
+
+    int old_cursor_scale = options->cursor_scale;
+    int cursor_scale     = options->cursor_scale;
+    GuiSpinner(options_icon_scale_rect, options_icon_scale_text, &cursor_scale, CURSOR_MIN_SCALE, CURSOR_MAX_SCALE, false);
+    if (old_cursor_scale != cursor_scale) {
+        options->cursor_scale = cursor_scale;
+    }
 
     GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, prev_align);
 
