@@ -156,6 +156,16 @@ extern Vector2 mouse_positionf;
 extern bool mouse_left_click;
 extern bool mouse_left_release;
 extern bool mouse_right_click;
+extern int current_mouse_cursor;
+
+static inline void set_mouse_cursor(int cursor)
+{
+    if (cursor != current_mouse_cursor) {
+        SetMouseCursor(cursor);
+        current_mouse_cursor = cursor;
+    }
+}
+
 
 extern float current_time;
 extern double double_current_time;

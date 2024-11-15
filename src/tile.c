@@ -73,6 +73,7 @@ char *tile_our_pos_string(struct tile_pos *pos)
 void print_tile(tile_t *tile)
 {
     if (tile) {
+        printf("%p ", tile);
         printf("tile<flags=%s path=%s s_pos=%s u_pos=%s>\n",
                tile_flag_string(tile),
                tile_path_string(tile),
@@ -257,6 +258,16 @@ bool tile_has_path_type(tile_t *tile, path_type_t type)
     return false;
 }
 
+bool tile_is_blank(tile_t *tile)
+{
+    each_direction {
+        if (tile->path[dir] != PATH_TYPE_NONE) {
+            return false;
+        }
+    }
+
+    return true;
+}
 
 void tile_set_positions(tile_t *tile, level_t *level, hex_axial_t solved_addr, hex_axial_t unsolved_addr)
 {

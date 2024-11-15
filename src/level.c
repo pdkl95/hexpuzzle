@@ -223,6 +223,10 @@ void level_toggle_currently_used_tiles(level_t *level)
 
 static level_t *init_level(level_t *level)
 {
+    assert_not_null(level);
+
+    memset(level, 0, sizeof(level_t));
+
     int i=0;
     for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
         for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
@@ -1036,6 +1040,23 @@ tile_pos_t *level_find_current_neighbor_tile_pos(level_t *level, tile_pos_t *pos
     return neighbor;
 }
 
+bool level_has_empty_tiles(level_t *level)
+{
+    for (int i=0; i<LEVEL_MAXTILES; i++) {
+        tile_t *tile = &(level->tiles[i]);
+
+        if (!tile->enabled || tile->hidden) {
+            continue;
+        }
+
+        if (tile_is_blank(tile)) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool level_check(level_t *level)
 {
     assert_not_null(level);
@@ -1210,7 +1231,7 @@ void level_set_hover(level_t *level, IVector2 mouse_position)
     }
 
     if (tile_pos_dragable(level->hover) && dragable_mode) {
-        SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+        set_mouse_cursor(MOUSE_CURSOR_POINTING_HAND);
     }
 }
 

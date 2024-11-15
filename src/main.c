@@ -88,6 +88,7 @@ Vector2 mouse_positionf;
 bool mouse_left_click  = false;
 bool mouse_left_release  = false;
 bool mouse_right_click = false;
+int current_mouse_cursor = -1;
 float cursor_spin = 0.0f;
 float cursor_spin_step = (360.0f / 100.0f);
 int frame_count = 0;
@@ -916,7 +917,7 @@ static void draw_name_header(void)
         if (mouse_left_click) {
             show_name_edit_dialog();
         } else {
-            SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+            set_mouse_cursor(MOUSE_CURSOR_POINTING_HAND);
         }
     }
 #else
@@ -1028,7 +1029,7 @@ static void draw_tool_panel(void)
                 edit_tool_erase = false;
                 set_edit_tool(type);
             } else {
-                SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+                set_mouse_cursor(MOUSE_CURSOR_POINTING_HAND);
             }
         }
 
@@ -1086,7 +1087,7 @@ static void draw_goto_next_level_panel(void)
         if (mouse_left_click) {
             level_play(next_level);
         } else {
-            SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+            set_mouse_cursor(MOUSE_CURSOR_POINTING_HAND);
         }
     }
 }
@@ -1566,7 +1567,7 @@ static void early_frame_setup(void)
     double_current_time = GetTime();
     current_time = (float)double_current_time;
 
-    SetMouseCursor(MOUSE_CURSOR_DEFAULT);
+    set_mouse_cursor(MOUSE_CURSOR_DEFAULT);
 
     if (level_finished) {
         SetShaderValue(win_border_shader, win_border_shader_loc.time, &current_time, SHADER_UNIFORM_FLOAT);
@@ -1663,7 +1664,7 @@ void gfx_init(void)
     }
 #endif
 
-    //SetMouseCursor(MOUSE_CURSOR_CROSSHAIR);
+    //set_mouse_cursor(MOUSE_CURSOR_CROSSHAIR);
 
     load_fonts();
 

@@ -68,6 +68,7 @@ void tile_swap_attributes(tile_t *a, tile_t *b);
 
 void tile_update_path_count(tile_t *tile);
 path_int_t tile_count_path_types(tile_t *tile);
+bool tile_is_blank(tile_t *tile);
 
 bool tile_from_json(tile_t *tile, struct level *level, cJSON *json);
 cJSON *tile_to_json(tile_t *tile);

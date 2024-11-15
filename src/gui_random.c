@@ -64,13 +64,14 @@ char *gui_random_enter_seed_text = NULL;
 const char *gui_random_gen_styles[] = {
     "Density / Scatter",
     "Hamiltonian Path - DFS",
-    "Separate DFS Per-Color"
+    "Separate DFS Per-Color",
+    "Connect To Point"
 };
 char *gui_random_gen_style_text = NULL;
 #define NUM_GEN_STYLES (sizeof(gui_random_gen_styles)/sizeof(char *))
 bool gui_random_gen_style_edit_mode = false;
 
-int gen_style = 2;
+int gen_style = 3;
 
 const char *gui_random_difficulties[] = {
     "Easy    (~2 paths/tile)",
@@ -438,12 +439,204 @@ static void generate_limited_single_color_path(level_t *level, int num_tiles, pa
 
 static void generate_separate_limited_paths_per_color(level_t *level, int num_tiles, int min_path, int max_path)
 {
+    assert_not_null(level);
+
     int color_count = 0;
     for (path_type_t type = (PATH_TYPE_NONE + 1); type < PATH_TYPE_COUNT; type++) {
         if (gui_random_color[type]) {
             generate_limited_single_color_path(level, num_tiles, type, color_count, min_path, max_path);
             color_count++;
         }
+    }
+}
+
+static tile_pos_t *find_random_empty_tile(level_t *level, tile_t *not_this_tile, bool blank_only)
+{
+    assert_not_null(level);
+
+    //printf("Finding blank tile\n");
+    for (int i=0; i<LEVEL_MAXTILES; i++) {
+        int idx = (i + rng_get(LEVEL_MAXTILES)) % LEVEL_MAXTILES;
+        tile_t *tile = &(level->tiles[idx]);
+
+        //printf("i=%d idx=%d tile=%p ", i, idx, tile);
+        //print_tile(tile);
+
+        assert_not_null(tile);
+
+        if (!tile->enabled || tile->hidden) {
+            //printf("continue - not enabled\n");
+            continue;
+        }
+
+        if (blank_only) {
+            if (tile_is_blank(tile)) {
+                tile_pos_t *pos = tile->unsolved_pos;
+
+                if (not_this_tile && pos->tile == not_this_tile) {
+                    //printf("continue - not_this_tile\n");
+                    continue;
+                }
+
+                //printf("returning: ");
+                //print_tile_pos(pos);
+
+                return pos;
+            }
+        } else {
+            tile_pos_t *pos = tile->unsolved_pos;
+
+            if (not_this_tile && pos->tile == not_this_tile) {
+                //printf("continue - not_this_tile\n");
+                continue;
+            }
+
+            //printf("returning: ");
+            //print_tile_pos(pos);
+
+            return pos;
+        }
+    }
+
+    //printf("returning NULL\n");
+
+    return NULL;
+}
+
+static tile_pos_t *find_random_tile_empty_first(level_t *level, tile_t *not_this_tile)
+{
+    tile_pos_t *pos = find_random_empty_tile(level, not_this_tile, true);
+    if (pos) {
+        return pos;
+    } else {
+        return find_random_empty_tile(level, not_this_tile, false);
+    }
+}
+
+static tile_pos_t *find_nearest_matching_color_tile(level_t *level, tile_pos_t *pos, path_type_t type)
+{
+    assert_not_null(level);
+    assert_not_null(pos);
+
+    tile_pos_t *closest = NULL;
+    int closest_distance = INT_MAX;
+
+    for (int i=0; i<LEVEL_MAXTILES; i++) {
+        int idx = (i + rng_get(LEVEL_MAXTILES)) % LEVEL_MAXTILES;
+        tile_t *test_tile = &(level->tiles[idx]);
+
+        if (!test_tile->enabled || test_tile->hidden) {
+            continue;
+        }
+
+        if (tile_has_path_type(test_tile, type)) {
+            tile_pos_t *test_pos = test_tile->unsolved_pos;
+            if (test_tile == pos->tile) {
+                //printf("SKIP\n");
+                continue;
+            }
+
+            int dist = hex_axial_distance(pos->position, test_pos->position);
+            if ((dist < closest_distance) || (closest == NULL)) {
+                closest_distance = dist;
+                closest = test_pos;
+            }
+        }
+    }
+
+    if (closest) {
+        //printf("closest: ");
+        //print_tile_pos(closest);
+        return closest;
+    } else {
+        tile_pos_t *rand_tile = find_random_tile_empty_first(level, pos->tile);
+        //printf("rand_tile: ");
+        //print_tile_pos(rand_tile);
+        return rand_tile;
+    }
+}
+
+static void draw_path_between_neighbor_tiles(tile_pos_t *a, tile_pos_t *b, path_type_t type)
+{
+    assert_not_null(a);
+    assert_not_null(b);
+    assert(a != b);
+
+#if 0
+    printf("\t <%d, %d> amd <%d, %d>\n",
+           a->position.q, a->position.r,
+           b->position.q, b->position.r);
+#endif
+
+    each_direction {
+        if (a->neighbors[dir] == b) {
+            hex_direction_t opp_dir = hex_opposite_direction(dir);
+            a->tile->path[    dir] = type;
+            b->tile->path[opp_dir] = type;
+            return;
+        }
+    }
+
+    assert(false && "not actually neighbors");
+}
+
+static void draw_path_between_tiles(level_t *level, tile_pos_t *a, tile_pos_t *b, path_type_t type)
+{
+    assert_not_null(level);
+    assert_not_null(a);
+    assert_not_null(b);
+    assert(a != b);
+
+    int dist = hex_axial_distance(a->position, b->position);
+
+#if 0
+    printf(">>> draw path between <%d, %d> amd <%d, %d> (dist == %d)\n",
+           a->position.q, a->position.r,
+           b->position.q, b->position.r,
+           dist);
+#endif
+
+    Vector2 a_px = hex_axial_to_pixel(a->position, a->size);
+    Vector2 b_px = hex_axial_to_pixel(b->position, b->size);
+
+    Vector2 prev_px = Vector2Lerp(a_px, b_px, 0.0f);
+    hex_axial_t prev_position = pixel_to_hex_axial(prev_px, a->size);
+    tile_pos_t *prev_pos = level_get_unsolved_tile_pos(level, prev_position);
+
+    int connection_count = 0;
+    for (int i=1; i<=dist; i++) {
+        Vector2 px = Vector2Lerp(a_px, b_px, ((float)i / ((float)dist)));
+        hex_axial_t position = pixel_to_hex_axial(px, a->size);
+        tile_pos_t *mid_pos = level_get_unsolved_tile_pos(level, position);
+        draw_path_between_neighbor_tiles(prev_pos, mid_pos, type);
+        prev_pos = mid_pos;
+        connection_count++;
+    }
+
+    assert(connection_count > 0);
+}
+
+static void generate_connect_to_point(level_t *level)
+{
+    assert_not_null(level);
+
+    while (level_has_empty_tiles(level)) {
+        tile_pos_t *blank_pos = find_random_tile_empty_first(level, NULL);
+        if (!blank_pos) {
+            //printf("out of blank tiles?!\n");
+            break;
+        }
+
+        path_type_t type = rng_color();
+
+        tile_pos_t *nearest_pos = find_nearest_matching_color_tile(level, blank_pos, type);
+        if (!nearest_pos) {
+            break;
+        }
+        //assert_not_null(nearest_pos);
+        assert(nearest_pos != blank_pos);
+
+        draw_path_between_tiles(level, blank_pos, nearest_pos, type);
     }
 }
 
@@ -514,6 +707,10 @@ struct level *generate_random_level(void)
         generate_separate_limited_paths_per_color(level, n, options->create_level_min_path, options->create_level_max_path);
         break;
 
+    case 3:
+        generate_connect_to_point(level);
+        break;
+
     default:
         __builtin_unreachable();
         assert(false && "should never reach here");
@@ -567,8 +764,6 @@ void init_gui_random(void)
 
     join_str = TextJoin(gui_random_difficulties, NUM_DIFFICULTIES, ";");
     gui_random_difficulty_text = strdup(join_str);
-
-    regen_level();
 }
 
 void cleanup_gui_random(void)
@@ -735,7 +930,7 @@ static void draw_gui_random_colors(void)
                 toggle_color(type);
                 regen_level();
             } else {
-                SetMouseCursor(MOUSE_CURSOR_POINTING_HAND);
+                set_mouse_cursor(MOUSE_CURSOR_POINTING_HAND);
             }
         }
 
@@ -745,6 +940,10 @@ static void draw_gui_random_colors(void)
 
 void draw_gui_random(void)
 {
+    if (!gui_random_level) {
+        regen_level();
+    }
+
     GuiPanel(gui_random_panel_rect, gui_random_panel_text);
 
     int old_radius = options->create_level_radius;
