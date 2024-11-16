@@ -1,6 +1,6 @@
 /****************************************************************************
  *                                                                          *
- * tile.h                                                                   *
+ * solver.h                                                                 *
  *                                                                          *
  * This file is part of hexpuzzle.                                          *
  *                                                                          *
@@ -19,66 +19,45 @@
  *                                                                          *
  ****************************************************************************/
 
-#ifndef TILE_H
-#define TILE_H
+#ifndef SOLVER_H
+#define SOLVER_H
 
-#include "cJSON/cJSON.h"
-
-#include "hex.h"
-#include "path.h"
-
-struct tile_pos;
-struct level;
-
-struct tile {
-    /*
-     * game attr
-     */
-    bool enabled;
-    bool fixed;
-    bool hidden;
-    int path_count;
-    path_type_t path[6];
-    path_type_t saved_path[6];
-
-    path_type_t start_for_path_type;
-
-    struct tile_pos *solved_pos;
-    struct tile_pos *unsolved_pos;
+enum solver_state {
+    SOLVER_STATE_IDLE = 0,
+    SOLVER_STATE_SOLVE,
+    SOLVER_STATE_UNDO
 };
-typedef struct tile tile_t;
+typedef enum solver_state solver_state_t;
 
-int compare_tiles(const void *p1, const void *p2);
+struct saved_position {
+    struct tile *tile;
+    hex_axial_t solved_position;
+    hex_axial_t unsolved_position;
+};
+typedef struct saved_position saved_position_t;
 
-char *tile_flag_string(tile_t *tile);
-char *tile_path_string(tile_t *tile);
-char *tile_our_pos_string(struct tile_pos *pos);
+struct solver {
+    struct level *level;
+    saved_position_t saved_positions[LEVEL_MAXTILES];
 
-void print_tile(tile_t *tile);
-tile_t *init_tile(tile_t *tile);
-tile_t *create_tile(void);
-void destroy_tile(tile_t *tile);
+    solver_state_t state;
+    bool anim_running;
+    float anim_progress;
+    float anim_step;
 
-bool tile_has_path_type(tile_t *tile, path_type_t type);
+    int tile_index;
+    struct tile_pos *swap_a;
+    struct tile_pos *swap_b;
+};
+typedef struct solver solver_t;
 
-bool tile_eq(tile_t *dst, tile_t *other);
-void tile_copy_attributes(tile_t *dst, tile_t *src);
-void tile_copy_attributes_except_enabled(tile_t *dst, tile_t *src);
-void tile_swap_attributes(tile_t *a, tile_t *b);
+solver_t *create_solver(struct level *kevek);
+void destroy_solver(solver_t *solver);
 
-void tile_update_path_count(tile_t *tile);
-path_int_t tile_count_path_types(tile_t *tile);
-bool tile_is_blank(tile_t *tile);
+void solver_start(solver_t *solver);
+void solver_stop(solver_t *solver);
+void solver_undo(solver_t *solver);
+void solver_update(solver_t *solver);
 
-bool tile_from_json(tile_t *tile, struct level *level, cJSON *json);
-cJSON *tile_to_json(tile_t *tile);
-
-static inline bool tile_dragable(tile_t *tile)
-{
-    return tile->enabled && !tile->fixed && !tile->hidden;
-}
-
-bool tile_is_solved(tile_t *tile);
-
-#endif /*TILE_H*/
+#endif /*SOLVER_H*/
 

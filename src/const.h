@@ -126,5 +126,7 @@
     #endif
 #endif
 
+#define SOLVER_SWAP_TIME 1.2
+
 #endif /*CONST_H*/
 

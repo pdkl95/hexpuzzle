@@ -103,6 +103,7 @@ hexpuzzle_SOURCES =                                    \
 	src/raylib_helper.h     src/raylib_helper.c    \
 	src/startup_action.h    src/startup_action.c   \
 	src/shader.h            src/shader.c           \
+	src/solver.h            src/solver.c           \
 	src/tile.h              src/tile.c             \
 	src/tile_draw.h         src/tile_draw.c        \
 	src/tile_pos.h          src/tile_pos.c         \

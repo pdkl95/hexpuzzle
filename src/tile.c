@@ -441,3 +441,9 @@ cJSON *tile_to_json(tile_t *tile)
     cJSON_Delete(json);
     return NULL;
 }
+
+bool tile_is_solved(tile_t *tile)
+{
+    return hex_axial_eq(tile->solved_pos->position,
+                        tile->unsolved_pos->position);
+}
