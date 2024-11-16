@@ -34,6 +34,7 @@
 #include "level.h"
 #include "collection.h"
 #include "win_anim.h"
+#include "solver.h"
 
 //#define DEBUG_DRAG_AND_DROP 1
 //#define DEBUG_LEVEL_FADE
@@ -261,8 +262,11 @@ static level_t *init_level(level_t *level)
     level->filename = NULL;
     level->savepath = NULL;
     level->changed = false;
+    level->solver = NULL;
 
     level->next = NULL;
+
+    level->enabled_tile_count = 0;
 
     level->finished_hue = 0.0f;
 
@@ -451,6 +455,11 @@ void destroy_level(level_t *level)
 {
     if (level) {
         level_destroy_physics_body(level);
+
+        if (level->solver) {
+            destroy_solver(level->solver);
+            level->solver = NULL;
+        }
 
         if (level->win_anim) {
             destroy_win_anim(level->win_anim);
@@ -687,6 +696,11 @@ void level_unload(void)
 
         if (current_level->have_physics_body) {
             level_destroy_physics_body(current_level);
+        }
+
+        if (current_level->solver) {
+            destroy_solver(current_level->solver);
+            current_level->solver = NULL;
         }
     }
 
@@ -978,6 +992,8 @@ void level_resize(level_t *level)
 
     level_sort_tiles(level);
 
+    level->enabled_tile_count = 0;
+
     for (int i=0; i<LEVEL_MAXTILES; i++) {
         tile_t *tile = &(level->tiles[i]);
         assert_not_null(tile);
@@ -987,6 +1003,7 @@ void level_resize(level_t *level)
         tile_pos_set_size(  solved_pos, level->tile_size);
         tile_pos_set_size(unsolved_pos, level->tile_size);
         if (tile->enabled) {
+            level->enabled_tile_count++;
             level_add_to_bounding_box(level, solved_pos);
         }
     }

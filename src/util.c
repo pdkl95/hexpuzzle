@@ -185,6 +185,16 @@ float ease_back_out(float t) {
     return EASE_BACK_C3 * t * t * t - EASE_BACK_C1 * t * t;
 }
 
+float ease_quartic_inout(float t)
+{
+    if (t < 0.5f) {
+		return 8.0f * t * t * t * t;
+	} else {
+		float f = t - 1.0f;
+		return -8.0f * f * f * f * f + 1.0f;
+	}
+}
+
 
 void
 halt_and_catch_fire(

@@ -77,6 +77,8 @@ float ease_exponential_out(float t);
 float ease_back_in(float t);
 float ease_back_out(float t);
 
+float ease_quartic_inout(float t);
+
 /****************
  * fatal errors *
  ****************/

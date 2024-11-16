@@ -43,6 +43,7 @@ typedef enum used_tiles used_tiles_t;
 
 struct collection;
 struct level;
+struct solver;
 
 typedef void (*level_fade_finished_cb_t)(struct level *level, void *data);
 
@@ -57,7 +58,7 @@ struct level {
 
     used_tiles_t currently_used_tiles;
 
-    int tile_count;
+    int enabled_tile_count;
 
     int current_tile_write_idx;
     tile_t tiles[LEVEL_MAXTILES];
@@ -118,6 +119,8 @@ struct level {
     struct PhysicsBodyData *physics_floor;
     Rectangle floor_rect;
     Vector2 physics_rotate_center;
+
+    struct solver *solver;
 
     struct win_anim *win_anim;
 

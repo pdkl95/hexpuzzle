@@ -25,11 +25,14 @@
 enum solver_state {
     SOLVER_STATE_IDLE = 0,
     SOLVER_STATE_SOLVE,
-    SOLVER_STATE_UNDO
+    SOLVER_STATE_SOLVE_MOVING,
+    SOLVER_STATE_UNDO,
+    SOLVER_STATE_UNDO_MOVING
 };
 typedef enum solver_state solver_state_t;
 
 struct saved_position {
+    int tile_index;
     struct tile *tile;
     hex_axial_t solved_position;
     hex_axial_t unsolved_position;
@@ -46,12 +49,17 @@ struct solver {
     float anim_step;
 
     int tile_index;
+    int solved_index;
+
     struct tile_pos *swap_a;
     struct tile_pos *swap_b;
+    Vector2 start_px;
+    Vector2 end_px;
 };
 typedef struct solver solver_t;
 
-solver_t *create_solver(struct level *kevek);
+solver_t *create_solver(struct level *level);
+solver_t *create_or_use_solver(struct level *level);
 void destroy_solver(solver_t *solver);
 
 void solver_start(solver_t *solver);

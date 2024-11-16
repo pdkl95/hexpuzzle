@@ -56,6 +56,8 @@
 #include "nvdata.h"
 #include "nvdata_finished.h"
 
+#include "solver.h"
+
 /* #if defined(PLATFORM_DESKTOP) */
 /* /\* good *\/ */
 /* #else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB */
@@ -74,6 +76,7 @@ char *config_dir;
 bool running = true;
 int physics_enabled_semaphore = 0;
 int automatic_event_polling_semaphore = 0;
+int mouse_input_semaphore = 1;
 bool event_waiting_active = false;
 bool window_size_changed = false;
 bool first_resize = true;
@@ -210,6 +213,16 @@ void disable_automatic_events(void)
         printf("automatic_event_polling_semaphore-- = %d\n", automatic_event_polling_semaphore);
 #endif
     }
+}
+
+void enable_mouse_input(void)
+{
+    mouse_input_semaphore++;
+}
+
+void disable_mouse_input(void)
+{
+    mouse_input_semaphore--;
 }
 
 #if defined(PLATFORM_DESKTOP)
@@ -490,74 +503,10 @@ resize(
     do_resize();
 }
 
-static bool
-handle_events(
-    void
-) {
-#if defined(PLATFORM_DESKTOP)
-    if (WindowShouldClose()) {
-        //infomsg("Window Closed");
-        running = false;
-        return true;
-    }
-#endif
-
-    if (IsWindowResized()) {
-        if (skip_next_resize_event) {
-            skip_next_resize_event = false;
-        } else {
-            schedule_resize();
-        }
-    }
-
-    if (IsKeyPressed(KEY_F)) {
-        show_fps = !show_fps;
-    }
-
-#if defined(PLATFORM_DESKTOP)
-    if (IsKeyPressed(KEY_R) && is_any_shift_down()) {
-        reset_window_to_center();
-    }
-
-    if (IsKeyPressed(KEY_F11)) {
-        //ToggleFullscreen();
-        ToggleBorderlessWindowed();
-    }
-#endif
-
-    if (modal_ui_active) {
-        if (IsKeyPressed(KEY_ESCAPE)) {
-            modal_ui_result = UI_RESULT_CANCEL;
-        } else if (IsKeyPressed(KEY_ENTER)) {
-            modal_ui_result = UI_RESULT_OK;
-        } else {
-            modal_ui_result = UI_RESULT_PENDING;;
-        }
-
-        return true;
-    }
-
-#if defined(PLATFORM_DESKTOP)
-    if (IsKeyPressed(KEY_ESCAPE)) {
-        infomsg("etc - quit");
-        running = false;
-        return true;
-    }
-
-    if (IsKeyPressed(KEY_F1)) {
-        if (current_level) {
-            cJSON *json = level_to_json(current_level);
-            char *json_str = cJSON_PrintUnformatted(json);
-            printf("JSON>>>\n%s\n<<<JSON\n", json_str);
-            free(json_str);
-            cJSON_Delete(json);
-        }
-    }
-#endif
-
-    //IVector2 old_mouse = mouse_position;
-    mouse_position.x = GetMouseX();
-    mouse_position.y = GetMouseY();
+void set_mouse_position(int new_x, int new_y)
+{
+    mouse_position.x = new_x;
+    mouse_position.y = new_y;
 
     mouse_positionf.x = (float)mouse_position.x;
     mouse_positionf.y = (float)mouse_position.y;
@@ -565,6 +514,11 @@ handle_events(
     if (do_level_ui_interaction()) {
         level_set_hover(current_level, mouse_position);
     }
+}
+
+static void handle_mouse_events(void)
+{
+    set_mouse_position(GetMouseX(), GetMouseY());
 
     mouse_left_click   = false;;
     mouse_left_release = false;
@@ -610,6 +564,97 @@ handle_events(
                 }
             }
         }
+    }
+}
+
+static bool
+handle_events(
+    void
+) {
+#if defined(PLATFORM_DESKTOP)
+    if (WindowShouldClose()) {
+        //infomsg("Window Closed");
+        running = false;
+        return true;
+    }
+#endif
+
+    if (IsWindowResized()) {
+        if (skip_next_resize_event) {
+            skip_next_resize_event = false;
+        } else {
+            schedule_resize();
+        }
+    }
+
+    if (IsKeyPressed(KEY_F)) {
+        show_fps = !show_fps;
+    }
+
+    if (IsKeyPressed(KEY_F5)) {
+        if (current_level) {
+            create_or_use_solver(current_level);
+            solver_start(current_level->solver);
+        }
+    }
+
+    if (IsKeyPressed(KEY_F6)) {
+        if (current_level) {
+            create_or_use_solver(current_level);
+            solver_stop(current_level->solver);
+        }
+    }
+
+    if (IsKeyPressed(KEY_F7)) {
+        if (current_level) {
+            create_or_use_solver(current_level);
+            solver_undo(current_level->solver);
+        }
+    }
+
+#if defined(PLATFORM_DESKTOP)
+    if (IsKeyPressed(KEY_R) && is_any_shift_down()) {
+        reset_window_to_center();
+    }
+
+    if (IsKeyPressed(KEY_F11)) {
+        //ToggleFullscreen();
+        ToggleBorderlessWindowed();
+    }
+#endif
+
+    if (modal_ui_active) {
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            modal_ui_result = UI_RESULT_CANCEL;
+        } else if (IsKeyPressed(KEY_ENTER)) {
+            modal_ui_result = UI_RESULT_OK;
+        } else {
+            modal_ui_result = UI_RESULT_PENDING;;
+        }
+
+        return true;
+    }
+
+#if defined(PLATFORM_DESKTOP)
+    if (IsKeyPressed(KEY_ESCAPE)) {
+        infomsg("etc - quit");
+        running = false;
+        return true;
+    }
+
+    if (IsKeyPressed(KEY_F1)) {
+        if (current_level) {
+            cJSON *json = level_to_json(current_level);
+            char *json_str = cJSON_PrintUnformatted(json);
+            printf("JSON>>>\n%s\n<<<JSON\n", json_str);
+            free(json_str);
+            cJSON_Delete(json);
+        }
+    }
+#endif
+
+    if (mouse_input_is_enabled()) {
+        handle_mouse_events();
     }
 
     if (current_level) {
@@ -1621,6 +1666,10 @@ static void early_frame_setup(void)
     current_time = (float)double_current_time;
 
     set_mouse_cursor(MOUSE_CURSOR_DEFAULT);
+
+    if (current_level && current_level->solver) {
+        solver_update(current_level->solver);
+    }
 
     if (level_finished) {
         SetShaderValue(win_border_shader, win_border_shader_loc.time, &current_time, SHADER_UNIFORM_FLOAT);
