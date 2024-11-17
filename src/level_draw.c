@@ -65,8 +65,9 @@ static void level_set_physics_transformation(tile_pos_t *pos)
 
 static void level_set_transition(level_t *level, tile_pos_t *pos, bool do_fade)
 {
-    rlTranslatef(pos->win.center.x,
-                 pos->win.center.y,
+    Vector2 tvec = Vector2Add(pos->win.center, pos->extra_translate);
+    rlTranslatef(tvec.x,
+                 tvec.y,
                  0.0);
 
     if (pos->physics_body) {
@@ -79,6 +80,8 @@ static void level_set_transition(level_t *level, tile_pos_t *pos, bool do_fade)
     } else if (do_fade) {
         level_set_fade_transition(level, pos);
     }
+
+    rlRotatef(TO_DEGREES(pos->extra_rotate), 0.0, 0.0, 1.0);
 }
 
 void level_draw(level_t *level, bool finished)

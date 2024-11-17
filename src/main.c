@@ -1551,6 +1551,8 @@ static void draw_cursor(void)
         switch (current_mouse_cursor) {
         case MOUSE_CURSOR_POINTING_HAND:
             iconid = ICON_CURSOR_HAND;
+            icon_pos.x -= 2 * options->cursor_scale;;
+            icon_pos.y -= 1 * options->cursor_scale;;
             break;
 
         default:

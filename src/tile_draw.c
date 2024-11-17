@@ -216,7 +216,8 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
     if (!tile->fixed) {
         /* background */
         Color bgcolor = tile_bg_color;
-        if (dragged_over || (pos->hover && !edit_mode_solved)) {
+
+        if (!dragged_over && (pos->hover && !edit_mode_solved)) {
             bgcolor = tile_bg_hover_color;
         }
 
@@ -343,12 +344,11 @@ void tile_draw_win_anim(tile_pos_t *pos, level_t *level)
         return;
     }
 
-    int tile_radius = hex_axial_distance(pos->position, LEVEL_CENTER_POSITION);
-    int offset = 3 - (tile_radius % 3);
+    int offset = 3 - (pos->ring_radius % 3);
 
     Color color = {0};
     color.r = (255/3) * offset;
-    color.g = (255 * tile_radius) / level->radius;
+    color.g = (255 * pos->ring_radius) / level->radius;
     color.b = (unsigned char)(255.0f * tile_draw_hash_wave(pos));
     color.a = 0.0;
 

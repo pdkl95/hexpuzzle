@@ -385,7 +385,7 @@ void level_reset(level_t *level)
 
     level->req_tile_size = 60.0f;
 
-    level->drag_reset_total_frames = 12;
+    level->drag_reset_total_frames = options->max_fps * TILE_RESET_TIME;
     level->drag_reset_frames = 0;
 
     level->hover = NULL;
@@ -1179,6 +1179,8 @@ void level_set_hover(level_t *level, IVector2 mouse_position)
 #endif
 
     if (level->hover && level->hover->tile && level->hover->tile->enabled) {
+        level->hover->hover = true;
+
         if (level->drag_target && (level->drag_target != level->hover)) {
             level->hover->swap_target = level->drag_target;
             level->drag_target->swap_target = level->hover;

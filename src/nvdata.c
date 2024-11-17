@@ -215,7 +215,6 @@ static bool program_state_from_json(cJSON *json)
             if (cJSON_IsNumber(cursor_size_json)) {
                 int value = cursor_size_json->valueint;
                 CLAMPVAR(value, CURSOR_MIN_SCALE, CURSOR_MAX_SCALE);
-                printf("cursor_scalw = %d\n", value);
                 options->cursor_scale = value;
             } else {
                 errmsg("Program state JSON['graphics']['cursor_size'] is not a NUMBER");

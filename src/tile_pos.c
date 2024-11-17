@@ -157,8 +157,10 @@ void tile_pos_toggle_hidden(tile_pos_t *pos)
 void tile_pos_set_path_section(tile_pos_t *pos, hex_direction_t section, path_type_t type)
 {
     assert_not_null(pos);
+    assert(type >= 0);
+    assert(type <= PATH_TYPE_COUNT);
 
-    pos->tile->path[section] = type % PATH_TYPE_COUNT;
+    pos->tile->path[section] = type;
 
     tile_update_path_count(pos->tile);
 
@@ -174,7 +176,14 @@ void tile_pos_cycle_path_section(tile_pos_t *pos, hex_direction_t section)
 {
     assert_not_null(pos);
 
-    tile_pos_set_path_section(pos, section, pos->tile->path[section] + 1);
+    path_type_t new_type = pos->tile->path[section];
+    if (mouse_right_click) {
+        new_type = new_type == PATH_TYPE_MIN ? PATH_TYPE_MAX : (new_type - 1);
+    } else {
+        new_type = new_type == PATH_TYPE_MAX ? PATH_TYPE_MIN : (new_type + 1);
+    }
+
+    tile_pos_set_path_section(pos, section, new_type);
 }
 
 static void tile_pos_modify_center(tile_pos_t *pos)
@@ -234,9 +243,14 @@ void tile_pos_rebuild(tile_pos_t *pos)
 {
     assert_not_null(pos);
 
+    pos->ring_radius = hex_axial_distance(pos->position, LEVEL_CENTER_POSITION);
+
+    pos->extra_rotate = 0.0f;
+    pos->extra_translate = VEC2_ZERO;
+
     pos->line_width = pos->size / 6.0;
     pos->center_circle_draw_radius = pos->line_width * 1.2;
-    pos->center_circle_hover_radius = pos->line_width * 1.6;
+    pos->center_circle_hover_radius = pos->line_width * 1.75;
     pos->win.center = hex_axial_to_pixel(pos->position, pos->size);
 
     pos->rel.center = Vector2Zero();

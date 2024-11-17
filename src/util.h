@@ -61,6 +61,11 @@ char *strdup_xxd_include(unsigned char *buf, unsigned int len);
 
 const char *gen_unique_id(void);
 
+static inline const char *booltext(bool value)
+{
+    return value ? "true" : "false";
+}
+
 /********************
  * easing functions *
  ********************/

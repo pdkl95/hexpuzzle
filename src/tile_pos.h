@@ -46,6 +46,8 @@ struct tile_pos {
     hex_axial_t position;
     hex_axial_t orig_position;
 
+    int ring_radius;
+
     bool solved;
 
     /*
@@ -57,6 +59,9 @@ struct tile_pos {
 
     tile_coord_t win; // window coordinates
     tile_coord_t rel; // tile-center relative coordinates
+
+    float   extra_rotate;
+    Vector2 extra_translate;
 
     /*
      * ui

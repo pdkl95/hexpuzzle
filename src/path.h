@@ -38,6 +38,9 @@ typedef enum path_type path_type_t;
 # error "PATH_TYPE_COUNT does not match enum path_type"
 #endif
 
+#define PATH_TYPE_MIN (PATH_TYPE_NONE)
+#define PATH_TYPE_MAX (PATH_TYPE_COUNT - 1)
+
 char *path_type_name(path_type_t type);
 
 struct path_int {
