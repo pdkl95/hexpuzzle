@@ -37,13 +37,11 @@ Rectangle options_icon_scale_rect;
 Rectangle options_anim_bg_rect;
 Rectangle options_anim_win_rect;
 Rectangle options_reset_finished_rect;
-Rectangle options_physics_effects_rect;
 
 char options_panel_text[] = "Options";
 char options_icon_scale_text[] = "Cursor Size";
 char options_anim_bg_text[]  = "Animate Background";
 char options_anim_win_text[] = "Animate Winning Levels";
-char options_physics_effects_text[] = "Physics Effects";
 char options_reset_finished_text[] = "Reset Level Finished Data";
 
 //                         8 =    5 2   1
@@ -188,10 +186,8 @@ void resize_gui_options(void)
 
     Vector2 options_anim_bg_text_size = MeasureGuiText(options_anim_bg_text);
     Vector2 options_anim_win_text_size = MeasureGuiText(options_anim_win_text);
-    Vector2 options_physics_effects_text_size = MeasureGuiText(options_physics_effects_text);
-    float anim_text_size = MAX(MAX(options_anim_bg_text_size.x,
-                                   options_anim_win_text_size.x),
-                               options_physics_effects_text_size.x);
+    float anim_text_size = MAX(options_anim_bg_text_size.x,
+                               options_anim_win_text_size.x);
 
     options_anim_bg_rect.x = options_area_rect.x;
     options_anim_bg_rect.y = options_area_rect.y;
@@ -203,14 +199,9 @@ void resize_gui_options(void)
     options_anim_win_rect.width = anim_text_size;
     options_anim_win_rect.height = TOOL_BUTTON_HEIGHT;
 
-    options_physics_effects_rect.x = options_area_rect.x;
-    options_physics_effects_rect.y = options_anim_win_rect.y + options_anim_win_rect.height + RAYGUI_ICON_SIZE;
-    options_physics_effects_rect.width = anim_text_size;
-    options_physics_effects_rect.height = TOOL_BUTTON_HEIGHT;
-
     Vector2 options_icon_scale_text_size = MeasureGuiText(options_icon_scale_text);
-    options_icon_scale_rect.x = options_physics_effects_rect.x + options_icon_scale_text_size.x;
-    options_icon_scale_rect.y = options_physics_effects_rect.y + options_physics_effects_rect.height + RAYGUI_ICON_SIZE;
+    options_icon_scale_rect.x = options_anim_win_rect.x + options_icon_scale_text_size.x;
+    options_icon_scale_rect.y = options_anim_win_rect.y + options_anim_win_rect.height + RAYGUI_ICON_SIZE;
     options_icon_scale_rect.width = 90;
     options_icon_scale_rect.height = TOOL_BUTTON_HEIGHT;
 
@@ -288,15 +279,11 @@ void draw_gui_graphics_options(void)
     int prev_align = GuiGetStyle(TOGGLE, TEXT_ALIGNMENT);
     GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
 
-    int old_physics_effects = options->physics_effects;
-
     GuiToggle(options_anim_bg_rect,         options_anim_bg_text,         &options->animate_bg);
     GuiToggle(options_anim_win_rect,        options_anim_win_text,        &options->animate_win);
-    GuiToggle(options_physics_effects_rect, options_physics_effects_text, &options->physics_effects);
 
     show_status_beside(options->animate_bg,      options_anim_bg_rect);
     show_status_beside(options->animate_win,     options_anim_win_rect);
-    show_status_beside(options->physics_effects, options_physics_effects_rect);
 
     int old_cursor_scale = options->cursor_scale;
     int cursor_scale     = options->cursor_scale;
@@ -306,14 +293,6 @@ void draw_gui_graphics_options(void)
     }
 
     GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, prev_align);
-
-    if (old_physics_effects != options->physics_effects) {
-        if (options->physics_effects) {
-            if (current_level) {
-                level_reset_physics_body_positions(current_level);
-            }
-        }
-    }
 }
 
 #if defined(PLATFORM_DESKTOP)

@@ -115,11 +115,6 @@ struct level {
     float fade_rotate_speed;
     float spin_direction;
 
-    bool have_physics_body;
-    struct PhysicsBodyData *physics_floor;
-    Rectangle floor_rect;
-    Vector2 physics_rotate_center;
-
     struct solver *solver;
 
     struct win_anim *win_anim;
@@ -222,11 +217,6 @@ void level_unwin(level_t *level);
 bool level_update_fade(level_t *level);
 void level_fade_in(level_t *level, level_fade_finished_cb_t callback, void *data);
 void level_fade_out(level_t *level, level_fade_finished_cb_t callback, void *data);
-
-void level_create_physics_body(level_t *level);
-void level_reset_physics_body_positions(level_t *level);
-void level_destroy_physics_body(level_t *level);
-void level_update_physics_forces(level_t *level);
 
 extern level_t *current_level;
 

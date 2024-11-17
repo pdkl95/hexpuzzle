@@ -50,19 +50,6 @@ static void level_set_fade_transition(level_t *level, tile_pos_t *pos)
                  0.0);
 }
 
-static void level_set_physics_transformation(tile_pos_t *pos)
-{
-    PhysicsBody body = pos->physics_body;
-
-
-    Vector2 offset = Vector2Subtract(body->position, pos->win.center);
-    rlTranslatef(offset.x,
-                 offset.y,
-                 0.0);
-
-    rlRotatef(TO_DEGREES(body->orient), 0.0, 0.0, 1.0);
-}
-
 static void level_set_transition(level_t *level, tile_pos_t *pos, bool do_fade)
 {
     Vector2 tvec = Vector2Add(pos->win.center, pos->extra_translate);
@@ -70,14 +57,7 @@ static void level_set_transition(level_t *level, tile_pos_t *pos, bool do_fade)
                  tvec.y,
                  0.0);
 
-    if (pos->physics_body) {
-        if (do_fade) {
-            level_set_physics_transformation(pos);
-            level_set_fade_transition(level, pos);
-        } else {
-            level_set_physics_transformation(pos);
-        }
-    } else if (do_fade) {
+    if (do_fade) {
         level_set_fade_transition(level, pos);
     }
 
@@ -155,31 +135,6 @@ void level_draw(level_t *level, bool finished)
                     tile_draw(pos, level->drag_target, finished, finished_color, finished_fade_in);
 
                     rlPopMatrix();
-
-#ifdef DEBUG_PHYSICS_VECTORS
-                    if (pos->physics_body) {
-                        rlPushMatrix();
-                        /* rlTranslatef(pos->win.center.x, */
-                        /*              pos->win.center.y, */
-                        /*              0.0); */
-
-                        /* Vector2 offset = Vector2Subtract(body->position, pos->win.center); */
-                        /* rlTranslatef(offset.x, */
-                        /*              offset.y, */
-                        /*              0.0); */
-                        rlTranslatef(pos->physics_body->position.x,
-                                     pos->physics_body->position.y,
-                                     0.0f);
-
-                        //const char *postxt = TextFormat("%4f, %4f", pos->physics_body->position.x, pos->physics_body->position.y);
-                        //DrawTextEx(font16, postxt, pos->rel.center, 16, 2.0, RAYWHITE);
-                        //DrawCircleLinesV(pos->rel.center, pos->physics_size, WHITE);
-                        DrawLineV(pos->rel.center, pos->debug_cent_vec, LIME);
-                        DrawLineV(pos->rel.center, pos->debug_rot_vec, PINK);
-                        DrawLineV(pos->rel.center, pos->physics_body->force, YELLOW);
-                        rlPopMatrix();
-                    }
-#endif
                 }
             }
         }
@@ -233,12 +188,6 @@ void level_draw(level_t *level, bool finished)
 
         rlPopMatrix();
     }
-
-    /* if (level->physics_floor) { */
-    /*     DrawCircleV(level->physics_rotate_center, 22, LIME); */
-    /*     DrawRectangleRounded(level->floor_rect, 0.2, 12, ColorAlpha(BLUE, 0.333)); */
-    /*     DrawRectangleRoundedLines(level->floor_rect, 0.2, 12, 2.0, ColorAlpha(YELLOW, 0.333)); */
-    /* } */
 
     //DrawRectangleLinesEx(level->px_bounding_box, 5.0, LIME);
     rlSetBlendMode(RL_BLEND_ALPHA);

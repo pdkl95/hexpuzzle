@@ -284,8 +284,6 @@ static level_t *init_level(level_t *level)
 
     level->radius = LEVEL_MIN_RADIUS;
 
-    level->have_physics_body = false;
-
     for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
         for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
             hex_axial_t addr = {
@@ -454,8 +452,6 @@ level_t *create_level(struct collection *collection)
 void destroy_level(level_t *level)
 {
     if (level) {
-        level_destroy_physics_body(level);
-
         if (level->solver) {
             destroy_solver(level->solver);
             level->solver = NULL;
@@ -694,10 +690,6 @@ void level_unload(void)
             win_anim_stop(current_level->win_anim);
         }
 
-        if (current_level->have_physics_body) {
-            level_destroy_physics_body(current_level);
-        }
-
         if (current_level->solver) {
             destroy_solver(current_level->solver);
             current_level->solver = NULL;
@@ -720,10 +712,6 @@ void level_play(level_t *level)
 
     level_load(level);
     level_use_unsolved_tile_pos(level);
-
-    if (!level->have_physics_body) {
-        level_create_physics_body(level);
-    }
 
     if (level->finished) {
         level_reset_tile_positions(level);
@@ -1018,8 +1006,6 @@ void level_resize(level_t *level)
 
     level->px_offset.x -= level->px_bounding_box.x;
     level->px_offset.y -= level->px_bounding_box.y;
-
-    level->physics_rotate_center = Vector2Subtract(window_center, level->px_offset);
 
 #if 0
     printf("-- px --\n");
@@ -1595,132 +1581,3 @@ void level_fade_out(level_t *level, level_fade_finished_cb_t callback, void *dat
     level->fade_target = 0.0f;
     level_fade_transition(level, callback, data);
 }
-
-void level_create_physics_body(level_t *level)
-{
-    assert_not_null(level);
-
-    if (!level->have_physics_body) {
-        if (options->verbose) {
-            infomsg("Creating tile physics objects");
-        }
-
-        Vector2 floor_pos = {
-            .x = window_center.x - level->px_offset.x,
-            .y = window_size.y - level->px_offset.y
-        };
-        floor_pos.y += 50.0;
-
-        level->floor_rect.x = floor_pos.x;
-        level->floor_rect.y = floor_pos.y;
-        level->floor_rect.width = 4.0f * (float)window_center.x;
-        level->floor_rect.height = 100.0f;
-        level->floor_rect.x -= 0.5 * level->floor_rect.width;
-
-        PhysicsBody floor = CreatePhysicsBodyRectangle(
-            floor_pos,
-            level->floor_rect.width,
-            level->floor_rect.height,
-            10);
-        floor->enabled = false;
-        floor->restitution = 1;
-        level->physics_floor = floor;
-
-        used_tiles_t save_currently_used_tiles = level->currently_used_tiles;
-        level_use_unsolved_tile_pos(level);
-
-        for (int i=0; i<LEVEL_MAXTILES; i++) {
-            tile_t *tile = &(level->tiles[i]);
-
-            if (tile->enabled) {
-                tile_pos_t *pos = tile->unsolved_pos;
-                tile_pos_create_physics_body(pos);
-            }
-        }
-
-        level->have_physics_body = true;
-
-        level->currently_used_tiles = save_currently_used_tiles;
-
-        UpdatePhysics();
-    }
-}
-
-void level_reset_physics_body_positions(level_t *level)
-{
-    assert_not_null(level);
-    assert(level->have_physics_body);
-
-    if (options->verbose) {
-        infomsg("Resetting tile physics object positions");
-    }
-
-    used_tiles_t save_currently_used_tiles = level->currently_used_tiles;
-    level_use_unsolved_tile_pos(level);
-
-    for (int i=0; i<LEVEL_MAXTILES; i++) {
-        tile_t *tile = &(level->tiles[i]);
-
-        if (tile->enabled) {
-            tile_pos_t *pos = tile->unsolved_pos;
-            pos->physics_body->position = pos->win.center;
-            pos->physics_body->orient = 0.0;
-        }
-    }
-
-    level->currently_used_tiles = save_currently_used_tiles;
-}
-
-void level_destroy_physics_body(level_t *level)
-{
-    assert_not_null(level);
-
-    if (level->have_physics_body) {
-        if (options->verbose) {
-            infomsg("Destroying tile physics objects");
-        }
-
-        used_tiles_t save_currently_used_tiles = level->currently_used_tiles;
-        level_use_unsolved_tile_pos(level);
-
-        for (int i=0; i<LEVEL_MAXTILES; i++) {
-            tile_t *tile = &(level->tiles[i]);
-
-            if (tile->enabled) {
-                tile_pos_t *pos = tile->unsolved_pos;
-                tile_pos_destroy_physics_body(pos);
-            }
-        }
-
-        if (level->physics_floor) {
-            DestroyPhysicsBody(level->physics_floor);
-            level->physics_floor = NULL;
-        }
-
-        level->have_physics_body = false;
-
-        level->currently_used_tiles = save_currently_used_tiles;
-    }
-}
-
-void level_update_physics_forces(level_t *level)
-{
-    assert_not_null(level);
-
-    used_tiles_t save_currently_used_tiles = level->currently_used_tiles;
-    level_use_unsolved_tile_pos(level);
-
-    for (int i=0; i<LEVEL_MAXTILES; i++) {
-        tile_t *tile = &(level->tiles[i]);
-
-        if (tile->enabled) {
-            tile_pos_t *pos = tile->unsolved_pos;
-            if (pos->physics_body) {
-                tile_pos_update_physics_forces(pos, level);
-            }
-        }
-    }
-
-    level->currently_used_tiles = save_currently_used_tiles;
-}
-

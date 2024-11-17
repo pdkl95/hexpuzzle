@@ -103,7 +103,6 @@ extern const char *progversion;
 # define UNUSED_FUNCTION(x) UNUSED_ ##x
 #endif
 
-//#define DEBUG_PHYSICS_VECTORS
 //#define RANDOM_GEN_DEBUG
 
 #include "const.h"
@@ -111,8 +110,6 @@ extern const char *progversion;
 #include "util.h"
 #include "logging.h"
 
-void enable_physics(void);
-void disable_physics(void);
 void disable_automatic_events(void);
 void enable_automatic_events(void);
 void enable_mouse_input(void);

@@ -46,46 +46,6 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
                    SHADER_UNIFORM_VEC4);
 }
 
-static void win_anim_fall_update(struct anim_fsm *anim_fsm, void *data)
-{
-    //win_anim_t *win_anim = (win_anim_t *)data;
-
-    //win_anim->fade[2] = 1.0f;
-    win_anim_common_update(anim_fsm, data);
-}
-
-static void win_anim_fall_enter(UNUSED struct anim_fsm *anim_fsm, void *data)
-{
-    win_anim_t *win_anim = (win_anim_t *)data;
-
-    if (options->physics_effects && win_anim->level->have_physics_body) {
-        level_reset_physics_body_positions(win_anim->level);
-        enable_physics();
-
-        if (win_anim->level->physics_floor) {
-            //SetPhysicsGravity(0.0, 80.0);
-        }
-    }
-
-    win_anim->fade[2] = 1.0f;
-    //win_anim_common_update(anim_fsm, data);
-}
-
-static void win_anim_fall_exit(UNUSED struct anim_fsm *anim_fsm, void *data)
-{
-    win_anim_t *win_anim = (win_anim_t *)data;
-
-    if (options->physics_effects && win_anim->level->have_physics_body) {
-        if (win_anim->level->physics_floor) {
-            SetPhysicsGravity(0.0, 0.0);
-        }
-
-        disable_physics();
-    }
-
-    //win_anim_common_update(anim_fsm, data);
-}
-
 static void win_anim_stay_update(struct anim_fsm *anim_fsm, void *data)
 {
     win_anim_t *win_anim = (win_anim_t *)data;
@@ -104,14 +64,10 @@ static void win_anim_fadein_update(struct anim_fsm *anim_fsm, void *data)
 
 anim_fsm_callbacks_t fadein_callbacks = { .update = win_anim_fadein_update };
 anim_fsm_callbacks_t   stay_callbacks = { .update = win_anim_stay_update   };
-anim_fsm_callbacks_t   fall_callbacks = { .update = win_anim_fall_update,
-                                          .enter  = win_anim_fall_enter,
-                                          .exit   = win_anim_fall_exit     };
 
 anim_fsm_state_t states[] = {
     { "FADEIN",   5.0, ANIM_FSM_STATE_NEXT, &fadein_callbacks },
-//    { "HUE",     10.0, ANIM_FSM_STATE_STAY,   &stay_callbacks },
-    { "FALL",    10.0, ANIM_FSM_STATE_STAY,   &fall_callbacks },
+    { "HUE",     10.0, ANIM_FSM_STATE_STAY,   &stay_callbacks },
     { "STOP",     0.0, ANIM_FSM_STATE_STOP,              NULL }
 };
 

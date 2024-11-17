@@ -33,7 +33,6 @@
 #include "cJSON/cJSON.h"
 
 #include "raygui/style/dark_alt.h"
-#include "physac/physac.h"
 
 #if defined(PLATFORM_DESKTOP)
 # include "tinyfiledialogs/tinyfiledialogs.h"
@@ -74,7 +73,6 @@ const char *progname    = PACKAGE_NAME;
 char *config_dir;
 
 bool running = true;
-int physics_enabled_semaphore = 0;
 int automatic_event_polling_semaphore = 0;
 int mouse_input_semaphore = 1;
 bool event_waiting_active = false;
@@ -130,47 +128,6 @@ void gui_setup(void);
 static inline bool do_level_ui_interaction(void)
 {
     return current_level && !modal_ui_active;
-}
-
-static inline bool do_physics(void)
-{
-    return physics_enabled_semaphore > 0;
-}
-
-void enable_physics(void)
-{
-    if (options->physics_effects) {
-        if (0 == physics_enabled_semaphore) {
-#ifdef DEBUG_SEMAPHORES
-            if (options->verbose) {
-                infomsg("Enabling physics effects");
-            }
-#endif
-        }
-        physics_enabled_semaphore++;
-#ifdef DEBUG_SEMAPHORES
-        printf("physics_enabled_semaphore++ = %d\n", physics_enabled_semaphore);
-#endif
-    }
-}
-
-void disable_physics(void)
-{
-    if (options->physics_effects) {
-        physics_enabled_semaphore--;
-
-        if (0 == physics_enabled_semaphore) {
-#ifdef DEBUG_SEMAPHORES
-            if (options->verbose) {
-                infomsg("Disabling physics effects");
-            }
-#endif
-        }
-
-#ifdef DEBUG_SEMAPHORES
-        printf("physics_enabled_semaphore-- = %d\n", physics_enabled_semaphore);
-#endif
-    }
 }
 
 void enable_automatic_events(void)
@@ -370,9 +327,6 @@ static void reset_current_level(void)
 
         level_unwin(current_level);
         level_reset_tile_positions(current_level);
-        if (current_level->have_physics_body) {
-            level_reset_physics_body_positions(current_level);
-        }
     } else {
         warnmsg("Cannot reset level - current_level is NULL");
     }
@@ -676,19 +630,6 @@ handle_events(
     }
 
     return true;
-}
-
-static void update_physics(void)
-{
-    if (!options->physics_effects) {
-        return;
-    }
-
-    UpdatePhysics();
-
-    if (current_level) {
-        level_update_physics_forces(current_level);
-    }
 }
 
 Rectangle name_text_rect;
@@ -1703,10 +1644,6 @@ bool do_one_frame(void)
         return false;
     }
 
-    if (do_physics()) {
-        update_physics();
-    }
-
     if (!render_frame()) {
         return false;
     }
@@ -1812,19 +1749,6 @@ gfx_cleanup(
 
     unload_fonts();
     CloseWindow();
-}
-#endif
-
-static void physics_init(void)
-{
-    InitPhysics();
-    SetPhysicsGravity(0.0, 0.0);
-}
-
-#if !defined(PLATFORM_WEB)
-static void physics_cleanup(void)
-{
-    ClosePhysics();
 }
 #endif
 
@@ -1955,7 +1879,6 @@ main(
     frame_delay = (1000 / options->max_fps);
 
     gfx_init();
-    physics_init();
     game_init();
     do_resize();
 
@@ -1977,7 +1900,6 @@ main(
     }
 
     game_cleanup();
-    physics_cleanup();
     gfx_cleanup();
 
     destroy_options(options);

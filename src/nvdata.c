@@ -243,9 +243,6 @@ static bool program_state_from_json(cJSON *json)
                 STR(name));                                                 \
     }
 
-        if (options->load_state_physics_effects) {
-            mk_bool_json(physics_effects, physics_effects);
-        }
         if (options->load_state_animate_bg) {
             mk_bool_json(animate_bg, animate_background);
         }
@@ -377,7 +374,6 @@ static cJSON *program_state_to_json(void)
         goto to_json_error;                                             \
     }
 
-    mk_bool_json(physics_effects, physics_effects);
     mk_bool_json(animate_bg, animate_background);
     mk_bool_json(animate_win, animate_win);
 #undef mk_bool_json

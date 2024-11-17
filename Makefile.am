@@ -98,7 +98,6 @@ hexpuzzle_SOURCES =                                    \
 	src/nvdata_finished.h   src/nvdata_finished.c  \
 	src/options.h           src/options.c          \
 	src/path.h              src/path.c             \
-	src/physac_impl.c 			       \
 	src/raygui_impl.c 			       \
 	src/raylib_helper.h     src/raylib_helper.c    \
 	src/startup_action.h    src/startup_action.c   \
@@ -112,7 +111,6 @@ hexpuzzle_SOURCES =                                    \
 	src/common.h            src/main.c
 
 hexpuzzle_SOURCES +=             		   \
-	external/physac/physac.h                   \
 	external/raygui/raygui.h 		   \
 	external/raygui/style/dark_alt.h           \
 	external/stb/stb_perlin.h                  \
