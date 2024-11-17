@@ -1484,7 +1484,7 @@ static void draw_cartesian_grid(bool draw_labels)
 
 static void draw_cursor(void)
 {
-    if (IsCursorOnScreen()) {
+    if (IsCursorOnScreen() && mouse_input_is_enabled()) {
         int iconid = ICON_CURSOR_POINTER;
         IVector2 icon_pos = mouse_position;
         int icon_scale = options->cursor_scale;

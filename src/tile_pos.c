@@ -20,7 +20,6 @@
  ****************************************************************************/
 
 #include "common.h"
-#include "physac/physac.h"
 
 #include "raylib_helper.h"
 #include "tile.h"

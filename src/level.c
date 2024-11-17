@@ -25,7 +25,6 @@
 
 #include "cJSON/cJSON.h"
 #include "raygui/raygui.h"
-#include "physac/physac.h"
 
 #include "raylib_helper.h"
 #include "options.h"
@@ -1006,6 +1005,39 @@ void level_resize(level_t *level)
 
     level->px_offset.x -= level->px_bounding_box.x;
     level->px_offset.y -= level->px_bounding_box.y;
+
+    level_use_unsolved_tile_pos(level);
+
+    tile_pos_t *center_pos = level_get_center_tile_pos(level);
+
+    for (int i=0; i<LEVEL_MAXTILES; i++) {
+        tile_t *tile = &(level->tiles[i]);
+
+        if (tile->enabled) {
+            tile_pos_t *solved_pos   = tile->solved_pos;
+            tile_pos_t *unsolved_pos = tile->unsolved_pos;
+
+            solved_pos->radial_vector   = Vector2Subtract(  solved_pos->win.center, center_pos->win.center);
+            unsolved_pos->radial_vector = Vector2Subtract(unsolved_pos->win.center, center_pos->win.center);
+
+            float solved_theta   = atan2f(  -solved_pos->radial_vector.y,   -solved_pos->radial_vector.x);
+            float unsolved_theta = atan2f(-unsolved_pos->radial_vector.y, -unsolved_pos->radial_vector.x);
+
+            solved_theta   += TAU/2.0;
+            unsolved_theta += TAU/2.0;
+
+            float ring_phase = TAU / 32.0f;
+            solved_theta   +=   solved_pos->ring_radius * (TAU/ring_phase);
+            unsolved_theta += unsolved_pos->ring_radius * (TAU/ring_phase);
+
+            solved_theta   = fmodf(  solved_theta, TAU);
+            unsolved_theta = fmodf(unsolved_theta, TAU);
+
+            solved_pos->radial_angle   = TAU -   solved_theta;
+            unsolved_pos->radial_angle = TAU - unsolved_theta;
+        }
+    }
+
 
 #if 0
     printf("-- px --\n");

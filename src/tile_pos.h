@@ -63,6 +63,9 @@ struct tile_pos {
     float   extra_rotate;
     Vector2 extra_translate;
 
+    Vector2 radial_vector;
+    float   radial_angle;
+
     /*
      * ui
      */

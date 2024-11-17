@@ -21,8 +21,6 @@
 
 #include "common.h"
 
-#include "physac/physac.h"
-
 #include "tile.h"
 #include "tile_pos.h"
 #include "tile_draw.h"
@@ -39,20 +37,19 @@ static void level_set_fade_transition(level_t *level, tile_pos_t *pos)
         return;
     }
 
-    Vector2 radial = Vector2Subtract(pos->win.center, center_pos->win.center);
-    Vector2 modded = Vector2Scale(radial, 5.0);
-    Vector2 faded  = Vector2Lerp(modded, radial, level->fade_value_eased);
+    Vector2 modded = Vector2Scale(pos->radial_vector, 5.0);
+    Vector2 faded  = Vector2Lerp(modded, pos->radial_vector, level->fade_value_eased);
 
-    Vector2 translate = Vector2Subtract(faded, radial);
+    Vector2 translate = Vector2Subtract(faded, pos->radial_vector);
 
     rlTranslatef(translate.x,
                  translate.y,
                  0.0);
 }
 
-static void level_set_transition(level_t *level, tile_pos_t *pos, bool do_fade)
+static void level_set_transition(level_t *level, tile_pos_t *pos, bool do_fade, float fade_ammount)
 {
-    Vector2 tvec = Vector2Add(pos->win.center, pos->extra_translate);
+    Vector2 tvec = Vector2Add(pos->win.center, Vector2Scale(pos->extra_translate, fade_ammount));
     rlTranslatef(tvec.x,
                  tvec.y,
                  0.0);
@@ -131,7 +128,7 @@ void level_draw(level_t *level, bool finished)
                 } else {
                     rlPushMatrix();
 
-                    level_set_transition(level, pos, do_fade);
+                    level_set_transition(level, pos, do_fade, finished_fade_in);
                     tile_draw(pos, level->drag_target, finished, finished_color, finished_fade_in);
 
                     rlPopMatrix();
@@ -153,7 +150,7 @@ void level_draw(level_t *level, bool finished)
 
                     rlPushMatrix();
 
-                    level_set_transition(level, pos, do_fade);
+                    level_set_transition(level, pos, do_fade, finished_fade_in);
                     tile_draw_win_anim(pos, level);
 
                     rlPopMatrix();

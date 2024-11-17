@@ -20,7 +20,6 @@
  ****************************************************************************/
 
 #include "common.h"
-#include "physac/physac.h"
 #include "options.h"
 #include "level.h"
 #include "win_anim.h"
@@ -33,6 +32,10 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
     win_anim->fade[0] = anim_fsm->state_progress;
     win_anim->fade[1] = ((float)win_anim->level->finished_hue) / 360.0;
 
+    float fade_magnitude = win_anim->fade[2];
+    //float fade_magnitude = ease_circular_in(anim_fsm->state_progress);
+    float  osc_magnitude = win_anim->fade[3];
+
 #if 0
     printf("progress = %f. hue = %f, fadein = %f\n",
            win_anim->fade[0],
@@ -44,31 +47,69 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
                    win_border_shader_loc.fade,
                    &(win_anim->fade[0]),
                    SHADER_UNIFORM_VEC4);
+
+    for (int i=0; i<LEVEL_MAXTILES; i++) {
+        tile_t *tile = &(win_anim->level->tiles[i]);
+
+        if (tile->enabled) {
+            tile_pos_t *pos = tile->unsolved_pos;
+            Vector2 norm_radial = Vector2Normalize(pos->radial_vector);
+
+            float time = current_time * 3.0;
+            float osc_norm = sinf(time + pos->radial_angle);
+            float osc = (osc_norm + 1.0) * 0.5;
+
+            float mag = fade_magnitude;
+            mag += 8.0f * (osc_magnitude * (pos->ring_radius)) * osc;
+
+            pos->extra_translate = Vector2Scale(norm_radial, mag);
+
+            float rotate_osc = cosf(time + pos->radial_angle);
+            pos->extra_rotate = rotate_osc * 0.1 * osc_magnitude *
+                (((float)pos->ring_radius) / ((float)win_anim->level->radius));
+        }
+    }
+
+    tile_pos_t *center_pos = level_get_center_tile_pos(win_anim->level);
+    center_pos->extra_rotate = 0.0f;
 }
 
-static void win_anim_stay_update(struct anim_fsm *anim_fsm, void *data)
-{
-    win_anim_t *win_anim = (win_anim_t *)data;
-
-    win_anim->fade[2] = 1.0f;
-    win_anim_common_update(anim_fsm, data);
-}
-
-static void win_anim_fadein_update(struct anim_fsm *anim_fsm, void *data)
+static void win_anim_fade_in_update(struct anim_fsm *anim_fsm, void *data)
 {
     win_anim_t *win_anim = (win_anim_t *)data;
 
     win_anim->fade[2] = anim_fsm->state_progress;
+    win_anim->fade[3] = 0.0f;
     win_anim_common_update(anim_fsm, data);
 }
 
-anim_fsm_callbacks_t fadein_callbacks = { .update = win_anim_fadein_update };
-anim_fsm_callbacks_t   stay_callbacks = { .update = win_anim_stay_update   };
+static void win_anim_osc_ramp_in_update(struct anim_fsm *anim_fsm, void *data)
+{
+    win_anim_t *win_anim = (win_anim_t *)data;
+
+    win_anim->fade[2] = 1.0;
+    win_anim->fade[3] = anim_fsm->state_progress;
+    win_anim_common_update(anim_fsm, data);
+}
+
+static void win_anim_osc_stay_update(struct anim_fsm *anim_fsm, void *data)
+{
+    win_anim_t *win_anim = (win_anim_t *)data;
+
+    win_anim->fade[2] = 1.0f;
+    win_anim->fade[3] = 1.0f;
+    win_anim_common_update(anim_fsm, data);
+}
+
+anim_fsm_callbacks_t     fade_in_callbacks = { .update = win_anim_fade_in_update     };
+anim_fsm_callbacks_t osc_ramp_in_callbacks = { .update = win_anim_osc_ramp_in_update };
+anim_fsm_callbacks_t    osc_stay_callbacks = { .update = win_anim_osc_stay_update    };
 
 anim_fsm_state_t states[] = {
-    { "FADEIN",   5.0, ANIM_FSM_STATE_NEXT, &fadein_callbacks },
-    { "HUE",     10.0, ANIM_FSM_STATE_STAY,   &stay_callbacks },
-    { "STOP",     0.0, ANIM_FSM_STATE_STOP,              NULL }
+    { "FADE_IN",       8.0, ANIM_FSM_STATE_NEXT,     &fade_in_callbacks },
+    { "OSC_RAMP_IN",   8.0, ANIM_FSM_STATE_NEXT, &osc_ramp_in_callbacks },
+    { "OSC_STAY",     10.0, ANIM_FSM_STATE_STAY,    &osc_stay_callbacks },
+    { "STOP",          0.0, ANIM_FSM_STATE_STOP,                   NULL }
 };
 
 win_anim_t *create_win_anim(struct level *level)

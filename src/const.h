@@ -122,8 +122,9 @@
     #endif
 #endif
 
-#define SOLVER_SOLVE_SWAP_TIME 0.5
-#define SOLVER_UNDO_SWAP_TIME  0.3
+#define SOLVER_SOLVE_SWAP_TIME 0.1
+//#define SOLVER_SOLVE_SWAP_TIME 0.45
+#define SOLVER_UNDO_SWAP_TIME  0.28
 
 #endif /*CONST_H*/
 
