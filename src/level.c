@@ -415,7 +415,7 @@ void level_update_id(level_t *level)
 
     if (level->collection && level->collection->have_id) {
         level->have_id = true;
-        asprintf(&level->id, "%s:%s", level->collection->id, level->name);
+        safe_asprintf(&level->id, "%s:%s", level->collection->id, level->name);
 
         printf("level_update_id() -> \"%s\"\n", level->id);
     } else {
@@ -737,7 +737,7 @@ void level_save_to_filename(level_t *level, const char *filepath)
     assert_not_null(filepath);
 
     char *tmpname;
-    asprintf(&tmpname, "%s.tmp", filepath);
+    safe_asprintf(&tmpname, "%s.tmp", filepath);
 
     if (options->verbose) {
         infomsg("saving level \"%s\" to: \"%s\"", level->name, tmpname);

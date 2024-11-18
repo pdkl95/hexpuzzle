@@ -150,7 +150,7 @@ src/data_shaders.h: $(SHADERS)
 	done
 
 src/hexpuzzle-physac_impl.$(OBJEXT): CFLAGS += -Wno-sign-compare
-src/hexpuzzle-raygui_impl.$(OBJEXT): CFLAGS += -Wno-unused-parameter
+src/hexpuzzle-raygui_impl.$(OBJEXT): CFLAGS += -Wno-unused-parameter -Wno-unused-result
 src/hexpuzzle-nvdata_finished.$(OBJEXT): CFLAGS += -Wno-unused-but-set-variable -Wno-unused-variable -Wno-incompatible-pointer-types
 
 BUILT_SOURCES = \

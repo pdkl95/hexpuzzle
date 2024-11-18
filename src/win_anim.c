@@ -48,6 +48,9 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
                    &(win_anim->fade[0]),
                    SHADER_UNIFORM_VEC4);
 
+    float envelope_phase = current_time * 0.3;
+    float envelope = powf(1.0f - sqrtf(1.0f - fabs(sinf(envelope_phase))), 3.0f);
+    float phase = current_time * 3.0;
     for (int i=0; i<LEVEL_MAXTILES; i++) {
         tile_t *tile = &(win_anim->level->tiles[i]);
 
@@ -55,22 +58,26 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
             tile_pos_t *pos = tile->unsolved_pos;
             Vector2 norm_radial = Vector2Normalize(pos->radial_vector);
 
-            float time = current_time * 3.0;
-            float osc_norm = sinf(time + pos->radial_angle);
-            float osc = (osc_norm + 1.0) * 0.5;
+            float osc_norm = sinf(phase + pos->radial_angle);
+            float osc = (osc_norm + 1.0) * 0.6;
 
             float mag = fade_magnitude;
-            mag += 8.0f * (osc_magnitude * (pos->ring_radius)) * osc;
+            mag += 12.0f * (osc_magnitude * (pos->ring_radius)) * osc;
+            mag *= envelope;
 
             pos->extra_translate = Vector2Scale(norm_radial, mag);
 
-            float rotate_osc = cosf(time + pos->radial_angle);
-            pos->extra_rotate = rotate_osc * 0.1 * osc_magnitude *
+            float rotate_osc = cosf(phase + pos->radial_angle);
+            pos->extra_rotate = rotate_osc * 0.1 * osc_magnitude * envelope *
                 (((float)pos->ring_radius) / ((float)win_anim->level->radius));
         }
     }
 
+    //Vector2 center_offset = { .x = 0.0f, .y = 1.0f };
+    /* center_offset = Vector2Rotate(center_offset, phase - (2.0 * TAU/4.0)); */
+
     tile_pos_t *center_pos = level_get_center_tile_pos(win_anim->level);
+    //center_pos->extra_translate = center_offset;
     center_pos->extra_rotate = 0.0f;
 }
 

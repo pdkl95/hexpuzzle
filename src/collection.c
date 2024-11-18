@@ -449,7 +449,7 @@ static void collection_generate_level_filename(collection_t *collection, level_t
 
     for (int n=collection->filename_seq; n<1000; n++) {
         char *tmp;
-        asprintf(&tmp, "%s%03d%s", prefix, n, suffix);
+        safe_asprintf(&tmp, "%s%03d%s", prefix, n, suffix);
         if (!collection_level_filename_exists(collection, tmp)) {
             collection->filename_seq = n + 1;
             level_set_file_path(level, tmp);
@@ -728,7 +728,7 @@ void collection_save_pack(collection_t *collection, const char *filename)
     assert_not_null(filename);
 
     char *tmpname;
-    asprintf(&tmpname, "%s.tmp", filename);
+    safe_asprintf(&tmpname, "%s.tmp", filename);
 
     if (options->verbose) {
         infomsg("Writing level collection to \"%s\"", tmpname);

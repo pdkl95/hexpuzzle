@@ -69,10 +69,10 @@ static void find_local_config_dir(void)
         return;
     }
 
-    asprintf(&local_config_dir, "%s/.config", PACKAGE_NAME);
+    safe_asprintf(&local_config_dir, "%s/.config", PACKAGE_NAME);
 #else
 # if defined(PLATFORM_WEB)
-    asprintf(&local_config_dir, "/%s", progname);
+    safe_asprintf(&local_config_dir, "/%s", progname);
 # else
 #  error "Unsupported platform! (no file layout information)"
 # endif
@@ -92,7 +92,7 @@ static void find_nvdata_dir(void)
 
     find_local_config_dir();
 
-    asprintf(&nvdata_dir, "%s/%s", local_config_dir, PACKAGE_NAME);
+    safe_asprintf(&nvdata_dir, "%s/%s", local_config_dir, PACKAGE_NAME);
 
     find_or_create_dir(nvdata_dir, "local storage");
 }
@@ -390,7 +390,7 @@ static cJSON *program_state_to_json(void)
 static void save_nvdata_program_state(void)
 {
     char *tmpname;
-    asprintf(&tmpname, "%s.tmp", nvdata_state_file_path);
+    safe_asprintf(&tmpname, "%s.tmp", nvdata_state_file_path);
 
     cJSON *json = program_state_to_json();
     if (!json) {
@@ -448,16 +448,16 @@ void init_nvdata(void)
     }
 
     if (nvdata_state_file_path == NULL) {
-        asprintf(&nvdata_state_file_path, "%s/%s", nvdata_dir, NVDATA_STATE_FILE_NAME);
+        safe_asprintf(&nvdata_state_file_path, "%s/%s", nvdata_dir, NVDATA_STATE_FILE_NAME);
     }
 
     if (nvdata_state_finished_levels_file_path == NULL) {
-        asprintf(&nvdata_state_finished_levels_file_path, "%s/%s",
+        safe_asprintf(&nvdata_state_finished_levels_file_path, "%s/%s",
                  nvdata_dir, NVDATA_FINISHED_LEVEL_FILE_NAME);
     }
 
     if (nvdata_default_browse_path == NULL) {
-        asprintf(&nvdata_default_browse_path, "%s/%s",
+        safe_asprintf(&nvdata_default_browse_path, "%s/%s",
                  nvdata_dir, NVDATA_DEFAULT_BROWSE_PATH_NAME);
     }
 

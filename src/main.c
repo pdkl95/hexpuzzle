@@ -1828,9 +1828,9 @@ main(
     char *xdg_config_dir = getenv("XDG_CONFIG_HOME");
     char *home_dir       = getenv("HOME");
     if (xdg_config_dir) {
-        asprintf(&config_dir, "%s/%s", xdg_config_dir, CONFIG_SUBDIR_NAME);
+        safe_asprintf(&config_dir, "%s/%s", xdg_config_dir, CONFIG_SUBDIR_NAME);
     } else {
-        asprintf(&config_dir, "%s/.config/%s", home_dir, CONFIG_SUBDIR_NAME);
+        safe_asprintf(&config_dir, "%s/.config/%s", home_dir, CONFIG_SUBDIR_NAME);
     }
 #endif
 

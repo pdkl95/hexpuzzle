@@ -101,7 +101,7 @@ static void set_random_seed(int value)
     if (gui_random_seed_str) {
         free(gui_random_seed_str);
     }
-    asprintf(&gui_random_seed_str, "%d", value);
+    safe_asprintf(&gui_random_seed_str, "%d", value);
 }
 
 static void new_random_seed(void)
