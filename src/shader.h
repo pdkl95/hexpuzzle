@@ -30,6 +30,14 @@ typedef struct win_border_shader_loc {
 } win_border_shader_loc_t;
 extern win_border_shader_loc_t win_border_shader_loc;
 
+extern Shader postprocessing_shader;
+typedef struct postprocessing_shader_loc {
+    int resolution;
+    int time;
+} postprocessing_shader_loc_t;
+extern postprocessing_shader_loc_t poetprocessing__shader_loc;
+
+
 void load_shaders(void);
 void unload_shaders(void);
 

@@ -26,6 +26,7 @@ FONTS = \
 	fonts/TerminusMedium-4.38.ttf
 
 SHADERS = \
+	shaders/postprocessing.frag.glsl \
 	shaders/win_border.frag.glsl
 
 EXTRA_DIST = \

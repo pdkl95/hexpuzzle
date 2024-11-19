@@ -98,6 +98,9 @@ bool show_fps = false;
 float current_time = 0.0f;
 double double_current_time = 0.0;
 
+RenderTexture2D scene_target = {0};
+bool do_postprocessing = false;
+
 float popup_text_fade_time = 2.5f;
 float popup_text_active_until = 0.0f;
 const char *popup_text;
@@ -373,7 +376,9 @@ static void
 unload_textures(
     void
 ) {
-
+    if (IsRenderTextureReady(scene_target)) {
+        UnloadRenderTexture(scene_target);
+    }
 }
 
 static void
@@ -382,7 +387,8 @@ create_textures(
 ) {
 
     unload_textures();
-    
+
+    scene_target = LoadRenderTexture(window_size.x, window_size.y);
 }
 
 static void
@@ -543,6 +549,10 @@ handle_events(
 
     if (IsKeyPressed(KEY_F)) {
         show_fps = !show_fps;
+    }
+
+    if (IsKeyPressed(KEY_P)) {
+        do_postprocessing = !do_postprocessing;
     }
 
     if (IsKeyPressed(KEY_F5)) {
@@ -1551,7 +1561,12 @@ static bool
 render_frame(
     void
 ) {
-    BeginDrawing();
+    if (do_postprocessing) {
+        BeginTextureMode(scene_target);
+    } else {
+        BeginDrawing();
+    }
+
     {
         ClearBackground(BLACK);
         draw_cartesian_grid(false);
@@ -1601,15 +1616,37 @@ render_frame(
         draw_popup_panels();
 #endif
         draw_popup_text();
-
-//#if defined(PLATFORM_DESKTOP)
-        if (show_fps) {
-            DrawTextShadow(TextFormat("FPS: %d", GetFPS()), 15, 10, DEFAULT_GUI_FONT_SIZE, WHITE);
-        }
-//#endif
-
-        draw_cursor();
     }
+
+    if (do_postprocessing) {
+        EndTextureMode();
+
+        BeginDrawing();
+        {
+            BeginShaderMode(postprocessing_shader);
+            {
+                Rectangle src_rect = {
+                    .x      = 0.0f,
+                    .y      = 0.0f,
+                    .width  = (float) scene_target.texture.width,
+                    .height = (float)-scene_target.texture.height
+                };
+                Vector2 position = {
+                    .x = 0.0f,
+                    .y = 0.0f
+                };
+                DrawTextureRec(scene_target.texture, src_rect, position, WHITE);
+            }
+            EndShaderMode();
+        }
+    }
+
+    if (show_fps) {
+        DrawTextShadow(TextFormat("FPS: %d", GetFPS()), 15, 10, DEFAULT_GUI_FONT_SIZE, WHITE);
+    }
+
+    draw_cursor();
+
     EndDrawing();
 
     return true;

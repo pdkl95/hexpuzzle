@@ -28,6 +28,10 @@ Shader win_border_shader;
 win_border_shader_loc_t win_border_shader_loc;
 char *win_border_shader_src;
 
+Shader postprocessing_shader;
+postprocessing_shader_loc_t postprocessing_shader_loc;
+char *postprocessing_shader_src;
+
 void load_shaders(void)
 {
     win_border_shader_src = strdup_xxd_include(
@@ -38,10 +42,21 @@ void load_shaders(void)
     win_border_shader_loc.resolution = GetShaderLocation(win_border_shader, "resolution");
     win_border_shader_loc.time       = GetShaderLocation(win_border_shader, "time");
     win_border_shader_loc.fade       = GetShaderLocation(win_border_shader, "fade");
+
+    postprocessing_shader_src = strdup_xxd_include(
+        shaders_postprocessing_frag_glsl,
+        shaders_postprocessing_frag_glsl_len);
+
+    postprocessing_shader = LoadShaderFromMemory(0, postprocessing_shader_src);
+    postprocessing_shader_loc.resolution = GetShaderLocation(postprocessing_shader, "resolution");
+    postprocessing_shader_loc.time       = GetShaderLocation(postprocessing_shader, "time");
 }
 
 void unload_shaders(void)
 {
     UnloadShader(win_border_shader);
     free(win_border_shader_src);
+
+    UnloadShader(postprocessing_shader);
+    free(postprocessing_shader_src);
 }
