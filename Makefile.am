@@ -4,6 +4,14 @@ ACLOCAL_AMFLAGS = -I m4
 
 AM_CPPFLAGS = -Wall -Wextra
 
+RAYLIB_SRC_DIR = external/raylib
+
+if ! USE_SYSTEM_RAYLIB
+MAYBE_RAYLIB_SRC_DIR = $(RAYLIB_SRC_DIR)
+endif
+
+SUBDIRS = $(MAYBE_RAYLIB_SRC_DIR)
+
 XXD ?= xxd
 
 CLASSICS_LEVELS = \
@@ -55,6 +63,12 @@ COMMON_PROG_LDADD = \
 
 hexpuzzle_CFLAGS = $(COMMON_PROG_CFLAGS)
 hexpuzzle_LDADD = $(COMMON_PROG_LDADD)
+
+if ! USE_SYSTEM_RAYLIB
+hexpuzzle_LDADD += \
+	$(RAYLIB_SRC_DIR)/libraylib.a \
+	-lGL -lc -lm -lpthread -ldl -lrt
+endif
 
 if BUILD_WEB
 hexpuzzle_LDFLAGS = \

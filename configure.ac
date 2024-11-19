@@ -81,6 +81,15 @@ AS_IF([test "x$enable_web" = "xyes"],[AC_DEFINE([WEB_BUILD],[1])])
 
 CFLAGS="$CFLAGS $OPTMODE"
 
+dnl >>> Use a locally installed version of raylib instead of
+dnl     the provided version in external/raylib
+
+AC_ARG_ENABLE([system-raylib],
+    AS_HELP_STRING([--enable-system-raylib], [Use a locally installed version of raylib instead of the version iincluded with project_name)]))
+
+AM_CONDITIONAL([USE_SYSTEM_RAYLIB], [test "x$enable_system_raylib" = "xyes"])
+
+
 dnl ========================================
 dnl ===  Compiler/Language Dependencies  ===
 dnl ========================================
@@ -91,6 +100,9 @@ AM_PROG_CC_C_O
 AC_USE_SYSTEM_EXTENSIONS
 
 AX_CHECK_STDC
+
+AM_PROG_AR
+AC_PROG_RANLIB
 
 
 dnl ===============================================================
@@ -165,20 +177,30 @@ dnl AC_CHECK_DECLS([])
 dnl Export any extra build options
 APP_CFLAGS="-I\$(top_srcdir)/external"
 APP_LIBS=""
-AC_SUBST(APP_CFLAGS)
-AC_SUBST(APP_LIBS)
 
 dnl =================================
 dnl ===  pkg-config dependencies  ===
 dnl =================================
 
+ALL_PKG_CFLAGS=""
+ALL_PKG_LIBS=""
+
 AS_IF([test "x$enable_web" != "xyes"], [
     PKG_CHECK_MODULES([GL],     [gl     >= 10.0.4])
+
+    ALL_PKG_CFLAGS="$ALL_PKG_CFLAGS $GL_CFLAGS"
+    ALL_PKG_LIBS="$ALL_PKG_LIBS $GL_LIBS"
 ])
-PKG_CHECK_MODULES([RAYLIB], [raylib >=  5.0.0])
- 
-ALL_PKG_CFLAGS="$GL_CFLAGS $RAYLIB_CFLAGS"
-ALL_PKG_LIBS="$GL_LIBS $RAYLIB_LIBS"
+
+AS_IF([test "x$enable_system_raylib" = "xyes"], [
+    PKG_CHECK_MODULES([RAYLIB], [raylib >=  5.0.0])
+
+    ALL_PKG_CFLAGS="$ALL_PKG_CFLAGS $RAYLIB_CFLAGS"
+    ALL_PKG_LIBS="$ALL_PKG_LIBS $RAYLIB_LIBS"
+],[
+    APP_CFLAGS="$APP_CFLAGS -I\$(top_srcdir)/external/raylib/src"
+    APP_LIBS="$APP_LIBS -L\$(top_srcdir)/external/raylib/src -ldl -lpthread"
+])
 
 
 dnl ================
@@ -190,10 +212,15 @@ AS_IF([test "x$enable_web" = "xyes"], [
     AC_SUBST(EXEEXT)
 ])
 
+AC_SUBST(APP_CFLAGS)
+AC_SUBST(APP_LIBS)
 AC_SUBST(ALL_PKG_CFLAGS)
 AC_SUBST(ALL_PKG_LIBS)
 
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([
+        external/raylib/Makefile
+        Makefile
+])
 
 AC_OUTPUT
 
