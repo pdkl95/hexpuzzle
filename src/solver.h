@@ -43,6 +43,8 @@ struct solver {
     struct level *level;
     saved_position_t saved_positions[LEVEL_MAXTILES];
 
+    IVector2 saved_mouse_position;
+
     solver_state_t state;
     bool anim_running;
     float anim_progress;
@@ -62,6 +64,8 @@ solver_t *create_solver(struct level *level);
 solver_t *create_or_use_solver(struct level *level);
 void destroy_solver(solver_t *solver);
 
+void solver_toggle_solve(solver_t *solver);
+void solver_toggle_undo(solver_t *solver);
 void solver_start(solver_t *solver);
 void solver_stop(solver_t *solver);
 void solver_undo(solver_t *solver);

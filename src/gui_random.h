@@ -30,5 +30,7 @@ void draw_gui_random(void);
 
 struct level *generate_random_level(void);
 
+void play_gui_random_level(void);
+
 #endif /*GUI_RANDOM_H*/
 

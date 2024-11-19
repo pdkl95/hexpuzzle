@@ -1005,7 +1005,7 @@ void draw_gui_random(void)
     }
 
     if (GuiButton(gui_random_play_button_rect, gui_random_play_button_text)) {
-        level_play(gui_random_level);
+        play_gui_random_level();
     }
 
     if (!colors_ok) {
@@ -1028,4 +1028,9 @@ void draw_gui_random(void)
         gui_random_gen_style_edit_mode = !gui_random_gen_style_edit_mode;
         regen_level();
     }
+}
+
+void play_gui_random_level(void)
+{
+    level_play(gui_random_level);
 }

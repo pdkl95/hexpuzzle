@@ -74,7 +74,7 @@ char *config_dir;
 
 bool running = true;
 int automatic_event_polling_semaphore = 0;
-int mouse_input_semaphore = 1;
+bool mouse_input_accepted = true;
 bool event_waiting_active = false;
 bool window_size_changed = false;
 bool first_resize = true;
@@ -174,12 +174,12 @@ void disable_automatic_events(void)
 
 void enable_mouse_input(void)
 {
-    mouse_input_semaphore++;
+    mouse_input_accepted = true;
 }
 
 void disable_mouse_input(void)
 {
-    mouse_input_semaphore--;
+    mouse_input_accepted = false;
 }
 
 #if defined(PLATFORM_DESKTOP)
@@ -548,7 +548,7 @@ handle_events(
     if (IsKeyPressed(KEY_F5)) {
         if (current_level) {
             create_or_use_solver(current_level);
-            solver_start(current_level->solver);
+            solver_toggle_solve(current_level->solver);
         }
     }
 
@@ -562,7 +562,7 @@ handle_events(
     if (IsKeyPressed(KEY_F7)) {
         if (current_level) {
             create_or_use_solver(current_level);
-            solver_undo(current_level->solver);
+            solver_toggle_undo(current_level->solver);
         }
     }
 
@@ -606,6 +606,18 @@ handle_events(
         }
     }
 #endif
+
+    if (IsKeyPressed(KEY_ENTER)) {
+        switch (game_mode) {
+        case GAME_MODE_RANDOM:
+            play_gui_random_level();
+            break;
+
+        default:
+            /* do nothing */
+            break;
+        }
+    }
 
     if (mouse_input_is_enabled()) {
         handle_mouse_events();

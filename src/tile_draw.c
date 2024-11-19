@@ -309,7 +309,7 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         }
     }
 
-    DrawLineEx(VEC2_ZERO, Vector2Scale(pos->radial_vector, 0.5), 3.0, LIME);
+    //DrawLineEx(VEC2_ZERO, Vector2Scale(pos->radial_vector, 0.5), 3.0, LIME);
 
 #if 0
     if (drag) {

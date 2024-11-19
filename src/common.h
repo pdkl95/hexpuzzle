@@ -115,10 +115,10 @@ void enable_automatic_events(void);
 void enable_mouse_input(void);
 void disable_mouse_input(void);
 
-extern int mouse_input_semaphore;
+extern bool mouse_input_accepted;
 static inline bool mouse_input_is_enabled(void)
 {
-    return mouse_input_semaphore > 0;
+    return mouse_input_accepted;
 }
 
 void set_mouse_position(int new_x, int new_y);
