@@ -64,6 +64,10 @@ Color text_shadow_color = BLACK;
 
 Color path_color_none = OPTIONS_DEFAULT_PATH_COLOR_0;
 
+#define FEEDBACK_BG_TINT 0xc0
+Color feedback_bg_tint_color = { FEEDBACK_BG_TINT, FEEDBACK_BG_TINT, FEEDBACK_BG_TINT, 0xff };
+
+
 void prepare_global_colors()
 {
     //cursor_outer_color = DODGER_BLUE;

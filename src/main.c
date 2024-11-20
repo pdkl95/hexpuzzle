@@ -40,6 +40,7 @@
 
 #include "options.h"
 #include "color.h"
+#include "raylib_helper.h"
 
 #include "tile_draw.h"
 
@@ -98,8 +99,13 @@ bool show_fps = false;
 float current_time = 0.0f;
 double double_current_time = 0.0;
 
-RenderTexture2D scene_target = {0};
+RenderTexture2D scene_targets[2];
+RenderTexture2D *scene_read_target;
+RenderTexture2D *scene_write_target;
+
 bool do_postprocessing = false;
+float feedback_bg_zoom_ratio = 0.1;
+Vector2 feedback_bg_zoom_margin = { .x = 20.0, .y = 20.0 };
 
 float popup_text_fade_time = 2.5f;
 float popup_text_active_until = 0.0f;
@@ -376,9 +382,15 @@ static void
 unload_textures(
     void
 ) {
-    if (IsRenderTextureReady(scene_target)) {
-        UnloadRenderTexture(scene_target);
+    if (IsRenderTextureReady(scene_targets[0])) {
+        UnloadRenderTexture(scene_targets[0]);
     }
+    if (IsRenderTextureReady(scene_targets[1])) {
+        UnloadRenderTexture(scene_targets[1]);
+    }
+
+    scene_read_target  = NULL;
+    scene_write_target = NULL;
 }
 
 static void
@@ -388,7 +400,17 @@ create_textures(
 
     unload_textures();
 
-    scene_target = LoadRenderTexture(window_size.x, window_size.y);
+    scene_targets[0] = LoadRenderTexture(window_size.x, window_size.y);
+    scene_targets[1] = LoadRenderTexture(window_size.x, window_size.y);
+    scene_read_target  = &(scene_targets[0]);
+    scene_write_target = &(scene_targets[1]);
+}
+
+static void swap_scene_targets(void)
+{
+    RenderTexture *tmp = scene_write_target;
+    scene_write_target = scene_read_target;
+    scene_read_target  = tmp;
 }
 
 static void
@@ -898,6 +920,10 @@ void gui_setup(void)
     goto_next_level_panel_rect.width  = goto_next_level_label_rect.width + (2 * PANEL_INNER_MARGIN);
     goto_next_level_panel_rect.height = goto_next_level_label_rect.height + (2 * PANEL_INNER_MARGIN);
     goto_next_level_panel_rect.x      = window_size.x - WINDOW_MARGIN - goto_next_level_panel_rect.width;
+
+    feedback_bg_zoom_ratio = 0.002;
+    feedback_bg_zoom_margin.x = feedback_bg_zoom_ratio * ((float)window_size.x);
+    feedback_bg_zoom_margin.y = feedback_bg_zoom_ratio * ((float)window_size.y);
 }
 
 static void draw_name_header(void)
@@ -1443,6 +1469,8 @@ static void draw_cartesian_grid(bool draw_labels)
     int major_size = minor_size * minor_per_major;
     float wrap_size = (float)major_size;
     float half_wrap = wrap_size / 2.0;
+    float minor_thickness = 1.0;
+    float major_thickness = 2.0;
 
     static float speed = 1.5;;
     static float oldspeed = 1.5;;
@@ -1480,22 +1508,34 @@ static void draw_cartesian_grid(bool draw_labels)
     }
 
     for (int x=-major_size; x<window_size.x + major_size; x += minor_size) {
-        DrawLine(x+off.x, 0, x+off.x, window_size.y, minor_color);
+        DrawLineEx((Vector2){x+off.x, 0},
+                   (Vector2){x+off.x, window_size.y},
+                   minor_thickness,
+                   minor_color);
     }
 
     for (int y=-major_size; y<window_size.y + major_size; y += minor_size) {
-        DrawLine(0, y+off.y, window_size.x, y+off.y, minor_color);
+        DrawLineEx((Vector2){0, y+off.y},
+                   (Vector2){window_size.x, y+off.y},
+                   minor_thickness,
+                   minor_color);
     }
 
     for (int x=-major_size; x<window_size.x + major_size; x += major_size) {
-        DrawLine(x+off.x, 0, x+off.x, window_size.y, royal_blue);
+        DrawLineEx((Vector2){x+off.x, 0},
+                   (Vector2){x+off.x, window_size.y},
+                   major_thickness,
+                   royal_blue);
         if (draw_labels) {
             DrawText(TextFormat("%d", x), (float)x + 3.0, 8.0, 16, YELLOW);
         }
     }
 
     for (int y=-major_size; y<window_size.y + major_size; y += major_size) {
-        DrawLine(0, y+off.y, window_size.x, y+off.y, magenta);
+        DrawLineEx((Vector2){0, y+off.y},
+                   (Vector2){window_size.x, y+off.y},
+                   major_thickness,
+                   magenta);
         if (draw_labels) {
             DrawText(TextFormat("%d", y), 3.0, (float)y + 3.9, 16, YELLOW);
         }
@@ -1557,18 +1597,39 @@ static void draw_cursor(void)
     }
 }
 
+static void draw_feedback_bg(void)
+{
+    Rectangle src = {
+        .x      = 0.0f,
+        .y      = 0.0f,
+        .width  = (float) scene_read_target->texture.width,
+        .height = (float)-scene_read_target->texture.height,
+    };
+    Rectangle dst = {
+        .x      = -feedback_bg_zoom_margin.x + window_center.x,
+        .y      = -feedback_bg_zoom_margin.y + window_center.y,
+        .width  = (float)scene_read_target->texture.width  + (2.0f * feedback_bg_zoom_margin.x),
+        .height = (float)scene_read_target->texture.height + (2.0f * feedback_bg_zoom_margin.y),
+    };
+    float rot = sin(current_time * 0.17) * (TAU / 36.0);
+    DrawTexturePro(scene_read_target->texture, src, dst, window_center, rot, feedback_bg_tint_color);
+}
+
 static bool
 render_frame(
     void
 ) {
     if (do_postprocessing) {
-        BeginTextureMode(scene_target);
+        BeginTextureMode(*scene_write_target);
     } else {
         BeginDrawing();
     }
 
     {
         ClearBackground(BLACK);
+
+        draw_feedback_bg();
+
         draw_cartesian_grid(false);
 
         switch (game_mode) {
@@ -1628,14 +1689,14 @@ render_frame(
                 Rectangle src_rect = {
                     .x      = 0.0f,
                     .y      = 0.0f,
-                    .width  = (float) scene_target.texture.width,
-                    .height = (float)-scene_target.texture.height
+                    .width  = (float) scene_write_target->texture.width,
+                    .height = (float)-scene_write_target->texture.height
                 };
                 Vector2 position = {
                     .x = 0.0f,
                     .y = 0.0f
                 };
-                DrawTextureRec(scene_target.texture, src_rect, position, WHITE);
+                DrawTextureRec(scene_write_target->texture, src_rect, position, WHITE);
             }
             EndShaderMode();
         }
@@ -1648,6 +1709,8 @@ render_frame(
     draw_cursor();
 
     EndDrawing();
+
+    swap_scene_targets();
 
     return true;
 }
