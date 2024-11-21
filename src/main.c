@@ -104,7 +104,10 @@ RenderTexture2D *scene_read_target;
 RenderTexture2D *scene_write_target;
 
 bool do_postprocessing = false;
-float bloom_ammount = 1.0;
+float bloom_amount = 1.0;
+float distort_amount = 0.0;
+float postprocessing_effect_amount[4];
+
 float feedback_bg_zoom_ratio = 0.1;
 Vector2 feedback_bg_zoom_margin = { .x = 20.0, .y = 20.0 };
 
@@ -1700,6 +1703,15 @@ render_frame(
 
         BeginDrawing();
         {
+            SetShaderValue(postprocessing_shader, postprocessing_shader_loc.time, &current_time, SHADER_UNIFORM_FLOAT);
+
+            distort_amount = bloom_amount;
+            postprocessing_effect_amount[0] = bloom_amount;
+            postprocessing_effect_amount[1] = distort_amount;
+            postprocessing_effect_amount[2] = 0.0f;
+            postprocessing_effect_amount[3] = 0.0f;
+            SetShaderValue(postprocessing_shader, postprocessing_shader_loc.effect_amount, &(postprocessing_effect_amount[0]), SHADER_UNIFORM_VEC4);
+
             BeginShaderMode(postprocessing_shader);
             {
                 Rectangle src_rect = {

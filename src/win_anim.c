@@ -26,7 +26,7 @@
 #include "shader.h"
 
 extern bool do_postprocessing;
-extern float bloom_ammount;
+extern float bloom_amount;
 
 static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
 {
@@ -83,10 +83,7 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
     tile_pos_t *center_pos = level_get_center_tile_pos(win_anim->level);
     center_pos->extra_rotate = 0.0f;
 
-    if (do_postprocessing) {
-        bloom_ammount = envelope * fade_magnitude * osc_magnitude;
-        SetShaderValue(postprocessing_shader, postprocessing_shader_loc.bloom_ammount, &bloom_ammount, SHADER_UNIFORM_FLOAT);
-    }
+    bloom_amount = envelope * fade_magnitude * osc_magnitude;
 }
 
 static void win_anim_fade_in_update(struct anim_fsm *anim_fsm, void *data)

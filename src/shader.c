@@ -50,7 +50,7 @@ void load_shaders(void)
     postprocessing_shader = LoadShaderFromMemory(0, postprocessing_shader_src);
     postprocessing_shader_loc.resolution    = GetShaderLocation(postprocessing_shader, "resolution");
     postprocessing_shader_loc.time          = GetShaderLocation(postprocessing_shader, "time");
-    postprocessing_shader_loc.bloom_ammount = GetShaderLocation(postprocessing_shader, "bloom_ammount");
+    postprocessing_shader_loc.effect_amount = GetShaderLocation(postprocessing_shader, "effect_amount");
 }
 
 void unload_shaders(void)
