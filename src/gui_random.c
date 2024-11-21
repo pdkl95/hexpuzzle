@@ -737,6 +737,8 @@ struct level *generate_random_level(void)
         assert(false && "should never reach here");
     }
 
+    level_update_path_counts(level);
+
 #ifndef RANDOM_GEN_DEBUG
     shuffle_tiles(level);
 #endif

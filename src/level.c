@@ -423,6 +423,14 @@ void level_update_id(level_t *level)
     }
 }
 
+void level_update_path_counts(level_t *level)
+{
+    for (int i = 0; i < LEVEL_MAXTILES; i++) {
+        tile_t *tile = &(level->tiles[i]);
+        tile_update_path_count(tile);
+    }
+}
+
 level_t *create_level(struct collection *collection)
 {
     level_t *level = alloc_level();
@@ -1490,6 +1498,7 @@ void level_win(level_t *level)
         return;
     }
 
+    enable_postprocessing();
     win_anim_start(level->win_anim);
 
     level->finished = true;
@@ -1507,6 +1516,7 @@ void level_unwin(level_t *level)
     }
 
     win_anim_stop(level->win_anim);
+    disable_postprocessing();
 
     level->finished = false;
     if (game_mode == GAME_MODE_WIN_LEVEL) {

@@ -7,6 +7,7 @@ in vec4 fragColor;
 // Input uniform values
 uniform sampler2D texture0;
 uniform vec4 colDiffuse;
+uniform float bloom_ammount;
 
 // Output fragment color
 out vec4 finalColor;
@@ -38,6 +39,8 @@ void main()
     vec4 blur = sum/(samples*samples);
 
     blur = pow(blur, vec4(2.0));
+
+    blur *= bloom_ammount;
 
     // Calculate final fragment color
     finalColor = blur + source; //*colDiffuse;

@@ -48,8 +48,9 @@ void load_shaders(void)
         shaders_postprocessing_frag_glsl_len);
 
     postprocessing_shader = LoadShaderFromMemory(0, postprocessing_shader_src);
-    postprocessing_shader_loc.resolution = GetShaderLocation(postprocessing_shader, "resolution");
-    postprocessing_shader_loc.time       = GetShaderLocation(postprocessing_shader, "time");
+    postprocessing_shader_loc.resolution    = GetShaderLocation(postprocessing_shader, "resolution");
+    postprocessing_shader_loc.time          = GetShaderLocation(postprocessing_shader, "time");
+    postprocessing_shader_loc.bloom_ammount = GetShaderLocation(postprocessing_shader, "bloom_ammount");
 }
 
 void unload_shaders(void)

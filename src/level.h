@@ -143,6 +143,7 @@ void level_backup_unsolved_tiles(level_t *level);
 void level_reset_tile_positions(level_t *level);
 
 void level_update_id(level_t *level);
+void level_update_path_counts(level_t *level);
 
 bool level_eq_tiles(level_t *level, level_t *other);
 void level_sort_tiles(level_t *level);

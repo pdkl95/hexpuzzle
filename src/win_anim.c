@@ -25,6 +25,9 @@
 #include "win_anim.h"
 #include "shader.h"
 
+extern bool do_postprocessing;
+extern float bloom_ammount;
+
 static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
 {
     win_anim_t *win_anim = (win_anim_t *)data;
@@ -48,9 +51,13 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
                    &(win_anim->fade[0]),
                    SHADER_UNIFORM_VEC4);
 
-    float envelope_phase = current_time * 0.3;
+    //float envelope_variation = (sinf(0.23f * current_time) + 1.0f) * 0.5;
+    float envelope_speed = 0.3f;
+    //envelope_speed += 0.05f * envelope_variation;
+
+    float envelope_phase = current_time * envelope_speed;
     float envelope = powf(1.0f - sqrtf(1.0f - fabs(sinf(envelope_phase))), 3.0f);
-    float phase = current_time * 3.0;
+    float phase = current_time * 3.0f;
     for (int i=0; i<LEVEL_MAXTILES; i++) {
         tile_t *tile = &(win_anim->level->tiles[i]);
 
@@ -59,7 +66,7 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
             Vector2 norm_radial = Vector2Normalize(pos->radial_vector);
 
             float osc_norm = sinf(phase + pos->radial_angle);
-            float osc = (osc_norm + 1.0) * 0.6;
+            float osc = (osc_norm + 1.0f) * 0.6f;
 
             float mag = fade_magnitude;
             mag += 12.0f * (osc_magnitude * (pos->ring_radius)) * osc;
@@ -68,17 +75,18 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
             pos->extra_translate = Vector2Scale(norm_radial, mag);
 
             float rotate_osc = cosf(phase + pos->radial_angle);
-            pos->extra_rotate = rotate_osc * 0.1 * osc_magnitude * envelope *
+            pos->extra_rotate = rotate_osc * 0.1f * osc_magnitude * envelope *
                 (((float)pos->ring_radius) / ((float)win_anim->level->radius));
         }
     }
 
-    //Vector2 center_offset = { .x = 0.0f, .y = 1.0f };
-    /* center_offset = Vector2Rotate(center_offset, phase - (2.0 * TAU/4.0)); */
-
     tile_pos_t *center_pos = level_get_center_tile_pos(win_anim->level);
-    //center_pos->extra_translate = center_offset;
     center_pos->extra_rotate = 0.0f;
+
+    if (do_postprocessing) {
+        bloom_ammount = envelope * fade_magnitude * osc_magnitude;
+        SetShaderValue(postprocessing_shader, postprocessing_shader_loc.bloom_ammount, &bloom_ammount, SHADER_UNIFORM_FLOAT);
+    }
 }
 
 static void win_anim_fade_in_update(struct anim_fsm *anim_fsm, void *data)

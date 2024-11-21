@@ -114,6 +114,8 @@ void disable_automatic_events(void);
 void enable_automatic_events(void);
 void enable_mouse_input(void);
 void disable_mouse_input(void);
+void enable_postprocessing(void);
+void disable_postprocessing(void);
 
 extern bool mouse_input_accepted;
 static inline bool mouse_input_is_enabled(void)

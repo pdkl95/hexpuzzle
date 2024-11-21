@@ -34,8 +34,9 @@ extern Shader postprocessing_shader;
 typedef struct postprocessing_shader_loc {
     int resolution;
     int time;
+    int bloom_ammount;
 } postprocessing_shader_loc_t;
-extern postprocessing_shader_loc_t poetprocessing__shader_loc;
+extern postprocessing_shader_loc_t postprocessing_shader_loc;
 
 
 void load_shaders(void);

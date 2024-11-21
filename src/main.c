@@ -104,6 +104,7 @@ RenderTexture2D *scene_read_target;
 RenderTexture2D *scene_write_target;
 
 bool do_postprocessing = false;
+float bloom_ammount = 1.0;
 float feedback_bg_zoom_ratio = 0.1;
 Vector2 feedback_bg_zoom_margin = { .x = 20.0, .y = 20.0 };
 
@@ -191,6 +192,16 @@ void disable_mouse_input(void)
     mouse_input_accepted = false;
 }
 
+void enable_postprocessing(void)
+{
+    do_postprocessing = true;
+}
+
+void disable_postprocessing(void)
+{
+    do_postprocessing = false;
+}
+
 #if defined(PLATFORM_DESKTOP)
 void show_name_edit_dialog(void)
 {
@@ -223,6 +234,7 @@ static void return_from_level_callback(UNUSED level_t *level, UNUSED void *data)
 void return_from_level(void)
 {
     if (current_level) {
+        //disable_postprocessing();
         level_fade_out(current_level, return_from_level_callback, NULL);
     }
 }
@@ -1619,6 +1631,8 @@ static bool
 render_frame(
     void
 ) {
+    static bool renderd_texture_last_frame = false;
+
     if (do_postprocessing) {
         BeginTextureMode(*scene_write_target);
     } else {
@@ -1628,7 +1642,9 @@ render_frame(
     {
         ClearBackground(BLACK);
 
-        draw_feedback_bg();
+        if (do_postprocessing && renderd_texture_last_frame) {
+            draw_feedback_bg();
+        }
 
         draw_cartesian_grid(false);
 
@@ -1700,6 +1716,10 @@ render_frame(
             }
             EndShaderMode();
         }
+
+        renderd_texture_last_frame = true;
+    } else {
+        renderd_texture_last_frame = false;
     }
 
     if (show_fps) {
