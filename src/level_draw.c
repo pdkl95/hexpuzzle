@@ -109,24 +109,14 @@ void level_draw(level_t *level, bool finished)
         float blend_amount = level->fade_value;// * (1.0f - finished_fade_in);
         glBlendColor(0.0f, 0.0f, 0.0f, blend_amount);
         rlSetBlendMode(RL_BLEND_CUSTOM);
-
-        float rot = (1.0 - ease_circular_out(level->fade_value)) * (TAU/2.0);
-
-        rlTranslatef(window_center.x,
-                     window_center.y,
-                     0.0);
-
-        float rot_x = rot * (360.0 / TAU) * level->fade_rotate_speed;
-        rlRotatef(rot_x, 0.0, 0.0, 1.0);
-
-        rlTranslatef(-window_center.x,
-                     -window_center.y,
-                     0.0);
     }
 
-    rlTranslatef(level->px_offset.x,
-                 level->px_offset.y,
-                 0.0);
+    float level_rotate = level->fade_rotate_level + level->extra_rotate_level;
+    rlTranslatef(window_center.x, window_center.y, 0.0);
+    rlRotatef(TO_DEGREES(level_rotate), 0.0, 0.0, 1.0);
+    rlTranslatef(-window_center.x, -window_center.y, 0.0);
+
+    rlTranslatef(level->px_offset.x, level->px_offset.y, 0.0);
 
     for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
         for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {

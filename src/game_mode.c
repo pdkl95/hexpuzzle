@@ -26,6 +26,7 @@
 
 game_mode_t game_mode = GAME_MODE_NULL;
 game_mode_t last_game_mode = GAME_MODE_NULL;
+game_mode_t options_restore_mode = GAME_MODE_NULL;
 
 char *game_mode_t_str(game_mode_t mode)
 {
@@ -62,24 +63,69 @@ char *game_mode_t_str(game_mode_t mode)
     }
 }
 
-void set_game_mode(game_mode_t new_mode)
-{
-    last_game_mode = game_mode;
-    game_mode = new_mode;
 
+
+static void _set_game_mode(game_mode_t new_mode)
+{
 #ifdef DEBUG_GAME_MODE
-    printf("SET: game_mode = %s (prev = %s)\n",
+    printf("--\nGM: _SET(%s)\told = %s\tlast = %s\n",
+           game_mode_t_str(new_mode),
            game_mode_t_str(game_mode),
            game_mode_t_str(last_game_mode));
 #endif
+
+    if (new_mode == game_mode) {
+        return;
+    }
+
+    game_mode_t old_mode = game_mode;
+
+    switch (new_mode) {
+    case GAME_MODE_OPTIONS:
+        options_restore_mode = old_mode;
+        game_mode = GAME_MODE_OPTIONS;
+        return;
+
+    default:
+        break;
+    }
+
+    switch (old_mode) {
+    case GAME_MODE_OPTIONS:
+        options_restore_mode = GAME_MODE_NULL;
+        break;
+
+    case GAME_MODE_PLAY_LEVEL:
+        if (new_mode == GAME_MODE_WIN_LEVEL) {
+            /* preserve last_game_mode */
+        } else {
+            last_game_mode = old_mode;
+        }
+        break;
+
+
+    case GAME_MODE_WIN_LEVEL:
+        if (new_mode == GAME_MODE_PLAY_LEVEL) {
+            /* preserve last_game_mode */
+        } else {
+            last_game_mode = old_mode;
+        }
+        break;
+
+    default:
+        last_game_mode = old_mode;
+        break;
+    }
+
+    game_mode = new_mode;
 }
 
-void set_game_mode_save_prev(game_mode_t new_mode)
+void set_game_mode(game_mode_t new_mode)
 {
-    game_mode = new_mode;
+    _set_game_mode(new_mode);
 
 #ifdef DEBUG_GAME_MODE
-    printf("SET: game_mode = %s (prev = %s) [saved prev]\n",
+    printf("GM:   >> SET game_mode = %s (prev = %s)\n",
            game_mode_t_str(game_mode),
            game_mode_t_str(last_game_mode));
 #endif
@@ -87,13 +133,18 @@ void set_game_mode_save_prev(game_mode_t new_mode)
 
 void prev_game_mode(void)
 {
-    game_mode_t tmp;
-    tmp = game_mode;
-    game_mode = last_game_mode;
-    last_game_mode = tmp;
+    switch (game_mode) {
+    case GAME_MODE_OPTIONS:
+        _set_game_mode(options_restore_mode);
+        break;
+
+    default:
+        _set_game_mode(last_game_mode);
+        break;
+    }
 
 #ifdef DEBUG_GAME_MODE
-    printf("POP: game_mode = %s (prev = %s)\n",
+    printf("GM:   >> POP game_mode = %s (prev = %s)\n",
            game_mode_t_str(game_mode),
            game_mode_t_str(last_game_mode));
 #endif

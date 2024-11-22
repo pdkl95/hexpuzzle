@@ -87,20 +87,15 @@
 #define NAME_FONT_SIZE    20
 #define NAME_FONT_SPACING 2.0
 
-#if 1
-# define DEFAULT_GUI_FONT      font18
-# define DEFAULT_GUI_FONT_SIZE 18
-#else
-# define DEFAULT_GUI_FONT      font20
-# define DEFAULT_GUI_FONT_SIZE 20
-#endif
+#define DEFAULT_GUI_FONT      font18
+#define DEFAULT_GUI_FONT_SIZE 22
 #define DEFAULT_GUI_FONT_SPACING 2.0
 
 #define CURSOR_MIN_SCALE 1
 #define CURSOR_MAX_SCALE 4
 
-#define PANEL_LABEL_FONT         font16
-#define PANEL_LABEL_FONT_SIZE    16
+#define PANEL_LABEL_FONT         font18
+#define PANEL_LABEL_FONT_SIZE    28
 #define PANEL_LABEL_FONT_SPACING 2.0
 
 #define PANEL_ROUNDNES 0.2

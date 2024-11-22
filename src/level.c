@@ -312,6 +312,9 @@ static level_t *init_level(level_t *level)
     level->fade_delta        = 0.0f;
     level->fade_target       = 0.0f;
 
+    level->fade_rotate_level  = 0.0f;
+    level->extra_rotate_level = 0.0f;
+
     if (rand() & 0x00000001) {
         level->spin_direction = -1.0;
     } else {
@@ -1210,8 +1213,8 @@ void level_set_hover(level_t *level, IVector2 mouse_position)
                 .r = r
             };
             tile_pos_t *pos = level_get_current_tile_pos(level, axial);
-            assert(pos->hover == false);
-            assert(pos->hover_adjacent == NULL);
+            pos->hover = false;
+            pos->hover_adjacent = NULL;
         }
     }
 
@@ -1547,7 +1550,7 @@ void level_win(level_t *level)
 
     level->finished = true;
     if (game_mode == GAME_MODE_PLAY_LEVEL) {
-        set_game_mode_save_prev(GAME_MODE_WIN_LEVEL);
+        set_game_mode(GAME_MODE_WIN_LEVEL);
     }
 }
 
@@ -1564,7 +1567,7 @@ void level_unwin(level_t *level)
 
     level->finished = false;
     if (game_mode == GAME_MODE_WIN_LEVEL) {
-        set_game_mode_save_prev(GAME_MODE_PLAY_LEVEL);
+        set_game_mode(GAME_MODE_PLAY_LEVEL);
     }
 }
 
@@ -1602,6 +1605,9 @@ bool level_update_fade(level_t *level)
             printf("level_update_fade(): fade_value %f -> %f\n", old_fade_value, level->fade_value);
 #endif
         }
+
+        level->fade_rotate_level = (1.0 - ease_circular_out(level->fade_value)) * (TAU/2.0);
+        level->fade_rotate_level *= level->fade_rotate_speed;
     }
 
     return level->fade_value != 1.0f;

@@ -44,6 +44,8 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
 {
     win_anim_t *win_anim = (win_anim_t *)data;
 
+    level_t *level = win_anim->level;
+
     win_anim->fade[0] = anim_fsm->state_progress;
     win_anim->fade[1] = ((float)win_anim->level->finished_hue) / 360.0;
 
@@ -70,13 +72,37 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
     float envelope_phase = current_time * envelope_speed;
 
     float e_f = powf(1.0f - sqrtf(1.0f - fabs(sinf(envelope_phase))), 3.0f);
+    float simple_envelope = e_f;
+
     //float e_g = cosf(powf(1.0f - sqrtf(1.0f - (sinf(0.7 * envelope_phase))), 4.0f));
     //float e_h = powf(1.0f - sqrtf(1.0f - fabs(sinf(0.12 * envelope_phase))), 4.0f);
 
     //float envelope = tanhf(fabs(e_f - e_g + e_h));
     float envelope = e_f;
 
-    tile_pos_t *center_pos = level_get_center_tile_pos(win_anim->level);
+#define TILE_POP_OUT_STEP 0.2
+#define TILE_POP_IN_STEP 0.05
+#define TILE_POP_PHASE (TAU/4)
+#define TILE_POP_RBG_MASK 0x00000001
+#define LEVEL_WIN_OSC_SPIN_RATE 0.001
+#define TILE_POP_AMPLIFY_MIN 60.0
+#define TILE_POP_AMPLIFY_MAX 220.0
+#define TILE_POP_AMPLIFY_DELTA ((TILE_POP_AMPLIFY_MAX) - (TILE_POP_AMPLIFY_MIN))
+
+    float pop_amplify_delta = TILE_POP_AMPLIFY_DELTA * fade_magnitude * simple_envelope;
+    float pop_amplify = TILE_POP_AMPLIFY_MIN;
+    pop_amplify += pop_amplify_delta;
+
+#if 0
+    level->extra_rotate_level = copysignf(simple_envelope
+                                          * osc_magnitude
+                                          * LEVEL_WIN_OSC_SPIN_RATE
+                                          * pop_amplify,
+                                          level->fade_rotate_speed);
+
+#endif
+
+    tile_pos_t *center_pos = level_get_center_tile_pos(level);
 
     float phase = fmod(current_time * 3.0f, TAU);
     for (int i=0; i<LEVEL_MAXTILES; i++) {
@@ -97,11 +123,6 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
             mag += 12.0f * (osc_magnitude * (pos->ring_radius)) * osc;
             mag *= envelope;
 
-#define TILE_POP_OUT_STEP 0.2
-#define TILE_POP_IN_STEP 0.05
-#define TILE_POP_PHASE (TAU/4)
-#define TILE_POP_MAGNITUDE 80.0
-#define TILE_POP_RBG_MASK 0x00000001
 
             if ((pos->prev_ring_phase < TILE_POP_PHASE) &&
                 (ring_phase > TILE_POP_PHASE)) {
@@ -124,7 +145,7 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
                 }
                 pos->pop_magnitude = (pos->pop_in_phase);
             }
-            float pop_magnitude = pos->pop_magnitude * fade_magnitude * TILE_POP_MAGNITUDE;
+            float pop_magnitude = pos->pop_magnitude * fade_magnitude * pop_amplify;
 
             pos->prev_ring_phase = ring_phase;
 

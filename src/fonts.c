@@ -27,23 +27,26 @@ Font font20;
 Font font18;
 Font font16;
 
+int gui_font_size = 26;
+
 void load_fonts(void)
 {
     font20 = LoadFontFromMemory(".ttf",
-                                fonts_TerminusMedium_4_38_ttf,
-                                fonts_TerminusMedium_4_38_ttf_len,
-                                20, NULL, 0);
+                                fonts_PalanquinDark_Regular_ttf,
+                                fonts_PalanquinDark_Regular_ttf_len,
+                                36, NULL, 0);
     SetTextureFilter(font20.texture, TEXTURE_FILTER_POINT);
 
-    font18 = LoadFontFromMemory(".otf",
-                                fonts_FiraSansOT_Medium_otf,
-                                fonts_FiraSansOT_Medium_otf_len,
-                                36, NULL, 0);
+    font18 = LoadFontFromMemory(".ttf",
+                                fonts_PalanquinDark_Regular_ttf,
+                                fonts_PalanquinDark_Regular_ttf_len,
+                                2 * gui_font_size, NULL, 0);
+//36, NULL, 0);
     SetTextureFilter(font18.texture, TEXTURE_FILTER_BILINEAR);
 
     font16 = LoadFontFromMemory(".ttf",
-                                fonts_SourceSansPro_Semibold_ttf,
-                                fonts_SourceSansPro_Semibold_ttf_len,
+                                fonts_PalanquinDark_Regular_ttf,
+                                fonts_PalanquinDark_Regular_ttf_len,
                                 32, NULL, 0);
     SetTextureFilter(font16.texture, TEXTURE_FILTER_BILINEAR);
 }
@@ -58,18 +61,27 @@ void unload_fonts(void)
 void set_default_gui_font(void)
 {
     GuiSetFont(DEFAULT_GUI_FONT);
-    GuiSetStyle(DEFAULT, TEXT_SIZE, DEFAULT_GUI_FONT_SIZE);
+    GuiSetStyle(DEFAULT, TEXT_SIZE, gui_font_size);  //DEFAULT_GUI_FONT_SIZE);
     GuiSetStyle(DEFAULT, TEXT_SPACING, 1);
 }
 
-#define def_set_gui_font(size)                  \
-    void set_gui_font##size(void)               \
-    {                                           \
-        GuiSetFont(font##size);                 \
-        GuiSetStyle(DEFAULT, TEXT_SIZE, size);  \
-        GuiSetStyle(DEFAULT, TEXT_SPACING, 1);  \
-    }
-def_set_gui_font(16)
-def_set_gui_font(18)
-def_set_gui_font(20)
-#undef def_set_gui_font
+void set_gui_font20(void)
+{
+    GuiSetFont(font20);
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 36);
+    GuiSetStyle(DEFAULT, TEXT_SPACING, 1);
+}
+
+void set_gui_font18(void)
+{
+    GuiSetFont(font18);
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 26);
+    GuiSetStyle(DEFAULT, TEXT_SPACING, 1);
+}
+
+void set_gui_font16(void)
+{
+    GuiSetFont(font16);
+    GuiSetStyle(DEFAULT, TEXT_SIZE, 32);
+    GuiSetStyle(DEFAULT, TEXT_SPACING, 1);
+}

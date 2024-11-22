@@ -21,9 +21,7 @@ CLASSICS_LEVELS = \
 	levels/classics/4-yellow.hexlevelpack
 
 FONTS = \
-	fonts/FiraSansOT-Medium.otf \
-	fonts/SourceSansPro-Semibold.ttf \
-	fonts/TerminusMedium-4.38.ttf
+	fonts/PalanquinDark-Regular.ttf
 
 SHADERS = \
 	shaders/postprocessing.frag.glsl \

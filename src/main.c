@@ -239,11 +239,14 @@ static void return_from_level_callback(UNUSED level_t *level, UNUSED void *data)
     prev_game_mode();
 }
 
-void return_from_level(void)
+bool return_from_level(void)
 {
     if (current_level) {
         //disable_postprocessing();
         level_fade_out(current_level, return_from_level_callback, NULL);
+        return true;
+    } else {
+        return false;
     }
 }
 
@@ -652,13 +655,31 @@ handle_events(
         return true;
     }
 
-#if defined(PLATFORM_DESKTOP)
     if (IsKeyPressed(KEY_ESCAPE)) {
-        infomsg("etc - quit");
-        running = false;
-        return true;
+        switch (game_mode) {
+        case GAME_MODE_OPTIONS:
+            prev_game_mode();
+            break;
+
+        case GAME_MODE_EDIT_LEVEL:
+            /* fall thrugh */
+        case GAME_MODE_WIN_LEVEL:
+            /* fall thrugh */
+        case GAME_MODE_PLAY_LEVEL:
+            if (return_from_level()) {
+                break;
+            }
+            /* fall through */
+
+        default:
+#if defined(PLATFORM_DESKTOP)
+            running = false;
+            return true;
+#endif
+        }
     }
 
+#if defined(PLATFORM_DESKTOP)
     if (IsKeyPressed(KEY_F1)) {
         if (current_level) {
             cJSON *json = level_to_json(current_level);
@@ -800,7 +821,7 @@ void gui_setup(void)
 
     name_panel_rect.x = WINDOW_MARGIN;
     name_panel_rect.y = WINDOW_MARGIN;
-    name_panel_rect.height = NAME_FONT_SIZE + (2 * PANEL_INNER_MARGIN);
+    name_panel_rect.height = 36 + (2 * PANEL_INNER_MARGIN);
 
     name_edit_button_rect.x = name_text_rect.x + name_text_rect.width + ICON_BUTTON_SIZE;
     name_edit_button_rect.y = name_text_rect.y;
@@ -967,7 +988,7 @@ static void draw_name_header(void)
 
     char *name = current_level->name;
 
-    Vector2 textsize = MeasureTextEx(NAME_FONT, name, NAME_FONT_SIZE, NAME_FONT_SPACING);
+    Vector2 textsize = MeasureTextEx(NAME_FONT, name, 36, NAME_FONT_SPACING);
 
     name_text_rect.width  = textsize.x;
     name_panel_rect.width = textsize.x + (2 * PANEL_INNER_MARGIN);
@@ -1002,8 +1023,8 @@ static void draw_name_header(void)
         .y = text_pos.y + 1
     };
 
-    DrawTextEx(NAME_FONT, name, text_shadow_pos, NAME_FONT_SIZE, NAME_FONT_SPACING, text_shadow_color);
-    DrawTextEx(NAME_FONT, name, text_pos, NAME_FONT_SIZE, NAME_FONT_SPACING, text_color);
+    DrawTextEx(NAME_FONT, name, text_shadow_pos, 36, NAME_FONT_SPACING, text_shadow_color);
+    DrawTextEx(NAME_FONT, name, text_pos, 36, NAME_FONT_SPACING, text_color);
 }
 
 static void draw_edit_panel(void)

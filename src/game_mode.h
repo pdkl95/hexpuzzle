@@ -50,7 +50,6 @@ extern game_mode_t last_game_mode;
 char *game_mode_t_str(game_mode_t mode);
 char *game_mode_str(void);
 void set_game_mode(game_mode_t new_mode);
-void set_game_mode_save_prev(game_mode_t new_mode);
 void prev_game_mode(void);
 void toggle_edit_mode(void);
 

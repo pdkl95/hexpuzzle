@@ -105,9 +105,12 @@ struct level {
     bool finished;
     float finished_hue;
 
+    float extra_rotate_level;
+
     bool  fade_active;
     float fade_value;
     float fade_value_eased;
+    float fade_rotate_level;
     float fade_delta;
     float fade_target;
     level_fade_finished_cb_t fade_finished_callback;
