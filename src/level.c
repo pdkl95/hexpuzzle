@@ -20,6 +20,7 @@
  ****************************************************************************/
 
 #include "common.h"
+#include "raylib_helper.h"
 
 #include <libgen.h>
 
@@ -80,7 +81,7 @@ static void level_enable_solved_tile_callback(hex_axial_t axial, void *data)
         if (pos->tile) {
             pos->tile->enabled = true;
         } else {
-            assert(false && "pos is missing tike");
+            assert(false && "pos is missing tile");
         }
     }
 }
@@ -221,11 +222,40 @@ void level_toggle_currently_used_tiles(level_t *level)
     }
 }
 
+static void update_neighbor_groups(tile_pos_t *pos)
+{
+    assert_not_null(pos);
+
+    pos->outer_neighbors_count = 0;
+    pos->ring_neighbors_count  = 0;
+    pos->inner_neighbors_count = 0;
+
+    for (hex_direction_t dir = 0; dir < 6; dir++) {
+        tile_pos_t *neighbor = pos->neighbors[dir];
+        if (!neighbor) {
+            continue;
+        }
+
+        if        (neighbor->center_distance < pos->center_distance) {
+            pos->inner_neighbors[pos->inner_neighbors_count] = neighbor;
+            pos->inner_neighbors_count++;
+        } else if (neighbor->center_distance > pos->center_distance) {
+            pos->outer_neighbors[pos->outer_neighbors_count] = neighbor;
+            pos->outer_neighbors_count++;
+        } else {
+            pos->ring_neighbors[pos->ring_neighbors_count] = neighbor;
+            pos->ring_neighbors_count++;
+        }
+    }
+}
+
 static level_t *init_level(level_t *level)
 {
     assert_not_null(level);
 
     memset(level, 0, sizeof(level_t));
+
+    level->center = LEVEL_CENTER_POSITION;
 
     int i=0;
     for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
@@ -236,6 +266,8 @@ static level_t *init_level(level_t *level)
             };
 
             init_tile(&level->tiles[i]);
+            level->tiles[i].id = i;
+
             init_tile_pos(&level->solved_positions[i], &level->tiles[i], addr);
             init_tile_pos(&level->unsolved_positions[i], &level->tiles[i], addr);
 
@@ -246,6 +278,11 @@ static level_t *init_level(level_t *level)
 
             level->solved_positions[i].solved = true;
             level->unsolved_positions[i].solved = false;
+
+            level->solved_positions[i].center_distance =
+                hex_axial_distance(level->solved_positions[i].position, level->center);
+            level->unsolved_positions[i].center_distance =
+                hex_axial_distance(level->unsolved_positions[i].position, level->center);
 
             i++;
         }
@@ -296,6 +333,7 @@ static level_t *init_level(level_t *level)
             for (hex_direction_t dir = 0; dir < 6; dir++) {
                 solved_pos->neighbors[dir]   = level_find_solved_neighbor_tile_pos(  level,   solved_pos, dir);
                 unsolved_pos->neighbors[dir] = level_find_unsolved_neighbor_tile_pos(level, unsolved_pos, dir);
+
 #if 0
                 hex_axial_t sn = hex_axial_neighbor(  solved_pos->position, dir);
                 hex_axial_t un = hex_axial_neighbor(unsolved_pos->position, dir);
@@ -310,6 +348,9 @@ static level_t *init_level(level_t *level)
                        un.q, un.r);
 #endif
             }
+
+            update_neighbor_groups(solved_pos);
+            update_neighbor_groups(unsolved_pos);
         }
     }
 
@@ -1028,6 +1069,9 @@ void level_resize(level_t *level)
             solved_pos->radial_vector   = Vector2Subtract(  solved_pos->win.center, center_pos->win.center);
             unsolved_pos->radial_vector = Vector2Subtract(unsolved_pos->win.center, center_pos->win.center);
 
+            solved_pos->radial_vector_norm   = Vector2Normalize(  solved_pos->radial_vector);
+            unsolved_pos->radial_vector_norm = Vector2Normalize(unsolved_pos->radial_vector);
+
             float solved_theta   = atan2f(  -solved_pos->radial_vector.y,   -solved_pos->radial_vector.x);
             float unsolved_theta = atan2f(-unsolved_pos->radial_vector.y, -unsolved_pos->radial_vector.x);
 
@@ -1622,4 +1666,47 @@ void level_fade_out(level_t *level, level_fade_finished_cb_t callback, void *dat
 #endif
     level->fade_target = 0.0f;
     level_fade_transition(level, callback, data);
+}
+
+static void level_update_tile_pops_callback(hex_axial_t axial, void *data)
+{
+    level_t *level = (level_t *)data;
+    tile_pos_t *pos = level_get_solved_tile_pos(level, axial);
+    if (!pos) {
+        return;
+    }
+
+    assert(pos->inner_neighbors_count >= 0);
+
+    switch (pos->inner_neighbors_count) {
+    case 0:
+        return;
+
+    case 1:
+        pos->extra_translate = Vector2MaxLength(pos->extra_translate,
+                                                pos->inner_neighbors[0]->extra_translate);
+        return;
+
+    default:
+        for (int i=0; i<pos->inner_neighbors_count; i++) {
+            if (pos->inner_neighbors[i]->extra_magnitude > 0.0f) {
+                Vector2 proj = Vector2Project(pos->inner_neighbors[i]->extra_translate,
+                                              pos->radial_vector);
+                pos->extra_translate = Vector2MaxLength(pos->extra_translate, proj);
+            }
+        }
+        return;
+    }
+}
+
+void level_update_tile_pops(level_t *level)
+{
+    return;
+    tile_pos_t *center = level_get_center_tile_pos(level);
+    for (int ring = 1; ring < level->radius; ring++) {
+        hex_axial_foreach_in_ring(center->position,
+                                  ring,
+                                  level_update_tile_pops_callback,
+                                  level);
+    }
 }

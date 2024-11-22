@@ -245,6 +245,11 @@ void tile_pos_rebuild(tile_pos_t *pos)
 
     pos->extra_rotate = 0.0f;
     pos->extra_translate = VEC2_ZERO;
+    pos->pop_translate = VEC2_ZERO;
+    pos->pop_magnitude = 0.0f;
+    pos->pop_out_phase = 0.0f;
+    pos->pop_in_phase = 0.0f;
+    pos->prev_ring_phase = 0.0f;
 
     pos->line_width = pos->size / 6.0;
     pos->center_circle_draw_radius = pos->line_width * 1.2;

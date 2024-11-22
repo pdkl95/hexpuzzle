@@ -28,6 +28,18 @@
 extern bool do_postprocessing;
 extern float bloom_amount;
 
+static void trigger_pop(tile_pos_t *pos)
+{
+    if ((pos->pop_out_phase > 0.0) || (pos->pop_in_phase)) {
+        return;\
+    }
+
+    pos->pop_out_phase = 1.0;
+    for (int i=0; i<pos->outer_neighbors_count; i++) {
+        trigger_pop(pos->outer_neighbors[i]);
+    }
+}
+
 static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
 {
     win_anim_t *win_anim = (win_anim_t *)data;
@@ -56,23 +68,81 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
     //envelope_speed += 0.05f * envelope_variation;
 
     float envelope_phase = current_time * envelope_speed;
-    float envelope = powf(1.0f - sqrtf(1.0f - fabs(sinf(envelope_phase))), 3.0f);
-    float phase = current_time * 3.0f;
+
+    float e_f = powf(1.0f - sqrtf(1.0f - fabs(sinf(envelope_phase))), 3.0f);
+    //float e_g = cosf(powf(1.0f - sqrtf(1.0f - (sinf(0.7 * envelope_phase))), 4.0f));
+    //float e_h = powf(1.0f - sqrtf(1.0f - fabs(sinf(0.12 * envelope_phase))), 4.0f);
+
+    //float envelope = tanhf(fabs(e_f - e_g + e_h));
+    float envelope = e_f;
+
+    tile_pos_t *center_pos = level_get_center_tile_pos(win_anim->level);
+
+    float phase = fmod(current_time * 3.0f, TAU);
     for (int i=0; i<LEVEL_MAXTILES; i++) {
         tile_t *tile = &(win_anim->level->tiles[i]);
 
         if (tile->enabled) {
             tile_pos_t *pos = tile->unsolved_pos;
-            Vector2 norm_radial = Vector2Normalize(pos->radial_vector);
 
-            float osc_norm = sinf(phase + pos->radial_angle);
+            float ring_phase = fmod(phase + pos->radial_angle, TAU);
+            if (pos->ring_radius & 0x00000001) {
+                ring_phase = TAU - ring_phase;
+            }
+
+            float osc_norm = sinf(ring_phase);
             float osc = (osc_norm + 1.0f) * 0.6f;
 
             float mag = fade_magnitude;
             mag += 12.0f * (osc_magnitude * (pos->ring_radius)) * osc;
             mag *= envelope;
 
-            pos->extra_translate = Vector2Scale(norm_radial, mag);
+#define TILE_POP_OUT_STEP 0.2
+#define TILE_POP_IN_STEP 0.05
+#define TILE_POP_PHASE (TAU/4)
+#define TILE_POP_MAGNITUDE 80.0
+#define TILE_POP_RBG_MASK 0x00000001
+
+            if ((pos->prev_ring_phase < TILE_POP_PHASE) &&
+                (ring_phase > TILE_POP_PHASE)) {
+                if ((rand() & TILE_POP_RBG_MASK) == TILE_POP_RBG_MASK) {
+                    trigger_pop(pos);
+                }
+            }
+            if (pos->pop_out_phase > 0.0f) {
+                pos->pop_out_phase -= TILE_POP_OUT_STEP;
+                if (pos->pop_out_phase < 0.0f) {
+                    pos->pop_out_phase = 0.0f;
+                    pos->pop_in_phase = 1.0f;
+                }
+                pos->pop_magnitude = 1.0f - (pos->pop_out_phase);
+            }
+            if (pos->pop_in_phase > 0.0f) {
+                pos->pop_in_phase -= TILE_POP_IN_STEP;
+                if (pos->pop_in_phase < 0.0f) {
+                    pos->pop_in_phase = 0.0f;
+                }
+                pos->pop_magnitude = (pos->pop_in_phase);
+            }
+            float pop_magnitude = pos->pop_magnitude * fade_magnitude * TILE_POP_MAGNITUDE;
+
+            pos->prev_ring_phase = ring_phase;
+
+            float tmag = tanh(mag);
+            pos->extra_magnitude = Lerp(pop_magnitude * tmag, mag + (0.25 * tmag), tmag);
+            pos->extra_magnitude += 6.0f * pos->ring_radius;
+            pos->extra_magnitude *= fade_magnitude * osc_magnitude;;
+
+#if 0
+            if (i==LEVEL_MAXTILES/2+7) {
+                printf("[%d] pop_out_phase = %f, prev_ring_phase = %f\n", i, pos->pop_out_phase, pos->prev_ring_phase);
+                printf("[%d]  pop_in_phase = %f,      ring_phase = %f\n", i, pos->pop_in_phase, ring_phase);
+                printf("[%d] pop_magnitude = %f,       extra_mag = %f\n--\n", i, pos->pop_magnitude, mag);
+            }
+#endif
+
+            pos->extra_translate = Vector2Scale(pos->radial_vector_norm, pos->extra_magnitude);
+            //pos->pop_translate   = Vector2Scale(pos->radial_vector_norm, pop_magnitude);
 
             float rotate_osc = cosf(phase + pos->radial_angle);
             pos->extra_rotate = rotate_osc * 0.1f * osc_magnitude * envelope *
@@ -80,10 +150,12 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
         }
     }
 
-    tile_pos_t *center_pos = level_get_center_tile_pos(win_anim->level);
+
     center_pos->extra_rotate = 0.0f;
 
     bloom_amount = envelope * fade_magnitude * osc_magnitude;
+
+    level_update_tile_pops(win_anim->level);
 }
 
 static void win_anim_fade_in_update(struct anim_fsm *anim_fsm, void *data)

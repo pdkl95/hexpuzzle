@@ -104,11 +104,17 @@ extern const char *progversion;
 #endif
 
 //#define RANDOM_GEN_DEBUG
+//#define DEBUG_ID_AND_DIR
 
 #include "const.h"
 #include "raylib_helper.h"
 #include "util.h"
 #include "logging.h"
+
+#ifdef DEBUG_ID_AND_DIR
+extern int debug_id;
+extern int debug_dir;
+#endif
 
 void disable_automatic_events(void);
 void enable_automatic_events(void);

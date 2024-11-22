@@ -52,9 +52,10 @@ void main()
 
     vec3 color = vec3(0);
 
-    //float tile_radius    = fragColor.g;
+    float tile_radius    = fragColor.g;
     float perlin_noise   = fragColor.b;
-    float path_highlight = fragColor.a;
+    float path_highlight = fragColor.r;
+    float extra_mag      = fragColor.a;
 
     float spin_fade = 1.0;
     float saturate = 0.0;
@@ -89,6 +90,8 @@ void main()
 
     vec3 saturate_color = vec3(1.0);
     color = mix(color, saturate_color, min(saturate, (1.0-base_wave)));
+
+    color = mix(color, vec3(1.0), extra_mag * 0.333);
 
     gl_FragColor = clamp(vec4(color, 1.0), 0.0, 1.0);
 }

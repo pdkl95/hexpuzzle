@@ -75,6 +75,8 @@ static inline const char *booltext(bool value)
 
 float ease_circular_in(float t);
 float ease_circular_out(float t);
+float ease_cuhic_in(float t);
+float ease_cubic_out(float t);
 float ease_quint_in(float t);
 float ease_quint_out(float t);
 float ease_exponential_in(float t);

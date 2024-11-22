@@ -31,6 +31,8 @@ struct tile_pos;
 struct level;
 
 struct tile {
+    int id;
+
     /*
      * game attr
      */

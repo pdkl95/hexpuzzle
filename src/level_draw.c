@@ -49,7 +49,10 @@ static void level_set_fade_transition(level_t *level, tile_pos_t *pos)
 
 static void level_set_transition(level_t *level, tile_pos_t *pos, bool do_fade, float fade_ammount)
 {
-    Vector2 tvec = Vector2Add(pos->win.center, Vector2Scale(pos->extra_translate, fade_ammount));
+    Vector2 extra_tvec = Vector2Scale(pos->extra_translate, fade_ammount);
+    Vector2 tvec = Vector2Add(pos->win.center, Vector2Add(extra_tvec, pos->pop_translate));
+
+
     rlTranslatef(tvec.x,
                  tvec.y,
                  0.0);
@@ -59,6 +62,30 @@ static void level_set_transition(level_t *level, tile_pos_t *pos, bool do_fade, 
     }
 
     rlRotatef(TO_DEGREES(pos->extra_rotate), 0.0, 0.0, 1.0);
+}
+
+static void level_draw_corner_connections(level_t *level)
+{
+    BeginShaderMode(win_border_shader);
+    {
+        for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
+            for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
+                hex_axial_t addr = {
+                    .q = q,
+                    .r = r
+                };
+                tile_pos_t *pos = level_get_current_tile_pos(level, addr);
+
+                rlPushMatrix();
+
+                //level_set_transition(level, pos, do_fade, finished_fade_in);
+                tile_draw_corner_connections(pos, level);
+
+                rlPopMatrix();
+            }
+        }
+    }
+    EndShaderMode();
 }
 
 void level_draw(level_t *level, bool finished)
@@ -185,6 +212,10 @@ void level_draw(level_t *level, bool finished)
 
         rlPopMatrix();
     }
+    if (finished) {
+        level_draw_corner_connections(level);
+    }
+
 
     //DrawRectangleLinesEx(level->px_bounding_box, 5.0, LIME);
     rlSetBlendMode(RL_BLEND_ALPHA);

@@ -148,6 +148,37 @@ float ease_circular_in(float t) {
 
 float ease_circular_out(float t) {
     return sqrtf(1.0f - powf(t - 1.0f, 2.0f));
+
+}
+
+float ease_sine_in(float t)
+{
+    return 1.0f - cosf((t * PI) / 2.0f);
+}
+
+float ease_sine_out(float t)
+{
+    return 1.0f - sinf((t * PI) / 2.0f);
+}
+
+float ease_quad_in(float t)
+{
+    return t * t;
+}
+
+float ease_quad_out(float t)
+{
+    return 1.0f - ((1.0 - t) * (1.0 - t));
+}
+
+float ease_cuhic_in(float t)
+{
+    return t * t * t;
+}
+
+float ease_cubic_out(float t)
+{
+    return 1.0f - powf(1.0f - t, 3.0f);
 }
 
 float ease_quint_in(float t) {

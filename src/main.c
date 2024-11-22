@@ -73,6 +73,11 @@ const char *progname    = PACKAGE_NAME;
 #define CONFIG_SUBDIR_NAME PACKAGE_NAME
 char *config_dir;
 
+#ifdef DEBUG_ID_AND_DIR
+int debug_id = 0;
+int debug_dir = 0;
+#endif
+
 bool running = true;
 int automatic_event_polling_semaphore = 0;
 bool mouse_input_accepted = true;
@@ -434,6 +439,7 @@ set_uniform_resolution(
 ) {
     float resolution[2] = { (float)window_size.x, (float)window_size.y };
     SetShaderValue(win_border_shader, win_border_shader_loc.resolution, resolution, SHADER_UNIFORM_VEC2);
+    SetShaderValue(postprocessing_shader, postprocessing_shader_loc.resolution, resolution, SHADER_UNIFORM_VEC2);
 }
 
 static void
@@ -605,6 +611,16 @@ handle_events(
             solver_stop(current_level->solver);
         }
     }
+
+#ifdef DEBUG_ID_AND_DIR
+    if (IsKeyPressed(KEY_F3)) {
+        debug_dir = (debug_dir + 1) % 6;
+    }
+
+    if (IsKeyPressed(KEY_F4)) {
+        debug_id = (debug_id + 1) % LEVEL_MAXTILES;
+    }
+#endif
 
     if (IsKeyPressed(KEY_F7)) {
         if (current_level) {
@@ -1705,7 +1721,7 @@ render_frame(
         {
             SetShaderValue(postprocessing_shader, postprocessing_shader_loc.time, &current_time, SHADER_UNIFORM_FLOAT);
 
-            distort_amount = bloom_amount;
+            distort_amount = sqrt(bloom_amount);
             postprocessing_effect_amount[0] = bloom_amount;
             postprocessing_effect_amount[1] = distort_amount;
             postprocessing_effect_amount[2] = 0.0f;
@@ -1737,6 +1753,12 @@ render_frame(
     if (show_fps) {
         DrawTextShadow(TextFormat("FPS: %d", GetFPS()), 15, 10, DEFAULT_GUI_FONT_SIZE, WHITE);
     }
+
+#ifdef DEBUG_ID_AND_DIR
+    DrawTextShadow(TextFormat("debug: id=%d dir=%d", debug_id, debug_dir), 15,
+                   window_size.y - DEFAULT_GUI_FONT_SIZE - DEFAULT_GUI_FONT_SIZE,
+                   DEFAULT_GUI_FONT_SIZE, WHITE);
+#endif
 
     draw_cursor();
 

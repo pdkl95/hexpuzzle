@@ -51,6 +51,12 @@ void printcolor(Color c);
                tmp.q, tmp.r); \
     } while(0)
 
+#define pcolor(var) do { \
+        printf(QUOTE(var) "\t= "); \
+        printcolor(var); \
+        printf("\n"); \
+    } while(0)
+
 /*** misc stuff */
 
 static inline Vector2 getVector2FromRectangle(Rectangle rect)
@@ -115,6 +121,17 @@ static inline Vector2 Vector2Max(Vector2 a, Vector2 b)
     result.x = fmax(a.x, b.x);
     result.y = fmax(a.y, b.y);
     return result;
+}
+
+static inline Vector2 Vector2MaxLength(Vector2 a, Vector2 b)
+{
+    float la = Vector2Length(a);
+    float lb = Vector2Length(b);
+    if (la > lb) {
+        return a;
+    } else {
+        return b;
+    }
 }
 
 Vector2 Vector2RotateAroundPoint(Vector2 v, float angle, Vector2 p);

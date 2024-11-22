@@ -218,6 +218,7 @@ void level_unwin(level_t *level);
 bool level_update_fade(level_t *level);
 void level_fade_in(level_t *level, level_fade_finished_cb_t callback, void *data);
 void level_fade_out(level_t *level, level_fade_finished_cb_t callback, void *data);
+void level_update_tile_pops(level_t *level);
 
 extern level_t *current_level;
 

@@ -62,8 +62,18 @@ struct tile_pos {
 
     float   extra_rotate;
     Vector2 extra_translate;
+    float   extra_magnitude;
+
+    float   pop_out_phase;
+    float   pop_in_phase;
+    float   pop_magnitude;
+    Vector2 pop_translate;
+    float   prev_ring_phase;
+
+    int     center_distance;
 
     Vector2 radial_vector;
+    Vector2 radial_vector_norm;
     float   radial_angle;
 
     /*
@@ -75,6 +85,13 @@ struct tile_pos {
     float center_circle_hover_radius;
 
     struct tile_pos *neighbors[6];
+    struct tile_pos *outer_neighbors[6];
+    struct tile_pos  *ring_neighbors[6];
+    struct tile_pos *inner_neighbors[6];
+    int outer_neighbors_count;
+    int  ring_neighbors_count;
+    int inner_neighbors_count;
+
     struct tile_pos *swap_target;
 
     struct tile_pos *hover_adjacent;

@@ -29,7 +29,7 @@ float lengthSq(in vec4 v) { return dot(v, v); }
 
 vec2 barrel_coord(vec2 st, float amt, float dist) {
     vec2 dist_st = st + (st-.5) * dist * amt;
-    return mix(st, dist_st, sqrt(distort_amount));
+    return mix(st, dist_st, distort_amount * 0.7);
 }
 
 vec2 barrel_coord(vec2 st, float amt) {
@@ -67,13 +67,8 @@ vec4 barrel(in vec2 st) {
 
 vec4 get_texel(vec2 coord)
 {
-    // if (distort_amount > 0.9) {
-    //     return barrel(coord);
-    // } else {
-    //     return texture(texture0, coord);
-    // }
-
-    return mix(texture(texture0, coord), barrel(coord), distort_amount);
+    //return mix(texture(texture0, coord), barrel(coord, 0.3), distort_amount * 0.666);
+    return texture(texture0, coord);
 }
 
 void main()
@@ -81,13 +76,22 @@ void main()
     bloom_amount = effect_amount.x;
     distort_amount = effect_amount.y;
 
+    //vec2 cPos = -1.0 + 2.0 * fragTexCoord;
+    //float cLength = length(cPos);
+
+    //float ripple = cos(cLength*1.85-time*0.7)*0.03;
+    //ripple *= pow(distort_amount, 4.0);;
+
+    //vec2 uv = fragTexCoord+(cPos/cLength)*ripple;
+    vec2 uv = fragTexCoord;
+
     vec4 sum = vec4(0);
     vec2 sizeFactor = vec2(1)/size*quality;
 
-    vec2 tex_coord = fragTexCoord;
+    //vec2 st = fragTexCoord;
 
     // Texel color fetching from texture sampler
-    vec4 source = get_texel(tex_coord);
+    vec4 source = get_texel(uv);
 
     const int range = 3;            // should be = (samples - 1)/2;
 
@@ -95,7 +99,7 @@ void main()
     {
         for (int y = -range; y <= range; y++)
         {
-            vec2 coord = tex_coord + vec2(x, y)*sizeFactor;
+            vec2 coord = uv + vec2(x, y)*sizeFactor;
             sum += get_texel(coord);
         }
     }
