@@ -153,10 +153,20 @@ static int rng_color_count(void)
     return count;
 }
 
+static int uodate_rng_color_count(void)
+{
+    gui_random_color_count = rng_color_count();
+    return gui_random_color_count;
+}
+
 static void toggle_color(path_type_t type)
 {
     gui_random_color[type] = !gui_random_color[type];
-    gui_random_color_count = rng_color_count();
+    if (uodate_rng_color_count() < 1) {
+        // cannot allow zero colors - undo the toggle
+        gui_random_color[type] = !gui_random_color[type];
+        uodate_rng_color_count();
+    }
 }
 
 static path_type_t rng_color(void)
@@ -926,26 +936,61 @@ static void draw_gui_random_colors(void)
     };
 
     int color_button_segments = 12;
-    float color_button_roundness = 0.5;
-    float color_button_line_thickness = 1.0;
-    float cross_thickness = 2.0;
+    float color_button_roundness = 0.5f;
+    float color_button_line_thickness = 1.0f;
+    float cross_thickness = 2.0f;
     Color cross_color = GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR));
     cross_color = ColorAlpha(cross_color, 0.7);
 
     for (path_type_t type = (PATH_TYPE_NONE + 1); type < PATH_TYPE_COUNT; type++) {
         bool hover = CheckCollisionPointRec(mouse_positionf, rect);
 
-        DrawRectangleRounded(rect, color_button_roundness, color_button_segments,
-                             hover ? path_type_highlight_color(type) : path_type_color(type));
         if (gui_random_color[type]) {
-            DrawRectangleRoundedLines(rect, color_button_roundness, color_button_segments, color_button_line_thickness, WHITE); 
+            /* button for color ON */
+            if (gui_random_color_count < 2) {
+                hover = false;
+            }
+
+            DrawRectangleRounded(rect,
+                                 color_button_roundness,
+                                 color_button_segments,
+                                 hover
+                                 ? path_type_hover_color(type)
+                                 : path_type_color(type));
+
+            DrawRectangleRoundedLines(rect,
+                                      color_button_roundness,
+                                      color_button_segments,
+                                      hover
+                                      ? color_button_line_thickness + 1.0f
+                                      : color_button_line_thickness,
+                                      hover
+                                      ? WHITE
+                                      : LIGHTGRAY);
+
         } else {
+            /* button for color OFF */
+            DrawRectangleRounded(rect,
+                                 color_button_roundness,
+                                 color_button_segments,
+                                 hover
+                                 ? path_type_disabled_hover_color(type)
+                                 : path_type_disabled_color(type));
+
             Vector2 s1 = { rect.x,              rect.y               };
             Vector2 e1 = { rect.x + rect.width, rect.y + rect.height };
             Vector2 s2 = { rect.x + rect.width, rect.y               };
             Vector2 e2 = { rect.x,              rect.y + rect.height };
             DrawLineEx(s1, e1, cross_thickness, cross_color);
             DrawLineEx(s2, e2, cross_thickness, cross_color);
+
+            if (hover) {
+                DrawRectangleRoundedLines(rect,
+                                          color_button_roundness,
+                                          color_button_segments,
+                                          color_button_line_thickness + 1.0f,
+                                          RAYWHITE);
+            }
         }
 
         if (hover) {

@@ -28,6 +28,9 @@
 struct color_option {
     Color color;
     Color highlight_color;
+    Color hover_color;
+    Color disabled_hover_color;
+    Color disabled_color;
     Color default_color;
     char rgb_string[COLOR_OPTION_STRING_LENGTH];
     char rgba_string[COLOR_OPTION_STRING_LENGTH];

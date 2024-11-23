@@ -89,7 +89,15 @@ void color_option_set(color_option_t *c_opt, Color new_color)
     assert_not_null(c_opt);
 
     c_opt->color = new_color;
-    c_opt->highlight_color = ColorBrightness(new_color, -0.25);
+    c_opt->highlight_color      = ColorBrightness(new_color, -0.25);
+    c_opt->hover_color          = ColorBrightness(new_color,  0.1);
+
+    c_opt->disabled_color       = ColorBrightness(new_color, -0.07);
+    Vector3 hsv = ColorToHSV(c_opt->disabled_color);
+    hsv.y *= 0.5;
+    c_opt->disabled_color = ColorFromHSV(hsv.x, hsv.y, hsv.z);
+
+    c_opt->disabled_hover_color = ColorLerp(c_opt->color, c_opt->disabled_color, 0.5);
 
     c_opt->rgba[0] = new_color.r;
     c_opt->rgba[1] = new_color.g;

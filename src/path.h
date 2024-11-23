@@ -58,5 +58,21 @@ static inline Color path_type_highlight_color(path_type_t type)
     return options->path_color[type].highlight_color;
 }
 
+static inline Color path_type_hover_color(path_type_t type)
+{
+    return options->path_color[type].hover_color;
+}
+
+static inline Color path_type_disabled_hover_color(path_type_t type)
+{
+    return options->path_color[type].disabled_hover_color;
+}
+
+static inline Color path_type_disabled_color(path_type_t type)
+{
+    return options->path_color[type].disabled_color;
+}
+
+
 #endif /*PATH_H*/
 
