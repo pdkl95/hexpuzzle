@@ -66,6 +66,8 @@ static inline const char *booltext(bool value)
     return value ? "true" : "false";
 }
 
+bool is_number(const char *str);
+
 /********************
  * easing functions *
  ********************/

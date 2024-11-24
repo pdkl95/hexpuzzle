@@ -734,10 +734,6 @@ Rectangle name_edit_button_rect;
 Rectangle edit_panel_rect;
 Rectangle radius_spinner_label_rect;
 Rectangle radius_spinner_rect;
-Rectangle close_button_rect;
-/* Rectangle save_button_rect; */
-/* Rectangle edit_button_rect; */
-/* Rectangle return_button_rect; */
 Rectangle edit_mode_toggle_rect;
 Rectangle open_file_button_rect;
 Rectangle tool_panel_rect;
@@ -748,7 +744,7 @@ Rectangle goto_next_level_panel_rect;
 Rectangle goto_next_level_label_rect;
 Rectangle goto_next_level_button_rect;
 
-#define MAX_RIGHT_SIDE_BUTTONS 5
+#define MAX_RIGHT_SIDE_BUTTONS 6
 Rectangle right_side_button_rect[MAX_RIGHT_SIDE_BUTTONS];
 
 char close_button_text_str[] = "Quit";
@@ -886,32 +882,22 @@ void gui_setup(void)
     tool_panel_rect.height = (2 * PANEL_INNER_MARGIN) + TOOL_BUTTON_HEIGHT;
     tool_panel_rect.y = window_size.y - WINDOW_MARGIN - tool_panel_rect.height;
 
-    Vector2 close_button_text_size   = MeasureGuiText(close_button_text_str);
-    Vector2 edit_button_text_size    = MeasureGuiText(edit_button_text_str);
-    Vector2 save_button_text_size    = MeasureGuiText(save_button_text_str);
-    Vector2 reset_button_text_size   = MeasureGuiText(reset_button_text_str);
-    Vector2 return_button_text_size  = MeasureGuiText(return_button_text_str);
-    Vector2 browser_button_text_size = MeasureGuiText(browser_button_text_str);
-    Vector2 options_button_text_size = MeasureGuiText(options_button_text_str);
+    int right_side_button_text_width = 0;
 
-    int close_button_text_width   = close_button_text_size.x;
-    int edit_button_text_width    = edit_button_text_size.x;
-    int save_button_text_width    = save_button_text_size.x;
-    int reset_button_text_width   = reset_button_text_size.x;
-    int return_button_text_width  = return_button_text_size.x;
-    int browser_button_text_width = browser_button_text_size.x;
-    int options_button_text_width = options_button_text_size.x;
+#define rsbw(name) do {                                                 \
+        Vector2 name##_button_text_size = MeasureGuiText(name##_button_text_str); \
+        right_side_button_text_width = MAX(right_side_button_text_width,          \
+                                           name##_button_text_size.x);            \
+    } while(0)
 
-    int right_side_button_text_width = close_button_text_width =
-        MAX(MAX(MAX(close_button_text_width, edit_button_text_width),
-                MAX(save_button_text_width, return_button_text_width)),
-            MAX(MAX(browser_button_text_width, options_button_text_width),
-                reset_button_text_width));
-
-    close_button_rect.x      = window_size.x - WINDOW_MARGIN - ICON_BUTTON_SIZE - close_button_text_width;
-    close_button_rect.y      = WINDOW_MARGIN;
-    close_button_rect.width  = ICON_BUTTON_SIZE + close_button_text_width;
-    close_button_rect.height = ICON_BUTTON_SIZE;
+    rsbw(close);
+    rsbw(edit);
+    rsbw(save);
+    rsbw(return);
+    rsbw(browser);
+    rsbw(options);
+    rsbw(reset);
+#undef rsbw
 
     memcpy(  close_button_text, GuiIconText(ICON_EXIT,               close_button_text_str),   CLOSE_BUTTON_TEXT_LENGTH);
     memcpy(   edit_button_text, GuiIconText(ICON_FILE_SAVE_CLASSIC,   edit_button_text_str),    EDIT_BUTTON_TEXT_LENGTH);
@@ -922,15 +908,15 @@ void gui_setup(void)
     memcpy(browser_button_text, GuiIconText(ICON_FOLDER_FILE_OPEN, browser_button_text_str), BROWSER_BUTTON_TEXT_LENGTH);
     memcpy( random_button_text, GuiIconText(ICON_SHUFFLE_FILL,      random_button_text_str),  RANDOM_BUTTON_TEXT_LENGTH);
 
-    right_side_button_rect[0].x      = close_button_rect.x;
-    right_side_button_rect[0].y      = close_button_rect.y + close_button_rect.height + (3 * WINDOW_MARGIN);
+    right_side_button_rect[0].y      = WINDOW_MARGIN;
     right_side_button_rect[0].width  = ICON_BUTTON_SIZE + right_side_button_text_width;
+    right_side_button_rect[0].x      = window_size.x - WINDOW_MARGIN - right_side_button_rect[0].width;
     right_side_button_rect[0].height = ICON_BUTTON_SIZE;
 
     for (int i=1; i<MAX_RIGHT_SIDE_BUTTONS; i++) {
         right_side_button_rect[i].x      = right_side_button_rect[i-1].x;
         right_side_button_rect[i].y      = right_side_button_rect[i-1].y + right_side_button_rect[i-1].height + WINDOW_MARGIN;
-        right_side_button_rect[i].width  = ICON_BUTTON_SIZE + right_side_button_text_width;
+        right_side_button_rect[i].width  = right_side_button_rect[i-1].width;
         right_side_button_rect[i].height = ICON_BUTTON_SIZE;
     }
 
@@ -1190,13 +1176,13 @@ static void draw_gui_widgets(void)
     int prev_align = GuiGetStyle(BUTTON, TEXT_ALIGNMENT);
     GuiSetStyle(BUTTON, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
 
+    int rsb = 0;
+
 #if defined(PLATFORM_DESKTOP)
-    if (GuiButton(close_button_rect, close_button_text)) {
+    if (GuiButton(right_side_button_rect[rsb++], close_button_text)) {
         running = false;
     }
 #endif
-
-    int rsb = 0;
 
     switch (game_mode) {
     case GAME_MODE_BROWSER:
@@ -1321,6 +1307,8 @@ static void draw_gui_widgets(void)
     default:
         break;
     }
+
+    assert(rsb < MAX_RIGHT_SIDE_BUTTONS);
 
     GuiSetStyle(BUTTON, TEXT_ALIGNMENT, prev_align);
 }
@@ -1901,6 +1889,7 @@ void gfx_init(void)
 
     set_default_gui_font();
 
+    //GuiSetStyle(DEFAULT, TEXT_SIZE, 26);
     GuiSetStyle(DEFAULT, TEXT_PADDING, 4);
     GuiSetStyle(DEFAULT, BORDER_WIDTH, 1);
 

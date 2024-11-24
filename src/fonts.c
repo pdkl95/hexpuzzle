@@ -27,7 +27,7 @@ Font font20;
 Font font18;
 Font font16;
 
-int gui_font_size = 26;
+int gui_font_size = DEFAULT_GUI_FONT_SIZE;
 
 void load_fonts(void)
 {

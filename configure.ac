@@ -141,6 +141,7 @@ AX_C___ATTRIBUTE__
 AC_C_CONST
 
 dnl Checks for header files.
+AC_CHECK_HEADERS([ctype.h], [], [ERR_NOT_FOUND([ctype.h])])
 AC_CHECK_HEADERS([dirent.h], [], [ERR_NOT_FOUND([dirent.h])])
 AC_CHECK_HEADERS([libgen.h], [], [ERR_NOT_FOUND([libgen.h])])
 AC_CHECK_HEADERS([limits.h], [], [ERR_NOT_FOUND([limits.h])])
@@ -164,6 +165,7 @@ AC_FUNC_MALLOC
 AC_FUNC_MMAP
 AC_CHECK_FUNC([asprintf], [], [ERR_NOT_FOUND([asprintf])])
 AC_CHECK_FUNC([getline], [], [ERR_NOT_FOUND([getline])])
+AC_CHECK_FUNC([isdigit], [], [ERR_NOT_FOUND([isdigit])])
 AC_CHECK_FUNC([vasprintf], [], [ERR_NOT_FOUND([vasprintf])])
 AC_CHECK_FUNC([scandir], [], [ERR_NOT_FOUND([scandir])])
 AC_CHECK_FUNC([strcspn], [], [ERR_NOT_FOUND([strcspn])])

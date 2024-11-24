@@ -27,6 +27,7 @@
 #include <limits.h>
 #include <stdarg.h>
 #include <math.h>
+#include <ctype.h>
 
 #include "util.h"
 
@@ -140,6 +141,17 @@ const char *gen_unique_id(void)
              (rand32() & 0x3fff) + 0x8000,
              rand32() & 0xffff, rand32());
     return buf;
+}
+
+bool is_number(const char *str)
+{
+    while (*str) {
+        if (!isdigit(*str)) {
+            return false;
+        }
+        str++;
+    }
+    return true;
 }
 
 float ease_circular_in(float t) {

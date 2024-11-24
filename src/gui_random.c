@@ -22,6 +22,7 @@
 #include "common.h"
 
 #include <limits.h>
+#include "tinyfiledialogs/tinyfiledialogs.h"
 
 #include "options.h"
 #include "gui_random.h"
@@ -36,7 +37,10 @@
 Rectangle gui_random_panel_rect;
 Rectangle gui_random_area_rect;
 Rectangle gui_random_play_button_rect;
-Rectangle gui_random_radius_rect;
+Rectangle gui_random_radius_label_rect;
+Rectangle gui_random_radius_left_button_rect;
+Rectangle gui_random_radius_display_rect;
+Rectangle gui_random_radius_right_button_rect;
 Rectangle gui_random_color_label_rect;
 Rectangle gui_random_gen_style_label_rect;
 Rectangle gui_random_gen_style_rect;
@@ -52,7 +56,9 @@ Vector2 seed_text_location;
 
 char gui_random_panel_text[] = "Random Level";
 char gui_random_play_button_text[] = "Play";
-char gui_random_radius_text[] = "Tile Radius  ";
+char gui_random_radius_label_text[] = "Tile Radius";
+char gui_random_radius_left_button_text[6];
+char gui_random_radius_right_button_text[6];
 char gui_random_color_label_text[] = "Colors";
 char gui_random_gen_style_label_text[] = "Gen. Method";
 char gui_random_difficulty_label_text[] = "Difficulty";
@@ -818,7 +824,7 @@ void resize_gui_random(void)
     gui_random_panel_rect.width  = window_size.x * 0.4;
     gui_random_panel_rect.height = window_size.y * 0.45;
 
-    MINVAR(gui_random_panel_rect.width,  350);
+    MINVAR(gui_random_panel_rect.width,  370);
     MINVAR(gui_random_panel_rect.height, 550);
 
     gui_random_panel_rect.x = (window_size.x / 2) - (gui_random_panel_rect.width  / 2);
@@ -831,15 +837,33 @@ void resize_gui_random(void)
     gui_random_area_rect.width  = gui_random_panel_rect.width - (2 * PANEL_INNER_MARGIN);
     gui_random_area_rect.height = panel_bottom - PANEL_INNER_MARGIN - gui_random_area_rect.y;
 
-    Vector2 gui_random_radius_text_size = MeasureGuiText(gui_random_radius_text);
+    memcpy(gui_random_radius_left_button_text,  GuiIconText(ICON_ARROW_LEFT_FILL, NULL), 6);
+    memcpy(gui_random_radius_right_button_text, GuiIconText(ICON_ARROW_RIGHT_FILL, NULL), 6);
 
-    gui_random_radius_rect.x      = gui_random_area_rect.x + gui_random_radius_text_size.x;
-    gui_random_radius_rect.y      = gui_random_area_rect.y;
-    gui_random_radius_rect.width  = 90; //gui_random_area_rect.width - gui_random_radius_text_size.x;
-    gui_random_radius_rect.height = 30;
+    Vector2 gui_random_radius_label_text_size = MeasureGuiText(gui_random_radius_label_text);
 
-    gui_random_area_rect.y      += gui_random_radius_rect.height + RAYGUI_ICON_SIZE;
-    gui_random_area_rect.height -= gui_random_radius_rect.height + RAYGUI_ICON_SIZE;
+    gui_random_radius_label_rect.x      = gui_random_area_rect.x;
+    gui_random_radius_label_rect.y      = gui_random_area_rect.y;
+    gui_random_radius_label_rect.width  = gui_random_radius_label_text_size.x;
+    gui_random_radius_label_rect.height = TOOL_BUTTON_HEIGHT;
+
+    gui_random_radius_left_button_rect.x      = gui_random_radius_label_rect.x + gui_random_radius_label_rect.width + RAYGUI_ICON_SIZE;;
+    gui_random_radius_left_button_rect.y      = gui_random_radius_label_rect.y;
+    gui_random_radius_left_button_rect.width  = TOOL_BUTTON_WIDTH;
+    gui_random_radius_left_button_rect.height = TOOL_BUTTON_HEIGHT;
+
+    gui_random_radius_display_rect.x      = gui_random_radius_left_button_rect.x + gui_random_radius_left_button_rect.width + BUTTON_MARGIN;
+    gui_random_radius_display_rect.y      = gui_random_radius_left_button_rect.y;
+    gui_random_radius_display_rect.width  = TOOL_BUTTON_WIDTH;
+    gui_random_radius_display_rect.height = TOOL_BUTTON_HEIGHT;
+
+    gui_random_radius_right_button_rect.x      = gui_random_radius_display_rect.x + gui_random_radius_display_rect.width + BUTTON_MARGIN;
+    gui_random_radius_right_button_rect.y      = gui_random_radius_display_rect.y;
+    gui_random_radius_right_button_rect.width  = TOOL_BUTTON_WIDTH;
+    gui_random_radius_right_button_rect.height = TOOL_BUTTON_HEIGHT;
+
+    gui_random_area_rect.y      += gui_random_radius_label_rect.height + RAYGUI_ICON_SIZE;
+    gui_random_area_rect.height -= gui_random_radius_label_rect.height + RAYGUI_ICON_SIZE;
 
     Vector2 color_label_text_size = MeasureGuiText(gui_random_color_label_text);
  
@@ -856,7 +880,7 @@ void resize_gui_random(void)
     gui_random_gen_style_label_rect.x      = gui_random_area_rect.x;
     gui_random_gen_style_label_rect.y      = gui_random_area_rect.y;
     gui_random_gen_style_label_rect.width  = gui_random_gen_style_label_text_size.x;
-    gui_random_gen_style_label_rect.height = TOOL_BUTTON_HEIGHT;;
+    gui_random_gen_style_label_rect.height = TOOL_BUTTON_HEIGHT;
 
     gui_random_gen_style_rect.x      = gui_random_gen_style_label_rect.x + gui_random_gen_style_label_rect.width + RAYGUI_ICON_SIZE;
     gui_random_gen_style_rect.y      = gui_random_gen_style_label_rect.y;
@@ -889,12 +913,12 @@ void resize_gui_random(void)
     gui_random_seed_rect.height = TOOL_BUTTON_HEIGHT;
 
     seed_text_location.x = gui_random_seed_rect.x + gui_random_seed_rect.width + RAYGUI_ICON_SIZE;
-    seed_text_location.y = gui_random_seed_rect.y;
+    seed_text_location.y = gui_random_seed_rect.y - 2;
 
     Vector2 gui_random_rng_seed_text_size   = MeasureGuiText(gui_random_rng_seed_text);
 
-    gui_random_rng_seed_rect.y      = seed_text_location.y;
-    gui_random_rng_seed_rect.width  = gui_random_rng_seed_text_size.x;
+    gui_random_rng_seed_rect.y      = gui_random_seed_rect.y;
+    gui_random_rng_seed_rect.width  = gui_random_rng_seed_text_size.x + (2 * BUTTON_MARGIN);
     gui_random_rng_seed_rect.height = TOOL_BUTTON_HEIGHT;
     gui_random_rng_seed_rect.x      = gui_random_area_rect.x + gui_random_area_rect.width - gui_random_rng_seed_rect.width;
 
@@ -903,8 +927,8 @@ void resize_gui_random(void)
     gui_random_enter_seed_rect.height = TOOL_BUTTON_HEIGHT;
     gui_random_enter_seed_rect.x      = gui_random_rng_seed_rect.x - RAYGUI_ICON_SIZE - gui_random_enter_seed_rect.width;
 
-    gui_random_seed_bg_rect.x      = seed_text_location.x - 6;
-    gui_random_seed_bg_rect.y      = seed_text_location.y - 2;
+    gui_random_seed_bg_rect.x      = seed_text_location.x - 5;
+    gui_random_seed_bg_rect.y      = seed_text_location.y;
     gui_random_seed_bg_rect.width  = 2 + gui_random_enter_seed_rect.x - gui_random_seed_bg_rect.x - RAYGUI_ICON_SIZE;
     gui_random_seed_bg_rect.height = 3 + gui_random_enter_seed_rect.height;
 
@@ -1006,6 +1030,54 @@ static void draw_gui_random_colors(void)
     }
 }
 
+bool ask_for_random_seed(void)
+{
+    char *seedstr = tinyfd_inputBox("New Random Seed",
+                                    "Enter a randon number generator seed:",
+                                    "");
+    if (strlen(seedstr) < 1) {
+        return false;
+    }
+
+    if (is_number(seedstr)) {
+        const char *src = seedstr;
+        char *endptr;
+
+        errno = 0;
+        long value = strtol(src, &endptr, 10);
+
+        if (  ( errno == ERANGE &&
+                (  value == LONG_MAX ||
+                   value == LONG_MIN )  ) ||
+              ( errno != 0 && value == 0)
+        ) {
+            perror("strtol");
+            errmsg("cannot parse numewric seed");
+            return false;
+        }
+
+        if (endptr == src) {
+            errmsg("No digits were found");
+            return false;
+        }
+
+        set_random_seed(value);
+    } else {
+        int value = 0;
+        char *p = seedstr;
+
+        while (*p) {
+            value <<= 7;
+            value ^= *p;
+            p++;
+        }
+
+        set_random_seed(value);
+    }
+
+    return true;
+}
+
 void draw_gui_random(void)
 {
     if (!gui_random_level) {
@@ -1014,14 +1086,22 @@ void draw_gui_random(void)
 
     GuiPanel(gui_random_panel_rect, gui_random_panel_text);
 
-    int old_radius = options->create_level_radius;
-
-    int radius = (int)options->create_level_radius;
-    GuiSpinner(gui_random_radius_rect, gui_random_radius_text, &radius, LEVEL_MIN_RADIUS, LEVEL_MAX_RADIUS, false);
-    options->create_level_radius = (long)radius;
-
-    if (old_radius != options->create_level_radius) {
-        regen_level();
+    GuiLabel(gui_random_radius_label_rect, gui_random_radius_label_text);
+    if (GuiButton(gui_random_radius_left_button_rect, gui_random_radius_left_button_text)) {
+        if (options->create_level_radius > LEVEL_MIN_RADIUS) {
+            options->create_level_radius--;
+            regen_level();
+        }
+    }
+    GuiDrawText(TextFormat("%d", options->create_level_radius),
+                GetTextBounds(LABEL, gui_random_radius_display_rect),
+                TEXT_ALIGN_LEFT, RAYWHITE);
+    //GuiLabel(gui_random_radius_display_rect, TextFormat(TextFormat("%d", options->create_level_radius));)
+    if (GuiButton(gui_random_radius_right_button_rect, gui_random_radius_right_button_text)) {
+        if (options->create_level_radius < LEVEL_MAX_RADIUS) {
+            options->create_level_radius++;
+            regen_level();
+        }
     }
 
     draw_gui_random_colors();
@@ -1039,7 +1119,9 @@ void draw_gui_random(void)
 
 
     if (GuiButton(gui_random_enter_seed_rect, gui_random_enter_seed_text)) {
-        regen_level();
+        if (ask_for_random_seed()) {
+            regen_level();
+        }
     }
 
     if (GuiButton(gui_random_rng_seed_rect, gui_random_rng_seed_text)) {

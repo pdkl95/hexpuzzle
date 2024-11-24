@@ -5155,6 +5155,20 @@ $as_echo "#define const /**/" >>confdefs.h
 fi
 
 
+for ac_header in ctype.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "ctype.h" "ac_cv_header_ctype_h" "$ac_includes_default"
+if test "x$ac_cv_header_ctype_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_CTYPE_H 1
+_ACEOF
+
+else
+  as_fn_error 1 "ctype.h not found" "$LINENO" 5
+fi
+
+done
+
 for ac_header in dirent.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "dirent.h" "ac_cv_header_dirent_h" "$ac_includes_default"
@@ -5866,6 +5880,13 @@ if test "x$ac_cv_func_getline" = xyes; then :
 
 else
   as_fn_error 1 "getline not found" "$LINENO" 5
+fi
+
+ac_fn_c_check_func "$LINENO" "isdigit" "ac_cv_func_isdigit"
+if test "x$ac_cv_func_isdigit" = xyes; then :
+
+else
+  as_fn_error 1 "isdigit not found" "$LINENO" 5
 fi
 
 ac_fn_c_check_func "$LINENO" "vasprintf" "ac_cv_func_vasprintf"
