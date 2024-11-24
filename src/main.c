@@ -111,6 +111,7 @@ RenderTexture2D *scene_write_target;
 bool do_postprocessing = false;
 float bloom_amount = 1.0;
 float distort_amount = 0.0;
+float warp_amount = 0.0;
 float postprocessing_effect_amount[4];
 
 float feedback_bg_zoom_ratio = 0.1;
@@ -1733,7 +1734,7 @@ render_frame(
             distort_amount = sqrt(bloom_amount);
             postprocessing_effect_amount[0] = bloom_amount;
             postprocessing_effect_amount[1] = distort_amount;
-            postprocessing_effect_amount[2] = 0.0f;
+            postprocessing_effect_amount[2] = warp_amount;
             postprocessing_effect_amount[3] = 0.0f;
             SetShaderValue(postprocessing_shader, postprocessing_shader_loc.effect_amount, &(postprocessing_effect_amount[0]), SHADER_UNIFORM_VEC4);
 

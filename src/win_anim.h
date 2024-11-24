@@ -29,6 +29,7 @@ struct win_anim {
     struct level *level;
     bool running;
     float fade[4];
+    float start_time;
 };
 typedef struct win_anim win_anim_t;
 

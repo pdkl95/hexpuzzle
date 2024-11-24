@@ -27,6 +27,7 @@
 
 extern bool do_postprocessing;
 extern float bloom_amount;
+extern float warp_amount;
 
 static void trigger_pop(tile_pos_t *pos)
 {
@@ -176,6 +177,9 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
 
     bloom_amount = envelope * fade_magnitude * osc_magnitude;
 
+    float run_time = GetTime() - win_anim->start_time;
+    warp_amount = tanhf(0.007 * run_time);
+
     level_update_tile_pops(win_anim->level);
 }
 
@@ -268,6 +272,7 @@ void win_anim_start(win_anim_t *win_anim)
     if (!win_anim->running) {
         anim_fsm_start(&win_anim->anim_fsm);
         win_anim->running = true;
+        win_anim->start_time = GetTime();
     }
 }
 
