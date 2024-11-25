@@ -234,6 +234,7 @@ static void set_edit_tool(path_type_t type)
 static void return_from_level_callback(UNUSED level_t *level, UNUSED void *data)
 {
     if (current_level) {
+        disable_postprocessing();
         level_unload();
     }
 
@@ -243,7 +244,13 @@ static void return_from_level_callback(UNUSED level_t *level, UNUSED void *data)
 bool return_from_level(void)
 {
     if (current_level) {
-        //disable_postprocessing();
+        if (current_level->fade_active) {
+            if (options->verbose) {
+                infomsg("forcinng quick exit");
+            }
+            running = false;
+            return true;
+        }
         level_fade_out(current_level, return_from_level_callback, NULL);
         return true;
     } else {

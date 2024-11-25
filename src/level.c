@@ -314,6 +314,7 @@ static level_t *init_level(level_t *level)
 
     level->fade_rotate_level  = 0.0f;
     level->extra_rotate_level = 0.0f;
+    level->extra_rotate_level_speed = 0.0f;
 
     if (rand() & 0x00000001) {
         level->spin_direction = -1.0;

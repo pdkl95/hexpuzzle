@@ -67,7 +67,7 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
                    SHADER_UNIFORM_VEC4);
 
     //float envelope_variation = (sinf(0.23f * current_time) + 1.0f) * 0.5;
-    float envelope_speed = 0.3f;
+    float envelope_speed = 0.21f;
     //envelope_speed += 0.05f * envelope_variation;
 
     float envelope_phase = current_time * envelope_speed;
@@ -75,7 +75,7 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
     float e_f = powf(1.0f - sqrtf(1.0f - fabs(sinf(envelope_phase))), 3.0f);
     float simple_envelope = e_f;
 
-    //float e_g = cosf(powf(1.0f - sqrtf(1.0f - (sinf(0.7 * envelope_phase))), 4.0f));
+    //float e_g = cosf(powf(1.0f - sqrtf(1.0f - (sinf(0.337 * envelope_phase))), 4.0f));
     //float e_h = powf(1.0f - sqrtf(1.0f - fabs(sinf(0.12 * envelope_phase))), 4.0f);
 
     //float envelope = tanhf(fabs(e_f - e_g + e_h));
@@ -85,23 +85,32 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
 #define TILE_POP_IN_STEP 0.05
 #define TILE_POP_PHASE (TAU/4)
 #define TILE_POP_RBG_MASK 0x00000001
-#define LEVEL_WIN_OSC_SPIN_RATE 0.001
+#define LEVEL_WIN_OSC_SPIN_RATE 0.0005
 #define TILE_POP_AMPLIFY_MIN 60.0
 #define TILE_POP_AMPLIFY_MAX 220.0
 #define TILE_POP_AMPLIFY_DELTA ((TILE_POP_AMPLIFY_MAX) - (TILE_POP_AMPLIFY_MIN))
+#define EVEL_WIN_SPIN_MAX_DECREASE -0.2f
+#define EVEL_WIN_SPIN_MAX_INCREASE 10.0f
 
     float pop_amplify_delta = TILE_POP_AMPLIFY_DELTA * fade_magnitude * simple_envelope;
     float pop_amplify = TILE_POP_AMPLIFY_MIN;
     pop_amplify += pop_amplify_delta;
 
-#if 0
-    level->extra_rotate_level = copysignf(simple_envelope
-                                          * osc_magnitude
-                                          * LEVEL_WIN_OSC_SPIN_RATE
-                                          * pop_amplify,
-                                          level->fade_rotate_speed);
+    level->extra_rotate_level_speed = copysignf(simple_envelope
+                                                * osc_magnitude
+                                                * LEVEL_WIN_OSC_SPIN_RATE
+                                                * pop_amplify,
+                                                level->fade_rotate_speed);
+\
+    float old_erl = level->extra_rotate_level;
+    float new_erl = (old_erl + level->extra_rotate_level_speed) * 0.97;
+    float delta_erl = new_erl - old_erl;
+    float clamp_delta = Clamp(delta_erl, EVEL_WIN_SPIN_MAX_DECREASE, EVEL_WIN_SPIN_MAX_INCREASE);
+    level->extra_rotate_level += clamp_delta;
+;
+//printf("erl = %f\tdelta = %f\tspeed = %f\n", level->extra_rotate_level, delta_erl, level->extra_rotate_level_speed);
 
-#endif
+    float spin_boost = 0.333 + fabsf(level->extra_rotate_level);
 
     tile_pos_t *center_pos = level_get_center_tile_pos(level);
 
@@ -121,7 +130,7 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
             float osc = (osc_norm + 1.0f) * 0.6f;
 
             float mag = fade_magnitude;
-            mag += 12.0f * (osc_magnitude * (pos->ring_radius)) * osc;
+            mag += 12.0f * ((osc_magnitude) * (pos->ring_radius)) * osc;
             mag *= envelope;
 
 
@@ -153,6 +162,7 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
             float tmag = tanh(mag);
             pos->extra_magnitude = Lerp(pop_magnitude * tmag, mag + (0.25 * tmag), tmag);
             pos->extra_magnitude += 6.0f * pos->ring_radius;
+            pos->extra_magnitude += powf(spin_boost, pos->ring_radius);
             pos->extra_magnitude *= fade_magnitude * osc_magnitude;;
 
 #if 0

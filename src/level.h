@@ -106,6 +106,7 @@ struct level {
     float finished_hue;
 
     float extra_rotate_level;
+    float extra_rotate_level_speed;
 
     bool  fade_active;
     float fade_value;
