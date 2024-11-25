@@ -23,65 +23,52 @@
 #include "fonts.h"
 #include "data_fonts.h"
 
-Font font20;
-Font font18;
-Font font16;
+font_handle_t gui_font;
+font_handle_t panel_font;
+font_handle_t name_font;
+font_handle_t big_button_font;
 
-int gui_font_size = DEFAULT_GUI_FONT_SIZE;
+font_handle_t *current_font;
+
+static inline font_handle_t load_standard_font(int size, int filter)
+{
+    font_handle_t fh = {
+        .size    = size,
+        .spacing = 2.0f,
+        .font = LoadFontFromMemory(".ttf",
+                                   fonts_PalanquinDark_Regular_ttf,
+                                   fonts_PalanquinDark_Regular_ttf_len,
+                                   2.9 * size,
+                                   NULL,
+                                   0)
+    };
+
+    SetTextureFilter(fh.font.texture, filter);
+
+    return fh;
+}
 
 void load_fonts(void)
 {
-    font20 = LoadFontFromMemory(".ttf",
-                                fonts_PalanquinDark_Regular_ttf,
-                                fonts_PalanquinDark_Regular_ttf_len,
-                                36, NULL, 0);
-    SetTextureFilter(font20.texture, TEXTURE_FILTER_POINT);
-
-    font18 = LoadFontFromMemory(".ttf",
-                                fonts_PalanquinDark_Regular_ttf,
-                                fonts_PalanquinDark_Regular_ttf_len,
-                                2 * gui_font_size, NULL, 0);
-//36, NULL, 0);
-    SetTextureFilter(font18.texture, TEXTURE_FILTER_BILINEAR);
-
-    font16 = LoadFontFromMemory(".ttf",
-                                fonts_PalanquinDark_Regular_ttf,
-                                fonts_PalanquinDark_Regular_ttf_len,
-                                32, NULL, 0);
-    SetTextureFilter(font16.texture, TEXTURE_FILTER_BILINEAR);
+    gui_font        = load_standard_font(26, TEXTURE_FILTER_BILINEAR);
+    panel_font      = load_standard_font(32, TEXTURE_FILTER_BILINEAR);
+    name_font       = load_standard_font(36, TEXTURE_FILTER_BILINEAR);
+    big_button_font = load_standard_font(48, TEXTURE_FILTER_POINT);
 }
 
 void unload_fonts(void)
 {
-    UnloadFont(font16);
-    UnloadFont(font18);
-    UnloadFont(font20);
+    UnloadFont(big_button_font.font);
+    UnloadFont(name_font.font);
+    UnloadFont(panel_font.font);
+    UnloadFont(gui_font.font);
 }
 
-void set_default_gui_font(void)
+void set_font(font_handle_t *fh)
 {
-    GuiSetFont(DEFAULT_GUI_FONT);
-    GuiSetStyle(DEFAULT, TEXT_SIZE, gui_font_size);  //DEFAULT_GUI_FONT_SIZE);
-    GuiSetStyle(DEFAULT, TEXT_SPACING, 1);
-}
+    current_font = fh;
 
-void set_gui_font20(void)
-{
-    GuiSetFont(font20);
-    GuiSetStyle(DEFAULT, TEXT_SIZE, 36);
-    GuiSetStyle(DEFAULT, TEXT_SPACING, 1);
-}
-
-void set_gui_font18(void)
-{
-    GuiSetFont(font18);
-    GuiSetStyle(DEFAULT, TEXT_SIZE, 26);
-    GuiSetStyle(DEFAULT, TEXT_SPACING, 1);
-}
-
-void set_gui_font16(void)
-{
-    GuiSetFont(font16);
-    GuiSetStyle(DEFAULT, TEXT_SIZE, 32);
-    GuiSetStyle(DEFAULT, TEXT_SPACING, 1);
+    GuiSetFont(fh->font);
+    GuiSetStyle(DEFAULT, TEXT_SIZE,    fh->size);
+    GuiSetStyle(DEFAULT, TEXT_SPACING, fh->spacing);
 }

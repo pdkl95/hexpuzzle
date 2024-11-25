@@ -406,7 +406,7 @@ void resize_gui_browser(void)
     browser_list_rect.width  = browser_area_rect.width;
     browser_list_rect.height = area_bottom - browser_list_rect.y;
 
-    Vector2 local_files_dir_label_text_size = MeasureGuiText(local_files_dir_label_text);
+    Vector2 local_files_dir_label_text_size = measure_gui_text(local_files_dir_label_text);
 
     local_files_dir_label_rect.x      = browser_area_rect.x;
     local_files_dir_label_rect.y      = browser_area_rect.y;
@@ -430,8 +430,8 @@ void resize_gui_browser(void)
     local_files_up_button_text   = strdup(GuiIconText(ICON_ARROW_LEFT, local_files_up_button_text_str));
     local_files_home_button_text = strdup(GuiIconText(ICON_HOUSE,      local_files_home_button_text_str));
 
-    Vector2 local_files_up_button_text_size   = MeasureGuiText(local_files_up_button_text);
-    Vector2 local_files_home_button_text_size = MeasureGuiText(local_files_home_button_text);
+    Vector2 local_files_up_button_text_size   = measure_gui_text(local_files_up_button_text);
+    Vector2 local_files_home_button_text_size = measure_gui_text(local_files_home_button_text);
 
     local_files_up_button_rect.x      = browser_area_rect.x;
     local_files_up_button_rect.y      = browser_area_rect.y;

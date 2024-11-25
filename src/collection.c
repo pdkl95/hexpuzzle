@@ -35,6 +35,7 @@
 #include "options.h"
 #include "raylib_helper.h"
 #include "collection.h"
+#include "fonts.h"
 
 #define COLLECTION_JSON_VERSION 1
 
@@ -884,7 +885,7 @@ static void collection_draw_buttons(collection_t *collection, Rectangle collecti
         GuiDisable();
     }
 
-    set_gui_font20();
+    set_big_button_font();
 
     if (GuiButton(collection_play_button_rect, collection_play_button_text)) {
         level_t *level = collection->levels;
@@ -918,7 +919,7 @@ static void collection_draw_buttons(collection_t *collection, Rectangle collecti
         }
     }
 
-    set_default_gui_font();
+    set_gui_font();
 }
 
 void collection_draw_move_buttons(collection_t *collection, Rectangle bounds)

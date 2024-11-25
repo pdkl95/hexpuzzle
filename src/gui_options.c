@@ -178,14 +178,14 @@ void resize_gui_options(void)
     options_area_rect.width  = options_tabbar_rect.width - (2 * PANEL_INNER_MARGIN);
     options_area_rect.height = panel_bottom - (2 * RAYGUI_ICON_SIZE) - options_area_rect.y;
 
-    Vector2 options_reset_finished_text_size = MeasureGuiText(options_reset_finished_text);
+    Vector2 options_reset_finished_text_size = measure_gui_text(options_reset_finished_text);
     options_reset_finished_rect.x = options_area_rect.x;
     options_reset_finished_rect.y = options_area_rect.y;
     options_reset_finished_rect.width = options_reset_finished_text_size.x;
     options_reset_finished_rect.height = TOOL_BUTTON_HEIGHT;
 
-    Vector2 options_anim_bg_text_size = MeasureGuiText(options_anim_bg_text);
-    Vector2 options_anim_win_text_size = MeasureGuiText(options_anim_win_text);
+    Vector2 options_anim_bg_text_size = measure_gui_text(options_anim_bg_text);
+    Vector2 options_anim_win_text_size = measure_gui_text(options_anim_win_text);
     float anim_text_size = MAX(options_anim_bg_text_size.x,
                                options_anim_win_text_size.x);
 
@@ -199,14 +199,14 @@ void resize_gui_options(void)
     options_anim_win_rect.width = anim_text_size;
     options_anim_win_rect.height = TOOL_BUTTON_HEIGHT;
 
-    Vector2 options_icon_scale_text_size = MeasureGuiText(options_icon_scale_text);
+    Vector2 options_icon_scale_text_size = measure_gui_text(options_icon_scale_text);
     options_icon_scale_rect.x = options_anim_win_rect.x + options_icon_scale_text_size.x;
     options_icon_scale_rect.y = options_anim_win_rect.y + options_anim_win_rect.height + RAYGUI_ICON_SIZE;
     options_icon_scale_rect.width = 90;
     options_icon_scale_rect.height = TOOL_BUTTON_HEIGHT;
 
-    options_status_on.text_size  = MeasureGuiText(options_status_on.text);
-    options_status_off.text_size = MeasureGuiText(options_status_off.text);
+    options_status_on.text_size  = measure_gui_text(options_status_on.text);
+    options_status_off.text_size = measure_gui_text(options_status_off.text);
 
     options_status_on.text_size.x = options_status_off.text_size.x =
         MAX(options_status_on.text_size.x, options_status_off.text_size.x);
@@ -218,8 +218,8 @@ void resize_gui_options(void)
     options_status_on.icon_text  = strdup(GuiIconText(ICON_OK_TICK,  options_status_on.text));
     options_status_off.icon_text = strdup(GuiIconText(ICON_CROSS, options_status_off.text));
 
-    options_status_on.icon_text_size  = MeasureGuiText(options_status_on.icon_text);
-    options_status_off.icon_text_size = MeasureGuiText(options_status_off.icon_text);
+    options_status_on.icon_text_size  = measure_gui_text(options_status_on.icon_text);
+    options_status_off.icon_text_size = measure_gui_text(options_status_off.icon_text);
 
     options_status_on.icon_text_size.x = options_status_off.icon_text_size.x =
         MAX(options_status_on.icon_text_size.x, options_status_off.icon_text_size.x);
@@ -230,7 +230,7 @@ void resize_gui_options(void)
     float max_label_text_size = 0.0f;
 
     for (int i=1; i<PATH_TYPE_COUNT; i++) {
-        Vector2 label_text_size = MeasureGuiText(color_options[i].label_text);
+        Vector2 label_text_size = measure_gui_text(color_options[i].label_text);
         color_options[i].label_size = label_text_size.x;
         if (label_text_size.x > max_label_text_size) {
             max_label_text_size = label_text_size.x;

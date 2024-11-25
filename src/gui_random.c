@@ -840,7 +840,7 @@ void resize_gui_random(void)
     memcpy(gui_random_radius_left_button_text,  GuiIconText(ICON_ARROW_LEFT_FILL, NULL), 6);
     memcpy(gui_random_radius_right_button_text, GuiIconText(ICON_ARROW_RIGHT_FILL, NULL), 6);
 
-    Vector2 gui_random_radius_label_text_size = MeasureGuiText(gui_random_radius_label_text);
+    Vector2 gui_random_radius_label_text_size = measure_gui_text(gui_random_radius_label_text);
 
     gui_random_radius_label_rect.x      = gui_random_area_rect.x;
     gui_random_radius_label_rect.y      = gui_random_area_rect.y;
@@ -865,7 +865,7 @@ void resize_gui_random(void)
     gui_random_area_rect.y      += gui_random_radius_label_rect.height + RAYGUI_ICON_SIZE;
     gui_random_area_rect.height -= gui_random_radius_label_rect.height + RAYGUI_ICON_SIZE;
 
-    Vector2 color_label_text_size = MeasureGuiText(gui_random_color_label_text);
+    Vector2 color_label_text_size = measure_gui_text(gui_random_color_label_text);
  
     gui_random_color_label_rect.x      = gui_random_area_rect.x;
     gui_random_color_label_rect.y      = gui_random_area_rect.y;
@@ -875,7 +875,7 @@ void resize_gui_random(void)
     gui_random_area_rect.y      += gui_random_color_label_rect.height + RAYGUI_ICON_SIZE;
     gui_random_area_rect.height -= gui_random_color_label_rect.height + RAYGUI_ICON_SIZE;
 
-    Vector2 gui_random_gen_style_label_text_size = MeasureGuiText(gui_random_gen_style_label_text);
+    Vector2 gui_random_gen_style_label_text_size = measure_gui_text(gui_random_gen_style_label_text);
 
     gui_random_gen_style_label_rect.x      = gui_random_area_rect.x;
     gui_random_gen_style_label_rect.y      = gui_random_area_rect.y;
@@ -890,7 +890,7 @@ void resize_gui_random(void)
     gui_random_area_rect.y      += gui_random_gen_style_rect.height + RAYGUI_ICON_SIZE;
     gui_random_area_rect.height -= gui_random_gen_style_rect.height + RAYGUI_ICON_SIZE;
 
-    Vector2 gui_random_difficulty_label_text_size = MeasureGuiText(gui_random_difficulty_label_text);
+    Vector2 gui_random_difficulty_label_text_size = measure_gui_text(gui_random_difficulty_label_text);
 
     gui_random_difficulty_label_rect.x      = gui_random_area_rect.x;
     gui_random_difficulty_label_rect.y      = gui_random_area_rect.y;
@@ -905,7 +905,7 @@ void resize_gui_random(void)
     gui_random_area_rect.y      += gui_random_difficulty_rect.height + RAYGUI_ICON_SIZE;
     gui_random_area_rect.height -= gui_random_difficulty_rect.height + RAYGUI_ICON_SIZE;
 
-    Vector2 gui_random_seed_text_size = MeasureGuiText(gui_random_seed_text);
+    Vector2 gui_random_seed_text_size = measure_gui_text(gui_random_seed_text);
 
     gui_random_seed_rect.x      = gui_random_area_rect.x;
     gui_random_seed_rect.y      = gui_random_area_rect.y;
@@ -915,7 +915,7 @@ void resize_gui_random(void)
     seed_text_location.x = gui_random_seed_rect.x + gui_random_seed_rect.width + RAYGUI_ICON_SIZE;
     seed_text_location.y = gui_random_seed_rect.y - 2;
 
-    Vector2 gui_random_rng_seed_text_size   = MeasureGuiText(gui_random_rng_seed_text);
+    Vector2 gui_random_rng_seed_text_size   = measure_gui_text(gui_random_rng_seed_text);
 
     gui_random_rng_seed_rect.y      = gui_random_seed_rect.y;
     gui_random_rng_seed_rect.width  = gui_random_rng_seed_text_size.x + (2 * BUTTON_MARGIN);
@@ -1114,9 +1114,7 @@ void draw_gui_random(void)
     GuiLabel(gui_random_seed_rect, gui_random_seed_text);
 
     DrawRectangleRec(gui_random_seed_bg_rect, seed_bg_color);
-    DrawTextEx(PANEL_LABEL_FONT, gui_random_seed_str, seed_text_location,
-               PANEL_LABEL_FONT_SIZE, PANEL_LABEL_FONT_SPACING, panel_header_text_color);
-
+    draw_panel_text(gui_random_seed_str, seed_text_location, panel_header_text_color);
 
     if (GuiButton(gui_random_enter_seed_rect, gui_random_enter_seed_text)) {
         if (ask_for_random_seed()) {

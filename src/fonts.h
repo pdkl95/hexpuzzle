@@ -22,23 +22,60 @@
 #ifndef FONTS_H
 #define FONTS_H
 
-extern Font font16;
-extern Font font18;
-extern Font font20;
+struct font_handle {
+    Font font;
+    float size;
+    float spacing;
+};
+typedef struct font_handle font_handle_t;
+
+extern font_handle_t *current_font;
 
 void load_fonts(void);
 void unload_fonts(void);
 
-void set_gui_font20(void);
-void set_gui_font18(void);
-void set_gui_font16(void);
-void set_default_gui_font(void);
+void set_font(font_handle_t *fh);
 
-#define MeasureGuiText(str)                  \
-    MeasureTextEx(DEFAULT_GUI_FONT,          \
-                  str,                       \
-                  DEFAULT_GUI_FONT_SIZE,     \
-                  DEFAULT_GUI_FONT_SPACING)
+#define MeasureTextWithFont(fh, str) \
+    MeasureTextEx(fh.font,           \
+                  str,               \
+                  fn.size,           \
+                  fh.spacing)
+
+#define deffont(name)                                                  \
+                                                                       \
+    extern font_handle_t name ## _font;                                \
+                                                                       \
+    static inline void set_ ## name ## _font(void)                     \
+    {                                                                  \
+        set_font(&(name ## _font));                                    \
+    }                                                                  \
+                                                                       \
+    static inline Vector2 measure_ ## name ## _text(const char *str)   \
+    {                                                                  \
+        return MeasureTextEx(name ## _font.font,                       \
+                             str,                                      \
+                             name ## _font.size,                       \
+                             name ## _font.spacing);                   \
+    }                                                                  \
+                                                                       \
+    static inline void draw_ ## name ## _text(const char *str,         \
+                                              Vector2 position,        \
+                                              Color tint)              \
+    {                                                                  \
+        DrawTextEx(name ## _font.font,                                 \
+                   str,                                                \
+                   position,                                           \
+                   name ## _font.size,                                 \
+                   name ## _font.spacing,                              \
+                   tint);                                              \
+    }
+
+deffont(gui);
+deffont(panel);
+deffont(name);
+deffont(big_button);
+
+#undef deffont
 
 #endif /*FONTS_H*/
-
