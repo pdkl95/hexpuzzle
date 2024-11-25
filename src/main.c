@@ -1656,6 +1656,37 @@ static void draw_feedback_bg(void)
     DrawTexturePro(scene_read_target->texture, src, dst, window_center, rot, feedback_bg_tint_color);
 }
 
+static void draw_gui(void)
+{
+    switch (game_mode) {
+    case GAME_MODE_BROWSER:
+        draw_gui_browser();
+        break;
+
+    case GAME_MODE_OPTIONS:
+        draw_gui_options();
+        break;
+
+    case GAME_MODE_RANDOM:
+        draw_gui_random();
+        break;
+
+    case GAME_MODE_PLAY_COLLECTION:
+        /* fall through */
+    case GAME_MODE_EDIT_COLLECTION:
+        if (current_collection) {
+            collection_draw(current_collection);
+        }
+        break;
+
+    default:
+        /* do nothing */
+        break;
+    }
+
+    draw_gui_widgets();
+}
+
 static bool
 render_frame(
     void
@@ -1678,18 +1709,6 @@ render_frame(
         draw_cartesian_grid(false);
 
         switch (game_mode) {
-        case GAME_MODE_BROWSER:
-            draw_gui_browser();
-            break;
-
-        case GAME_MODE_OPTIONS:
-            draw_gui_options();
-            break;
-
-        case GAME_MODE_RANDOM:
-            draw_gui_random();
-            break;
-
         case GAME_MODE_WIN_LEVEL:
             /* fall thrugh */
         case GAME_MODE_PLAY_LEVEL:
@@ -1704,20 +1723,11 @@ render_frame(
             }
             break;
 
-        case GAME_MODE_PLAY_COLLECTION:
-            /* fall through */
-        case GAME_MODE_EDIT_COLLECTION:
-            if (current_collection) {
-                collection_draw(current_collection);
-            }
-            break;
-
         default:
             /* do nothing */
             break;
         }
 
-        draw_gui_widgets();
 #if defined(PLATFORM_DESKTOP)
         draw_popup_panels();
 #endif
@@ -1759,6 +1769,8 @@ render_frame(
     } else {
         renderd_texture_last_frame = false;
     }
+
+draw_gui();
 
     if (show_fps) {
         DrawTextShadow(TextFormat("FPS: %d", GetFPS()), 15, 10, DEFAULT_GUI_FONT_SIZE, WHITE);
