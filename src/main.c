@@ -46,6 +46,7 @@
 
 #include "level.h"
 #include "level_draw.h"
+#include "level_undo.h"
 #include "collection.h"
 #include "shader.h"
 
@@ -369,6 +370,66 @@ static void reset_current_level(void)
         level_reset_tile_positions(current_level);
     } else {
         warnmsg("Cannot reset level - current_level is NULL");
+    }
+}
+
+static void undo_play(void)
+{
+    if (current_level) {
+        level_undo_play(current_level);
+    }
+}
+
+static void redo_play(void)
+{
+    if (current_level) {
+        level_redo_play(current_level);
+    }
+}
+
+static void undo_edit(void)
+{
+    if (current_level) {
+        level_undo_edit(current_level);
+    }
+}
+
+static void redo_edit(void)
+{
+    if (current_level) {
+        level_redo_edit(current_level);
+    }
+}
+
+static void undo(void)
+{
+    switch (game_mode) {
+    case GAME_MODE_PLAY_LEVEL:
+        undo_play();
+        break;
+
+    case GAME_MODE_EDIT_LEVEL:
+        undo_edit();
+        break;
+
+    default:
+        warnmsg("UNDO only works in PLAY of EDIT mode");
+    }
+}
+
+static void redo(void)
+{
+    switch (game_mode) {
+    case GAME_MODE_PLAY_LEVEL:
+        redo_play();
+        break;
+
+    case GAME_MODE_EDIT_LEVEL:
+        redo_edit();
+        break;
+
+    default:
+        warnmsg("REDO only works in PLAY of EDIT mode");
     }
 }
 
@@ -711,6 +772,14 @@ handle_events(
         }
     }
 
+    if (IsKeyPressed(KEY_U)) {
+        undo();
+    }
+
+    if (IsKeyPressed(KEY_R)) {
+        redo();
+    }
+
     if (mouse_input_is_enabled()) {
         handle_mouse_events();
     }
@@ -752,7 +821,7 @@ Rectangle goto_next_level_panel_rect;
 Rectangle goto_next_level_label_rect;
 Rectangle goto_next_level_button_rect;
 
-#define MAX_RIGHT_SIDE_BUTTONS 6
+#define MAX_RIGHT_SIDE_BUTTONS 8
 Rectangle right_side_button_rect[MAX_RIGHT_SIDE_BUTTONS];
 
 char close_button_text_str[] = "Quit";
@@ -786,6 +855,14 @@ char reset_button_text[RESET_BUTTON_TEXT_LENGTH];
 char return_button_text_str[] = "Back";
 #define RETURN_BUTTON_TEXT_LENGTH (6 + sizeof(return_button_text_str))
 char return_button_text[RETURN_BUTTON_TEXT_LENGTH];
+
+char undo_button_text_str[] = "Undo";
+#define UNDO_BUTTON_TEXT_LENGTH (6 + sizeof(undo_button_text_str))
+char undo_button_text[UNDO_BUTTON_TEXT_LENGTH];
+
+char redo_button_text_str[] = "Redo";
+#define REDO_BUTTON_TEXT_LENGTH (6 + sizeof(redo_button_text_str))
+char redo_button_text[REDO_BUTTON_TEXT_LENGTH];
 
 char open_file_button_text_str[] = "Open File";
 #define OPEN_FILE_BUTTON_TEXT_LENGTH (6 + sizeof(open_file_button_text_str))
@@ -911,7 +988,9 @@ void gui_setup(void)
     memcpy(   edit_button_text, GuiIconText(ICON_FILE_SAVE_CLASSIC,   edit_button_text_str),    EDIT_BUTTON_TEXT_LENGTH);
     memcpy(   save_button_text, GuiIconText(ICON_TOOLS,               save_button_text_str),    SAVE_BUTTON_TEXT_LENGTH);
     memcpy(  reset_button_text, GuiIconText(ICON_EXPLOSION,          reset_button_text_str),   RESET_BUTTON_TEXT_LENGTH);
-    memcpy( return_button_text, GuiIconText(ICON_UNDO_FILL,         return_button_text_str),  RETURN_BUTTON_TEXT_LENGTH);
+    memcpy( return_button_text, GuiIconText(ICON_CROSS,             return_button_text_str),  RETURN_BUTTON_TEXT_LENGTH);
+    memcpy(   undo_button_text, GuiIconText(ICON_UNDO_FILL,           undo_button_text_str),    UNDO_BUTTON_TEXT_LENGTH);
+    memcpy(   redo_button_text, GuiIconText(ICON_REDO_FILL,           redo_button_text_str),    REDO_BUTTON_TEXT_LENGTH);
     memcpy(options_button_text, GuiIconText(ICON_GEAR,             options_button_text_str), OPTIONS_BUTTON_TEXT_LENGTH);
     memcpy(browser_button_text, GuiIconText(ICON_FOLDER_FILE_OPEN, browser_button_text_str), BROWSER_BUTTON_TEXT_LENGTH);
     memcpy( random_button_text, GuiIconText(ICON_SHUFFLE_FILL,      random_button_text_str),  RANDOM_BUTTON_TEXT_LENGTH);
@@ -1255,6 +1334,17 @@ static void draw_gui_widgets(void)
 
         if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
             return_from_level();
+        }
+
+        // skip one position
+        rsb++;
+
+        if (GuiButton(right_side_button_rect[rsb++], undo_button_text)) {
+            undo_play();
+        }
+
+        if (GuiButton(right_side_button_rect[rsb++], redo_button_text)) {
+            redo_play();
         }
         break;
 

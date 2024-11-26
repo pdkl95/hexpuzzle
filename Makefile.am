@@ -104,6 +104,7 @@ hexpuzzle_SOURCES =                                    \
 	src/hex.h               src/hex.c              \
 	src/level.h             src/level.c            \
 	src/level_draw.h        src/level_draw.c       \
+	src/level_undo.h        src/level_undo.c       \
 	src/logging.h           src/logging.c          \
 	src/nvdata.h            src/nvdata.c           \
 	src/nvdata_finished.h   src/nvdata_finished.c  \

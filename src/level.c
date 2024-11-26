@@ -32,6 +32,7 @@
 #include "tile.h"
 #include "tile_pos.h"
 #include "level.h"
+#include "level_undo.h"
 #include "collection.h"
 #include "win_anim.h"
 #include "solver.h"
@@ -300,6 +301,7 @@ static level_t *init_level(level_t *level)
     level->changed = false;
     level->solver = NULL;
 
+    level->undo = NULL;
     level->next = NULL;
 
     level->enabled_tile_count = 0;
@@ -445,6 +447,11 @@ void level_reset(level_t *level)
     level_enable_spiral(level, level->radius);
 
     level_use_null_tile_pos(level);
+
+    if (level->undo) {
+        destroy_level_undo(level->undo);
+    }
+    level->undo = create_level_undo(level);
 }
 
 void level_reset_tile_positions(level_t *level)
@@ -504,6 +511,11 @@ level_t *create_level(struct collection *collection)
 void destroy_level(level_t *level)
 {
     if (level) {
+        if (level->undo) {
+            destroy_level_undo(level->undo);
+            level->undo = NULL;
+        }
+
         if (level->solver) {
             destroy_solver(level->solver);
             level->solver = NULL;
@@ -1351,7 +1363,7 @@ void level_drag_start(level_t *level)
     }
 }
 
-void level_swap_tile_pos(level_t *level, tile_pos_t *a, tile_pos_t *b)
+void level_swap_tile_pos(level_t *level, tile_pos_t *a, tile_pos_t *b, bool save_to_undo)
 {
     assert_not_null(level);
     assert_not_null(a);
@@ -1389,8 +1401,26 @@ void level_swap_tile_pos(level_t *level, tile_pos_t *a, tile_pos_t *b)
     }
 
     level->changed = true;
+
+    if (save_to_undo) {
+        level_undo_add_swap_event(level, a->position, b->position);
+    }
 }
 
+void level_swap_tile_pos_by_position(level_t *level, hex_axial_t a, hex_axial_t b, bool save_to_undo)
+{
+    tile_t *atile = level_get_tile(level, a);
+    tile_t *btile = level_get_tile(level, b);
+    assert_not_null(atile);
+    assert_not_null(btile);
+
+    tile_pos_t *apos = atile->unsolved_pos;
+    tile_pos_t *bpos = btile->unsolved_pos;
+    assert_not_null(apos);
+    assert_not_null(bpos);
+
+    level_swap_tile_pos(level, apos, bpos, save_to_undo);
+}
 
 
 void level_drop_tile(level_t *level, tile_pos_t *drag_target, tile_pos_t *drop_target)
@@ -1403,7 +1433,7 @@ void level_drop_tile(level_t *level, tile_pos_t *drag_target, tile_pos_t *drop_t
     assert(drop_target->tile->enabled);
 
     if (!drop_target->tile->fixed && level_using_unsolved_tiles(level) && (drag_target != drop_target)) {
-        level_swap_tile_pos(level, level->drag_target, drop_target);
+        level_swap_tile_pos(level, level->drag_target, drop_target, true);
     }
 }
 

@@ -44,6 +44,7 @@ typedef enum used_tiles used_tiles_t;
 struct collection;
 struct level;
 struct solver;
+struct undo;
 
 typedef void (*level_fade_finished_cb_t)(struct level *level, void *data);
 
@@ -122,6 +123,8 @@ struct level {
     struct solver *solver;
 
     struct win_anim *win_anim;
+
+    struct undo *undo;
 
     struct collection *collection;
 
@@ -202,7 +205,8 @@ tile_pos_t *level_get_center_tile_pos(level_t *leve);
 
 void level_resize(level_t *level);
 void level_set_hover(level_t *level, IVector2 mouse_position);
-void level_swap_tile_pos(level_t *level, tile_pos_t *a, tile_pos_t *b);
+void level_swap_tile_pos(level_t *level, tile_pos_t *a, tile_pos_t *b, bool save_to_undo);
+    void level_swap_tile_pos_by_position(level_t *level, hex_axial_t a, hex_axial_t b, bool save_to_undo);
 void level_drag_start(level_t *level);
 void level_drag_stop(level_t *level);
 void level_modify_hovered_feature(level_t *level);

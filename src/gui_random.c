@@ -687,7 +687,7 @@ static void shuffle_tiles(level_t *level)
 
         tile_pos_t *pos_i = level->enabled_positions[i];
         tile_pos_t *pos_j = level->enabled_positions[j];
-        level_swap_tile_pos(level, pos_i, pos_j);
+        level_swap_tile_pos(level, pos_i, pos_j, false);
         level->enabled_positions[i] = pos_j;
         level->enabled_positions[j] = pos_i;
     }
