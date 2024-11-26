@@ -26,6 +26,8 @@ struct font_handle {
     Font font;
     float size;
     float spacing;
+    bool use_color;
+    int color;
 };
 typedef struct font_handle font_handle_t;
 
@@ -77,5 +79,7 @@ deffont(name);
 deffont(big_button);
 
 #undef deffont
+
+#define set_default_font() set_gui_font()
 
 #endif /*FONTS_H*/

@@ -30,15 +30,18 @@ font_handle_t big_button_font;
 
 font_handle_t *current_font;
 
-static inline font_handle_t load_standard_font(int size, int filter)
+bool restore_color_next_change = false;
+int restore_color;
+
+static inline font_handle_t load_font(int size, int filter, unsigned char *font_data, unsigned int font_data_length)
 {
     font_handle_t fh = {
         .size    = size,
         .spacing = 2.0f,
         .font = LoadFontFromMemory(".ttf",
-                                   fonts_PalanquinDark_Regular_ttf,
-                                   fonts_PalanquinDark_Regular_ttf_len,
-                                   2.9 * size,
+                                   font_data,
+                                   font_data_length,
+                                   2.0 * size,
                                    NULL,
                                    0)
     };
@@ -48,12 +51,33 @@ static inline font_handle_t load_standard_font(int size, int filter)
     return fh;
 }
 
+static inline void set_font_color(font_handle_t *fh, int color)
+{
+    fh->color = color;
+    fh->use_color = true;
+}
+
 void load_fonts(void)
 {
-    gui_font        = load_standard_font(26, TEXTURE_FILTER_BILINEAR);
-    panel_font      = load_standard_font(32, TEXTURE_FILTER_BILINEAR);
-    name_font       = load_standard_font(36, TEXTURE_FILTER_BILINEAR);
-    big_button_font = load_standard_font(48, TEXTURE_FILTER_POINT);
+    gui_font        = load_font(16, TEXTURE_FILTER_TRILINEAR,
+                                fonts_Ubuntu_Medium_ttf,
+                                fonts_Ubuntu_Medium_ttf_len);
+                                /* fonts_UbuntuCondensed_Regular_ttf, */
+                                /* fonts_UbuntuCondensed_Regular_ttf_len); */
+
+    panel_font      = load_font(20, TEXTURE_FILTER_BILINEAR,
+                                fonts_Ubuntu_Medium_ttf,
+                                fonts_Ubuntu_Medium_ttf_len);
+
+    name_font       = load_font(36, TEXTURE_FILTER_POINT,
+                                fonts_Ubuntu_Medium_ttf,
+                                fonts_Ubuntu_Medium_ttf_len);
+
+    big_button_font = load_font(36, TEXTURE_FILTER_POINT,
+                                fonts_BeetypeFilled_ljJq_otf,
+                                fonts_BeetypeFilled_ljJq_otf_len);
+
+    set_font_color(&big_button_font, 0xc1c1c1ff);
 }
 
 void unload_fonts(void)
@@ -66,9 +90,21 @@ void unload_fonts(void)
 
 void set_font(font_handle_t *fh)
 {
+    if (restore_color_next_change) {
+        restore_color_next_change = false;
+        GuiSetStyle(BUTTON, TEXT_COLOR_NORMAL, restore_color);
+    }
+
     current_font = fh;
 
     GuiSetFont(fh->font);
     GuiSetStyle(DEFAULT, TEXT_SIZE,    fh->size);
     GuiSetStyle(DEFAULT, TEXT_SPACING, fh->spacing);
+
+    if (fh->use_color) {
+        restore_color = GuiGetStyle(BUTTON, TEXT_COLOR_NORMAL);
+        restore_color_next_change = true;
+
+        GuiSetStyle(BUTTON, TEXT_COLOR_NORMAL, fh->color);
+    }
 }

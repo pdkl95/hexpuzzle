@@ -824,7 +824,7 @@ void resize_gui_random(void)
     gui_random_panel_rect.width  = window_size.x * 0.4;
     gui_random_panel_rect.height = window_size.y * 0.45;
 
-    MINVAR(gui_random_panel_rect.width,  370);
+    MINVAR(gui_random_panel_rect.width,  400);
     MINVAR(gui_random_panel_rect.height, 550);
 
     gui_random_panel_rect.x = (window_size.x / 2) - (gui_random_panel_rect.width  / 2);
@@ -913,12 +913,12 @@ void resize_gui_random(void)
     gui_random_seed_rect.height = TOOL_BUTTON_HEIGHT;
 
     seed_text_location.x = gui_random_seed_rect.x + gui_random_seed_rect.width + RAYGUI_ICON_SIZE;
-    seed_text_location.y = gui_random_seed_rect.y - 2;
+    seed_text_location.y = gui_random_seed_rect.y + 1;
 
     Vector2 gui_random_rng_seed_text_size   = measure_gui_text(gui_random_rng_seed_text);
 
     gui_random_rng_seed_rect.y      = gui_random_seed_rect.y;
-    gui_random_rng_seed_rect.width  = gui_random_rng_seed_text_size.x + (2 * BUTTON_MARGIN);
+    gui_random_rng_seed_rect.width  = gui_random_rng_seed_text_size.x + (4 * BUTTON_MARGIN);
     gui_random_rng_seed_rect.height = TOOL_BUTTON_HEIGHT;
     gui_random_rng_seed_rect.x      = gui_random_area_rect.x + gui_random_area_rect.width - gui_random_rng_seed_rect.width;
 
@@ -928,14 +928,15 @@ void resize_gui_random(void)
     gui_random_enter_seed_rect.x      = gui_random_rng_seed_rect.x - RAYGUI_ICON_SIZE - gui_random_enter_seed_rect.width;
 
     gui_random_seed_bg_rect.x      = seed_text_location.x - 5;
-    gui_random_seed_bg_rect.y      = seed_text_location.y;
+    gui_random_seed_bg_rect.y      = seed_text_location.y - 5;
     gui_random_seed_bg_rect.width  = 2 + gui_random_enter_seed_rect.x - gui_random_seed_bg_rect.x - RAYGUI_ICON_SIZE;
     gui_random_seed_bg_rect.height = 3 + gui_random_enter_seed_rect.height;
 
     gui_random_area_rect.y      += gui_random_rng_seed_rect.height + RAYGUI_ICON_SIZE;
     gui_random_area_rect.height -= gui_random_rng_seed_rect.height + RAYGUI_ICON_SIZE;
 
-    gui_random_play_button_rect.height = 3 * RAYGUI_ICON_SIZE;
+    Vector2 gui_random_play_button_text_size = measure_big_button_text(gui_random_play_button_text);
+    gui_random_play_button_rect.height = gui_random_play_button_text_size.y + (3 * BUTTON_MARGIN);;
     gui_random_play_button_rect.width  = gui_random_area_rect.width;
     gui_random_play_button_rect.x      = gui_random_area_rect.x;
     gui_random_play_button_rect.y      = gui_random_area_rect.y + gui_random_area_rect.height - gui_random_play_button_rect.height;
@@ -1131,9 +1132,13 @@ void draw_gui_random(void)
         GuiDisable();
     }
 
+    set_big_button_font();
+
     if (GuiButton(gui_random_play_button_rect, gui_random_play_button_text)) {
         play_gui_random_level();
     }
+
+    set_default_font();
 
     if (!colors_ok) {
         GuiEnable();

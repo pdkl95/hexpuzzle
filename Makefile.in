@@ -395,7 +395,8 @@ CLASSICS_LEVELS = \
 	levels/classics/4-yellow.hexlevelpack
 
 FONTS = \
-	fonts/PalanquinDark-Regular.ttf
+	fonts/BeetypeFilled-ljJq.otf \
+	fonts/Ubuntu-Medium.ttf
 
 SHADERS = \
 	shaders/postprocessing.frag.glsl \
