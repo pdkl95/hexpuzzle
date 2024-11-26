@@ -14,6 +14,7 @@
 
 @SET_MAKE@
 
+
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -88,7 +89,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 bin_PROGRAMS = hexpuzzle$(EXEEXT)
 @USE_SYSTEM_RAYLIB_FALSE@am__append_1 = \
-@USE_SYSTEM_RAYLIB_FALSE@	$(RAYLIB_SRC_DIR)/libraylib.a \
+@USE_SYSTEM_RAYLIB_FALSE@	external/raylib/libraylib.a \
 @USE_SYSTEM_RAYLIB_FALSE@	-lGL -lc -lm -lpthread -ldl -lrt
 
 #	-s ASYNCIFY
@@ -99,6 +100,7 @@ bin_PROGRAMS = hexpuzzle$(EXEEXT)
 @BUILD_WEB_FALSE@	external/tinyfiledialogs/tinyfiledialogs.c \
 @BUILD_WEB_FALSE@	external/tinyfiledialogs/tinyfiledialogs.h
 
+@BUILD_DEBUG_TRUE@am__append_4 = -D_DEBUG
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/ax_c___attribute__.m4 \
@@ -115,6 +117,26 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = config.h
 CONFIG_CLEAN_FILES = lib/getopt.h
 CONFIG_CLEAN_VPATH_FILES =
+LIBRARIES = $(noinst_LIBRARIES)
+ARFLAGS = cru
+AM_V_AR = $(am__v_AR_@AM_V@)
+am__v_AR_ = $(am__v_AR_@AM_DEFAULT_V@)
+am__v_AR_0 = @echo "  AR      " $@;
+am__v_AR_1 = 
+external_raylib_libraylib_a_AR = $(AR) $(ARFLAGS)
+external_raylib_libraylib_a_LIBADD =
+am__dirstamp = $(am__leading_dot)dirstamp
+am_external_raylib_libraylib_a_OBJECTS =  \
+	external/raylib/external_raylib_libraylib_a-raudio.$(OBJEXT) \
+	external/raylib/external_raylib_libraylib_a-rcore.$(OBJEXT) \
+	external/raylib/external_raylib_libraylib_a-rglfw.$(OBJEXT) \
+	external/raylib/external_raylib_libraylib_a-rmodels.$(OBJEXT) \
+	external/raylib/external_raylib_libraylib_a-rshapes.$(OBJEXT) \
+	external/raylib/external_raylib_libraylib_a-rtext.$(OBJEXT) \
+	external/raylib/external_raylib_libraylib_a-rtextures.$(OBJEXT) \
+	external/raylib/external_raylib_libraylib_a-utils.$(OBJEXT)
+external_raylib_libraylib_a_OBJECTS =  \
+	$(am_external_raylib_libraylib_a_OBJECTS)
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__hexpuzzle_SOURCES_DIST = src/anim_fsm.h src/anim_fsm.c \
@@ -139,7 +161,6 @@ am__hexpuzzle_SOURCES_DIST = src/anim_fsm.h src/anim_fsm.c \
 	external/cJSON/cJSON.h \
 	external/tinyfiledialogs/tinyfiledialogs.c \
 	external/tinyfiledialogs/tinyfiledialogs.h
-am__dirstamp = $(am__leading_dot)dirstamp
 @BUILD_WEB_FALSE@am__objects_1 = external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.$(OBJEXT)
 am_hexpuzzle_OBJECTS = src/hexpuzzle-anim_fsm.$(OBJEXT) \
 	src/hexpuzzle-classics.$(OBJEXT) \
@@ -167,7 +188,7 @@ hexpuzzle_OBJECTS = $(am_hexpuzzle_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @USE_SYSTEM_RAYLIB_FALSE@am__DEPENDENCIES_3 =  \
-@USE_SYSTEM_RAYLIB_FALSE@	$(RAYLIB_SRC_DIR)/libraylib.a
+@USE_SYSTEM_RAYLIB_FALSE@	external/raylib/libraylib.a
 hexpuzzle_DEPENDENCIES = $(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3)
 hexpuzzle_LINK = $(CCLD) $(hexpuzzle_CFLAGS) $(CFLAGS) \
 	$(hexpuzzle_LDFLAGS) $(LDFLAGS) -o $@
@@ -203,30 +224,15 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(hexpuzzle_SOURCES) $(dist_EXTRA_hexpuzzle_SOURCES)
-DIST_SOURCES = $(am__hexpuzzle_SOURCES_DIST) \
+SOURCES = $(external_raylib_libraylib_a_SOURCES) $(hexpuzzle_SOURCES) \
 	$(dist_EXTRA_hexpuzzle_SOURCES)
-RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
-	ctags-recursive dvi-recursive html-recursive info-recursive \
-	install-data-recursive install-dvi-recursive \
-	install-exec-recursive install-html-recursive \
-	install-info-recursive install-pdf-recursive \
-	install-ps-recursive install-recursive installcheck-recursive \
-	installdirs-recursive pdf-recursive ps-recursive \
-	tags-recursive uninstall-recursive
+DIST_SOURCES = $(external_raylib_libraylib_a_SOURCES) \
+	$(am__hexpuzzle_SOURCES_DIST) $(dist_EXTRA_hexpuzzle_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
     *) (install-info --version) >/dev/null 2>&1;; \
   esac
-RECURSIVE_CLEAN_TARGETS = mostlyclean-recursive clean-recursive	\
-  distclean-recursive maintainer-clean-recursive
-am__recursive_targets = \
-  $(RECURSIVE_TARGETS) \
-  $(RECURSIVE_CLEAN_TARGETS) \
-  $(am__extra_recursive_targets)
-AM_RECURSIVE_TARGETS = $(am__recursive_targets:-recursive=) TAGS CTAGS \
-	cscope distdir dist dist-all distcheck
 am__tagged_files = $(HEADERS) $(SOURCES) $(TAGS_FILES) \
 	$(LISP)config.h.in
 # Read a list of newline-separated strings from the standard input,
@@ -248,7 +254,7 @@ am__define_uniq_tagged_files = \
 ETAGS = etags
 CTAGS = ctags
 CSCOPE = cscope
-DIST_SUBDIRS = external/raylib
+AM_RECURSIVE_TARGETS = cscope
 am__DIST_COMMON = $(srcdir)/Makefile.in $(srcdir)/config.h.in \
 	$(top_srcdir)/build-aux/ar-lib $(top_srcdir)/build-aux/compile \
 	$(top_srcdir)/build-aux/depcomp \
@@ -266,31 +272,6 @@ am__remove_distdir = \
       || { sleep 5 && rm -rf "$(distdir)"; }; \
   else :; fi
 am__post_remove_distdir = $(am__remove_distdir)
-am__relativize = \
-  dir0=`pwd`; \
-  sed_first='s,^\([^/]*\)/.*$$,\1,'; \
-  sed_rest='s,^[^/]*/*,,'; \
-  sed_last='s,^.*/\([^/]*\)$$,\1,'; \
-  sed_butlast='s,/*[^/]*$$,,'; \
-  while test -n "$$dir1"; do \
-    first=`echo "$$dir1" | sed -e "$$sed_first"`; \
-    if test "$$first" != "."; then \
-      if test "$$first" = ".."; then \
-        dir2=`echo "$$dir0" | sed -e "$$sed_last"`/"$$dir2"; \
-        dir0=`echo "$$dir0" | sed -e "$$sed_butlast"`; \
-      else \
-        first2=`echo "$$dir2" | sed -e "$$sed_first"`; \
-        if test "$$first2" = "$$first"; then \
-          dir2=`echo "$$dir2" | sed -e "$$sed_rest"`; \
-        else \
-          dir2="../$$dir2"; \
-        fi; \
-        dir0="$$dir0"/"$$first"; \
-      fi; \
-    fi; \
-    dir1=`echo "$$dir1" | sed -e "$$sed_rest"`; \
-  done; \
-  reldir="$$dir2"
 DIST_ARCHIVES = $(distdir).tar.gz $(distdir).tar.xz
 GZIP_ENV = --best
 DIST_TARGETS = dist-xz dist-gzip
@@ -403,9 +384,8 @@ top_srcdir = @top_srcdir@
 AUTOMAKE_OPTIONS = subdir-objects
 ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -Wall -Wextra
-RAYLIB_SRC_DIR = external/raylib
-@USE_SYSTEM_RAYLIB_FALSE@MAYBE_RAYLIB_SRC_DIR = $(RAYLIB_SRC_DIR)
-SUBDIRS = $(MAYBE_RAYLIB_SRC_DIR)
+RAYLIB_PLATFORM = PLATFORM_DESKTOP
+RAYLIB_GRAPHICS = GRAPHICS_API_OPENGL_33
 CLASSICS_LEVELS = \
 	levels/classics/1-red.hexlevelpack \
 	levels/classics/2-blue.hexlevelpack \
@@ -419,22 +399,21 @@ SHADERS = \
 	shaders/postprocessing.frag.glsl \
 	shaders/win_border.frag.glsl
 
-EXTRA_DIST = \
-	README.md \
-	lib/gnugetopt.h \
-	lib/getopt.c \
-	lib/getopt1.c \
-	external/sglib/LICENSE \
-	$(CLASSICS_LEVELS) \
-	$(FONTS) \
-	$(SHADERS)
-
+EXTRA_DIST = README.md lib/gnugetopt.h lib/getopt.c lib/getopt1.c \
+	external/sglib/LICENSE $(CLASSICS_LEVELS) $(FONTS) $(SHADERS) \
+	$(GLFW_SRC) $(RAYLIB_EXTERNAL_SRC) \
+	external/raylib/platforms/rcore_desktop.c \
+	external/raylib/platforms/rcore_web.c \
+	external/raylib/external/glfw/LICENSE.md
 @BUILD_WEB_FALSE@COMMON_PROG_CFLAGS = -DPLATFORM=PLATFORM_DESKTOP \
 @BUILD_WEB_FALSE@	-DPLATFORM_DESKTOP -I$(top_srcdir)/src \
 @BUILD_WEB_FALSE@	$(ALL_PKG_CFLAGS) $(APP_CFLAGS)
 @BUILD_WEB_TRUE@COMMON_PROG_CFLAGS = -DPLATFORM=PLATFORM_WEB \
 @BUILD_WEB_TRUE@	-DPLATFORM_WEB -flto -I$(top_srcdir)/src \
 @BUILD_WEB_TRUE@	$(ALL_PKG_CFLAGS) $(APP_CFLAGS)
+noinst_LIBRARIES = \
+	external/raylib/libraylib.a
+
 COMMON_PROG_LDADD = \
 	$(ALL_PKG_LIBS) \
 	$(APP_LIBS) \
@@ -478,8 +457,123 @@ BUILT_SOURCES = \
 MAINTAINERCLEANFILES = \
 	$(dist_EXTRA_hexpuzzle_SOURCES)
 
+
+######################################################################
+# Raylib
+external_raylib_libraylib_a_CFLAGS = $(ALL_PKG_CFLAGS) $(APP_CFLAGS) \
+	-Wall -D_GNU_SOURCE -D$(RAYLIB_PLATFORM) -D$(RAYLIB_GRAPHICS) \
+	-Wno-missing-braces -Werror=pointer-arith -fno-strict-aliasing \
+	-Werror=implicit-function-declaration \
+	-I$(top_srcdir)/external/raylib \
+	-I$(top_srcdir)/external/raylib/external/glfw/include \
+	-Iext$(top_srcdir)/ernal/raylib/external/glfw/deps/mingw -fPIC \
+	-Wno-unused-function -Wno-unused-parameter -Wno-sign-compare \
+	$(am__append_4)
+GLFW_SRC = \
+	external/raylib/external/glfw/src/cocoa_joystick.h \
+	external/raylib/external/glfw/src/cocoa_platform.h \
+	external/raylib/external/glfw/src/cocoa_time.c \
+	external/raylib/external/glfw/src/cocoa_time.h \
+	external/raylib/external/glfw/src/context.c \
+	external/raylib/external/glfw/src/egl_context.c \
+	external/raylib/external/glfw/src/glx_context.c \
+	external/raylib/external/glfw/src/init.c \
+	external/raylib/external/glfw/src/input.c \
+	external/raylib/external/glfw/src/internal.h \
+	external/raylib/external/glfw/src/linux_joystick.c \
+	external/raylib/external/glfw/src/linux_joystick.h \
+	external/raylib/external/glfw/src/mappings.h \
+	external/raylib/external/glfw/src/monitor.c \
+	external/raylib/external/glfw/src/null_init.c \
+	external/raylib/external/glfw/src/null_joystick.c \
+	external/raylib/external/glfw/src/null_joystick.h \
+	external/raylib/external/glfw/src/null_monitor.c \
+	external/raylib/external/glfw/src/null_platform.h \
+	external/raylib/external/glfw/src/null_window.c \
+	external/raylib/external/glfw/src/osmesa_context.c \
+	external/raylib/external/glfw/src/platform.c \
+	external/raylib/external/glfw/src/platform.h \
+	external/raylib/external/glfw/src/posix_module.c \
+	external/raylib/external/glfw/src/posix_poll.c \
+	external/raylib/external/glfw/src/posix_poll.h \
+	external/raylib/external/glfw/src/posix_thread.c \
+	external/raylib/external/glfw/src/posix_thread.h \
+	external/raylib/external/glfw/src/posix_time.c \
+	external/raylib/external/glfw/src/posix_time.h \
+	external/raylib/external/glfw/src/vulkan.c \
+	external/raylib/external/glfw/src/wgl_context.c \
+	external/raylib/external/glfw/src/win32_init.c \
+	external/raylib/external/glfw/src/win32_joystick.c \
+	external/raylib/external/glfw/src/win32_joystick.h \
+	external/raylib/external/glfw/src/win32_module.c \
+	external/raylib/external/glfw/src/win32_monitor.c \
+	external/raylib/external/glfw/src/win32_platform.h \
+	external/raylib/external/glfw/src/win32_thread.c \
+	external/raylib/external/glfw/src/win32_thread.h \
+	external/raylib/external/glfw/src/win32_time.c \
+	external/raylib/external/glfw/src/win32_time.h \
+	external/raylib/external/glfw/src/win32_window.c \
+	external/raylib/external/glfw/src/window.c \
+	external/raylib/external/glfw/src/wl_init.c \
+	external/raylib/external/glfw/src/wl_monitor.c \
+	external/raylib/external/glfw/src/wl_platform.h \
+	external/raylib/external/glfw/src/wl_window.c \
+	external/raylib/external/glfw/src/x11_init.c \
+	external/raylib/external/glfw/src/x11_monitor.c \
+	external/raylib/external/glfw/src/x11_platform.h \
+	external/raylib/external/glfw/src/x11_window.c \
+	external/raylib/external/glfw/src/xkb_unicode.c \
+	external/raylib/external/glfw/src/xkb_unicode.h \
+	external/raylib/external/glfw/include/GLFW/glfw3.h \
+	external/raylib/external/glfw/include/GLFW/glfw3native.h
+
+RAYLIB_EXTERNAL_SRC = \
+	external/raylib/external/cgltf.h \
+	external/raylib/external/dirent.h \
+	external/raylib/external/dr_flac.h \
+	external/raylib/external/dr_mp3.h \
+	external/raylib/external/dr_wav.h \
+	external/raylib/external/glad.h \
+	external/raylib/external/glad_gles2.h \
+	external/raylib/external/jar_mod.h \
+	external/raylib/external/jar_xm.h \
+	external/raylib/external/m3d.h \
+	external/raylib/external/miniaudio.h \
+	external/raylib/external/msf_gif.h \
+	external/raylib/external/nanosvg.h \
+	external/raylib/external/nanosvgrast.h \
+	external/raylib/external/par_shapes.h \
+	external/raylib/external/qoa.h \
+	external/raylib/external/qoi.h \
+	external/raylib/external/rl_gputex.h \
+	external/raylib/external/rprand.h \
+	external/raylib/external/sdefl.h \
+	external/raylib/external/sinfl.h \
+	external/raylib/external/stb_image.h \
+	external/raylib/external/stb_image_resize2.h \
+	external/raylib/external/stb_image_write.h \
+	external/raylib/external/stb_perlin.h \
+	external/raylib/external/stb_rect_pack.h \
+	external/raylib/external/stb_truetype.h \
+	external/raylib/external/tinyobj_loader_c.h \
+	external/raylib/external/vox_loader.h
+
+external_raylib_libraylib_a_SOURCES = \
+	external/raylib/raylib_config.h \
+	external/raylib/raudio.c \
+	external/raylib/raylib.h \
+	external/raylib/rcore.c \
+	external/raylib/rglfw.c \
+	external/raylib/rlgl.h \
+	external/raylib/rmodels.c \
+	external/raylib/rshapes.c \
+	external/raylib/rtext.c \
+	external/raylib/rtextures.c \
+	external/raylib/utils.c \
+	external/raylib/utils.h
+
 all: $(BUILT_SOURCES) config.h
-	$(MAKE) $(AM_MAKEFLAGS) all-recursive
+	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 .SUFFIXES: .c .o .obj
@@ -531,6 +625,44 @@ $(srcdir)/config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f config.h stamp-h1
+
+clean-noinstLIBRARIES:
+	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+external/raylib/$(am__dirstamp):
+	@$(MKDIR_P) external/raylib
+	@: > external/raylib/$(am__dirstamp)
+external/raylib/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) external/raylib/$(DEPDIR)
+	@: > external/raylib/$(DEPDIR)/$(am__dirstamp)
+external/raylib/external_raylib_libraylib_a-raudio.$(OBJEXT):  \
+	external/raylib/$(am__dirstamp) \
+	external/raylib/$(DEPDIR)/$(am__dirstamp)
+external/raylib/external_raylib_libraylib_a-rcore.$(OBJEXT):  \
+	external/raylib/$(am__dirstamp) \
+	external/raylib/$(DEPDIR)/$(am__dirstamp)
+external/raylib/external_raylib_libraylib_a-rglfw.$(OBJEXT):  \
+	external/raylib/$(am__dirstamp) \
+	external/raylib/$(DEPDIR)/$(am__dirstamp)
+external/raylib/external_raylib_libraylib_a-rmodels.$(OBJEXT):  \
+	external/raylib/$(am__dirstamp) \
+	external/raylib/$(DEPDIR)/$(am__dirstamp)
+external/raylib/external_raylib_libraylib_a-rshapes.$(OBJEXT):  \
+	external/raylib/$(am__dirstamp) \
+	external/raylib/$(DEPDIR)/$(am__dirstamp)
+external/raylib/external_raylib_libraylib_a-rtext.$(OBJEXT):  \
+	external/raylib/$(am__dirstamp) \
+	external/raylib/$(DEPDIR)/$(am__dirstamp)
+external/raylib/external_raylib_libraylib_a-rtextures.$(OBJEXT):  \
+	external/raylib/$(am__dirstamp) \
+	external/raylib/$(DEPDIR)/$(am__dirstamp)
+external/raylib/external_raylib_libraylib_a-utils.$(OBJEXT):  \
+	external/raylib/$(am__dirstamp) \
+	external/raylib/$(DEPDIR)/$(am__dirstamp)
+
+external/raylib/libraylib.a: $(external_raylib_libraylib_a_OBJECTS) $(external_raylib_libraylib_a_DEPENDENCIES) $(EXTRA_external_raylib_libraylib_a_DEPENDENCIES) external/raylib/$(am__dirstamp)
+	$(AM_V_at)-rm -f external/raylib/libraylib.a
+	$(AM_V_AR)$(external_raylib_libraylib_a_AR) external/raylib/libraylib.a $(external_raylib_libraylib_a_OBJECTS) $(external_raylib_libraylib_a_LIBADD)
+	$(AM_V_at)$(RANLIB) external/raylib/libraylib.a
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
@@ -671,6 +803,7 @@ mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
 	-rm -f external/cJSON/*.$(OBJEXT)
 	-rm -f external/pcg/*.$(OBJEXT)
+	-rm -f external/raylib/*.$(OBJEXT)
 	-rm -f external/tinyfiledialogs/*.$(OBJEXT)
 	-rm -f src/*.$(OBJEXT)
 
@@ -679,6 +812,14 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@external/cJSON/$(DEPDIR)/hexpuzzle-cJSON.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@external/pcg/$(DEPDIR)/hexpuzzle-pcg_basic.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@external/raylib/$(DEPDIR)/external_raylib_libraylib_a-raudio.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rcore.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rglfw.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rmodels.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rshapes.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rtext.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rtextures.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@external/raylib/$(DEPDIR)/external_raylib_libraylib_a-utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-anim_fsm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-classics.Po@am__quote@
@@ -724,6 +865,118 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(COMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+external/raylib/external_raylib_libraylib_a-raudio.o: external/raylib/raudio.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -MT external/raylib/external_raylib_libraylib_a-raudio.o -MD -MP -MF external/raylib/$(DEPDIR)/external_raylib_libraylib_a-raudio.Tpo -c -o external/raylib/external_raylib_libraylib_a-raudio.o `test -f 'external/raylib/raudio.c' || echo '$(srcdir)/'`external/raylib/raudio.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/raylib/$(DEPDIR)/external_raylib_libraylib_a-raudio.Tpo external/raylib/$(DEPDIR)/external_raylib_libraylib_a-raudio.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/raylib/raudio.c' object='external/raylib/external_raylib_libraylib_a-raudio.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -c -o external/raylib/external_raylib_libraylib_a-raudio.o `test -f 'external/raylib/raudio.c' || echo '$(srcdir)/'`external/raylib/raudio.c
+
+external/raylib/external_raylib_libraylib_a-raudio.obj: external/raylib/raudio.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -MT external/raylib/external_raylib_libraylib_a-raudio.obj -MD -MP -MF external/raylib/$(DEPDIR)/external_raylib_libraylib_a-raudio.Tpo -c -o external/raylib/external_raylib_libraylib_a-raudio.obj `if test -f 'external/raylib/raudio.c'; then $(CYGPATH_W) 'external/raylib/raudio.c'; else $(CYGPATH_W) '$(srcdir)/external/raylib/raudio.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/raylib/$(DEPDIR)/external_raylib_libraylib_a-raudio.Tpo external/raylib/$(DEPDIR)/external_raylib_libraylib_a-raudio.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/raylib/raudio.c' object='external/raylib/external_raylib_libraylib_a-raudio.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -c -o external/raylib/external_raylib_libraylib_a-raudio.obj `if test -f 'external/raylib/raudio.c'; then $(CYGPATH_W) 'external/raylib/raudio.c'; else $(CYGPATH_W) '$(srcdir)/external/raylib/raudio.c'; fi`
+
+external/raylib/external_raylib_libraylib_a-rcore.o: external/raylib/rcore.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -MT external/raylib/external_raylib_libraylib_a-rcore.o -MD -MP -MF external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rcore.Tpo -c -o external/raylib/external_raylib_libraylib_a-rcore.o `test -f 'external/raylib/rcore.c' || echo '$(srcdir)/'`external/raylib/rcore.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rcore.Tpo external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rcore.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/raylib/rcore.c' object='external/raylib/external_raylib_libraylib_a-rcore.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -c -o external/raylib/external_raylib_libraylib_a-rcore.o `test -f 'external/raylib/rcore.c' || echo '$(srcdir)/'`external/raylib/rcore.c
+
+external/raylib/external_raylib_libraylib_a-rcore.obj: external/raylib/rcore.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -MT external/raylib/external_raylib_libraylib_a-rcore.obj -MD -MP -MF external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rcore.Tpo -c -o external/raylib/external_raylib_libraylib_a-rcore.obj `if test -f 'external/raylib/rcore.c'; then $(CYGPATH_W) 'external/raylib/rcore.c'; else $(CYGPATH_W) '$(srcdir)/external/raylib/rcore.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rcore.Tpo external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rcore.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/raylib/rcore.c' object='external/raylib/external_raylib_libraylib_a-rcore.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -c -o external/raylib/external_raylib_libraylib_a-rcore.obj `if test -f 'external/raylib/rcore.c'; then $(CYGPATH_W) 'external/raylib/rcore.c'; else $(CYGPATH_W) '$(srcdir)/external/raylib/rcore.c'; fi`
+
+external/raylib/external_raylib_libraylib_a-rglfw.o: external/raylib/rglfw.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -MT external/raylib/external_raylib_libraylib_a-rglfw.o -MD -MP -MF external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rglfw.Tpo -c -o external/raylib/external_raylib_libraylib_a-rglfw.o `test -f 'external/raylib/rglfw.c' || echo '$(srcdir)/'`external/raylib/rglfw.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rglfw.Tpo external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rglfw.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/raylib/rglfw.c' object='external/raylib/external_raylib_libraylib_a-rglfw.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -c -o external/raylib/external_raylib_libraylib_a-rglfw.o `test -f 'external/raylib/rglfw.c' || echo '$(srcdir)/'`external/raylib/rglfw.c
+
+external/raylib/external_raylib_libraylib_a-rglfw.obj: external/raylib/rglfw.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -MT external/raylib/external_raylib_libraylib_a-rglfw.obj -MD -MP -MF external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rglfw.Tpo -c -o external/raylib/external_raylib_libraylib_a-rglfw.obj `if test -f 'external/raylib/rglfw.c'; then $(CYGPATH_W) 'external/raylib/rglfw.c'; else $(CYGPATH_W) '$(srcdir)/external/raylib/rglfw.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rglfw.Tpo external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rglfw.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/raylib/rglfw.c' object='external/raylib/external_raylib_libraylib_a-rglfw.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -c -o external/raylib/external_raylib_libraylib_a-rglfw.obj `if test -f 'external/raylib/rglfw.c'; then $(CYGPATH_W) 'external/raylib/rglfw.c'; else $(CYGPATH_W) '$(srcdir)/external/raylib/rglfw.c'; fi`
+
+external/raylib/external_raylib_libraylib_a-rmodels.o: external/raylib/rmodels.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -MT external/raylib/external_raylib_libraylib_a-rmodels.o -MD -MP -MF external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rmodels.Tpo -c -o external/raylib/external_raylib_libraylib_a-rmodels.o `test -f 'external/raylib/rmodels.c' || echo '$(srcdir)/'`external/raylib/rmodels.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rmodels.Tpo external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rmodels.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/raylib/rmodels.c' object='external/raylib/external_raylib_libraylib_a-rmodels.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -c -o external/raylib/external_raylib_libraylib_a-rmodels.o `test -f 'external/raylib/rmodels.c' || echo '$(srcdir)/'`external/raylib/rmodels.c
+
+external/raylib/external_raylib_libraylib_a-rmodels.obj: external/raylib/rmodels.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -MT external/raylib/external_raylib_libraylib_a-rmodels.obj -MD -MP -MF external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rmodels.Tpo -c -o external/raylib/external_raylib_libraylib_a-rmodels.obj `if test -f 'external/raylib/rmodels.c'; then $(CYGPATH_W) 'external/raylib/rmodels.c'; else $(CYGPATH_W) '$(srcdir)/external/raylib/rmodels.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rmodels.Tpo external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rmodels.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/raylib/rmodels.c' object='external/raylib/external_raylib_libraylib_a-rmodels.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -c -o external/raylib/external_raylib_libraylib_a-rmodels.obj `if test -f 'external/raylib/rmodels.c'; then $(CYGPATH_W) 'external/raylib/rmodels.c'; else $(CYGPATH_W) '$(srcdir)/external/raylib/rmodels.c'; fi`
+
+external/raylib/external_raylib_libraylib_a-rshapes.o: external/raylib/rshapes.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -MT external/raylib/external_raylib_libraylib_a-rshapes.o -MD -MP -MF external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rshapes.Tpo -c -o external/raylib/external_raylib_libraylib_a-rshapes.o `test -f 'external/raylib/rshapes.c' || echo '$(srcdir)/'`external/raylib/rshapes.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rshapes.Tpo external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rshapes.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/raylib/rshapes.c' object='external/raylib/external_raylib_libraylib_a-rshapes.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -c -o external/raylib/external_raylib_libraylib_a-rshapes.o `test -f 'external/raylib/rshapes.c' || echo '$(srcdir)/'`external/raylib/rshapes.c
+
+external/raylib/external_raylib_libraylib_a-rshapes.obj: external/raylib/rshapes.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -MT external/raylib/external_raylib_libraylib_a-rshapes.obj -MD -MP -MF external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rshapes.Tpo -c -o external/raylib/external_raylib_libraylib_a-rshapes.obj `if test -f 'external/raylib/rshapes.c'; then $(CYGPATH_W) 'external/raylib/rshapes.c'; else $(CYGPATH_W) '$(srcdir)/external/raylib/rshapes.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rshapes.Tpo external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rshapes.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/raylib/rshapes.c' object='external/raylib/external_raylib_libraylib_a-rshapes.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -c -o external/raylib/external_raylib_libraylib_a-rshapes.obj `if test -f 'external/raylib/rshapes.c'; then $(CYGPATH_W) 'external/raylib/rshapes.c'; else $(CYGPATH_W) '$(srcdir)/external/raylib/rshapes.c'; fi`
+
+external/raylib/external_raylib_libraylib_a-rtext.o: external/raylib/rtext.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -MT external/raylib/external_raylib_libraylib_a-rtext.o -MD -MP -MF external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rtext.Tpo -c -o external/raylib/external_raylib_libraylib_a-rtext.o `test -f 'external/raylib/rtext.c' || echo '$(srcdir)/'`external/raylib/rtext.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rtext.Tpo external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rtext.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/raylib/rtext.c' object='external/raylib/external_raylib_libraylib_a-rtext.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -c -o external/raylib/external_raylib_libraylib_a-rtext.o `test -f 'external/raylib/rtext.c' || echo '$(srcdir)/'`external/raylib/rtext.c
+
+external/raylib/external_raylib_libraylib_a-rtext.obj: external/raylib/rtext.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -MT external/raylib/external_raylib_libraylib_a-rtext.obj -MD -MP -MF external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rtext.Tpo -c -o external/raylib/external_raylib_libraylib_a-rtext.obj `if test -f 'external/raylib/rtext.c'; then $(CYGPATH_W) 'external/raylib/rtext.c'; else $(CYGPATH_W) '$(srcdir)/external/raylib/rtext.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rtext.Tpo external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rtext.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/raylib/rtext.c' object='external/raylib/external_raylib_libraylib_a-rtext.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -c -o external/raylib/external_raylib_libraylib_a-rtext.obj `if test -f 'external/raylib/rtext.c'; then $(CYGPATH_W) 'external/raylib/rtext.c'; else $(CYGPATH_W) '$(srcdir)/external/raylib/rtext.c'; fi`
+
+external/raylib/external_raylib_libraylib_a-rtextures.o: external/raylib/rtextures.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -MT external/raylib/external_raylib_libraylib_a-rtextures.o -MD -MP -MF external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rtextures.Tpo -c -o external/raylib/external_raylib_libraylib_a-rtextures.o `test -f 'external/raylib/rtextures.c' || echo '$(srcdir)/'`external/raylib/rtextures.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rtextures.Tpo external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rtextures.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/raylib/rtextures.c' object='external/raylib/external_raylib_libraylib_a-rtextures.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -c -o external/raylib/external_raylib_libraylib_a-rtextures.o `test -f 'external/raylib/rtextures.c' || echo '$(srcdir)/'`external/raylib/rtextures.c
+
+external/raylib/external_raylib_libraylib_a-rtextures.obj: external/raylib/rtextures.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -MT external/raylib/external_raylib_libraylib_a-rtextures.obj -MD -MP -MF external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rtextures.Tpo -c -o external/raylib/external_raylib_libraylib_a-rtextures.obj `if test -f 'external/raylib/rtextures.c'; then $(CYGPATH_W) 'external/raylib/rtextures.c'; else $(CYGPATH_W) '$(srcdir)/external/raylib/rtextures.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rtextures.Tpo external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rtextures.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/raylib/rtextures.c' object='external/raylib/external_raylib_libraylib_a-rtextures.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -c -o external/raylib/external_raylib_libraylib_a-rtextures.obj `if test -f 'external/raylib/rtextures.c'; then $(CYGPATH_W) 'external/raylib/rtextures.c'; else $(CYGPATH_W) '$(srcdir)/external/raylib/rtextures.c'; fi`
+
+external/raylib/external_raylib_libraylib_a-utils.o: external/raylib/utils.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -MT external/raylib/external_raylib_libraylib_a-utils.o -MD -MP -MF external/raylib/$(DEPDIR)/external_raylib_libraylib_a-utils.Tpo -c -o external/raylib/external_raylib_libraylib_a-utils.o `test -f 'external/raylib/utils.c' || echo '$(srcdir)/'`external/raylib/utils.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/raylib/$(DEPDIR)/external_raylib_libraylib_a-utils.Tpo external/raylib/$(DEPDIR)/external_raylib_libraylib_a-utils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/raylib/utils.c' object='external/raylib/external_raylib_libraylib_a-utils.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -c -o external/raylib/external_raylib_libraylib_a-utils.o `test -f 'external/raylib/utils.c' || echo '$(srcdir)/'`external/raylib/utils.c
+
+external/raylib/external_raylib_libraylib_a-utils.obj: external/raylib/utils.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -MT external/raylib/external_raylib_libraylib_a-utils.obj -MD -MP -MF external/raylib/$(DEPDIR)/external_raylib_libraylib_a-utils.Tpo -c -o external/raylib/external_raylib_libraylib_a-utils.obj `if test -f 'external/raylib/utils.c'; then $(CYGPATH_W) 'external/raylib/utils.c'; else $(CYGPATH_W) '$(srcdir)/external/raylib/utils.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/raylib/$(DEPDIR)/external_raylib_libraylib_a-utils.Tpo external/raylib/$(DEPDIR)/external_raylib_libraylib_a-utils.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/raylib/utils.c' object='external/raylib/external_raylib_libraylib_a-utils.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -c -o external/raylib/external_raylib_libraylib_a-utils.obj `if test -f 'external/raylib/utils.c'; then $(CYGPATH_W) 'external/raylib/utils.c'; else $(CYGPATH_W) '$(srcdir)/external/raylib/utils.c'; fi`
 
 src/hexpuzzle-anim_fsm.o: src/anim_fsm.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-anim_fsm.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-anim_fsm.Tpo -c -o src/hexpuzzle-anim_fsm.o `test -f 'src/anim_fsm.c' || echo '$(srcdir)/'`src/anim_fsm.c
@@ -1159,61 +1412,14 @@ external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.obj: external/tinyfiledialogs
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.obj `if test -f 'external/tinyfiledialogs/tinyfiledialogs.c'; then $(CYGPATH_W) 'external/tinyfiledialogs/tinyfiledialogs.c'; else $(CYGPATH_W) '$(srcdir)/external/tinyfiledialogs/tinyfiledialogs.c'; fi`
 
-# This directory's subdirectories are mostly independent; you can cd
-# into them and run 'make' without going through this Makefile.
-# To change the values of 'make' variables: instead of editing Makefiles,
-# (1) if the variable is set in 'config.status', edit 'config.status'
-#     (which will cause the Makefiles to be regenerated when you run 'make');
-# (2) otherwise, pass the desired values on the 'make' command line.
-$(am__recursive_targets):
-	@fail=; \
-	if $(am__make_keepgoing); then \
-	  failcom='fail=yes'; \
-	else \
-	  failcom='exit 1'; \
-	fi; \
-	dot_seen=no; \
-	target=`echo $@ | sed s/-recursive//`; \
-	case "$@" in \
-	  distclean-* | maintainer-clean-*) list='$(DIST_SUBDIRS)' ;; \
-	  *) list='$(SUBDIRS)' ;; \
-	esac; \
-	for subdir in $$list; do \
-	  echo "Making $$target in $$subdir"; \
-	  if test "$$subdir" = "."; then \
-	    dot_seen=yes; \
-	    local_target="$$target-am"; \
-	  else \
-	    local_target="$$target"; \
-	  fi; \
-	  ($(am__cd) $$subdir && $(MAKE) $(AM_MAKEFLAGS) $$local_target) \
-	  || eval $$failcom; \
-	done; \
-	if test "$$dot_seen" = "no"; then \
-	  $(MAKE) $(AM_MAKEFLAGS) "$$target-am" || exit 1; \
-	fi; test -z "$$fail"
-
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
-tags: tags-recursive
+tags: tags-am
 TAGS: tags
 
 tags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
 	set x; \
 	here=`pwd`; \
-	if ($(ETAGS) --etags-include --version) >/dev/null 2>&1; then \
-	  include_option=--etags-include; \
-	  empty_fix=.; \
-	else \
-	  include_option=--include; \
-	  empty_fix=; \
-	fi; \
-	list='$(SUBDIRS)'; for subdir in $$list; do \
-	  if test "$$subdir" = .; then :; else \
-	    test ! -f $$subdir/TAGS || \
-	      set "$$@" "$$include_option=$$here/$$subdir/TAGS"; \
-	  fi; \
-	done; \
 	$(am__define_uniq_tagged_files); \
 	shift; \
 	if test -z "$(ETAGS_ARGS)$$*$$unique"; then :; else \
@@ -1226,7 +1432,7 @@ tags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
 	      $$unique; \
 	  fi; \
 	fi
-ctags: ctags-recursive
+ctags: ctags-am
 
 CTAGS: ctags
 ctags-am: $(TAGS_DEPENDENCIES) $(am__tagged_files)
@@ -1245,7 +1451,7 @@ cscope: cscope.files
 clean-cscope:
 	-rm -f cscope.files
 cscope.files: clean-cscope cscopelist
-cscopelist: cscopelist-recursive
+cscopelist: cscopelist-am
 
 cscopelist-am: $(am__tagged_files)
 	list='$(am__tagged_files)'; \
@@ -1295,31 +1501,6 @@ distdir: $(DISTFILES)
 	    test -f "$(distdir)/$$file" \
 	    || cp -p $$d/$$file "$(distdir)/$$file" \
 	    || exit 1; \
-	  fi; \
-	done
-	@list='$(DIST_SUBDIRS)'; for subdir in $$list; do \
-	  if test "$$subdir" = .; then :; else \
-	    $(am__make_dryrun) \
-	      || test -d "$(distdir)/$$subdir" \
-	      || $(MKDIR_P) "$(distdir)/$$subdir" \
-	      || exit 1; \
-	    dir1=$$subdir; dir2="$(distdir)/$$subdir"; \
-	    $(am__relativize); \
-	    new_distdir=$$reldir; \
-	    dir1=$$subdir; dir2="$(top_distdir)"; \
-	    $(am__relativize); \
-	    new_top_distdir=$$reldir; \
-	    echo " (cd $$subdir && $(MAKE) $(AM_MAKEFLAGS) top_distdir="$$new_top_distdir" distdir="$$new_distdir" \\"; \
-	    echo "     am__remove_distdir=: am__skip_length_check=: am__skip_mode_fix=: distdir)"; \
-	    ($(am__cd) $$subdir && \
-	      $(MAKE) $(AM_MAKEFLAGS) \
-	        top_distdir="$$new_top_distdir" \
-	        distdir="$$new_distdir" \
-		am__remove_distdir=: \
-		am__skip_length_check=: \
-		am__skip_mode_fix=: \
-	        distdir) \
-	      || exit 1; \
 	  fi; \
 	done
 	-test -n "$(am__skip_mode_fix)" \
@@ -1454,23 +1635,22 @@ distcleancheck: distclean
 	       exit 1; } >&2
 check-am: all-am
 check: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) check-recursive
-all-am: Makefile $(PROGRAMS) config.h
-installdirs: installdirs-recursive
-installdirs-am:
+	$(MAKE) $(AM_MAKEFLAGS) check-am
+all-am: Makefile $(LIBRARIES) $(PROGRAMS) config.h
+installdirs:
 	for dir in "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: $(BUILT_SOURCES)
-	$(MAKE) $(AM_MAKEFLAGS) install-recursive
-install-exec: install-exec-recursive
-install-data: install-data-recursive
-uninstall: uninstall-recursive
+	$(MAKE) $(AM_MAKEFLAGS) install-am
+install-exec: install-exec-am
+install-data: install-data-am
+uninstall: uninstall-am
 
 install-am: all-am
 	@$(MAKE) $(AM_MAKEFLAGS) install-exec-am install-data-am
 
-installcheck: installcheck-recursive
+installcheck: installcheck-am
 install-strip:
 	if test -z '$(STRIP)'; then \
 	  $(MAKE) $(AM_MAKEFLAGS) INSTALL_PROGRAM="$(INSTALL_STRIP_PROGRAM)" \
@@ -1492,6 +1672,8 @@ distclean-generic:
 	-rm -f external/cJSON/$(am__dirstamp)
 	-rm -f external/pcg/$(DEPDIR)/$(am__dirstamp)
 	-rm -f external/pcg/$(am__dirstamp)
+	-rm -f external/raylib/$(DEPDIR)/$(am__dirstamp)
+	-rm -f external/raylib/$(am__dirstamp)
 	-rm -f external/tinyfiledialogs/$(DEPDIR)/$(am__dirstamp)
 	-rm -f external/tinyfiledialogs/$(am__dirstamp)
 	-rm -f src/$(DEPDIR)/$(am__dirstamp)
@@ -1503,98 +1685,97 @@ maintainer-clean-generic:
 	-test -z "$(BUILT_SOURCES)" || rm -f $(BUILT_SOURCES)
 	-test -z "$(MAINTAINERCLEANFILES)" || rm -f $(MAINTAINERCLEANFILES)
 @BUILD_WEB_FALSE@clean-local:
-clean: clean-recursive
+clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-generic clean-local mostlyclean-am
+clean-am: clean-binPROGRAMS clean-generic clean-local \
+	clean-noinstLIBRARIES mostlyclean-am
 
-distclean: distclean-recursive
+distclean: distclean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf external/cJSON/$(DEPDIR) external/pcg/$(DEPDIR) external/tinyfiledialogs/$(DEPDIR) src/$(DEPDIR)
+	-rm -rf external/cJSON/$(DEPDIR) external/pcg/$(DEPDIR) external/raylib/$(DEPDIR) external/tinyfiledialogs/$(DEPDIR) src/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-tags
 
-dvi: dvi-recursive
+dvi: dvi-am
 
 dvi-am:
 
-html: html-recursive
+html: html-am
 
 html-am:
 
-info: info-recursive
+info: info-am
 
 info-am:
 
 install-data-am:
 
-install-dvi: install-dvi-recursive
+install-dvi: install-dvi-am
 
 install-dvi-am:
 
 install-exec-am: install-binPROGRAMS
 
-install-html: install-html-recursive
+install-html: install-html-am
 
 install-html-am:
 
-install-info: install-info-recursive
+install-info: install-info-am
 
 install-info-am:
 
 install-man:
 
-install-pdf: install-pdf-recursive
+install-pdf: install-pdf-am
 
 install-pdf-am:
 
-install-ps: install-ps-recursive
+install-ps: install-ps-am
 
 install-ps-am:
 
 installcheck-am:
 
-maintainer-clean: maintainer-clean-recursive
+maintainer-clean: maintainer-clean-am
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf external/cJSON/$(DEPDIR) external/pcg/$(DEPDIR) external/tinyfiledialogs/$(DEPDIR) src/$(DEPDIR)
+	-rm -rf external/cJSON/$(DEPDIR) external/pcg/$(DEPDIR) external/raylib/$(DEPDIR) external/tinyfiledialogs/$(DEPDIR) src/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
-mostlyclean: mostlyclean-recursive
+mostlyclean: mostlyclean-am
 
 mostlyclean-am: mostlyclean-compile mostlyclean-generic
 
-pdf: pdf-recursive
+pdf: pdf-am
 
 pdf-am:
 
-ps: ps-recursive
+ps: ps-am
 
 ps-am:
 
 uninstall-am: uninstall-binPROGRAMS
 
-.MAKE: $(am__recursive_targets) all check install install-am \
-	install-strip
+.MAKE: all check install install-am install-strip
 
-.PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am \
-	am--refresh check check-am clean clean-binPROGRAMS \
-	clean-cscope clean-generic clean-local cscope cscopelist-am \
-	ctags ctags-am dist dist-all dist-bzip2 dist-gzip dist-lzip \
-	dist-shar dist-tarZ dist-xz dist-zip distcheck distclean \
-	distclean-compile distclean-generic distclean-hdr \
-	distclean-tags distcleancheck distdir distuninstallcheck dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-binPROGRAMS install-data install-data-am install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	installdirs-am maintainer-clean maintainer-clean-generic \
-	mostlyclean mostlyclean-compile mostlyclean-generic pdf pdf-am \
-	ps ps-am tags tags-am uninstall uninstall-am \
-	uninstall-binPROGRAMS
+.PHONY: CTAGS GTAGS TAGS all all-am am--refresh check check-am clean \
+	clean-binPROGRAMS clean-cscope clean-generic clean-local \
+	clean-noinstLIBRARIES cscope cscopelist-am ctags ctags-am dist \
+	dist-all dist-bzip2 dist-gzip dist-lzip dist-shar dist-tarZ \
+	dist-xz dist-zip distcheck distclean distclean-compile \
+	distclean-generic distclean-hdr distclean-tags distcleancheck \
+	distdir distuninstallcheck dvi dvi-am html html-am info \
+	info-am install install-am install-binPROGRAMS install-data \
+	install-data-am install-dvi install-dvi-am install-exec \
+	install-exec-am install-html install-html-am install-info \
+	install-info-am install-man install-pdf install-pdf-am \
+	install-ps install-ps-am install-strip installcheck \
+	installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic pdf pdf-am ps ps-am tags tags-am uninstall \
+	uninstall-am uninstall-binPROGRAMS
 
 .PRECIOUS: Makefile
 
@@ -1625,6 +1806,9 @@ src/data_shaders.h: $(SHADERS)
 src/hexpuzzle-physac_impl.$(OBJEXT): CFLAGS += -Wno-sign-compare
 src/hexpuzzle-raygui_impl.$(OBJEXT): CFLAGS += -Wno-unused-parameter -Wno-unused-result
 src/hexpuzzle-nvdata_finished.$(OBJEXT): CFLAGS += -Wno-unused-but-set-variable -Wno-unused-variable -Wno-incompatible-pointer-types
+
+external/raylib/external_raylib_libraylib_a-rglfw.$(OBJEXT): CFLAGS += -Wno-missing-field-initializers
+external/raylib/external_raylib_libraylib_a-rtextures.$(OBJEXT): CFLAGS += -Wno-array-bounds
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

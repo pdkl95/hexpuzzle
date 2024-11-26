@@ -44,7 +44,7 @@
 
 // Check if config flags have been externally provided on compilation line
 #if !defined(EXTERNAL_CONFIG_FLAGS)
-    #include "config.h"     // Defines module configuration flags
+    #include "raylib_config.h"     // Defines module configuration flags
 #endif
 
 #if defined(SUPPORT_MODULE_RMODELS)

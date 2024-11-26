@@ -4,13 +4,8 @@ ACLOCAL_AMFLAGS = -I m4
 
 AM_CPPFLAGS = -Wall -Wextra
 
-RAYLIB_SRC_DIR = external/raylib
-
-if ! USE_SYSTEM_RAYLIB
-MAYBE_RAYLIB_SRC_DIR = $(RAYLIB_SRC_DIR)
-endif
-
-SUBDIRS = $(MAYBE_RAYLIB_SRC_DIR)
+RAYLIB_PLATFORM = PLATFORM_DESKTOP
+RAYLIB_GRAPHICS = GRAPHICS_API_OPENGL_33
 
 XXD ?= xxd
 
@@ -48,6 +43,9 @@ COMMON_PROG_CFLAGS = \
 	-DPLATFORM_DESKTOP
 endif
 
+noinst_LIBRARIES = \
+	external/raylib/libraylib.a
+
 bin_PROGRAMS = hexpuzzle
 
 COMMON_PROG_CFLAGS += \
@@ -65,7 +63,7 @@ hexpuzzle_LDADD = $(COMMON_PROG_LDADD)
 
 if ! USE_SYSTEM_RAYLIB
 hexpuzzle_LDADD += \
-	$(RAYLIB_SRC_DIR)/libraylib.a \
+	external/raylib/libraylib.a \
 	-lGL -lc -lm -lpthread -ldl -lrt
 endif
 
@@ -171,3 +169,143 @@ BUILT_SOURCES = \
 
 MAINTAINERCLEANFILES = \
 	$(dist_EXTRA_hexpuzzle_SOURCES)
+
+
+######################################################################
+# Raylib
+
+external_raylib_libraylib_a_CFLAGS = \
+	$(ALL_PKG_CFLAGS) \
+	$(APP_CFLAGS) \
+	-Wall \
+	-D_GNU_SOURCE \
+	-D$(RAYLIB_PLATFORM) \
+	-D$(RAYLIB_GRAPHICS) \
+	-Wno-missing-braces \
+	-Werror=pointer-arith \
+	-fno-strict-aliasing \
+	-Werror=implicit-function-declaration \
+	-I$(top_srcdir)/external/raylib \
+	-I$(top_srcdir)/external/raylib/external/glfw/include \
+	-Iext$(top_srcdir)/ernal/raylib/external/glfw/deps/mingw \
+	-fPIC \
+	-Wno-unused-function \
+	-Wno-unused-parameter \
+	-Wno-sign-compare
+
+if BUILD_DEBUG
+external_raylib_libraylib_a_CFLAGS += -D_DEBUG
+endif
+
+GLFW_SRC = \
+	external/raylib/external/glfw/src/cocoa_joystick.h \
+	external/raylib/external/glfw/src/cocoa_platform.h \
+	external/raylib/external/glfw/src/cocoa_time.c \
+	external/raylib/external/glfw/src/cocoa_time.h \
+	external/raylib/external/glfw/src/context.c \
+	external/raylib/external/glfw/src/egl_context.c \
+	external/raylib/external/glfw/src/glx_context.c \
+	external/raylib/external/glfw/src/init.c \
+	external/raylib/external/glfw/src/input.c \
+	external/raylib/external/glfw/src/internal.h \
+	external/raylib/external/glfw/src/linux_joystick.c \
+	external/raylib/external/glfw/src/linux_joystick.h \
+	external/raylib/external/glfw/src/mappings.h \
+	external/raylib/external/glfw/src/monitor.c \
+	external/raylib/external/glfw/src/null_init.c \
+	external/raylib/external/glfw/src/null_joystick.c \
+	external/raylib/external/glfw/src/null_joystick.h \
+	external/raylib/external/glfw/src/null_monitor.c \
+	external/raylib/external/glfw/src/null_platform.h \
+	external/raylib/external/glfw/src/null_window.c \
+	external/raylib/external/glfw/src/osmesa_context.c \
+	external/raylib/external/glfw/src/platform.c \
+	external/raylib/external/glfw/src/platform.h \
+	external/raylib/external/glfw/src/posix_module.c \
+	external/raylib/external/glfw/src/posix_poll.c \
+	external/raylib/external/glfw/src/posix_poll.h \
+	external/raylib/external/glfw/src/posix_thread.c \
+	external/raylib/external/glfw/src/posix_thread.h \
+	external/raylib/external/glfw/src/posix_time.c \
+	external/raylib/external/glfw/src/posix_time.h \
+	external/raylib/external/glfw/src/vulkan.c \
+	external/raylib/external/glfw/src/wgl_context.c \
+	external/raylib/external/glfw/src/win32_init.c \
+	external/raylib/external/glfw/src/win32_joystick.c \
+	external/raylib/external/glfw/src/win32_joystick.h \
+	external/raylib/external/glfw/src/win32_module.c \
+	external/raylib/external/glfw/src/win32_monitor.c \
+	external/raylib/external/glfw/src/win32_platform.h \
+	external/raylib/external/glfw/src/win32_thread.c \
+	external/raylib/external/glfw/src/win32_thread.h \
+	external/raylib/external/glfw/src/win32_time.c \
+	external/raylib/external/glfw/src/win32_time.h \
+	external/raylib/external/glfw/src/win32_window.c \
+	external/raylib/external/glfw/src/window.c \
+	external/raylib/external/glfw/src/wl_init.c \
+	external/raylib/external/glfw/src/wl_monitor.c \
+	external/raylib/external/glfw/src/wl_platform.h \
+	external/raylib/external/glfw/src/wl_window.c \
+	external/raylib/external/glfw/src/x11_init.c \
+	external/raylib/external/glfw/src/x11_monitor.c \
+	external/raylib/external/glfw/src/x11_platform.h \
+	external/raylib/external/glfw/src/x11_window.c \
+	external/raylib/external/glfw/src/xkb_unicode.c \
+	external/raylib/external/glfw/src/xkb_unicode.h \
+	external/raylib/external/glfw/include/GLFW/glfw3.h \
+	external/raylib/external/glfw/include/GLFW/glfw3native.h
+
+RAYLIB_EXTERNAL_SRC = \
+	external/raylib/external/cgltf.h \
+	external/raylib/external/dirent.h \
+	external/raylib/external/dr_flac.h \
+	external/raylib/external/dr_mp3.h \
+	external/raylib/external/dr_wav.h \
+	external/raylib/external/glad.h \
+	external/raylib/external/glad_gles2.h \
+	external/raylib/external/jar_mod.h \
+	external/raylib/external/jar_xm.h \
+	external/raylib/external/m3d.h \
+	external/raylib/external/miniaudio.h \
+	external/raylib/external/msf_gif.h \
+	external/raylib/external/nanosvg.h \
+	external/raylib/external/nanosvgrast.h \
+	external/raylib/external/par_shapes.h \
+	external/raylib/external/qoa.h \
+	external/raylib/external/qoi.h \
+	external/raylib/external/rl_gputex.h \
+	external/raylib/external/rprand.h \
+	external/raylib/external/sdefl.h \
+	external/raylib/external/sinfl.h \
+	external/raylib/external/stb_image.h \
+	external/raylib/external/stb_image_resize2.h \
+	external/raylib/external/stb_image_write.h \
+	external/raylib/external/stb_perlin.h \
+	external/raylib/external/stb_rect_pack.h \
+	external/raylib/external/stb_truetype.h \
+	external/raylib/external/tinyobj_loader_c.h \
+	external/raylib/external/vox_loader.h
+
+external_raylib_libraylib_a_SOURCES = \
+	external/raylib/raylib_config.h \
+	external/raylib/raudio.c \
+	external/raylib/raylib.h \
+	external/raylib/rcore.c \
+	external/raylib/rglfw.c \
+	external/raylib/rlgl.h \
+	external/raylib/rmodels.c \
+	external/raylib/rshapes.c \
+	external/raylib/rtext.c \
+	external/raylib/rtextures.c \
+	external/raylib/utils.c \
+	external/raylib/utils.h
+
+EXTRA_DIST += \
+	$(GLFW_SRC) \
+	$(RAYLIB_EXTERNAL_SRC) \
+	external/raylib/platforms/rcore_desktop.c \
+	external/raylib/platforms/rcore_web.c \
+	external/raylib/external/glfw/LICENSE.md
+
+external/raylib/external_raylib_libraylib_a-rglfw.$(OBJEXT): CFLAGS += -Wno-missing-field-initializers
+external/raylib/external_raylib_libraylib_a-rtextures.$(OBJEXT): CFLAGS += -Wno-array-bounds

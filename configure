@@ -6355,7 +6355,7 @@ fi
 
 
 
-ac_config_files="$ac_config_files external/raylib/Makefile Makefile"
+ac_config_files="$ac_config_files Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -7107,7 +7107,6 @@ do
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "lib/getopt.h") CONFIG_LINKS="$CONFIG_LINKS lib/getopt.h:lib/gnugetopt.h" ;;
-    "external/raylib/Makefile") CONFIG_FILES="$CONFIG_FILES external/raylib/Makefile" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;

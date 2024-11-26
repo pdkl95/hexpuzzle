@@ -219,10 +219,7 @@ AC_SUBST(APP_LIBS)
 AC_SUBST(ALL_PKG_CFLAGS)
 AC_SUBST(ALL_PKG_LIBS)
 
-AC_CONFIG_FILES([
-        external/raylib/Makefile
-        Makefile
-])
+AC_CONFIG_FILES([Makefile])
 
 AC_OUTPUT
 
