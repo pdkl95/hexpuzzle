@@ -118,11 +118,6 @@ float postprocessing_effect_amount[4];
 float feedback_bg_zoom_ratio = 0.1;
 Vector2 feedback_bg_zoom_margin = { .x = 20.0, .y = 20.0 };
 
-float popup_text_fade_time = 2.5f;
-float popup_text_active_until = 0.0f;
-const char *popup_text;
-Color popup_text_color = { 0xFF, 0xFA, 0xCD, 0xFF };
-
 bool level_finished = false;
 
 level_t *current_level = NULL;
@@ -432,16 +427,6 @@ static void redo(void)
         warnmsg("REDO only works in PLAY of EDIT mode");
     }
 }
-
-#define print_popup(...) {                                          \
-        popup_text = TextFormat(__VA_ARGS__);                       \
-        popup_text_active_until = GetTime() + popup_text_fade_time; \
-    } while(0)
-
-#define popup_infomsg(...) {                    \
-        infomsg(__VA_ARGS__);                   \
-        print_popup(__VA_ARGS__);               \
-    } while(0)
 
 static void
 schedule_resize(
@@ -898,7 +883,7 @@ void gui_setup(void)
 
     name_text_rect.x = WINDOW_MARGIN + PANEL_INNER_MARGIN;
     name_text_rect.y = WINDOW_MARGIN + PANEL_INNER_MARGIN;
-    name_text_rect.height = NAME_FONT_SIZE;
+    name_text_rect.height = name_font.size;
 
     name_panel_rect.x = WINDOW_MARGIN;
     name_panel_rect.y = WINDOW_MARGIN;
@@ -920,7 +905,7 @@ void gui_setup(void)
     radius_spinner_label_rect.y =
         edit_panel_rect.y
         + PANEL_INNER_MARGIN;
-    radius_spinner_label_rect.height = PANEL_LABEL_FONT_SIZE;
+    radius_spinner_label_rect.height = panel_font.size;
 
     radius_spinner_rect.x = name_text_rect.x;
     radius_spinner_rect.y =
@@ -950,13 +935,10 @@ void gui_setup(void)
     memcpy(cycle_tool_button_text,  GuiIconText(ICON_MUTATE_FILL, cycle_tool_button_text_str), CYCLE_TOOL_BUTTON_TEXT_LENGTH);
     memcpy(erase_tool_button_text,  GuiIconText(ICON_RUBBER, erase_tool_button_text_str), ERASE_TOOL_BUTTON_TEXT_LENGTH);
 
-    Vector2 edit_tool_label_text_size = MeasureTextEx(PANEL_LABEL_FONT,
-                                                      edit_tool_label_text,
-                                                      PANEL_LABEL_FONT_SIZE,
-                                                      PANEL_LABEL_FONT_SPACING);
+    Vector2 edit_tool_label_text_size   = measure_panel_text(edit_tool_label_text);
 
-    Vector2 cycle_tool_button_text_size = MeasureGuiText(cycle_tool_button_text);
-    Vector2 erase_tool_button_text_size = MeasureGuiText(erase_tool_button_text);
+    Vector2 cycle_tool_button_text_size = measure_gui_text(cycle_tool_button_text);
+    Vector2 erase_tool_button_text_size = measure_gui_text(erase_tool_button_text);
 
     tool_panel_rect.x = edit_panel_rect.x;
     tool_panel_rect.width = (4 * PANEL_INNER_MARGIN)
@@ -970,7 +952,7 @@ void gui_setup(void)
     int right_side_button_text_width = 0;
 
 #define rsbw(name) do {                                                 \
-        Vector2 name##_button_text_size = MeasureGuiText(name##_button_text_str); \
+        Vector2 name##_button_text_size = measure_gui_text(name##_button_text_str); \
         right_side_button_text_width = MAX(right_side_button_text_width,          \
                                            name##_button_text_size.x);            \
     } while(0)
@@ -1007,7 +989,7 @@ void gui_setup(void)
         right_side_button_rect[i].height = ICON_BUTTON_SIZE;
     }
 
-    Vector2 open_file_button_text_size = MeasureGuiText(open_file_button_text_str);
+    Vector2 open_file_button_text_size = measure_gui_text(open_file_button_text_str);
     open_file_button_rect.x      = window_size.x - WINDOW_MARGIN - ICON_BUTTON_SIZE - open_file_button_text_size.x;
     open_file_button_rect.y      = window_size.y - WINDOW_MARGIN - ICON_BUTTON_SIZE;
     open_file_button_rect.width  = ICON_BUTTON_SIZE + open_file_button_text_size.x;
@@ -1030,10 +1012,7 @@ void gui_setup(void)
     erase_tool_button_rect.width  = erase_tool_button_text_size.x;
     erase_tool_button_rect.height = cycle_tool_button_rect.height;
 
-    Vector2 goto_next_level_label_text_size = MeasureTextEx(NAME_FONT,
-                                                      goto_next_level_label_text,
-                                                      NAME_FONT_SIZE,
-                                                      NAME_FONT_SPACING);
+    Vector2 goto_next_level_label_text_size = measure_name_text(goto_next_level_label_text);
 
     goto_next_level_panel_rect.y      = tool_panel_rect.y;
 
@@ -1061,7 +1040,7 @@ static void draw_name_header(void)
 
     char *name = current_level->name;
 
-    Vector2 textsize = MeasureTextEx(NAME_FONT, name, 36, NAME_FONT_SPACING);
+    Vector2 textsize = measure_name_text(name);
 
     name_text_rect.width  = textsize.x;
     name_panel_rect.width = textsize.x + (2 * PANEL_INNER_MARGIN);
@@ -1096,8 +1075,8 @@ static void draw_name_header(void)
         .y = text_pos.y + 1
     };
 
-    DrawTextEx(NAME_FONT, name, text_shadow_pos, 36, NAME_FONT_SPACING, text_shadow_color);
-    DrawTextEx(NAME_FONT, name, text_pos, 36, NAME_FONT_SPACING, text_color);
+    draw_name_text(name, text_shadow_pos, text_shadow_color);
+    draw_name_text(name, text_pos, text_color);
 }
 
 static void draw_edit_panel(void)
@@ -1107,8 +1086,9 @@ static void draw_edit_panel(void)
     DrawRectangleRounded(edit_panel_rect, PANEL_ROUNDNES, 0, bg);
     DrawRectangleRoundedLines(edit_panel_rect, PANEL_ROUNDNES, 0, 1.0, edge);
 
-    DrawTextEx(PANEL_LABEL_FONT, "Board Radius", getVector2FromRectangle(radius_spinner_label_rect),
-               PANEL_LABEL_FONT_SIZE, PANEL_LABEL_FONT_SPACING, panel_header_text_color);
+    draw_panel_text("Board Radius",
+                    getVector2FromRectangle(radius_spinner_label_rect),
+                    panel_header_text_color);
 
     int radius = 1;
     if (current_level) {
@@ -1151,8 +1131,9 @@ static void draw_tool_panel(void)
     DrawRectangleRounded(tool_panel_rect, PANEL_ROUNDNES, 0, bg);
     DrawRectangleRoundedLines(tool_panel_rect, PANEL_ROUNDNES, 0, 1.0, edge);
 
-    DrawTextEx(PANEL_LABEL_FONT, edit_tool_label_text, getVector2FromRectangle(edit_tool_label_rect),
-               PANEL_LABEL_FONT_SIZE, PANEL_LABEL_FONT_SPACING, panel_header_text_color);
+    draw_panel_text(edit_tool_label_text,
+                    getVector2FromRectangle(edit_tool_label_rect),
+                    panel_header_text_color);
 
     GuiToggle(cycle_tool_button_rect, cycle_tool_button_text, &edit_tool_cycle);
     if (edit_tool_cycle) {
@@ -1228,19 +1209,13 @@ static void draw_goto_next_level_panel(void)
         .y = text_pos.y + 1
     };
 
-    DrawTextEx(NAME_FONT,
-               goto_next_level_label_text,
-               text_shadow_pos,
-               NAME_FONT_SIZE,
-               NAME_FONT_SPACING,
-               text_shadow_color);
+    draw_name_text(goto_next_level_label_text,
+                   text_shadow_pos,
+                   text_shadow_color);
 
-    DrawTextEx(NAME_FONT,
-               goto_next_level_label_text,
-               getVector2FromRectangle(goto_next_level_label_rect),
-               NAME_FONT_SIZE,
-               NAME_FONT_SPACING,
-               text_color);
+    draw_name_text(goto_next_level_label_text,
+                   getVector2FromRectangle(goto_next_level_label_rect),
+                   text_color);
 
     if (hover) {
         if (mouse_left_click) {
@@ -1560,21 +1535,6 @@ static void draw_popup_panels(void)
 }
 #endif
 
-static void draw_popup_text(void)
-{
-    float curtime = GetTime();
-    if (curtime < popup_text_active_until) {
-        float remaining = popup_text_active_until - curtime;
-        float fade = ease_quintic_in(remaining / popup_text_fade_time);
-        int corner_padding = 40;
-        int fade_font_size = 24;
-        int text_x = corner_padding;
-        int text_y = window_size.y - corner_padding - fade_font_size;
-        Color fade_text_color = ColorAlpha(popup_text_color, fade);
-        DrawText(popup_text, text_x, text_y, fade_font_size, fade_text_color);
-    }
-}
-
 static void draw_cartesian_grid(bool draw_labels)
 {
     bool animate_bg = !options->wait_events && options->animate_bg;
@@ -1828,7 +1788,6 @@ render_frame(
 #if defined(PLATFORM_DESKTOP)
         draw_popup_panels();
 #endif
-        draw_popup_text();
     }
 
     if (do_postprocessing) {
@@ -1997,7 +1956,7 @@ void gfx_init(void)
 
     GuiLoadStyleDark();
 
-    set_default_gui_font();
+    set_gui_font();
 
     //GuiSetStyle(DEFAULT, TEXT_SIZE, 26);
     GuiSetStyle(DEFAULT, TEXT_PADDING, 4);
