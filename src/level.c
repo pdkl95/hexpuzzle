@@ -183,16 +183,25 @@ tile_pos_t *level_get_unsolved_tile_pos(level_t *level,  hex_axial_t axial)
 
 void level_use_solved_tile_pos(level_t *level)
 {
+    if (current_level) {
+        level_undo_add_use_tiles_event(level, level->currently_used_tiles, USED_TILES_SOLVED);
+    }
     level->currently_used_tiles = USED_TILES_SOLVED;
 }
 
 void level_use_unsolved_tile_pos(level_t *level)
 {
+    if (current_level) {
+        level_undo_add_use_tiles_event(level, level->currently_used_tiles, USED_TILES_UNSOLVED);
+    }
     level->currently_used_tiles = USED_TILES_UNSOLVED;
 }
 
 void level_use_null_tile_pos(level_t *level)
 {
+    if (current_level) {
+        level_undo_add_use_tiles_event(level, level->currently_used_tiles, USED_TILES_NULL);
+    }
     level->currently_used_tiles = USED_TILES_NULL;
 }
 

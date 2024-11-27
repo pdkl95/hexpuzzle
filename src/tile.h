@@ -20,6 +20,7 @@
  ****************************************************************************/
 
 #ifndef TILE_H
+
 #define TILE_H
 
 #include "cJSON/cJSON.h"
@@ -30,6 +31,13 @@
 struct tile_pos;
 struct level;
 
+struct tile_flags {
+    bool enabled;
+    bool fixed;
+    bool hidden;
+};
+typedef struct tile_flags tile_flags_t;
+
 struct tile {
     int id;
 
@@ -39,6 +47,7 @@ struct tile {
     bool enabled;
     bool fixed;
     bool hidden;
+
     int path_count;
     path_type_t path[6];
     path_type_t saved_path[6];
@@ -50,6 +59,14 @@ struct tile {
 };
 typedef struct tile tile_t;
 
+struct tile_neighbor_paths {
+    path_type_t path[6];
+    path_type_t saved_path[6];
+    path_type_t neighbor_path[6];
+    tile_t     *neighbors[6];
+};
+typedef struct tile_neighbor_paths tile_neighbor_paths_t;
+
 int compare_tiles(const void *p1, const void *p2);
 
 char *tile_flag_string(tile_t *tile);
@@ -60,6 +77,12 @@ void print_tile(tile_t *tile);
 tile_t *init_tile(tile_t *tile);
 tile_t *create_tile(void);
 void destroy_tile(tile_t *tile);
+
+tile_flags_t tile_get_flags(tile_t *tile);
+void tile_set_flags(tile_t *tile, tile_flags_t flags);
+
+tile_neighbor_paths_t tile_get_neighbor_paths(tile_t *tile);
+void tile_set_neighbor_paths(tile_t *tile, tile_neighbor_paths_t paths);
 
 bool tile_has_path_type(tile_t *tile, path_type_t type);
 

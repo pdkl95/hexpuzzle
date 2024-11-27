@@ -1093,12 +1093,15 @@ static void draw_edit_panel(void)
                     panel_header_text_color);
 
     int radius = 1;
-    if (current_level) {
-        radius = current_level->radius;
+    if (!current_level) {
+        return;
     }
+
+    radius = current_level->radius;
 
     GuiSpinner(radius_spinner_rect, NULL, &radius, LEVEL_MIN_RADIUS, LEVEL_MAX_RADIUS, false);
     if (current_level->radius != radius) {
+        level_undo_add_set_radius_event(current_level, current_level->radius, radius);
         level_set_radius(current_level, radius);
     }
 

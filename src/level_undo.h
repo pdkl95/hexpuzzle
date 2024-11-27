@@ -15,7 +15,7 @@
  * Public License for more details.                                         *
  *                                                                          *
  * You should have received a copy of the GNU General Public License along  *
- * with hexpuzzle. If not, see <https://www.gnu.org/licenses/>.                 *
+ * with hexpuzzle. If not, see <https://www.gnu.org/licenses/>.             *
  *                                                                          *
  ****************************************************************************/
 
@@ -23,14 +23,58 @@
 #define LEVEL_UNDO_H
 
 #include "hex.h"
+#include "tile.h"
+#include "level.h"
 
-struct level;
+/* basic event containers */
 
 struct undo_swap_event {
     hex_axial_t a;
     hex_axial_t b;
 };
 typedef struct undo_swap_event undo_swap_event_t;
+
+struct undo_use_tiles_event {
+    used_tiles_t from;
+    used_tiles_t to;
+};
+typedef struct undo_use_tiles_event undo_use_tiles_event_t;
+
+struct undo_set_radius_event {
+    int from;
+    int to;
+};
+typedef struct undo_set_radius_event undo_set_radius_event_t;
+
+struct undo_set_flags_event {
+    tile_t      *tile;
+    tile_flags_t from;
+    tile_flags_t to;
+};
+typedef struct undo_set_flags_event undo_set_flags_event_t;
+
+struct undo_set_flags_and_paths_event {
+    tile_t               *tile;
+    tile_flags_t          flags_from;
+    tile_flags_t          flags_to;
+    tile_neighbor_paths_t paths_from;
+    tile_neighbor_paths_t paths_to;
+};
+typedef struct undo_set_flags_and_paths_event undo_set_flags_and_paths_event_t;
+
+struct undo_change_path_event {
+    tile_t         *tile1;
+    hex_direction_t tile1_section;
+    path_type_t     tile1_path_from;
+    path_type_t     tile1_path_to;
+
+    tile_t         *tile2;
+    hex_direction_t tile2_section;
+    path_type_t     tile2_path_from;
+    path_type_t     tile2_path_to;
+};
+typedef struct undo_change_path_event undo_change_path_event_t;
+
 
 /*** play events */
 
@@ -51,13 +95,23 @@ typedef struct undo_play_event undo_play_event_t;
 
 enum undo_edit_event_type {
     UNDO_EDIT_TYPE_NONE = 0,
-    UNDO_EDIT_TYPE_SWAP
+    UNDO_EDIT_TYPE_SWAP,
+    UNDO_EDIT_TYPE_USE_TILES,
+    UNDO_EDIT_TYPE_SET_RADIUS,
+    UNDO_EDIT_TYPE_SET_FLAGS,
+    UNDO_EDIT_TYPE_SET_FLAGS_AND_PATHS,
+    UNDO_EDIT_TYPE_CHANGE_PATH
 };
 typedef enum undo_edit_event_type undo_edit_event_type_t;
 struct undo_edit_event {
     undo_edit_event_type_t type;
     union {
-        undo_swap_event_t swap;
+        undo_swap_event_t                swap;
+        undo_use_tiles_event_t           use_tiles;
+        undo_set_radius_event_t          set_radius;
+        undo_set_flags_event_t           set_flags;
+        undo_set_flags_and_paths_event_t set_flags_and_paths;
+        undo_change_path_event_t         change_path;
     };
 };
 typedef struct undo_edit_event undo_edit_event_t;
@@ -98,7 +152,45 @@ void destroy_level_undo(undo_t *undo);
 void level_undo_add_event(level_t *level, undo_event_t event);
 void level_undo_add_play_event(level_t *level, undo_play_event_t event);
 void level_undo_add_edit_event(level_t *level, undo_edit_event_t event);
+
 void level_undo_add_swap_event(level_t *level, hex_axial_t a, hex_axial_t b);
+void level_undo_add_use_tiles_event(level_t *level, used_tiles_t from, used_tiles_t to);
+void level_undo_add_set_radius_event(level_t *level, int from, int to);
+
+void level_undo_add_set_flags_event(
+    level_t *level,
+    tile_t *tile,
+    tile_flags_t from,
+    tile_flags_t to);
+
+void level_undo_add_set_flags_event_with_neighbor_paths(
+    level_t *level,
+    tile_t *tile,
+    tile_flags_t flags_from,
+    tile_neighbor_paths_t neighbor_paths_from,
+    tile_flags_t flags_to,
+    tile_neighbor_paths_t neighbor_paths_to);
+
+void level_undo_add_change_path_event(
+    level_t *level,
+
+    tile_t *tile,
+    hex_direction_t section,
+    path_type_t from,
+    path_type_t to);
+
+void level_undo_add_change_paths_event(
+    level_t *level,
+
+    tile_t *tile1,
+    hex_direction_t tile1_section,
+    path_type_t tile1_path_from,
+    path_type_t tile1_path_to,
+
+    tile_t *tile2,
+    hex_direction_t tile2_section,
+    path_type_t tile2_path_from,
+    path_type_t tile2_path_to);
 
 void level_undo_play(level_t *level);
 void level_redo_play(level_t *level);

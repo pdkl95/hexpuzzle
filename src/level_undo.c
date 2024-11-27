@@ -15,7 +15,7 @@
  * Public License for more details.                                         *
  *                                                                          *
  * You should have received a copy of the GNU General Public License along  *
- * with hexpuzzle. If not, see <https://www.gnu.org/licenses/>.                 *
+ * with hexpuzzle. If not, see <https://www.gnu.org/licenses/>.             *
  *                                                                          *
  ****************************************************************************/
 
@@ -326,9 +326,182 @@ void level_undo_add_swap_event(level_t *level, hex_axial_t a, hex_axial_t b)
     level_undo_add_event(level, event);
 }
 
-static void replay_swap(level_t *level, undo_swap_event_t event)
+#define EDIT_EVENT(union_name, enum_name) \
+    undo_event_t event;                   \
+    event.type = UNDO_EVENT_TYPE_EDIT;    \
+    event.edit.type = UNDO_EDIT_TYPE_##enum_name;
+
+void level_undo_add_use_tiles_event(level_t *level, used_tiles_t from, used_tiles_t to)
+{
+    EDIT_EVENT(use_tiles, USE_TILES);
+    event.edit.use_tiles.from = from;
+    event.edit.use_tiles.to   = to;
+
+    level_undo_add_event(level, event);
+}
+
+void level_undo_add_set_radius_event(level_t *level, int from, int to)
+{
+    EDIT_EVENT(set_radius, SET_RADIUS);
+    event.edit.set_radius.from = from;
+    event.edit.set_radius.to   = to;
+
+    level_undo_add_event(level, event);
+}
+
+void level_undo_add_set_flags_event(level_t *level, tile_t *tile, tile_flags_t from, tile_flags_t to)
+{
+    EDIT_EVENT(set_flags, SET_FLAGS);
+    event.edit.set_flags.tile = tile;
+    event.edit.set_flags.from = from;
+    event.edit.set_flags.to   = to;
+
+    level_undo_add_event(level, event);
+}
+
+void level_undo_add_set_flags_event_with_neighbor_paths(
+    level_t *level,
+    tile_t *tile,
+    tile_flags_t flags_from,
+    tile_neighbor_paths_t neighbor_paths_from,
+    tile_flags_t flags_to,
+    tile_neighbor_paths_t neighbor_paths_to)
+{
+    EDIT_EVENT(set_flags_and_paths, SET_FLAGS_AND_PATHS);
+    event.edit.set_flags_and_paths.tile = tile;
+    event.edit.set_flags_and_paths.flags_from = flags_from;
+    event.edit.set_flags_and_paths.paths_from = neighbor_paths_from;
+    event.edit.set_flags_and_paths.flags_to   = flags_to;
+    event.edit.set_flags_and_paths.paths_to   = neighbor_paths_to;
+
+    level_undo_add_event(level, event);
+}
+
+void level_undo_add_change_path_event(
+    level_t *level,
+
+    tile_t *tile,
+    hex_direction_t section,
+    path_type_t from,
+    path_type_t to)
+{
+    EDIT_EVENT(change_path, CHANGE_PATH);
+
+    event.edit.change_path.tile1           = tile;
+    event.edit.change_path.tile1_section   = section;
+    event.edit.change_path.tile1_path_from = from;
+    event.edit.change_path.tile1_path_to   = to;
+
+    event.edit.change_path.tile2           = NULL;
+
+    level_undo_add_event(level, event);
+}
+
+void level_undo_add_change_paths_event(
+    level_t *level,
+
+    tile_t *tile1,
+    hex_direction_t tile1_section,
+    path_type_t tile1_path_from,
+    path_type_t tile1_path_to,
+
+    tile_t *tile2,
+    hex_direction_t tile2_section,
+    path_type_t tile2_path_from,
+    path_type_t tile2_path_to)
+{
+    EDIT_EVENT(change_path, CHANGE_PATH);
+
+    event.edit.change_path.tile1           = tile1;
+    event.edit.change_path.tile1_section   = tile1_section;
+    event.edit.change_path.tile1_path_from = tile1_path_from;
+    event.edit.change_path.tile1_path_to   = tile1_path_to;
+
+    event.edit.change_path.tile2           = tile2;
+    event.edit.change_path.tile2_section   = tile2_section;
+    event.edit.change_path.tile2_path_from = tile2_path_from;
+    event.edit.change_path.tile2_path_to   = tile2_path_to;
+
+    level_undo_add_event(level, event);
+}
+
+
+static void rewind_swap(level_t *level, undo_swap_event_t event)
 {
     level_swap_tile_pos_by_position(level, event.a, event.b, false);
+}
+
+static void replay_swap(level_t *level, undo_swap_event_t event)
+{
+    rewind_swap(level, event);
+}
+
+static void rewind_use_tiles(level_t *level, undo_use_tiles_event_t event)
+{
+    level->currently_used_tiles = event.from;
+}
+
+static void replay_use_tiles(level_t *level, undo_use_tiles_event_t event)
+{
+    level->currently_used_tiles = event.to;
+}
+
+static void rewind_set_radius(level_t *level, undo_set_radius_event_t event)
+{
+    level_set_radius(level, event.from);
+}
+
+static void replay_set_radius(level_t *level, undo_set_radius_event_t event)
+{
+    level_set_radius(level, event.to);
+}
+
+static void rewind_set_flags(UNUSED level_t *level, undo_set_flags_event_t event)
+{
+    tile_set_flags(event.tile, event.from);
+}
+
+static void replay_set_flags(UNUSED level_t *level, undo_set_flags_event_t event)
+{
+    tile_set_flags(event.tile, event.to);
+}
+
+static void rewind_set_flags_and_paths(UNUSED level_t *level, undo_set_flags_and_paths_event_t event)
+{
+    tile_set_flags(event.tile, event.flags_from);
+    tile_set_neighbor_paths(event.tile, event.paths_from);
+}
+
+static void replay_set_flags_and_paths(UNUSED level_t *level, undo_set_flags_and_paths_event_t event)
+{
+    tile_set_flags(event.tile, event.flags_to);
+    tile_set_neighbor_paths(event.tile, event.paths_to);
+}
+
+static void rewind_change_path(UNUSED level_t *level, undo_change_path_event_t event)
+{
+    if (event.tile1) {
+        event.tile1->path[event.tile1_section] = event.tile1_path_from;
+        tile_update_path_count(event.tile1);
+    }
+
+    if (event.tile2) {
+        event.tile2->path[event.tile2_section] = event.tile2_path_from;
+        tile_update_path_count(event.tile2);
+    }
+}
+
+static void replay_change_path(UNUSED level_t *level, undo_change_path_event_t event)
+{
+    if (event.tile1) {
+        event.tile1->path[event.tile1_section] = event.tile1_path_to;
+        tile_update_path_count(event.tile1);
+    }
+
+    if (event.tile2) {
+        event.tile2->path[event.tile2_section] = event.tile2_path_to;
+        tile_update_path_count(event.tile2);
+    }
 }
 
 void level_undo_add_play_event(level_t *level, undo_play_event_t play_event)
@@ -385,7 +558,7 @@ void level_undo_play(level_t *level)
 
     switch (event.edit.type) {
     case UNDO_PLAY_TYPE_SWAP:
-        replay_swap(level, event.play.swap);
+        rewind_swap(level, event.play.swap);
         break;
 
     default:
@@ -422,7 +595,27 @@ void level_undo_edit(level_t *level)
 
     switch (event.edit.type) {
     case UNDO_EDIT_TYPE_SWAP:
-        replay_swap(level, event.edit.swap);
+        rewind_swap(level, event.edit.swap);
+        break;
+
+    case UNDO_EDIT_TYPE_USE_TILES:
+        rewind_use_tiles(level, event.edit.use_tiles);
+        break;
+
+    case UNDO_EDIT_TYPE_SET_RADIUS:
+        rewind_set_radius(level, event.edit.set_radius);
+        break;
+
+    case UNDO_EDIT_TYPE_SET_FLAGS:
+        rewind_set_flags(level, event.edit.set_flags);
+        break;
+
+    case UNDO_EDIT_TYPE_SET_FLAGS_AND_PATHS:
+        rewind_set_flags_and_paths(level, event.edit.set_flags_and_paths);
+        break;
+
+    case UNDO_EDIT_TYPE_CHANGE_PATH:
+        rewind_change_path(level, event.edit.change_path);
         break;
 
     default:
@@ -497,6 +690,26 @@ void level_redo_edit(level_t *level)
     switch (event.edit.type) {
     case UNDO_EDIT_TYPE_SWAP:
         replay_swap(level, event.edit.swap);
+        break;
+
+   case UNDO_EDIT_TYPE_USE_TILES:
+        replay_use_tiles(level, event.edit.use_tiles);
+        break;
+
+    case UNDO_EDIT_TYPE_SET_RADIUS:
+        replay_set_radius(level, event.edit.set_radius);
+        break;
+
+    case UNDO_EDIT_TYPE_SET_FLAGS:
+        replay_set_flags(level, event.edit.set_flags);
+        break;
+
+    case UNDO_EDIT_TYPE_SET_FLAGS_AND_PATHS:
+        replay_set_flags_and_paths(level, event.edit.set_flags_and_paths);
+        break;
+
+    case UNDO_EDIT_TYPE_CHANGE_PATH:
+        replay_change_path(level, event.edit.change_path);
         break;
 
     default:

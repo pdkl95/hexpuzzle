@@ -25,6 +25,7 @@
 #include "tile.h"
 #include "tile_pos.h"
 #include "level.h"
+#include "level_undo.h"
 
 void print_tile_pos(tile_pos_t *pos)
 {
@@ -124,12 +125,20 @@ void tile_pos_toggle_fixed(tile_pos_t *pos)
 {
     assert_not_null(pos);
 
+    tile_flags_t old_flags = tile_get_flags(pos->tile);
+
     pos->tile->fixed = !pos->tile->fixed;
+
+    tile_flags_t new_flags = tile_get_flags(pos->tile);
+    level_undo_add_set_flags_event(current_level, pos->tile, old_flags, new_flags);
 }
 
 void tile_pos_toggle_hidden(tile_pos_t *pos)
 {
     assert_not_null(pos);
+
+    tile_flags_t old_flags = tile_get_flags(pos->tile);
+    tile_neighbor_paths_t old_neighbor_paths = tile_get_neighbor_paths(pos->tile);
 
     pos->tile->hidden = !pos->tile->hidden;
 
@@ -150,14 +159,22 @@ void tile_pos_toggle_hidden(tile_pos_t *pos)
     }
 
     tile_update_path_count(pos->tile);
+
+    tile_flags_t new_flags = tile_get_flags(pos->tile);
+    tile_neighbor_paths_t new_neighbor_paths = tile_get_neighbor_paths(pos->tile);
+    level_undo_add_set_flags_event_with_neighbor_paths(current_level, pos->tile,
+                                                       old_flags, old_neighbor_paths,
+                                                       new_flags, new_neighbor_paths);
 }
 
 void tile_pos_set_path_section(tile_pos_t *pos, hex_direction_t section, path_type_t type)
 {
+    assert_not_null(current_level);
     assert_not_null(pos);
     assert(type >= 0);
     assert(type <= PATH_TYPE_COUNT);
 
+    path_type_t old_path = pos->tile->path[section];
     pos->tile->path[section] = type;
 
     tile_update_path_count(pos->tile);
@@ -165,8 +182,28 @@ void tile_pos_set_path_section(tile_pos_t *pos, hex_direction_t section, path_ty
     if (pos->hover_adjacent) {
         hex_direction_t opposite_section =
             hex_opposite_direction(section);
-        pos->hover_adjacent->tile->path[opposite_section] = pos->tile->path[section];
+        tile_t *adjacent_tile = pos->hover_adjacent->tile;
+        path_type_t old_adjacent_path = adjacent_tile->path[opposite_section];
+        adjacent_tile->path[opposite_section] = pos->tile->path[section];
         tile_update_path_count(pos->hover_adjacent->tile);
+
+        level_undo_add_change_paths_event(current_level,
+
+                                          pos->tile,
+                                          section,
+                                          old_path,
+                                          pos->tile->path[section],
+
+                                          adjacent_tile,
+                                          opposite_section,
+                                          old_adjacent_path,
+                                          adjacent_tile->path[opposite_section]);
+    } else {
+        level_undo_add_change_path_event(current_level,
+                                         pos->tile,
+                                         section,
+                                         old_path,
+                                         pos->tile->path[section]);
     }
 }
 

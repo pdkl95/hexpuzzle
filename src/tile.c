@@ -247,6 +247,73 @@ path_int_t tile_count_path_types(tile_t *tile)
     return rv;
 }
 
+tile_flags_t tile_get_flags(tile_t *tile)
+{
+    tile_flags_t flags = {
+        .enabled = tile->enabled,
+        .fixed   = tile->fixed,
+        .hidden  = tile->hidden
+    };
+    return flags;
+}
+
+void tile_set_flags(tile_t *tile, tile_flags_t flags)
+{
+    tile->enabled = flags.enabled;
+    tile->fixed   = flags.fixed;
+    tile->hidden  = flags.hidden;
+}
+
+tile_neighbor_paths_t tile_get_neighbor_paths(tile_t *tile)
+{
+    assert_not_null(tile);
+
+    tile_neighbor_paths_t paths = {0};
+
+    tile_pos_t *pos = tile->solved_pos;
+    assert_not_null(pos);
+
+    each_direction {
+        hex_direction_t opposite_dir = hex_opposite_direction(dir);
+        tile_pos_t *neighbor = pos->neighbors[dir];
+
+        if (neighbor) { // && neighbor->enabled)
+            assert_not_null(neighbor->tile);
+
+            paths.neighbors[dir] = neighbor->tile;;
+            paths.neighbor_path[dir] = neighbor->tile->path[opposite_dir];
+        } else {
+            paths.neighbors[dir] = NULL;
+        }
+
+        paths.path[dir]       = tile->path[dir];
+        paths.saved_path[dir] = tile->saved_path[dir];
+    }
+
+    return paths;
+}
+
+void tile_set_neighbor_paths(tile_t *tile, tile_neighbor_paths_t paths)
+{
+    assert_not_null(tile);
+
+    each_direction {
+        tile_t *neighbor = paths.neighbors[dir];
+        if (neighbor) {
+            hex_direction_t opposite_dir = hex_opposite_direction(dir);
+            neighbor->path[opposite_dir] = paths.neighbor_path[opposite_dir];
+        }
+
+        tile->path[dir]       = paths.path[dir];
+        tile->saved_path[dir] = paths.saved_path[dir];
+
+
+        tile_update_path_count(neighbor);;
+    }
+
+    tile_update_path_count(tile);
+}
+
 bool tile_has_path_type(tile_t *tile, path_type_t type)
 {
     each_direction {
