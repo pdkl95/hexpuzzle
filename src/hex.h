@@ -50,6 +50,11 @@ inline static hex_direction_t hex_opposite_direction(hex_direction_t dir)
     return (dir + 3) % 6;
 }
 
+struct hex_direction_order {
+    hex_direction_t dir[6];
+};
+typedef struct hex_direction_order hex_direction_order_t;
+
 /*
  * Axial Coordinates for hexagons
  */

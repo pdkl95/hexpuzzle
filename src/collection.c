@@ -898,6 +898,8 @@ static void collection_draw_buttons(collection_t *collection, Rectangle collecti
         }
     }
 
+    set_panel_font();
+
     if (game_mode == GAME_MODE_EDIT_COLLECTION) {
         if (GuiButton(collection_edit_button_rect, collection_edit_button_text)) {
             level_t *level = collection->levels;
@@ -919,7 +921,7 @@ static void collection_draw_buttons(collection_t *collection, Rectangle collecti
         }
     }
 
-    set_gui_font();
+    set_default_font();
 }
 
 void collection_draw_move_buttons(collection_t *collection, Rectangle bounds)

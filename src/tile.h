@@ -59,11 +59,22 @@ struct tile {
 };
 typedef struct tile tile_t;
 
+struct path_state {
+    tile_t *tile;
+    hex_direction_t section;
+    path_type_t path;
+    path_type_t saved_path;
+};
+typedef struct path_state path_state_t;
+
+struct path_state_pair {
+    path_state_t local;
+    path_state_t neighbor;
+};
+typedef struct path_state_pair path_state_pair_t;
+
 struct tile_neighbor_paths {
-    path_type_t path[6];
-    path_type_t saved_path[6];
-    path_type_t neighbor_path[6];
-    tile_t     *neighbors[6];
+    path_state_pair_t sections[6];
 };
 typedef struct tile_neighbor_paths tile_neighbor_paths_t;
 

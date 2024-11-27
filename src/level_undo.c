@@ -23,7 +23,7 @@
 #include "level.h"
 #include "level_undo.h"
 
-//#define DEBUG_UNDO_LIST
+#define DEBUG_UNDO_LIST
 
 #define UNDO_LIST_MAX_EVENTS 64
 struct undo_list {
@@ -54,8 +54,18 @@ static const char *undo_edit_event_type_str(undo_edit_event_type_t type)
         return "(NULL)";
     case UNDO_EDIT_TYPE_SWAP:
         return "SWAP";
+    case UNDO_EDIT_TYPE_USE_TILES:
+        return "USE_TILES";
+    case UNDO_EDIT_TYPE_SET_RADIUS:
+        return "SET_RADIUS";
+    case UNDO_EDIT_TYPE_SET_FLAGS:
+        return "SET_FLAGS";
+    case UNDO_EDIT_TYPE_SET_FLAGS_AND_PATHS:
+        return "SET_FLAGS_AND_PATHS";
+    case UNDO_EDIT_TYPE_CHANGE_PATH:
+        return "CHANGE_PATH";
     default:
-        return "(INVALID PLAY EVENT TYPE)";
+        return "(INVALID EDIT EVENT TYPE)";
     }
 }
 
@@ -313,7 +323,7 @@ void level_undo_add_swap_event(level_t *level, hex_axial_t a, hex_axial_t b)
         break;
 
     case GAME_MODE_EDIT_LEVEL:
-        event.type = UNDO_EVENT_TYPE_PLAY;
+        event.type = UNDO_EVENT_TYPE_EDIT;
         event.edit.type = UNDO_EDIT_TYPE_SWAP;
         event.edit.swap.a = a;
         event.edit.swap.b = b;        

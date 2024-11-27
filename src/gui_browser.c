@@ -393,10 +393,12 @@ void resize_gui_browser(void)
 
     float area_bottom = browser_area_rect.y + browser_area_rect.height;
 
+    Vector2 browser_play_button_text_size = measure_big_button_text(browser_play_button_text);
+
     browser_play_button_rect.x = browser_area_rect.x;
     browser_play_button_rect.y = area_bottom - TOOL_BUTTON_HEIGHT;
     browser_play_button_rect.width  = browser_area_rect.width;
-    browser_play_button_rect.height = TOOL_BUTTON_HEIGHT;    \
+    browser_play_button_rect.height = browser_play_button_text_size.y + (4 * BUTTON_MARGIN);
 
     area_bottom -= browser_play_button_rect.height;
     area_bottom -= RAYGUI_ICON_SIZE;
@@ -463,11 +465,16 @@ int draw_gui_browser_list(gui_list_vars_t *list, Rectangle list_rect)
                   &list->active,
                   &list->focus);
 
+    set_big_button_font();
+
     if (GuiButton(browser_play_button_rect, browser_play_button_text)) {
         if (list->active >= 0 && list->active < list->count) {
+            set_default_font();
             return list->active;
         }
     }
+
+    set_default_font();
 
     return -1;
 }

@@ -59,6 +59,8 @@
 
 #include "solver.h"
 
+#include "classics.h"
+
 /* #if defined(PLATFORM_DESKTOP) */
 /* /\* good *\/ */
 /* #else   // PLATFORM_RPI, PLATFORM_ANDROID, PLATFORM_WEB */
@@ -799,12 +801,18 @@ Rectangle radius_spinner_rect;
 Rectangle edit_mode_toggle_rect;
 Rectangle open_file_button_rect;
 Rectangle tool_panel_rect;
+Rectangle edit_tool_label_shadow_rect;
 Rectangle edit_tool_label_rect;
 Rectangle cycle_tool_button_rect;
 Rectangle erase_tool_button_rect;
 Rectangle goto_next_level_panel_rect;
 Rectangle goto_next_level_label_rect;
 Rectangle goto_next_level_button_rect;
+
+float tool_panel_content_height;
+
+Vector2 edit_tool_label_location;
+Vector2 edit_tool_label_shadow_location;
 
 #define MAX_RIGHT_SIDE_BUTTONS 8
 Rectangle right_side_button_rect[MAX_RIGHT_SIDE_BUTTONS];
@@ -940,13 +948,16 @@ void gui_setup(void)
     Vector2 cycle_tool_button_text_size = measure_gui_text(cycle_tool_button_text);
     Vector2 erase_tool_button_text_size = measure_gui_text(erase_tool_button_text);
 
+    tool_panel_content_height = MAX(edit_tool_label_text_size.y,
+                                    TOOL_BUTTON_HEIGHT);
+
     tool_panel_rect.x = edit_panel_rect.x;
     tool_panel_rect.width = (4 * PANEL_INNER_MARGIN)
-        + ((PATH_TYPE_COUNT - 1) * (2 * ICON_BUTTON_SIZE))
+        + ((PATH_TYPE_COUNT - 0) * (2 * ICON_BUTTON_SIZE))
         + edit_tool_label_text_size.x
         + cycle_tool_button_text_size.x
         + erase_tool_button_text_size.x;
-    tool_panel_rect.height = (2 * PANEL_INNER_MARGIN) + TOOL_BUTTON_HEIGHT;
+    tool_panel_rect.height = (2 * PANEL_INNER_MARGIN) + tool_panel_content_height;
     tool_panel_rect.y = window_size.y - WINDOW_MARGIN - tool_panel_rect.height;
 
     int right_side_button_text_width = 0;
@@ -1001,18 +1012,23 @@ void gui_setup(void)
 
     edit_tool_label_rect.x =  tool_panel_rect.x + PANEL_INNER_MARGIN;
     edit_tool_label_rect.y =  tool_panel_rect.y + PANEL_INNER_MARGIN;
-    edit_tool_label_rect.width = edit_tool_label_text_size.x;
-    edit_tool_label_rect.height = TOOL_BUTTON_HEIGHT;
+    edit_tool_label_rect.width = edit_tool_label_text_size.x + (4 * BUTTON_MARGIN);
+    edit_tool_label_rect.height = tool_panel_content_height;
+
+    edit_tool_label_location = getVector2FromRectangle(edit_tool_label_rect);
+    edit_tool_label_location.x += 3.0 + (1 * BUTTON_MARGIN);
+    edit_tool_label_location.y += 3.0;
+    edit_tool_label_shadow_location = Vector2Add(edit_tool_label_location, VEC2_SHADOW);
 
     cycle_tool_button_rect.x = edit_tool_label_rect.x + edit_tool_label_rect.width + ICON_BUTTON_SIZE;
     cycle_tool_button_rect.y = edit_tool_label_rect.y;
     cycle_tool_button_rect.width  = cycle_tool_button_text_size.x;
-    cycle_tool_button_rect.height = edit_tool_label_rect.height;
+    cycle_tool_button_rect.height = tool_panel_content_height;
 
     erase_tool_button_rect.x = cycle_tool_button_rect.x + cycle_tool_button_rect.width + ICON_BUTTON_SIZE;
     erase_tool_button_rect.y = cycle_tool_button_rect.y;
     erase_tool_button_rect.width  = erase_tool_button_text_size.x;
-    erase_tool_button_rect.height = cycle_tool_button_rect.height;
+    erase_tool_button_rect.height = tool_panel_content_height;
 
     Vector2 goto_next_level_label_text_size = measure_name_text(goto_next_level_label_text);
 
@@ -1125,7 +1141,9 @@ static void draw_edit_panel(void)
     if ((edit_mode_toggle_active == 0 && current_level->currently_used_tiles == USED_TILES_UNSOLVED) ||
         (edit_mode_toggle_active == 1 && current_level->currently_used_tiles == USED_TILES_SOLVED)
     ) {
+        used_tiles_t old_used_tiles = current_level->currently_used_tiles;
         level_toggle_currently_used_tiles(current_level);
+        level_undo_add_use_tiles_event(current_level, old_used_tiles, current_level->currently_used_tiles);
     }
 }
 
@@ -1136,8 +1154,14 @@ static void draw_tool_panel(void)
     DrawRectangleRounded(tool_panel_rect, PANEL_ROUNDNES, 0, bg);
     DrawRectangleRoundedLines(tool_panel_rect, PANEL_ROUNDNES, 0, 1.0, edge);
 
+    DrawRectangleRec(edit_tool_label_rect, panel_header_label_bg_color);
+
     draw_panel_text(edit_tool_label_text,
-                    getVector2FromRectangle(edit_tool_label_rect),
+                    edit_tool_label_shadow_location,
+                    text_shadow_color);
+
+    draw_panel_text(edit_tool_label_text,
+                    edit_tool_label_location,
                     panel_header_text_color);
 
     GuiToggle(cycle_tool_button_rect, cycle_tool_button_text, &edit_tool_cycle);
@@ -1156,8 +1180,8 @@ static void draw_tool_panel(void)
     Rectangle rect = {
         .x = erase_tool_button_rect.x + erase_tool_button_rect.width + ICON_BUTTON_SIZE,
         .y = erase_tool_button_rect.y,
-        .width  = TOOL_BUTTON_WIDTH,
-        .height = TOOL_BUTTON_HEIGHT
+        .width  = tool_panel_content_height,
+        .height = tool_panel_content_height
     };
 
     float line_thickness = 1.0;
@@ -1298,6 +1322,17 @@ static void draw_gui_widgets(void)
 
         if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
             show_ask_save_box = true;
+        }
+
+        // skip one position
+        rsb++;
+
+        if (GuiButton(right_side_button_rect[rsb++], undo_button_text)) {
+            undo_edit();
+        }
+
+        if (GuiButton(right_side_button_rect[rsb++], redo_button_text)) {
+            redo_edit();
         }
         break;
 
@@ -1831,7 +1866,7 @@ render_frame(
         renderd_texture_last_frame = false;
     }
 
-draw_gui();
+    draw_gui();
 
     if (show_fps) {
         DrawTextShadow(TextFormat("FPS: %d", GetFPS()), 15, 10, DEFAULT_GUI_FONT_SIZE, WHITE);
@@ -2023,8 +2058,8 @@ static void game_init(void)
     init_gui_browser();
     init_gui_random();
 
-    //set_game_mode(GAME_MODE_BROWSER);
-    set_game_mode(GAME_MODE_RANDOM);
+    set_game_mode(GAME_MODE_BROWSER);
+    //set_game_mode(GAME_MODE_RANDOM);
 
     load_nvdata();
 }
@@ -2138,6 +2173,12 @@ main(
 #else
 
     start_given_file();
+
+#if 1
+    open_classics_game_pack(2);
+    set_game_mode(GAME_MODE_EDIT_COLLECTION);
+    level_edit(current_collection->levels);
+#endif
 
     if (options->verbose) {
         infomsg("Entering Main Loop...");

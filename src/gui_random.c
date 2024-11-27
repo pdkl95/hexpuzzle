@@ -147,10 +147,6 @@ void shuffle_int(int *list, int len)
     }
 }
 
-struct hex_direction_order {
-    hex_direction_t dir[6];
-};
-typedef struct hex_direction_order hex_direction_order_t;
 hex_direction_order_t get_random_direction_order(int len)
 {
     assert(len >  0);

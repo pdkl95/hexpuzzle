@@ -77,7 +77,9 @@ static inline bool is_any_shift_down(void)
 
 #define VEC2_ZERO    ((Vector2){ 0.0f, 0.0f })
 #define VEC2_ONE     ((Vector2){ 1.0f, 1.0f })
+
 #define VEC2_ORIGIN  VEC2_ZERO
+#define VEC2_SHADOW  VEC2_ONE
 
 /*** Colors ***/
 
