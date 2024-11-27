@@ -72,14 +72,13 @@ char *gui_random_enter_seed_text = NULL;
 const char *gui_random_gen_styles[] = {
     "Density / Scatter",
     "Hamiltonian Path - DFS",
-    "Separate DFS Per-Color",
     "Connect To Point"
 };
 char *gui_random_gen_style_text = NULL;
 #define NUM_GEN_STYLES (sizeof(gui_random_gen_styles)/sizeof(char *))
 bool gui_random_gen_style_edit_mode = false;
 
-int gen_style = 3;
+int gen_style = 2;
 
 const char *gui_random_difficulties[] = {
     "Easy    (~2 paths/tile)",
@@ -91,6 +90,8 @@ char *gui_random_difficulty_text = NULL;
 bool gui_random_difficulty_edit_mode = false;
 
 int difficulty = 1;
+
+bool any_drop_down_active = false;
 
 bool gui_random_color[PATH_TYPE_COUNT];
 int gui_random_color_count = PATH_TYPE_COUNT - 1;
@@ -133,6 +134,47 @@ static int rng_get(int bound)
     }
 }
 
+void shuffle_int(int *list, int len)
+{
+    int i, j, tmp;
+    for (i = len - 1; i > 0; i--) {
+        j = rng_get(i + 1);
+
+        tmp = list[j];
+
+        list[j] = list[i];
+        list[i] = tmp;
+    }
+}
+
+struct hex_direction_order {
+    hex_direction_t dir[6];
+};
+typedef struct hex_direction_order hex_direction_order_t;
+hex_direction_order_t get_random_direction_order(int len)
+{
+    assert(len >  0);
+    assert(len <= 6);
+
+    hex_direction_order_t order;
+    for(int i=0; i < len; i++) {
+        order.dir[i] = i;
+    }
+
+    shuffle_int((int *)(&(order.dir[0])), len);
+
+#if 1
+    printf("shuffe<len=%d> = [%d", len, order.dir[0]);
+    for(int i=1; i < len; i++) {
+        printf(", %d", order.dir[i]);
+    }
+    printf("]\n");
+#endif
+
+    return order;
+}
+
+#if 0
 static bool rng_bool(int true_chances, int false_chances)
 {
     int total_chances = true_chances + false_chances;
@@ -147,6 +189,7 @@ static int rng_sign(int pos_chances, int neg_chances)
         return -1;
     }
 }
+#endif
 
 static int rng_color_count(void)
 {
@@ -222,10 +265,10 @@ static void generate_random_paths(level_t *level, int num_tiles)
         //print_tile_pos(pos);
         //pint(num_paths);
 
-        while (num_paths > 0) {
-            int offset = rng_get(6);
-            each_direction {
-                hex_direction_t idx = (dir + offset) % 6;
+        if (num_paths > 0) {
+            hex_direction_order_t order = get_random_direction_order(num_paths);
+            for (int i=0; i<num_paths; i++) {
+                hex_direction_t idx = order.dir[i];
 
                 if (tile->path[idx]) {
                     continue;
@@ -253,10 +296,21 @@ static void set_all_hover(level_t *level, bool value)
     }
 }
 
+#define DEBUG_DFS
+#ifdef DEBUG_DFS
+int dfs_depth;
+#endif
+
 static void dfs_tile_pos(tile_pos_t *pos)
 {
     bool todo[6] = {0};
     int todo_count = 0;
+
+#ifdef DEBUG_DFS
+    printf("DFS: depth = %d ", dfs_depth);
+    print_tile_pos(pos);
+    dfs_depth++;
+#endif
 
     pos->hover = true;
 
@@ -268,10 +322,10 @@ static void dfs_tile_pos(tile_pos_t *pos)
         }
     }
 
-    while (todo_count > 0) {
-        int offset = rng_get(6);
-        each_direction {
-            hex_direction_t idx = (dir + offset) % 6;
+    if (todo_count > 0) {
+        hex_direction_order_t order = get_random_direction_order(todo_count);
+        for (int i=0; i<todo_count; i++) {
+            hex_direction_t idx = order.dir[i];
             if (todo[idx]) {
                 todo[idx] = false;
 
@@ -286,10 +340,14 @@ static void dfs_tile_pos(tile_pos_t *pos)
                 }
                 break;
             }
-        }
 
-        todo_count--;
+            todo_count--;
+        }
     }
+
+#ifdef DEBUG_DFS
+    dfs_depth--;
+#endif
 }
 
 static tile_pos_t *rng_get_start_pos(level_t *level, int num_tiles)
@@ -310,162 +368,11 @@ static void generate_dfs_path(level_t *level, int num_tiles)
     tile_pos_t *start_pos = rng_get_start_pos(level, num_tiles);
 
     set_all_hover(level, false);
+#ifdef DEBUG_DFS
+    dfs_depth = 0;
+#endif
     dfs_tile_pos(start_pos);
     set_all_hover(level, false);
-}
-
-static int limited_dfs_neighbor_score(tile_pos_t *neighbor, path_type_t type)
-{
-    assert_not_null(neighbor);
-    assert_not_null(neighbor->tile);
-    assert(type != PATH_TYPE_NONE);
-
-    int score = 0;
-
-    tile_t *tile = neighbor->tile;
-    if (!tile->enabled) {
-        return INT_MAX;
-    }
-
-    each_direction {
-        if (tile->path[dir] == type) {
-            score += 10;
-        } else if (tile->path[dir] != PATH_TYPE_NONE) {
-            score += 2;
-        }
-    }
-
-    score += rng_get(6);
-    score += rng_get(3);
-
-    return score;
-}
-
-static void limited_dfs_tile_pos(tile_pos_t *pos, path_type_t type, int color_count, int min_path, int max_path)
-{
-    assert_not_null(pos);
-
-    int todo_count = 0;
-    tile_pos_t *todo[6];
-    hex_direction_t todo_dir[6];
-
-    memset(todo, 0, sizeof(todo));
-    if (min_path < 1) {
-        //min_path = 1;
-        return;
-    }
-    if (max_path < 1) {
-        //max_path = 1;
-        //printf("STOP max_path == %d", max_path);
-        return;
-    }
-
-    pos->hover = true;
-
-    int pathcount = rng_get(max_path - min_path) + min_path;
-
-    for_each_direction(_dir) {
-        hex_direction_t dir = _dir;
-        tile_pos_t *neighbor = pos->neighbors[dir];
-
-        if (neighbor && neighbor->tile && neighbor->tile->enabled) {
-            if (neighbor->hover) {
-                //printf("SKIP marked tile\n");
-            } else {
-                for (int i=0; i<todo_count; i++) {
-                    int cur_score = limited_dfs_neighbor_score( todo[i], type);
-                    int new_score = limited_dfs_neighbor_score(neighbor, type);
-                    if (new_score > cur_score) {
-                        tile_pos_t *tmp = neighbor;
-                        neighbor = todo[i];
-                        todo[i] = tmp;
-
-                        hex_direction_t dirtmp = dir;
-                        dir = todo_dir[i];
-                        todo_dir[i] = dirtmp;
-                    }
-                }
-
-                todo[todo_count] = neighbor;
-                todo_dir[todo_count] = dir;
-                todo_count++;
-            }
-#ifdef RANDOM_GEN_DEBUG
-        } else {
-            if (neighbor && neighbor->tile) {
-                //printf("neighbor->tile is NOT ENABLED\n");
-            } else if (neighbor) {
-                printf("neighbor->tile is NULL\n");
-            } else {
-                printf("neighbor is NULL\n");
-            }
-#endif
-        }
-    }
-
-#ifdef RANDOM_GEN_DEBUG
-    if (todo_count < 1) {
-        printf("STOP todo_count = %d\n", todo_count);
-    }
-
-    if (pathcount < 1) {
-        printf("STOP pathcount = %d\n", pathcount);
-    }
-#endif
-
-    while ((todo_count > 0) && (pathcount > 0)) {
-        //printf("\t\ttodo_count = %d, pathcount = %d\n", todo_count, pathcount);
-
-        todo_count--;
-
-        tile_pos_t *neighbor = todo[todo_count];
-        hex_direction_t dir = todo_dir[todo_count];
-
-        hex_direction_t opp_dir = hex_opposite_direction(dir);
-
-#ifdef RANDOM_GEN_DEBUG
-        printf("\ttile<%d, %d>[%d, %s] = %s\n",
-               pos->position.q, pos->position.r,
-               dir, hex_direction_name(dir),
-               path_type_name(type));
-#endif
-
-        if ((pos->tile->path[dir] == PATH_TYPE_NONE) || (rng_bool(color_count + 1, 7))) {
-            pos->tile->path[dir] = type;
-            neighbor->tile->path[opp_dir] = pos->tile->path[dir];
-
-            int dmin = rng_sign(1, 5);
-            int dmax = rng_sign(1, 7);
-//            dmin = -1;
-//            dmax = -1;
-            limited_dfs_tile_pos(neighbor, type, color_count, min_path + dmin, max_path + dmax);
-        }
-
-        pathcount--;
-    }
-}
-
-static void generate_limited_single_color_path(level_t *level, int num_tiles, path_type_t type, int color_count, int min_path, int max_path)
-{
-    tile_pos_t *start_pos = rng_get_start_pos(level, num_tiles);
-    start_pos->tile->start_for_path_type = type;
-    //printf(">>> Generating %s from <%d, %d>\n", path_type_name(type), start_pos->position.q, start_pos->position.r);
-
-    set_all_hover(level, false);
-    limited_dfs_tile_pos(start_pos, type, color_count, min_path, max_path);
-}
-
-static void generate_separate_limited_paths_per_color(level_t *level, int num_tiles, int min_path, int max_path)
-{
-    assert_not_null(level);
-
-    int color_count = 0;
-    for (path_type_t type = (PATH_TYPE_NONE + 1); type < PATH_TYPE_COUNT; type++) {
-        if (gui_random_color[type]) {
-            generate_limited_single_color_path(level, num_tiles, type, color_count, min_path, max_path);
-            color_count++;
-        }
-    }
 }
 
 static tile_pos_t *find_random_empty_tile(level_t *level, tile_t *not_this_tile, bool blank_only)
@@ -743,10 +650,6 @@ struct level *generate_random_level(void)
         break;
 
     case 2:
-        generate_separate_limited_paths_per_color(level, n, options->create_level_min_path, options->create_level_max_path);
-        break;
-
-    case 3:
         generate_connect_to_point(level);
         break;
 
@@ -939,8 +842,8 @@ void resize_gui_random(void)
     gui_random_enter_seed_rect.height = TOOL_BUTTON_HEIGHT;
     gui_random_enter_seed_rect.x      = gui_random_rng_seed_rect.x - RAYGUI_ICON_SIZE - gui_random_enter_seed_rect.width;
 
-    gui_random_seed_bg_rect.x      = seed_text_location.x - 5;
-    gui_random_seed_bg_rect.y      = seed_text_location.y - 5;
+    gui_random_seed_bg_rect.x      = seed_text_location.x;
+    gui_random_seed_bg_rect.y      = seed_text_location.y;
     gui_random_seed_bg_rect.width  = 2 + gui_random_enter_seed_rect.x - gui_random_seed_bg_rect.x - RAYGUI_ICON_SIZE;
     gui_random_seed_bg_rect.height = 3 + gui_random_enter_seed_rect.height;
 
@@ -959,6 +862,9 @@ void resize_gui_random(void)
     gui_random_preview_rect.width  = MIN(gui_random_preview_rect.height, gui_random_area_rect.width);
     gui_random_preview_rect.y      = gui_random_area_rect.y;
     gui_random_preview_rect.x      = gui_random_area_rect.x + (gui_random_area_rect.width / 2) - (gui_random_preview_rect.width / 2);
+
+    seed_text_location.x += 3;
+    seed_text_location.y += 5;
 }
 
 static void draw_gui_random_colors(void)
@@ -980,7 +886,10 @@ static void draw_gui_random_colors(void)
     cross_color = ColorAlpha(cross_color, 0.7);
 
     for (path_type_t type = (PATH_TYPE_NONE + 1); type < PATH_TYPE_COUNT; type++) {
-        bool hover = CheckCollisionPointRec(mouse_positionf, rect);
+        bool hover = false;
+        if (!any_drop_down_active) {
+            hover = CheckCollisionPointRec(mouse_positionf, rect);
+        }
 
         if (gui_random_color[type]) {
             /* button for color ON */
@@ -1093,13 +1002,34 @@ bool ask_for_random_seed(void)
 
 void draw_preview(void)
 {
-    bool hover = CheckCollisionPointRec(mouse_positionf, gui_random_preview_rect);
+    bool hover = false;;
+    if (!any_drop_down_active) {
+        hover = CheckCollisionPointRec(mouse_positionf, gui_random_preview_rect);
+    }
 
     DrawRectangleRec(gui_random_preview_rect, BLACK);
     level_preview(gui_random_level, gui_random_preview_rect);
 
     if (hover) {
-        DrawRectangleLinesEx(gui_random_preview_rect, 1.0, tile_edge_hover_color);
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+            Rectangle shift_rect = gui_random_preview_rect;
+            shift_rect.x -= 1;
+            shift_rect.y += 1;
+
+            DrawRectangleLinesEx(gui_random_preview_rect, 2.0, text_shadow_color);
+            DrawRectangleLinesEx(shift_rect, 1.0, tile_edge_drag_color);
+        } else {
+            Rectangle shift_rect = gui_random_preview_rect;
+            shift_rect.x += 1;
+            shift_rect.y -= 1;
+
+            DrawRectangleLinesEx(gui_random_preview_rect, 2.0, text_shadow_color);
+            DrawRectangleLinesEx(shift_rect, 1.0, tile_edge_hover_color);
+        }
+
+        if (mouse_left_click) {
+            play_gui_random_level();
+        }
     }
 }
 
@@ -1108,6 +1038,10 @@ void draw_gui_random(void)
 {
     if (!gui_random_level) {
         regen_level();
+    }
+
+    if (any_drop_down_active) {
+        GuiLock();
     }
 
     GuiPanel(gui_random_panel_rect, gui_random_panel_text);
@@ -1179,6 +1113,8 @@ void draw_gui_random(void)
         draw_preview();
     }
 
+    GuiUnlock();
+
     GuiLabel(gui_random_difficulty_label_rect, gui_random_difficulty_label_text);
     if (GuiDropdownBox(gui_random_difficulty_rect, gui_random_difficulty_text, &difficulty, gui_random_difficulty_edit_mode)) {
         gui_random_difficulty_edit_mode = !gui_random_difficulty_edit_mode;
@@ -1190,6 +1126,8 @@ void draw_gui_random(void)
         gui_random_gen_style_edit_mode = !gui_random_gen_style_edit_mode;
         regen_level();
     }
+
+        any_drop_down_active = gui_random_difficulty_edit_mode || gui_random_gen_style_edit_mode;
 }
 
 void play_gui_random_level(void)
