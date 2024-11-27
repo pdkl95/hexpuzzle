@@ -163,7 +163,7 @@ hex_direction_order_t get_random_direction_order(int len)
 
     shuffle_int((int *)(&(order.dir[0])), len);
 
-#if 1
+#if 0
     printf("shuffe<len=%d> = [%d", len, order.dir[0]);
     for(int i=1; i < len; i++) {
         printf(", %d", order.dir[i]);
@@ -296,7 +296,7 @@ static void set_all_hover(level_t *level, bool value)
     }
 }
 
-#define DEBUG_DFS
+//#define DEBUG_DFS
 #ifdef DEBUG_DFS
 int dfs_depth;
 #endif
@@ -729,7 +729,7 @@ void resize_gui_random(void)
     gui_random_panel_rect.width  = window_size.x * 0.4;
     gui_random_panel_rect.height = window_size.y * 0.45;
 
-    MINVAR(gui_random_panel_rect.width,  400);
+    MINVAR(gui_random_panel_rect.width,  420);
     MINVAR(gui_random_panel_rect.height, 550);
 
     gui_random_panel_rect.x = (window_size.x / 2) - (gui_random_panel_rect.width  / 2);
@@ -794,7 +794,7 @@ void resize_gui_random(void)
 
     gui_random_gen_style_label_rect.x      = gui_random_area_rect.x;
     gui_random_gen_style_label_rect.y      = gui_random_area_rect.y;
-    gui_random_gen_style_label_rect.width  = gui_random_gen_style_label_text_size.x;
+    gui_random_gen_style_label_rect.width  = gui_random_gen_style_label_text_size.x + (2 * BUTTON_MARGIN);
     gui_random_gen_style_label_rect.height = TOOL_BUTTON_HEIGHT;
 
     gui_random_gen_style_rect.x      = gui_random_gen_style_label_rect.x + gui_random_gen_style_label_rect.width + RAYGUI_ICON_SIZE;
@@ -809,7 +809,7 @@ void resize_gui_random(void)
 
     gui_random_difficulty_label_rect.x      = gui_random_area_rect.x;
     gui_random_difficulty_label_rect.y      = gui_random_area_rect.y;
-    gui_random_difficulty_label_rect.width  = gui_random_difficulty_label_text_size.x;
+    gui_random_difficulty_label_rect.width  = gui_random_difficulty_label_text_size.x + (2 * BUTTON_MARGIN);
     gui_random_difficulty_label_rect.height = TOOL_BUTTON_HEIGHT;
 
     gui_random_difficulty_rect.x      = gui_random_difficulty_label_rect.x + gui_random_difficulty_label_rect.width + RAYGUI_ICON_SIZE;
@@ -824,7 +824,7 @@ void resize_gui_random(void)
 
     gui_random_seed_rect.x      = gui_random_area_rect.x;
     gui_random_seed_rect.y      = gui_random_area_rect.y;
-    gui_random_seed_rect.width  = gui_random_seed_text_size.x;
+    gui_random_seed_rect.width  = gui_random_seed_text_size.x + (2 * BUTTON_MARGIN);
     gui_random_seed_rect.height = TOOL_BUTTON_HEIGHT;
 
     seed_text_location.x = gui_random_seed_rect.x + gui_random_seed_rect.width + RAYGUI_ICON_SIZE;
@@ -865,6 +865,7 @@ void resize_gui_random(void)
 
     seed_text_location.x += 3;
     seed_text_location.y += 5;
+    gui_random_seed_rect.y += BUTTON_MARGIN;
 }
 
 static void draw_gui_random_colors(void)
@@ -1115,10 +1116,20 @@ void draw_gui_random(void)
 
     GuiUnlock();
 
+    if (gui_random_gen_style_edit_mode) {
+        GuiLock();
+    }
+
     GuiLabel(gui_random_difficulty_label_rect, gui_random_difficulty_label_text);
     if (GuiDropdownBox(gui_random_difficulty_rect, gui_random_difficulty_text, &difficulty, gui_random_difficulty_edit_mode)) {
         gui_random_difficulty_edit_mode = !gui_random_difficulty_edit_mode;
         regen_level();
+    }
+
+    GuiUnlock();
+
+    if (gui_random_gen_style_edit_mode) {
+        GuiLock();
     }
 
     GuiLabel(gui_random_gen_style_label_rect, gui_random_gen_style_label_text);

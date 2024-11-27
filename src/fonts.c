@@ -46,6 +46,10 @@ static inline font_handle_t load_font(int size, int filter, unsigned char *font_
                                    0)
     };
 
+    if (filter == TEXTURE_FILTER_TRILINEAR) {
+        GenTextureMipmaps(&fh.font.texture);
+    }
+
     SetTextureFilter(fh.font.texture, filter);
 
     return fh;
@@ -67,11 +71,11 @@ void load_fonts(void)
                                 fonts_Ubuntu_Medium_ttf,
                                 fonts_Ubuntu_Medium_ttf_len);
 
-    name_font       = load_font(36, TEXTURE_FILTER_POINT,
+    name_font       = load_font(36, TEXTURE_FILTER_BILINEAR,
                                 fonts_Ubuntu_Medium_ttf,
                                 fonts_Ubuntu_Medium_ttf_len);
 
-    big_button_font = load_font(36, TEXTURE_FILTER_POINT,
+    big_button_font = load_font(36, TEXTURE_FILTER_BILINEAR,
                                 fonts_BeetypeFilled_ljJq_otf,
                                 fonts_BeetypeFilled_ljJq_otf_len);
 
