@@ -62,8 +62,6 @@ void load_fonts(void)
     gui_font        = load_font(16, TEXTURE_FILTER_TRILINEAR,
                                 fonts_Ubuntu_Medium_ttf,
                                 fonts_Ubuntu_Medium_ttf_len);
-                                /* fonts_UbuntuCondensed_Regular_ttf, */
-                                /* fonts_UbuntuCondensed_Regular_ttf_len); */
 
     panel_font      = load_font(20, TEXTURE_FILTER_BILINEAR,
                                 fonts_Ubuntu_Medium_ttf,

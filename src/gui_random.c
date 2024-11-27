@@ -52,6 +52,8 @@ Rectangle gui_random_enter_seed_rect;
 Rectangle gui_random_rng_seed_rect;
 Rectangle gui_random_preview_rect;
 
+Vector2 radius_display_text_location;
+Vector2 radius_display_text_shadow_location;
 Vector2 seed_text_location;
 
 char gui_random_panel_text[] = "Random Level";
@@ -789,7 +791,7 @@ void init_gui_random(void)
 {
     init_gui_random_minimal();
 
-    seed_bg_color = ColorBrightness(tile_bg_color, -0.15);
+    seed_bg_color = ColorBrightness(tile_bg_color, -0.25);
 
     SAFEFREE(gui_random_enter_seed_text);
     SAFEFREE(gui_random_gen_style_text);
@@ -861,6 +863,16 @@ void resize_gui_random(void)
     gui_random_radius_right_button_rect.y      = gui_random_radius_display_rect.y;
     gui_random_radius_right_button_rect.width  = TOOL_BUTTON_WIDTH;
     gui_random_radius_right_button_rect.height = TOOL_BUTTON_HEIGHT;
+
+    radius_display_text_location.x = gui_random_radius_display_rect.x + 8;
+    radius_display_text_location.y = gui_random_radius_display_rect.y + 3;
+    gui_random_radius_display_rect.x      += 1;
+    gui_random_radius_display_rect.width  -= 2;
+    gui_random_radius_display_rect.height += 1;
+
+    radius_display_text_shadow_location = radius_display_text_location;
+    radius_display_text_shadow_location.x += 1.0f;
+    radius_display_text_shadow_location.y += 1.0f;
 
     gui_random_area_rect.y      += gui_random_radius_label_rect.height + RAYGUI_ICON_SIZE;
     gui_random_area_rect.height -= gui_random_radius_label_rect.height + RAYGUI_ICON_SIZE;
@@ -1079,6 +1091,19 @@ bool ask_for_random_seed(void)
     return true;
 }
 
+void draw_preview(void)
+{
+    bool hover = CheckCollisionPointRec(mouse_positionf, gui_random_preview_rect);
+
+    DrawRectangleRec(gui_random_preview_rect, BLACK);
+    level_preview(gui_random_level, gui_random_preview_rect);
+
+    if (hover) {
+        DrawRectangleLinesEx(gui_random_preview_rect, 1.0, tile_edge_hover_color);
+    }
+}
+
+
 void draw_gui_random(void)
 {
     if (!gui_random_level) {
@@ -1094,10 +1119,16 @@ void draw_gui_random(void)
             regen_level();
         }
     }
-    GuiDrawText(TextFormat("%d", options->create_level_radius),
-                GetTextBounds(LABEL, gui_random_radius_display_rect),
-                TEXT_ALIGN_LEFT, RAYWHITE);
-    //GuiLabel(gui_random_radius_display_rect, TextFormat(TextFormat("%d", options->create_level_radius));)
+    DrawRectangleRec(gui_random_radius_display_rect, seed_bg_color);
+
+    draw_panel_text(TextFormat("%d", options->create_level_radius),
+                    radius_display_text_shadow_location,
+                    text_shadow_color);
+
+    draw_panel_text(TextFormat("%d", options->create_level_radius),
+                    radius_display_text_location,
+                    RAYWHITE);
+
     if (GuiButton(gui_random_radius_right_button_rect, gui_random_radius_right_button_text)) {
         if (options->create_level_radius < LEVEL_MAX_RADIUS) {
             options->create_level_radius++;
@@ -1145,8 +1176,7 @@ void draw_gui_random(void)
     }
 
     if (gui_random_level) {
-        DrawRectangleRec(gui_random_preview_rect, BLACK);
-        level_preview(gui_random_level, gui_random_preview_rect);
+        draw_preview();
     }
 
     GuiLabel(gui_random_difficulty_label_rect, gui_random_difficulty_label_text);

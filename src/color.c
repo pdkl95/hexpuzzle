@@ -81,7 +81,7 @@ void prepare_global_colors()
     panel_edge_hover_color        = ColorBrightness(panel_edge_color,  0.3);
     panel_header_text_hover_color = WHITE;
 
-    text_shadow_color = ColorAlpha(BLACK, 0.8);
+    text_shadow_color = ColorAlpha(BLACK, 0.85);
 }
 
 void color_option_set(color_option_t *c_opt, Color new_color)
