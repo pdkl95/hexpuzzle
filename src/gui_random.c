@@ -745,7 +745,7 @@ void resize_gui_random(void)
 
     gui_random_radius_label_rect.x      = gui_random_area_rect.x;
     gui_random_radius_label_rect.y      = gui_random_area_rect.y;
-    gui_random_radius_label_rect.width  = gui_random_radius_label_text_size.x;
+    gui_random_radius_label_rect.width  = gui_random_radius_label_text_size.x + (4 * BUTTON_MARGIN);
     gui_random_radius_label_rect.height = TOOL_BUTTON_HEIGHT;
 
     gui_random_radius_left_button_rect.x      = gui_random_radius_label_rect.x + gui_random_radius_label_rect.width + RAYGUI_ICON_SIZE;;
@@ -1030,19 +1030,8 @@ void draw_preview(void)
     }
 }
 
-
-void draw_gui_random(void)
+static void draw_tile_radius_gui(void)
 {
-    if (!gui_random_level) {
-        regen_level();
-    }
-
-    if (any_drop_down_active) {
-        GuiLock();
-    }
-
-    GuiPanel(gui_random_panel_rect, gui_random_panel_text);
-
     GuiLabel(gui_random_radius_label_rect, gui_random_radius_label_text);
     if (GuiButton(gui_random_radius_left_button_rect, gui_random_radius_left_button_text)) {
         if (options->create_level_radius > LEVEL_MIN_RADIUS) {
@@ -1066,6 +1055,21 @@ void draw_gui_random(void)
             regen_level();
         }
     }
+}
+
+void draw_gui_random(void)
+{
+    if (!gui_random_level) {
+        regen_level();
+    }
+
+    if (any_drop_down_active) {
+        GuiLock();
+    }
+
+    GuiPanel(gui_random_panel_rect, gui_random_panel_text);
+
+    draw_tile_radius_gui();
 
     draw_gui_random_colors();
 

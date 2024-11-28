@@ -795,9 +795,14 @@ handle_events(
 Rectangle name_text_rect;
 Rectangle name_panel_rect;
 Rectangle name_edit_button_rect;
-Rectangle edit_panel_rect;
-Rectangle radius_spinner_label_rect;
-Rectangle radius_spinner_rect;
+
+Rectangle edit_radius_panel_rect;
+Rectangle edit_radius_label_rect;
+Rectangle edit_radius_left_button_rect;
+Rectangle edit_radius_display_rect;
+Rectangle edit_radius_right_button_rect;
+Rectangle edit_mode_panel_rect;
+Rectangle edit_mode_label_rect;
 Rectangle edit_mode_toggle_rect;
 Rectangle open_file_button_rect;
 Rectangle tool_panel_rect;
@@ -811,6 +816,10 @@ Rectangle goto_next_level_button_rect;
 
 float tool_panel_content_height;
 
+Vector2 edit_radius_label_location;
+Vector2 edit_radius_display_text_location;
+Vector2 edit_radius_display_text_shadow_location;
+Vector2 edit_mode_label_location;
 Vector2 edit_tool_label_location;
 Vector2 edit_tool_label_shadow_location;
 
@@ -869,26 +878,21 @@ char erase_tool_button_text_str[] = "Erase";
 #define ERASE_TOOL_BUTTON_TEXT_LENGTH (6 + sizeof(erase_tool_button_text_str))
 char erase_tool_button_text[ERASE_TOOL_BUTTON_TEXT_LENGTH];
 
+char edit_radius_label_text[] = "Radius";
+char edit_mode_label_text[] = "Mode";
 char edit_tool_label_text[] = "Edit Tool";
 char goto_next_level_label_text[] = "Next level?";
+
+char edit_radius_left_button_text[6];
+char edit_radius_right_button_text[6];
 
 char cancel_ok_with_icons[25];
 char no_yes_with_icons[25];
 
 int edit_mode_toggle_active;
 
-void gui_setup(void)
+static void gui_setup_name_panel(void)
 {
-    cancel_ok_with_icons[0] = '\0';
-    strcat(cancel_ok_with_icons, GuiIconText(ICON_CROSS,"Cancel"));
-    strcat(cancel_ok_with_icons, ";");
-    strcat(cancel_ok_with_icons, GuiIconText(ICON_OK_TICK,"Ok"));
-
-    no_yes_with_icons[0] = '\0';
-    strcat(no_yes_with_icons, GuiIconText(ICON_CROSS,"No"));
-    strcat(no_yes_with_icons, ";");
-    strcat(no_yes_with_icons, GuiIconText(ICON_OK_TICK,"Yes"));
-
     name_text_rect.x = WINDOW_MARGIN + PANEL_INNER_MARGIN;
     name_text_rect.y = WINDOW_MARGIN + PANEL_INNER_MARGIN;
     name_text_rect.height = name_font.size;
@@ -902,44 +906,101 @@ void gui_setup(void)
 
     name_edit_button_rect.width  = ICON_BUTTON_SIZE;
     name_edit_button_rect.height = ICON_BUTTON_SIZE;
+}
 
-    edit_panel_rect.x = name_panel_rect.x;
-    edit_panel_rect.y =
+static void gui_setup_edit_mode_panel(void)
+{
+    edit_mode_panel_rect.x = name_panel_rect.x;
+    edit_mode_panel_rect.y =
         name_panel_rect.y
         + name_panel_rect.height
         + WINDOW_MARGIN;
 
-    radius_spinner_label_rect.x = name_text_rect.x;
-    radius_spinner_label_rect.y =
-        edit_panel_rect.y
-        + PANEL_INNER_MARGIN;
-    radius_spinner_label_rect.height = panel_font.size;
+    Vector2 edit_mode_label_text_size = measure_panel_text(edit_mode_label_text);
 
-    radius_spinner_rect.x = name_text_rect.x;
-    radius_spinner_rect.y =
-        radius_spinner_label_rect.y
-        + radius_spinner_label_rect.height
-        + PANEL_INNER_MARGIN;
-    radius_spinner_rect.width  = 180;
-    radius_spinner_rect.height = 30;
+    edit_mode_label_rect.x = edit_mode_panel_rect.x + PANEL_INNER_MARGIN;
+    edit_mode_label_rect.y = edit_mode_panel_rect.y + edit_mode_panel_rect.height + PANEL_INNER_MARGIN;
+    edit_mode_label_rect.width  = edit_mode_label_text_size.x;
+    edit_mode_label_rect.height = edit_mode_label_text_size.y;
 
-    edit_mode_toggle_rect.x = radius_spinner_rect.x;
-    edit_mode_toggle_rect.y =
-        radius_spinner_rect.y
-        + radius_spinner_rect.height
-        + PANEL_INNER_MARGIN;
-    edit_mode_toggle_rect.width  = radius_spinner_rect.width;
-    edit_mode_toggle_rect.height = radius_spinner_rect.height;
+    edit_mode_label_location.x = edit_mode_label_rect.x;
+    edit_mode_label_location.y = edit_mode_label_rect.y;
 
-    edit_panel_rect.width =
-        radius_spinner_rect.width
-        + (2 * PANEL_INNER_MARGIN);
-    edit_panel_rect.height =
-        radius_spinner_label_rect.height
-        + radius_spinner_rect.height
-        + edit_mode_toggle_rect.height
-        + (4 * PANEL_INNER_MARGIN);
+    edit_mode_toggle_rect.x = edit_mode_panel_rect.x + PANEL_INNER_MARGIN;
+    edit_mode_toggle_rect.y = edit_mode_label_rect.y + edit_mode_label_rect.height + PANEL_INNER_MARGIN;
+    edit_mode_toggle_rect.width  = 120;
+    edit_mode_toggle_rect.height = 24;
 
+    edit_mode_panel_rect.width =
+        edit_mode_toggle_rect.x
+        + edit_mode_toggle_rect.width
+        + PANEL_INNER_MARGIN
+        - edit_mode_panel_rect.x;
+
+    edit_mode_panel_rect.height =
+        edit_mode_label_rect.height
+        + (2 * edit_mode_toggle_rect.height)
+        + (3 * PANEL_INNER_MARGIN);
+}
+
+static void gui_setup_edit_radius_panel(void)
+{
+    edit_radius_panel_rect.x = edit_mode_panel_rect.x;
+    edit_radius_panel_rect.y = edit_mode_panel_rect.y + edit_mode_panel_rect.height + PANEL_INNER_MARGIN;
+
+    Vector2 edit_radius_label_text_size = measure_panel_text(edit_radius_label_text);
+
+    edit_radius_label_rect.x = name_text_rect.x;
+    edit_radius_label_rect.y = edit_radius_panel_rect.y + PANEL_INNER_MARGIN;
+    edit_radius_label_rect.width  = edit_radius_label_text_size.x;
+    edit_radius_label_rect.height = edit_radius_label_text_size.y;
+
+    edit_radius_label_location.x = edit_radius_label_rect.x;
+    edit_radius_label_location.y = edit_radius_label_rect.y;
+
+    memcpy(edit_radius_left_button_text,  GuiIconText(ICON_ARROW_LEFT_FILL, NULL), 6);
+    memcpy(edit_radius_right_button_text, GuiIconText(ICON_ARROW_RIGHT_FILL, NULL), 6);
+
+    edit_radius_left_button_rect.x      = edit_radius_panel_rect.x + PANEL_INNER_MARGIN;
+    edit_radius_left_button_rect.y      = edit_radius_label_rect.y + edit_radius_label_rect.height + PANEL_INNER_MARGIN;
+    edit_radius_left_button_rect.width  = TOOL_BUTTON_WIDTH;
+    edit_radius_left_button_rect.height = TOOL_BUTTON_HEIGHT;
+
+    edit_radius_display_rect.x      = edit_radius_left_button_rect.x + edit_radius_left_button_rect.width + BUTTON_MARGIN;
+    edit_radius_display_rect.y      = edit_radius_left_button_rect.y;
+    edit_radius_display_rect.width  = TOOL_BUTTON_WIDTH;
+    edit_radius_display_rect.height = TOOL_BUTTON_HEIGHT;
+
+    edit_radius_right_button_rect.x      = edit_radius_display_rect.x + edit_radius_display_rect.width + BUTTON_MARGIN;
+    edit_radius_right_button_rect.y      = edit_radius_display_rect.y;
+    edit_radius_right_button_rect.width  = TOOL_BUTTON_WIDTH;
+    edit_radius_right_button_rect.height = TOOL_BUTTON_HEIGHT;
+
+    edit_radius_display_text_location.x = edit_radius_display_rect.x + 8;
+    edit_radius_display_text_location.y = edit_radius_display_rect.y + 3;
+    edit_radius_display_rect.x      += 1;
+    edit_radius_display_rect.width  -= 2;
+    edit_radius_display_rect.height += 1;
+
+    edit_radius_display_text_shadow_location = edit_radius_display_text_location;
+    edit_radius_display_text_shadow_location.x += 1.0f;
+    edit_radius_display_text_shadow_location.y += 1.0f;
+
+    edit_radius_panel_rect.width =
+        edit_radius_right_button_rect.x
+        + edit_radius_right_button_rect.width
+        + PANEL_INNER_MARGIN
+        - edit_radius_panel_rect.x;
+
+    edit_radius_panel_rect.height =
+        edit_radius_right_button_rect.y
+        + edit_radius_right_button_rect.height
+        + PANEL_INNER_MARGIN
+        - edit_radius_panel_rect.y;
+}
+
+static void gui_setup_edit_tool_panel(void)
+{
     memcpy(cycle_tool_button_text,  GuiIconText(ICON_MUTATE_FILL, cycle_tool_button_text_str), CYCLE_TOOL_BUTTON_TEXT_LENGTH);
     memcpy(erase_tool_button_text,  GuiIconText(ICON_RUBBER, erase_tool_button_text_str), ERASE_TOOL_BUTTON_TEXT_LENGTH);
 
@@ -951,7 +1012,7 @@ void gui_setup(void)
     tool_panel_content_height = MAX(edit_tool_label_text_size.y,
                                     TOOL_BUTTON_HEIGHT);
 
-    tool_panel_rect.x = edit_panel_rect.x;
+    tool_panel_rect.x = edit_radius_panel_rect.x;
     tool_panel_rect.width = (4 * PANEL_INNER_MARGIN)
         + ((PATH_TYPE_COUNT - 0) * (2 * ICON_BUTTON_SIZE))
         + edit_tool_label_text_size.x
@@ -959,6 +1020,44 @@ void gui_setup(void)
         + erase_tool_button_text_size.x;
     tool_panel_rect.height = (2 * PANEL_INNER_MARGIN) + tool_panel_content_height;
     tool_panel_rect.y = window_size.y - WINDOW_MARGIN - tool_panel_rect.height;
+
+    edit_tool_label_rect.x =  tool_panel_rect.x + PANEL_INNER_MARGIN;
+    edit_tool_label_rect.y =  tool_panel_rect.y + PANEL_INNER_MARGIN;
+    edit_tool_label_rect.width = edit_tool_label_text_size.x + (4 * BUTTON_MARGIN);
+    edit_tool_label_rect.height = tool_panel_content_height;
+
+    edit_tool_label_location = getVector2FromRectangle(edit_tool_label_rect);
+    edit_tool_label_location.x += 3.0 + (1 * BUTTON_MARGIN);
+    edit_tool_label_location.y += 3.0;
+    edit_tool_label_shadow_location = Vector2Add(edit_tool_label_location, VEC2_SHADOW);
+
+    cycle_tool_button_rect.x = edit_tool_label_rect.x + edit_tool_label_rect.width + PANEL_INNER_MARGIN;
+    cycle_tool_button_rect.y = edit_tool_label_rect.y;
+    cycle_tool_button_rect.width  = cycle_tool_button_text_size.x;
+    cycle_tool_button_rect.height = tool_panel_content_height;
+
+    erase_tool_button_rect.x = cycle_tool_button_rect.x + cycle_tool_button_rect.width + ICON_BUTTON_SIZE;
+    erase_tool_button_rect.y = cycle_tool_button_rect.y;
+    erase_tool_button_rect.width  = erase_tool_button_text_size.x;
+    erase_tool_button_rect.height = tool_panel_content_height;
+}
+
+void gui_setup(void)
+{
+    cancel_ok_with_icons[0] = '\0';
+    strcat(cancel_ok_with_icons, GuiIconText(ICON_CROSS,"Cancel"));
+    strcat(cancel_ok_with_icons, ";");
+    strcat(cancel_ok_with_icons, GuiIconText(ICON_OK_TICK,"Ok"));
+
+    no_yes_with_icons[0] = '\0';
+    strcat(no_yes_with_icons, GuiIconText(ICON_CROSS,"No"));
+    strcat(no_yes_with_icons, ";");
+    strcat(no_yes_with_icons, GuiIconText(ICON_OK_TICK,"Yes"));
+
+    gui_setup_name_panel();
+    gui_setup_edit_mode_panel();
+    gui_setup_edit_radius_panel();
+    gui_setup_edit_tool_panel();
 
     int right_side_button_text_width = 0;
 
@@ -1009,26 +1108,6 @@ void gui_setup(void)
     open_file_button_rect.height = ICON_BUTTON_SIZE;
 
     memcpy(open_file_button_text,  GuiIconText(ICON_FILE_OPEN, open_file_button_text_str), OPEN_FILE_BUTTON_TEXT_LENGTH);
-
-    edit_tool_label_rect.x =  tool_panel_rect.x + PANEL_INNER_MARGIN;
-    edit_tool_label_rect.y =  tool_panel_rect.y + PANEL_INNER_MARGIN;
-    edit_tool_label_rect.width = edit_tool_label_text_size.x + (4 * BUTTON_MARGIN);
-    edit_tool_label_rect.height = tool_panel_content_height;
-
-    edit_tool_label_location = getVector2FromRectangle(edit_tool_label_rect);
-    edit_tool_label_location.x += 3.0 + (1 * BUTTON_MARGIN);
-    edit_tool_label_location.y += 3.0;
-    edit_tool_label_shadow_location = Vector2Add(edit_tool_label_location, VEC2_SHADOW);
-
-    cycle_tool_button_rect.x = edit_tool_label_rect.x + edit_tool_label_rect.width + ICON_BUTTON_SIZE;
-    cycle_tool_button_rect.y = edit_tool_label_rect.y;
-    cycle_tool_button_rect.width  = cycle_tool_button_text_size.x;
-    cycle_tool_button_rect.height = tool_panel_content_height;
-
-    erase_tool_button_rect.x = cycle_tool_button_rect.x + cycle_tool_button_rect.width + ICON_BUTTON_SIZE;
-    erase_tool_button_rect.y = cycle_tool_button_rect.y;
-    erase_tool_button_rect.width  = erase_tool_button_text_size.x;
-    erase_tool_button_rect.height = tool_panel_content_height;
 
     Vector2 goto_next_level_label_text_size = measure_name_text(goto_next_level_label_text);
 
@@ -1097,29 +1176,49 @@ static void draw_name_header(void)
     draw_name_text(name, text_pos, text_color);
 }
 
-static void draw_edit_panel(void)
+static void drsw_edit_tile_radius_gui(void)
 {
-    Color bg   = panel_bg_color;
-    Color edge = panel_edge_color;
-    DrawRectangleRounded(edit_panel_rect, PANEL_ROUNDNES, 0, bg);
-    DrawRectangleRoundedLines(edit_panel_rect, PANEL_ROUNDNES, 0, 1.0, edge);
+    DrawRectangleRounded(edit_radius_panel_rect, PANEL_ROUNDNES, 0, panel_bg_color);
+    DrawRectangleRoundedLines(edit_radius_panel_rect, PANEL_ROUNDNES, 0, 1.0, panel_edge_color);
 
-    draw_panel_text("Board Radius",
-                    getVector2FromRectangle(radius_spinner_label_rect),
+    draw_panel_text(edit_radius_label_text,
+                    edit_radius_label_location,
                     panel_header_text_color);
 
-    int radius = 1;
-    if (!current_level) {
-        return;
+    if (GuiButton(edit_radius_left_button_rect, edit_radius_left_button_text)) {
+        if (current_level->radius > LEVEL_MIN_RADIUS) {
+            int new_radius = current_level->radius - 1;
+            level_undo_add_set_radius_event(current_level, current_level->radius, new_radius);
+            level_set_radius(current_level, new_radius);
+        }
     }
+    DrawRectangleRec(edit_radius_display_rect, panel_header_label_bg_color);
 
-    radius = current_level->radius;
+    draw_panel_text(TextFormat("%d", current_level->radius),
+                    edit_radius_display_text_shadow_location,
+                    text_shadow_color);
 
-    GuiSpinner(radius_spinner_rect, NULL, &radius, LEVEL_MIN_RADIUS, LEVEL_MAX_RADIUS, false);
-    if (current_level->radius != radius) {
-        level_undo_add_set_radius_event(current_level, current_level->radius, radius);
-        level_set_radius(current_level, radius);
+    draw_panel_text(TextFormat("%d", current_level->radius),
+                    edit_radius_display_text_location,
+                    RAYWHITE);
+
+    if (GuiButton(edit_radius_right_button_rect, edit_radius_right_button_text)) {
+        if (current_level->radius < LEVEL_MAX_RADIUS) {
+            int new_radius = current_level->radius + 1;
+            level_undo_add_set_radius_event(current_level, current_level->radius, new_radius);
+            level_set_radius(current_level, new_radius);
+        }
     }
+}
+
+static void drsw_edit_tile_mode_gui(void)
+{
+    DrawRectangleRounded(edit_mode_panel_rect, PANEL_ROUNDNES, 0, panel_bg_color);
+    DrawRectangleRoundedLines(edit_mode_panel_rect, PANEL_ROUNDNES, 0, 1.0, panel_edge_color);
+
+    draw_panel_text(edit_mode_label_text,
+                    edit_mode_label_location,
+                    panel_header_text_color);
 
     int edit_mode_toggle_active;
     switch (current_level->currently_used_tiles) {
@@ -1136,7 +1235,7 @@ static void draw_edit_panel(void)
         break;
     }
 
-    GuiToggleSlider(edit_mode_toggle_rect, "#112#Solved;#62#Scrambled", &edit_mode_toggle_active);
+    GuiToggleGroup(edit_mode_toggle_rect, "#112#Solved\n#62#Scrambled", &edit_mode_toggle_active);
 
     if ((edit_mode_toggle_active == 0 && current_level->currently_used_tiles == USED_TILES_UNSOLVED) ||
         (edit_mode_toggle_active == 1 && current_level->currently_used_tiles == USED_TILES_SOLVED)
@@ -1311,7 +1410,11 @@ static void draw_gui_widgets(void)
     case GAME_MODE_EDIT_LEVEL:
         draw_name_header();
 
-        draw_edit_panel();
+        //if (current_level) {
+            drsw_edit_tile_radius_gui();
+            drsw_edit_tile_mode_gui();
+            //}
+
         if (edit_mode_solved) {
             draw_tool_panel();
         }
@@ -2001,6 +2104,7 @@ void gfx_init(void)
     //GuiSetStyle(DEFAULT, TEXT_SIZE, 26);
     GuiSetStyle(DEFAULT, TEXT_PADDING, 4);
     GuiSetStyle(DEFAULT, BORDER_WIDTH, 1);
+    GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
 
     if (options->wait_events) {
         if (options->verbose) {
