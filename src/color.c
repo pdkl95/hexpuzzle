@@ -61,9 +61,12 @@ Color panel_edge_hover_color        = { 0x94, 0x83, 0xA2, 0xcc };
 Color panel_header_text_hover_color = { 0xFF, 0xFF, 0xFF, 0xff };
 Color panel_header_label_bg_color   = { 0x4B, 0x0C, 0x7F, 0xC0 };
 
+Color error_cross_color = { 0xCC, 0x00, 0x00, 0xDD };
+
 Color text_shadow_color = BLACK;
 
 Color path_color_none = OPTIONS_DEFAULT_PATH_COLOR_0;
+
 
 #define FEEDBACK_BG_TINT 0xc0
 Color feedback_bg_tint_color = { FEEDBACK_BG_TINT, FEEDBACK_BG_TINT, FEEDBACK_BG_TINT, 0xff };

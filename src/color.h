@@ -80,6 +80,7 @@ extern Color panel_edge_hover_color;
 extern Color panel_header_text_hover_color;
 extern Color panel_header_label_bg_color;
 
+extern Color error_cross_color;
 extern Color text_shadow_color;
 
 extern Color path_color_none;

@@ -36,12 +36,14 @@ Rectangle options_area_rect;
 Rectangle options_icon_scale_rect;
 Rectangle options_anim_bg_rect;
 Rectangle options_anim_win_rect;
+Rectangle options_show_level_previews_rect;
 Rectangle options_reset_finished_rect;
 
 char options_panel_text[] = "Options";
 char options_icon_scale_text[] = "Cursor Size";
 char options_anim_bg_text[]  = "Animate Background";
 char options_anim_win_text[] = "Animate Winning Levels";
+char options_show_level_previews_text[] = "Show Level Previews";
 char options_reset_finished_text[] = "Reset Level Finished Data";
 
 //                         8 =    5 2   1
@@ -146,7 +148,7 @@ void init_gui_options(void)
     }
 #endif
 
-resize_gui_options();
+    resize_gui_options();
 }
 
 void cleanup_gui_options(void)
@@ -186,8 +188,10 @@ void resize_gui_options(void)
 
     Vector2 options_anim_bg_text_size = measure_gui_text(options_anim_bg_text);
     Vector2 options_anim_win_text_size = measure_gui_text(options_anim_win_text);
-    float anim_text_size = MAX(options_anim_bg_text_size.x,
-                               options_anim_win_text_size.x);
+    Vector2 options_show_level_previews_text_size = measure_gui_text(options_show_level_previews_text);
+    float anim_text_size = MAX(MAX(options_anim_bg_text_size.x,
+                                   options_anim_win_text_size.x),
+                               options_show_level_previews_text_size.x);
 
     options_anim_bg_rect.x = options_area_rect.x;
     options_anim_bg_rect.y = options_area_rect.y;
@@ -199,9 +203,14 @@ void resize_gui_options(void)
     options_anim_win_rect.width = anim_text_size;
     options_anim_win_rect.height = TOOL_BUTTON_HEIGHT;
 
+    options_show_level_previews_rect.x = options_area_rect.x;
+    options_show_level_previews_rect.y = options_anim_win_rect.y + options_anim_win_rect.height + RAYGUI_ICON_SIZE;
+    options_show_level_previews_rect.width = anim_text_size;
+    options_show_level_previews_rect.height = TOOL_BUTTON_HEIGHT;
+
     Vector2 options_icon_scale_text_size = measure_gui_text(options_icon_scale_text);
-    options_icon_scale_rect.x = options_anim_win_rect.x + options_icon_scale_text_size.x;
-    options_icon_scale_rect.y = options_anim_win_rect.y + options_anim_win_rect.height + RAYGUI_ICON_SIZE;
+    options_icon_scale_rect.x = options_show_level_previews_rect.x + options_icon_scale_text_size.x;
+    options_icon_scale_rect.y = options_show_level_previews_rect.y + options_show_level_previews_rect.height + RAYGUI_ICON_SIZE;
     options_icon_scale_rect.width = 90;
     options_icon_scale_rect.height = TOOL_BUTTON_HEIGHT;
 
@@ -279,11 +288,13 @@ void draw_gui_graphics_options(void)
     int prev_align = GuiGetStyle(TOGGLE, TEXT_ALIGNMENT);
     GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
 
-    GuiToggle(options_anim_bg_rect,         options_anim_bg_text,         &options->animate_bg);
-    GuiToggle(options_anim_win_rect,        options_anim_win_text,        &options->animate_win);
+    GuiToggle(options_anim_bg_rect,             options_anim_bg_text,             &options->animate_bg);
+    GuiToggle(options_anim_win_rect,            options_anim_win_text,            &options->animate_win);
+    GuiToggle(options_show_level_previews_rect, options_show_level_previews_text, &options->show_level_previews);
 
-    show_status_beside(options->animate_bg,      options_anim_bg_rect);
-    show_status_beside(options->animate_win,     options_anim_win_rect);
+    show_status_beside(options->animate_bg,          options_anim_bg_rect);
+    show_status_beside(options->animate_win,         options_anim_win_rect);
+    show_status_beside(options->show_level_previews, options_show_level_previews_rect);
 
     int old_cursor_scale = options->cursor_scale;
     int cursor_scale     = options->cursor_scale;

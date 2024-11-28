@@ -811,8 +811,10 @@ Rectangle edit_tool_label_rect;
 Rectangle cycle_tool_button_rect;
 Rectangle erase_tool_button_rect;
 Rectangle goto_next_level_panel_rect;
+Rectangle goto_next_level_no_preview_panel_rect;
 Rectangle goto_next_level_label_rect;
 Rectangle goto_next_level_button_rect;
+Rectangle goto_next_level_preview_rect;
 
 float tool_panel_content_height;
 
@@ -822,6 +824,7 @@ Vector2 edit_radius_display_text_shadow_location;
 Vector2 edit_mode_label_location;
 Vector2 edit_tool_label_location;
 Vector2 edit_tool_label_shadow_location;
+Vector2 goto_next_level_label_location;
 
 #define MAX_RIGHT_SIDE_BUTTONS 8
 Rectangle right_side_button_rect[MAX_RIGHT_SIDE_BUTTONS];
@@ -890,6 +893,8 @@ char cancel_ok_with_icons[25];
 char no_yes_with_icons[25];
 
 int edit_mode_toggle_active;
+
+Vector2 inner_margin_vec2 = { .x = PANEL_INNER_MARGIN, .y = PANEL_INNER_MARGIN };
 
 static void gui_setup_name_panel(void)
 {
@@ -1042,6 +1047,66 @@ static void gui_setup_edit_tool_panel(void)
     erase_tool_button_rect.height = tool_panel_content_height;
 }
 
+static void gui_setup_goto_next_level_panel(void)
+{
+    Vector2 goto_next_level_label_text_size = measure_panel_text(goto_next_level_label_text);
+
+    Vector2 panel_bottom_right = {
+        .x = window_size.x - WINDOW_MARGIN,
+        .y = window_size.x - WINDOW_MARGIN
+    };
+    Vector2 content_bottom_right = Vector2Subtract(panel_bottom_right, inner_margin_vec2);
+
+    float preview_size = GOTO_NEXT_LEVEL_PREVIEW_SIZE;
+    goto_next_level_label_rect.width    = goto_next_level_label_text_size.x;
+    goto_next_level_label_rect.height   = goto_next_level_label_text_size.y;
+    goto_next_level_preview_rect.width  = preview_size;
+    goto_next_level_preview_rect.height = preview_size;
+
+    Rectangle inner_rect;
+    inner_rect.width  = MAX(goto_next_level_label_rect.width,
+                            goto_next_level_preview_rect.width);
+    inner_rect.height =
+        goto_next_level_preview_rect.height
+        + goto_next_level_label_rect.height
+        + PANEL_INNER_MARGIN;
+
+    inner_rect.x = content_bottom_right.x - inner_rect.width;
+    inner_rect.y = content_bottom_right.y - inner_rect.height;
+
+    goto_next_level_label_location.x = inner_rect.x;
+    goto_next_level_label_location.y =
+        inner_rect.y
+        + inner_rect.height
+        - goto_next_level_label_rect.height;
+
+    goto_next_level_label_rect.x = goto_next_level_label_location.x;
+    goto_next_level_label_rect.y = goto_next_level_label_location.y;
+
+    goto_next_level_preview_rect.x = inner_rect.x;
+    goto_next_level_preview_rect.y = inner_rect.y;
+
+    if (goto_next_level_label_rect.width > goto_next_level_preview_rect.width) {
+        float delta = goto_next_level_label_rect.width - goto_next_level_preview_rect.width;
+        goto_next_level_preview_rect.x += delta * 0.5;
+    } else if (goto_next_level_label_rect.width < goto_next_level_preview_rect.width) {
+        float delta = goto_next_level_preview_rect.width - goto_next_level_label_rect.width;
+        delta *= 0.5;
+        goto_next_level_label_rect.x     += delta;
+        goto_next_level_label_location.x += delta;
+    }
+
+    goto_next_level_panel_rect.width  = inner_rect.width  + (2 * PANEL_INNER_MARGIN);
+    goto_next_level_panel_rect.height = inner_rect.height + (2 * PANEL_INNER_MARGIN);
+    goto_next_level_panel_rect.x      = inner_rect.x - PANEL_INNER_MARGIN;
+    goto_next_level_panel_rect.y      = inner_rect.y - PANEL_INNER_MARGIN;
+
+    goto_next_level_no_preview_panel_rect = goto_next_level_panel_rect;
+    float height_delta = goto_next_level_preview_rect.height + PANEL_INNER_MARGIN;
+    goto_next_level_no_preview_panel_rect.y += height_delta;
+    goto_next_level_no_preview_panel_rect.height -= height_delta;
+}
+
 void gui_setup(void)
 {
     cancel_ok_with_icons[0] = '\0';
@@ -1058,6 +1123,7 @@ void gui_setup(void)
     gui_setup_edit_mode_panel();
     gui_setup_edit_radius_panel();
     gui_setup_edit_tool_panel();
+    gui_setup_goto_next_level_panel();
 
     int right_side_button_text_width = 0;
 
@@ -1108,19 +1174,6 @@ void gui_setup(void)
     open_file_button_rect.height = ICON_BUTTON_SIZE;
 
     memcpy(open_file_button_text,  GuiIconText(ICON_FILE_OPEN, open_file_button_text_str), OPEN_FILE_BUTTON_TEXT_LENGTH);
-
-    Vector2 goto_next_level_label_text_size = measure_name_text(goto_next_level_label_text);
-
-    goto_next_level_panel_rect.y      = tool_panel_rect.y;
-
-    goto_next_level_label_rect.y      = goto_next_level_panel_rect.y + PANEL_INNER_MARGIN;
-    goto_next_level_label_rect.width  = goto_next_level_label_text_size.x;
-    goto_next_level_label_rect.height = TOOL_BUTTON_HEIGHT;
-    goto_next_level_label_rect.x      = window_size.x - WINDOW_MARGIN - goto_next_level_label_rect.width - PANEL_INNER_MARGIN;
-
-    goto_next_level_panel_rect.width  = goto_next_level_label_rect.width + (2 * PANEL_INNER_MARGIN);
-    goto_next_level_panel_rect.height = goto_next_level_label_rect.height + (2 * PANEL_INNER_MARGIN);
-    goto_next_level_panel_rect.x      = window_size.x - WINDOW_MARGIN - goto_next_level_panel_rect.width;
 
     feedback_bg_zoom_ratio = 0.002;
     feedback_bg_zoom_margin.x = feedback_bg_zoom_ratio * ((float)window_size.x);
@@ -1305,6 +1358,66 @@ static void draw_tool_panel(void)
     }
 }
 
+bool draw_level_preview(level_t *level, Rectangle bounds)
+{
+    bool rv = false;
+
+    bool hover = false;;
+    if (!GuiIsLocked()) {
+        hover = CheckCollisionPointRec(mouse_positionf, bounds);
+    }
+
+    DrawRectangleRec(bounds, BLACK);
+
+    if (level) {
+        level_preview(level, bounds);
+    } else {
+        Vector2 bounds_loc  = {.x = bounds.x,     .y = bounds.y      };
+        Vector2 bounds_size = {.x = bounds.width, .y = bounds.height };
+
+        Vector2 margin   = Vector2Scale(bounds_size, 0.1f);
+        Vector2 c_tl  = Vector2Add(bounds_loc, margin);
+        Vector2 c_br = Vector2Subtract(Vector2Add(bounds_loc, bounds_size), margin);
+        Vector2 c_tr = { .x = c_br.x, .y = c_tl.y };
+        Vector2 c_bl = { .x = c_tl.x, .y = c_br.y };
+
+        float thickness = 2.0;
+        Color color = error_cross_color;
+
+        DrawLineEx(c_tl, c_br, thickness, color);
+        DrawLineEx(c_bl, c_tr, thickness, color);
+
+        DrawLineEx(c_tl, c_tr, thickness, color);
+        DrawLineEx(c_tr, c_br, thickness, color);
+        DrawLineEx(c_br, c_bl, thickness, color);
+        DrawLineEx(c_bl, c_tl, thickness, color);
+    }
+
+    if (hover) {
+        if (IsMouseButtonDown(MOUSE_BUTTON_LEFT)) {
+            Rectangle shift_bounds = bounds;
+            shift_bounds.x -= 1;
+            shift_bounds.y += 1;
+
+            DrawRectangleLinesEx(      bounds, 2.0,    text_shadow_color);
+            DrawRectangleLinesEx(shift_bounds, 1.0, tile_edge_drag_color);
+        } else {
+            Rectangle shift_bounds = bounds;
+            shift_bounds.x += 1;
+            shift_bounds.y -= 1;
+
+            DrawRectangleLinesEx(      bounds, 2.0,     text_shadow_color);
+            DrawRectangleLinesEx(shift_bounds, 1.0, tile_edge_hover_color);
+        }
+
+        if (mouse_left_click) {
+            rv = true;
+        }
+    }
+
+    return rv;
+}
+
 static void draw_goto_next_level_panel(void)
 {
     assert_not_null(current_collection);
@@ -1322,34 +1435,40 @@ static void draw_goto_next_level_panel(void)
     Color edge_color = panel_edge_color;
     Color text_color = panel_header_text_color;
 
-    if (hover) {
-        bg_color   = panel_bg_hover_color;
-        edge_color = panel_edge_hover_color;
-        text_color = panel_header_text_hover_color;
+    if (options->show_level_previews) {
+        DrawRectangleRounded(goto_next_level_panel_rect, PANEL_ROUNDNES, 0, bg_color);
+        DrawRectangleRoundedLines(goto_next_level_panel_rect, PANEL_ROUNDNES, 0, 2.0, edge_color);
+    } else {
+        if (hover) {
+            bg_color   = panel_bg_hover_color;
+            edge_color = panel_edge_hover_color;
+            text_color = panel_header_text_hover_color;
+        }
+
+        DrawRectangleRounded(goto_next_level_no_preview_panel_rect, PANEL_ROUNDNES, 0, bg_color);
+        DrawRectangleRoundedLines(goto_next_level_no_preview_panel_rect, PANEL_ROUNDNES, 0, 2.0, edge_color);
     }
 
-    DrawRectangleRounded(goto_next_level_panel_rect, PANEL_ROUNDNES, 0, bg_color);
-    DrawRectangleRoundedLines(goto_next_level_panel_rect, PANEL_ROUNDNES, 0, 2.0, edge_color);
-
-    Vector2 text_pos = getVector2FromRectangle(goto_next_level_label_rect);
+    Vector2 text_pos = goto_next_level_label_location;
     Vector2 text_shadow_pos = {
         .x = text_pos.x + 1,
         .y = text_pos.y + 1
     };
+    draw_panel_text(goto_next_level_label_text,
+                    text_shadow_pos,
+                    text_shadow_color);
 
-    draw_name_text(goto_next_level_label_text,
-                   text_shadow_pos,
-                   text_shadow_color);
+    draw_panel_text(goto_next_level_label_text,
+                    text_pos,
+                    text_color);
 
-    draw_name_text(goto_next_level_label_text,
-                   getVector2FromRectangle(goto_next_level_label_rect),
-                   text_color);
-
-    if (hover) {
-        if (mouse_left_click) {
+    if (options->show_level_previews) {
+        if (draw_level_preview(next_level, goto_next_level_preview_rect)) {
             level_play(next_level);
-        } else {
-            set_mouse_cursor(MOUSE_CURSOR_POINTING_HAND);
+        }
+    } else {
+        if (hover && mouse_left_click) {
+            level_play(next_level);
         }
     }
 }
@@ -1410,12 +1529,10 @@ static void draw_gui_widgets(void)
     case GAME_MODE_EDIT_LEVEL:
         draw_name_header();
 
-        //if (current_level) {
-            drsw_edit_tile_radius_gui();
-            drsw_edit_tile_mode_gui();
-            //}
+        drsw_edit_tile_mode_gui();
 
         if (edit_mode_solved) {
+            drsw_edit_tile_radius_gui();
             draw_tool_panel();
         }
 
@@ -1927,10 +2044,6 @@ render_frame(
             /* do nothing */
             break;
         }
-
-#if defined(PLATFORM_DESKTOP)
-        draw_popup_panels();
-#endif
     }
 
     if (do_postprocessing) {
@@ -1970,6 +2083,10 @@ render_frame(
     }
 
     draw_gui();
+
+#if defined(PLATFORM_DESKTOP)
+        draw_popup_panels();
+#endif
 
     if (show_fps) {
         DrawTextShadow(TextFormat("FPS: %d", GetFPS()), 15, 10, DEFAULT_GUI_FONT_SIZE, WHITE);
@@ -2279,6 +2396,10 @@ main(
     start_given_file();
 
 #if 1
+    open_classics_game_pack(1);
+    level_play(current_collection->levels);
+#endif
+#if 0
     open_classics_game_pack(2);
     set_game_mode(GAME_MODE_EDIT_COLLECTION);
     level_edit(current_collection->levels);

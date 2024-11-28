@@ -59,6 +59,8 @@ static struct option long_options[] = {
     {       "no-animate-bg",       no_argument, 0, 'B' },
     {         "animate-win",       no_argument, 0, 'i' },
     {      "no-animate-win",       no_argument, 0, 'I' },
+    {       "show-previews",       no_argument, 0, '-' },
+    {    "no-show-previews",       no_argument, 0, '_' },
     {         "wait-events",       no_argument, 0, 'w' },
     {             "verbose",       no_argument, 0, 'v' },
     {             "version",       no_argument, 0, 'V' },
@@ -91,6 +93,8 @@ static char help_text[] =
     "   --no-animate-bg            Disable background animation\n"
     "      --animate-win           Enable animation on level win (default: on)\n"
     "   --no-animate-win           Disable animation on level win\n"
+    "      --show-previews         Enable showing small level previews (default: on)\n"
+    "   --no-show-previews         Disable showing small level previews\n"
     "\n"
     "  -W, --width=NUMBER          Window width (default: " STR(OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH) ")\n"
     "  -H, --height=NUMBER         Window height (default: " STR(OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT) ")\n"
@@ -262,6 +266,7 @@ options_set_defaults(
     options->wait_events           = OPTIONS_DEFAULT_WAIT_EVENTS;
     options->animate_bg            = OPTIONS_DEFAULT_ANIMATE_BG;
     options->animate_win           = OPTIONS_DEFAULT_ANIMATE_WIN;
+    options->show_level_previews   = OPTIONS_DEFAULT_SHOW_LEVEL_PREVIEWS;
     options->max_fps               = OPTIONS_DEFAULT_MAX_FPS;
     options->initial_window_width  = OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH;
     options->initial_window_height = OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT;
@@ -269,6 +274,7 @@ options_set_defaults(
 
     options->load_state_animate_bg  = true;
     options->load_state_animate_win = true;
+    options->load_state_show_level_previews = true;
     options->load_color_opt = true;
 
     options->safe_mode = false;
@@ -424,6 +430,16 @@ options_parse_args(
         case 'I':
             options->animate_win = false;
             options->load_state_animate_win = false;
+            break;
+
+        case '-':
+            options->show_level_previews = true;
+            options->load_state_show_level_previews = false;
+            break;
+
+        case '_':
+            options->show_level_previews = false;
+            options->load_state_show_level_previews = false;
             break;
 
         case 'w':

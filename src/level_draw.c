@@ -245,16 +245,19 @@ void level_preview(level_t *level, Rectangle rect)
              scale_factor * (rect.height / window_size.y),
              1.0f);
 
+    used_tiles_t save_currently_used_tiles = level->currently_used_tiles;
     float save_fade_value = level->fade_value;
     float save_fade_value_eased = level->fade_value_eased;
     float save_fade_rotate_speed = level->fade_rotate_speed;
 
+    level->currently_used_tiles = USED_TILES_UNSOLVED;
     level->fade_value = 1.0;
     level->fade_value_eased = 1.0;
     level->fade_rotate_speed = 0.0;
 
     level_draw(level, false);
 
+    level->currently_used_tiles = save_currently_used_tiles;
     level->fade_value = save_fade_value;
     level->fade_value_eased = save_fade_value_eased;
     level->fade_rotate_speed = save_fade_rotate_speed;
