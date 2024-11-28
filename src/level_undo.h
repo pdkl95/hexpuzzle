@@ -126,6 +126,8 @@ enum undo_event_type {
 typedef enum undo_event_type undo_event_type_t;
 struct undo_event {
     undo_event_type_t type;
+    bool chain_prev;
+    bool chain_next;
     union {
         undo_play_event_t play;
         undo_edit_event_t edit;
@@ -159,12 +161,14 @@ void level_undo_add_set_radius_event(level_t *level, int from, int to);
 
 void level_undo_add_set_flags_event(
     level_t *level,
+    bool include_prev_swap,
     tile_t *tile,
     tile_flags_t from,
     tile_flags_t to);
 
 void level_undo_add_set_flags_event_with_neighbor_paths(
     level_t *level,
+    bool include_prev_swap,
     tile_t *tile,
     tile_flags_t flags_from,
     tile_neighbor_paths_t neighbor_paths_from,

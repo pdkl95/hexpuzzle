@@ -125,17 +125,29 @@ void tile_pos_toggle_fixed(tile_pos_t *pos)
 {
     assert_not_null(pos);
 
+    bool include_prev_swap = false;
+    if (!hex_axial_eq(pos->position, pos->tile->unsolved_pos->position)) {
+        level_solve_tile(current_level, pos->position, true);
+        include_prev_swap = true;
+    }
+
     tile_flags_t old_flags = tile_get_flags(pos->tile);
 
     pos->tile->fixed = !pos->tile->fixed;
 
     tile_flags_t new_flags = tile_get_flags(pos->tile);
-    level_undo_add_set_flags_event(current_level, pos->tile, old_flags, new_flags);
+    level_undo_add_set_flags_event(current_level, include_prev_swap, pos->tile, old_flags, new_flags);
 }
 
 void tile_pos_toggle_hidden(tile_pos_t *pos)
 {
     assert_not_null(pos);
+
+    bool include_prev_swap = false;
+    if (!hex_axial_eq(pos->position, pos->tile->unsolved_pos->position)) {
+        level_solve_tile(current_level, pos->position, true);
+        include_prev_swap = true;
+    }
 
     tile_flags_t old_flags = tile_get_flags(pos->tile);
     tile_neighbor_paths_t old_neighbor_paths = tile_get_neighbor_paths(pos->tile);
@@ -162,7 +174,9 @@ void tile_pos_toggle_hidden(tile_pos_t *pos)
 
     tile_flags_t new_flags = tile_get_flags(pos->tile);
     tile_neighbor_paths_t new_neighbor_paths = tile_get_neighbor_paths(pos->tile);
-    level_undo_add_set_flags_event_with_neighbor_paths(current_level, pos->tile,
+    level_undo_add_set_flags_event_with_neighbor_paths(current_level,
+                                                       include_prev_swap,
+                                                       pos->tile,
                                                        old_flags, old_neighbor_paths,
                                                        new_flags, new_neighbor_paths);
 }

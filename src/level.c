@@ -1431,6 +1431,21 @@ void level_swap_tile_pos_by_position(level_t *level, hex_axial_t a, hex_axial_t 
     level_swap_tile_pos(level, apos, bpos, save_to_undo);
 }
 
+void level_solve_tile(level_t *level, hex_axial_t position, bool save_to_undo)
+{
+    tile_t *tile = level_get_tile(level, position);
+    assert_not_null(tile);
+
+    tile_pos_t *pos = tile->unsolved_pos;
+    assert_not_null(pos);
+
+    hex_axial_t solved_p   = tile->solved_pos->position;
+    hex_axial_t unsolved_p = tile->unsolved_pos->position;
+
+    if (!hex_axial_eq(solved_p, unsolved_p)) {
+        level_swap_tile_pos_by_position(level, solved_p, unsolved_p, save_to_undo);
+    }
+}
 
 void level_drop_tile(level_t *level, tile_pos_t *drag_target, tile_pos_t *drop_target)
 {

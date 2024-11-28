@@ -172,10 +172,9 @@ static undo_list_t *find_current_list(undo_list_t *list)
     return list;
 }
 
-static bool get_undo_event(undo_list_t *list, undo_event_t *eventp)
+static undo_event_t *_get_undo_event(undo_list_t *list, bool update_current)
 {
     assert_not_null(list);
-    assert_not_null(eventp);
 
     list = find_current_list(list);
 
@@ -184,23 +183,67 @@ static bool get_undo_event(undo_list_t *list, undo_event_t *eventp)
         if (list->current < UNDO_LIST_MAX_EVENTS) {
             if (list->current == 0) {
                 if (list->prev) {
-                    list->prev->current--;
-                    *eventp = list->prev->events[list->prev->current];
-                    return true;
+                    if (update_current) {
+                        list->prev->current--;
+                    }
+                    return &(list->prev->events[list->prev->current]);
                 } else {
-                    return false;
+                    return NULL;
                 }
             } else {
-                list->current--;
-                *eventp = list->events[list->current];
-                return true;
+                if (update_current) {
+                    list->current--;
+                }
+                return &(list->events[list->current]);
             }
         }
 
         list = list->next;
     }
 
-    return false;
+    return NULL;
+}
+
+static bool get_undo_event(undo_list_t *list, undo_event_t *eventp)
+{
+    assert_not_null(list);
+    assert_not_null(eventp);
+
+    undo_event_t *prev_event = _get_undo_event(list, true);
+    if (prev_event) {
+        *eventp = *prev_event;
+        return true;
+    } else {
+        return false;
+    }
+}
+
+static undo_event_t *find_prev_event(undo_list_t *list)
+{
+    assert_not_null(list);
+
+    return _get_undo_event(list, false);
+}
+
+static undo_event_t *_get_redo_event(undo_list_t *list, bool update_current)
+{
+    assert_not_null(list);
+
+    list = find_current_list(list);
+
+    while (list) {
+        if (list->current < list->last) {
+            undo_event_t *rv = &(list->events[list->current]);
+            if (update_current) {
+                list->current++;
+            }
+            return rv;
+        }
+
+        list = list->next;
+    }
+
+    return NULL;
 }
 
 static bool get_redo_event(undo_list_t *list, undo_event_t *eventp)
@@ -208,19 +251,20 @@ static bool get_redo_event(undo_list_t *list, undo_event_t *eventp)
     assert_not_null(list);
     assert_not_null(eventp);
 
-    list = find_current_list(list);
-
-    while (list) {
-        if (list->current < list->last) {
-            *eventp = list->events[list->current];
-            list->current++;
-            return true;
-        }
-
-        list = list->next;
+    undo_event_t *next_event = _get_redo_event(list, true);
+    if (next_event) {
+        *eventp = *next_event;
+        return true;
+    } else {
+        return false;
     }
+}
 
-    return false;
+UNUSED static undo_event_t *find_next_event(undo_list_t *list)
+{
+    assert_not_null(list);
+
+    return _get_redo_event(list, false);
 }
 
 undo_t *create_level_undo(struct level *level)
@@ -252,6 +296,16 @@ void destroy_level_undo(undo_t *undo)
     }
 
     SAFEFREE(undo);
+}
+
+void chain_with_prev_edit_event(level_t *level, undo_event_t *event)
+{
+    undo_event_t *prev = find_prev_event(level->undo->edit_event_list);
+    if (!prev) {
+        return;
+    }
+    prev->chain_next  = true;
+    event->chain_prev = true;
 }
 
 void level_undo_add_event(level_t *level, undo_event_t event)
@@ -359,18 +413,28 @@ void level_undo_add_set_radius_event(level_t *level, int from, int to)
     level_undo_add_event(level, event);
 }
 
-void level_undo_add_set_flags_event(level_t *level, tile_t *tile, tile_flags_t from, tile_flags_t to)
+void level_undo_add_set_flags_event(
+    level_t *level,
+    bool include_prev_swap,
+    tile_t *tile,
+    tile_flags_t from,
+    tile_flags_t to)
 {
     EDIT_EVENT(set_flags, SET_FLAGS);
     event.edit.set_flags.tile = tile;
     event.edit.set_flags.from = from;
     event.edit.set_flags.to   = to;
 
+    if (include_prev_swap) {
+        chain_with_prev_edit_event(level, &event);
+    }
+
     level_undo_add_event(level, event);
 }
 
 void level_undo_add_set_flags_event_with_neighbor_paths(
     level_t *level,
+    bool include_prev_swap,
     tile_t *tile,
     tile_flags_t flags_from,
     tile_neighbor_paths_t neighbor_paths_from,
@@ -383,6 +447,10 @@ void level_undo_add_set_flags_event_with_neighbor_paths(
     event.edit.set_flags_and_paths.paths_from = neighbor_paths_from;
     event.edit.set_flags_and_paths.flags_to   = flags_to;
     event.edit.set_flags_and_paths.paths_to   = neighbor_paths_to;
+
+    if (include_prev_swap) {
+        chain_with_prev_edit_event(level, &event);
+    }
 
     level_undo_add_event(level, event);
 }
@@ -582,55 +650,59 @@ void level_undo_edit(level_t *level)
     assert_not_null(level->undo);
 
     undo_event_t event;
-    if (!get_undo_event(level->undo->edit_event_list, &event)) {
-        if (options->verbose) {
-            infomsg("UNDO(edit): nothing to undo");
+    do {
+
+        if (!get_undo_event(level->undo->edit_event_list, &event)) {
+            if (options->verbose) {
+                infomsg("UNDO(edit): nothing to undo");
+            }
+            return;
         }
-        return;
-    }
 
-    assert(event.type == UNDO_EVENT_TYPE_EDIT);
+        assert(event.type == UNDO_EVENT_TYPE_EDIT);
 
-    level->undo->edit_count--;
+        level->undo->edit_count--;
 
 #ifdef DEBUG_UNDO_LIST
-    print_undo_lists(level->undo->edit_event_list);
+        print_undo_lists(level->undo->edit_event_list);
 #endif
 
-    if (options->verbose) {
-        infomsg("UNDO(edit): %s event #%d",
-                undo_event_type_str(&event),
-                level->undo->edit_count);
-    }
+        if (options->verbose) {
+            infomsg("UNDO(edit): %s event #%d",
+                    undo_event_type_str(&event),
+                    level->undo->edit_count);
+        }
 
-    switch (event.edit.type) {
-    case UNDO_EDIT_TYPE_SWAP:
-        rewind_swap(level, event.edit.swap);
-        break;
+        switch (event.edit.type) {
+        case UNDO_EDIT_TYPE_SWAP:
+            rewind_swap(level, event.edit.swap);
+            break;
 
-    case UNDO_EDIT_TYPE_USE_TILES:
-        rewind_use_tiles(level, event.edit.use_tiles);
-        break;
+        case UNDO_EDIT_TYPE_USE_TILES:
+            rewind_use_tiles(level, event.edit.use_tiles);
+            break;
 
-    case UNDO_EDIT_TYPE_SET_RADIUS:
-        rewind_set_radius(level, event.edit.set_radius);
-        break;
+        case UNDO_EDIT_TYPE_SET_RADIUS:
+            rewind_set_radius(level, event.edit.set_radius);
+            break;
 
-    case UNDO_EDIT_TYPE_SET_FLAGS:
-        rewind_set_flags(level, event.edit.set_flags);
-        break;
+        case UNDO_EDIT_TYPE_SET_FLAGS:
+            rewind_set_flags(level, event.edit.set_flags);
+            break;
 
-    case UNDO_EDIT_TYPE_SET_FLAGS_AND_PATHS:
-        rewind_set_flags_and_paths(level, event.edit.set_flags_and_paths);
-        break;
+        case UNDO_EDIT_TYPE_SET_FLAGS_AND_PATHS:
+            rewind_set_flags_and_paths(level, event.edit.set_flags_and_paths);
+            break;
 
-    case UNDO_EDIT_TYPE_CHANGE_PATH:
-        rewind_change_path(level, event.edit.change_path);
-        break;
+        case UNDO_EDIT_TYPE_CHANGE_PATH:
+            rewind_change_path(level, event.edit.change_path);
+            break;
 
-    default:
-        __builtin_unreachable();
-    }
+        default:
+            __builtin_unreachable();
+        }
+
+    } while(event.chain_prev);
 }
 
 void level_redo_play(level_t *level)
@@ -676,54 +748,58 @@ void level_redo_edit(level_t *level)
     assert_not_null(level->undo);
 
     undo_event_t event;
-    if (!get_redo_event(level->undo->edit_event_list, &event)) {
-        if (options->verbose) {
-            infomsg("REDO(edit): nothing to redo");
+    do {
+
+        if (!get_redo_event(level->undo->edit_event_list, &event)) {
+            if (options->verbose) {
+                infomsg("REDO(edit): nothing to redo");
+            }
+            return;
         }
-        return;
-    }
 
-    assert(event.type == UNDO_EVENT_TYPE_EDIT);
+        assert(event.type == UNDO_EVENT_TYPE_EDIT);
 
-    level->undo->edit_count++;
+        level->undo->edit_count++;
 
 #ifdef DEBUG_UNDO_LIST
-    print_undo_lists(level->undo->edit_event_list);
+        print_undo_lists(level->undo->edit_event_list);
 #endif
 
-    if (options->verbose) {
-        infomsg("REDO (edit mode) %s event #%d",
-                undo_event_type_str(&event),
-                level->undo->edit_count);
-    }
+        if (options->verbose) {
+            infomsg("REDO (edit mode) %s event #%d",
+                    undo_event_type_str(&event),
+                    level->undo->edit_count);
+        }
 
-    switch (event.edit.type) {
-    case UNDO_EDIT_TYPE_SWAP:
-        replay_swap(level, event.edit.swap);
-        break;
+        switch (event.edit.type) {
+        case UNDO_EDIT_TYPE_SWAP:
+            replay_swap(level, event.edit.swap);
+            break;
 
-   case UNDO_EDIT_TYPE_USE_TILES:
-        replay_use_tiles(level, event.edit.use_tiles);
-        break;
+        case UNDO_EDIT_TYPE_USE_TILES:
+            replay_use_tiles(level, event.edit.use_tiles);
+            break;
 
-    case UNDO_EDIT_TYPE_SET_RADIUS:
-        replay_set_radius(level, event.edit.set_radius);
-        break;
+        case UNDO_EDIT_TYPE_SET_RADIUS:
+            replay_set_radius(level, event.edit.set_radius);
+            break;
 
-    case UNDO_EDIT_TYPE_SET_FLAGS:
-        replay_set_flags(level, event.edit.set_flags);
-        break;
+        case UNDO_EDIT_TYPE_SET_FLAGS:
+            replay_set_flags(level, event.edit.set_flags);
+            break;
 
-    case UNDO_EDIT_TYPE_SET_FLAGS_AND_PATHS:
-        replay_set_flags_and_paths(level, event.edit.set_flags_and_paths);
-        break;
+        case UNDO_EDIT_TYPE_SET_FLAGS_AND_PATHS:
+            replay_set_flags_and_paths(level, event.edit.set_flags_and_paths);
+            break;
 
-    case UNDO_EDIT_TYPE_CHANGE_PATH:
-        replay_change_path(level, event.edit.change_path);
-        break;
+        case UNDO_EDIT_TYPE_CHANGE_PATH:
+            replay_change_path(level, event.edit.change_path);
+            break;
 
-    default:
-        __builtin_unreachable();
-    }
+        default:
+            __builtin_unreachable();
+        }
+
+    } while(event.chain_next);
 }
 
