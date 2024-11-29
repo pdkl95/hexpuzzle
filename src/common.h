@@ -116,6 +116,8 @@ extern int debug_id;
 extern int debug_dir;
 #endif
 
+int global_rng_get(int bound);
+
 void disable_automatic_events(void);
 void enable_automatic_events(void);
 void enable_mouse_input(void);

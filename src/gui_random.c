@@ -1138,7 +1138,7 @@ void draw_gui_random(void)
         regen_level();
     }
 
-        any_drop_down_active = gui_random_difficulty_edit_mode || gui_random_gen_style_edit_mode;
+    any_drop_down_active = gui_random_difficulty_edit_mode || gui_random_gen_style_edit_mode;
 }
 
 void play_gui_random_level(void)

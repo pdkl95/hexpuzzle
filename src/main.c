@@ -31,6 +31,7 @@
 #include <sys/stat.h>
 
 #include "cJSON/cJSON.h"
+#include "pcg/pcg_basic.h"
 
 #include "raygui/style/dark_alt.h"
 
@@ -120,6 +121,8 @@ float postprocessing_effect_amount[4];
 float feedback_bg_zoom_ratio = 0.1;
 Vector2 feedback_bg_zoom_margin = { .x = 20.0, .y = 20.0 };
 
+pcg32_random_t global_rng;
+
 bool level_finished = false;
 
 level_t *current_level = NULL;
@@ -141,6 +144,20 @@ char const * file_filter_patterns[2] = {
 };
 
 void gui_setup(void);
+
+static void seed_global_rng(void)
+{
+    pcg32_srandom_r(&global_rng, rand(), rand());
+}
+
+int global_rng_get(int bound)
+{
+    if (bound <= 1) {
+        return 0;
+    } else {
+        return (int)pcg32_boundedrand_r(&global_rng, (uint32_t)bound);
+    }
+}
 
 static inline bool do_level_ui_interaction(void)
 {
@@ -810,6 +827,7 @@ Rectangle edit_tool_label_shadow_rect;
 Rectangle edit_tool_label_rect;
 Rectangle cycle_tool_button_rect;
 Rectangle erase_tool_button_rect;
+Rectangle edit_shuffle_panel_rect;
 Rectangle goto_next_level_panel_rect;
 Rectangle goto_next_level_no_preview_panel_rect;
 Rectangle goto_next_level_label_rect;
@@ -824,6 +842,7 @@ Vector2 edit_radius_display_text_shadow_location;
 Vector2 edit_mode_label_location;
 Vector2 edit_tool_label_location;
 Vector2 edit_tool_label_shadow_location;
+Vector2 edit_shuffle_label_location;
 Vector2 goto_next_level_label_location;
 
 #define MAX_RIGHT_SIDE_BUTTONS 8
@@ -884,6 +903,7 @@ char erase_tool_button_text[ERASE_TOOL_BUTTON_TEXT_LENGTH];
 char edit_radius_label_text[] = "Radius";
 char edit_mode_label_text[] = "Mode";
 char edit_tool_label_text[] = "Edit Tool";
+char edit_shuffle_label_text[] = "Shuffle";
 char goto_next_level_label_text[] = "Next level?";
 
 char edit_radius_left_button_text[6];
@@ -1047,6 +1067,18 @@ static void gui_setup_edit_tool_panel(void)
     erase_tool_button_rect.height = tool_panel_content_height;
 }
 
+static void gui_setup_edit_shuffle_panel(void)
+{
+    Vector2 edit_shuffle_label_text_size = measure_panel_text(edit_shuffle_label_text);
+
+    edit_shuffle_label_location = edit_tool_label_location;
+
+    edit_shuffle_panel_rect.x = tool_panel_rect.x;
+    edit_shuffle_panel_rect.y = tool_panel_rect.y;
+    edit_shuffle_panel_rect.height = tool_panel_rect.height;
+    edit_shuffle_panel_rect.width = edit_shuffle_label_text_size.x + (4 * PANEL_INNER_MARGIN);
+}
+
 static void gui_setup_goto_next_level_panel(void)
 {
     Vector2 goto_next_level_label_text_size = measure_panel_text(goto_next_level_label_text);
@@ -1123,6 +1155,7 @@ void gui_setup(void)
     gui_setup_edit_mode_panel();
     gui_setup_edit_radius_panel();
     gui_setup_edit_tool_panel();
+    gui_setup_edit_shuffle_panel();
     gui_setup_goto_next_level_panel();
 
     int right_side_button_text_width = 0;
@@ -1298,6 +1331,43 @@ static void drsw_edit_tile_mode_gui(void)
         level_undo_add_use_tiles_event(current_level, old_used_tiles, current_level->currently_used_tiles);
     }
 }
+
+static void draw_shuffle_panel(void)
+{
+    bool hover = CheckCollisionPointRec(mouse_positionf, edit_shuffle_panel_rect);
+
+    Color bg_color   = panel_bg_color;
+    Color edge_color = panel_edge_color;
+    Color text_color = panel_header_text_color;
+
+    if (hover) {
+        bg_color   = panel_bg_hover_color;
+        edge_color = panel_edge_hover_color;
+            text_color = panel_header_text_hover_color;
+    }
+
+    DrawRectangleRounded(edit_shuffle_panel_rect, PANEL_ROUNDNES, 0, bg_color);
+    DrawRectangleRoundedLines(edit_shuffle_panel_rect, PANEL_ROUNDNES, 0, 1.0, edge_color);
+
+    Vector2 text_pos = edit_shuffle_label_location;
+    Vector2 text_shadow_pos = {
+        .x = text_pos.x + 1,
+        .y = text_pos.y + 1
+    };
+
+    draw_panel_text(edit_shuffle_label_text,
+                    text_shadow_pos,
+                    text_shadow_color);
+
+    draw_panel_text(edit_shuffle_label_text,
+                    text_pos,
+                    text_color);
+
+    if (hover && mouse_left_click && current_level) {
+        level_shuffle_tiles(current_level);
+    }
+}
+
 
 static void draw_tool_panel(void)
 {
@@ -1534,6 +1604,10 @@ static void draw_gui_widgets(void)
         if (edit_mode_solved) {
             drsw_edit_tile_radius_gui();
             draw_tool_panel();
+        }
+
+        if (edit_mode_unsolved) {
+            draw_shuffle_panel();
         }
 
         if (GuiButton(right_side_button_rect[rsb++], options_button_text)) {
@@ -2279,8 +2353,8 @@ static void game_init(void)
     init_gui_browser();
     init_gui_random();
 
-    set_game_mode(GAME_MODE_BROWSER);
-    //set_game_mode(GAME_MODE_RANDOM);
+    //set_game_mode(GAME_MODE_BROWSER);
+    set_game_mode(GAME_MODE_RANDOM);
 
     load_nvdata();
 }
@@ -2327,6 +2401,7 @@ main(
 ) {
     srand48((long int)time(NULL));
     srand(time(NULL));
+    seed_global_rng();
 
 #if defined(PLATFORM_DESKTOP)
     progname = basename(argv[0]);
@@ -2395,7 +2470,7 @@ main(
 
     start_given_file();
 
-#if 1
+#if 0
     open_classics_game_pack(1);
     level_play(current_collection->levels);
 #endif

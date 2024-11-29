@@ -1771,3 +1771,30 @@ void level_update_tile_pops(level_t *level)
                                   level);
     }
 }
+
+void level_shuffle_tiles(level_t *level)
+{
+    used_tiles_t save_currently_used_tiles = level->currently_used_tiles;
+    level->currently_used_tiles = USED_TILES_UNSOLVED;
+
+    tile_pos_t *backup_enabled_positions[LEVEL_MAXTILES];
+    memcpy(backup_enabled_positions, level->enabled_positions, sizeof(backup_enabled_positions));
+
+    int num_positions = level_get_enabled_positions(level);
+
+    for (int i=num_positions-1; i>0; i--) {
+        int j = i;
+        while (i == j) {
+            j = global_rng_get(i + 1);
+        }
+
+        tile_pos_t *pos_i = level->enabled_positions[i];
+        tile_pos_t *pos_j = level->enabled_positions[j];
+        level_swap_tile_pos(level, pos_i, pos_j, false);
+        level->enabled_positions[i] = pos_j;
+        level->enabled_positions[j] = pos_i;
+    }
+
+    memcpy(level->enabled_positions, backup_enabled_positions, sizeof(backup_enabled_positions));
+    level->currently_used_tiles = save_currently_used_tiles;
+}
