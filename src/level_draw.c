@@ -213,10 +213,11 @@ void level_draw(level_t *level, bool finished)
 
 #if 0
     if (level->drag_target) {
-        DrawText(TextFormat("drag_target<%d,%d> drag_offset = (%f, %f)",
-                            level->drag_target->position.q, level->drag_target->position.r,
-                            level->drag_offset.x, level->drag_offset.y),
-                 10, 10, 20, GREEN);
+        draw_gui_font(TextFormat("drag_target<%d,%d> drag_offset = (%f, %f)",
+                                 level->drag_target->position.q, level->drag_target->position.r,
+                                 level->drag_offset.x, level->drag_offset.y),
+                      (Vector2) { .x = 10, .y = 10 },
+                      GREEN);
     }
 #endif
 }

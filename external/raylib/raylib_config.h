@@ -45,8 +45,8 @@
 //#define SUPPORT_CAMERA_SYSTEM           1
 // Gestures module is included (rgestures.h) to support gestures detection: tap, hold, swipe, drag
 //#define SUPPORT_GESTURES_SYSTEM         1
-// Include pseudo-random numbers generator (rprand.h), based on Xoshiro128** and SplitMix64
-#define SUPPORT_RPRAND_GENERATOR        1
+/// Include pseudo-random numbers generator (rprand.h), based on Xoshiro128** and SplitMix64
+//#define SUPPORT_RPRAND_GENERATOR        1
 // Mouse gestures are directly mapped like touches and processed by gestures system
 //#define SUPPORT_MOUSE_GESTURES          1
 // Reconfigure standard input to receive key inputs, works with SSH connection.
@@ -177,7 +177,7 @@
 //------------------------------------------------------------------------------------
 // Default font is loaded on window initialization to be available for the user to render simple text
 // NOTE: If enabled, uses external module functions to load default raylib font
-#define SUPPORT_DEFAULT_FONT            1
+//#define SUPPORT_DEFAULT_FONT            1
 // Selected desired font fileformats to be supported for loading
 #define SUPPORT_FILEFORMAT_FNT          1
 #define SUPPORT_FILEFORMAT_TTF          1

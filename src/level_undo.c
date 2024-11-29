@@ -148,8 +148,26 @@ static undo_list_t *create_undo_list(void)
     return list;
 }
 
+static void cleanup_undo_event(undo_event_t *event)
+{
+    switch (event->edit.type) {
+    case UNDO_EDIT_TYPE_SHUFFLE:
+        SAFEFREE(event->edit.shuffle.from);
+        SAFEFREE(event->edit.shuffle.to);
+        break;
+
+    default:
+        /* do nothing */
+        break;
+    }
+}
+
 static void destroy_undo_list(undo_list_t *list)
 {
+    for (int i=0; i<list->last; i++) {
+        cleanup_undo_event(&(list->events[i]));
+    }
+
     if (list->prev) {
         list->prev->next = NULL;
         destroy_undo_list(list->prev);

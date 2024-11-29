@@ -2356,8 +2356,8 @@ static void game_init(void)
     init_gui_browser();
     init_gui_random();
 
-    //set_game_mode(GAME_MODE_BROWSER);
-    set_game_mode(GAME_MODE_RANDOM);
+    set_game_mode(GAME_MODE_BROWSER);
+    //set_game_mode(GAME_MODE_RANDOM);
 
     load_nvdata();
 }

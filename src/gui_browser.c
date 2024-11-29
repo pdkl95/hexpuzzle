@@ -73,6 +73,7 @@ Rectangle local_files_home_button_rect;
 
 char browser_panel_text[] = "Browser";
 char browser_play_button_text[] = "Play";
+char browser_open_button_text[] = "Open";
 
 char local_files_dir_label_text[] = "Directory";
 char local_files_up_button_text_str[] = "Up";
@@ -313,11 +314,11 @@ void change_gui_browser_path_to_home(void)
 void open_entry(gui_list_entry_t *entry)
 {
     switch (entry->type) {
-    /* case ENTRY_TYPE_DIR: */
-    /*     if (DirectoryExists(entry->path)) { */
-    /*         change_gui_browser_path(entry->path); */
-    /*     } */
-    /*     break; */
+    case ENTRY_TYPE_DIR:
+        if (DirectoryExists(entry->path)) {
+            change_gui_browser_path(entry->path);
+        }
+        break;
 
     case ENTRY_TYPE_COLLECTION_DIR:
         /* fall through */
@@ -387,24 +388,28 @@ void resize_gui_browser(void)
     browser_tabbar_rect.y = browser_panel_rect.y + PANEL_INNER_MARGIN + TOOL_BUTTON_HEIGHT;
 
     browser_area_rect.x      = browser_tabbar_rect.x + PANEL_INNER_MARGIN;
-    browser_area_rect.y      = browser_tabbar_rect.y + browser_tabbar_rect.height + (2 * RAYGUI_ICON_SIZE);
+    browser_area_rect.y      = browser_tabbar_rect.y + browser_tabbar_rect.height + PANEL_INNER_MARGIN;
     browser_area_rect.width  = browser_tabbar_rect.width - (2 * PANEL_INNER_MARGIN);
-    browser_area_rect.height = panel_bottom - (2 * RAYGUI_ICON_SIZE) - browser_area_rect.y;
+    browser_area_rect.height = panel_bottom - (2 * PANEL_INNER_MARGIN) - browser_area_rect.y;
 
     float area_bottom = browser_area_rect.y + browser_area_rect.height;
 
     Vector2 browser_play_button_text_size = measure_big_button_text(browser_play_button_text);
+    Vector2 browser_open_button_text_size = measure_big_button_text(browser_open_button_text);
 
+    Vector2 button_max_size = Vector2Max(browser_play_button_text_size,
+                                         browser_open_button_text_size);
+
+    browser_play_button_rect.height = button_max_size.y + (5 * BUTTON_MARGIN);
     browser_play_button_rect.x = browser_area_rect.x;
-    browser_play_button_rect.y = area_bottom - TOOL_BUTTON_HEIGHT;
+    browser_play_button_rect.y = area_bottom - browser_play_button_rect.height;
     browser_play_button_rect.width  = browser_area_rect.width;
-    browser_play_button_rect.height = browser_play_button_text_size.y + (4 * BUTTON_MARGIN);
 
     area_bottom -= browser_play_button_rect.height;
-    area_bottom -= RAYGUI_ICON_SIZE;
+    area_bottom -= 2 * PANEL_INNER_MARGIN;
 
     browser_list_rect.x      = browser_area_rect.x;
-    browser_list_rect.y      = browser_area_rect.y;
+    browser_list_rect.y      = browser_area_rect.y + PANEL_INNER_MARGIN;
     browser_list_rect.width  = browser_area_rect.width;
     browser_list_rect.height = area_bottom - browser_list_rect.y;
 
@@ -454,7 +459,7 @@ void resize_gui_browser(void)
     local_files_list_rect.height = area_bottom - local_files_list_rect.y;
 }
 
-int draw_gui_browser_list(gui_list_vars_t *list, Rectangle list_rect)
+void draw_gui_browser_list(gui_list_vars_t *list, Rectangle list_rect)
 {
     GuiSetStyle(LISTVIEW, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
 
@@ -464,14 +469,25 @@ int draw_gui_browser_list(gui_list_vars_t *list, Rectangle list_rect)
                   &list->scroll_index,
                   &list->active,
                   &list->focus);
+}
 
+int draw_gui_browser_big_button(gui_list_vars_t *list, const char *button_text)
+{
     set_big_button_font();
 
-    if (GuiButton(browser_play_button_rect, browser_play_button_text)) {
+    if (list->active == -1) {
+        GuiDisable();
+    }
+
+    if (GuiButton(browser_play_button_rect, button_text)) {
         if (list->active >= 0 && list->active < list->count) {
             set_default_font();
             return list->active;
         }
+    }
+
+    if (list->active == -1) {
+        GuiEnable();
     }
 
     set_default_font();
@@ -481,7 +497,9 @@ int draw_gui_browser_list(gui_list_vars_t *list, Rectangle list_rect)
 
 void draw_gui_browser_classics(void)
 {
-    int selected = draw_gui_browser_list(&classics, browser_list_rect);
+    draw_gui_browser_list(&classics, browser_list_rect);
+
+    int selected = draw_gui_browser_big_button(&classics, browser_play_button_text);
 
     if (selected > -1) {
         open_classics_game_pack(selected + 1);
@@ -502,10 +520,30 @@ void draw_gui_browser_local_level_file(void)
         change_gui_browser_path_to_home();
     }
 
-    int selected = draw_gui_browser_list(&local_files, local_files_list_rect);
+    draw_gui_browser_list(&local_files, local_files_list_rect);
+
+    char *button_text =  browser_play_button_text;
+    gui_list_entry_t *entry = &(local_files.entries[local_files.active]);
+
+    switch (entry->type) {
+    case ENTRY_TYPE_DIR:
+        button_text = browser_open_button_text;
+        break;
+
+    case ENTRY_TYPE_LEVEL_FILE:
+        /* fall through */
+    case ENTRY_TYPE_COLLECTION_FILE:
+        /* fall through */
+    case ENTRY_TYPE_COLLECTION_DIR:
+        break;
+
+    default:
+        break;
+    }
+
+    int selected = draw_gui_browser_big_button(&local_files, button_text);
 
     if (selected > -1) {
-        gui_list_entry_t *entry = &(local_files.entries[selected]);
         if (entry) {
             open_entry(entry);
         }
