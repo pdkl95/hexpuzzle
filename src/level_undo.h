@@ -75,6 +75,18 @@ struct undo_change_path_event {
 };
 typedef struct undo_change_path_event undo_change_path_event_t;
 
+struct undo_shuffle_data {
+    tile_t tiles[LEVEL_MAXTILES];
+    tile_pos_t unsolved_positions[LEVEL_MAXTILES];
+};
+typedef struct undo_shuffle_data undo_shuffle_data_t;
+
+struct undo_shuffle {
+    undo_shuffle_data_t *from;
+    undo_shuffle_data_t *to;
+};
+typedef struct undo_shuffle undo_shuffle_t;
+
 
 /*** play events */
 
@@ -83,6 +95,7 @@ enum undo_play_event_type {
     UNDO_PLAY_TYPE_SWAP
 };
 typedef enum undo_play_event_type undo_play_event_type_t;
+
 struct undo_play_event {
     undo_play_event_type_t type;
     union {
@@ -100,7 +113,8 @@ enum undo_edit_event_type {
     UNDO_EDIT_TYPE_SET_RADIUS,
     UNDO_EDIT_TYPE_SET_FLAGS,
     UNDO_EDIT_TYPE_SET_FLAGS_AND_PATHS,
-    UNDO_EDIT_TYPE_CHANGE_PATH
+    UNDO_EDIT_TYPE_CHANGE_PATH,
+    UNDO_EDIT_TYPE_SHUFFLE
 };
 typedef enum undo_edit_event_type undo_edit_event_type_t;
 struct undo_edit_event {
@@ -112,6 +126,7 @@ struct undo_edit_event {
         undo_set_flags_event_t           set_flags;
         undo_set_flags_and_paths_event_t set_flags_and_paths;
         undo_change_path_event_t         change_path;
+        undo_shuffle_t                   shuffle;
     };
 };
 typedef struct undo_edit_event undo_edit_event_t;
@@ -195,6 +210,9 @@ void level_undo_add_change_paths_event(
     hex_direction_t tile2_section,
     path_type_t tile2_path_from,
     path_type_t tile2_path_to);
+
+undo_shuffle_data_t *level_undo_copy_shuffle_data(level_t *level);
+void level_undo_add_shuffle(level_t *level, undo_shuffle_data_t *from, undo_shuffle_data_t *to);
 
 void level_undo_play(level_t *level);
 void level_redo_play(level_t *level);

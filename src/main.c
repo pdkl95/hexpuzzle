@@ -1364,7 +1364,10 @@ static void draw_shuffle_panel(void)
                     text_color);
 
     if (hover && mouse_left_click && current_level) {
+        undo_shuffle_data_t *from = level_undo_copy_shuffle_data(current_level);
         level_shuffle_tiles(current_level);
+        undo_shuffle_data_t *to = level_undo_copy_shuffle_data(current_level);
+        level_undo_add_shuffle(current_level, from, to);
     }
 }
 

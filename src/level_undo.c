@@ -64,6 +64,8 @@ static const char *undo_edit_event_type_str(undo_edit_event_type_t type)
         return "SET_FLAGS_AND_PATHS";
     case UNDO_EDIT_TYPE_CHANGE_PATH:
         return "CHANGE_PATH";
+    case UNDO_EDIT_TYPE_SHUFFLE:
+        return "SHUFFLE";
     default:
         return "(INVALID EDIT EVENT TYPE)";
     }
@@ -503,6 +505,24 @@ void level_undo_add_change_paths_event(
     level_undo_add_event(level, event);
 }
 
+undo_shuffle_data_t *level_undo_copy_shuffle_data(level_t *level)
+{
+    undo_shuffle_data_t *data = calloc(1, sizeof(undo_shuffle_data_t));
+
+    memcpy(data->tiles, level->tiles, sizeof(data->tiles));
+    memcpy(data->unsolved_positions, level->unsolved_positions, sizeof(data->unsolved_positions));
+
+    return data;
+}
+
+void level_undo_add_shuffle(level_t *level, undo_shuffle_data_t *from, undo_shuffle_data_t *to)
+{
+    EDIT_EVENT(shuffle, SHUFFLE);
+    event.edit.shuffle.from = from;
+    event.edit.shuffle.to   = to;
+
+    level_undo_add_event(level, event);
+}
 
 static void rewind_swap(level_t *level, undo_swap_event_t event)
 {
@@ -580,6 +600,22 @@ static void replay_change_path(UNUSED level_t *level, undo_change_path_event_t e
         event.tile2->path[event.tile2_section] = event.tile2_path_to;
         tile_update_path_count(event.tile2);
     }
+}
+
+static void apply_shuffle_data(level_t *level, undo_shuffle_data_t *data)
+{
+    memcpy(level->tiles, data->tiles, sizeof(data->tiles));
+    memcpy(level->unsolved_positions, data->unsolved_positions, sizeof(data->unsolved_positions));
+}
+
+static void rewind_shuffle(level_t *level, undo_shuffle_t event)
+{
+    apply_shuffle_data(level, event.from);
+}
+
+static void replay_shuffle(level_t *level, undo_shuffle_t event)
+{
+    apply_shuffle_data(level, event.to);
 }
 
 void level_undo_add_play_event(level_t *level, undo_play_event_t play_event)
@@ -698,6 +734,10 @@ void level_undo_edit(level_t *level)
             rewind_change_path(level, event.edit.change_path);
             break;
 
+        case UNDO_EDIT_TYPE_SHUFFLE:
+            rewind_shuffle(level, event.edit.shuffle);
+            break;
+
         default:
             __builtin_unreachable();
         }
@@ -794,6 +834,10 @@ void level_redo_edit(level_t *level)
 
         case UNDO_EDIT_TYPE_CHANGE_PATH:
             replay_change_path(level, event.edit.change_path);
+            break;
+
+        case UNDO_EDIT_TYPE_SHUFFLE:
+            replay_shuffle(level, event.edit.shuffle);
             break;
 
         default:
