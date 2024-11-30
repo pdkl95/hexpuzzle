@@ -13,6 +13,11 @@ varying in vec4 fragColor;
 uniform vec2 resolution;
 uniform float time;
 uniform vec4 fade;
+uniform vec4 effect_amount;
+
+float bloom_amount;
+float distort_amount;
+float warp_amount;
 
 // Output fragment color
 //out vec4 finalColor;
@@ -34,6 +39,10 @@ vec3 hsv2rgb(const in vec3 hsv) {
 
 void main()
 {
+    bloom_amount = effect_amount.x;
+    distort_amount = effect_amount.y;
+    warp_amount = effect_amount.z;
+
     float px = 1.0/resolution.y;
     float aspect = resolution.y/resolution.x;
 
@@ -48,14 +57,19 @@ void main()
     }
 
     float dist_center = distance(vec2(0.0), position);
-    float radial_wave = (sin((3.333 * time) - (10.0 * dist_center)) + 1.0) / 2.0;
+
+#define RADIALWAVE(speed, radius_scale, offset)                    \
+    ((sin(((speed) * time) - ((radius_scale) * dist_center) + (offset)) + 1.0) / 2.0)
+
+    float radial_wave = RADIALWAVE(3.333, 10.0, 0.0);
 
     vec3 color = vec3(0);
+    float alpha = 1.0;
 
     float tile_radius    = fragColor.g;
     float perlin_noise   = fragColor.b;
     float path_highlight = fragColor.r;
-    float extra_mag      = fragColor.a;
+    float hidden         = fragColor.a;
 
     float spin_fade = 1.0;
     float saturate = 0.0;
@@ -72,8 +86,8 @@ void main()
     float hue = fade.y;
     float fade_in_override = fade.z;
     saturate *= fade_in_override;
-
-    float wave_mix = (sin(1.0 * time) + 1.0) / 2.0;
+#define WAVE_MIX_SPEED  1.0
+    float wave_mix = (sin(WAVE_MIX_SPEED * time) + 1.0) / 2.0;
 
     float wave = (radial_wave * 0.5) + (perlin_noise * 0.5);
     wave = mix(wave, radial_wave, wave_mix);
@@ -86,12 +100,34 @@ void main()
 
     vec3 blank_color = vec3(0.19607843137254902);
     float spin_extra = (1.0 - spin_fade) * fade_in_override;
-    color = mix(blank_color, color, fade_in_override + spin_extra);
+
+    float total_wave = fade_in_override + spin_extra;
+
+    if (hidden > 0.5) {
+        float hidden_tmp;
+        float hidden_mix = 0.0;
+        float hidden_wave = 0.0;
+
+#define HWAVE(speed, radius_scale, offset)                              \
+    hidden_tmp = RADIALWAVE(speed, radius_scale, offset);               \
+    hidden_mix += hidden_tmp;                                           \
+    hidden_wave = max(hidden_wave, smoothstep(0.94, 0.97, hidden_tmp));
+
+        HWAVE(3.333, 10.0, 0.0);
+        hidden_mix *= 0.333333333;
+
+        hidden_wave *= fade_in_override;
+        color = mix(color, vec3(0.7333333333333333, 1.0, 0.9568627450980393), hidden_mix);
+
+        color = mix(vec3(0.0), color, hidden_wave);
+        alpha = hidden_wave * (1.1 - dist_center) * bloom_amount;
+
+    } else {
+        color = mix(blank_color, color, total_wave);
+    }
 
     vec3 saturate_color = vec3(1.0);
     color = mix(color, saturate_color, min(saturate, (1.0-base_wave)));
 
-    color = mix(color, vec3(1.0), extra_mag * 0.333);
-
-    gl_FragColor = clamp(vec4(color, 1.0), 0.0, 1.0);
+    gl_FragColor = clamp(vec4(color, alpha), 0.0, 1.0);
 }

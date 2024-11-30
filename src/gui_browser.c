@@ -473,26 +473,37 @@ void draw_gui_browser_list(gui_list_vars_t *list, Rectangle list_rect)
 
 int draw_gui_browser_big_button(gui_list_vars_t *list, const char *button_text)
 {
+    int rv = -1;
+
     set_big_button_font();
 
-    if (list->active == -1) {
+    bool disable_button = list->active == -1;
+
+    if (disable_button) {
         GuiDisable();
     }
 
     if (GuiButton(browser_play_button_rect, button_text)) {
         if (list->active >= 0 && list->active < list->count) {
-            set_default_font();
-            return list->active;
+            rv = list->active;
+            goto big_button_cleanup;
         }
     }
 
-    if (list->active == -1) {
+    if (mouse_left_doubleclick) {
+        if (list->active >= 0 && list->active < list->count) {
+            rv = list->active;
+            goto big_button_cleanup;
+        }
+    }
+
+  big_button_cleanup:
+    if (disable_button) {
         GuiEnable();
     }
 
     set_default_font();
-
-    return -1;
+    return rv;
 }
 
 void draw_gui_browser_classics(void)

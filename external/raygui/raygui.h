@@ -3206,6 +3206,8 @@ int GuiListView(Rectangle bounds, const char *text, int *scrollIndex, int *activ
     return result;
 }
 
+extern bool mouse_left_click;
+
 // List View control with extended parameters
 int GuiListViewEx(Rectangle bounds, const char **text, int count, int *scrollIndex, int *active, int *focus)
 {
@@ -3252,12 +3254,16 @@ int GuiListViewEx(Rectangle bounds, const char **text, int count, int *scrollInd
                 if (CheckCollisionPointRec(mousePoint, itemBounds))
                 {
                     itemFocused = startIndex + i;
-                    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON))
-                    {
-                        if (itemSelected == (startIndex + i)) itemSelected = -1;
-                        else itemSelected = startIndex + i;
+                    if (mouse_left_click)                     {
+                        /* if (itemSelected == (startIndex + i)) itemSelected = -1; */
+                        /* else itemSelected = startIndex + i; */
+                        itemSelected = startIndex + i;
                     }
                     break;
+                } else {
+                    if ((itemSelected == (startIndex + i)) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+                        itemSelected = -1;
+                    }
                 }
 
                 // Update item rectangle y position for next item

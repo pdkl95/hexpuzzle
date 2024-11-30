@@ -357,7 +357,7 @@ static Color get_win_border_color(tile_pos_t *pos, level_t *level)
     color.r = (255/3) * offset;
     color.g = (255 * pos->ring_radius) / level->radius;
     color.b = (unsigned char)(255.0f * tile_draw_hash_wave(pos));
-    color.a = 0.0;
+    color.a = pos->tile->hidden ? 255 : 0;
 
     return color;
 }

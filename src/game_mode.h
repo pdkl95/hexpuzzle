@@ -39,7 +39,7 @@ extern game_mode_t game_mode;
 extern game_mode_t last_game_mode;
 
 #define play_level_mode    (game_mode == GAME_MODE_PLAY_LEVEL)
-#define win_level_mode     (game_mode == GAME_MODE_PLAY_LEVEL)
+#define win_level_mode     (game_mode == GAME_MODE_WIN_LEVEL)
 #define play_mode          (play_level_mode || win_level_mode)
 
 #define edit_mode    (game_mode == GAME_MODE_EDIT_LEVEL)

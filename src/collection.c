@@ -850,6 +850,22 @@ static void collection_move_level_later(collection_t *collection, int level_idx)
     collection->changed = true;
 }
 
+static void cellection_launch_active_gui_list_level(collection_t *collection, bool edit)
+{
+    level_t *level = collection->levels;
+    int n = collection->gui_list_active;
+    if (n >= 0) {
+        while (n--) {
+            level = level->next;
+        }
+        if (edit) {
+            level_edit(level);
+        } else {
+            level_play(level);
+        }
+    }
+}
+
 static void collection_draw_buttons(collection_t *collection, Rectangle collection_list_rect)
 {
     float margin = (float)RAYGUI_ICON_SIZE;
@@ -881,20 +897,18 @@ static void collection_draw_buttons(collection_t *collection, Rectangle collecti
 
     char *collection_new_button_text = "New\nLevel";
 
-    if (collection->gui_list_active == -1) {
+    bool disable_buttons = collection->gui_list_active == -1;
+    if (disable_buttons) {
         GuiDisable();
     }
 
     set_big_button_font();
 
     if (GuiButton(collection_play_button_rect, collection_play_button_text)) {
-        level_t *level = collection->levels;
-        int n = collection->gui_list_active;
-        if (n >= 0) {
-            while (n--) {
-                level = level->next;
-            }
-            level_play(level);
+        cellection_launch_active_gui_list_level(collection, false);
+    } else {
+        if (mouse_left_doubleclick) {
+            cellection_launch_active_gui_list_level(collection, false);
         }
     }
 
@@ -902,14 +916,7 @@ static void collection_draw_buttons(collection_t *collection, Rectangle collecti
 
     if (game_mode == GAME_MODE_EDIT_COLLECTION) {
         if (GuiButton(collection_edit_button_rect, collection_edit_button_text)) {
-            level_t *level = collection->levels;
-            int n = collection->gui_list_active;
-            if (n >= 0) {
-                while (n--) {
-                    level = level->next;
-                }
-                level_edit(level);
-            }
+            cellection_launch_active_gui_list_level(collection, true);
         }
     }
 

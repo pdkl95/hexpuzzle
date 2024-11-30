@@ -39,9 +39,10 @@ void load_shaders(void)
         shaders_win_border_frag_glsl_len);
 
     win_border_shader = LoadShaderFromMemory(0, win_border_shader_src);
-    win_border_shader_loc.resolution = GetShaderLocation(win_border_shader, "resolution");
-    win_border_shader_loc.time       = GetShaderLocation(win_border_shader, "time");
-    win_border_shader_loc.fade       = GetShaderLocation(win_border_shader, "fade");
+    win_border_shader_loc.resolution    = GetShaderLocation(win_border_shader, "resolution");
+    win_border_shader_loc.time          = GetShaderLocation(win_border_shader, "time");
+    win_border_shader_loc.fade          = GetShaderLocation(win_border_shader, "fade");
+    win_border_shader_loc.effect_amount = GetShaderLocation(win_border_shader, "effect_amount");
 
     postprocessing_shader_src = strdup_xxd_include(
         shaders_postprocessing_frag_glsl,

@@ -93,6 +93,7 @@ endif
 
 hexpuzzle_SOURCES =                                    \
 	src/anim_fsm.h          src/anim_fsm.c         \
+	src/background.h        src/background.c       \
 	src/classics.h          src/classics.c         \
 	src/collection.h        src/collection.c       \
 	src/color.h             src/color.c            \

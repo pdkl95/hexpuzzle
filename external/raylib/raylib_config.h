@@ -42,7 +42,7 @@
 // Module: rcore - Configuration Flags
 //------------------------------------------------------------------------------------
 // Camera module is included (rcamera.h) and multiple predefined cameras are available: free, 1st/3rd person, orbital
-//#define SUPPORT_CAMERA_SYSTEM           1
+#define SUPPORT_CAMERA_SYSTEM           1
 // Gestures module is included (rgestures.h) to support gestures detection: tap, hold, swipe, drag
 //#define SUPPORT_GESTURES_SYSTEM         1
 /// Include pseudo-random numbers generator (rprand.h), based on Xoshiro128** and SplitMix64

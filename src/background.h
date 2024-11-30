@@ -1,6 +1,6 @@
 /****************************************************************************
  *                                                                          *
- * shader.h                                                                 *
+ * background.h                                                             *
  *                                                                          *
  * This file is part of hexpuzzle.                                          *
  *                                                                          *
@@ -19,29 +19,56 @@
  *                                                                          *
  ****************************************************************************/
 
-#ifndef SHADER_H
-#define SHADER_H
+#ifndef BACKGROUND_H
+#define BACKGROUND_H
 
-extern Shader win_border_shader;
-typedef struct win_border_shader_loc {
-    int resolution;
-    int time;
-    int fade;
-    int effect_amount;
-} win_border_shader_loc_t;
-extern win_border_shader_loc_t win_border_shader_loc;
+#include "anim_fsm.h"
 
-extern Shader postprocessing_shader;
-typedef struct postprocessing_shader_loc {
-    int resolution;
-    int time;
-    int effect_amount;
-} postprocessing_shader_loc_t;
-extern postprocessing_shader_loc_t postprocessing_shader_loc;
+enum background_mode {
+    BG_MODE_INIT = 0,
+    BG_MODE_NORMAL,
+    BG_MODE_WIN
+};
+typedef enum background_mode background_mode_t;
+
+struct background_control {
+    float amp;
+};
+typedef struct background_control background_control_t;
 
 
-void load_shaders(void);
-void unload_shaders(void);
+struct background {
+    background_mode_t mode;
 
-#endif /*SHADER_H*/
+    background_control_t *control;
+
+    background_control_t normal_control;
+    background_control_t win_control;
+
+    anim_fsm_t anim_fsm;
+
+    float amp;
+    int change_counter_frames;
+    int lerp_counter_frames;
+
+    Camera camera;
+
+    Color  minor_color;
+    Color hmajor_color;
+    Color vmajor_color;
+};
+typedef struct background background_t;
+
+
+background_t *create_background(void);
+void destroy_background(background_t *bg);
+
+void background_resize(background_t *bg);
+
+void background_set_mode(background_t *bg, background_mode_t new_mode);
+void background_draw(background_t *bg);
+
+
+                     
+#endif /*BACKGROUND_H*/
 

@@ -54,6 +54,7 @@
 #include "gui_browser.h"
 #include "gui_options.h"
 #include "gui_random.h"
+#include "background.h"
 
 #include "nvdata.h"
 #include "nvdata_finished.h"
@@ -99,6 +100,8 @@ Vector2 mouse_positionf;
 bool mouse_left_click  = false;
 bool mouse_left_release  = false;
 bool mouse_right_click = false;
+bool mouse_left_doubleclick = true;
+double last_mouse_click_time = -100.0;
 int current_mouse_cursor = -1;
 float cursor_spin = 0.0f;
 float cursor_spin_step = (360.0f / 100.0f);
@@ -124,6 +127,8 @@ Vector2 feedback_bg_zoom_margin = { .x = 20.0, .y = 20.0 };
 pcg32_random_t global_rng;
 
 bool level_finished = false;
+
+background_t *background;
 
 level_t *current_level = NULL;
 collection_t *current_collection = NULL;
@@ -249,7 +254,7 @@ static void set_edit_tool(path_type_t type)
 static void return_from_level_callback(UNUSED level_t *level, UNUSED void *data)
 {
     if (current_level) {
-        disable_postprocessing();
+        //disable_postprocessing();
         level_unload();
     }
 
@@ -542,6 +547,8 @@ do_resize(
         level_resize(current_level);
     }
 
+    background_resize(background);
+
     gui_setup();
     resize_gui_browser();
     resize_gui_options();
@@ -595,6 +602,7 @@ void set_mouse_position(int new_x, int new_y)
     }
 }
 
+#define MAX_DOUBLECLICK_TIME 0.3
 static void handle_mouse_events(void)
 {
     set_mouse_position(GetMouseX(), GetMouseY());
@@ -602,10 +610,18 @@ static void handle_mouse_events(void)
     mouse_left_click   = false;;
     mouse_left_release = false;
     mouse_right_click  = false;;
+    mouse_left_doubleclick = false;
 
     if (IsCursorOnScreen()) {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             mouse_left_click = true;
+\
+            double click_time = GetTime();
+            if ((click_time - last_mouse_click_time) < MAX_DOUBLECLICK_TIME) {
+                mouse_left_doubleclick = true;
+            }
+            last_mouse_click_time = click_time;
+
             if (do_level_ui_interaction()) {
                 if (edit_mode_solved) {
                     if (edit_tool_cycle) {
@@ -643,6 +659,10 @@ static void handle_mouse_events(void)
                 }
             }
         }
+    }
+
+    if (mouse_left_doubleclick) {
+        printf("DOUBLECLICK!\n");
     }
 }
 
@@ -1872,113 +1892,6 @@ static void draw_popup_panels(void)
 }
 #endif
 
-static void draw_cartesian_grid(bool draw_labels)
-{
-    bool animate_bg = !options->wait_events && options->animate_bg;
-
-    rlPushMatrix();
-
-    Vector2 hwin = {
-        .x = window_size.x / 2.0,
-        .y = window_size.y / 2.0
-    };
-
-    if (animate_bg) {
-        rlTranslatef(hwin.x,
-                     hwin.y,
-                     0.0);
-
-        float rot_x = 2.0 * sinf(current_time / 10.0);
-        //float rot_x = rot * (360.0 / TAU) * level->fade_rotate_speed;
-        rlRotatef(rot_x, 0.0, 0.0, 1.0);
-
-        rlTranslatef(-hwin.x,
-                     -hwin.y,
-                     0.0);
-    }
-
-    Color minor_color = ColorAlpha(purple, 0.5);
-
-    int minor_size = 25;
-    int minor_per_major = 4;
-    int major_size = minor_size * minor_per_major;
-    float wrap_size = (float)major_size;
-    float half_wrap = wrap_size / 2.0;
-    float minor_thickness = 1.0;
-    float major_thickness = 2.0;
-
-    static float speed = 1.5;;
-    static float oldspeed = 1.5;;
-    static float newspeed = 1.5;;
-    static Vector2 off = { 1.0, 0.0 };
-    static Vector2 dir = { 1.0, 0.0 };
-    static Vector2 olddir = {0};
-    static Vector2 newdir = {0};
-    static int dir_lerp_frames = 0;
-#define TOTAL_LERP_FRAMES options->max_fps
-
-
-    if (animate_bg) {
-        if ((frame_count % (3 * options->max_fps)) == 0) {
-            oldspeed = speed;
-            newspeed = 1.0 + (2.0 * drand48());
-            float angle = (0.4 * TAU) * drand48() - (0.2 * TAU);
-            olddir = dir;
-            newdir = Vector2Normalize(Vector2Rotate(dir, angle));
-            dir_lerp_frames = TOTAL_LERP_FRAMES;
-        }
-        if (dir_lerp_frames > 0) {
-            dir_lerp_frames--;
-            float t = 1.0 - (((float)dir_lerp_frames) / ((float)TOTAL_LERP_FRAMES));
-            speed = Lerp(oldspeed, newspeed, t);
-            dir = Vector2Lerp(olddir, newdir, t);
-        }
-
-        off = Vector2Add(off, Vector2Scale(dir, speed));
-
-        if      (off.x < -half_wrap) { off.x += wrap_size; }
-        else if (off.x >  half_wrap) { off.x -= wrap_size; }
-        if      (off.y < -half_wrap) { off.y += wrap_size; }
-        else if (off.y >  half_wrap) { off.y -= wrap_size; }
-    }
-
-    for (int x=-major_size; x<window_size.x + major_size; x += minor_size) {
-        DrawLineEx((Vector2){x+off.x, 0},
-                   (Vector2){x+off.x, window_size.y},
-                   minor_thickness,
-                   minor_color);
-    }
-
-    for (int y=-major_size; y<window_size.y + major_size; y += minor_size) {
-        DrawLineEx((Vector2){0, y+off.y},
-                   (Vector2){window_size.x, y+off.y},
-                   minor_thickness,
-                   minor_color);
-    }
-
-    for (int x=-major_size; x<window_size.x + major_size; x += major_size) {
-        DrawLineEx((Vector2){x+off.x, 0},
-                   (Vector2){x+off.x, window_size.y},
-                   major_thickness,
-                   royal_blue);
-        if (draw_labels) {
-            DrawText(TextFormat("%d", x), (float)x + 3.0, 8.0, 16, YELLOW);
-        }
-    }
-
-    for (int y=-major_size; y<window_size.y + major_size; y += major_size) {
-        DrawLineEx((Vector2){0, y+off.y},
-                   (Vector2){window_size.x, y+off.y},
-                   major_thickness,
-                   magenta);
-        if (draw_labels) {
-            DrawText(TextFormat("%d", y), 3.0, (float)y + 3.9, 16, YELLOW);
-        }
-    }
-
-    rlPopMatrix();
-}
-
 static void draw_cursor(void)
 {
     if (IsCursorOnScreen() && mouse_input_is_enabled()) {
@@ -2087,6 +2000,17 @@ render_frame(
 ) {
     static bool renderd_texture_last_frame = false;
 
+    distort_amount = sqrt(bloom_amount);
+    postprocessing_effect_amount[0] = bloom_amount;
+    postprocessing_effect_amount[1] = distort_amount;
+    postprocessing_effect_amount[2] = warp_amount;
+    postprocessing_effect_amount[3] = 0.0f;
+
+    SetShaderValue(win_border_shader, win_border_shader_loc.effect_amount, &(postprocessing_effect_amount[0]), SHADER_UNIFORM_VEC4);
+
+    SetShaderValue(postprocessing_shader, postprocessing_shader_loc.effect_amount, &(postprocessing_effect_amount[0]), SHADER_UNIFORM_VEC4);
+    SetShaderValue(postprocessing_shader, postprocessing_shader_loc.time, &current_time, SHADER_UNIFORM_FLOAT);
+
     if (do_postprocessing) {
         BeginTextureMode(*scene_write_target);
     } else {
@@ -2100,7 +2024,7 @@ render_frame(
             draw_feedback_bg();
         }
 
-        draw_cartesian_grid(false);
+        background_draw(background);
 
         switch (game_mode) {
         case GAME_MODE_WIN_LEVEL:
@@ -2128,15 +2052,6 @@ render_frame(
 
         BeginDrawing();
         {
-            SetShaderValue(postprocessing_shader, postprocessing_shader_loc.time, &current_time, SHADER_UNIFORM_FLOAT);
-
-            distort_amount = sqrt(bloom_amount);
-            postprocessing_effect_amount[0] = bloom_amount;
-            postprocessing_effect_amount[1] = distort_amount;
-            postprocessing_effect_amount[2] = warp_amount;
-            postprocessing_effect_amount[3] = 0.0f;
-            SetShaderValue(postprocessing_shader, postprocessing_shader_loc.effect_amount, &(postprocessing_effect_amount[0]), SHADER_UNIFORM_VEC4);
-
             BeginShaderMode(postprocessing_shader);
             {
                 Rectangle src_rect = {
@@ -2356,6 +2271,8 @@ static void game_init(void)
     init_gui_browser();
     init_gui_random();
 
+    background = create_background();
+
     set_game_mode(GAME_MODE_BROWSER);
     //set_game_mode(GAME_MODE_RANDOM);
 
@@ -2394,6 +2311,8 @@ static void game_cleanup(void)
     cleanup_gui_browser();
     cleanup_nvdata();
     cleanup_gui_options();
+
+    destroy_background(background);
 }
 #endif
 
