@@ -69,8 +69,6 @@ void background_resize(background_t *bg)
 {
     float nearfar_dist = MIN(window_size.x, window_size.y);
 
-    //Vector2 cpos = window_size;
-    //Vector2 cpos = window_center;
     Vector2 cpos = VEC2_ZERO;
 
     memset(&bg->camera, 0, sizeof(Camera));
@@ -78,6 +76,7 @@ void background_resize(background_t *bg)
     bg->camera.target = (Vector3){ cpos.x, cpos.y, 4 * nearfar_dist };
     bg->camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
     bg->camera.fovy = 45.0f;
+    //bg->camera.fovy = 90.0f;
     bg->camera.projection = CAMERA_PERSPECTIVE;
 }
 
@@ -116,15 +115,15 @@ void background_draw(background_t *bg)
     int minor_per_major = 4;
     int major_size = minor_size * minor_per_major;
     float wrap_size = (float)major_size;
-    float half_wrap = wrap_size / 2.0;
-    float minor_thickness = 3.0;
-    float major_thickness = 4.0;
+    //float half_wrap = wrap_size / 2.0;
+    float minor_thickness = 2.0;
+    float major_thickness = 3.0;
 
-    int margin_size = 2 * major_size;
-    int xmin = -margin_size;
-    int ymin = -margin_size;
-    int xmax = window_size.x + margin_size;
-    int ymax = window_size.y + margin_size;
+    int margin = 5 * major_size;
+    int xmin = -margin;
+    int ymin = -margin;
+    int xmax = window_size.x + margin;
+    int ymax = window_size.y + margin;
 
     static float speed = cart_bg_normal_speed;
     static float angle = 0.0;
@@ -209,7 +208,7 @@ void background_draw(background_t *bg)
         float rot_y = circ_mag * -dir.y;
 
         float rot_z = 2.0 * sinf(current_time / 10.0);
-        rot_z += 1.0f - bloom_fade;
+        rot_z += 1.0f - (fade * bloom_fade);
 
         rlRotatef(rot_z, 0.0, 0.0, 1.0);
 
@@ -223,44 +222,43 @@ void background_draw(background_t *bg)
         rlRotatef(TO_DEGREES(rot_y), 0.0, 1.0, 0.0);
 
         off = Vector2Add(off, Vector2Scale(dir, speed * bg->amp));
+        off.x = fmodf(off.x, wrap_size);
+        off.y = fmodf(off.y, wrap_size);
 
-        if      (off.x < -half_wrap) { off.x += wrap_size; }
-        else if (off.x >  half_wrap) { off.x -= wrap_size; }
-        if      (off.y < -half_wrap) { off.y += wrap_size; }
-        else if (off.y >  half_wrap) { off.y -= wrap_size; }
+        //printf("off=(%4f,%4f)\n", off.x, off.y);
     }
 
-    for (int x=xmin; x<xmax; x += minor_size) {
-        DrawLineEx((Vector2){x+off.x, 0},
-                   (Vector2){x+off.x, window_size.y},
-                   minor_thickness,
-                   bg->minor_color);
-    }
-
-    for (int y=ymin; y<ymax; y += minor_size) {
-        DrawLineEx((Vector2){0, y+off.y},
-                   (Vector2){window_size.x, y+off.y},
-                   minor_thickness,
-                   bg->minor_color);
-    }
-
-    for (int x=xmin; x<xmax; x += major_size) {
-        DrawLineEx((Vector2){x+off.x, 0},
-                   (Vector2){x+off.x, window_size.y},
-                   major_thickness,
-                   bg->vmajor_color);
-        if (draw_labels) {
-            DrawText(TextFormat("%d", x), (float)x + 3.0, 8.0, 16, YELLOW);
+    for (int x=xmin, n=0; x<xmax; x += minor_size, n = (n + 1) % minor_per_major) {
+        if (n) {
+            DrawLineEx((Vector2){ x+off.x, ymin },
+                       (Vector2){ x+off.x, ymax },
+                       minor_thickness,
+                       bg->minor_color);
+        } else {
+            DrawLineEx((Vector2){ x+off.x, ymin },
+                       (Vector2){ x+off.x, ymax },
+                       major_thickness,
+                       bg->vmajor_color);
+            if (draw_labels) {
+                DrawText(TextFormat("%d", x), (float)x + 3.0, 8.0, 16, YELLOW);
+            }
         }
     }
 
-    for (int y=ymin; y<ymax; y += major_size) {
-        DrawLineEx((Vector2){0, y+off.y},
-                   (Vector2){window_size.x, y+off.y},
-                   major_thickness,
-                   bg->hmajor_color);
-        if (draw_labels) {
-            DrawText(TextFormat("%d", y), 3.0, (float)y + 3.9, 16, YELLOW);
+    for (int y=ymin, n=0; y<ymax; y += minor_size, n = (n + 1) % minor_per_major) {
+        if (n) {
+            DrawLineEx((Vector2){ xmin, y+off.y },
+                       (Vector2){ xmax, y+off.y },
+                       minor_thickness,
+                       bg->minor_color);
+        } else {
+            DrawLineEx((Vector2){ xmin, y+off.y },
+                       (Vector2){ xmax, y+off.y },
+                       major_thickness,
+                       bg->hmajor_color);
+            if (draw_labels) {
+                DrawText(TextFormat("%d", y), 3.0, (float)y + 3.9, 16, YELLOW);
+            }
         }
     }
 

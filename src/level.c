@@ -1354,21 +1354,38 @@ void level_drag_start(level_t *level)
 {
     assert_not_null(level);
 
-    if (level->drag_target) {
+    if (level->drag_target) { 
 #ifdef DEBUG_DRAG_AND_DROP
-        printf("drag_stop(): hover = %p\n", level->hover);
+        printf("drag_start(): forgetting old drag_target %p\n", level->hover);
 #endif
-        level->drag_target = NULL;
+       level->drag_target = NULL;
     }
 
     if (level->hover && level_using_unsolved_tiles(level)) {
-        if (level->hover->tile->enabled && !level->hover->tile->fixed) {
-            level->drag_target = level->hover;
-            level->drag_start  = level->mouse_pos;
+        if (!level->hover->tile->enabled) {
 #ifdef DEBUG_DRAG_AND_DROP
-            printf("drag_start(): drag_target = %p\n", level->drag_target);
+            printf("drag_start(): reject drag start (NOT enabled)\n");
 #endif
+            return;
         }
+        if (level->hover->tile->fixed) {
+#ifdef DEBUG_DRAG_AND_DROP
+            printf("drag_start(): reject drag start (IS fixed))\n");
+#endif
+            return;
+        }
+        if (level->hover->tile->hidden) {
+#ifdef DEBUG_DRAG_AND_DROP
+            printf("drag_start(): reject drag start (IS hidden)\n");
+#endif
+            return;
+        }
+
+        level->drag_target = level->hover;
+        level->drag_start  = level->mouse_pos;
+#ifdef DEBUG_DRAG_AND_DROP
+        printf("drag_start(): drag_target = %p\n", level->drag_target);
+#endif
     }
 }
 
