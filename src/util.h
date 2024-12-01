@@ -68,6 +68,8 @@ static inline const char *booltext(bool value)
 
 bool is_number(const char *str);
 
+double normal_rng(void);
+
 /********************
  * easing functions *
  ********************/

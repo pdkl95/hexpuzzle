@@ -49,7 +49,7 @@ struct background {
 
     float amp;
     int change_counter_frames;
-    int lerp_counter_frames;
+    float change_per_frame;
 
     Camera camera;
 

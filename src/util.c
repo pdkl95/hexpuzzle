@@ -154,6 +154,14 @@ bool is_number(const char *str)
     return true;
 }
 
+double normal_rng(void)
+{
+	double a = ((double)(rand()))/((double)RAND_MAX);
+	double b = ((double)(rand()))/((double)RAND_MAX);
+
+	return  sqrt(-2.0 * log(a)) * cos(2 * M_PI * b);
+}
+
 float ease_circular_in(float t) {
     return 1.0f - sqrtf(1.0f - (t * t));
 }

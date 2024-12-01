@@ -39,22 +39,22 @@ void lerp_background_control(background_control_t *dst,
     lerp_float(amp);
 #undef lerp_float
 }
- 
+
 background_t *create_background(void)
 {
     background_t *bg = calloc(1, sizeof(background_t));
 
     bg->amp = 1.0;
     bg->change_counter_frames = 3 * options->max_fps;
-    bg->lerp_counter_frames = options->max_fps;
+    bg->change_per_frame = 1.0f / ((float)bg->change_counter_frames);
 
-    bg->minor_color  = ColorBrightness(purple,     -0.3);
-    bg->hmajor_color = ColorBrightness(magenta,    -0.25);
-    bg->vmajor_color = ColorBrightness(royal_blue, -0.25);
+    bg->minor_color  = ColorBrightness(purple,     -0.4);
+    bg->hmajor_color = ColorBrightness(magenta,    -0.15);
+    bg->vmajor_color = ColorBrightness(royal_blue, -0.15);
 
-    bg->minor_color  = ColorAlpha(bg->minor_color,  0.55);
-    bg->hmajor_color = ColorAlpha(bg->hmajor_color, 0.98);
-    bg->vmajor_color = ColorAlpha(bg->vmajor_color, 0.98);
+    bg->minor_color  = ColorAlpha(bg->minor_color,  0.65);
+    bg->hmajor_color = ColorAlpha(bg->hmajor_color, 0.95);
+    bg->vmajor_color = ColorAlpha(bg->vmajor_color, 0.95);
 
     background_resize(bg);
     return bg;
@@ -105,51 +105,12 @@ void background_draw(background_t *bg)
         .y = window_size.y / 2.0
     };
 
-    if (animate_bg) {
-        rlTranslatef(hwin.x,
-                     hwin.y,
-                     0.0);
-
-        float bloom_fade = 0.5 * bloom_amount;
-        bloom_fade += 0.5;
-        float circ_mag = TAU/36.0f;
-        circ_mag *= bloom_fade;
-        circ_mag *= fade;
-        float circ_time_scale = 3.0;
-        float rot_x = circ_mag * cosf(current_time / circ_time_scale);
-        float rot_y = circ_mag * sinf(current_time / circ_time_scale);
-        float rot_z = 2.0 * sinf(current_time / 10.0);
-
-        rlRotatef(rot_z, 0.0, 0.0, 1.0);
-
-        rlTranslatef(-window_size.x,
-                     -window_size.y,
-                     0.0);
-        /* rlTranslatef(-hwin.x, */
-        /*              -hwin.y, */
-        /*              0.0); */
-        rlRotatef(TO_DEGREES(rot_x), 1.0, 0.0, 0.0);
-        rlRotatef(TO_DEGREES(rot_y), 0.0, 1.0, 0.0);
-    }
-
 #define cart_bg_normal_speed   1.0
-#define cart_bg_finished_speed 1.5
+#define cart_bg_finished_speed 3.5
 #define cart_bg_delta_speed ((cart_bg_finished_speed) - (cart_bg_normal_speed))
 #define cart_bg_accel_duration 10.0
 #define cart_bg_delta_speed_per_second ((cart_bg_delta_speed) / (cart_bg_accel_duration))
 #define cart_bg_delta_speed_per_frame ((cart_bg_delta_speed_per_second) / (options->max_fps))
-
-#define cart_bg_normal_change_frames   (3 * options->max_fps)
-#define cart_bg_finished_change_frames (options->max_fps / 3)
-
-#define cart_bg_normal_lerp_frames   (options->max_fps)
-#define cart_bg_finished_lerp_frames (options->max_fps / 4)
-
-#define cart_bg_change_frame_delta (3)
-#define cart_bg_lerp_fram_deltas   (2)
-
-    static int change_counter = 0;
-    static int lerp_counter = 0;
 
     int minor_size = 25;
     int minor_per_major = 4;
@@ -159,18 +120,27 @@ void background_draw(background_t *bg)
     float minor_thickness = 3.0;
     float major_thickness = 4.0;
 
+    int margin_size = 2 * major_size;
+    int xmin = -margin_size;
+    int ymin = -margin_size;
+    int xmax = window_size.x + margin_size;
+    int ymax = window_size.y + margin_size;
+
     static float speed = cart_bg_normal_speed;
-    static float oldspeed = 1.5;
-    static float newspeed = 1.5;
+    static float angle = 0.0;
+    static float prev_angle = 0.0f;
+    static float next_angle = 0.0f;
+    static float change_fract = 0.0f;
+    static int change_counter = 0;
+    //static float rot_direction = 1.0;
+
     static Vector2 off = { 1.0, 0.0 };
     static Vector2 dir = { 1.0, 0.0 };
-    static Vector2 olddir = {0};
-    static Vector2 newdir = {0};
 
     if (animate_bg) {
 #if 1
         if (win_level_mode) {
-#if 1
+#if 0
             if (bg->change_counter_frames > cart_bg_finished_change_frames) {
                 bg->change_counter_frames--;
             }
@@ -200,20 +170,57 @@ void background_draw(background_t *bg)
         }
 #endif
 
-        if (change_counter < 1) {
-            oldspeed = speed;
-            newspeed = 1.0 + (2.0 * drand48());
-            float angle = (0.4 * TAU) * drand48() - (0.2 * TAU);
-            olddir = dir;
-            newdir = Vector2Normalize(Vector2Rotate(dir, angle));
-            lerp_counter = bg->lerp_counter_frames;
+        if (0 == change_counter) {
+            prev_angle = next_angle;
+            next_angle += 0.5 * normal_rng();
+            next_angle = fmodf(next_angle, TAU);
+            //printf("next_angle = %f\n", next_angle);
+            change_fract = 0.0f;
+            change_counter = bg->change_counter_frames;
+            //float angle_dist = prev_angle < angle ? (TAU - angle + prev_angle) : (prev_angle - angle);
+            //rot_direction = angle_dist < TAU / 2.0 ? -1.0 : 1.0;
+
+        } else {
+            change_counter--;
         }
-        if (lerp_counter > 0) {
-            lerp_counter--;
-            float t = 1.0 - (((float)lerp_counter) / ((float)bg->lerp_counter_frames));
-            speed = Lerp(oldspeed, newspeed, t);
-            dir = Vector2Lerp(olddir, newdir, t);
-        }
+
+        change_fract += bg->change_per_frame;
+        float eased_change_fract = ease_quartic_inout(change_fract);
+        angle = Lerp(prev_angle, next_angle, eased_change_fract);
+
+        //printf("fract = %f, angle = %f\n", change_fract, angle);
+
+        dir = Vector2Rotate((Vector2) { .x = 0.0f, .y = 1.0f }, angle);
+        dir = Vector2Scale(dir, speed);
+
+        rlTranslatef(hwin.x,
+                     hwin.y,
+                     0.0);
+
+        float bloom_fade = 0.5 * bloom_amount;
+        bloom_fade += 0.5;
+        float circ_mag = TAU/36.0f;
+        circ_mag *= bloom_fade;
+        circ_mag *= fade;
+        //float circ_time_scale = 3.0;
+        /* float rot_x = circ_mag * cosf(current_time / circ_time_scale); */
+        /* float rot_y = circ_mag * sinf(current_time / circ_time_scale); */
+        float rot_x = circ_mag * -dir.x;
+        float rot_y = circ_mag * -dir.y;
+
+        float rot_z = 2.0 * sinf(current_time / 10.0);
+        rot_z += 1.0f - bloom_fade;
+
+        rlRotatef(rot_z, 0.0, 0.0, 1.0);
+
+        rlTranslatef(-window_size.x,
+                     -window_size.y,
+                     0.0);
+        /* rlTranslatef(-hwin.x, */
+        /*              -hwin.y, */
+        /*              0.0); */
+        rlRotatef(TO_DEGREES(rot_x), 1.0, 0.0, 0.0);
+        rlRotatef(TO_DEGREES(rot_y), 0.0, 1.0, 0.0);
 
         off = Vector2Add(off, Vector2Scale(dir, speed * bg->amp));
 
@@ -223,21 +230,21 @@ void background_draw(background_t *bg)
         else if (off.y >  half_wrap) { off.y -= wrap_size; }
     }
 
-    for (int x=-minor_size; x<window_size.x + major_size; x += minor_size) {
+    for (int x=xmin; x<xmax; x += minor_size) {
         DrawLineEx((Vector2){x+off.x, 0},
                    (Vector2){x+off.x, window_size.y},
                    minor_thickness,
                    bg->minor_color);
     }
 
-    for (int y=-minor_size; y<window_size.y + major_size; y += minor_size) {
+    for (int y=ymin; y<ymax; y += minor_size) {
         DrawLineEx((Vector2){0, y+off.y},
                    (Vector2){window_size.x, y+off.y},
                    minor_thickness,
                    bg->minor_color);
     }
 
-    for (int x=-major_size; x<window_size.x + major_size; x += major_size) {
+    for (int x=xmin; x<xmax; x += major_size) {
         DrawLineEx((Vector2){x+off.x, 0},
                    (Vector2){x+off.x, window_size.y},
                    major_thickness,
@@ -247,7 +254,7 @@ void background_draw(background_t *bg)
         }
     }
 
-    for (int y=-major_size; y<window_size.y + major_size; y += major_size) {
+    for (int y=ymin; y<ymax; y += major_size) {
         DrawLineEx((Vector2){0, y+off.y},
                    (Vector2){window_size.x, y+off.y},
                    major_thickness,
