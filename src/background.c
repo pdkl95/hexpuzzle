@@ -30,16 +30,6 @@
 
 extern float bloom_amount;
 
-void lerp_background_control(background_control_t *dst,
-                             background_control_t *start,
-                             background_control_t *end,
-                             float t)
-{
-#define lerp_float(field) dst->field = Lerp(start->field, end->field, t)
-    lerp_float(amp);
-#undef lerp_float
-}
-
 background_t *create_background(void)
 {
     background_t *bg = calloc(1, sizeof(background_t));
@@ -78,11 +68,6 @@ void background_resize(background_t *bg)
     bg->camera.fovy = 45.0f;
     //bg->camera.fovy = 90.0f;
     bg->camera.projection = CAMERA_PERSPECTIVE;
-}
-
-void background_set_mode(background_t *bg, background_mode_t new_mode)
-{
-    bg->mode = new_mode;
 }
 
 float smooth_change(float current, float target, float step)
@@ -153,37 +138,11 @@ void background_draw(background_t *bg)
     static Vector2 dir = { 1.0, 0.0 };
 
     if (animate_bg) {
-#if 1
-        if (win_level_mode) {
-#if 0
-            if (bg->change_counter_frames > cart_bg_finished_change_frames) {
-                bg->change_counter_frames--;
-            }
-
-            if (bg->lerp_counter_frames > cart_bg_finished_lerp_frames) {
-                bg->lerp_counter_frames--;
-            }
-#endif
-            if (bg->amp < cart_bg_finished_speed) {
-                bg->amp += cart_bg_delta_speed_per_frame;
-            }
-            //printf("(WIN) amp = %f\n", bg->amp);
-        } else {
-#if 0
-            if (bg->change_counter_frames < cart_bg_normal_change_frames) {
-                bg->change_counter_frames++;
-            }
-
-            if (bg->lerp_counter_frames > cart_bg_normal_lerp_frames) {
-                bg->lerp_counter_frames++;
-            }
-#endif
-            if (bg->amp > cart_bg_normal_speed) {
-                bg->amp -= cart_bg_delta_speed_per_frame * 4.0;
-            }
-            //printf("(NOR) amp = %f\n", bg->amp);
-        }
-#endif
+        bg->amp = smooth_change(bg->amp,
+                                win_level_mode
+                                ? cart_bg_finished_speed
+                                : cart_bg_normal_speed,
+                                cart_bg_delta_speed_per_frame);
 
         if (0 == change_counter) {
             prev_angle = next_angle;
@@ -194,7 +153,6 @@ void background_draw(background_t *bg)
             change_counter = bg->change_counter_frames;
             //float angle_dist = prev_angle < angle ? (TAU - angle + prev_angle) : (prev_angle - angle);
             //rot_direction = angle_dist < TAU / 2.0 ? -1.0 : 1.0;
-
         } else {
             change_counter--;
         }

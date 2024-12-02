@@ -22,31 +22,7 @@
 #ifndef BACKGROUND_H
 #define BACKGROUND_H
 
-#include "anim_fsm.h"
-
-enum background_mode {
-    BG_MODE_INIT = 0,
-    BG_MODE_NORMAL,
-    BG_MODE_WIN
-};
-typedef enum background_mode background_mode_t;
-
-struct background_control {
-    float amp;
-};
-typedef struct background_control background_control_t;
-
-
 struct background {
-    background_mode_t mode;
-
-    background_control_t *control;
-
-    background_control_t normal_control;
-    background_control_t win_control;
-
-    anim_fsm_t anim_fsm;
-
     float amp;
     int change_counter_frames;
     float change_per_frame;
@@ -64,10 +40,7 @@ background_t *create_background(void);
 void destroy_background(background_t *bg);
 
 void background_resize(background_t *bg);
-
-void background_set_mode(background_t *bg, background_mode_t new_mode);
 void background_draw(background_t *bg);
-
 
                      
 #endif /*BACKGROUND_H*/

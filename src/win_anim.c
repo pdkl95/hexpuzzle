@@ -101,14 +101,14 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
                                                 * LEVEL_WIN_OSC_SPIN_RATE
                                                 * pop_amplify,
                                                 level->fade_rotate_speed);
-\
+
     float old_erl = level->extra_rotate_level;
     float new_erl = (old_erl + level->extra_rotate_level_speed) * 0.97;
     float delta_erl = new_erl - old_erl;
     float clamp_delta = Clamp(delta_erl, EVEL_WIN_SPIN_MAX_DECREASE, EVEL_WIN_SPIN_MAX_INCREASE);
     level->extra_rotate_level += clamp_delta;
-;
-//printf("erl = %f\tdelta = %f\tspeed = %f\n", level->extra_rotate_level, delta_erl, level->extra_rotate_level_speed);
+
+    //printf("erl = %f\tdelta = %f\tspeed = %f\n", level->extra_rotate_level, delta_erl, level->extra_rotate_level_speed);
 
     float spin_boost = 0.333 + fabsf(level->extra_rotate_level);
 
