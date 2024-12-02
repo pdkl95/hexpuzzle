@@ -70,6 +70,10 @@ bool is_number(const char *str);
 
 double normal_rng(void);
 
+float slew_limit(float current, float target, float step);
+float slew_limit_up(float current, float target, float step);
+float slew_limit_down(float current, float target, float step);
+
 /********************
  * easing functions *
  ********************/

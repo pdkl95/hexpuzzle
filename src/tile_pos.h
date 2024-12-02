@@ -35,6 +35,9 @@ struct tile_coord {
     Vector2 center;
     Vector2 corners[7];
     Vector2 midpoints[7];
+    Vector2 midpoint_path_cw[7];
+    Vector2 midpoint_path_ccw[7];
+    Vector2 radial_unit[7];
     tile_section_t sections[6];
 };
 typedef struct tile_coord tile_coord_t;

@@ -334,7 +334,12 @@ void tile_pos_rebuild(tile_pos_t *pos)
 
     Vector2 cent = Vector2Lerp(pos->win.midpoints[0], pos->win.midpoints[3], 0.5);
 
+    float half_line_width = pos->line_width / 2.0f;
+
     each_direction {
+        pos->win.radial_unit[dir] = Vector2Normalize(Vector2Subtract(pos->win.midpoints[dir], pos->win.center));
+        pos->rel.radial_unit[dir] = pos->win.radial_unit[dir];
+
         Vector2 c0 = pos->win.corners[dir];
         Vector2 c1 = pos->win.corners[dir + 1];
 
@@ -345,6 +350,16 @@ void tile_pos_rebuild(tile_pos_t *pos)
         pos->rel.sections[dir].corners[0] = Vector2Subtract(pos->win.sections[dir].corners[0], pos->win.center);
         pos->rel.sections[dir].corners[1] = Vector2Subtract(pos->win.sections[dir].corners[1], pos->win.center);
         pos->rel.sections[dir].corners[2] = Vector2Subtract(pos->win.sections[dir].corners[2], pos->win.center);
+
+        Vector2 mid_to_corner = Vector2Subtract(pos->win.midpoints[dir], pos->win.sections[dir].corners[0]);
+        Vector2 halfpath = Vector2Scale(Vector2Normalize(mid_to_corner), half_line_width);
+
+        pos->win.midpoint_path_cw[dir] = Vector2Add(pos->win.midpoints[dir], halfpath);
+        halfpath = Vector2Scale(halfpath, -1.0);
+        pos->win.midpoint_path_ccw[dir] = Vector2Add(pos->win.midpoints[dir], halfpath);
+
+        pos->rel.midpoint_path_cw[dir] = Vector2Subtract(pos->rel.midpoint_path_cw[dir], pos->win.center);
+        pos->rel.midpoint_path_ccw[dir] = Vector2Subtract(pos->rel.midpoint_path_ccw[dir], pos->win.center);
     }
 }
 

@@ -160,10 +160,13 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
             pos->prev_ring_phase = ring_phase;
 
             float tmag = tanh(mag);
-            pos->extra_magnitude = Lerp(pop_magnitude * tmag, mag + (0.25 * tmag), tmag);
-            pos->extra_magnitude += 6.0f * pos->ring_radius;
-            pos->extra_magnitude += powf(spin_boost, pos->ring_radius);
-            pos->extra_magnitude *= fade_magnitude * osc_magnitude;;
+            float extra_magnitude_target = Lerp(pop_magnitude * tmag, mag + (0.25 * tmag), tmag);
+            extra_magnitude_target += 6.0f * pos->ring_radius;
+            extra_magnitude_target += powf(spin_boost, pos->ring_radius + 1);
+            extra_magnitude_target *= fade_magnitude * osc_magnitude;
+            pos->extra_magnitude = slew_limit_down(pos->extra_magnitude,
+                                                   extra_magnitude_target,
+                                                   1.666);
 
 #if 0
             if (i==LEVEL_MAXTILES/2+7) {
@@ -224,9 +227,9 @@ anim_fsm_callbacks_t     fade_in_callbacks = { .update = win_anim_fade_in_update
 anim_fsm_callbacks_t osc_ramp_in_callbacks = { .update = win_anim_osc_ramp_in_update };
 anim_fsm_callbacks_t    osc_stay_callbacks = { .update = win_anim_osc_stay_update    };
 
-anim_fsm_state_t states[] = {
-    { "FADE_IN",       8.0, ANIM_FSM_STATE_NEXT,     &fade_in_callbacks },
-    { "OSC_RAMP_IN",   8.0, ANIM_FSM_STATE_NEXT, &osc_ramp_in_callbacks },
+anim_fsm_state_t states[] = { //8
+    { "FADE_IN",       1.0, ANIM_FSM_STATE_NEXT,     &fade_in_callbacks },
+    { "OSC_RAMP_IN",   1.0, ANIM_FSM_STATE_NEXT, &osc_ramp_in_callbacks },
     { "OSC_STAY",     10.0, ANIM_FSM_STATE_STAY,    &osc_stay_callbacks },
     { "STOP",          0.0, ANIM_FSM_STATE_STOP,                   NULL }
 };

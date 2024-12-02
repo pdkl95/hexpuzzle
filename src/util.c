@@ -162,6 +162,51 @@ double normal_rng(void)
 	return  sqrt(-2.0 * log(a)) * cos(2 * M_PI * b);
 }
 
+float slew_limit(float current, float target, float step)
+{
+    if (current < target) {
+        current += step;
+    } else if (current > step) {
+        current -= step;
+    }
+
+    if (fabsf(target - current) <= step) {
+        return target;
+    } else {
+        return current;
+    }
+}
+
+float slew_limit_up(float current, float target, float step)
+{
+    if (current > target) {
+        return target;
+    } else if (current < step) {
+        current += step;
+    }
+
+    if (fabsf(target - current) <= step) {
+        return target;
+    } else {
+        return current;
+    }
+}
+
+float slew_limit_down(float current, float target, float step)
+{
+    if (current < target) {
+        return target;
+    } else if (current > step) {
+        current -= step;
+    }
+
+    if (fabsf(target - current) <= step) {
+        return target;
+    } else {
+        return current;
+    }
+}
+
 float ease_circular_in(float t) {
     return 1.0f - sqrtf(1.0f - (t * t));
 }

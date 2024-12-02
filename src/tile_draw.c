@@ -327,7 +327,7 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
     /* show each hex's axial coordinates */
     int font_size = GuiGetStyle(DEFAULT, TEXT_SIZE);
     const char *coord_text = TextFormat("#%d: %d,%d", pos->tile->id, pos->position.q, pos->position.r);
-    Vector2 text_size = MeasureTextEx(DEFAULT_GUI_FONT, coord_text, font_size, 1.0);
+    Vector2 text_size = measure_gui_text(coord_text);
     DrawTextDropShadow(coord_text, pos->rel.center.x - (text_size.x/2), pos->rel.center.y + 14, font_size, WHITE, BLACK);
 #endif
 }
@@ -385,6 +385,7 @@ void tile_draw_corner_connections(tile_pos_t *pos, level_t *level)
     }
 
     each_direction {
+        hex_direction_t opposite_dir = hex_opposite_direction(dir);
         tile_pos_t *neighbor = pos->neighbors[dir];
         if (!neighbor || !neighbor->tile->enabled || neighbor->tile->hidden) {
             continue;
@@ -414,16 +415,49 @@ void tile_draw_corner_connections(tile_pos_t *pos, level_t *level)
         Color color = get_win_border_color(pos, level) ;
         color.a = (unsigned char)(255.0f * MAX(pos->extra_magnitude, neighbor->extra_magnitude));
 
-        DrawSplineSegmentCatmullRom(p0, p1, p2, p3, 3.0, color);
+        float thickness = 3.0;
+        //thickness += pos->extra_magnitude * 0.1;
+        DrawSplineSegmentCatmullRom(p0, p1, p2, p3, thickness, color);
+
+        if (dir > 2) {
+            /// only one side of each path
+            continue;
+        }
+
+        if (tile->path[dir] != PATH_TYPE_NONE) {
+            float outside_scale = pos->extra_magnitude * 0.05;
+            Vector2 outside          = Vector2Scale(     pos->win.radial_unit[dir], outside_scale);
+            Vector2 neighbor_outside = Vector2Scale(neighbor->win.radial_unit[opposite_dir], outside_scale);
+
+            Vector2 pos_cw_p  = pos->win.midpoint_path_cw[dir];
+            Vector2 pos_cw_c  = Vector2Add(pos->win.midpoint_path_cw[dir], outside);
+            Vector2 nbr_ccw_c = Vector2Add(neighbor->win.midpoint_path_ccw[opposite_dir], neighbor_outside);
+            Vector2 nbr_ccw_p = neighbor->win.midpoint_path_ccw[opposite_dir];
+
+            pos_cw_p  = Vector2Add(pos_cw_p,  pos->extra_translate);
+            pos_cw_c  = Vector2Add(pos_cw_c,  pos->extra_translate);
+            nbr_ccw_c = Vector2Add(nbr_ccw_c, neighbor->extra_translate);
+            nbr_ccw_p = Vector2Add(nbr_ccw_p, neighbor->extra_translate);
 
 #ifdef DEBUG_ID_AND_DIR
-        if (debug_dir == (int)dir && debug_id == pos->tile->id) {
-            float r = 12.0f;
-            DrawCircleV(p0, r, PINK);
-            DrawCircleV(p1, r, RED);
-            DrawCircleV(p2, r, GREEN);
-            DrawCircleV(p3, r, LIME);
-        }
+            if (debug_dir == (int)dir && debug_id == pos->tile->id) {
+                float r = 12.0f;
+
+                DrawCircleV(pos_cw_p,  r, RED);
+                DrawCircleV(pos_cw_c,  r, PINK);
+                DrawCircleV(nbr_ccw_c, r, LIME);
+                DrawCircleV(nbr_ccw_p, r, GREEN);
+            }
 #endif
+
+            color.a = MIN(0.5, color.a);
+            DrawSplineSegmentBezierCubic(
+                pos_cw_p,
+                pos_cw_c,
+                nbr_ccw_c,
+                nbr_ccw_p,
+                thickness,
+                color);
+        }
     }
 }
