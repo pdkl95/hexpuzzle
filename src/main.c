@@ -764,8 +764,8 @@ handle_events(
             }
             /* fall through */
 
-        default:
 #if defined(PLATFORM_DESKTOP)
+        default:
             running = false;
             return true;
 #endif

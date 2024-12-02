@@ -951,10 +951,17 @@ static void draw_gui_random_colors(void)
 
 bool ask_for_random_seed(void)
 {
+#if defined(PLATFORM_DESKTOP)
     char *seedstr = tinyfd_inputBox("New Random Seed",
                                     "Enter a randon number generator seed:",
                                     "");
-    if (strlen(seedstr) < 1) {
+#endif
+
+#if defined(PLATFORM_WEB)
+    char *seedstr = "";
+#endif
+
+            if (strlen(seedstr) < 1) {
         return false;
     }
 

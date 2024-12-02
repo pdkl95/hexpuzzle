@@ -4,9 +4,6 @@ ACLOCAL_AMFLAGS = -I m4
 
 AM_CPPFLAGS = -Wall -Wextra
 
-RAYLIB_PLATFORM = PLATFORM_DESKTOP
-RAYLIB_GRAPHICS = GRAPHICS_API_OPENGL_33
-
 XXD ?= xxd
 
 CLASSICS_LEVELS = \
@@ -34,12 +31,20 @@ EXTRA_DIST = \
 	$(SHADERS)
 
 if BUILD_WEB
+RAYLIB_PLATFORM = PLATFORM_WEB
+RAYLIB_GRAPHICS = GRAPHICS_API_OPENGL_ES2
+
 COMMON_PROG_CFLAGS = \
 	-DPLATFORM=PLATFORM_WEB \
 	-DPLATFORM_WEB \
 	-flto
 else
+RAYLIB_PLATFORM = PLATFORM_DESKTOP
+RAYLIB_GRAPHICS = GRAPHICS_API_OPENGL_33
+
 COMMON_PROG_CFLAGS = \
+	-D$(RAYLIB_PLATFORM) \
+	-D$(RAYLIB_GRAPHICS) \
 	-DPLATFORM=PLATFORM_DESKTOP \
 	-DPLATFORM_DESKTOP
 endif
@@ -294,7 +299,6 @@ external_raylib_libraylib_a_SOURCES = \
 	external/raylib/raudio.c \
 	external/raylib/raylib.h \
 	external/raylib/rcore.c \
-	external/raylib/rglfw.c \
 	external/raylib/rlgl.h \
 	external/raylib/rmodels.c \
 	external/raylib/rshapes.c \
@@ -302,6 +306,11 @@ external_raylib_libraylib_a_SOURCES = \
 	external/raylib/rtextures.c \
 	external/raylib/utils.c \
 	external/raylib/utils.h
+
+if ! BUILD_WEB
+external_raylib_libraylib_a_SOURCES += \
+	external/raylib/rglfw.c
+endif
 
 EXTRA_DIST += \
 	$(GLFW_SRC) \
