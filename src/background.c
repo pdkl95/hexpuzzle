@@ -85,6 +85,21 @@ void background_set_mode(background_t *bg, background_mode_t new_mode)
     bg->mode = new_mode;
 }
 
+float smooth_change(float current, float target, float step)
+{
+    if (current < target) {
+        current += step;
+    } else if (current > step) {
+        current -= step;
+    }
+
+    if (fabsf(target - current) <= step) {
+        return target;
+    } else {
+        return current;
+    }
+}
+
 void background_draw(background_t *bg)
 {
     bool draw_labels = false;;
@@ -129,6 +144,7 @@ void background_draw(background_t *bg)
     static float angle = 0.0;
     static float prev_angle = 0.0f;
     static float next_angle = 0.0f;
+    static float finished_fract = 0.0f;
     static float change_fract = 0.0f;
     static int change_counter = 0;
     //static float rot_direction = 1.0;
@@ -198,14 +214,23 @@ void background_draw(background_t *bg)
 
         float bloom_fade = 0.5 * bloom_amount;
         bloom_fade += 0.5;
+        float circ_time_scale = 3.0;
         float circ_mag = TAU/36.0f;
-        circ_mag *= bloom_fade;
-        circ_mag *= fade;
-        //float circ_time_scale = 3.0;
-        /* float rot_x = circ_mag * cosf(current_time / circ_time_scale); */
-        /* float rot_y = circ_mag * sinf(current_time / circ_time_scale); */
-        float rot_x = circ_mag * -dir.x;
-        float rot_y = circ_mag * -dir.y;
+
+        float rot_x, rot_y;
+        if (current_level) {
+            finished_fract = smooth_change(finished_fract,
+                                           current_level->finished_fract,
+                                           0.005f);
+            circ_mag *= finished_fract;
+            rot_x = circ_mag * cosf(current_time / circ_time_scale);
+            rot_y = circ_mag * sinf(current_time / circ_time_scale);
+        } else {
+            circ_mag *= bloom_fade;
+            circ_mag *= fade;
+            rot_x = circ_mag * -dir.x;
+            rot_y = circ_mag * -dir.y;
+        }
 
         float rot_z = 2.0 * sinf(current_time / 10.0);
         rot_z += 1.0f - (fade * bloom_fade);

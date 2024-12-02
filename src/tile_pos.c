@@ -71,21 +71,31 @@ void destroy_tile_pos(tile_pos_t *pos)
     SAFEFREE(pos);
 }
 
-bool tile_pos_check(tile_pos_t *pos)
+bool tile_pos_check(tile_pos_t *pos, int *path_count, int *finished_path_count)
 {
+    bool rv = true;
+
     each_direction {
         if (pos->tile->path[dir] != PATH_TYPE_NONE) {
+            if (path_count) {
+                *path_count += + 1;
+            }
+
             hex_direction_t opp_i = hex_opposite_direction(dir);
             tile_pos_t *neighbor = pos->neighbors[dir];
             if (neighbor) {
-                if (pos->tile->path[dir] != neighbor->tile->path[opp_i]) {
-                    return false;
+                if (pos->tile->path[dir] == neighbor->tile->path[opp_i]) {
+                    if (finished_path_count) {
+                        *finished_path_count += 1;
+                    }
+                } else {
+                    rv = false;
                 }
             }
         }
     }
 
-    return true;
+    return rv;
 }
 
 void tile_pos_set_hover(tile_pos_t *pos, Vector2 mouse_pos)

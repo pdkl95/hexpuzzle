@@ -104,6 +104,9 @@ struct level {
     bool changed;
 
     bool finished;
+    float finished_fract;
+    int path_count;
+    int finished_path_count;
     float finished_hue;
 
     float extra_rotate_level;

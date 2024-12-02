@@ -440,6 +440,8 @@ void level_reset(level_t *level)
 
     level_resize(level);
 
+    level->finished_fract = 0.0f;
+
     level_use_solved_tile_pos(level);
     level_enable_spiral(level, level->radius);
 
@@ -1168,16 +1170,23 @@ bool level_check(level_t *level)
     case GAME_MODE_PLAY_LEVEL:
         break;
     case GAME_MODE_WIN_LEVEL:
+        level->finished_fract = 1.0;
         break;
     default:
+        level->finished_fract = 0.0;
         return false;
     }
 
     if (options->cheat_autowin) {
+        level->finished_fract = 1.0;
         return true;
     }
 
+    bool rv = true;
+
     path_int_t total = {0};
+    level->path_count = 0;
+    level->finished_path_count = 0;
 
     for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
         for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
@@ -1187,8 +1196,8 @@ bool level_check(level_t *level)
             };
             tile_pos_t *pos = level_get_current_tile_pos(level, axial);
             if (pos->tile->enabled) {
-                if (!tile_pos_check(pos)) {
-                    return false;
+                if (!tile_pos_check(pos, &(level->path_count), &(level->finished_path_count))) {
+                    rv = false;
                 }
 
                 path_int_t counts = tile_count_path_types(pos->tile);
@@ -1199,17 +1208,24 @@ bool level_check(level_t *level)
         }
     }
 
+    bool blank = true;
     for (int i=0; i<PATH_TYPE_COUNT; i++) {
         if (i == PATH_TYPE_NONE) {
             continue;
         }
         if (total.path[i] > 0) {
-            return true;
+            blank = false;
+            break;
         }
     }
 
-    // level is blank
-    return false;
+    if (blank || (level->path_count == 0)) {
+        rv = false;
+    }
+
+    level->finished_fract = ((float)level->finished_path_count) / ((float)level->path_count);
+
+    return rv;
 }
 
 void level_set_hover(level_t *level, IVector2 mouse_position)
