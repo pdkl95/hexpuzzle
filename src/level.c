@@ -1633,13 +1633,12 @@ void level_win(level_t *level)
         return;
     }
 
-    enable_postprocessing();
-    win_anim_start(level->win_anim);
-
     level->finished = true;
     if (game_mode == GAME_MODE_PLAY_LEVEL) {
         set_game_mode(GAME_MODE_WIN_LEVEL);
     }
+
+    win_anim_start(level->win_anim);
 }
 
 void level_unwin(level_t *level)
@@ -1651,7 +1650,6 @@ void level_unwin(level_t *level)
     }
 
     win_anim_stop(level->win_anim);
-    disable_postprocessing();
 
     level->finished = false;
     if (game_mode == GAME_MODE_WIN_LEVEL) {

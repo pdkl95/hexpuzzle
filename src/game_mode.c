@@ -63,7 +63,15 @@ char *game_mode_t_str(game_mode_t mode)
     }
 }
 
+static void on_enter_win_level_mode(void)
+{
+    enable_postprocessing();
+}
 
+static void on_exit_win_level_mode(void)
+{
+    disable_postprocessing();
+}
 
 static void _set_game_mode(game_mode_t new_mode)
 {
@@ -114,6 +122,26 @@ static void _set_game_mode(game_mode_t new_mode)
 
     default:
         last_game_mode = old_mode;
+        break;
+    }
+
+    /* exit events */
+    switch (old_mode) {
+    case GAME_MODE_WIN_LEVEL:
+        on_exit_win_level_mode();
+        break;
+
+    default:
+        break;
+    }
+
+    /* enter events */
+    switch (new_mode) {
+    case GAME_MODE_WIN_LEVEL:
+        on_enter_win_level_mode();
+        break;
+
+    default:
         break;
     }
 

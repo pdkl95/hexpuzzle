@@ -254,7 +254,7 @@ static void set_edit_tool(path_type_t type)
 static void return_from_level_callback(UNUSED level_t *level, UNUSED void *data)
 {
     if (current_level) {
-        //disable_postprocessing();
+        disable_postprocessing();
         level_unload();
     }
 
@@ -2010,8 +2010,9 @@ render_frame(
 
     SetShaderValue(postprocessing_shader, postprocessing_shader_loc.effect_amount, &(postprocessing_effect_amount[0]), SHADER_UNIFORM_VEC4);
     SetShaderValue(postprocessing_shader, postprocessing_shader_loc.time, &current_time, SHADER_UNIFORM_FLOAT);
+    bool do_postprocessing_this_frame = do_postprocessing;
 
-    if (do_postprocessing) {
+    if (do_postprocessing_this_frame) {
         BeginTextureMode(*scene_write_target);
     } else {
         BeginDrawing();
@@ -2020,7 +2021,7 @@ render_frame(
     {
         ClearBackground(BLACK);
 
-        if (do_postprocessing && renderd_texture_last_frame) {
+        if (do_postprocessing_this_frame && renderd_texture_last_frame) {
             draw_feedback_bg();
         }
 
@@ -2047,7 +2048,7 @@ render_frame(
         }
     }
 
-    if (do_postprocessing) {
+    if (do_postprocessing_this_frame) {
         EndTextureMode();
 
         BeginDrawing();
@@ -2067,6 +2068,12 @@ render_frame(
                 DrawTextureRec(scene_write_target->texture, src_rect, position, WHITE);
             }
             EndShaderMode();
+
+#if 0
+            DrawTextShadow(TextFormat("PostProcFX %s", do_postprocessing_this_frame ? "ON" : "OFF"),
+                           15, window_size.y - 15 - DEFAULT_GUI_FONT_SIZE - DEFAULT_GUI_FONT_SIZE,
+                           DEFAULT_GUI_FONT_SIZE, WHITE);
+#endif
         }
 
         renderd_texture_last_frame = true;
