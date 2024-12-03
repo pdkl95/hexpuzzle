@@ -208,21 +208,37 @@ static bool program_state_from_json(cJSON *json)
         }
     }
 
-    cJSON *graphics_json = cJSON_GetObjectItemCaseSensitive(json, "graphics");
-    if (graphics_json) {
-        cJSON *cursor_size_json = cJSON_GetObjectItemCaseSensitive(graphics_json, "cursor_size");
+    cJSON *ui_json = cJSON_GetObjectItemCaseSensitive(json, "ui");
+    if (ui_json) {
+        cJSON *cursor_size_json = cJSON_GetObjectItemCaseSensitive(ui_json, "cursor_size");
         if (cursor_size_json) {
             if (cJSON_IsNumber(cursor_size_json)) {
                 int value = cursor_size_json->valueint;
                 CLAMPVAR(value, CURSOR_MIN_SCALE, CURSOR_MAX_SCALE);
                 options->cursor_scale = value;
             } else {
-                errmsg("Program state JSON['graphics']['cursor_size'] is not a NUMBER");
+                errmsg("Program state JSON['ui']['cursor_size'] is not a NUMBER");
             }
         } else {
-            warnmsg("Program state JSON['graphics'] is missing \"cursor_size\"");
+            warnmsg("Program state JSON['ui'] is missing \"cursor_size\"");
         }
 
+        cJSON *double_click_ms_json = cJSON_GetObjectItemCaseSensitive(ui_json, "double_click_ms");
+        if (double_click_ms_json) {
+            if (cJSON_IsNumber(double_click_ms_json)) {
+                int value = double_click_ms_json->valueint;
+                CLAMPVAR(value, DOUBLE_CLICK_MS_MIN, DOUBLE_CLICK_MS_MAX);
+                options->double_click_ms = value;
+            } else {
+                errmsg("Program state JSON['ui']['double_click_ms'] is not a NUMBER");
+            }
+        } else {
+            warnmsg("Program state JSON['ui'] is missing \"double_click_ms\"");
+        }
+    }
+
+    cJSON *graphics_json = cJSON_GetObjectItemCaseSensitive(json, "graphics");
+    if (graphics_json) {
         cJSON *bool_json = NULL;
 
 #define mk_bool_json(field, name)                                           \
@@ -353,14 +369,25 @@ static cJSON *program_state_to_json(void)
         }
     }
 
-    cJSON *graphics_json = cJSON_AddObjectToObject(json, "graphics");
-    if (!graphics_json) {
-        errmsg("Error adding \"graphics\" object to JSON");
+    cJSON *ui_json = cJSON_AddObjectToObject(json, "ui");
+    if (!ui_json) {
+        errmsg("Error adding \"ui\" object to JSON");
         goto to_json_error;
     }
 
-    if (cJSON_AddNumberToObject(graphics_json, "cursor_size", options->cursor_scale) == NULL) {
-        errmsg("Error adding \"cursor_size\" to JSON.graphics");
+    if (cJSON_AddNumberToObject(ui_json, "cursor_size", options->cursor_scale) == NULL) {
+        errmsg("Error adding \"cursor_size\" to JSON.ui");
+        goto to_json_error;
+    }
+
+    if (cJSON_AddNumberToObject(ui_json, "double_click_ms", options->double_click_ms) == NULL) {
+        errmsg("Error adding \"double_click_ms\" to JSON.ui");
+        goto to_json_error;
+    }
+
+    cJSON *graphics_json = cJSON_AddObjectToObject(json, "graphics");
+    if (!graphics_json) {
+        errmsg("Error adding \"graphics\" object to JSON");
         goto to_json_error;
     }
 

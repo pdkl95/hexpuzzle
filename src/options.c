@@ -271,6 +271,7 @@ options_set_defaults(
     options->initial_window_width  = OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH;
     options->initial_window_height = OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT;
     options->cursor_scale          = OPTIONS_DEFAULT_CURSOR_SCALE;
+    options->double_click_ms       = OPTIONS_DEFAULT_DOUBLE_CLICK_MS;
 
     options->load_state_animate_bg  = true;
     options->load_state_animate_win = true;

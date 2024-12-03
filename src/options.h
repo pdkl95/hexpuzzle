@@ -37,6 +37,7 @@
 #define OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH  800
 #define OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT 800
 #define OPTIONS_DEFAULT_CURSOR_SCALE 1
+#define OPTIONS_DEFAULT_DOUBLE_CLICK_MS 250
 
 #define OPTIONS_DEFAULT_STARTUP_ACTION STARTUP_ACTION_NONE
 
@@ -93,6 +94,7 @@ struct options {
     long initial_window_width;
     long initial_window_height;
     long cursor_scale;
+    long double_click_ms;
 
     char *nvdata_dir;
 
