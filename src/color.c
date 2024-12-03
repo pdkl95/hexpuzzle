@@ -88,6 +88,39 @@ void prepare_global_colors()
     text_shadow_color = ColorAlpha(BLACK, 0.85);
 }
 
+static Vector4 RGB2HSV(Vector4 rgb)
+{
+    Vector4 hsv;
+
+    float K = 0.f;
+
+    if (rgb.y < rgb.z)
+    {
+        float tmp = rgb.y;
+        rgb.y = rgb.z;
+        rgb.z = tmp;
+
+        K = -1.f;
+    }
+
+    if (rgb.x < rgb.y)
+    {
+        float tmp = rgb.x;
+        rgb.x = rgb.y;
+        rgb.y = tmp;
+
+        K = -2.f / 6.f - K;
+    }
+
+    float chroma = rgb.x - MIN(rgb.y, rgb.z);
+    hsv.x = fabs(K + (rgb.y - rgb.z) / (6.f * chroma + 1e-20f));
+    hsv.y = chroma / (rgb.x + 1e-20f);
+    hsv.z = rgb.x;
+    hsv.w = rgb.w;
+
+    return hsv;
+}
+
 void color_option_set(color_option_t *c_opt, Color new_color)
 {
     assert_not_null(c_opt);
@@ -122,6 +155,10 @@ void color_option_set(color_option_t *c_opt, Color new_color)
              new_color.r,
              new_color.g,
              new_color.b);
+
+    Vector4 norm = ColorNormalize(c_opt->color);
+    float hue = RGB2HSV(norm).x;
+    c_opt->hue = (unsigned char)(255.0 * hue);
 };
 
 static unsigned char parse_hex_byte(const char *p)

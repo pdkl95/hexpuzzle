@@ -2006,7 +2006,7 @@ render_frame(
     postprocessing_effect_amount[2] = warp_amount;
     postprocessing_effect_amount[3] = 0.0f;
 
-    SetShaderValue(win_border_shader, win_border_shader_loc.effect_amount, &(postprocessing_effect_amount[0]), SHADER_UNIFORM_VEC4);
+    //SetShaderValue(win_border_shader, win_border_shader_loc.effect_amount, &(postprocessing_effect_amount[0]), SHADER_UNIFORM_VEC4);
 
     SetShaderValue(postprocessing_shader, postprocessing_shader_loc.effect_amount, &(postprocessing_effect_amount[0]), SHADER_UNIFORM_VEC4);
     SetShaderValue(postprocessing_shader, postprocessing_shader_loc.time, &current_time, SHADER_UNIFORM_FLOAT);

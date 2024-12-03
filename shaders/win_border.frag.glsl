@@ -18,23 +18,18 @@ uniform vec4 effect_amount;
 float bloom_amount;
 float distort_amount;
 float warp_amount;
+float do_hue_override;
 
 // Output fragment color
 //out vec4 finalColor;
 
 #define TAU 6.283185307179586
 
-#define saturate(V) clamp(V, 0.0, 1.0)
-
-vec3 hue2rgb(const in float hue) {
-    float R = abs(hue * 6.0 - 3.0) - 1.0;
-    float G = 2.0 - abs(hue * 6.0 - 2.0);
-    float B = 2.0 - abs(hue * 6.0 - 4.0);
-    return saturate(vec3(R,G,B));
-}
-
-vec3 hsv2rgb(const in vec3 hsv) {
-    return ((hue2rgb(hsv.x) - 1.0) * hsv.y + 1.0) * hsv.z;
+vec3 hsv2rgb(vec3 c)
+{
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
 }
 
 void main()
@@ -42,6 +37,7 @@ void main()
     bloom_amount = effect_amount.x;
     distort_amount = effect_amount.y;
     warp_amount = effect_amount.z;
+    do_hue_override = effect_amount.w;
 
     float px = 1.0/resolution.y;
     float aspect = resolution.y/resolution.x;
@@ -66,9 +62,9 @@ void main()
     vec3 color = vec3(0);
     float alpha = 1.0;
 
-    float tile_radius    = fragColor.g;
-    float perlin_noise   = fragColor.b;
     float path_highlight = fragColor.r;
+    float hue_override   = fragColor.g;
+    float perlin_noise   = fragColor.b;
     float hidden         = fragColor.a;
 
     float spin_fade = 1.0;
@@ -128,6 +124,11 @@ void main()
 
     vec3 saturate_color = vec3(1.0);
     color = mix(color, saturate_color, min(saturate, (1.0-base_wave)));
+
+    if (do_hue_override > 0.6 && hue_override != 0.0) {
+        vec3 override_color = hsv2rgb(vec3(hue_override, 1.0, 1.0));
+        color = mix(color, override_color, 1.0 - bloom_amount);
+    }
 
     gl_FragColor = clamp(vec4(color, alpha), 0.0, 1.0);
 }

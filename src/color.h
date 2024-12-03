@@ -35,6 +35,7 @@ struct color_option {
     char rgb_string[COLOR_OPTION_STRING_LENGTH];
     char rgba_string[COLOR_OPTION_STRING_LENGTH];
     unsigned char rgba[4];
+    unsigned char hue;
 };
 typedef struct color_option color_option_t;
 

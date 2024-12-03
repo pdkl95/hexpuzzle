@@ -227,9 +227,9 @@ anim_fsm_callbacks_t     fade_in_callbacks = { .update = win_anim_fade_in_update
 anim_fsm_callbacks_t osc_ramp_in_callbacks = { .update = win_anim_osc_ramp_in_update };
 anim_fsm_callbacks_t    osc_stay_callbacks = { .update = win_anim_osc_stay_update    };
 
-anim_fsm_state_t states[] = { //8
-    { "FADE_IN",       1.0, ANIM_FSM_STATE_NEXT,     &fade_in_callbacks },
-    { "OSC_RAMP_IN",   1.0, ANIM_FSM_STATE_NEXT, &osc_ramp_in_callbacks },
+anim_fsm_state_t states[] = {
+    { "FADE_IN",       6.0, ANIM_FSM_STATE_NEXT,     &fade_in_callbacks },
+    { "OSC_RAMP_IN",   8.0, ANIM_FSM_STATE_NEXT, &osc_ramp_in_callbacks },
     { "OSC_STAY",     10.0, ANIM_FSM_STATE_STAY,    &osc_stay_callbacks },
     { "STOP",          0.0, ANIM_FSM_STATE_STOP,                   NULL }
 };

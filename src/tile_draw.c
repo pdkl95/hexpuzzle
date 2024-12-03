@@ -348,27 +348,27 @@ static float tile_draw_hash_wave(tile_pos_t *pos)
                              0, 0, 0);
 }
 
-static Color get_win_border_color(tile_pos_t *pos, level_t *level)
+static Color get_win_border_color(tile_pos_t *pos)
 {
     int offset = 3 - (pos->ring_radius % 3);
 
     Color color = {0};
 
     color.r = (255/3) * offset;
-    color.g = (255 * pos->ring_radius) / level->radius;
+    color.g = 0;
     color.b = (unsigned char)(255.0f * tile_draw_hash_wave(pos));
     color.a = pos->tile->hidden ? 255 : 0;
 
     return color;
 }
 
-void tile_draw_win_anim(tile_pos_t *pos, level_t *level)
+void tile_draw_win_anim(tile_pos_t *pos)
 {
     if (!pos->tile->enabled) {
         return;
     }
 
-    Color color = get_win_border_color(pos, level);
+    Color color = get_win_border_color(pos);
 
     tile_draw_path_highlight(pos, true, color);
 
@@ -377,7 +377,7 @@ void tile_draw_win_anim(tile_pos_t *pos, level_t *level)
     DrawPolyLinesEx(pos->rel.center, 6, pos->size, 0.0f, line_width, color);
 }
 
-void tile_draw_corner_connections(tile_pos_t *pos, level_t *level)
+void tile_draw_corner_connections(tile_pos_t *pos)
 {
     tile_t *tile = pos->tile;
     if (!tile->enabled || tile->hidden) {
@@ -412,7 +412,7 @@ void tile_draw_corner_connections(tile_pos_t *pos, level_t *level)
         p2 = Vector2Add(p2, neighbor->extra_translate);
         p3 = Vector2Add(p3, neighbor->extra_translate);
 
-        Color color = get_win_border_color(pos, level) ;
+        Color color = get_win_border_color(pos);
         color.a = (unsigned char)(255.0f * MAX(pos->extra_magnitude, neighbor->extra_magnitude));
 
         float thickness = 3.0;
@@ -471,7 +471,8 @@ void tile_draw_corner_connections(tile_pos_t *pos, level_t *level)
             }
 #endif
 
-            color.a = 0.0;
+            color.g = options->path_color[tile->path[dir]].hue;
+            color.a = 1.0;
 
             DrawSplineSegmentBezierCubic(
                 pos_m_p,

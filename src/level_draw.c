@@ -29,6 +29,7 @@
 #include "shader.h"
 #include "win_anim.h"
 
+extern float postprocessing_effect_amount[4];
 
 static void level_set_fade_transition(level_t *level, tile_pos_t *pos)
 {
@@ -66,6 +67,10 @@ static void level_set_transition(level_t *level, tile_pos_t *pos, bool do_fade, 
 
 static void level_draw_corner_connections(level_t *level)
 {
+    postprocessing_effect_amount[3] = 1.0f;
+
+    SetShaderValue(win_border_shader, win_border_shader_loc.effect_amount, &(postprocessing_effect_amount[0]), SHADER_UNIFORM_VEC4);
+
     BeginShaderMode(win_border_shader);
     {
         for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
@@ -79,7 +84,7 @@ static void level_draw_corner_connections(level_t *level)
                 rlPushMatrix();
 
                 //level_set_transition(level, pos, do_fade, finished_fade_in);
-                tile_draw_corner_connections(pos, level);
+                tile_draw_corner_connections(pos);
 
                 rlPopMatrix();
             }
@@ -155,6 +160,10 @@ void level_draw(level_t *level, bool finished)
     }
 
     if (finished) {
+        postprocessing_effect_amount[3] = 0.0f;
+
+        SetShaderValue(win_border_shader, win_border_shader_loc.effect_amount, &(postprocessing_effect_amount[0]), SHADER_UNIFORM_VEC4);
+
         BeginShaderMode(win_border_shader);
         {
             for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
@@ -168,7 +177,7 @@ void level_draw(level_t *level, bool finished)
                     rlPushMatrix();
 
                     level_set_transition(level, pos, do_fade, finished_fade_in);
-                    tile_draw_win_anim(pos, level);
+                    tile_draw_win_anim(pos);
 
                     rlPopMatrix();
                 }
