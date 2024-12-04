@@ -23,10 +23,12 @@
 
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <time.h>
 
 #include "cJSON/cJSON.h"
 
 #include "options.h"
+#include "level.h"
 #include "nvdata.h"
 #include "nvdata_finished.h"
 
@@ -36,6 +38,7 @@ char *local_config_dir = NULL;
 char *nvdata_dir = NULL;
 char *nvdata_state_file_path = NULL;
 char *nvdata_default_browse_path = NULL;
+char *nvdata_saved_current_level_path = NULL;
 
 static void find_or_create_dir(const char *path, const char *desc)
 {
@@ -107,7 +110,7 @@ static bool program_state_from_json(cJSON *json)
     cJSON *version_json = cJSON_GetObjectItemCaseSensitive(json, "version");
     if (version_json) {
         if (!cJSON_IsNumber(version_json)) {
-            errmsg("Error parsing level JSON['version'] is not a Number");
+            errmsg("Error parsing program state: JSON['version'] is not a Number");
             return false;
         }
 
@@ -117,6 +120,34 @@ static bool program_state_from_json(cJSON *json)
         }
     } else {
         warnmsg("Program state JSON is missing \"version\"");
+    }
+
+    cJSON *current_level_save_file_json = cJSON_GetObjectItemCaseSensitive(json, "current_level_save_file");
+    if (current_level_save_file_json) {
+        if (!cJSON_IsString(current_level_save_file_json)) {
+            errmsg("Error parsing program state: JSON['current_level_save_file_json'] is not a String");
+            return false;
+        }
+
+        char *filename = cJSON_GetStringValue(current_level_save_file_json);
+        if (filename) {
+            infomsg("Loading current level save file \"%s\"", filename);
+
+            if (current_level) {
+                errmsg("Cannot load - current_level is ocupied ");
+            } else {
+                level_t *level = load_level_file(filename);
+                if (level) {
+                    infomsg("Level loaded. Removing transient save file \"%s\"", filename);
+                    level_play(level);
+                    unlink(filename);
+                } else {
+                    errmsg("Load failed!");
+                }
+            }
+        } else {
+            errmsg("Error parsing program state: JSON['current_level_save_file_json'] is NULL");
+        }
     }
 
     cJSON *window_json = cJSON_GetObjectItemCaseSensitive(json, "window");
@@ -320,6 +351,13 @@ static cJSON *program_state_to_json(void)
         goto to_json_error;
     }
 
+    if (nvdata_saved_current_level_path) {
+        if (cJSON_AddStringToObject(json, "current_level_save_file", nvdata_saved_current_level_path) == NULL) {
+            errmsg("Error adding \"current_level_save_file\" to JSON");
+            goto to_json_error;
+        }
+    }
+
     cJSON *window_json = cJSON_AddObjectToObject(json, "window");
     if (!window_json) {
         errmsg("Error adding \"window\" object to JSON");
@@ -521,4 +559,27 @@ void save_nvdata(void)
         save_nvdata_program_state();
         save_nvdata_game_metadata();
     }
+}
+
+void save_current_level_with_nvdata(void)
+{
+    assert_not_null(current_level);
+
+    SAFEFREE(nvdata_saved_current_level_path);
+
+#define TIMEBUF_SIZE 200
+    char timebuf[TIMEBUF_SIZE];
+    struct tm *tm_info;
+
+    time_t now = time(NULL);
+    tm_info = localtime(&now);
+    strftime(timebuf, TIMEBUF_SIZE, "%Y%m%d-%H%M%S", tm_info);
+
+    safe_asprintf(&nvdata_saved_current_level_path, "%s/%s-%s.%s",
+                  nvdata_dir, NVDATA_SAVED_CURRENT_LEVEL_FILE_NAME_PREFIX,
+                  timebuf, LEVEL_FILENAME_EXT);
+
+    infomsg("Saving current level to: %s", nvdata_saved_current_level_path);
+
+    level_save_to_filename(current_level, nvdata_saved_current_level_path);
 }

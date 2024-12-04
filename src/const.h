@@ -113,6 +113,7 @@
 #define NVDATA_STATE_FILE_NAME "state.json"
 #define NVDATA_FINISHED_LEVEL_FILE_NAME "finished_levels.dat"
 #define NVDATA_DEFAULT_BROWSE_PATH_NAME "levels"
+#define NVDATA_SAVED_CURRENT_LEVEL_FILE_NAME_PREFIX "level_in_progress"
 
 #ifndef MAX_FILEPATH_LENGTH
     #if defined(_WIN32)

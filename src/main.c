@@ -376,6 +376,16 @@ static void reset_window_to_center(void)
 
     SetWindowPosition(x, y);
 }
+
+void savequit_current_level(void)
+{
+    printf("savequit_current_level()\n");
+    running = false;
+
+    if (current_level) {
+        save_current_level_with_nvdata();
+    }
+}
 #endif
 
 static void reset_current_level(void)
@@ -602,7 +612,6 @@ void set_mouse_position(int new_x, int new_y)
     }
 }
 
-#define MAX_DOUBLECLICK_TIME 0.3
 static void handle_mouse_events(void)
 {
     set_mouse_position(GetMouseX(), GetMouseY());
@@ -615,9 +624,9 @@ static void handle_mouse_events(void)
     if (IsCursorOnScreen()) {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             mouse_left_click = true;
-\
+
             double click_time = GetTime();
-            if ((click_time - last_mouse_click_time) < MAX_DOUBLECLICK_TIME) {
+            if ((click_time - last_mouse_click_time) < options->double_click_ms) {
                 mouse_left_doubleclick = true;
             }
             last_mouse_click_time = click_time;
@@ -865,7 +874,7 @@ Vector2 edit_tool_label_shadow_location;
 Vector2 edit_shuffle_label_location;
 Vector2 goto_next_level_label_location;
 
-#define MAX_RIGHT_SIDE_BUTTONS 8
+#define MAX_RIGHT_SIDE_BUTTONS 9
 Rectangle right_side_button_rect[MAX_RIGHT_SIDE_BUTTONS];
 
 char close_button_text_str[] = "Quit";
@@ -891,6 +900,10 @@ char save_button_text[SAVE_BUTTON_TEXT_LENGTH];
 char edit_button_text_str[] = "Edit";
 #define EDIT_BUTTON_TEXT_LENGTH (6 + sizeof(edit_button_text_str))
 char edit_button_text[EDIT_BUTTON_TEXT_LENGTH];
+
+char savequit_button_text_str[] = "Save&Quit";
+#define SAVEQUIT_BUTTON_TEXT_LENGTH (6 + sizeof(savequit_button_text_str))
+char savequit_button_text[SAVEQUIT_BUTTON_TEXT_LENGTH];
 
 char reset_button_text_str[] = "Reset";
 #define RESET_BUTTON_TEXT_LENGTH (6 + sizeof(reset_button_text_str))
@@ -1180,6 +1193,9 @@ void gui_setup(void)
 
     int right_side_button_text_width = 0;
 
+    Vector2 savequit_button_text_size = measure_gui_narrow_text(savequit_button_text_str);
+    right_side_button_text_width = MAX(right_side_button_text_width, savequit_button_text_size.x);
+
 #define rsbw(name) do {                                                 \
         Vector2 name##_button_text_size = measure_gui_text(name##_button_text_str); \
         right_side_button_text_width = MAX(right_side_button_text_width,          \
@@ -1197,16 +1213,17 @@ void gui_setup(void)
 
     right_side_button_text_width += 2 * BUTTON_MARGIN;
 
-    memcpy(  close_button_text, GuiIconText(ICON_EXIT,               close_button_text_str),   CLOSE_BUTTON_TEXT_LENGTH);
-    memcpy(   edit_button_text, GuiIconText(ICON_FILE_SAVE_CLASSIC,   edit_button_text_str),    EDIT_BUTTON_TEXT_LENGTH);
-    memcpy(   save_button_text, GuiIconText(ICON_TOOLS,               save_button_text_str),    SAVE_BUTTON_TEXT_LENGTH);
-    memcpy(  reset_button_text, GuiIconText(ICON_EXPLOSION,          reset_button_text_str),   RESET_BUTTON_TEXT_LENGTH);
-    memcpy( return_button_text, GuiIconText(ICON_CROSS,             return_button_text_str),  RETURN_BUTTON_TEXT_LENGTH);
-    memcpy(   undo_button_text, GuiIconText(ICON_UNDO_FILL,           undo_button_text_str),    UNDO_BUTTON_TEXT_LENGTH);
-    memcpy(   redo_button_text, GuiIconText(ICON_REDO_FILL,           redo_button_text_str),    REDO_BUTTON_TEXT_LENGTH);
-    memcpy(options_button_text, GuiIconText(ICON_GEAR,             options_button_text_str), OPTIONS_BUTTON_TEXT_LENGTH);
-    memcpy(browser_button_text, GuiIconText(ICON_FOLDER_FILE_OPEN, browser_button_text_str), BROWSER_BUTTON_TEXT_LENGTH);
-    memcpy( random_button_text, GuiIconText(ICON_SHUFFLE_FILL,      random_button_text_str),  RANDOM_BUTTON_TEXT_LENGTH);
+    memcpy(   close_button_text, GuiIconText(ICON_EXIT,                 close_button_text_str),    CLOSE_BUTTON_TEXT_LENGTH);
+    memcpy(    edit_button_text, GuiIconText(ICON_FILE_SAVE_CLASSIC,     edit_button_text_str),     EDIT_BUTTON_TEXT_LENGTH);
+    memcpy(    save_button_text, GuiIconText(ICON_TOOLS,                 save_button_text_str),     SAVE_BUTTON_TEXT_LENGTH);
+    memcpy(savequit_button_text, GuiIconText(ICON_FILE_SAVE_CLASSIC, savequit_button_text_str), SAVEQUIT_BUTTON_TEXT_LENGTH);
+    memcpy(   reset_button_text, GuiIconText(ICON_EXPLOSION,            reset_button_text_str),    RESET_BUTTON_TEXT_LENGTH);
+    memcpy(  return_button_text, GuiIconText(ICON_CROSS,               return_button_text_str),   RETURN_BUTTON_TEXT_LENGTH);
+    memcpy(    undo_button_text, GuiIconText(ICON_UNDO_FILL,             undo_button_text_str),     UNDO_BUTTON_TEXT_LENGTH);
+    memcpy(    redo_button_text, GuiIconText(ICON_REDO_FILL,             redo_button_text_str),     REDO_BUTTON_TEXT_LENGTH);
+    memcpy( options_button_text, GuiIconText(ICON_GEAR,               options_button_text_str),  OPTIONS_BUTTON_TEXT_LENGTH);
+    memcpy( browser_button_text, GuiIconText(ICON_FOLDER_FILE_OPEN,   browser_button_text_str),  BROWSER_BUTTON_TEXT_LENGTH);
+    memcpy(  random_button_text, GuiIconText(ICON_SHUFFLE_FILL,        random_button_text_str),   RANDOM_BUTTON_TEXT_LENGTH);
 
     right_side_button_rect[0].y      = WINDOW_MARGIN;
     right_side_button_rect[0].width  = ICON_BUTTON_SIZE + right_side_button_text_width;
@@ -1659,6 +1676,12 @@ static void draw_gui_widgets(void)
         if (GuiButton(right_side_button_rect[rsb++], options_button_text)) {
             set_game_mode(GAME_MODE_OPTIONS);
         }
+
+        set_gui_narrow_font();
+        if (GuiButton(right_side_button_rect[rsb++], savequit_button_text)) {
+            savequit_current_level();
+        }
+        set_default_font();
 
         if (GuiButton(right_side_button_rect[rsb++], reset_button_text)) {
             reset_current_level();

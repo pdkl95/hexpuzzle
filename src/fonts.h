@@ -74,6 +74,7 @@ void set_font(font_handle_t *fh);
     }
 
 deffont(gui);
+deffont(gui_narrow);
 deffont(panel);
 deffont(name);
 deffont(big_button);

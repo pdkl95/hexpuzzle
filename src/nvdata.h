@@ -27,5 +27,7 @@ void cleanup_nvdata(void);
 void load_nvdata(void);
 void save_nvdata(void);
 
+void save_current_level_with_nvdata(void);
+
 #endif /*NVDATA_H*/
 

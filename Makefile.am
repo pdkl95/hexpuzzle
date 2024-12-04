@@ -14,6 +14,7 @@ CLASSICS_LEVELS = \
 
 FONTS = \
 	fonts/BeetypeFilled-ljJq.otf \
+	fonts/CabinCondensed-Bold.ttf \
 	fonts/Ubuntu-Medium.ttf
 
 SHADERS = \

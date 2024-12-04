@@ -24,6 +24,7 @@
 #include "data_fonts.h"
 
 font_handle_t gui_font;
+font_handle_t gui_narrow_font;
 font_handle_t panel_font;
 font_handle_t name_font;
 font_handle_t big_button_font;
@@ -67,6 +68,10 @@ void load_fonts(void)
                                 fonts_Ubuntu_Medium_ttf,
                                 fonts_Ubuntu_Medium_ttf_len);
 
+    gui_narrow_font = load_font(15, TEXTURE_FILTER_TRILINEAR,
+                                fonts_CabinCondensed_Bold_ttf,
+                                fonts_CabinCondensed_Bold_ttf_len);
+
     panel_font      = load_font(20, TEXTURE_FILTER_BILINEAR,
                                 fonts_Ubuntu_Medium_ttf,
                                 fonts_Ubuntu_Medium_ttf_len);
@@ -87,6 +92,7 @@ void unload_fonts(void)
     UnloadFont(big_button_font.font);
     UnloadFont(name_font.font);
     UnloadFont(panel_font.font);
+    UnloadFont(gui_narrow_font.font);
     UnloadFont(gui_font.font);
 }
 
