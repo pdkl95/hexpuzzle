@@ -53,6 +53,7 @@ struct solver {
     int tile_index;
     int solved_index;
 
+    bool fast;
     struct tile_pos *swap_a;
     struct tile_pos *swap_b;
     Vector2 start_px;
@@ -67,6 +68,7 @@ void destroy_solver(solver_t *solver);
 void solver_toggle_solve(solver_t *solver);
 void solver_toggle_undo(solver_t *solver);
 void solver_start(solver_t *solver);
+void solver_start_fast(solver_t *solver);
 void solver_stop(solver_t *solver);
 void solver_undo(solver_t *solver);
 void solver_update(solver_t *solver);

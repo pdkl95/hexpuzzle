@@ -85,7 +85,7 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
 #define TILE_POP_IN_STEP 0.05
 #define TILE_POP_PHASE (TAU/4)
 #define TILE_POP_RBG_MASK 0x00000001
-#define LEVEL_WIN_OSC_SPIN_RATE 0.0005
+#define LEVEL_WIN_OSC_SPIN_RATE 0.0004
 #define TILE_POP_AMPLIFY_MIN 60.0
 #define TILE_POP_AMPLIFY_MAX 220.0
 #define TILE_POP_AMPLIFY_DELTA ((TILE_POP_AMPLIFY_MAX) - (TILE_POP_AMPLIFY_MIN))
@@ -96,21 +96,30 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
     float pop_amplify = TILE_POP_AMPLIFY_MIN;
     pop_amplify += pop_amplify_delta;
 
-    level->extra_rotate_level_speed = copysignf(simple_envelope
-                                                * osc_magnitude
-                                                * LEVEL_WIN_OSC_SPIN_RATE
-                                                * pop_amplify,
-                                                level->fade_rotate_speed);
+    level->extra_rotate_level_speed = slew_limit_down(
+        level->extra_rotate_level_speed,
+        simple_envelope
+        * osc_magnitude
+        * LEVEL_WIN_OSC_SPIN_RATE
+        * pop_amplify,
+        0.0015);
 
-    float old_erl = level->extra_rotate_level;
-    float new_erl = (old_erl + level->extra_rotate_level_speed) * 0.97;
-    float delta_erl = new_erl - old_erl;
-    float clamp_delta = Clamp(delta_erl, EVEL_WIN_SPIN_MAX_DECREASE, EVEL_WIN_SPIN_MAX_INCREASE);
-    level->extra_rotate_level += clamp_delta;
+    level->extra_rotate_level_velocity = level->extra_rotate_level_speed;
+    /* level->extra_rotate_level_velocity = copysignf(level->extra_rotate_level_speed, */
+    /*                                                level->fade_rotate_speed); */
 
-    //printf("erl = %f\tdelta = %f\tspeed = %f\n", level->extra_rotate_level, delta_erl, level->extra_rotate_level_speed);
+    /* float old_erl = level->extra_rotate_level; */
+    /* float new_erl = (old_erl + level->extra_rotate_level_velocity) * 0.97; */
+    /* float delta_erl = new_erl - old_erl; */
+    /* float clamp_delta = Clamp(delta_erl, EVEL_WIN_SPIN_MAX_DECREASE, EVEL_WIN_SPIN_MAX_INCREASE); */
+    /* level->extra_rotate_level += clamp_delta; */
 
-    float spin_boost = 0.333 + fabsf(level->extra_rotate_level);
+    /* printf("erl = %f\tdelta = %f\tvelocity = %f\n", level->extra_rotate_level, delta_erl, level->extra_rotate_level_velocity); */
+
+    level->extra_rotate_level += level->extra_rotate_level_velocity;
+    level->extra_rotate_level = fmodf(level->extra_rotate_level, TAU);
+
+    float spin_boost = 0.233 + fabsf(level->extra_rotate_level);
 
     tile_pos_t *center_pos = level_get_center_tile_pos(level);
 
@@ -161,8 +170,8 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
 
             float tmag = tanh(mag);
             float extra_magnitude_target = Lerp(pop_magnitude * tmag, mag + (0.25 * tmag), tmag);
-            extra_magnitude_target += 6.0f * pos->ring_radius;
-            extra_magnitude_target += powf(spin_boost, pos->ring_radius + 1);
+            extra_magnitude_target += 1.0f * pos->ring_radius;
+            extra_magnitude_target += powf(spin_boost, pos->ring_radius);
             extra_magnitude_target *= fade_magnitude * osc_magnitude;
             pos->extra_magnitude = slew_limit_down(pos->extra_magnitude,
                                                    extra_magnitude_target,
@@ -180,7 +189,7 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
             //pos->pop_translate   = Vector2Scale(pos->radial_vector_norm, pop_magnitude);
 
             float rotate_osc = cosf(phase + pos->radial_angle);
-            pos->extra_rotate = rotate_osc * 0.1f * osc_magnitude * envelope *
+            pos->extra_rotate = rotate_osc * 0.12f * osc_magnitude * envelope *
                 (((float)pos->ring_radius) / ((float)win_anim->level->radius));
         }
     }
@@ -228,8 +237,8 @@ anim_fsm_callbacks_t osc_ramp_in_callbacks = { .update = win_anim_osc_ramp_in_up
 anim_fsm_callbacks_t    osc_stay_callbacks = { .update = win_anim_osc_stay_update    };
 
 anim_fsm_state_t states[] = {
-    { "FADE_IN",       6.0, ANIM_FSM_STATE_NEXT,     &fade_in_callbacks },
-    { "OSC_RAMP_IN",   8.0, ANIM_FSM_STATE_NEXT, &osc_ramp_in_callbacks },
+    { "FADE_IN",       1/* 6.0 */, ANIM_FSM_STATE_NEXT,     &fade_in_callbacks },
+    { "OSC_RAMP_IN",   1/* 8.0 */, ANIM_FSM_STATE_NEXT, &osc_ramp_in_callbacks },
     { "OSC_STAY",     10.0, ANIM_FSM_STATE_STAY,    &osc_stay_callbacks },
     { "STOP",          0.0, ANIM_FSM_STATE_STOP,                   NULL }
 };

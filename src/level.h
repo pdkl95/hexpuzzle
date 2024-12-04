@@ -111,6 +111,7 @@ struct level {
 
     float extra_rotate_level;
     float extra_rotate_level_speed;
+    float extra_rotate_level_velocity;
 
     bool  fade_active;
     float fade_value;
@@ -211,6 +212,7 @@ void level_set_hover(level_t *level, IVector2 mouse_position);
 void level_swap_tile_pos(level_t *level, tile_pos_t *a, tile_pos_t *b, bool save_to_undo);
 void level_swap_tile_pos_by_position(level_t *level, hex_axial_t a, hex_axial_t b, bool save_to_undo);
 void level_solve_tile(level_t *level, hex_axial_t position, bool save_to_undo);
+void level_solve(level_t *level);
 void level_drag_start(level_t *level);
 void level_drag_stop(level_t *level);
 void level_modify_hovered_feature(level_t *level);

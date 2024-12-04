@@ -118,6 +118,9 @@ void solver_set_state(solver_t *solver, solver_state_t new_state)
         stop_move_anim(solver);
         set_mouse_position(solver->saved_mouse_position.x,
                            solver->saved_mouse_position.y);
+
+        solver->fast = false;
+
         enable_mouse_input();
         break;
 
@@ -202,6 +205,22 @@ void solver_start(solver_t *solver)
     solver_set_state(solver, SOLVER_STATE_SOLVE);
 }
 
+
+void solver_start_fast(solver_t *solver)
+{
+    solver->fast = true;
+    assert_not_null(solver);
+
+#ifdef DEBUG_SOLVER
+    printf("solver: START (FAST)\n");
+#endif
+
+    solver->tile_index   = 0;
+    solver->solved_index = 0;
+
+    solver_set_state(solver, SOLVER_STATE_SOLVE);
+}
+
 void solver_stop(solver_t *solver)
 {
     assert_not_null(solver);
@@ -224,6 +243,8 @@ void solver_undo(solver_t *solver)
     solver_set_state(solver, SOLVER_STATE_UNDO);
 }
 
+static bool update_move_anim(solver_t *solver);
+
 static void start_move_anim(solver_t *solver, float anim_time)
 {
     if (solver->anim_running) {
@@ -245,6 +266,11 @@ static void start_move_anim(solver_t *solver, float anim_time)
     set_mouse_position(ipos.x, ipos.y);
 
     level_drag_start(solver->level);
+
+    if (solver->fast) {
+        solver->anim_progress = 1.0;
+        //update_move_anim(solver);
+    }
 }
 
 static void stop_move_anim(solver_t *solver)
@@ -360,7 +386,7 @@ void solver_update_solve(solver_t *solver)
     if (tile_is_solved(tile)) {
 
 #ifdef DEBUG_SOLVER
-        printf("solver: skip already solved tile: ");kip
+        printf("solver: skip already solved tile: ");
         print_tile(tile);
 #endif
         if (next_tile_index(solver)) {

@@ -626,7 +626,7 @@ static void handle_mouse_events(void)
             mouse_left_click = true;
 
             double click_time = GetTime();
-            if ((click_time - last_mouse_click_time) < options->double_click_ms) {
+            if ((click_time - last_mouse_click_time) < ((float)options->double_click_ms) * 0.001f) {
                 mouse_left_doubleclick = true;
             }
             last_mouse_click_time = click_time;

@@ -426,8 +426,11 @@ void tile_draw_corner_connections(tile_pos_t *pos)
 
         if (tile->path[dir] != PATH_TYPE_NONE) {
             Vector2 pos_m_p = pos->win.midpoints[dir]; 
-            Vector2 nbr_m_p = neighbor->win.midpoints[opposite_dir];
+            pos_m_p = Vector2RotateAroundPoint(pos_m_p,  pos->extra_rotate, pos->win.center);
             pos_m_p = Vector2Add(pos_m_p, pos->extra_translate);
+
+            Vector2 nbr_m_p = neighbor->win.midpoints[opposite_dir];
+            nbr_m_p = Vector2RotateAroundPoint(nbr_m_p,  neighbor->extra_rotate, neighbor->win.center);
             nbr_m_p = Vector2Add(nbr_m_p, neighbor->extra_translate);
 
             float outside_dist = Vector2Distance(pos_m_p, nbr_m_p) * 0.7;
@@ -436,9 +439,11 @@ void tile_draw_corner_connections(tile_pos_t *pos)
             Vector2 neighbor_outside = Vector2Scale(neighbor->win.radial_unit[opposite_dir], outside_dist);
 
             Vector2 pos_m_c = Vector2Add(pos->win.midpoints[dir], outside);
-            Vector2 nbr_m_c = Vector2Add(neighbor->win.midpoints[opposite_dir], neighbor_outside);
-            nbr_m_c = Vector2Add(nbr_m_c, neighbor->extra_translate);
+            pos_m_c = Vector2RotateAroundPoint(pos_m_c,  pos->extra_rotate, pos->win.center);
             pos_m_c = Vector2Add(pos_m_c, pos->extra_translate);
+            Vector2 nbr_m_c = Vector2Add(neighbor->win.midpoints[opposite_dir], neighbor_outside);
+            nbr_m_c = Vector2RotateAroundPoint(nbr_m_c,  neighbor->extra_rotate, neighbor->win.center);
+            nbr_m_c = Vector2Add(nbr_m_c, neighbor->extra_translate);
 
 #if 0
             Vector2 pos_cw1_p  = pos->win.midpoint_path_cw[dir];

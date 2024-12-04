@@ -786,6 +786,10 @@ void level_play(level_t *level)
 
     level_fade_in(level, NULL, NULL);
     set_game_mode(GAME_MODE_PLAY_LEVEL);
+
+    if (options->cheat_autowin) {
+        level_solve(level);
+    }
 }
 
 void level_edit(level_t *level)
@@ -1478,6 +1482,14 @@ void level_solve_tile(level_t *level, hex_axial_t position, bool save_to_undo)
     if (!hex_axial_eq(solved_p, unsolved_p)) {
         level_swap_tile_pos_by_position(level, solved_p, unsolved_p, save_to_undo);
     }
+}
+
+void level_solve(level_t *level)
+{
+    assert_not_null(level);
+
+    create_or_use_solver(current_level);
+    solver_start_fast(current_level->solver);
 }
 
 void level_drop_tile(level_t *level, tile_pos_t *drag_target, tile_pos_t *drop_target)
