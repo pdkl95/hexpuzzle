@@ -51,6 +51,7 @@ COMMON_PROG_CFLAGS = \
 endif
 
 noinst_LIBRARIES = \
+	external/libcombined_deps.a \
 	external/raylib/libraylib.a
 
 bin_PROGRAMS = hexpuzzle
@@ -70,6 +71,7 @@ hexpuzzle_LDADD = $(COMMON_PROG_LDADD)
 
 if ! USE_SYSTEM_RAYLIB
 hexpuzzle_LDADD += \
+	external/libcombined_deps.a \
 	external/raylib/libraylib.a \
 	-lGL -lc -lm -lpthread -ldl -lrt
 endif
@@ -130,22 +132,6 @@ hexpuzzle_SOURCES =                                    \
 	src/win_anim.h          src/win_anim.c         \
 	src/common.h            src/main.c
 
-hexpuzzle_SOURCES +=             		   \
-	external/raygui/raygui.h 		   \
-	external/raygui/style/dark_alt.h           \
-	external/stb/stb_perlin.h                  \
-	external/sglib/sglib.h                     \
-	external/pcg/pcg_basic.c                   \
-	external/pcg/pcg_basic.h                   \
-	external/cJSON/cJSON.c                     \
-	external/cJSON/cJSON.h
-
-if ! BUILD_WEB
-hexpuzzle_SOURCES += 				   \
-	external/tinyfiledialogs/tinyfiledialogs.c \
-	external/tinyfiledialogs/tinyfiledialogs.h
-endif
-
 dist_EXTRA_hexpuzzle_SOURCES =      \
 	src/data_classics_levels.h  \
 	src/data_fonts.h            \
@@ -181,7 +167,31 @@ MAINTAINERCLEANFILES = \
 
 
 ######################################################################
-# Raylib
+# libcombined_deps.a
+
+#external_libcombined_deps_a_LIBADD = \
+#	external/raylib/libraylib.a
+
+external_libcombined_deps_a_SOURCES =	 \
+	external/raygui/raygui.h 	 \
+	external/raygui/style/dark_alt.h \
+	external/stb/stb_perlin.h	 \
+	external/sglib/sglib.h		 \
+	external/pcg/pcg_basic.c	 \
+	external/pcg/pcg_basic.h	 \
+	external/cJSON/cJSON.c		 \
+	external/cJSON/cJSON.h
+
+if ! BUILD_WEB
+external_libcombined_deps_a_SOURCES +=	   	   \
+	external/tinyfiledialogs/tinyfiledialogs.c \
+	external/tinyfiledialogs/tinyfiledialogs.h
+endif
+
+
+
+######################################################################
+# libraylib.a
 
 external_raylib_libraylib_a_CFLAGS = \
 	$(ALL_PKG_CFLAGS) \

@@ -89,6 +89,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 bin_PROGRAMS = hexpuzzle$(EXEEXT)
 @USE_SYSTEM_RAYLIB_FALSE@am__append_1 = \
+@USE_SYSTEM_RAYLIB_FALSE@	external/libcombined_deps.a \
 @USE_SYSTEM_RAYLIB_FALSE@	external/raylib/libraylib.a \
 @USE_SYSTEM_RAYLIB_FALSE@	-lGL -lc -lm -lpthread -ldl -lrt
 
@@ -126,6 +127,22 @@ AM_V_AR = $(am__v_AR_@AM_V@)
 am__v_AR_ = $(am__v_AR_@AM_DEFAULT_V@)
 am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
+external_libcombined_deps_a_AR = $(AR) $(ARFLAGS)
+external_libcombined_deps_a_LIBADD =
+am__external_libcombined_deps_a_SOURCES_DIST =  \
+	external/raygui/raygui.h external/raygui/style/dark_alt.h \
+	external/stb/stb_perlin.h external/sglib/sglib.h \
+	external/pcg/pcg_basic.c external/pcg/pcg_basic.h \
+	external/cJSON/cJSON.c external/cJSON/cJSON.h \
+	external/tinyfiledialogs/tinyfiledialogs.c \
+	external/tinyfiledialogs/tinyfiledialogs.h
+am__dirstamp = $(am__leading_dot)dirstamp
+@BUILD_WEB_FALSE@am__objects_1 = external/tinyfiledialogs/tinyfiledialogs.$(OBJEXT)
+am_external_libcombined_deps_a_OBJECTS =  \
+	external/pcg/pcg_basic.$(OBJEXT) \
+	external/cJSON/cJSON.$(OBJEXT) $(am__objects_1)
+external_libcombined_deps_a_OBJECTS =  \
+	$(am_external_libcombined_deps_a_OBJECTS)
 external_raylib_libraylib_a_AR = $(AR) $(ARFLAGS)
 external_raylib_libraylib_a_LIBADD =
 am__external_raylib_libraylib_a_SOURCES_DIST =  \
@@ -135,8 +152,7 @@ am__external_raylib_libraylib_a_SOURCES_DIST =  \
 	external/raylib/rshapes.c external/raylib/rtext.c \
 	external/raylib/rtextures.c external/raylib/utils.c \
 	external/raylib/utils.h external/raylib/rglfw.c
-am__dirstamp = $(am__leading_dot)dirstamp
-@BUILD_WEB_FALSE@am__objects_1 = external/raylib/external_raylib_libraylib_a-rglfw.$(OBJEXT)
+@BUILD_WEB_FALSE@am__objects_2 = external/raylib/external_raylib_libraylib_a-rglfw.$(OBJEXT)
 am_external_raylib_libraylib_a_OBJECTS =  \
 	external/raylib/external_raylib_libraylib_a-raudio.$(OBJEXT) \
 	external/raylib/external_raylib_libraylib_a-rcore.$(OBJEXT) \
@@ -145,35 +161,11 @@ am_external_raylib_libraylib_a_OBJECTS =  \
 	external/raylib/external_raylib_libraylib_a-rtext.$(OBJEXT) \
 	external/raylib/external_raylib_libraylib_a-rtextures.$(OBJEXT) \
 	external/raylib/external_raylib_libraylib_a-utils.$(OBJEXT) \
-	$(am__objects_1)
+	$(am__objects_2)
 external_raylib_libraylib_a_OBJECTS =  \
 	$(am_external_raylib_libraylib_a_OBJECTS)
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am__hexpuzzle_SOURCES_DIST = src/anim_fsm.h src/anim_fsm.c \
-	src/background.h src/background.c src/classics.h \
-	src/classics.c src/collection.h src/collection.c src/color.h \
-	src/color.c src/const.h src/fonts.h src/fonts.c \
-	src/game_mode.h src/game_mode.c src/gui_browser.h \
-	src/gui_browser.c src/gui_options.h src/gui_options.c \
-	src/gui_random.h src/gui_random.c src/hex.h src/hex.c \
-	src/level.h src/level.c src/level_draw.h src/level_draw.c \
-	src/level_undo.h src/level_undo.c src/logging.h src/logging.c \
-	src/nvdata.h src/nvdata.c src/nvdata_finished.h \
-	src/nvdata_finished.c src/options.h src/options.c src/path.h \
-	src/path.c src/raygui_impl.c src/raylib_helper.h \
-	src/raylib_helper.c src/startup_action.h src/startup_action.c \
-	src/shader.h src/shader.c src/solver.h src/solver.c src/tile.h \
-	src/tile.c src/tile_draw.h src/tile_draw.c src/tile_pos.h \
-	src/tile_pos.c src/util.h src/util.c src/win_anim.h \
-	src/win_anim.c src/common.h src/main.c \
-	external/raygui/raygui.h external/raygui/style/dark_alt.h \
-	external/stb/stb_perlin.h external/sglib/sglib.h \
-	external/pcg/pcg_basic.c external/pcg/pcg_basic.h \
-	external/cJSON/cJSON.c external/cJSON/cJSON.h \
-	external/tinyfiledialogs/tinyfiledialogs.c \
-	external/tinyfiledialogs/tinyfiledialogs.h
-@BUILD_WEB_FALSE@am__objects_2 = external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.$(OBJEXT)
 am_hexpuzzle_OBJECTS = src/hexpuzzle-anim_fsm.$(OBJEXT) \
 	src/hexpuzzle-background.$(OBJEXT) \
 	src/hexpuzzle-classics.$(OBJEXT) \
@@ -195,13 +187,12 @@ am_hexpuzzle_OBJECTS = src/hexpuzzle-anim_fsm.$(OBJEXT) \
 	src/hexpuzzle-shader.$(OBJEXT) src/hexpuzzle-solver.$(OBJEXT) \
 	src/hexpuzzle-tile.$(OBJEXT) src/hexpuzzle-tile_draw.$(OBJEXT) \
 	src/hexpuzzle-tile_pos.$(OBJEXT) src/hexpuzzle-util.$(OBJEXT) \
-	src/hexpuzzle-win_anim.$(OBJEXT) src/hexpuzzle-main.$(OBJEXT) \
-	external/pcg/hexpuzzle-pcg_basic.$(OBJEXT) \
-	external/cJSON/hexpuzzle-cJSON.$(OBJEXT) $(am__objects_2)
+	src/hexpuzzle-win_anim.$(OBJEXT) src/hexpuzzle-main.$(OBJEXT)
 hexpuzzle_OBJECTS = $(am_hexpuzzle_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @USE_SYSTEM_RAYLIB_FALSE@am__DEPENDENCIES_3 =  \
+@USE_SYSTEM_RAYLIB_FALSE@	external/libcombined_deps.a \
 @USE_SYSTEM_RAYLIB_FALSE@	external/raylib/libraylib.a
 hexpuzzle_DEPENDENCIES = $(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3)
 hexpuzzle_LINK = $(CCLD) $(hexpuzzle_CFLAGS) $(CFLAGS) \
@@ -238,10 +229,12 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = $(external_raylib_libraylib_a_SOURCES) $(hexpuzzle_SOURCES) \
+SOURCES = $(external_libcombined_deps_a_SOURCES) \
+	$(external_raylib_libraylib_a_SOURCES) $(hexpuzzle_SOURCES) \
 	$(dist_EXTRA_hexpuzzle_SOURCES)
-DIST_SOURCES = $(am__external_raylib_libraylib_a_SOURCES_DIST) \
-	$(am__hexpuzzle_SOURCES_DIST) $(dist_EXTRA_hexpuzzle_SOURCES)
+DIST_SOURCES = $(am__external_libcombined_deps_a_SOURCES_DIST) \
+	$(am__external_raylib_libraylib_a_SOURCES_DIST) \
+	$(hexpuzzle_SOURCES) $(dist_EXTRA_hexpuzzle_SOURCES)
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -432,6 +425,7 @@ EXTRA_DIST = README.md lib/gnugetopt.h lib/getopt.c lib/getopt1.c \
 @BUILD_WEB_TRUE@	-DPLATFORM_WEB -flto -I$(top_srcdir)/src \
 @BUILD_WEB_TRUE@	$(ALL_PKG_CFLAGS) $(APP_CFLAGS)
 noinst_LIBRARIES = \
+	external/libcombined_deps.a \
 	external/raylib/libraylib.a
 
 COMMON_PROG_LDADD = \
@@ -446,27 +440,39 @@ hexpuzzle_LDADD = $(COMMON_PROG_LDADD) $(am__append_1)
 @BUILD_WEB_TRUE@	GL_ENABLE_GET_PROC_ADDRESS=1 -s \
 @BUILD_WEB_TRUE@	ALLOW_MEMORY_GROWTH=1 $(am__append_2) \
 @BUILD_WEB_TRUE@	-lidbfs.js --shell-file minshell.html
-hexpuzzle_SOURCES = src/anim_fsm.h src/anim_fsm.c src/background.h \
-	src/background.c src/classics.h src/classics.c \
-	src/collection.h src/collection.c src/color.h src/color.c \
-	src/const.h src/fonts.h src/fonts.c src/game_mode.h \
-	src/game_mode.c src/gui_browser.h src/gui_browser.c \
-	src/gui_options.h src/gui_options.c src/gui_random.h \
-	src/gui_random.c src/hex.h src/hex.c src/level.h src/level.c \
-	src/level_draw.h src/level_draw.c src/level_undo.h \
-	src/level_undo.c src/logging.h src/logging.c src/nvdata.h \
-	src/nvdata.c src/nvdata_finished.h src/nvdata_finished.c \
-	src/options.h src/options.c src/path.h src/path.c \
-	src/raygui_impl.c src/raylib_helper.h src/raylib_helper.c \
-	src/startup_action.h src/startup_action.c src/shader.h \
-	src/shader.c src/solver.h src/solver.c src/tile.h src/tile.c \
-	src/tile_draw.h src/tile_draw.c src/tile_pos.h src/tile_pos.c \
-	src/util.h src/util.c src/win_anim.h src/win_anim.c \
-	src/common.h src/main.c external/raygui/raygui.h \
-	external/raygui/style/dark_alt.h external/stb/stb_perlin.h \
-	external/sglib/sglib.h external/pcg/pcg_basic.c \
-	external/pcg/pcg_basic.h external/cJSON/cJSON.c \
-	external/cJSON/cJSON.h $(am__append_3)
+hexpuzzle_SOURCES = \
+	src/anim_fsm.h          src/anim_fsm.c         \
+	src/background.h        src/background.c       \
+	src/classics.h          src/classics.c         \
+	src/collection.h        src/collection.c       \
+	src/color.h             src/color.c            \
+	src/const.h                                    \
+	src/fonts.h             src/fonts.c            \
+	src/game_mode.h         src/game_mode.c        \
+	src/gui_browser.h       src/gui_browser.c      \
+	src/gui_options.h       src/gui_options.c      \
+	src/gui_random.h        src/gui_random.c       \
+	src/hex.h               src/hex.c              \
+	src/level.h             src/level.c            \
+	src/level_draw.h        src/level_draw.c       \
+	src/level_undo.h        src/level_undo.c       \
+	src/logging.h           src/logging.c          \
+	src/nvdata.h            src/nvdata.c           \
+	src/nvdata_finished.h   src/nvdata_finished.c  \
+	src/options.h           src/options.c          \
+	src/path.h              src/path.c             \
+	src/raygui_impl.c 			       \
+	src/raylib_helper.h     src/raylib_helper.c    \
+	src/startup_action.h    src/startup_action.c   \
+	src/shader.h            src/shader.c           \
+	src/solver.h            src/solver.c           \
+	src/tile.h              src/tile.c             \
+	src/tile_draw.h         src/tile_draw.c        \
+	src/tile_pos.h          src/tile_pos.c         \
+	src/util.h              src/util.c             \
+	src/win_anim.h          src/win_anim.c         \
+	src/common.h            src/main.c
+
 dist_EXTRA_hexpuzzle_SOURCES = \
 	src/data_classics_levels.h  \
 	src/data_fonts.h            \
@@ -480,7 +486,18 @@ MAINTAINERCLEANFILES = \
 
 
 ######################################################################
-# Raylib
+# libcombined_deps.a
+
+#external_libcombined_deps_a_LIBADD = \
+#	external/raylib/libraylib.a
+external_libcombined_deps_a_SOURCES = external/raygui/raygui.h \
+	external/raygui/style/dark_alt.h external/stb/stb_perlin.h \
+	external/sglib/sglib.h external/pcg/pcg_basic.c \
+	external/pcg/pcg_basic.h external/cJSON/cJSON.c \
+	external/cJSON/cJSON.h $(am__append_3)
+
+######################################################################
+# libraylib.a
 external_raylib_libraylib_a_CFLAGS = $(ALL_PKG_CFLAGS) $(APP_CFLAGS) \
 	-Wall -D_GNU_SOURCE -D$(RAYLIB_PLATFORM) -D$(RAYLIB_GRAPHICS) \
 	-Wno-missing-braces -Werror=pointer-arith -fno-strict-aliasing \
@@ -642,6 +659,39 @@ distclean-hdr:
 
 clean-noinstLIBRARIES:
 	-test -z "$(noinst_LIBRARIES)" || rm -f $(noinst_LIBRARIES)
+external/pcg/$(am__dirstamp):
+	@$(MKDIR_P) external/pcg
+	@: > external/pcg/$(am__dirstamp)
+external/pcg/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) external/pcg/$(DEPDIR)
+	@: > external/pcg/$(DEPDIR)/$(am__dirstamp)
+external/pcg/pcg_basic.$(OBJEXT): external/pcg/$(am__dirstamp) \
+	external/pcg/$(DEPDIR)/$(am__dirstamp)
+external/cJSON/$(am__dirstamp):
+	@$(MKDIR_P) external/cJSON
+	@: > external/cJSON/$(am__dirstamp)
+external/cJSON/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) external/cJSON/$(DEPDIR)
+	@: > external/cJSON/$(DEPDIR)/$(am__dirstamp)
+external/cJSON/cJSON.$(OBJEXT): external/cJSON/$(am__dirstamp) \
+	external/cJSON/$(DEPDIR)/$(am__dirstamp)
+external/tinyfiledialogs/$(am__dirstamp):
+	@$(MKDIR_P) external/tinyfiledialogs
+	@: > external/tinyfiledialogs/$(am__dirstamp)
+external/tinyfiledialogs/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) external/tinyfiledialogs/$(DEPDIR)
+	@: > external/tinyfiledialogs/$(DEPDIR)/$(am__dirstamp)
+external/tinyfiledialogs/tinyfiledialogs.$(OBJEXT):  \
+	external/tinyfiledialogs/$(am__dirstamp) \
+	external/tinyfiledialogs/$(DEPDIR)/$(am__dirstamp)
+external/$(am__dirstamp):
+	@$(MKDIR_P) external
+	@: > external/$(am__dirstamp)
+
+external/libcombined_deps.a: $(external_libcombined_deps_a_OBJECTS) $(external_libcombined_deps_a_DEPENDENCIES) $(EXTRA_external_libcombined_deps_a_DEPENDENCIES) external/$(am__dirstamp)
+	$(AM_V_at)-rm -f external/libcombined_deps.a
+	$(AM_V_AR)$(external_libcombined_deps_a_AR) external/libcombined_deps.a $(external_libcombined_deps_a_OBJECTS) $(external_libcombined_deps_a_LIBADD)
+	$(AM_V_at)$(RANLIB) external/libcombined_deps.a
 external/raylib/$(am__dirstamp):
 	@$(MKDIR_P) external/raylib
 	@: > external/raylib/$(am__dirstamp)
@@ -785,33 +835,6 @@ src/hexpuzzle-win_anim.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-main.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
-external/pcg/$(am__dirstamp):
-	@$(MKDIR_P) external/pcg
-	@: > external/pcg/$(am__dirstamp)
-external/pcg/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) external/pcg/$(DEPDIR)
-	@: > external/pcg/$(DEPDIR)/$(am__dirstamp)
-external/pcg/hexpuzzle-pcg_basic.$(OBJEXT):  \
-	external/pcg/$(am__dirstamp) \
-	external/pcg/$(DEPDIR)/$(am__dirstamp)
-external/cJSON/$(am__dirstamp):
-	@$(MKDIR_P) external/cJSON
-	@: > external/cJSON/$(am__dirstamp)
-external/cJSON/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) external/cJSON/$(DEPDIR)
-	@: > external/cJSON/$(DEPDIR)/$(am__dirstamp)
-external/cJSON/hexpuzzle-cJSON.$(OBJEXT):  \
-	external/cJSON/$(am__dirstamp) \
-	external/cJSON/$(DEPDIR)/$(am__dirstamp)
-external/tinyfiledialogs/$(am__dirstamp):
-	@$(MKDIR_P) external/tinyfiledialogs
-	@: > external/tinyfiledialogs/$(am__dirstamp)
-external/tinyfiledialogs/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) external/tinyfiledialogs/$(DEPDIR)
-	@: > external/tinyfiledialogs/$(DEPDIR)/$(am__dirstamp)
-external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.$(OBJEXT):  \
-	external/tinyfiledialogs/$(am__dirstamp) \
-	external/tinyfiledialogs/$(DEPDIR)/$(am__dirstamp)
 
 hexpuzzle$(EXEEXT): $(hexpuzzle_OBJECTS) $(hexpuzzle_DEPENDENCIES) $(EXTRA_hexpuzzle_DEPENDENCIES) 
 	@rm -f hexpuzzle$(EXEEXT)
@@ -828,8 +851,8 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@external/cJSON/$(DEPDIR)/hexpuzzle-cJSON.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@external/pcg/$(DEPDIR)/hexpuzzle-pcg_basic.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@external/cJSON/$(DEPDIR)/cJSON.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@external/pcg/$(DEPDIR)/pcg_basic.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@external/raylib/$(DEPDIR)/external_raylib_libraylib_a-raudio.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rcore.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rglfw.Po@am__quote@
@@ -838,7 +861,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rtext.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rtextures.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@external/raylib/$(DEPDIR)/external_raylib_libraylib_a-utils.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@external/tinyfiledialogs/$(DEPDIR)/tinyfiledialogs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-anim_fsm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-background.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-classics.Po@am__quote@
@@ -1418,48 +1441,6 @@ src/hexpuzzle-main.obj: src/main.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-main.obj `if test -f 'src/main.c'; then $(CYGPATH_W) 'src/main.c'; else $(CYGPATH_W) '$(srcdir)/src/main.c'; fi`
 
-external/pcg/hexpuzzle-pcg_basic.o: external/pcg/pcg_basic.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT external/pcg/hexpuzzle-pcg_basic.o -MD -MP -MF external/pcg/$(DEPDIR)/hexpuzzle-pcg_basic.Tpo -c -o external/pcg/hexpuzzle-pcg_basic.o `test -f 'external/pcg/pcg_basic.c' || echo '$(srcdir)/'`external/pcg/pcg_basic.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/pcg/$(DEPDIR)/hexpuzzle-pcg_basic.Tpo external/pcg/$(DEPDIR)/hexpuzzle-pcg_basic.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/pcg/pcg_basic.c' object='external/pcg/hexpuzzle-pcg_basic.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o external/pcg/hexpuzzle-pcg_basic.o `test -f 'external/pcg/pcg_basic.c' || echo '$(srcdir)/'`external/pcg/pcg_basic.c
-
-external/pcg/hexpuzzle-pcg_basic.obj: external/pcg/pcg_basic.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT external/pcg/hexpuzzle-pcg_basic.obj -MD -MP -MF external/pcg/$(DEPDIR)/hexpuzzle-pcg_basic.Tpo -c -o external/pcg/hexpuzzle-pcg_basic.obj `if test -f 'external/pcg/pcg_basic.c'; then $(CYGPATH_W) 'external/pcg/pcg_basic.c'; else $(CYGPATH_W) '$(srcdir)/external/pcg/pcg_basic.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/pcg/$(DEPDIR)/hexpuzzle-pcg_basic.Tpo external/pcg/$(DEPDIR)/hexpuzzle-pcg_basic.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/pcg/pcg_basic.c' object='external/pcg/hexpuzzle-pcg_basic.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o external/pcg/hexpuzzle-pcg_basic.obj `if test -f 'external/pcg/pcg_basic.c'; then $(CYGPATH_W) 'external/pcg/pcg_basic.c'; else $(CYGPATH_W) '$(srcdir)/external/pcg/pcg_basic.c'; fi`
-
-external/cJSON/hexpuzzle-cJSON.o: external/cJSON/cJSON.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT external/cJSON/hexpuzzle-cJSON.o -MD -MP -MF external/cJSON/$(DEPDIR)/hexpuzzle-cJSON.Tpo -c -o external/cJSON/hexpuzzle-cJSON.o `test -f 'external/cJSON/cJSON.c' || echo '$(srcdir)/'`external/cJSON/cJSON.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/cJSON/$(DEPDIR)/hexpuzzle-cJSON.Tpo external/cJSON/$(DEPDIR)/hexpuzzle-cJSON.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/cJSON/cJSON.c' object='external/cJSON/hexpuzzle-cJSON.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o external/cJSON/hexpuzzle-cJSON.o `test -f 'external/cJSON/cJSON.c' || echo '$(srcdir)/'`external/cJSON/cJSON.c
-
-external/cJSON/hexpuzzle-cJSON.obj: external/cJSON/cJSON.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT external/cJSON/hexpuzzle-cJSON.obj -MD -MP -MF external/cJSON/$(DEPDIR)/hexpuzzle-cJSON.Tpo -c -o external/cJSON/hexpuzzle-cJSON.obj `if test -f 'external/cJSON/cJSON.c'; then $(CYGPATH_W) 'external/cJSON/cJSON.c'; else $(CYGPATH_W) '$(srcdir)/external/cJSON/cJSON.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/cJSON/$(DEPDIR)/hexpuzzle-cJSON.Tpo external/cJSON/$(DEPDIR)/hexpuzzle-cJSON.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/cJSON/cJSON.c' object='external/cJSON/hexpuzzle-cJSON.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o external/cJSON/hexpuzzle-cJSON.obj `if test -f 'external/cJSON/cJSON.c'; then $(CYGPATH_W) 'external/cJSON/cJSON.c'; else $(CYGPATH_W) '$(srcdir)/external/cJSON/cJSON.c'; fi`
-
-external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.o: external/tinyfiledialogs/tinyfiledialogs.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.o -MD -MP -MF external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Tpo -c -o external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.o `test -f 'external/tinyfiledialogs/tinyfiledialogs.c' || echo '$(srcdir)/'`external/tinyfiledialogs/tinyfiledialogs.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Tpo external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/tinyfiledialogs/tinyfiledialogs.c' object='external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.o `test -f 'external/tinyfiledialogs/tinyfiledialogs.c' || echo '$(srcdir)/'`external/tinyfiledialogs/tinyfiledialogs.c
-
-external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.obj: external/tinyfiledialogs/tinyfiledialogs.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.obj -MD -MP -MF external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Tpo -c -o external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.obj `if test -f 'external/tinyfiledialogs/tinyfiledialogs.c'; then $(CYGPATH_W) 'external/tinyfiledialogs/tinyfiledialogs.c'; else $(CYGPATH_W) '$(srcdir)/external/tinyfiledialogs/tinyfiledialogs.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Tpo external/tinyfiledialogs/$(DEPDIR)/hexpuzzle-tinyfiledialogs.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/tinyfiledialogs/tinyfiledialogs.c' object='external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o external/tinyfiledialogs/hexpuzzle-tinyfiledialogs.obj `if test -f 'external/tinyfiledialogs/tinyfiledialogs.c'; then $(CYGPATH_W) 'external/tinyfiledialogs/tinyfiledialogs.c'; else $(CYGPATH_W) '$(srcdir)/external/tinyfiledialogs/tinyfiledialogs.c'; fi`
-
 ID: $(am__tagged_files)
 	$(am__define_uniq_tagged_files); mkid -fID $$unique
 tags: tags-am
@@ -1716,6 +1697,7 @@ clean-generic:
 distclean-generic:
 	-test -z "$(CONFIG_CLEAN_FILES)" || rm -f $(CONFIG_CLEAN_FILES)
 	-test . = "$(srcdir)" || test -z "$(CONFIG_CLEAN_VPATH_FILES)" || rm -f $(CONFIG_CLEAN_VPATH_FILES)
+	-rm -f external/$(am__dirstamp)
 	-rm -f external/cJSON/$(DEPDIR)/$(am__dirstamp)
 	-rm -f external/cJSON/$(am__dirstamp)
 	-rm -f external/pcg/$(DEPDIR)/$(am__dirstamp)
