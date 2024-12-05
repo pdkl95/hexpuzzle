@@ -13,12 +13,14 @@ varying in vec4 fragColor;
 uniform vec2 resolution;
 uniform float time;
 uniform vec4 fade;
-uniform vec4 effect_amount;
+uniform vec4 effect_amount1;
+uniform vec4 effect_amount2;
 
 float bloom_amount;
 float distort_amount;
 float warp_amount;
 float do_hue_override;
+float extra_rotate_level;
 
 // Output fragment color
 //out vec4 finalColor;
@@ -34,10 +36,11 @@ vec3 hsv2rgb(vec3 c)
 
 void main()
 {
-    bloom_amount = effect_amount.x;
-    distort_amount = effect_amount.y;
-    warp_amount = effect_amount.z;
-    do_hue_override = effect_amount.w;
+    bloom_amount = effect_amount1.x;
+    distort_amount = effect_amount1.y;
+    warp_amount = effect_amount1.z;
+    do_hue_override = effect_amount1.w;
+    extra_rotate_level = effect_amount2.x;
 
     float px = 1.0/resolution.y;
     float aspect = resolution.y/resolution.x;
@@ -71,6 +74,7 @@ void main()
     float saturate = 0.0;
     if (path_highlight > 0.5) {
         float theta = atan(position.y/ position.x);
+        theta += extra_rotate_level;
         float spin = (theta * TAU) + (time * 3.57) - (dist_center * TAU * 2.0);
         spin_fade = (sin(spin) + 1.0) * 0.5 + 0.3;
         if (spin_fade > 1.0) {
@@ -80,6 +84,11 @@ void main()
     }
 
     float hue = fade.y;
+#ifdef EXTRA_RAINBOW
+    hue += spin_fade + perlin_noise;
+    hue = mod(hue, 1.0);
+#endif
+
     float fade_in_override = fade.z;
     saturate *= fade_in_override;
 #define WAVE_MIX_SPEED  1.0
@@ -129,6 +138,11 @@ void main()
         vec3 override_color = hsv2rgb(vec3(hue_override, 1.0, 1.0));
         color = mix(color, override_color, 1.0 - bloom_amount);
     }
+
+    //color = vec3(path_highlight);
+    //color = vec3(perlin_noise);
+    //color = vec3(total_wave-1.0);
+    //color = vec3(spin_fade-0.0);
 
     gl_FragColor = clamp(vec4(color, alpha), 0.0, 1.0);
 }

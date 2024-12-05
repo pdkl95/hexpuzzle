@@ -20,6 +20,7 @@
  ****************************************************************************/
 
 #include "common.h"
+#include "options.h"
 #include "shader.h"
 
 #include "data_shaders.h"
@@ -38,20 +39,33 @@ void load_shaders(void)
         shaders_win_border_frag_glsl,
         shaders_win_border_frag_glsl_len);
 
+    if (options->extra_rainbows) {
+        char *orig_src = win_border_shader_src;
+        char *version_line = strsep(&orig_src, "\n");;
+        win_border_shader_src = NULL;
+        safe_asprintf(&win_border_shader_src,
+                      "%s\n#define EXTRA_RAINBOW 1\n\n%s",
+                      version_line,
+                      orig_src);
+        free(version_line);
+    }
+
     win_border_shader = LoadShaderFromMemory(0, win_border_shader_src);
-    win_border_shader_loc.resolution    = GetShaderLocation(win_border_shader, "resolution");
-    win_border_shader_loc.time          = GetShaderLocation(win_border_shader, "time");
-    win_border_shader_loc.fade          = GetShaderLocation(win_border_shader, "fade");
-    win_border_shader_loc.effect_amount = GetShaderLocation(win_border_shader, "effect_amount");
+    win_border_shader_loc.resolution     = GetShaderLocation(win_border_shader, "resolution");
+    win_border_shader_loc.time           = GetShaderLocation(win_border_shader, "time");
+    win_border_shader_loc.fade           = GetShaderLocation(win_border_shader, "fade");
+    win_border_shader_loc.effect_amount1 = GetShaderLocation(win_border_shader, "effect_amount1");
+    win_border_shader_loc.effect_amount2 = GetShaderLocation(win_border_shader, "effect_amount2");
 
     postprocessing_shader_src = strdup_xxd_include(
         shaders_postprocessing_frag_glsl,
         shaders_postprocessing_frag_glsl_len);
 
     postprocessing_shader = LoadShaderFromMemory(0, postprocessing_shader_src);
-    postprocessing_shader_loc.resolution    = GetShaderLocation(postprocessing_shader, "resolution");
-    postprocessing_shader_loc.time          = GetShaderLocation(postprocessing_shader, "time");
-    postprocessing_shader_loc.effect_amount = GetShaderLocation(postprocessing_shader, "effect_amount");
+    postprocessing_shader_loc.resolution     = GetShaderLocation(postprocessing_shader, "resolution");
+    postprocessing_shader_loc.time           = GetShaderLocation(postprocessing_shader, "time");
+    postprocessing_shader_loc.effect_amount1 = GetShaderLocation(postprocessing_shader, "effect_amount1");
+    postprocessing_shader_loc.effect_amount2 = GetShaderLocation(postprocessing_shader, "effect_amount2");
 }
 
 void unload_shaders(void)

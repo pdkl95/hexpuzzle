@@ -30,6 +30,8 @@
 #endif
 
 #include <limits.h>
+#include <time.h>
+
 
 #include "options.h"
 
@@ -61,6 +63,8 @@ static struct option long_options[] = {
     {      "no-animate-win",       no_argument, 0, 'I' },
     {       "show-previews",       no_argument, 0, '-' },
     {    "no-show-previews",       no_argument, 0, '_' },
+    {      "extra-rainbows",       no_argument, 0, ':' },
+    {   "no-extra-rainbows",       no_argument, 0, ';' },
     {         "wait-events",       no_argument, 0, 'w' },
     {             "verbose",       no_argument, 0, 'v' },
     {             "version",       no_argument, 0, 'V' },
@@ -267,6 +271,7 @@ options_set_defaults(
     options->animate_bg            = OPTIONS_DEFAULT_ANIMATE_BG;
     options->animate_win           = OPTIONS_DEFAULT_ANIMATE_WIN;
     options->show_level_previews   = OPTIONS_DEFAULT_SHOW_LEVEL_PREVIEWS;
+    options->extra_rainbows        = OPTIONS_DEFAULT_EXTRA_RAINBOWS;
     options->max_fps               = OPTIONS_DEFAULT_MAX_FPS;
     options->initial_window_width  = OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH;
     options->initial_window_height = OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT;
@@ -314,6 +319,18 @@ options_set_defaults(
 
     if (options->nvdata_dir) {
         options->nvdata_dir = NULL;
+    }
+
+    time_t current_time = time(NULL);
+    struct tm tm;
+    if (localtime_r(&current_time, &tm)) {
+        if (tm.tm_mon == 5) {
+            // pride month
+            infomsg("It's pride month! Automatically enabling --extra-rainbows");
+            options->extra_rainbows = true;
+        }
+    } else {
+        errmsg("localtime_r failed: %s", strerror(errno));
     }
 }
 
@@ -441,6 +458,14 @@ options_parse_args(
         case '_':
             options->show_level_previews = false;
             options->load_state_show_level_previews = false;
+            break;
+
+        case ':':
+            options->extra_rainbows = true;
+            break;
+
+        case ';':
+            options->extra_rainbows = false;
             break;
 
         case 'w':

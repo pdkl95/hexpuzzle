@@ -119,7 +119,8 @@ bool do_postprocessing = false;
 float bloom_amount = 1.0;
 float distort_amount = 0.0;
 float warp_amount = 0.0;
-float postprocessing_effect_amount[4];
+float postprocessing_effect_amount1[4];
+float postprocessing_effect_amount2[4];
 
 float feedback_bg_zoom_ratio = 0.1;
 Vector2 feedback_bg_zoom_margin = { .x = 20.0, .y = 20.0 };
@@ -2024,15 +2025,24 @@ render_frame(
     static bool renderd_texture_last_frame = false;
 
     distort_amount = sqrt(bloom_amount);
-    postprocessing_effect_amount[0] = bloom_amount;
-    postprocessing_effect_amount[1] = distort_amount;
-    postprocessing_effect_amount[2] = warp_amount;
-    postprocessing_effect_amount[3] = 0.0f;
+    postprocessing_effect_amount1[0] = bloom_amount;
+    postprocessing_effect_amount1[1] = distort_amount;
+    postprocessing_effect_amount1[2] = warp_amount;
+    postprocessing_effect_amount1[3] = 0.0f;
 
-    //SetShaderValue(win_border_shader, win_border_shader_loc.effect_amount, &(postprocessing_effect_amount[0]), SHADER_UNIFORM_VEC4);
+    postprocessing_effect_amount2[0] = current_level ? current_level->extra_rotate_level : 0.0f;
+    postprocessing_effect_amount2[1] = 0.0f;
+    postprocessing_effect_amount2[2] = 0.0f;
+    postprocessing_effect_amount2[3] = 0.0f;
 
-    SetShaderValue(postprocessing_shader, postprocessing_shader_loc.effect_amount, &(postprocessing_effect_amount[0]), SHADER_UNIFORM_VEC4);
+    //SetShaderValue(win_border_shader, win_border_shader_loc.effect_amount1, &(postprocessing_effect_amount1[0]), SHADER_UNIFORM_VEC4);
+    //SetShaderValue(win_border_shader, win_border_shader_loc.effect_amount2, &(postprocessing_effect_amount2[0]), SHADER_UNIFORM_VEC4);
+
+    SetShaderValue(postprocessing_shader, postprocessing_shader_loc.effect_amount1, &(postprocessing_effect_amount1[0]), SHADER_UNIFORM_VEC4);
+    SetShaderValue(postprocessing_shader, postprocessing_shader_loc.effect_amount2, &(postprocessing_effect_amount2[0]), SHADER_UNIFORM_VEC4);
+
     SetShaderValue(postprocessing_shader, postprocessing_shader_loc.time, &current_time, SHADER_UNIFORM_FLOAT);
+
     bool do_postprocessing_this_frame = do_postprocessing;
 
     if (do_postprocessing_this_frame) {
@@ -2303,8 +2313,8 @@ static void game_init(void)
 
     background = create_background();
 
-    set_game_mode(GAME_MODE_BROWSER);
-    //set_game_mode(GAME_MODE_RANDOM);
+    //set_game_mode(GAME_MODE_BROWSER);
+    set_game_mode(GAME_MODE_RANDOM);
 
     load_nvdata();
 }

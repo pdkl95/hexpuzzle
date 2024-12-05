@@ -29,7 +29,8 @@
 #include "shader.h"
 #include "win_anim.h"
 
-extern float postprocessing_effect_amount[4];
+extern float postprocessing_effect_amount1[4];
+extern float postprocessing_effect_amount2[4];
 
 static void level_set_fade_transition(level_t *level, tile_pos_t *pos)
 {
@@ -67,9 +68,10 @@ static void level_set_transition(level_t *level, tile_pos_t *pos, bool do_fade, 
 
 static void level_draw_corner_connections(level_t *level)
 {
-    postprocessing_effect_amount[3] = 1.0f;
+    postprocessing_effect_amount1[3] = 1.0f;
 
-    SetShaderValue(win_border_shader, win_border_shader_loc.effect_amount, &(postprocessing_effect_amount[0]), SHADER_UNIFORM_VEC4);
+    SetShaderValue(win_border_shader, win_border_shader_loc.effect_amount1, &(postprocessing_effect_amount1[0]), SHADER_UNIFORM_VEC4);
+    SetShaderValue(win_border_shader, win_border_shader_loc.effect_amount2, &(postprocessing_effect_amount2[0]), SHADER_UNIFORM_VEC4);
 
     BeginShaderMode(win_border_shader);
     {
@@ -160,9 +162,10 @@ void level_draw(level_t *level, bool finished)
     }
 
     if (finished) {
-        postprocessing_effect_amount[3] = 0.0f;
+        postprocessing_effect_amount1[3] = 0.0f;
 
-        SetShaderValue(win_border_shader, win_border_shader_loc.effect_amount, &(postprocessing_effect_amount[0]), SHADER_UNIFORM_VEC4);
+        SetShaderValue(win_border_shader, win_border_shader_loc.effect_amount1, &(postprocessing_effect_amount1[0]), SHADER_UNIFORM_VEC4);
+        SetShaderValue(win_border_shader, win_border_shader_loc.effect_amount2, &(postprocessing_effect_amount2[0]), SHADER_UNIFORM_VEC4);
 
         BeginShaderMode(win_border_shader);
         {

@@ -7,7 +7,8 @@ in vec4 fragColor;
 // Input uniform values
 uniform sampler2D texture0;
 uniform vec4 colDiffuse;
-uniform vec4 effect_amount;
+uniform vec4 effect_amount1;
+uniform vec4 effect_amount2;
 uniform float time;
 uniform vec2 resolution;
 
@@ -92,9 +93,9 @@ vec4 get_texel(vec2 coord)
 
 void main()
 {
-    bloom_amount = effect_amount.x;
-    distort_amount = effect_amount.y;
-    warp_amount = effect_amount.z;
+    bloom_amount = effect_amount1.x;
+    distort_amount = effect_amount1.y;
+    warp_amount = effect_amount1.z;
 
     vec2 p = 1.1 * fragTexCoord.xy;
 

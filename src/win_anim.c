@@ -119,8 +119,6 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
     level->extra_rotate_level += level->extra_rotate_level_velocity;
     level->extra_rotate_level = fmodf(level->extra_rotate_level, TAU);
 
-    float spin_boost = 0.233 + fabsf(level->extra_rotate_level);
-
     tile_pos_t *center_pos = level_get_center_tile_pos(level);
 
     float phase = fmod(current_time * 3.0f, TAU);
@@ -171,7 +169,7 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
             float tmag = tanh(mag);
             float extra_magnitude_target = Lerp(pop_magnitude * tmag, mag + (0.25 * tmag), tmag);
             extra_magnitude_target += 1.0f * pos->ring_radius;
-            extra_magnitude_target += powf(spin_boost, pos->ring_radius);
+            //extra_magnitude_target += spin_boost * pos->ring_radius;
             extra_magnitude_target *= fade_magnitude * osc_magnitude;
             pos->extra_magnitude = slew_limit_down(pos->extra_magnitude,
                                                    extra_magnitude_target,
@@ -185,7 +183,6 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
             }
 #endif
 
-            pos->extra_translate = Vector2Scale(pos->radial_vector_norm, pos->extra_magnitude);
             //pos->pop_translate   = Vector2Scale(pos->radial_vector_norm, pop_magnitude);
 
             float rotate_osc = cosf(phase + pos->radial_angle);

@@ -27,7 +27,8 @@ typedef struct win_border_shader_loc {
     int resolution;
     int time;
     int fade;
-    int effect_amount;
+    int effect_amount1;
+    int effect_amount2;
 } win_border_shader_loc_t;
 extern win_border_shader_loc_t win_border_shader_loc;
 
@@ -35,7 +36,8 @@ extern Shader postprocessing_shader;
 typedef struct postprocessing_shader_loc {
     int resolution;
     int time;
-    int effect_amount;
+    int effect_amount1;
+    int effect_amount2;
 } postprocessing_shader_loc_t;
 extern postprocessing_shader_loc_t postprocessing_shader_loc;
 

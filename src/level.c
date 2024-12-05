@@ -1775,7 +1775,7 @@ void level_fade_out(level_t *level, level_fade_finished_cb_t callback, void *dat
 static void level_update_tile_pops_callback(hex_axial_t axial, void *data)
 {
     level_t *level = (level_t *)data;
-    tile_pos_t *pos = level_get_solved_tile_pos(level, axial);
+    tile_pos_t *pos = level_get_unsolved_tile_pos(level, axial);
     if (!pos) {
         return;
     }
@@ -1784,32 +1784,30 @@ static void level_update_tile_pops_callback(hex_axial_t axial, void *data)
 
     switch (pos->inner_neighbors_count) {
     case 0:
-        return;
+        break;
 
     case 1:
-        pos->extra_translate = Vector2MaxLength(pos->extra_translate,
-                                                pos->inner_neighbors[0]->extra_translate);
-        return;
+        pos->extra_magnitude = MAX(pos->extra_magnitude,
+                                   pos->inner_neighbors[0]->extra_magnitude);
+        break;
 
     default:
         for (int i=0; i<pos->inner_neighbors_count; i++) {
-            if (pos->inner_neighbors[i]->extra_magnitude > 0.0f) {
-                Vector2 proj = Vector2Project(pos->inner_neighbors[i]->extra_translate,
-                                              pos->radial_vector);
-                pos->extra_translate = Vector2MaxLength(pos->extra_translate, proj);
-            }
+            pos->extra_magnitude = MAX(pos->extra_magnitude,
+                                       pos->inner_neighbors[i]->extra_magnitude);
         }
-        return;
+        break;
     }
+
+    pos->extra_translate = Vector2Scale(pos->radial_vector_norm, pos->extra_magnitude);
 }
 
 void level_update_tile_pops(level_t *level)
 {
-    return;
     tile_pos_t *center = level_get_center_tile_pos(level);
     for (int ring = 1; ring < level->radius; ring++) {
         hex_axial_foreach_in_ring(center->position,
-                                  ring,
+                                  ring + 1,
                                   level_update_tile_pops_callback,
                                   level);
     }
