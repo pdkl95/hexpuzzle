@@ -36,6 +36,7 @@
 #include "collection.h"
 #include "win_anim.h"
 #include "solver.h"
+#include "physics.h"
 
 //#define DEBUG_DRAG_AND_DROP 1
 //#define DEBUG_LEVEL_FADE
@@ -255,6 +256,8 @@ static level_t *init_level(level_t *level)
     assert_not_null(level);
 
     memset(level, 0, sizeof(level_t));
+
+    level->physics = NULL;
 
     level->center = LEVEL_CENTER_POSITION;
 

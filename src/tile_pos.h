@@ -63,6 +63,10 @@ struct tile_pos {
     tile_coord_t win; // window coordinates
     tile_coord_t rel; // tile-center relative coordinates
 
+    Vector2 physics_position;
+    Vector2 physics_velocity;
+    float   physics_rotation;
+
     float   extra_rotate;
     Vector2 extra_translate;
     float   extra_magnitude;

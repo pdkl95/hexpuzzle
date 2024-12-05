@@ -56,6 +56,9 @@ tile_pos_t *init_tile_pos(tile_pos_t *pos, tile_t *tile, hex_axial_t addr)
     pos->hover = false;
     pos->hover_center = false;
 
+    pos->physics_position = VEC2_ZERO;
+    pos->physics_rotation = 0.0f;
+
     return pos;
 }
 

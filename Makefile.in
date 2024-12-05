@@ -89,6 +89,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 bin_PROGRAMS = hexpuzzle$(EXEEXT)
 @USE_SYSTEM_RAYLIB_FALSE@am__append_1 = \
+@USE_SYSTEM_RAYLIB_FALSE@	$(CHIPMUNK_DIR)/src/libchipmunk.a \
 @USE_SYSTEM_RAYLIB_FALSE@	external/libcombined_deps.a \
 @USE_SYSTEM_RAYLIB_FALSE@	external/raylib/libraylib.a \
 @USE_SYSTEM_RAYLIB_FALSE@	-lGL -lc -lm -lpthread -ldl -lrt
@@ -181,6 +182,7 @@ am_hexpuzzle_OBJECTS = src/hexpuzzle-anim_fsm.$(OBJEXT) \
 	src/hexpuzzle-logging.$(OBJEXT) src/hexpuzzle-nvdata.$(OBJEXT) \
 	src/hexpuzzle-nvdata_finished.$(OBJEXT) \
 	src/hexpuzzle-options.$(OBJEXT) src/hexpuzzle-path.$(OBJEXT) \
+	src/hexpuzzle-physics.$(OBJEXT) \
 	src/hexpuzzle-raygui_impl.$(OBJEXT) \
 	src/hexpuzzle-raylib_helper.$(OBJEXT) \
 	src/hexpuzzle-startup_action.$(OBJEXT) \
@@ -192,6 +194,7 @@ hexpuzzle_OBJECTS = $(am_hexpuzzle_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @USE_SYSTEM_RAYLIB_FALSE@am__DEPENDENCIES_3 =  \
+@USE_SYSTEM_RAYLIB_FALSE@	$(CHIPMUNK_DIR)/src/libchipmunk.a \
 @USE_SYSTEM_RAYLIB_FALSE@	external/libcombined_deps.a \
 @USE_SYSTEM_RAYLIB_FALSE@	external/raylib/libraylib.a
 hexpuzzle_DEPENDENCIES = $(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3)
@@ -412,6 +415,7 @@ EXTRA_DIST = README.md lib/gnugetopt.h lib/getopt.c lib/getopt1.c \
 	external/raylib/platforms/rcore_desktop.c \
 	external/raylib/platforms/rcore_web.c \
 	external/raylib/external/glfw/LICENSE.md
+CHIPMUNK_DIR = /home/endymion/build/ChipmunkLatest/Chipmunk-7.0.3
 @BUILD_WEB_FALSE@RAYLIB_PLATFORM = PLATFORM_DESKTOP
 @BUILD_WEB_TRUE@RAYLIB_PLATFORM = PLATFORM_WEB
 @BUILD_WEB_FALSE@RAYLIB_GRAPHICS = GRAPHICS_API_OPENGL_33
@@ -433,7 +437,8 @@ COMMON_PROG_LDADD = \
 	$(APP_LIBS) \
 	-lm
 
-hexpuzzle_CFLAGS = $(COMMON_PROG_CFLAGS)
+hexpuzzle_CFLAGS = $(COMMON_PROG_CFLAGS) \
+	-I$(CHIPMUNK_DIR)/include/chipmunk
 hexpuzzle_LDADD = $(COMMON_PROG_LDADD) $(am__append_1)
 @BUILD_WEB_TRUE@hexpuzzle_LDFLAGS = -flto -s MAX_WEBGL_VERSION=1 -s \
 @BUILD_WEB_TRUE@	USE_GLFW=3 -s WASM=1 -s \
@@ -461,6 +466,7 @@ hexpuzzle_SOURCES = \
 	src/nvdata_finished.h   src/nvdata_finished.c  \
 	src/options.h           src/options.c          \
 	src/path.h              src/path.c             \
+	src/physics.h           src/physics.c          \
 	src/raygui_impl.c 			       \
 	src/raylib_helper.h     src/raylib_helper.c    \
 	src/startup_action.h    src/startup_action.c   \
@@ -813,6 +819,8 @@ src/hexpuzzle-options.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-path.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/hexpuzzle-physics.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-raygui_impl.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-raylib_helper.$(OBJEXT): src/$(am__dirstamp) \
@@ -882,6 +890,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-nvdata_finished.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-options.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-path.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-physics.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raygui_impl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raylib_helper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-shader.Po@am__quote@
@@ -1286,6 +1295,20 @@ src/hexpuzzle-path.obj: src/path.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/path.c' object='src/hexpuzzle-path.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-path.obj `if test -f 'src/path.c'; then $(CYGPATH_W) 'src/path.c'; else $(CYGPATH_W) '$(srcdir)/src/path.c'; fi`
+
+src/hexpuzzle-physics.o: src/physics.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-physics.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-physics.Tpo -c -o src/hexpuzzle-physics.o `test -f 'src/physics.c' || echo '$(srcdir)/'`src/physics.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-physics.Tpo src/$(DEPDIR)/hexpuzzle-physics.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/physics.c' object='src/hexpuzzle-physics.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-physics.o `test -f 'src/physics.c' || echo '$(srcdir)/'`src/physics.c
+
+src/hexpuzzle-physics.obj: src/physics.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-physics.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-physics.Tpo -c -o src/hexpuzzle-physics.obj `if test -f 'src/physics.c'; then $(CYGPATH_W) 'src/physics.c'; else $(CYGPATH_W) '$(srcdir)/src/physics.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-physics.Tpo src/$(DEPDIR)/hexpuzzle-physics.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/physics.c' object='src/hexpuzzle-physics.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-physics.obj `if test -f 'src/physics.c'; then $(CYGPATH_W) 'src/physics.c'; else $(CYGPATH_W) '$(srcdir)/src/physics.c'; fi`
 
 src/hexpuzzle-raygui_impl.o: src/raygui_impl.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-raygui_impl.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-raygui_impl.Tpo -c -o src/hexpuzzle-raygui_impl.o `test -f 'src/raygui_impl.c' || echo '$(srcdir)/'`src/raygui_impl.c

@@ -130,6 +130,8 @@ struct level {
 
     struct undo *undo;
 
+    struct physics *physics;
+
     struct collection *collection;
 
     struct level *prev, *next;

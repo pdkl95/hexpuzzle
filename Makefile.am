@@ -31,6 +31,8 @@ EXTRA_DIST = \
 	$(FONTS) \
 	$(SHADERS)
 
+CHIPMUNK_DIR = /home/endymion/build/ChipmunkLatest/Chipmunk-7.0.3
+
 if BUILD_WEB
 RAYLIB_PLATFORM = PLATFORM_WEB
 RAYLIB_GRAPHICS = GRAPHICS_API_OPENGL_ES2
@@ -69,8 +71,12 @@ COMMON_PROG_LDADD = \
 hexpuzzle_CFLAGS = $(COMMON_PROG_CFLAGS)
 hexpuzzle_LDADD = $(COMMON_PROG_LDADD)
 
+hexpuzzle_CFLAGS += \
+	-I$(CHIPMUNK_DIR)/include/chipmunk
+
 if ! USE_SYSTEM_RAYLIB
 hexpuzzle_LDADD += \
+	$(CHIPMUNK_DIR)/src/libchipmunk.a \
 	external/libcombined_deps.a \
 	external/raylib/libraylib.a \
 	-lGL -lc -lm -lpthread -ldl -lrt
@@ -120,6 +126,7 @@ hexpuzzle_SOURCES =                                    \
 	src/nvdata_finished.h   src/nvdata_finished.c  \
 	src/options.h           src/options.c          \
 	src/path.h              src/path.c             \
+	src/physics.h           src/physics.c          \
 	src/raygui_impl.c 			       \
 	src/raylib_helper.h     src/raylib_helper.c    \
 	src/startup_action.h    src/startup_action.c   \

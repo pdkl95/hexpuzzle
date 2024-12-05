@@ -1,6 +1,6 @@
 /****************************************************************************
  *                                                                          *
- * win_anim.h                                                               *
+ * physics.h                                                                *
  *                                                                          *
  * This file is part of hexpuzzle.                                          *
  *                                                                          *
@@ -19,37 +19,69 @@
  *                                                                          *
  ****************************************************************************/
 
-#ifndef WIN_ANIM_H
-#define WIN_ANIM_H
+#ifndef PHYSICS_H
+#define PHYSICS_H
 
-#include "anim_fsm.h"
+#include <chipmunk.h>
 
-enum win_anim_mode {
-    WIN_ANIM_MODE_POPS,
-    WIN_ANIM_MODE_PHYSICS
+struct tile_pos;
+struct level;
+
+static inline Vector2 cpVectToVector2(cpVect v)
+{
+    Vector2 rv = {
+        .x = v.x,
+        .y = v.y
+    };
+    return rv;
+}
+
+static inline cpVect Vector2TocpVect(Vector2 v)
+{
+    return cpv(v.x, v.y);
+}
+
+enum physics_state {
+    PHYSICS_STOP    = 0,
+    PHYSICS_RUNNING = 1
 };
-typedef enum win_anim_mode win_anim_mode_t;
+typedef enum physics_state physics_state_t;
 
-struct win_anim {
-    win_anim_mode_t mode;
-    anim_fsm_t anim_fsm;
+struct physics_tile {
+    struct tile_pos *pos;
+    cpShape *shape;
+    cpBody *body;
+
+    cpFloat radius;
+    cpFloat mass;
+    cpFloat moment;
+};
+typedef struct physics_tile physics_tile_t;
+
+struct physics {
     struct level *level;
-    bool running;
-    float fade[4];
-    float start_time;
+
+    physics_state_t state;
+
+    cpSpace *space;
+
+    cpShape *wall[4];
+
+    int num_tiles;
+    physics_tile_t *tiles;
+
+    cpFloat time_step;
+    cpFloat time;
 };
-typedef struct win_anim win_anim_t;
+typedef struct physics physics_t;
 
-win_anim_t *create_win_anim(struct level *level);
-void destroy_win_anim(win_anim_t *win_anim);
+physics_t *create_physics(struct level *level);
+void destroy_physics(physics_t *physics);
 
-void win_anim_update(win_anim_t *win_anim);
-void win_anim_draw(win_anim_t *win_anim);
+void physics_build_tiles(physics_t *physics);
 
-bool win_anim_running(win_anim_t *win_anim);
+void physics_start(physics_t *physics);
+void physics_update(physics_t *physics);
 
-void win_anim_start(win_anim_t *win_anim);
-void win_anim_stop(win_anim_t *win_anim);
-
-#endif /*WIN_ANIM_H*/
+#endif /*PHYSICS_H*/
 

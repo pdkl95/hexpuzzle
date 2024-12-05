@@ -24,6 +24,7 @@
 #include "level.h"
 #include "win_anim.h"
 #include "shader.h"
+#include "physics.h"
 
 extern bool do_postprocessing;
 extern float bloom_amount;
@@ -32,7 +33,7 @@ extern float warp_amount;
 static void trigger_pop(tile_pos_t *pos)
 {
     if ((pos->pop_out_phase > 0.0) || (pos->pop_in_phase)) {
-        return;\
+        return;
     }
 
     pos->pop_out_phase = 1.0;
@@ -41,30 +42,47 @@ static void trigger_pop(tile_pos_t *pos)
     }
 }
 
-static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
+static void win_anim_common_update_physics(win_anim_t *win_anim)
 {
-    win_anim_t *win_anim = (win_anim_t *)data;
-
+#if 1
     level_t *level = win_anim->level;
 
-    win_anim->fade[0] = anim_fsm->state_progress;
-    win_anim->fade[1] = ((float)win_anim->level->finished_hue) / 360.0;
+    for (int i=0; i<4; i++) {
+        cpShape *wall = level->physics->wall[i];
+
+        Vector2 a = cpVectToVector2(cpSegmentShapeGetA(wall));
+        Vector2 b = cpVectToVector2(cpSegmentShapeGetB(wall));
+        a = Vector2Add(a, window_center);
+        b = Vector2Add(b, window_center);
+        //a = Vector2Add(a, level->px_offset);
+        //b = Vector2Add(b, level->px_offset);
+        DrawLineEx(a, b, 8.0, LIME);
+    }
+#endif
+
+#if 0
+    Vector2 winsize = ivector2_to_vector2(window_size);
+
+    for (int i=0; i<LEVEL_MAXTILES; i++) {
+        tile_t *tile = &(win_anim->level->tiles[i]);
+
+        if (tile->enabled) {
+            tile_pos_t *pos = tile->unsolved_pos;
+
+            pos->extra_translate = Vector2Divide(pos->physics_position, winsize);
+            pos->extra_rotate = pos->physics_rotation;
+        }
+    }
+#endif
+}
+
+static void win_anim_common_update_pops(win_anim_t *win_anim)
+{
+    level_t *level = win_anim->level;
 
     float fade_magnitude = win_anim->fade[2];
     //float fade_magnitude = ease_circular_in(anim_fsm->state_progress);
     float  osc_magnitude = win_anim->fade[3];
-
-#if 0
-    printf("progress = %f. hue = %f, fadein = %f\n",
-           win_anim->fade[0],
-           win_anim->fade[1],
-           win_anim->fade[2]);
-#endif
-
-    SetShaderValue(win_border_shader,
-                   win_border_shader_loc.fade,
-                   &(win_anim->fade[0]),
-                   SHADER_UNIFORM_VEC4);
 
     //float envelope_variation = (sinf(0.23f * current_time) + 1.0f) * 0.5;
     float envelope_speed = 0.21f;
@@ -202,6 +220,36 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
     level_update_tile_pops(win_anim->level);
 }
 
+static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
+{
+    win_anim_t *win_anim = (win_anim_t *)data;
+
+    win_anim->fade[0] = anim_fsm->state_progress;
+    win_anim->fade[1] = ((float)win_anim->level->finished_hue) / 360.0;
+
+#if 0
+    printf("progress = %f. hue = %f, fadein = %f\n",
+           win_anim->fade[0],
+           win_anim->fade[1],
+           win_anim->fade[2]);
+#endif
+
+    SetShaderValue(win_border_shader,
+                   win_border_shader_loc.fade,
+                   &(win_anim->fade[0]),
+                   SHADER_UNIFORM_VEC4);
+
+    switch (win_anim->mode) {
+    case WIN_ANIM_MODE_POPS:
+        win_anim_common_update_pops(win_anim);
+        break;
+
+    case WIN_ANIM_MODE_PHYSICS:
+        win_anim_common_update_physics(win_anim);
+        break;
+    }
+}
+
 static void win_anim_fade_in_update(struct anim_fsm *anim_fsm, void *data)
 {
     win_anim_t *win_anim = (win_anim_t *)data;
@@ -244,6 +292,8 @@ win_anim_t *create_win_anim(struct level *level)
 {
     win_anim_t *win_anim = calloc(1, sizeof(win_anim_t));
 
+    win_anim->mode = WIN_ANIM_MODE_PHYSICS;
+
     win_anim->running = false;
     win_anim->level = level;
 
@@ -253,6 +303,10 @@ win_anim_t *create_win_anim(struct level *level)
     win_anim->fade[3] = 0.0;
 
     init_anim_fsm(&win_anim->anim_fsm, states, NULL, win_anim);
+
+    if (!level->physics) {
+        level->physics = create_physics(level);
+    }
 
     return win_anim;
 }
@@ -266,6 +320,7 @@ void win_anim_update(win_anim_t *win_anim)
 {
     assert_not_null(win_anim);
 
+    physics_update(win_anim->level->physics);
     anim_fsm_update(&win_anim->anim_fsm);
 }
 
@@ -292,6 +347,8 @@ void win_anim_start(win_anim_t *win_anim)
         anim_fsm_start(&win_anim->anim_fsm);
         win_anim->running = true;
         win_anim->start_time = GetTime();
+
+        physics_start(win_anim->level->physics);
     }
 }
 

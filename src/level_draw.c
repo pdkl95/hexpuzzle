@@ -215,7 +215,7 @@ void level_draw(level_t *level, bool finished)
         rlPopMatrix();
     }
     if (finished) {
-        level_draw_corner_connections(level);
+        //level_draw_corner_connections(level);
     }
 
 
