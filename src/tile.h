@@ -56,6 +56,8 @@ struct tile {
 
     struct tile_pos *solved_pos;
     struct tile_pos *unsolved_pos;
+
+    struct physics_tile *physics_tile;
 };
 typedef struct tile tile_t;
 

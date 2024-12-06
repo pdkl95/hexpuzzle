@@ -33,7 +33,7 @@ physics_t *create_physics(struct level *level)
 
     physics->state = PHYSICS_STOP;
 
-    physics->tiles = NULL;
+    memset(physics->tiles, 0, sizeof(physics->tiles));
 
     physics->time = 0.0;
     physics->time_step = 1.0 / options->max_fps;
@@ -42,9 +42,7 @@ physics_t *create_physics(struct level *level)
 
     cpSpaceSetIterations(physics->space, 20);
 
-    //cpVect gravity = cpvzero;
-    cpVect gravity = cpv(0.0, 500.0);
-
+    cpVect gravity = cpv(0.0, 250.0);
     cpSpaceSetGravity(physics->space, gravity);
 
     Vector2 size = window_center;
@@ -53,13 +51,6 @@ physics_t *create_physics(struct level *level)
     cpVect tr = cpv( size.x,-size.x);
     cpVect bl = cpv(-size.x, size.y);
     cpVect br = cpv( size.x, size.y);
-
-    /* cpVect px_offset = cpv(level->px_offset.x, */
-    /*                        level->px_offset.y); */
-    /* tl = cpvadd(tl, px_offset); */
-    /* tr = cpvadd(tr, px_offset); */
-    /* bl = cpvadd(bl, px_offset); */
-    /* br = cpvadd(br, px_offset); */
 
     cpBody *wall_body = cpSpaceGetStaticBody(physics->space);
     physics->wall[0] = cpSegmentShapeNew(wall_body, tl, tr, 0);
@@ -79,13 +70,17 @@ physics_t *create_physics(struct level *level)
 void destroy_physics(physics_t *physics)
 {
     if (physics) {
-        if (physics->tiles) {
-            for (int i=0; i<physics->num_tiles; i++) {
-                physics_tile_t *pt = &(physics->tiles[i]);
+        for (int i=0; i<LEVEL_MAXTILES; i++) {
+            physics_tile_t *pt = &(physics->tiles[i]);
 
-                cpBodyFree(pt->body);
+            for (hex_direction_t dir=0; dir<3; dir++) {
+                if (pt->path_constraint[dir]) {
+                    cpConstraintFree(pt->path_constraint[dir]);
+                }
             }
-            FREE(physics->tiles);
+
+            cpShapeFree(pt->shape);
+            cpBodyFree(pt->body);
         }
 
         for (int i=0; i<4; i++) {
@@ -98,36 +93,23 @@ void destroy_physics(physics_t *physics)
     }
 }
 
-cpFloat gravity_strength = 5.0e6f;
-
-UNUSED static void tile_velocity_update_func(cpBody *body, UNUSED cpVect gravity, cpFloat damping, cpFloat dt)
-{
-    cpVect p = cpBodyGetPosition(body);
-    cpFloat sqdist = cpvlengthsq(p);
-    cpVect g = cpvmult(p, -gravity_strength / (sqdist * cpfsqrt(sqdist)));
-    g = cpvmult(g, 20);
-    //g = cpvadd(g, gravity);
-    cpBodyUpdateVelocity(body, g, damping, dt);
-}
-
 void physics_build_tiles(physics_t *physics)
 {
-    //level_t *level = physics->level;
+    level_t *level = physics->level;
 
-    physics->num_tiles = level_get_enabled_positions(physics->level);
-
-    physics->tiles = calloc(physics->num_tiles, sizeof(physics_tile_t));
-
-    tile_pos_t *center_pos = level_get_center_tile_pos(physics->level);
-
-    /* cpVect px_offset = cpv(level->px_offset.x, */
-    /*                        level->px_offset.y); */
+    physics->num_tiles = level_get_enabled_tiles(level);
 
     for (int i=0; i<physics->num_tiles; i++) {
-        tile_pos_t *pos = physics->level->enabled_positions[i];
+        tile_t *tile = level->enabled_tiles[i];\
+        assert_not_null(tile);
+        tile_pos_t *pos = tile->unsolved_pos;
+        assert(tile->enabled);
+        assert_not_null(pos);
         physics_tile_t *pt = &(physics->tiles[i]);
+        assert_not_null(pt);
 
-        pt->pos = pos;
+        pt->tile = tile;
+        tile->physics_tile = pt;
 
         Vector2 center_position = Vector2Subtract(pos->win.center, window_center);
         cpVect position = cpv(center_position.x,
@@ -136,18 +118,11 @@ void physics_build_tiles(physics_t *physics)
         cpVect verts[6];
         each_direction {
             Vector2 corner = pos->rel.corners[dir];
-            corner = Vector2Scale(corner, 0.95);
+            //corner = Vector2Scale(corner, 0.95);
             verts[dir] = cpv(corner.x, corner.y);
         }
-        /* cpVect verts[6]; */
-        /* cpFloat size = pos->size * 1.0; */
-        /* for(int i=0; i<6; i++){ */
-        /*     cpFloat angle = -2.0f*CP_PI*i/((cpFloat)6); */
-        /*     verts[i] = cpv(size*cos(angle), pos->size*sin(angle)); */
-        /* } */
-
         pt->radius = pos->size;
-        pt->mass = 10;//pos->size;
+        pt->mass = 11; //pos->size;
         pt->moment = cpMomentForPoly(pt->mass, 6, verts, cpvzero, 0.0f);
 
         pt->body = cpSpaceAddBody(physics->space, cpBodyNew(pt->mass, pt->moment));
@@ -157,32 +132,47 @@ void physics_build_tiles(physics_t *physics)
 
         cpBodySetPosition(pt->body, position);
 
-        if (pos == center_pos) {
-            //cpBodySetAngularVelocity(pt->body, 1);
+        cpShapeSetElasticity(pt->shape, 0.4f);
+        cpShapeSetFriction(pt->shape, 0.4f);
+    }
+#if 0
+    for (int i=0; i<physics->num_tiles; i++) {
+        physics_tile_t *pt = &(physics->tiles[i]);
+        tile_t *tile = pt->tile;;
+        tile_pos_t *pos = tile->unsolved_pos;
+        tile_pos_t *solved_pos = tile->solved_pos;
 
-            cpShapeSetElasticity(pt->shape, 1.0f);
-            cpShapeSetFriction(pt->shape, 1.0f);
-        } else {
-            //cpFloat r = cpvlength(position);
-            //cpFloat v = cpfsqrt(gravity_strength / r) / r;
+        pt->constraint_count = 0;
 
-            /* Vector2 vel = Vector2Scale(Vector2Normalize(Vector2Rotate(center_position, */
-            /*                                                           TAU/4.0f)), */
-            /*                            20); */
+        for (hex_direction_t dir=0; dir<3; dir++) {
+            if (tile->path[dir] == PATH_TYPE_NONE) {
+                continue;
+            }
+            hex_direction_t opposite_dir = hex_opposite_direction(dir);
 
-            //cpVect cpv_vel = cpv(vel.x, vel.y);
+            tile_pos_t *solved_neighbor = solved_pos->neighbors[dir];
+            assert_not_null(solved_neighbor);
+            assert(solved_neighbor->tile->enabled);
+            assert(tile->path[dir] == solved_neighbor->tile->path[opposite_dir]);
+            tile_pos_t *neighbor = solved_neighbor->tile->unsolved_pos;
+            assert_not_null(neighbor);
 
-            //cpBodySetVelocity(pt->body, cpv_vel);
-            //cpBodySetAngularVelocity(pt->body, v / 5.0f);
+            cpConstraint *c = cpDampedSpringNew(
+                pt->body,
+                neighbor->tile->physics_tile->body,
+                Vector2TocpVect(pos->rel.midpoints[dir]),
+                Vector2TocpVect(neighbor->rel.midpoints[opposite_dir]),
+                pos->size * 2,
+                10.0f,
+                0.5f);
 
-            cpShapeSetElasticity(pt->shape, 0.0f);
-            cpShapeSetFriction(pt->shape, 0.4f);
+            cpSpaceAddConstraint(physics->space, c);
 
-            //cpBodySetVelocityUpdateFunc(pt->body, tile_velocity_update_func);
-            //cpBodySetVelocityUpdateFunc(pt->body, cpBodyUpdateVelocity);
-            //cpBodySetPositionUpdateFunc(pt->body, cpBodyUpdatePosition);
+            pt->path_constraint[pt->constraint_count] = c;
+            pt->constraint_count++;
         }
     }
+#endif
 }
 
 void physics_start(physics_t *physics)
@@ -202,31 +192,25 @@ void physics_update(physics_t *physics)
         return;
     }
 
-    Vector2 winsize = ivector2_to_vector2(window_size);
-    //winsize = Vector2Scale(winsize, 0.2);
-    float tau_12 = TAU/12.0;
+    Vector2 screen_offset = Vector2Subtract(window_center, physics->level->px_offset);
 
     for (int i=0; i<physics->num_tiles; i++) {
         physics_tile_t *pt = &(physics->tiles[i]);
+        tile_t *tile = pt->tile;
+        tile_pos_t *pos = tile->unsolved_pos;
+
+        cpVect velocity = cpBodyGetVelocity(pt->body);
+        pos->physics_velocity = cpVectToVector2(velocity);
 
         cpVect position = cpBodyGetPosition(pt->body);
-        cpVect velocity = cpBodyGetVelocity(pt->body);
-        //position = cpBodyWorldToLocal(pt->body, position);
         Vector2 vec2_position = cpVectToVector2(position);
-        pt->pos->physics_velocity = cpVectToVector2(velocity);
-        pt->pos->physics_position = vec2_position;
-        float scale = 0.2;
-        pt->pos->physics_position = Vector2Scale(pt->pos->physics_position, scale);
-        //pt->pos->physics_position.x /= winsize.x * scale;
-        //pt->pos->physics_position.y /= winsize.y * scale;
-        pt->pos->extra_translate = pt->pos->physics_position;
-        pt->pos->extra_rotate = cpBodyGetAngle(pt->body) - tau_12;
+        vec2_position = Vector2Add(vec2_position, screen_offset);
+        pos->physics_position = vec2_position;
+        pos->extra_translate = Vector2Subtract(pos->physics_position, pos->win.center); 
 
-        //cpVect force = cpvmult(cpvnormalize(cpvperp(position)), cpvlength(position) * 0.01);
-        //cpBodyApplyImpulseAtWorldPoint(pt->body, force, position);
+        pos->extra_rotate = cpBodyGetAngle(pt->body);
     }
 
     physics->time += physics->time_step;
-    cpSpaceStep(physics->space, physics->time_step/2.0);
-    cpSpaceStep(physics->space, physics->time_step/2.0);
+    cpSpaceStep(physics->space, physics->time_step);
 }

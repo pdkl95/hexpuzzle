@@ -187,7 +187,8 @@ static void win_anim_common_update_pops(win_anim_t *win_anim)
             float tmag = tanh(mag);
             float extra_magnitude_target = Lerp(pop_magnitude * tmag, mag + (0.25 * tmag), tmag);
             extra_magnitude_target += 1.0f * pos->ring_radius;
-            //extra_magnitude_target += spin_boost * pos->ring_radius;
+            float spin_boost = 1.0f + (pos->ring_radius /2.0f);
+            extra_magnitude_target += spin_boost * pos->ring_radius;
             extra_magnitude_target *= fade_magnitude * osc_magnitude;
             pos->extra_magnitude = slew_limit_down(pos->extra_magnitude,
                                                    extra_magnitude_target,
@@ -282,8 +283,10 @@ anim_fsm_callbacks_t osc_ramp_in_callbacks = { .update = win_anim_osc_ramp_in_up
 anim_fsm_callbacks_t    osc_stay_callbacks = { .update = win_anim_osc_stay_update    };
 
 anim_fsm_state_t states[] = {
-    { "FADE_IN",       1/* 6.0 */, ANIM_FSM_STATE_NEXT,     &fade_in_callbacks },
-    { "OSC_RAMP_IN",   1/* 8.0 */, ANIM_FSM_STATE_NEXT, &osc_ramp_in_callbacks },
+//    { "FADE_IN",       1/* 6.0 */, ANIM_FSM_STATE_NEXT,     &fade_in_callbacks },
+//    { "OSC_RAMP_IN",   1/* 8.0 */, ANIM_FSM_STATE_NEXT, &osc_ramp_in_callbacks },
+    { "FADE_IN",       6.0, ANIM_FSM_STATE_NEXT,     &fade_in_callbacks },
+    { "OSC_RAMP_IN",   8.0, ANIM_FSM_STATE_NEXT, &osc_ramp_in_callbacks },
     { "OSC_STAY",     10.0, ANIM_FSM_STATE_STAY,    &osc_stay_callbacks },
     { "STOP",          0.0, ANIM_FSM_STATE_STOP,                   NULL }
 };
@@ -292,7 +295,8 @@ win_anim_t *create_win_anim(struct level *level)
 {
     win_anim_t *win_anim = calloc(1, sizeof(win_anim_t));
 
-    win_anim->mode = WIN_ANIM_MODE_PHYSICS;
+    //win_anim->mode = WIN_ANIM_MODE_PHYSICS;
+    win_anim->mode = WIN_ANIM_MODE_POPS;
 
     win_anim->running = false;
     win_anim->level = level;
@@ -320,7 +324,10 @@ void win_anim_update(win_anim_t *win_anim)
 {
     assert_not_null(win_anim);
 
-    physics_update(win_anim->level->physics);
+    if (win_anim->mode == WIN_ANIM_MODE_PHYSICS) {
+        physics_update(win_anim->level->physics);
+    }
+
     anim_fsm_update(&win_anim->anim_fsm);
 }
 
@@ -348,7 +355,10 @@ void win_anim_start(win_anim_t *win_anim)
         win_anim->running = true;
         win_anim->start_time = GetTime();
 
-        physics_start(win_anim->level->physics);
+        if (win_anim->mode == WIN_ANIM_MODE_PHYSICS) {
+            assert(win_anim->level->finished);
+            physics_start(win_anim->level->physics);
+        }
     }
 }
 

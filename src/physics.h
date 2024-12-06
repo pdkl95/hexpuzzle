@@ -48,9 +48,12 @@ enum physics_state {
 typedef enum physics_state physics_state_t;
 
 struct physics_tile {
-    struct tile_pos *pos;
+    struct tile *tile;
     cpShape *shape;
     cpBody *body;
+
+    int constraint_count;
+    cpConstraint *path_constraint[3];
 
     cpFloat radius;
     cpFloat mass;
@@ -68,7 +71,7 @@ struct physics {
     cpShape *wall[4];
 
     int num_tiles;
-    physics_tile_t *tiles;
+    physics_tile_t tiles[LEVEL_MAXTILES];
 
     cpFloat time_step;
     cpFloat time;

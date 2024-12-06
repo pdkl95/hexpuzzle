@@ -379,7 +379,7 @@ void tile_draw_win_anim(tile_pos_t *pos)
     DrawPolyLinesEx(pos->rel.center, 6, pos->size, 0.0f, line_width, color);
 }
 
-#define MIN_CORNER_DIST_SQR 129.0f
+#define MIN_CORNER_DIST_SQR 120.0f
 void tile_draw_corner_connections(tile_pos_t *pos)
 {
     tile_t *tile = pos->tile;
@@ -417,6 +417,7 @@ void tile_draw_corner_connections(tile_pos_t *pos)
         p2 = Vector2Add(p2, neighbor->extra_translate);
         p3 = Vector2Add(p3, neighbor->extra_translate);
 
+        bool is_on = true;
         float cdist_sqr = Vector2DistanceSqr(p1, p2);
         if (cdist_sqr > MIN_CORNER_DIST_SQR) {
             color.a = (unsigned char)(255.0f * MAX(pos->extra_magnitude, neighbor->extra_magnitude));
@@ -425,7 +426,7 @@ void tile_draw_corner_connections(tile_pos_t *pos)
             //thickness += pos->extra_magnitude * 0.1;
             DrawSplineSegmentCatmullRom(p0, p1, p2, p3, thickness, color);
         } else {
-            continue;
+            is_on = false;
         }
 
         if (dir > 2) {
@@ -459,18 +460,26 @@ void tile_draw_corner_connections(tile_pos_t *pos)
             Vector2 pos_cw1_c  = Vector2Add(pos->win.midpoint_path_cw[dir], outside);
             Vector2 nbr_ccw1_c = Vector2Add(neighbor->win.midpoint_path_ccw[opposite_dir], neighbor_outside);
             Vector2 nbr_ccw1_p = neighbor->win.midpoint_path_ccw[opposite_dir];
+            pos_cw1_p  = Vector2RotateAroundPoint(pos_cw1_p,  pos->extra_rotate, pos->win.center);
             pos_cw1_p  = Vector2Add(pos_cw1_p,  pos->extra_translate);
+            pos_cw1_c  = Vector2RotateAroundPoint(pos_cw1_c,  pos->extra_rotate, pos->win.center);
             pos_cw1_c  = Vector2Add(pos_cw1_c,  pos->extra_translate);
+            nbr_ccw1_c = Vector2RotateAroundPoint(nbr_ccw1_c,  neighbor->extra_rotate, neighbor->win.center);
             nbr_ccw1_c = Vector2Add(nbr_ccw1_c, neighbor->extra_translate);
+            nbr_ccw1_p = Vector2RotateAroundPoint(nbr_ccw1_p,  neighbor->extra_rotate, neighbor->win.center);
             nbr_ccw1_p = Vector2Add(nbr_ccw1_p, neighbor->extra_translate);
 
             Vector2 pos_ccw2_p = pos->win.midpoint_path_ccw[dir];
             Vector2 pos_ccw2_c = Vector2Add(pos->win.midpoint_path_ccw[dir], outside);
             Vector2 nbr_cw2_c  = Vector2Add(neighbor->win.midpoint_path_cw[opposite_dir], neighbor_outside);
             Vector2 nbr_cw2_p  = neighbor->win.midpoint_path_cw[opposite_dir];
+            pos_ccw2_p = Vector2RotateAroundPoint(pos_ccw2_p,  pos->extra_rotate, pos->win.center);
             pos_ccw2_p = Vector2Add(pos_ccw2_p,  pos->extra_translate);
+            pos_ccw2_c = Vector2RotateAroundPoint(pos_ccw2_c,  pos->extra_rotate, pos->win.center);
             pos_ccw2_c = Vector2Add(pos_ccw2_c,  pos->extra_translate);
+            nbr_cw2_c  = Vector2RotateAroundPoint(nbr_cw2_c,  neighbor->extra_rotate, neighbor->win.center);
             nbr_cw2_c  = Vector2Add(nbr_cw2_c, neighbor->extra_translate);
+            nbr_cw2_p  = Vector2RotateAroundPoint(nbr_cw2_p,  neighbor->extra_rotate, neighbor->win.center);
             nbr_cw2_p  = Vector2Add(nbr_cw2_p, neighbor->extra_translate);
 #endif
 
@@ -486,35 +495,43 @@ void tile_draw_corner_connections(tile_pos_t *pos)
 #endif
 
             color.g = options->path_color[tile->path[dir]].hue;
-            color.a = 1.0;
+            float thickness = pos->line_width;
+
+            color.a = 0.0;
+            if (is_on) {
+                color.a = 1.0;
+                thickness = pos->line_width * 0.75;
+            }
 
             DrawSplineSegmentBezierCubic(
                 pos_m_p,
                 pos_m_c,
                 nbr_m_c,
                 nbr_m_p,
-                pos->line_width * 0.75,
+                thickness,
                 color);
 
 #if 0
-            float edge_thickness = 2.0;
-            color.a = 1.0;
+            } else {
+                color.a = 1.0;
+                float edge_thickness = 2.0;
 
-            DrawSplineSegmentBezierCubic(
-                pos_cw1_p,
-                pos_cw1_c,
-                nbr_ccw1_c,
-                nbr_ccw1_p,
-                edge_thickness,
-                color);
+                DrawSplineSegmentBezierCubic(
+                    pos_cw1_p,
+                    pos_cw1_c,
+                    nbr_ccw1_c,
+                    nbr_ccw1_p,
+                    edge_thickness,
+                    color);
 
-            DrawSplineSegmentBezierCubic(
-                pos_ccw2_p,
-                pos_ccw2_c,
-                nbr_cw2_c,
-                nbr_cw2_p,
-                edge_thickness,
-                color);
+                DrawSplineSegmentBezierCubic(
+                    pos_ccw2_p,
+                    pos_ccw2_c,
+                    nbr_cw2_c,
+                    nbr_cw2_p,
+                    edge_thickness,
+                    color);
+            }
 #endif
         }
     }
