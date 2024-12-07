@@ -54,6 +54,8 @@ struct tile {
 
     path_type_t start_for_path_type;
 
+    bool visited;
+
     struct tile_pos *solved_pos;
     struct tile_pos *unsolved_pos;
 

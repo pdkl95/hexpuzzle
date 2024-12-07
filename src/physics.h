@@ -84,6 +84,7 @@ void destroy_physics(physics_t *physics);
 void physics_build_tiles(physics_t *physics);
 
 void physics_start(physics_t *physics);
+void physics_stop(physics_t *physics);
 void physics_update(physics_t *physics);
 
 #endif /*PHYSICS_H*/

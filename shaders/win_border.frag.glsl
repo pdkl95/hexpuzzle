@@ -21,6 +21,7 @@ float distort_amount;
 float warp_amount;
 float do_hue_override;
 float extra_rotate_level;
+float wave_amount;
 
 // Output fragment color
 //out vec4 finalColor;
@@ -41,6 +42,7 @@ void main()
     warp_amount = effect_amount1.z;
     do_hue_override = effect_amount1.w;
     extra_rotate_level = effect_amount2.x;
+    wave_amount = effect_amount2.y;
 
     float px = 1.0/resolution.y;
     float aspect = resolution.y/resolution.x;
@@ -69,6 +71,8 @@ void main()
     float hue_override   = fragColor.g;
     float perlin_noise   = fragColor.b;
     float hidden         = fragColor.a;
+
+    wave_amount = max(wave_amount, hue_override);
 
     float spin_fade = 1.0;
     float saturate = 0.0;
@@ -99,6 +103,7 @@ void main()
 
     float base_wave = wave;
     wave *= spin_fade;
+    wave *= wave_amount;
 
     vec3 hsv = vec3(hue, 0.7, clamp(wave, 0.0, 1.0));
     color = hsv2rgb(hsv);
@@ -106,7 +111,7 @@ void main()
     vec3 blank_color = vec3(0.19607843137254902);
     float spin_extra = (1.0 - spin_fade) * fade_in_override;
 
-    float total_wave = fade_in_override + spin_extra;
+    float total_wave = fade_in_override + (spin_extra * wave_amount);
 
     if (hidden > 0.5) {
         float hidden_tmp;
@@ -122,6 +127,10 @@ void main()
         hidden_mix *= 0.333333333;
 
         hidden_wave *= fade_in_override;
+
+        hidden_mix  *= wave_amount;
+        hidden_wave *= wave_amount;
+
         color = mix(color, vec3(0.7333333333333333, 1.0, 0.9568627450980393), hidden_mix);
 
         color = mix(vec3(0.0), color, hidden_wave);
@@ -132,11 +141,14 @@ void main()
     }
 
     vec3 saturate_color = vec3(1.0);
-    color = mix(color, saturate_color, min(saturate, (1.0-base_wave)));
+    float saturate_mix = clamp(min(saturate, (1.0 - base_wave)), 0.0, 1.0);
+    color = mix(color, saturate_color, saturate_mix * wave_amount);
 
     if (do_hue_override > 0.6 && hue_override != 0.0) {
         vec3 override_color = hsv2rgb(vec3(hue_override, 1.0, 1.0));
-        color = mix(color, override_color, 1.0 - bloom_amount);
+        float override_mix = 1.0 - bloom_amount;
+        override_mix = mix(override_mix, 1.0, wave_amount);
+        color = mix(color, override_color, override_mix);
     }
 
     //color = vec3(path_highlight);

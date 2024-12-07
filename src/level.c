@@ -1491,8 +1491,26 @@ void level_solve(level_t *level)
 {
     assert_not_null(level);
 
-    create_or_use_solver(current_level);
-    solver_start_fast(current_level->solver);
+    for (int i=0; i<LEVEL_MAXTILES; i++) {
+        tile_t *tile = &(level->tiles[i]);
+
+        if ((!tile->enabled) ||
+            (tile->hidden) ||
+            (!tile->solved_pos) ||
+            (!tile->unsolved_pos)) {
+            continue;
+        }
+
+        hex_axial_t solved_p   = tile->solved_pos->position;
+        hex_axial_t unsolved_p = tile->unsolved_pos->position;
+
+        if (!hex_axial_eq(solved_p, unsolved_p)) {
+            level_swap_tile_pos_by_position(level, solved_p, unsolved_p, false);
+        }
+    }
+
+    /* create_or_use_solver(current_level); */
+    /* solver_start_fast(current_level->solver); */
 }
 
 void level_drop_tile(level_t *level, tile_pos_t *drag_target, tile_pos_t *drop_target)

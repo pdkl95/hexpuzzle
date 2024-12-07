@@ -283,10 +283,13 @@ anim_fsm_callbacks_t osc_ramp_in_callbacks = { .update = win_anim_osc_ramp_in_up
 anim_fsm_callbacks_t    osc_stay_callbacks = { .update = win_anim_osc_stay_update    };
 
 anim_fsm_state_t states[] = {
-//    { "FADE_IN",       1/* 6.0 */, ANIM_FSM_STATE_NEXT,     &fade_in_callbacks },
-//    { "OSC_RAMP_IN",   1/* 8.0 */, ANIM_FSM_STATE_NEXT, &osc_ramp_in_callbacks },
+#if 1
+    { "FADE_IN",       1/* 6.0 */, ANIM_FSM_STATE_NEXT,     &fade_in_callbacks },
+    { "OSC_RAMP_IN",   1/* 8.0 */, ANIM_FSM_STATE_NEXT, &osc_ramp_in_callbacks },
+#else
     { "FADE_IN",       6.0, ANIM_FSM_STATE_NEXT,     &fade_in_callbacks },
     { "OSC_RAMP_IN",   8.0, ANIM_FSM_STATE_NEXT, &osc_ramp_in_callbacks },
+#endif
     { "OSC_STAY",     10.0, ANIM_FSM_STATE_STAY,    &osc_stay_callbacks },
     { "STOP",          0.0, ANIM_FSM_STATE_STOP,                   NULL }
 };
@@ -295,8 +298,11 @@ win_anim_t *create_win_anim(struct level *level)
 {
     win_anim_t *win_anim = calloc(1, sizeof(win_anim_t));
 
-    //win_anim->mode = WIN_ANIM_MODE_PHYSICS;
+#if 1
+    win_anim->mode = WIN_ANIM_MODE_PHYSICS;
+#else
     win_anim->mode = WIN_ANIM_MODE_POPS;
+#endif
 
     win_anim->running = false;
     win_anim->level = level;
@@ -367,6 +373,10 @@ void win_anim_stop(win_anim_t *win_anim)
     assert_not_null(win_anim);
 
     if (win_anim->running) {
+        if (win_anim->mode == WIN_ANIM_MODE_PHYSICS) {
+            physics_stop(win_anim->level->physics);
+        }
+
         win_anim->running = false;
         anim_fsm_stop(&win_anim->anim_fsm);
     }

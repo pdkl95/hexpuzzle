@@ -317,7 +317,7 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         }
     }
 
-    DrawLineEx(VEC2_ZERO, pos->physics_velocity, 3.0, PINK);
+    //DrawLineEx(VEC2_ZERO, pos->physics_velocity, 3.0, PINK);
 
     //DrawLineEx(VEC2_ZERO, Vector2Scale(pos->radial_vector, 0.5), 3.0, LIME);
 
@@ -417,16 +417,17 @@ void tile_draw_corner_connections(tile_pos_t *pos)
         p2 = Vector2Add(p2, neighbor->extra_translate);
         p3 = Vector2Add(p3, neighbor->extra_translate);
 
-        bool is_on = true;
-        float cdist_sqr = Vector2DistanceSqr(p1, p2);
-        if (cdist_sqr > MIN_CORNER_DIST_SQR) {
-            color.a = (unsigned char)(255.0f * MAX(pos->extra_magnitude, neighbor->extra_magnitude));
+        bool is_pop = false;
 
-            float thickness = 3.0;
-            //thickness += pos->extra_magnitude * 0.1;
-            DrawSplineSegmentCatmullRom(p0, p1, p2, p3, thickness, color);
-        } else {
-            is_on = false;
+        if (is_pop) {
+            float cdist_sqr = Vector2DistanceSqr(p1, p2);
+            if (cdist_sqr > MIN_CORNER_DIST_SQR) {
+                color.a = (unsigned char)(255.0f * MAX(pos->extra_magnitude, neighbor->extra_magnitude));
+
+                float thickness = 3.0;
+                //thickness += pos->extra_magnitude * 0.1;
+                DrawSplineSegmentCatmullRom(p0, p1, p2, p3, thickness, color);
+            }
         }
 
         if (dir > 2) {
@@ -498,9 +499,11 @@ void tile_draw_corner_connections(tile_pos_t *pos)
             float thickness = pos->line_width;
 
             color.a = 0.0;
-            if (is_on) {
+            if (is_pop) {
                 color.a = 1.0;
                 thickness = pos->line_width * 0.75;
+            } else {
+                DrawLineEx(p1, p2,  1.0, LIME);
             }
 
             DrawSplineSegmentBezierCubic(

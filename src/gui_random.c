@@ -58,6 +58,7 @@ Vector2 seed_text_location;
 
 char gui_random_panel_text[] = "Random Level";
 char gui_random_play_button_text[] = "Play";
+char gui_random_continue_button_text[] = "Continue";
 char gui_random_radius_label_text[] = "Tile Radius";
 char gui_random_radius_left_button_text[6];
 char gui_random_radius_right_button_text[6];
@@ -96,6 +97,7 @@ bool any_drop_down_active = false;
 bool gui_random_color[PATH_TYPE_COUNT];
 int gui_random_color_count = PATH_TYPE_COUNT - 1;
 
+bool played_level = false;
 level_t *gui_random_level = NULL;
 uint64_t gui_random_seed;
 char *gui_random_seed_str = NULL;
@@ -673,6 +675,7 @@ static void regen_level(void)
     }
 
     gui_random_level = generate_random_level();
+    played_level = false;
 }
 
 void init_gui_random_minimal(void)
@@ -847,7 +850,12 @@ void resize_gui_random(void)
     gui_random_area_rect.height -= gui_random_rng_seed_rect.height + RAYGUI_ICON_SIZE;
 
     Vector2 gui_random_play_button_text_size = measure_big_button_text(gui_random_play_button_text);
-    gui_random_play_button_rect.height = gui_random_play_button_text_size.y + (3 * BUTTON_MARGIN);;
+    Vector2 gui_random_continue_button_text_size = measure_big_button_text(gui_random_continue_button_text);
+    Vector2 play_or_continue_text_size = {
+        .x = MAX(gui_random_play_button_text_size.x, gui_random_continue_button_text_size.x),
+        .y = MAX(gui_random_play_button_text_size.y, gui_random_continue_button_text_size.y)
+    };
+    gui_random_play_button_rect.height = play_or_continue_text_size.y + (3 * BUTTON_MARGIN);;
     gui_random_play_button_rect.width  = gui_random_area_rect.width;
     gui_random_play_button_rect.x      = gui_random_area_rect.x;
     gui_random_play_button_rect.y      = gui_random_area_rect.y + gui_random_area_rect.height - gui_random_play_button_rect.height;
@@ -1064,6 +1072,15 @@ static void draw_tile_radius_gui(void)
     }
 }
 
+static char *get_play_or_continue_text(void)
+{
+    if (played_level) {
+        return gui_random_continue_button_text;
+    } else {
+        return gui_random_play_button_text;
+    }
+}
+
 void draw_gui_random(void)
 {
     if (!gui_random_level) {
@@ -1107,7 +1124,7 @@ void draw_gui_random(void)
 
     set_big_button_font();
 
-    if (GuiButton(gui_random_play_button_rect, gui_random_play_button_text)) {
+    if (GuiButton(gui_random_play_button_rect, get_play_or_continue_text())) {
         play_gui_random_level();
     }
 
@@ -1151,4 +1168,5 @@ void draw_gui_random(void)
 void play_gui_random_level(void)
 {
     level_play(gui_random_level);
+    played_level = true;
 }
