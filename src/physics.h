@@ -52,8 +52,9 @@ struct physics_tile {
     cpShape *shape;
     cpBody *body;
 
-    int constraint_count;
-    cpConstraint *path_constraint[3];
+    bool path_has_spring[3];
+    cpConstraint *path_spring[3];
+    cpConstraint *path_rotary_limit[3];
 
     cpFloat radius;
     cpFloat mass;
@@ -72,6 +73,7 @@ struct physics {
 
     int num_tiles;
     physics_tile_t tiles[LEVEL_MAXTILES];
+    bool tiles_ready;
 
     cpFloat time_step;
     cpFloat time;

@@ -42,9 +42,9 @@ static void trigger_pop(tile_pos_t *pos)
     }
 }
 
-static void win_anim_common_update_physics(win_anim_t *win_anim)
+static void win_anim_common_update_physics(UNUSED win_anim_t *win_anim)
 {
-#if 1
+#if 0
     level_t *level = win_anim->level;
 
     for (int i=0; i<4; i++) {
@@ -57,21 +57,6 @@ static void win_anim_common_update_physics(win_anim_t *win_anim)
         //a = Vector2Add(a, level->px_offset);
         //b = Vector2Add(b, level->px_offset);
         DrawLineEx(a, b, 8.0, LIME);
-    }
-#endif
-
-#if 0
-    Vector2 winsize = ivector2_to_vector2(window_size);
-
-    for (int i=0; i<LEVEL_MAXTILES; i++) {
-        tile_t *tile = &(win_anim->level->tiles[i]);
-
-        if (tile->enabled) {
-            tile_pos_t *pos = tile->unsolved_pos;
-
-            pos->extra_translate = Vector2Divide(pos->physics_position, winsize);
-            pos->extra_rotate = pos->physics_rotation;
-        }
     }
 #endif
 }
@@ -139,7 +124,7 @@ static void win_anim_common_update_pops(win_anim_t *win_anim)
 
     tile_pos_t *center_pos = level_get_center_tile_pos(level);
 
-    float phase = fmod(current_time * 3.0f, TAU);
+    float phase = fmodf(current_time * 3.0f, TAU);
     for (int i=0; i<LEVEL_MAXTILES; i++) {
         tile_t *tile = &(win_anim->level->tiles[i]);
 
@@ -216,7 +201,7 @@ static void win_anim_common_update_pops(win_anim_t *win_anim)
     bloom_amount = envelope * fade_magnitude * osc_magnitude;
 
     float run_time = GetTime() - win_anim->start_time;
-    warp_amount = tanhf(0.007 * run_time);
+    warp_amount = tanhf(0.087 * run_time);
 
     level_update_tile_pops(win_anim->level);
 }
@@ -267,6 +252,13 @@ static void win_anim_osc_ramp_in_update(struct anim_fsm *anim_fsm, void *data)
     win_anim->fade[2] = 1.0;
     win_anim->fade[3] = anim_fsm->state_progress;
     win_anim_common_update(anim_fsm, data);
+
+    if (anim_fsm->state_progress == 0.0f) {
+        if (win_anim->mode == WIN_ANIM_MODE_PHYSICS) {
+            assert(win_anim->level->finished);
+            physics_start(win_anim->level->physics);
+        }
+    }
 }
 
 static void win_anim_osc_stay_update(struct anim_fsm *anim_fsm, void *data)
@@ -283,7 +275,7 @@ anim_fsm_callbacks_t osc_ramp_in_callbacks = { .update = win_anim_osc_ramp_in_up
 anim_fsm_callbacks_t    osc_stay_callbacks = { .update = win_anim_osc_stay_update    };
 
 anim_fsm_state_t states[] = {
-#if 1
+#if 0
     { "FADE_IN",       1/* 6.0 */, ANIM_FSM_STATE_NEXT,     &fade_in_callbacks },
     { "OSC_RAMP_IN",   1/* 8.0 */, ANIM_FSM_STATE_NEXT, &osc_ramp_in_callbacks },
 #else
@@ -360,11 +352,6 @@ void win_anim_start(win_anim_t *win_anim)
         anim_fsm_start(&win_anim->anim_fsm);
         win_anim->running = true;
         win_anim->start_time = GetTime();
-
-        if (win_anim->mode == WIN_ANIM_MODE_PHYSICS) {
-            assert(win_anim->level->finished);
-            physics_start(win_anim->level->physics);
-        }
     }
 }
 

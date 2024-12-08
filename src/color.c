@@ -38,7 +38,7 @@ Color purple     = { 155,  79, 150, 255 }; // 9b4f96
 Color royal_blue = {   0,  56, 168, 255 }; // 0038a8
 
 
-Color tile_bg_color            = { 0x32, 0x32, 0x32, 0xff };
+Color tile_bg_color            = { 0x28, 0x28, 0x28, 0xff };
 Color tile_bg_hover_color      = { 0x40, 0x40, 0x40, 0xff };
 Color tile_bg_drag_color       = { 0x3b, 0x3b, 0x3b, 0xff };
 Color tile_bg_hidden_color     = { 0x32, 0x32, 0x32, 0x33 };

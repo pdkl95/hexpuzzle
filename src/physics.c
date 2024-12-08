@@ -22,8 +22,10 @@
 #include "common.h"
 #include "options.h"
 #include "level.h"
+#include "win_anim.h"
 #include "physics.h"
 
+float gravity_strength = 250.0;
 
 physics_t *create_physics(struct level *level)
 {
@@ -44,8 +46,8 @@ physics_t *create_physics(struct level *level)
 
     cpSpaceSetIterations(physics->space, 20);
 
-    cpVect gravity = cpv(0.0, 250.0);
-    cpSpaceSetGravity(physics->space, gravity);
+    /* cpVect gravity = cpv(0.0, gravity_strength); */
+    /* cpSpaceSetGravity(physics->space, gravity); */
 
     Vector2 size = window_center;
     size = Vector2Scale(size, 1.0);
@@ -62,11 +64,36 @@ physics_t *create_physics(struct level *level)
 
     for (int i=0; i<4; i++) {
         cpShapeSetFriction(physics->wall[i], 1.0);
-        cpShapeSetElasticity(physics->wall[i], 0.8);
+        cpShapeSetElasticity(physics->wall[i], 0.75);
         cpSpaceAddShape(physics->space, physics->wall[i]);
     }
 
     return physics;
+}
+
+void cleanup_phyics_tile(physics_tile_t *pt)
+{
+    assert_not_null(pt);
+
+    for (hex_direction_t dir=0; dir<3; dir++) {
+        if (pt->path_spring[dir]) {
+            cpConstraintFree(pt->path_spring[dir]);
+            pt->path_spring[dir] = NULL;
+        }
+        if (pt->path_rotary_limit[dir]) {
+            cpConstraintFree(pt->path_rotary_limit[dir]);
+            pt->path_rotary_limit[dir] = NULL;
+        }
+    }
+
+    if (pt->shape) {
+        cpShapeFree(pt->shape);
+        pt->shape = NULL;
+    }
+    if (pt->body) {
+        cpBodyFree(pt->body);
+        pt->body = NULL;
+    }
 }
 
 void destroy_physics(physics_t *physics)
@@ -74,15 +101,7 @@ void destroy_physics(physics_t *physics)
     if (physics) {
         for (int i=0; i<LEVEL_MAXTILES; i++) {
             physics_tile_t *pt = &(physics->tiles[i]);
-
-            for (hex_direction_t dir=0; dir<3; dir++) {
-                if (pt->path_constraint[dir]) {
-                    cpConstraintFree(pt->path_constraint[dir]);
-                }
-            }
-
-            cpShapeFree(pt->shape);
-            cpBodyFree(pt->body);
+            cleanup_phyics_tile(pt);
         }
 
         for (int i=0; i<4; i++) {
@@ -94,7 +113,7 @@ void destroy_physics(physics_t *physics)
         FREE(physics);
     }
 }
-\
+
 static void shuffle_int(int *list, int len)
 {
     int i, j, tmp;
@@ -129,6 +148,9 @@ static bool constrain_random_spanning_tree(physics_t *physics, tile_t *tile, hex
 
     shuffle_int((int *)(&(order.dir[0])), 6);
 
+
+    int path_constraint_count = 0;
+
     for (int i=0; i<6; i++) {
         hex_direction_t dir = order.dir[i];
 
@@ -158,42 +180,79 @@ static bool constrain_random_spanning_tree(physics_t *physics, tile_t *tile, hex
         if (constrain_random_spanning_tree(physics, neighbor_tile, &opposite_dir)) {
             physics_tile_t *neighbor_pt = neighbor_tile->physics_tile;
 
+#if 1
+            float arcsize = TAU/6.0f;
             cpConstraint *c1 = cpRotaryLimitJointNew(
                 pt->body,
                 neighbor_pt->body,
-                -TAU/6,
-                TAU/6);
+                -arcsize,
+                arcsize);
 
             cpConstraintSetMaxForce(c1, 10000);
             //cpConstraintSetMaxBias(c1, 1)
             cpSpaceAddConstraint(physics->space, c1);
 
+            pt->path_rotary_limit[path_constraint_count] = c1;
+#endif
+#if 1
             cpConstraint *c2 = cpDampedSpringNew(
                 pt->body,
                 neighbor_pt->body,
                 Vector2TocpVect(tile->unsolved_pos->rel.midpoints[dir]),
                 Vector2TocpVect(neighbor_tile->unsolved_pos->rel.midpoints[opposite_dir]),
-                10.0f,
-                10.0f,
+                2.0f,
+                120.0f,
                 25.0f);
 
             cpConstraintSetMaxForce(c2, 10000);
             //cpConstraintSetMaxBias(c2, 1)
             cpSpaceAddConstraint(physics->space, c2);
+            pt->path_spring[path_constraint_count] = c2;
+#endif
+
+            pt->path_has_spring[dir] = true;
+
+            path_constraint_count++;
         }
     }
 
     return true;
 }
 
+static cpVect tile_spin_velocity(physics_tile_t *pt)
+{
+    cpVect pos = cpBodyGetPosition(pt->body);
+    cpVect vel = cpBodyGetVelocity(pt->body);
+    cpVect v = cpv(-pos.y, pos.x);
+    v = cpvadd(v, vel);
+    return v;
+}
+
+float fade_in_factor = 0.0;
+
+static void spin_velocity_update_func(cpBody *body, UNUSED cpVect gravity, cpFloat damping, cpFloat dt)
+{
+    physics_tile_t *pt = cpBodyGetUserData(body);
+
+    cpVect orbit_vel = tile_spin_velocity(pt);
+    orbit_vel = cpvmult(orbit_vel, 0.5 * fade_in_factor);
+    cpBodyUpdateVelocity(body, orbit_vel, damping, dt);
+}
+
 void physics_build_tiles(physics_t *physics)
 {
+    if (physics->tiles_ready) {
+        return;
+    }
+
     level_t *level = physics->level;
+
+    //tile_pos_t *center = level_get_center_tile_pos(level);
 
     physics->num_tiles = level_get_enabled_tiles(level);
 
     for (int i=0; i<physics->num_tiles; i++) {
-        tile_t *tile = level->enabled_tiles[i];\
+        tile_t *tile = level->enabled_tiles[i];
         assert_not_null(tile);
         tile_pos_t *pos = tile->unsolved_pos;
         assert(tile->enabled);
@@ -211,11 +270,11 @@ void physics_build_tiles(physics_t *physics)
         cpVect verts[6];
         each_direction {
             Vector2 corner = pos->rel.corners[dir];
-            //corner = Vector2Scale(corner, 0.95);
+            corner = Vector2Scale(corner, 0.95);
             verts[dir] = cpv(corner.x, corner.y);
         }
         pt->radius = pos->size;
-        pt->mass = 1; //pos->size;
+        pt->mass = 10; //pos->size;
         pt->moment = cpMomentForPoly(pt->mass, 6, verts, cpvzero, 0.0f);
 
         pt->body = cpSpaceAddBody(physics->space, cpBodyNew(pt->mass, pt->moment));
@@ -225,8 +284,18 @@ void physics_build_tiles(physics_t *physics)
 
         cpBodySetPosition(pt->body, position);
 
-        cpShapeSetElasticity(pt->shape, 0.4f);
-        cpShapeSetFriction(pt->shape, 0.4f);
+        /* if (pos == center) { */
+        /*     cpShapeSetElasticity(pt->shape, 0.0f); */
+        /*     cpShapeSetFriction(pt->shape, 1.0f); */
+        /*     //cpBodySetType(pt->body, CP_BODY_TYPE_STATIC); */
+        /* } else { */
+            cpBodySetVelocity(pt->body, tile_spin_velocity(pt));
+
+            cpBodySetVelocityUpdateFunc(pt->body, spin_velocity_update_func);
+
+            cpShapeSetElasticity(pt->shape, 0.4f);
+            cpShapeSetFriction(pt->shape, 0.4f);
+        /* } */
 
         tile->visited = false;
     }
@@ -234,43 +303,7 @@ void physics_build_tiles(physics_t *physics)
     physics_tile_t *start_pt = &(physics->tiles[global_rng_get(physics->num_tiles)]);
     constrain_random_spanning_tree(physics, start_pt->tile, NULL);
 
-#if 0
-    for (int i=0; i<physics->num_tiles; i++) {
-        physics_tile_t *pt = &(physics->tiles[i]);
-        tile_t *tile = pt->tile;;
-        tile_pos_t *pos = tile->unsolved_pos;
-        tile_pos_t *solved_pos = tile->solved_pos;
-
-        pt->constraint_count = 0;
-
-        for (hex_direction_t dir=0; dir<3; dir++) {
-            if (tile->path[dir] == PATH_TYPE_NONE) {
-                continue;
-            }
-            hex_direction_t opposite_dir = hex_opposite_direction(dir);
-
-            tile_pos_t *solved_neighbor = solved_pos->neighbors[dir];
-            assert_not_null(solved_neighbor);
-            assert(solved_neighbor->tile->enabled);
-            assert(tile->path[dir] == solved_neighbor->tile->path[opposite_dir]);
-            tile_pos_t *neighbor = solved_neighbor->tile->unsolved_pos;
-            assert_not_null(neighbor);
-
-            cpConstraint *c = cpSlideJointNew(
-                pt->body,
-                neighbor->tile->physics_tile->body,
-                Vector2TocpVect(pos->rel.midpoints[dir]),
-                Vector2TocpVect(neighbor->rel.midpoints[opposite_dir]),
-                0.0f,
-                350.0f);
-
-            cpSpaceAddConstraint(physics->space, c);
-
-            pt->path_constraint[pt->constraint_count] = c;
-            pt->constraint_count++;
-        }
-    }
-#endif
+    physics->tiles_ready = true;
 }
 
 void physics_reset(physics_t *physics)
@@ -289,6 +322,7 @@ void physics_reset(physics_t *physics)
         assert_not_null(pt);
 
         Vector2 center_position = Vector2Subtract(pos->win.center, window_center);
+        center_position = Vector2Add(center_position, level->px_offset);
         cpVect position = cpv(center_position.x,
                               center_position.y);
 
@@ -296,6 +330,7 @@ void physics_reset(physics_t *physics)
         cpBodySetVelocity(pt->body, cpvzero);
         cpBodySetAngularVelocity(pt->body, 0.0f);
 
+        pos->physics_velocity = VEC2_ZERO;
         pos->physics_position = pos->extra_translate = VEC2_ZERO;
         pos->physics_rotation = pos->extra_rotate = 0.0f;
     }
@@ -308,6 +343,7 @@ void physics_start(physics_t *physics)
     physics_build_tiles(physics);
 
     physics->state = PHYSICS_RUNNING;
+    physics_reset(physics);
 }
 
 void physics_stop(physics_t *physics)
@@ -340,11 +376,12 @@ void physics_update(physics_t *physics)
         Vector2 vec2_position = cpVectToVector2(position);
         vec2_position = Vector2Add(vec2_position, screen_offset);
         pos->physics_position = vec2_position;
-        pos->extra_translate = Vector2Subtract(pos->physics_position, pos->win.center); 
+        pos->extra_translate = Vector2Subtract(pos->physics_position, pos->win.center);
 
         pos->extra_rotate = cpBodyGetAngle(pt->body);
     }
 
+    fade_in_factor = physics->level->win_anim->fade[3];
     physics->time += physics->time_step;
     cpSpaceStep(physics->space, physics->time_step);
 }

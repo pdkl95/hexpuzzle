@@ -2022,6 +2022,8 @@ static bool
 render_frame(
     void
 ) {
+    float fxmag = (sinf(current_time) + 1.0f) / 2.0;
+
     static bool renderd_texture_last_frame = false;
 
     distort_amount = sqrt(bloom_amount);
@@ -2031,7 +2033,7 @@ render_frame(
     postprocessing_effect_amount1[3] = 0.0f;
 
     postprocessing_effect_amount2[0] = current_level ? current_level->extra_rotate_level : 0.0f;
-    postprocessing_effect_amount2[1] = 0.0f;
+    postprocessing_effect_amount2[1] = fxmag;
     postprocessing_effect_amount2[2] = 0.0f;
     postprocessing_effect_amount2[3] = 0.0f;
 
@@ -2129,6 +2131,8 @@ render_frame(
                    window_size.y - DEFAULT_GUI_FONT_SIZE - DEFAULT_GUI_FONT_SIZE,
                    DEFAULT_GUI_FONT_SIZE, WHITE);
 #endif
+
+    DrawTextShadow(TextFormat("fxmag: %3.2f", fxmag), window_center.x, 10, DEFAULT_GUI_FONT_SIZE, WHITE);
 
     draw_cursor();
 

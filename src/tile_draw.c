@@ -28,6 +28,7 @@
 #include "tile_draw.h"
 #include "level.h"
 #include "win_anim.h"
+#include "physics.h"
 
 #include "stb/stb_perlin.h"
 
@@ -190,6 +191,8 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         return;
     }
 
+    float fade = current_level ? fade = current_level->win_anim->fade[2] : 1.0f;
+
     bool drag = (pos == drag_target) && !edit_mode_solved;
     bool dragged_over = false;
 
@@ -305,8 +308,10 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
 
     if ((tile->path_count > 0) || edit_mode_solved) {
         if (finished) {
-            Color cent_color = ColorLerp(tile_center_color, finished_color, 0.5);
-            cent_color = ColorBrightness(cent_color, -0.6);
+            float cent_color_fade = current_level ? fade : 0.5;
+            float darken = -0.75 * fade;
+            Color cent_color = ColorLerp(tile_center_color, finished_color, cent_color_fade);
+            cent_color = ColorBrightness(cent_color, darken);
             DrawCircleV(pos->rel.center, pos->center_circle_draw_radius, cent_color);
         } else {
             DrawCircleV(pos->rel.center, pos->center_circle_draw_radius, tile_center_color);
@@ -317,7 +322,6 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         }
     }
 
-    //DrawLineEx(VEC2_ZERO, pos->physics_velocity, 3.0, PINK);
 
     //DrawLineEx(VEC2_ZERO, Vector2Scale(pos->radial_vector, 0.5), 3.0, LIME);
 
@@ -325,12 +329,38 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
     if (drag) {
         return;
     }
+    rlPushMatrix();
+    rlRotatef(TO_DEGREES(-pos->extra_rotate), 0.0, 0.0, 1.0);
 
+    DrawLineEx(VEC2_ZERO, Vector2Scale(pos->physics_velocity, 0.2), 3.0, PINK);
+
+#if 0
     /* show each hex's axial coordinates */
     int font_size = GuiGetStyle(DEFAULT, TEXT_SIZE);
-    const char *coord_text = TextFormat("#%d: %d,%d", pos->tile->id, pos->position.q, pos->position.r);
-    Vector2 text_size = measure_gui_text(coord_text);
-    DrawTextDropShadow(coord_text, pos->rel.center.x - (text_size.x/2), pos->rel.center.y + 14, font_size, WHITE, BLACK);
+
+    const char *coord_text1 = TextFormat("#%d: %d,%d", pos->tile->id, pos->position.q, pos->position.r);
+    Vector2 text_size1 = measure_gui_text(coord_text1);
+    Vector2 pp = pos->physics_position;
+    pp = Vector2Subtract(pp, window_center);
+    if (current_level) {
+        //pp = Vector2Subtract(pp, current_level->px_offset);
+        pp = Vector2Add(pp, current_level->px_offset);
+    }
+    const char *coord_text2 = TextFormat("phy: %3.2f,%3.2f", pp.x, pp.y);
+    Vector2 text_size2 = measure_gui_text(coord_text2);
+    const char *coord_text3 = TextFormat("a = %3.2f", atan2f(pp.y, pp.x) );
+    Vector2 text_size3 = measure_gui_text(coord_text3);
+
+    float yoffset = 14;
+    float sep = 1;
+    DrawTextDropShadow(coord_text1, pos->rel.center.x - (text_size1.x/2), pos->rel.center.y + yoffset, font_size, WHITE, BLACK);
+    DrawTextDropShadow(coord_text2, pos->rel.center.x - (text_size2.x/2), pos->rel.center.y + yoffset + text_size1.y + sep, font_size, WHITE, BLACK);
+    DrawTextDropShadow(coord_text3, pos->rel.center.x - (text_size3.x/2), pos->rel.center.y + yoffset - text_size1.y - sep, font_size, WHITE, BLACK);
+    //Vector2 lineend = Vector2Add(pos->rel.center, (Vector2) { .x = -pp.x, -pp.y });
+    //DrawLineEx(pos->rel.center, lineend, 3.0, PINK);
+#endif
+
+    rlPopMatrix();
 #endif
 }
 
@@ -379,11 +409,22 @@ void tile_draw_win_anim(tile_pos_t *pos)
     DrawPolyLinesEx(pos->rel.center, 6, pos->size, 0.0f, line_width, color);
 }
 
+extern float bloom_amount;
 #define MIN_CORNER_DIST_SQR 120.0f
 void tile_draw_corner_connections(tile_pos_t *pos)
 {
     tile_t *tile = pos->tile;
     if (!tile->enabled || tile->hidden) {
+        return;
+    }
+
+    float fade = 1.0;
+    if (current_level) {
+        fade = current_level->win_anim->fade[2];//* current_level->fade_value_eased;
+    }
+
+    physics_tile_t *pt = pos->tile->physics_tile;
+    if (!pt) {
         return;
     }
 
@@ -395,6 +436,11 @@ void tile_draw_corner_connections(tile_pos_t *pos)
         if (!neighbor || !neighbor->tile->enabled || neighbor->tile->hidden) {
             continue;
         }
+
+        Vector2 save_pos_extra_translate = pos->extra_translate;
+        Vector2 save_neighbor_extra_translate = neighbor->extra_translate;
+        pos->extra_translate = Vector2Scale(pos->extra_translate, fade);
+        neighbor->extra_translate = Vector2Scale(neighbor->extra_translate, fade);
 
         //int p0_corner_index = (dir + 2) % 6;
 
@@ -432,7 +478,7 @@ void tile_draw_corner_connections(tile_pos_t *pos)
 
         if (dir > 2) {
             // only one side of each path
-            continue;
+            goto pos_neighbor_cleanup;
         }
 
         if (tile->path[dir] != PATH_TYPE_NONE) {
@@ -444,7 +490,10 @@ void tile_draw_corner_connections(tile_pos_t *pos)
             nbr_m_p = Vector2RotateAroundPoint(nbr_m_p,  neighbor->extra_rotate, neighbor->win.center);
             nbr_m_p = Vector2Add(nbr_m_p, neighbor->extra_translate);
 
-            float outside_dist = Vector2Distance(pos_m_p, nbr_m_p) * 0.7;
+            float outside_dist = Vector2Distance(pos_m_p, nbr_m_p) * bloom_amount;  //0.7;
+            if (!pt->path_has_spring[dir]) {
+                outside_dist *= 0.3;
+            }
             //float outside_scale = pos->extra_magnitude * 0.05;
             Vector2 outside          = Vector2Scale(     pos->win.radial_unit[dir], outside_dist);
             Vector2 neighbor_outside = Vector2Scale(neighbor->win.radial_unit[opposite_dir], outside_dist);
@@ -502,8 +551,13 @@ void tile_draw_corner_connections(tile_pos_t *pos)
             if (is_pop) {
                 color.a = 1.0;
                 thickness = pos->line_width * 0.75;
-            } else {
-                DrawLineEx(p1, p2,  1.0, LIME);
+            }
+
+            if (!pt->path_has_spring[dir]) {
+                thickness *= 0.3334 * fade;
+                color.r = fade;
+                color.b = 0.0;
+                color.a = 0.0;
             }
 
             DrawSplineSegmentBezierCubic(
@@ -515,7 +569,6 @@ void tile_draw_corner_connections(tile_pos_t *pos)
                 color);
 
 #if 0
-            } else {
                 color.a = 1.0;
                 float edge_thickness = 2.0;
 
@@ -534,8 +587,11 @@ void tile_draw_corner_connections(tile_pos_t *pos)
                     nbr_cw2_p,
                     edge_thickness,
                     color);
-            }
 #endif
         }
+
+      pos_neighbor_cleanup:
+        pos->extra_translate = save_pos_extra_translate;
+        neighbor->extra_translate = save_neighbor_extra_translate;
     }
 }

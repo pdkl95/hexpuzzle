@@ -516,6 +516,11 @@ level_t *create_level(struct collection *collection)
 void destroy_level(level_t *level)
 {
     if (level) {
+        if (level->physics) {
+            destroy_physics(level->physics);
+            level->physics = NULL;
+        }
+
         if (level->undo) {
             destroy_level_undo(level->undo);
             level->undo = NULL;
