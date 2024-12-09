@@ -663,6 +663,8 @@ CFLAGS
 CC
 USE_SYSTEM_RAYLIB_FALSE
 USE_SYSTEM_RAYLIB_TRUE
+USE_PHYSICS_FALSE
+USE_PHYSICS_TRUE
 USE_CHIPMUNK_FALSE
 USE_CHIPMUNK_TRUE
 BUILD_WEB_FALSE
@@ -1387,8 +1389,7 @@ Optional Features:
   --enable-debug          Enable normal debug features (-g, -O0)
   --enable-web            Build html/js/wasm for web (run configure with
                           emconfigure!)
-  --disable-chipmunk      Disable features that depend on the Chipmunk physics
-                          engine)
+  --disable-chipmunk      Disable the Chipmunk physics engine)
   --enable-system-raylib  Use a locally installed version of raylib instead of
                           the version iincluded with hexpuzzle)
   --enable-dependency-tracking
@@ -3048,6 +3049,37 @@ fi
 
 if test "x$enable_chipmunk" != "xno"; then :
   $as_echo "#define USE_CHIPMUNK 1" >>confdefs.h
+
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if a physics engine is available" >&5
+$as_echo_n "checking if a physics engine is available... " >&6; }
+if test "x$enable_chipmunk" != "xno"; then :
+
+    enable_physics="yes"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: chipmunk" >&5
+$as_echo "chipmunk" >&6; }
+
+else
+
+    enable_physics="no"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: No physics engine present - disabling physics features" >&5
+$as_echo "$as_me: WARNING: No physics engine present - disabling physics features" >&2;}
+
+fi
+
+ if test "x$enable_physics" = "xyes"; then
+  USE_PHYSICS_TRUE=
+  USE_PHYSICS_FALSE='#'
+else
+  USE_PHYSICS_TRUE='#'
+  USE_PHYSICS_FALSE=
+fi
+
+
+
+if test "x$enable_physics" = "xyes"; then :
+  $as_echo "#define USE_PHYSICS 1" >>confdefs.h
 
 fi
 
@@ -6525,6 +6557,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_CHIPMUNK_TRUE}" && test -z "${USE_CHIPMUNK_FALSE}"; then
   as_fn_error $? "conditional \"USE_CHIPMUNK\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${USE_PHYSICS_TRUE}" && test -z "${USE_PHYSICS_FALSE}"; then
+  as_fn_error $? "conditional \"USE_PHYSICS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_SYSTEM_RAYLIB_TRUE}" && test -z "${USE_SYSTEM_RAYLIB_FALSE}"; then

@@ -24,7 +24,9 @@
 #include "level.h"
 #include "win_anim.h"
 #include "shader.h"
+#ifdef USE_PHYSICS
 #include "physics.h"
+#endif
 
 extern bool do_postprocessing;
 extern float bloom_amount;
@@ -42,6 +44,7 @@ static void trigger_pop(tile_pos_t *pos)
     }
 }
 
+#ifdef USE_PHYSICS
 static void win_anim_common_update_physics(UNUSED win_anim_t *win_anim)
 {
 #if 0
@@ -60,6 +63,7 @@ static void win_anim_common_update_physics(UNUSED win_anim_t *win_anim)
     }
 #endif
 }
+#endif
 
 static void win_anim_common_update_pops(win_anim_t *win_anim)
 {
@@ -230,9 +234,11 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
         win_anim_common_update_pops(win_anim);
         break;
 
+#ifdef USE_PHYSICS
     case WIN_ANIM_MODE_PHYSICS:
         win_anim_common_update_physics(win_anim);
         break;
+#endif
     }
 }
 
@@ -254,10 +260,12 @@ static void win_anim_osc_ramp_in_update(struct anim_fsm *anim_fsm, void *data)
     win_anim_common_update(anim_fsm, data);
 
     if (anim_fsm->state_progress == 0.0f) {
+#ifdef USE_PHYSICS
         if (win_anim->mode == WIN_ANIM_MODE_PHYSICS) {
             assert(win_anim->level->finished);
             physics_start(win_anim->level->physics);
         }
+#endif
     }
 }
 
@@ -290,12 +298,15 @@ win_anim_t *create_win_anim(struct level *level)
 {
     win_anim_t *win_anim = calloc(1, sizeof(win_anim_t));
 
-#if 1
+#ifdef USE_PHYSICS
+# if 1
     win_anim->mode = WIN_ANIM_MODE_PHYSICS;
+# else
+    win_anim->mode = WIN_ANIM_MODE_POPS;
+# endif
 #else
     win_anim->mode = WIN_ANIM_MODE_POPS;
 #endif
-
     win_anim->running = false;
     win_anim->level = level;
 
@@ -306,9 +317,11 @@ win_anim_t *create_win_anim(struct level *level)
 
     init_anim_fsm(&win_anim->anim_fsm, states, NULL, win_anim);
 
+#ifdef USE_PHYSICS
     if (!level->physics) {
         level->physics = create_physics(level);
     }
+#endif
 
     return win_anim;
 }
@@ -322,9 +335,11 @@ void win_anim_update(win_anim_t *win_anim)
 {
     assert_not_null(win_anim);
 
+#ifdef USE_PHYSICS
     if (win_anim->mode == WIN_ANIM_MODE_PHYSICS) {
         physics_update(win_anim->level->physics);
     }
+#endif
 
     anim_fsm_update(&win_anim->anim_fsm);
 }
@@ -360,9 +375,11 @@ void win_anim_stop(win_anim_t *win_anim)
     assert_not_null(win_anim);
 
     if (win_anim->running) {
+#ifdef USE_PHYSICS
         if (win_anim->mode == WIN_ANIM_MODE_PHYSICS) {
             physics_stop(win_anim->level->physics);
         }
+#endif
 
         win_anim->running = false;
         anim_fsm_stop(&win_anim->anim_fsm);

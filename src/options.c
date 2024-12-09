@@ -61,6 +61,10 @@ static struct option long_options[] = {
     {       "no-animate-bg",       no_argument, 0, 'B' },
     {         "animate-win",       no_argument, 0, 'i' },
     {      "no-animate-win",       no_argument, 0, 'I' },
+#ifdef USE_PHYSICS
+    {         "use-physics",       no_argument, 0, 'y' },
+    {      "no-use-physics",       no_argument, 0, 'Y' },
+#endif
     {       "show-previews",       no_argument, 0, '-' },
     {    "no-show-previews",       no_argument, 0, '_' },
     {      "extra-rainbows",       no_argument, 0, ':' },
@@ -97,6 +101,8 @@ static char help_text[] =
     "   --no-animate-bg            Disable background animation\n"
     "      --animate-win           Enable animation on level win (default: on)\n"
     "   --no-animate-win           Disable animation on level win\n"
+    "      --use-physics           Enable the physics engine (default: on)\n"
+    "   --no-use-physics           Disable the physucs engine\n"
     "      --show-previews         Enable showing small level previews (default: on)\n"
     "   --no-show-previews         Disable showing small level previews\n"
     "\n"
@@ -270,6 +276,7 @@ options_set_defaults(
     options->wait_events           = OPTIONS_DEFAULT_WAIT_EVENTS;
     options->animate_bg            = OPTIONS_DEFAULT_ANIMATE_BG;
     options->animate_win           = OPTIONS_DEFAULT_ANIMATE_WIN;
+    options->use_physics           = OPTIONS_DEFAULT_USE_PHYSICS;
     options->show_level_previews   = OPTIONS_DEFAULT_SHOW_LEVEL_PREVIEWS;
     options->extra_rainbows        = OPTIONS_DEFAULT_EXTRA_RAINBOWS;
     options->max_fps               = OPTIONS_DEFAULT_MAX_FPS;
@@ -449,7 +456,17 @@ options_parse_args(
             options->animate_win = false;
             options->load_state_animate_win = false;
             break;
+#ifdef USE_PHYSICS
+        case 'y':
+            options->use_physics = true;
+            options->load_state_use_physics = false;
+            break;
 
+        case 'Y':
+            options->use_physics = false;
+            options->load_state_use_physics = false;
+            break;
+#endif
         case '-':
             options->show_level_previews = true;
             options->load_state_show_level_previews = false;

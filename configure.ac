@@ -85,12 +85,27 @@ dnl >>> Use a locally installed version of chipmunk instead of
 dnl     the provided version in external/chipmunk
 
 AC_ARG_ENABLE([chipmunk],
-    AS_HELP_STRING([--disable-chipmunk], [Disable features that depend on the Chipmunk physics engine)]))
+    AS_HELP_STRING([--disable-chipmunk], [Disable the Chipmunk physics engine)]))
 
 AM_CONDITIONAL([USE_CHIPMUNK], [test "x$enable_chipmunk" != "xno"])
 
 AH_TEMPLATE([USE_CHIPMUNK], [Defined to 1 if chipmunk is enabled])
 AS_IF([test "x$enable_chipmunk" != "xno"],[AC_DEFINE([USE_CHIPMUNK],[1])])
+
+dnl >>> any physics engine
+AC_MSG_CHECKING([if a physics engine is available])
+AS_IF([test "x$enable_chipmunk" != "xno"], [
+    enable_physics="yes"
+    AC_MSG_RESULT([chipmunk])
+],[
+    enable_physics="no"
+    AC_MSG_WARN([No physics engine present - disabling physics features])
+])
+
+AM_CONDITIONAL([USE_PHYSICS], [test "x$enable_physics" = "xyes"])
+
+AH_TEMPLATE([USE_PHYSICS], [Defined to 1 if a physics engine is available])
+AS_IF([test "x$enable_physics" = "xyes"],[AC_DEFINE([USE_PHYSICS],[1])])
 
 
 dnl >>> Use a locally installed version of raylib instead of

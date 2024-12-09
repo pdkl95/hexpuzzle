@@ -36,7 +36,9 @@
 #include "collection.h"
 #include "win_anim.h"
 #include "solver.h"
+#ifdef USE_PHYSICS
 #include "physics.h"
+#endif
 
 //#define DEBUG_DRAG_AND_DROP 1
 //#define DEBUG_LEVEL_FADE
@@ -257,7 +259,9 @@ static level_t *init_level(level_t *level)
 
     memset(level, 0, sizeof(level_t));
 
+#ifdef USE_PHYSICS
     level->physics = NULL;
+#endif
 
     level->center = LEVEL_CENTER_POSITION;
 
@@ -516,10 +520,12 @@ level_t *create_level(struct collection *collection)
 void destroy_level(level_t *level)
 {
     if (level) {
+#ifdef USE_PHYSICS
         if (level->physics) {
             destroy_physics(level->physics);
             level->physics = NULL;
         }
+#endif
 
         if (level->undo) {
             destroy_level_undo(level->undo);

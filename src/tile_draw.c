@@ -28,7 +28,9 @@
 #include "tile_draw.h"
 #include "level.h"
 #include "win_anim.h"
+#ifdef USE_PHYSICS
 #include "physics.h"
+#endif
 
 #include "stb/stb_perlin.h"
 
@@ -332,7 +334,9 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
     rlPushMatrix();
     rlRotatef(TO_DEGREES(-pos->extra_rotate), 0.0, 0.0, 1.0);
 
+#ifdef USE_PHYSICS
     DrawLineEx(VEC2_ZERO, Vector2Scale(pos->physics_velocity, 0.2), 3.0, PINK);
+#endif
 
 #if 0
     /* show each hex's axial coordinates */
@@ -340,6 +344,7 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
 
     const char *coord_text1 = TextFormat("#%d: %d,%d", pos->tile->id, pos->position.q, pos->position.r);
     Vector2 text_size1 = measure_gui_text(coord_text1);
+#ifdef USE_PHYSICS
     Vector2 pp = pos->physics_position;
     pp = Vector2Subtract(pp, window_center);
     if (current_level) {
@@ -350,14 +355,17 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
     Vector2 text_size2 = measure_gui_text(coord_text2);
     const char *coord_text3 = TextFormat("a = %3.2f", atan2f(pp.y, pp.x) );
     Vector2 text_size3 = measure_gui_text(coord_text3);
+#endif
 
     float yoffset = 14;
     float sep = 1;
     DrawTextDropShadow(coord_text1, pos->rel.center.x - (text_size1.x/2), pos->rel.center.y + yoffset, font_size, WHITE, BLACK);
+#ifdef USE_PHYSICS
     DrawTextDropShadow(coord_text2, pos->rel.center.x - (text_size2.x/2), pos->rel.center.y + yoffset + text_size1.y + sep, font_size, WHITE, BLACK);
     DrawTextDropShadow(coord_text3, pos->rel.center.x - (text_size3.x/2), pos->rel.center.y + yoffset - text_size1.y - sep, font_size, WHITE, BLACK);
     //Vector2 lineend = Vector2Add(pos->rel.center, (Vector2) { .x = -pp.x, -pp.y });
     //DrawLineEx(pos->rel.center, lineend, 3.0, PINK);
+#endif
 #endif
 
     rlPopMatrix();
@@ -423,10 +431,12 @@ void tile_draw_corner_connections(tile_pos_t *pos)
         fade = current_level->win_anim->fade[2];//* current_level->fade_value_eased;
     }
 
+#ifdef USE_PHYSICS
     physics_tile_t *pt = pos->tile->physics_tile;
     if (!pt) {
         return;
     }
+#endif
 
     Color color = get_win_border_color(pos);
 
@@ -491,9 +501,11 @@ void tile_draw_corner_connections(tile_pos_t *pos)
             nbr_m_p = Vector2Add(nbr_m_p, neighbor->extra_translate);
 
             float outside_dist = Vector2Distance(pos_m_p, nbr_m_p) * bloom_amount;  //0.7;
+#ifdef USE_PHYSICS
             if (!pt->path_has_spring[dir]) {
                 outside_dist *= 0.3;
             }
+#endif
             //float outside_scale = pos->extra_magnitude * 0.05;
             Vector2 outside          = Vector2Scale(     pos->win.radial_unit[dir], outside_dist);
             Vector2 neighbor_outside = Vector2Scale(neighbor->win.radial_unit[opposite_dir], outside_dist);
@@ -553,12 +565,16 @@ void tile_draw_corner_connections(tile_pos_t *pos)
                 thickness = pos->line_width * 0.75;
             }
 
+#ifdef USE_PHYSICS
             if (!pt->path_has_spring[dir]) {
+#endif
                 thickness *= 0.3334 * fade;
                 color.r = fade;
                 color.b = 0.0;
                 color.a = 0.0;
+#ifdef USE_PHYSICS
             }
+#endif
 
             DrawSplineSegmentBezierCubic(
                 pos_m_p,

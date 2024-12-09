@@ -2131,8 +2131,6 @@ render_frame(
                    DEFAULT_GUI_FONT_SIZE, WHITE);
 #endif
 
-    DrawTextShadow(TextFormat("fxmag: %3.2f", fxmag), window_center.x, 10, DEFAULT_GUI_FONT_SIZE, WHITE);
-
     draw_cursor();
 
     EndDrawing();

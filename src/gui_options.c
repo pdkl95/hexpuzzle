@@ -46,6 +46,11 @@ char options_anim_win_text[] = "Animate Winning Levels";
 char options_show_level_previews_text[] = "Show Level Previews";
 char options_reset_finished_text[] = "Reset Level Finished Data";
 
+#ifdef USE_PHYSICS
+Rectangle options_use_physics_rect;
+char options_use_physics_text[] = "Use Physics Engine";
+#endif
+
 //                         8 =    5 2   1
 //                           "Color N"'\0'
 #define GUI_COLOR_OPTION_LABEL_MAXLEN 8
@@ -186,12 +191,18 @@ void resize_gui_options(void)
     options_reset_finished_rect.width = options_reset_finished_text_size.x + (4 * BUTTON_MARGIN);;
     options_reset_finished_rect.height = TOOL_BUTTON_HEIGHT;
 
-    Vector2 options_anim_bg_text_size = measure_gui_text(options_anim_bg_text);
-    Vector2 options_anim_win_text_size = measure_gui_text(options_anim_win_text);
-    Vector2 options_show_level_previews_text_size = measure_gui_text(options_show_level_previews_text);
-    float anim_text_size = MAX(MAX(options_anim_bg_text_size.x,
-                                   options_anim_win_text_size.x),
-                               options_show_level_previews_text_size.x);
+#define mktext(name) \
+    Vector2 options_##name##_text_size = measure_gui_text(options_##name##_text); \
+    anim_text_size = MAX(anim_text_size, options_##name##_text_size.x);
+
+    float anim_text_size = 0.0f;
+    mktext(anim_bg);
+    mktext(anim_win);
+#ifdef USE_PHYSICS
+    mktext(use_physics);
+#endif
+    mktext(show_level_previews);
+#undef mktext
 
     anim_text_size += 4 * BUTTON_MARGIN;
 
@@ -205,8 +216,19 @@ void resize_gui_options(void)
     options_anim_win_rect.width = anim_text_size;
     options_anim_win_rect.height = TOOL_BUTTON_HEIGHT;
 
+#ifdef USE_PHYSICS
+    options_use_physics_rect.x = options_area_rect.x;
+    options_use_physics_rect.y = options_anim_win_rect.y + options_anim_win_rect.height + RAYGUI_ICON_SIZE;
+    options_use_physics_rect.width = anim_text_size;
+    options_use_physics_rect.height = TOOL_BUTTON_HEIGHT;
+#endif
+
     options_show_level_previews_rect.x = options_area_rect.x;
+#ifdef USE_PHYSICS
+    options_show_level_previews_rect.y = options_use_physics_rect.y + options_use_physics_rect.height + RAYGUI_ICON_SIZE;
+#else
     options_show_level_previews_rect.y = options_anim_win_rect.y + options_anim_win_rect.height + RAYGUI_ICON_SIZE;
+#endif
     options_show_level_previews_rect.width = anim_text_size;
     options_show_level_previews_rect.height = TOOL_BUTTON_HEIGHT;
 
@@ -293,10 +315,16 @@ void draw_gui_graphics_options(void)
 
     GuiToggle(options_anim_bg_rect,             options_anim_bg_text,             &options->animate_bg);
     GuiToggle(options_anim_win_rect,            options_anim_win_text,            &options->animate_win);
+#ifdef USE_PHYSICS
+    GuiToggle(options_use_physics_rect,         options_use_physics_text,         &options->use_physics);
+#endif
     GuiToggle(options_show_level_previews_rect, options_show_level_previews_text, &options->show_level_previews);
 
     show_status_beside(options->animate_bg,          options_anim_bg_rect);
     show_status_beside(options->animate_win,         options_anim_win_rect);
+#ifdef USE_PHYSICS
+    show_status_beside(options->use_physics,         options_use_physics_rect);
+#endif
     show_status_beside(options->show_level_previews, options_show_level_previews_rect);
 
     int old_cursor_scale = options->cursor_scale;

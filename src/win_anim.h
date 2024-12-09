@@ -26,7 +26,9 @@
 
 enum win_anim_mode {
     WIN_ANIM_MODE_POPS,
+#ifdef USE_PHYSICS
     WIN_ANIM_MODE_PHYSICS
+#endif
 };
 typedef enum win_anim_mode win_anim_mode_t;
 

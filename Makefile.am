@@ -139,7 +139,6 @@ hexpuzzle_SOURCES =                                    \
 	src/nvdata_finished.h   src/nvdata_finished.c  \
 	src/options.h           src/options.c          \
 	src/path.h              src/path.c             \
-	src/physics.h           src/physics.c          \
 	src/raygui_impl.c 			       \
 	src/raylib_helper.h     src/raylib_helper.c    \
 	src/startup_action.h    src/startup_action.c   \
@@ -151,6 +150,11 @@ hexpuzzle_SOURCES =                                    \
 	src/util.h              src/util.c             \
 	src/win_anim.h          src/win_anim.c         \
 	src/common.h            src/main.c
+
+if USE_PHYSICS
+hexpuzzle_SOURCES += \
+	src/physics.h           src/physics.c
+endif
 
 dist_EXTRA_hexpuzzle_SOURCES =      \
 	src/data_classics_levels.h  \
