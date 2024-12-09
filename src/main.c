@@ -514,6 +514,8 @@ create_textures(
 
     scene_targets[0] = LoadRenderTexture(window_size.x, window_size.y);
     scene_targets[1] = LoadRenderTexture(window_size.x, window_size.y);
+    SetTextureWrap(scene_targets[0].texture, TEXTURE_WRAP_MIRROR_REPEAT);
+    SetTextureWrap(scene_targets[1].texture, TEXTURE_WRAP_MIRROR_REPEAT);
     scene_read_target  = &(scene_targets[0]);
     scene_write_target = &(scene_targets[1]);
 }

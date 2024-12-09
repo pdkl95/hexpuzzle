@@ -193,14 +193,15 @@ void background_draw(background_t *bg)
         float rot_z = 2.0 * sinf(current_time / 10.0);
         rot_z += 1.0f - (fade * bloom_fade);
 
+        float scale_rot = 3.0f;
+        rot_z *= scale_rot * fade;
+
         rlRotatef(rot_z, 0.0, 0.0, 1.0);
 
         rlTranslatef(-window_size.x,
                      -window_size.y,
                      0.0);
-        /* rlTranslatef(-hwin.x, */
-        /*              -hwin.y, */
-        /*              0.0); */
+
         rlRotatef(TO_DEGREES(rot_x), 1.0, 0.0, 0.0);
         rlRotatef(TO_DEGREES(rot_y), 0.0, 1.0, 0.0);
 
