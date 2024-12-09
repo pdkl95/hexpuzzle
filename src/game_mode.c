@@ -49,6 +49,9 @@ char *game_mode_t_str(game_mode_t mode)
     case GAME_MODE_EDIT_LEVEL:
         return "EDIT_LEVEL";
 
+    case GAME_MODE_TITLE:
+        return "TITLE";
+
     case GAME_MODE_BROWSER:
         return "BROWSER";
 

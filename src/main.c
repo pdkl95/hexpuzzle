@@ -51,6 +51,7 @@
 #include "collection.h"
 #include "shader.h"
 
+#include "gui_title.h"
 #include "gui_browser.h"
 #include "gui_options.h"
 #include "gui_random.h"
@@ -566,6 +567,7 @@ do_resize(
     background_resize(background);
 
     gui_setup();
+    resize_gui_title();
     resize_gui_browser();
     resize_gui_options();
     resize_gui_random();
@@ -1595,12 +1597,44 @@ static void draw_win_panels(void)
     }
 }
 
+int rsb = 0;
+
+static bool game_mode_button(const char *text, game_mode_t mode)
+{
+    bool rv = false;
+
+    if (game_mode == mode) {
+        GuiDisable();
+    }
+
+    if (GuiButton(right_side_button_rect[rsb++], text)) {
+        set_game_mode(mode);
+        rv = true;
+    }
+
+    if (game_mode == mode) {
+        GuiEnable();
+    }
+
+    return rv;
+}
+
+#define gm_button(text_name, mode_name)                                 \
+    game_mode_button(text_name##_button_text, GAME_MODE_##mode_name)
+
+static void standard_buttons(void)
+{
+    gm_button(options, OPTIONS);
+    gm_button(browser, BROWSER);
+    gm_button(random, RANDOM);
+}
+
 static void draw_gui_widgets(void)
 {
     int prev_align = GuiGetStyle(BUTTON, TEXT_ALIGNMENT);
     GuiSetStyle(BUTTON, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
 
-    int rsb = 0;
+    rsb = 0;
 
 #if defined(PLATFORM_DESKTOP)
     if (GuiButton(right_side_button_rect[rsb++], close_button_text)) {
@@ -1609,14 +1643,14 @@ static void draw_gui_widgets(void)
 #endif
 
     switch (game_mode) {
-    case GAME_MODE_BROWSER:
-        if (GuiButton(right_side_button_rect[rsb++], options_button_text)) {
-            set_game_mode(GAME_MODE_OPTIONS);
-        }
+    case GAME_MODE_TITLE:
+        /* fall through */
+    case GAME_MODE_RANDOM:
+        standard_buttons();
+        break;
 
-        if (GuiButton(right_side_button_rect[rsb++], random_button_text)) {
-            set_game_mode(GAME_MODE_RANDOM);
-        }
+    case GAME_MODE_BROWSER:
+        standard_buttons();
 
 #if defined(PLATFORM_DESKTOP)
         if (GuiButton(open_file_button_rect, open_file_button_text)) {
@@ -1628,16 +1662,6 @@ static void draw_gui_widgets(void)
     case GAME_MODE_OPTIONS:
         if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
             prev_game_mode();
-        }
-        break;
-
-    case GAME_MODE_RANDOM:
-        if (GuiButton(right_side_button_rect[rsb++], options_button_text)) {
-            set_game_mode(GAME_MODE_OPTIONS);
-        }
-
-        if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
-            set_game_mode(GAME_MODE_BROWSER);
         }
         break;
 
@@ -1655,9 +1679,7 @@ static void draw_gui_widgets(void)
             draw_shuffle_panel();
         }
 
-        if (GuiButton(right_side_button_rect[rsb++], options_button_text)) {
-            set_game_mode(GAME_MODE_OPTIONS);
-        }
+        gm_button(options, OPTIONS);
 
         if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
             show_ask_save_box = true;
@@ -1712,9 +1734,7 @@ static void draw_gui_widgets(void)
         draw_name_header();
         draw_win_panels();
 
-        if (GuiButton(right_side_button_rect[rsb++], options_button_text)) {
-            set_game_mode(GAME_MODE_OPTIONS);
-        }
+        gm_button(options, OPTIONS);
 
         if (GuiButton(right_side_button_rect[rsb++], reset_button_text)) {
             reset_current_level();
@@ -1738,13 +1758,8 @@ static void draw_gui_widgets(void)
         break;
 
     case GAME_MODE_EDIT_COLLECTION:
-        if (GuiButton(right_side_button_rect[rsb++], options_button_text)) {
-            set_game_mode(GAME_MODE_OPTIONS);
-        }
-
-        if (GuiButton(right_side_button_rect[rsb++], browser_button_text)) {
-            set_game_mode(GAME_MODE_BROWSER);
-        }
+        gm_button(options, OPTIONS);
+        gm_button(browser, BROWSER);
 
         if (GuiButton(right_side_button_rect[rsb++], edit_button_text)) {
             toggle_edit_mode();
@@ -1760,13 +1775,8 @@ static void draw_gui_widgets(void)
         break;
 
     case GAME_MODE_PLAY_COLLECTION:
-        if (GuiButton(right_side_button_rect[rsb++], options_button_text)) {
-            set_game_mode(GAME_MODE_OPTIONS);
-        }
-
-        if (GuiButton(right_side_button_rect[rsb++], browser_button_text)) {
-            set_game_mode(GAME_MODE_BROWSER);
-        }
+        gm_button(options, OPTIONS);
+        gm_button(browser, BROWSER);
 
         if (GuiButton(right_side_button_rect[rsb++], edit_button_text)) {
             toggle_edit_mode();
@@ -1782,6 +1792,7 @@ static void draw_gui_widgets(void)
 
     GuiSetStyle(BUTTON, TEXT_ALIGNMENT, prev_align);
 }
+#undef gm_button
 
 #if defined(PLATFORM_DESKTOP)
 static void draw_name_edit_dialog(void)
@@ -2006,6 +2017,10 @@ static void draw_feedback_bg(void)
 static void draw_gui(void)
 {
     switch (game_mode) {
+    case GAME_MODE_TITLE:
+        draw_gui_title();
+        break;
+
     case GAME_MODE_BROWSER:
         draw_gui_browser();
         break;
@@ -2268,7 +2283,6 @@ void gfx_init(void)
 
     set_gui_font();
 
-    //GuiSetStyle(DEFAULT, TEXT_SIZE, 26);
     GuiSetStyle(DEFAULT, TEXT_PADDING, 4);
     GuiSetStyle(DEFAULT, BORDER_WIDTH, 1);
     GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
@@ -2326,13 +2340,15 @@ static void game_init(void)
 
     init_gui_options();
     init_nvdata();
+    init_gui_title();
     init_gui_browser();
     init_gui_random();
 
     background = create_background();
 
     //set_game_mode(GAME_MODE_BROWSER);
-    set_game_mode(GAME_MODE_RANDOM);
+    //set_game_mode(GAME_MODE_RANDOM);
+    set_game_mode(GAME_MODE_TITLE);
 
     load_nvdata();
 }
@@ -2367,6 +2383,7 @@ static void game_cleanup(void)
 
     cleanup_gui_random();
     cleanup_gui_browser();
+    cleanup_gui_title();
     cleanup_nvdata();
     cleanup_gui_options();
 

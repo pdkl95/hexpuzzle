@@ -130,6 +130,7 @@ hexpuzzle_SOURCES =                                    \
 	src/gui_browser.h       src/gui_browser.c      \
 	src/gui_options.h       src/gui_options.c      \
 	src/gui_random.h        src/gui_random.c       \
+	src/gui_title.h         src/gui_title.c        \
 	src/hex.h               src/hex.c              \
 	src/level.h             src/level.c            \
 	src/level_draw.h        src/level_draw.c       \
