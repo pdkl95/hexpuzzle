@@ -773,9 +773,8 @@ handle_events(
                 break;
             }
             /* fall through */
-
-#if defined(PLATFORM_DESKTOP)
         default:
+#if defined(PLATFORM_DESKTOP)
             running = false;
             return true;
 #endif

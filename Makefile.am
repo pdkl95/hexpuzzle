@@ -2,6 +2,8 @@ AUTOMAKE_OPTIONS = subdir-objects
 
 ACLOCAL_AMFLAGS = -I m4
 
+SUBDIRS =
+
 AM_CPPFLAGS = -Wall -Wextra
 
 XXD ?= xxd
@@ -31,7 +33,14 @@ EXTRA_DIST = \
 	$(FONTS) \
 	$(SHADERS)
 
-CHIPMUNK_DIR = /home/endymion/build/ChipmunkLatest/Chipmunk-7.0.3
+#CHIPMUNK_DIR = /home/endymion/build/ChipmunkLatest/Chipmunk-7.0.3
+CHIPMUNK_DIR = external/chipmunk
+
+if USE_CHIPMUNK
+	MAYBE_USE_CHIPMUNK = $(CHIPMUNK_DIR)
+endif
+SUBDIRS += $(MAYBE_USE_CHIPMUNK)
+
 
 if BUILD_WEB
 RAYLIB_PLATFORM = PLATFORM_WEB
@@ -71,12 +80,8 @@ COMMON_PROG_LDADD = \
 hexpuzzle_CFLAGS = $(COMMON_PROG_CFLAGS)
 hexpuzzle_LDADD = $(COMMON_PROG_LDADD)
 
-hexpuzzle_CFLAGS += \
-	-I$(CHIPMUNK_DIR)/include/chipmunk
-
 if ! USE_SYSTEM_RAYLIB
 hexpuzzle_LDADD += \
-	$(CHIPMUNK_DIR)/src/libchipmunk.a \
 	external/libcombined_deps.a \
 	external/raylib/libraylib.a \
 	-lGL -lc -lm -lpthread -ldl -lrt
@@ -103,6 +108,14 @@ hexpuzzle_LDFLAGS += \
 
 clean-local:
 	rm -f hexpuzzle.js hexpuzzle.wasm
+endif
+
+if USE_CHIPMUNK
+hexpuzzle_CFLAGS += \
+	-I$(CHIPMUNK_DIR)/include/chipmunk
+
+hexpuzzle_LDADD += \
+	$(CHIPMUNK_DIR)/libchipmunk.a
 endif
 
 hexpuzzle_SOURCES =                                    \

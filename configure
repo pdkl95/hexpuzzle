@@ -663,6 +663,8 @@ CFLAGS
 CC
 USE_SYSTEM_RAYLIB_FALSE
 USE_SYSTEM_RAYLIB_TRUE
+USE_CHIPMUNK_FALSE
+USE_CHIPMUNK_TRUE
 BUILD_WEB_FALSE
 BUILD_WEB_TRUE
 BUILD_DEBUG_FALSE
@@ -742,6 +744,7 @@ enable_silent_rules
 enable_maintainer_mode
 enable_debug
 enable_web
+enable_chipmunk
 enable_system_raylib
 enable_dependency_tracking
 enable_assert
@@ -1384,6 +1387,8 @@ Optional Features:
   --enable-debug          Enable normal debug features (-g, -O0)
   --enable-web            Build html/js/wasm for web (run configure with
                           emconfigure!)
+  --disable-chipmunk      Disable features that depend on the Chipmunk physics
+                          engine)
   --enable-system-raylib  Use a locally installed version of raylib instead of
                           the version iincluded with hexpuzzle)
   --enable-dependency-tracking
@@ -3023,6 +3028,29 @@ if test "x$enable_web" = "xyes"; then :
 fi
 
 CFLAGS="$CFLAGS $OPTMODE"
+
+
+# Check whether --enable-chipmunk was given.
+if test "${enable_chipmunk+set}" = set; then :
+  enableval=$enable_chipmunk;
+fi
+
+
+ if test "x$enable_chipmunk" != "xno"; then
+  USE_CHIPMUNK_TRUE=
+  USE_CHIPMUNK_FALSE='#'
+else
+  USE_CHIPMUNK_TRUE='#'
+  USE_CHIPMUNK_FALSE=
+fi
+
+
+
+if test "x$enable_chipmunk" != "xno"; then :
+  $as_echo "#define USE_CHIPMUNK 1" >>confdefs.h
+
+fi
+
 
 
 # Check whether --enable-system-raylib was given.
@@ -6355,7 +6383,7 @@ fi
 
 
 
-ac_config_files="$ac_config_files Makefile"
+ac_config_files="$ac_config_files external/chipmunk/Makefile Makefile"
 
 
 cat >confcache <<\_ACEOF
@@ -6493,6 +6521,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_WEB_TRUE}" && test -z "${BUILD_WEB_FALSE}"; then
   as_fn_error $? "conditional \"BUILD_WEB\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${USE_CHIPMUNK_TRUE}" && test -z "${USE_CHIPMUNK_FALSE}"; then
+  as_fn_error $? "conditional \"USE_CHIPMUNK\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_SYSTEM_RAYLIB_TRUE}" && test -z "${USE_SYSTEM_RAYLIB_FALSE}"; then
@@ -7107,6 +7139,7 @@ do
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h" ;;
     "depfiles") CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
     "lib/getopt.h") CONFIG_LINKS="$CONFIG_LINKS lib/getopt.h:lib/gnugetopt.h" ;;
+    "external/chipmunk/Makefile") CONFIG_FILES="$CONFIG_FILES external/chipmunk/Makefile" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;

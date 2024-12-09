@@ -22,7 +22,7 @@
 #ifndef PHYSICS_H
 #define PHYSICS_H
 
-#include <chipmunk.h>
+#include <chipmunk/chipmunk.h>
 
 struct tile_pos;
 struct level;

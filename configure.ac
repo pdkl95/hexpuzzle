@@ -81,6 +81,18 @@ AS_IF([test "x$enable_web" = "xyes"],[AC_DEFINE([WEB_BUILD],[1])])
 
 CFLAGS="$CFLAGS $OPTMODE"
 
+dnl >>> Use a locally installed version of chipmunk instead of
+dnl     the provided version in external/chipmunk
+
+AC_ARG_ENABLE([chipmunk],
+    AS_HELP_STRING([--disable-chipmunk], [Disable features that depend on the Chipmunk physics engine)]))
+
+AM_CONDITIONAL([USE_CHIPMUNK], [test "x$enable_chipmunk" != "xno"])
+
+AH_TEMPLATE([USE_CHIPMUNK], [Defined to 1 if chipmunk is enabled])
+AS_IF([test "x$enable_chipmunk" != "xno"],[AC_DEFINE([USE_CHIPMUNK],[1])])
+
+
 dnl >>> Use a locally installed version of raylib instead of
 dnl     the provided version in external/raylib
 
@@ -219,7 +231,10 @@ AC_SUBST(APP_LIBS)
 AC_SUBST(ALL_PKG_CFLAGS)
 AC_SUBST(ALL_PKG_LIBS)
 
-AC_CONFIG_FILES([Makefile])
+AC_CONFIG_FILES([
+        external/chipmunk/Makefile
+        Makefile
+])
 
 AC_OUTPUT
 
