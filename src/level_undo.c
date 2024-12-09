@@ -23,7 +23,7 @@
 #include "level.h"
 #include "level_undo.h"
 
-//#define DEBUG_UNDO_LIST
+#define DEBUG_UNDO_LIST
 
 #define UNDO_LIST_MAX_EVENTS 64
 struct undo_list {
@@ -42,6 +42,8 @@ static const char *undo_play_event_type_str(undo_play_event_type_t type)
         return "(NULL)";
     case UNDO_PLAY_TYPE_SWAP:
         return "SWAP";
+    case UNDO_PLAY_TYPE_RESET:
+        return "RESET";
     default:
         return "(INVALID PLAY EVENT TYPE)";
     }
@@ -410,6 +412,30 @@ void level_undo_add_swap_event(level_t *level, hex_axial_t a, hex_axial_t b)
     level_undo_add_event(level, event);
 }
 
+#define PLAY_EVENT(union_name, enum_name) \
+    undo_event_t event;                   \
+    event.type = UNDO_EVENT_TYPE_PLAY;    \
+    event.edit.type = UNDO_PLAY_TYPE_##enum_name;
+
+undo_reset_data_t *level_undo_copy_reset_data(level_t *level)
+{
+    undo_reset_data_t *data = calloc(1, sizeof(undo_reset_data_t));
+
+    memcpy(data->tiles, level->tiles, sizeof(data->tiles));
+    memcpy(data->unsolved_positions, level->unsolved_positions, sizeof(data->unsolved_positions));
+
+    return data;
+}
+
+void level_undo_add_reset(level_t *level, undo_reset_data_t *from, undo_reset_data_t *to)
+{
+    PLAY_EVENT(reset, RESET);
+    event.play.reset.from = from;
+    event.play.reset.to   = to;
+
+    level_undo_add_event(level, event);
+}
+
 #define EDIT_EVENT(union_name, enum_name) \
     undo_event_t event;                   \
     event.type = UNDO_EVENT_TYPE_EDIT;    \
@@ -636,6 +662,22 @@ static void replay_shuffle(level_t *level, undo_shuffle_t event)
     apply_shuffle_data(level, event.to);
 }
 
+static void apply_reset_data(level_t *level, undo_reset_data_t *data)
+{
+    memcpy(level->tiles, data->tiles, sizeof(data->tiles));
+    memcpy(level->unsolved_positions, data->unsolved_positions, sizeof(data->unsolved_positions));
+}
+
+static void rewind_reset(level_t *level, undo_reset_t event)
+{
+    apply_reset_data(level, event.from);
+}
+
+static void replay_reset(level_t *level, undo_reset_t event)
+{
+    apply_reset_data(level, event.to);
+}
+
 void level_undo_add_play_event(level_t *level, undo_play_event_t play_event)
 {
     assert_not_null(level);
@@ -691,6 +733,10 @@ void level_undo_play(level_t *level)
     switch (event.edit.type) {
     case UNDO_PLAY_TYPE_SWAP:
         rewind_swap(level, event.play.swap);
+        break;
+
+    case UNDO_PLAY_TYPE_RESET:
+        rewind_reset(level, event.play.reset);
         break;
 
     default:
@@ -793,6 +839,10 @@ void level_redo_play(level_t *level)
     switch (event.edit.type) {
     case UNDO_PLAY_TYPE_SWAP:
         replay_swap(level, event.play.swap);
+        break;
+
+    case UNDO_PLAY_TYPE_RESET:
+        replay_reset(level, event.play.reset);
         break;
 
     default:

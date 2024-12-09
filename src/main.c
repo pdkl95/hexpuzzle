@@ -396,8 +396,11 @@ static void reset_current_level(void)
             infomsg("Resetting level tile positions");
         }
 
+        undo_reset_data_t *data_from = level_undo_copy_reset_data(current_level);
         level_unwin(current_level);
         level_reset_tile_positions(current_level);
+        undo_reset_data_t *data_to = level_undo_copy_reset_data(current_level);
+        level_undo_add_reset(current_level, data_from, data_to);
     } else {
         warnmsg("Cannot reset level - current_level is NULL");
     }
@@ -1719,6 +1722,18 @@ static void draw_gui_widgets(void)
 
         if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
             return_from_level();
+        }
+
+        // skip two positions
+        rsb++;
+        rsb++;
+
+        if (GuiButton(right_side_button_rect[rsb++], undo_button_text)) {
+            undo_play();
+        }
+
+        if (GuiButton(right_side_button_rect[rsb++], redo_button_text)) {
+            redo_play();
         }
         break;
 

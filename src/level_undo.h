@@ -87,12 +87,25 @@ struct undo_shuffle {
 };
 typedef struct undo_shuffle undo_shuffle_t;
 
+struct undo_reset_data {
+    tile_t tiles[LEVEL_MAXTILES];
+    tile_pos_t unsolved_positions[LEVEL_MAXTILES];
+};
+typedef struct undo_reset_data undo_reset_data_t;
+
+struct undo_reset {
+    undo_reset_data_t *from;
+    undo_reset_data_t *to;
+};
+typedef struct undo_reset undo_reset_t;
+
 
 /*** play events */
 
 enum undo_play_event_type {
     UNDO_PLAY_TYPE_NONE = 0,
-    UNDO_PLAY_TYPE_SWAP
+    UNDO_PLAY_TYPE_SWAP,
+    UNDO_PLAY_TYPE_RESET
 };
 typedef enum undo_play_event_type undo_play_event_type_t;
 
@@ -100,6 +113,7 @@ struct undo_play_event {
     undo_play_event_type_t type;
     union {
         undo_swap_event_t swap;
+        undo_reset_t      reset;
     };
 };
 typedef struct undo_play_event undo_play_event_t;
@@ -169,8 +183,9 @@ void destroy_level_undo(undo_t *undo);
 void level_undo_add_event(level_t *level, undo_event_t event);
 void level_undo_add_play_event(level_t *level, undo_play_event_t event);
 void level_undo_add_edit_event(level_t *level, undo_edit_event_t event);
-
+undo_reset_data_t *level_undo_copy_reset_data(level_t *level);
 void level_undo_add_swap_event(level_t *level, hex_axial_t a, hex_axial_t b);
+void level_undo_add_reset(level_t *level, undo_reset_data_t *from, undo_reset_data_t *to);
 void level_undo_add_use_tiles_event(level_t *level, used_tiles_t from, used_tiles_t to);
 void level_undo_add_set_radius_event(level_t *level, int from, int to);
 
