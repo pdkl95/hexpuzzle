@@ -41,8 +41,16 @@ void set_font(font_handle_t *fh);
 #define MeasureTextWithFont(fh, str) \
     MeasureTextEx(fh.font,           \
                   str,               \
-                  fn.size,           \
+                  fh.size,           \
                   fh.spacing)
+
+#define draw_text_with_font(fh, str, position, tint) \
+    DrawTextEx(fh.font,                              \
+               str,                                  \
+               position,                             \
+               fh.size,                              \
+               fh.spacing,                           \
+               tint)
 
 #define deffont(name)                                                  \
                                                                        \

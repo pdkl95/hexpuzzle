@@ -2340,9 +2340,9 @@ static void game_init(void)
 
     init_gui_options();
     init_nvdata();
-    init_gui_title();
     init_gui_browser();
     init_gui_random();
+    init_gui_title();
 
     background = create_background();
 

@@ -23,7 +23,7 @@
 #include "level.h"
 #include "level_undo.h"
 
-#define DEBUG_UNDO_LIST
+//#define DEBUG_UNDO_LIST
 
 #define UNDO_LIST_MAX_EVENTS 64
 struct undo_list {

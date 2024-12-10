@@ -202,7 +202,7 @@ static int rng_color_count(void)
     return count;
 }
 
-static int uodate_rng_color_count(void)
+static int update_rng_color_count(void)
 {
     gui_random_color_count = rng_color_count();
     return gui_random_color_count;
@@ -211,10 +211,10 @@ static int uodate_rng_color_count(void)
 static void toggle_color(path_type_t type)
 {
     gui_random_color[type] = !gui_random_color[type];
-    if (uodate_rng_color_count() < 1) {
+    if (update_rng_color_count() < 1) {
         // cannot allow zero colors - undo the toggle
         gui_random_color[type] = !gui_random_color[type];
-        uodate_rng_color_count();
+        update_rng_color_count();
     }
 }
 
@@ -664,6 +664,38 @@ struct level *generate_random_level(void)
 
     level_use_unsolved_tile_pos(level);
     level_backup_unsolved_tiles(level);
+
+    return level;
+}
+
+struct level *generate_random_title_level(void)
+{
+    long save_radius = options->create_level_radius;
+    options->create_level_radius = Clamp(options->max_win_radius, LEVEL_MIN_RADIUS, LEVEL_MAX_RADIUS);
+
+    bool save_color[PATH_TYPE_COUNT];
+    memcpy(save_color, gui_random_color, sizeof(save_color));
+    for (int i=0; i<PATH_TYPE_COUNT; i++) {
+        gui_random_color[i] = true;
+    }
+    update_rng_color_count();
+
+    uint64_t save_random_seed = gui_random_seed;
+    rng_seed();
+
+    int save_difficulty = difficulty;
+    difficulty = NUM_DIFFICULTIES - 1;
+
+    int save_gen_style = gen_style;
+    gen_style = 1;
+
+    level_t *level = generate_random_level();
+
+    gen_style = save_gen_style;
+    difficulty = save_difficulty;
+    gui_random_seed = save_random_seed;
+    memcpy(gui_random_color, save_color, sizeof(save_color));
+    options->create_level_radius = save_radius;
 
     return level;
 }

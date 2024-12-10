@@ -266,6 +266,19 @@ static bool program_state_from_json(cJSON *json)
         } else {
             warnmsg("Program state JSON['ui'] is missing \"double_click_ms\"");
         }
+
+        cJSON *max_win_radius_json = cJSON_GetObjectItemCaseSensitive(ui_json, "max_win_radius");
+        if (max_win_radius_json) {
+            if (cJSON_IsNumber(max_win_radius_json)) {
+                int value = max_win_radius_json->valueint;
+                CLAMPVAR(value, LEVEL_MIN_RADIUS, LEVEL_MAX_RADIUS);
+                options->max_win_radius = value;
+            } else {
+                errmsg("Program state JSON['ui']['max_win_radius'] is not a NUMBER");
+            }
+        } else {
+            warnmsg("Program state JSON['ui'] is missing \"max_win_radius\"");
+        }
     }
 
     cJSON *graphics_json = cJSON_GetObjectItemCaseSensitive(json, "graphics");
@@ -423,6 +436,11 @@ static cJSON *program_state_to_json(void)
 
     if (cJSON_AddNumberToObject(ui_json, "double_click_ms", options->double_click_ms) == NULL) {
         errmsg("Error adding \"double_click_ms\" to JSON.ui");
+        goto to_json_error;
+    }
+
+    if (cJSON_AddNumberToObject(ui_json, "max_win_radius", options->max_win_radius) == NULL) {
+        errmsg("Error adding \"max_win_radius\" to JSON.ui");
         goto to_json_error;
     }
 

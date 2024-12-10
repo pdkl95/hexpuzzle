@@ -1683,6 +1683,10 @@ void level_win(level_t *level)
     }
 
     win_anim_start(level->win_anim);
+
+    if (level->radius > options->max_win_radius) {
+        options->max_win_radius = level->radius;
+    }
 }
 
 void level_unwin(level_t *level)

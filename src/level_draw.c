@@ -234,7 +234,7 @@ void level_draw(level_t *level, bool finished)
 #endif
 }
 
-void level_preview(level_t *level, Rectangle rect)
+void _level_preview(level_t *level, Rectangle rect, bool show_solved)
 {
     rlPushMatrix();
 
@@ -263,7 +263,7 @@ void level_preview(level_t *level, Rectangle rect)
     float save_fade_value_eased = level->fade_value_eased;
     float save_fade_rotate_speed = level->fade_rotate_speed;
 
-    level->currently_used_tiles = USED_TILES_UNSOLVED;
+    level->currently_used_tiles = show_solved ? USED_TILES_SOLVED : USED_TILES_UNSOLVED;
     level->fade_value = 1.0;
     level->fade_value_eased = 1.0;
     level->fade_rotate_speed = 0.0;
@@ -276,4 +276,14 @@ void level_preview(level_t *level, Rectangle rect)
     level->fade_rotate_speed = save_fade_rotate_speed;
 
     rlPopMatrix();
+}
+
+void level_preview(level_t *level, Rectangle rect)
+{
+    _level_preview(level, rect, false);
+}
+
+void level_preview_solved(level_t *level, Rectangle rect)
+{
+    _level_preview(level, rect, true);
 }

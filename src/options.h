@@ -40,7 +40,7 @@
 #define OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT 800
 #define OPTIONS_DEFAULT_CURSOR_SCALE 1
 #define OPTIONS_DEFAULT_DOUBLE_CLICK_MS 250
-
+#define OPTIONS_DEFAULT_MAX_WSIN_RADIUS LEVEL_MIN_RADIUS
 #define OPTIONS_DEFAULT_STARTUP_ACTION STARTUP_ACTION_NONE
 
 #define OPTIONS_DEFAULT_CREATE_LEVEL_MODE CREATE_LEVEL_MODE_DFS
@@ -100,6 +100,7 @@ struct options {
     long initial_window_height;
     long cursor_scale;
     long double_click_ms;
+    long max_win_radius;
 
     char *nvdata_dir;
 
