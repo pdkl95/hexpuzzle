@@ -47,7 +47,7 @@ typedef enum anim_fsm_state_switch_mode anim_fsm_state_switch_mode_t;
 
 struct anim_fsm_state {
     char *name;
-    double length;
+    float length;
     anim_fsm_state_switch_mode_t switch_mode;
     anim_fsm_callbacks_t *callbacks;
 };
@@ -62,12 +62,12 @@ struct anim_fsm {
     int current_state_index;
     int stop_state_index;
 
-    double start_time;
-    double elapsed_time;
+    float start_time;
+    float elapsed_time;
 
-    double state_elapsed_time;
-    double state_start_time;
-    double state_end_time;
+    float state_elapsed_time;
+    float state_start_time;
+    float state_end_time;
 
     float state_progress;
 };
@@ -86,7 +86,8 @@ void anim_fsm_start(anim_fsm_t *anim_fsm);
 void anim_fsm_stop(anim_fsm_t *anim_fsm);
 void anim_fsm_next_state(anim_fsm_t *anim_fsm);
 void anim_fsm_set_state(anim_fsm_t *anim_fsm, int states_index);
-
+void anim_fsm_shift_current_time_preserving_progress(anim_fsm_t *anim_fsm, float delta_time);
+\
 
 #endif /*ANIM_FSM_H*/
 

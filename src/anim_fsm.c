@@ -209,3 +209,10 @@ void anim_fsm_set_state(anim_fsm_t *anim_fsm, int state_index)
     anim_fsm_change_state(anim_fsm, state_index);
 }
 
+
+void anim_fsm_shift_current_time_preserving_progress(anim_fsm_t *anim_fsm, float delta_time)
+{
+    anim_fsm->start_time += delta_time;
+    anim_fsm->state_start_time += delta_time;
+    anim_fsm->state_end_time += delta_time;
+}

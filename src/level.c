@@ -315,20 +315,20 @@ static level_t *init_level(level_t *level)
 
     level->finished_hue = 0.0f;
 
-    level->fade_active = false;
-    level->fade_value        = 0.0f;
-    level->fade_value_eased  = 0.0f;
-    level->fade_delta        = 0.0f;
-    level->fade_target       = 0.0f;
+    level->fade.active = false;
+    level->fade.value        = 0.0f;
+    level->fade.value_eased  = 0.0f;
+    level->fade.delta        = 0.0f;
+    level->fade.target       = 0.0f;
 
-    level->fade_rotate_level  = 0.0f;
+    level->fade.rotate_level  = 0.0f;
     level->extra_rotate_level = 0.0f;
     level->extra_rotate_level_speed = 0.0f;
 
     if (rand() & 0x00000001) {
-        level->spin_direction = -1.0;
+        level->fade.spin_direction = -1.0;
     } else {
-        level->spin_direction = 1.0;
+        level->fade.spin_direction = 1.0;
     }
 
     level->radius = LEVEL_MIN_RADIUS;
@@ -1707,72 +1707,72 @@ void level_unwin(level_t *level)
 
 bool level_is_fading(level_t *level)
 {
-    return level->fade_active;
+    return level->fade.active;
 }
 
 bool level_update_fade(level_t *level)
 {
     assert_not_null(level);
 
-    if (level->fade_active && (level->fade_value != level->fade_target)) {
-        if (fabs(level->fade_value - level->fade_target) <= LEVEL_FADE_DELTA) {
-            level->fade_value       = level->fade_target;
-            level->fade_value_eased = level->fade_target;
+    if (level->fade.active && (level->fade.value != level->fade.target)) {
+        if (fabs(level->fade.value - level->fade.target) <= LEVEL_FADE_DELTA) {
+            level->fade.value       = level->fade.target;
+            level->fade.value_eased = level->fade.target;
 #ifdef DEBUG_LEVEL_FADE
-            printf("level_update_fade(): stopped at fade_target = %f\n", level->fade_target);
+            printf("level_update_fade(): stopped at fade_target = %f\n", level->fade.target);
 #endif
 
-            if (level->fade_finished_callback) {
-                level->fade_finished_callback(level, level->fade_finished_data);
+            if (level->fade.finished_callback) {
+                level->fade.finished_callback(level, level->fade.finished_data);
             }
-            level->fade_active = false;
+            level->fade.active = false;
 
         } else {
 #ifdef DEBUG_LEVEL_FADE
-            float old_fade_value = level->fade_value;
+            float old_fade_value = level->fade.value;
 #endif
 
-            level->fade_value += level->fade_delta;
-            level->fade_value_eased = ease_exponential_out(level->fade_value);
+            level->fade.value += level->fade.delta;
+            level->fade.value_eased = ease_exponential_out(level->fade.value);
 
 #ifdef DEBUG_LEVEL_FADE
-            printf("level_update_fade(): fade_value %f -> %f\n", old_fade_value, level->fade_value);
+            printf("level_update_fade(): fade_value %f -> %f\n", old_fade_value, level->fade.value);
 #endif
         }
 
-        level->fade_rotate_level = (1.0 - ease_circular_out(level->fade_value)) * (TAU/2.0);
-        level->fade_rotate_level *= level->fade_rotate_speed;
+        level->fade.rotate_level = (1.0 - ease_circular_out(level->fade.value)) * (TAU/2.0);
+        level->fade.rotate_level *= level->fade.rotate_speed;
     }
 
-    return level->fade_value != 1.0f;
+    return level->fade.value != 1.0f;
 }
 
 static void level_fade_transition(level_t *level, level_fade_finished_cb_t callback, void *data)
 {
     assert_not_null(level);
 
-    level->fade_finished_callback = callback;
-    level->fade_finished_data = data;
+    level->fade.finished_callback = callback;
+    level->fade.finished_data = data;
 
-    level->fade_rotate_speed = 0.8333;
+    level->fade.rotate_speed = 0.8333;
     if (rand() & 0x00000001) {
-        level->fade_rotate_speed *= -1.0;
+        level->fade.rotate_speed *= -1.0;
     }
 
-    if (level->fade_value < level->fade_target) {
-        level->fade_delta = LEVEL_FADE_DELTA;
-        level->fade_active = true;
-    } else if (level->fade_value > level->fade_target) {
-        level->fade_delta = -LEVEL_FADE_DELTA;
-        level->fade_active = true;
+    if (level->fade.value < level->fade.target) {
+        level->fade.delta = LEVEL_FADE_DELTA;
+        level->fade.active = true;
+    } else if (level->fade.value > level->fade.target) {
+        level->fade.delta = -LEVEL_FADE_DELTA;
+        level->fade.active = true;
     } else {
         /* equal */
     }
 
 #ifdef DEBUG_LEVEL_FADE
-    printf("level_fade_transition(): fade_value  = %f\n", level->fade_value);
-    printf("level_fade_transition(): fade_target = %f\n", level->fade_target);
-    printf("level_fade_transition(): fade_delta  = %f\n", level->fade_delta);
+    printf("level_fade_transition(): fade_value  = %f\n", level->fade.value);
+    printf("level_fade_transition(): fade_target = %f\n", level->fade.target);
+    printf("level_fade_transition(): fade_delta  = %f\n", level->fade.delta);
 #endif
 }
 
@@ -1788,7 +1788,7 @@ void level_fade_in(level_t *level, level_fade_finished_cb_t callback, void *data
 #ifdef DEBUG_LEVEL_FADE
     printf("level_fade_in()\n");
 #endif
-    level->fade_target = 1.0f;
+    level->fade.target = 1.0f;
     level_fade_transition(level, callback, data);
 }
 
@@ -1804,7 +1804,7 @@ void level_fade_out(level_t *level, level_fade_finished_cb_t callback, void *dat
 #ifdef DEBUG_LEVEL_FADE
     printf("level_fade_out()\n");
 #endif
-    level->fade_target = 0.0f;
+    level->fade.target = 0.0f;
     level_fade_transition(level, callback, data);
 }
 

@@ -266,7 +266,7 @@ static void return_from_level_callback(UNUSED level_t *level, UNUSED void *data)
 bool return_from_level(void)
 {
     if (current_level) {
-        if (current_level->fade_active) {
+        if (current_level->fade.active) {
             if (options->verbose) {
                 infomsg("forcinng quick exit");
             }

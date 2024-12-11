@@ -48,6 +48,20 @@ struct undo;
 
 typedef void (*level_fade_finished_cb_t)(struct level *level, void *data);
 
+struct level_fade {
+    bool  active;
+    float value;
+    float value_eased;
+    float rotate_level;
+    float delta;
+    float target;
+    float rotate_speed;
+    float spin_direction;
+    level_fade_finished_cb_t finished_callback;
+    void *finished_data;
+};
+typedef struct level_fade level_fade_t;
+
 struct level {
     char *id;
     bool have_id;
@@ -113,16 +127,7 @@ struct level {
     float extra_rotate_level_speed;
     float extra_rotate_level_velocity;
 
-    bool  fade_active;
-    float fade_value;
-    float fade_value_eased;
-    float fade_rotate_level;
-    float fade_delta;
-    float fade_target;
-    level_fade_finished_cb_t fade_finished_callback;
-    void *fade_finished_data;
-    float fade_rotate_speed;
-    float spin_direction;
+    level_fade_t fade;
 
     struct solver *solver;
 

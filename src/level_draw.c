@@ -35,12 +35,12 @@ extern float postprocessing_effect_amount2[4];
 static void level_set_fade_transition(level_t *level, tile_pos_t *pos)
 {
     tile_pos_t *center_pos = level_get_center_tile_pos(level);
-    if (!level->fade_active && center_pos == pos) {
+    if (!level->fade.active && center_pos == pos) {
         return;
     }
 
     Vector2 modded = Vector2Scale(pos->radial_vector, 5.0);
-    Vector2 faded  = Vector2Lerp(modded, pos->radial_vector, level->fade_value_eased);
+    Vector2 faded  = Vector2Lerp(modded, pos->radial_vector, level->fade.value_eased);
 
     Vector2 translate = Vector2Subtract(faded, pos->radial_vector);
 
@@ -113,12 +113,12 @@ void level_draw(level_t *level, bool finished)
     rlPushMatrix();
 
     if (do_fade) {
-        float blend_amount = level->fade_value;// * (1.0f - finished_fade_in);
+        float blend_amount = level->fade.value;// * (1.0f - finished_fade_in);
         glBlendColor(0.0f, 0.0f, 0.0f, blend_amount);
         rlSetBlendMode(RL_BLEND_CUSTOM);
     }
 
-    float level_rotate = level->fade_rotate_level + level->extra_rotate_level;
+    float level_rotate = level->fade.rotate_level + level->extra_rotate_level;
     rlTranslatef(window_center.x, window_center.y, 0.0);
     rlRotatef(TO_DEGREES(level_rotate), 0.0, 0.0, 1.0);
     rlTranslatef(-window_center.x, -window_center.y, 0.0);
@@ -259,21 +259,21 @@ void _level_preview(level_t *level, Rectangle rect, bool show_solved)
              1.0f);
 
     used_tiles_t save_currently_used_tiles = level->currently_used_tiles;
-    float save_fade_value = level->fade_value;
-    float save_fade_value_eased = level->fade_value_eased;
-    float save_fade_rotate_speed = level->fade_rotate_speed;
+    float save_fade_value = level->fade.value;
+    float save_fade_value_eased = level->fade.value_eased;
+    float save_fade_rotate_speed = level->fade.rotate_speed;
 
     level->currently_used_tiles = show_solved ? USED_TILES_SOLVED : USED_TILES_UNSOLVED;
-    level->fade_value = 1.0;
-    level->fade_value_eased = 1.0;
-    level->fade_rotate_speed = 0.0;
+    level->fade.value = 1.0;
+    level->fade.value_eased = 1.0;
+    level->fade.rotate_speed = 0.0;
 
     level_draw(level, false);
 
     level->currently_used_tiles = save_currently_used_tiles;
-    level->fade_value = save_fade_value;
-    level->fade_value_eased = save_fade_value_eased;
-    level->fade_rotate_speed = save_fade_rotate_speed;
+    level->fade.value = save_fade_value;
+    level->fade.value_eased = save_fade_value_eased;
+    level->fade.rotate_speed = save_fade_rotate_speed;
 
     rlPopMatrix();
 }
