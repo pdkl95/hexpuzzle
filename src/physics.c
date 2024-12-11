@@ -340,6 +340,10 @@ void physics_start(physics_t *physics)
 {
     assert_not_null(physics);
 
+    if (physics->state == PHYSICS_RUNNING) {
+        return;
+    }
+
     physics_build_tiles(physics);
 
     physics->state = PHYSICS_RUNNING;
@@ -349,6 +353,11 @@ void physics_start(physics_t *physics)
 void physics_stop(physics_t *physics)
 {
     assert_not_null(physics);
+
+    if (physics->state == PHYSICS_STOP) {
+        return;
+    }
+
     physics->state = PHYSICS_STOP;
 
     physics_reset(physics);

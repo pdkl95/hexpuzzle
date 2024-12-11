@@ -24,6 +24,56 @@
 
 //#define DEBUG_ANIM_FSM_CALLS
 
+const char *anim_fsm_state_str(anim_fsm_state_switch_mode_t state)
+{
+    switch (state) {
+    case ANIM_FSM_STATE_NEXT:
+        return "NEXT";
+
+    case ANIM_FSM_STATE_RESTART:
+        return "RESTART";
+
+    case ANIM_FSM_STATE_STAY:
+        return "STAY";
+
+    case ANIM_FSM_STATE_STOP:
+        return "STOP";
+
+    default:
+        return "(INVALID ANIM_FSM_STATE)";
+    }
+}
+
+void print_anim_fsm(anim_fsm_t *anim_fsm)
+{
+    if (!anim_fsm) {
+        printf(">>> anim_fsm[NULL]\n");
+        return;
+    }
+
+    if (!anim_fsm->current_state) {
+        printf(">>> anim_fsm[%p] NULL CURRENT STATE\n", anim_fsm);
+        return;
+    }
+
+    printf(">>> anim_fsm[%p] current_state = \"%s\"[%d]\n",
+           anim_fsm,
+           anim_fsm->current_state->name,
+           anim_fsm->current_state_index);
+
+#define pr_field(field)                                 \
+    printf("\t->" #field " \t= %f\n", anim_fsm->field);
+
+    pr_field(start_time);
+    pr_field(elapsed_time);
+    pr_field(state_elapsed_time);
+    pr_field(state_start_time);
+    pr_field(state_end_time);
+    pr_field(state_progress);
+
+#undef pr_field
+}
+
 #ifdef DEBUG_ANIM_FSM_CALLS
 # define debug_call(source, callback_name)                              \
     printf("anim_fsm_call(state=\"%s\" type=\"%s\" cb_name=\"%s\"\n",   \

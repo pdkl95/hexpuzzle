@@ -42,6 +42,8 @@ struct win_anim {
 };
 typedef struct win_anim win_anim_t;
 
+void print_win_anim(win_anim_t *win_anim);
+
 win_anim_t *create_win_anim(struct level *level);
 void destroy_win_anim(win_anim_t *win_anim);
 

@@ -427,10 +427,7 @@ undo_reset_data_t *level_undo_copy_reset_data(level_t *level)
     memcpy(data->unsolved_positions, level->unsolved_positions, sizeof(data->unsolved_positions));
     if (level->win_anim) {
         data->have_win_anim = true;
-
         memcpy(&data->win_anim, level->win_anim, sizeof(data->win_anim));
-        memcpy(&data->anim_fsm, &level->win_anim->anim_fsm, sizeof(data->anim_fsm));
-        data->current_time = current_time;
     } else {
         data->have_win_anim = false;
     }
@@ -675,26 +672,14 @@ static void replay_shuffle(level_t *level, undo_shuffle_t event)
 
 static void apply_reset_data(level_t *level, undo_reset_data_t *data)
 {
-    level->finished = data->finished;
 
     memcpy(level->tiles, data->tiles, sizeof(data->tiles));
     memcpy(level->unsolved_positions, data->unsolved_positions, sizeof(data->unsolved_positions));
-    if (data->have_win_anim) {
-        assert_not_null(level->win_anim);
 
-        level_t *save_level_pointer = level->win_anim->level;
-        memcpy(level->win_anim, &data->win_anim, sizeof(data->win_anim));
-        memcpy(&level->win_anim->anim_fsm, &data->anim_fsm, sizeof(data->anim_fsm));
-
-        level->win_anim->level = save_level_pointer;
-
-        /* preserve the relative elapsed time */
-        level->win_anim->start_time = current_time
-            - (data->current_time - data->win_anim.start_time);
-
-        anim_fsm_shift_current_time_preserving_progress(\
-            &level->win_anim->anim_fsm,
-            current_time - data->current_time);
+    if (data->finished) {
+        level_win(level);
+    } else {
+        level_unwin(level);
     }
 }
 

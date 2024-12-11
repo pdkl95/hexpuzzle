@@ -32,6 +32,35 @@ extern bool do_postprocessing;
 extern float bloom_amount;
 extern float warp_amount;
 
+const char *win_anim_mode_str(win_anim_mode_t mode)
+{
+    switch (mode) {
+    case WIN_ANIM_MODE_POPS:
+        return "POPS";
+
+#ifdef USE_PHYSICS
+    case WIN_ANIM_MODE_PHYSICS:
+        return "PHYSICS";
+#endif
+
+    default:
+        return "(INVALID WIN_ANIM_MODE)";
+    }
+}
+
+void print_win_anim(win_anim_t *win_anim)
+{
+    printf(">>> win_anim[%p] %s %s\n",
+           win_anim,
+           win_anim_mode_str(win_anim->mode),
+           win_anim->running ? "running" : "off");
+    for (int i=0; i<4; i++) {
+        printf("\t->fade[%d] = %f\n", i, win_anim->fade[i]);
+    }
+    printf("\t->start_time = %f\n", win_anim->start_time);
+    print_anim_fsm(&win_anim->anim_fsm);
+}
+
 static void trigger_pop(tile_pos_t *pos)
 {
     if ((pos->pop_out_phase > 0.0) || (pos->pop_in_phase)) {
@@ -294,10 +323,8 @@ anim_fsm_state_t states[] = {
     { "STOP",          0.0, ANIM_FSM_STATE_STOP,                   NULL }
 };
 
-win_anim_t *create_win_anim(struct level *level)
+void init_win_anim(win_anim_t *win_anim)
 {
-    win_anim_t *win_anim = calloc(1, sizeof(win_anim_t));
-
 #ifdef USE_PHYSICS
 # if 1
     win_anim->mode = WIN_ANIM_MODE_PHYSICS;
@@ -308,20 +335,34 @@ win_anim_t *create_win_anim(struct level *level)
     win_anim->mode = WIN_ANIM_MODE_POPS;
 #endif
     win_anim->running = false;
-    win_anim->level = level;
 
     win_anim->fade[0] = 0.0;
     win_anim->fade[1] = 0.0;
     win_anim->fade[2] = 0.0;
     win_anim->fade[3] = 0.0;
 
-    init_anim_fsm(&win_anim->anim_fsm, states, NULL, win_anim);
+#ifdef USE_PHYSICS
+    if (win_anim->level->physics) {
+        physics_reset(win_anim->level->physics);
+    }
+#endif
+}
+
+win_anim_t *create_win_anim(struct level *level)
+{
+    win_anim_t *win_anim = calloc(1, sizeof(win_anim_t));
+
+    win_anim->level = level;
 
 #ifdef USE_PHYSICS
     if (!level->physics) {
         level->physics = create_physics(level);
     }
 #endif
+
+    init_win_anim(win_anim);
+
+    init_anim_fsm(&win_anim->anim_fsm, states, NULL, win_anim);
 
     return win_anim;
 }
@@ -367,6 +408,15 @@ void win_anim_start(win_anim_t *win_anim)
         anim_fsm_start(&win_anim->anim_fsm);
         win_anim->running = true;
         win_anim->start_time = GetTime();
+
+#ifdef USE_PHYSICS
+        level_t *level = win_anim->level;
+        if (level->physics) {
+            if (level->physics->tiles_ready) {
+                physics_start(level->physics);
+            }
+        }
+#endif
     }
 }
 
@@ -380,7 +430,6 @@ void win_anim_stop(win_anim_t *win_anim)
             physics_stop(win_anim->level->physics);
         }
 #endif
-
         win_anim->running = false;
         anim_fsm_stop(&win_anim->anim_fsm);
     }

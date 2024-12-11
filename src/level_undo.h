@@ -96,7 +96,6 @@ struct undo_reset_data {
 
     bool have_win_anim;
     win_anim_t win_anim;
-    anim_fsm_t anim_fsm;
     float current_time;
 };
 typedef struct undo_reset_data undo_reset_data_t;

@@ -73,6 +73,8 @@ struct anim_fsm {
 };
 typedef struct anim_fsm anim_fsm_t;
 
+void print_anim_fsm(anim_fsm_t *anim_fsm);
+
 void init_anim_fsm(anim_fsm_t *anim_fsm, anim_fsm_state_t *states, anim_fsm_callbacks_t *callbacks, void *data);
 anim_fsm_t *create_anim_fsm(anim_fsm_state_t *states, anim_fsm_callbacks_t *callbacks, void *data);
 void destroy_anim_fsm(anim_fsm_t *anim_fsm);

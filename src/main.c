@@ -678,9 +678,11 @@ static void handle_mouse_events(void)
         }
     }
 
+#if 0
     if (mouse_left_doubleclick) {
         printf("DOUBLECLICK!\n");
     }
+#endif
 }
 
 static bool
