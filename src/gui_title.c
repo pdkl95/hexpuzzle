@@ -34,8 +34,10 @@ Rectangle title2_text_rect;
 
 Vector2 title1_text_position;
 Vector2 title2_text_position;
-Vector2 title1_text_shadow_position;
-Vector2 title2_text_shadow_position;
+Vector2 title1_text_pos_shadow_position;
+Vector2 title2_text_pos_shadow_position;
+Vector2 title1_text_neg_shadow_position;
+Vector2 title2_text_neg_shadow_position;
 
 char title1_text[] = "Hex";
 char title2_text[] = "Puzzle";
@@ -52,15 +54,13 @@ float title2_hoffset = 5.0f;
 
 level_t *bg_level = NULL;
 
+Color hexpanel_bg_color;
 Color shade_overlay_color;
+Color title_shadow_color;
 
 void init_gui_title(void)
 {
     title_text_color = purple;
-
-    //title_font.font = big_button_font.font;
-    //title_font.size = 4.0f * big_button_font.size;
-    //title_font.spacing = big_button_font.spacing;
 
     title_font.font = name_font.font;
     title_font.size = 3.0f * name_font.size;
@@ -69,7 +69,19 @@ void init_gui_title(void)
     title_font.use_color = false;
     title_font.color = 0;
 
-    shade_overlay_color = ColorAlpha(ColorBrightness(text_shadow_color, 0.22), 0.5);
+    Vector3 hexpanel_bg_hsv = ColorToHSV(panel_bg_color);
+    hexpanel_bg_hsv.y *= 0.6;
+    hexpanel_bg_color = ColorFromHSV(hexpanel_bg_hsv.x,
+                                     hexpanel_bg_hsv.y,
+                                     hexpanel_bg_hsv.z);
+    hexpanel_bg_color   = ColorAlpha(hexpanel_bg_color, 0.12f);
+    shade_overlay_color = ColorAlpha(ColorBrightness(text_shadow_color,  0.22), 0.5);
+
+    title_shadow_color.r = 0;
+    title_shadow_color.g = 0;
+    title_shadow_color.b = 0;
+    title_shadow_color.a = 80;
+
     resize_gui_title();
 }
 
@@ -86,7 +98,7 @@ void resize_gui_title(void)
 
     panel_rect.width = window_size.x * 0.65;
 
-    float level_margin = 5.0f;
+    float level_margin = 16.0f;
     bg_level_rect.width  =    panel_rect.width - (2.0 * level_margin);
     bg_level_rect.height = bg_level_rect.width - (2.0 * level_margin);
     bg_level_rect.x      = window_center.x - (bg_level_rect.width  / 2.0f);
@@ -108,12 +120,42 @@ void resize_gui_title(void)
     title1_text_position = getVector2FromRectangle(title1_text_rect);
     title2_text_position = getVector2FromRectangle(title2_text_rect);
 
+    title1_text_rect.width += 18.0f;
+    title2_text_rect.width += 15.0f;
+    title1_text_rect.x -= 8.0f;
+    title2_text_rect.x -= 8.0f;
+
+    title1_text_rect.height -= 12.0f;
+    title2_text_rect.height -= 12.0f;
+    title1_text_rect.y += 8.0f;
+    title2_text_rect.y += 5.0f;
+}
+
+static inline void draw_title(void)
+{
+    DrawRectangleRounded(title1_text_rect, 0.25f, 8, title_shadow_color);
+    DrawRectangleRounded(title2_text_rect, 0.25f, 8, title_shadow_color);
+
     Vector2 shadow_offset = {
-        .x = 2.0f,
-        .y = 2.0f
+        .x = 1.0f,
+        .y = 0.0f
     };
-    title1_text_shadow_position = Vector2Add(title1_text_position, shadow_offset);
-    title2_text_shadow_position = Vector2Add(title2_text_position, shadow_offset);
+    shadow_offset = Vector2Rotate(shadow_offset, -fmodf(0.3 * current_time, TAU));
+
+    Vector2 noffset = Vector2Scale(shadow_offset, 2.7);
+    title1_text_neg_shadow_position = Vector2Subtract(title1_text_position, noffset);
+    title2_text_neg_shadow_position = Vector2Subtract(title2_text_position, noffset);
+    draw_text_with_font(title_font, title1_text, title1_text_neg_shadow_position, royal_blue);
+    draw_text_with_font(title_font, title2_text, title2_text_neg_shadow_position, royal_blue);
+
+    Vector2 poffset = Vector2Scale(shadow_offset, 1.8);
+    title1_text_pos_shadow_position = Vector2Add(title1_text_position, poffset);
+    title2_text_pos_shadow_position = Vector2Add(title2_text_position, poffset);
+    draw_text_with_font(title_font, title1_text, title1_text_pos_shadow_position, magenta);
+    draw_text_with_font(title_font, title2_text, title2_text_pos_shadow_position, magenta);
+
+    draw_text_with_font(title_font, title1_text, title1_text_position, title_text_color);
+    draw_text_with_font(title_font, title2_text, title2_text_position, title_text_color);
 }
 
 void draw_gui_title(void)
@@ -122,7 +164,7 @@ void draw_gui_title(void)
         bg_level = generate_random_title_level();
     }
 
-    DrawPoly(       window_center, 6, hexpanel_size + 2.0f, hexpanel_rotation, ColorAlpha(panel_bg_color, 0.15));
+    DrawPoly(       window_center, 6, hexpanel_size + 2.0f, hexpanel_rotation, hexpanel_bg_color);
     level_preview_solved(bg_level, bg_level_rect);
     DrawPoly(       window_center, 6, hexpanel_size + 2.0f, hexpanel_rotation, shade_overlay_color);
 
@@ -130,9 +172,5 @@ void draw_gui_title(void)
     DrawPolyLinesEx(window_center, 6, hexpanel_size - 2.0f, hexpanel_rotation, 1.0f, magenta);
     DrawPolyLinesEx(window_center, 6, hexpanel_size + 2.0f, hexpanel_rotation, 3.0f, royal_blue);
 
-    draw_text_with_font(title_font, title1_text, title1_text_shadow_position, text_shadow_color);
-    draw_text_with_font(title_font, title2_text, title2_text_shadow_position, text_shadow_color);
-
-    draw_text_with_font(title_font, title1_text, title1_text_position, title_text_color);
-    draw_text_with_font(title_font, title2_text, title2_text_position, title_text_color);
+    draw_title();
 }
