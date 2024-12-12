@@ -356,6 +356,12 @@ static void edit_game_file(const char *path)
     open_game_file(path, true);
 }
 
+void play_random_game(void)
+{
+    set_game_mode(GAME_MODE_RANDOM);
+    play_gui_random_level();
+}
+
 const char *default_open_file_path(void)
 {
     static char path[MAX_FILEPATH_LENGTH];
@@ -2288,6 +2294,8 @@ void gfx_init(void)
     GuiSetStyle(DEFAULT, TEXT_PADDING, 4);
     GuiSetStyle(DEFAULT, BORDER_WIDTH, 1);
     GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
+    GuiSetStyle(DROPDOWNBOX, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
+    GuiSetStyle(DROPDOWNBOX, TEXT_PADDING, 10);
 
     if (options->wait_events) {
         if (options->verbose) {
@@ -2361,6 +2369,10 @@ static void start_given_file(void)
     switch (options->startup_action) {
     case STARTUP_ACTION_PLAY:
         play_game_file(options->file_path);
+        break;
+
+    case STARTUP_ACTION_RANDOM:
+        play_random_game();
         break;
 
     case STARTUP_ACTION_EDIT:

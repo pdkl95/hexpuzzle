@@ -46,6 +46,8 @@ Rectangle gui_random_gen_style_label_rect;
 Rectangle gui_random_gen_style_rect;
 Rectangle gui_random_difficulty_label_rect;
 Rectangle gui_random_difficulty_rect;
+Rectangle gui_random_fixed_hidden_assist_label_rect;
+Rectangle gui_random_fixed_hidden_assist_rect;
 Rectangle gui_random_seed_rect;
 Rectangle gui_random_seed_bg_rect;
 Rectangle gui_random_enter_seed_rect;
@@ -65,6 +67,7 @@ char gui_random_radius_right_button_text[6];
 char gui_random_color_label_text[] = "Colors";
 char gui_random_gen_style_label_text[] = "Gen. Method";
 char gui_random_difficulty_label_text[] = "Difficulty";
+char gui_random_fixed_hidden_assist_label_text[] = "Fixed/Removed";
 char gui_random_seed_text[] = "RNG Seed";
 char gui_random_rng_seed_text[] = "Randomize";
 char gui_random_enter_seed_text_str[] = "Enter";
@@ -91,6 +94,22 @@ char *gui_random_difficulty_text = NULL;
 bool gui_random_difficulty_edit_mode = false;
 
 int difficulty = 1;
+
+const char *gui_random_fixed_hidden_assist[] = {
+    "Common (symmetric)",
+    "Common (random)",
+    "Uncommon (symmetric)",
+    "Uncommon (random)",
+    "Rare (symmetric)",
+    "Rare (random)",
+    "None"
+};
+char *gui_random_fixed_hidden_assist_text = NULL;
+#define NUM_FIXED_HIDDEN_ASSIST (sizeof(gui_random_fixed_hidden_assist)/sizeof(char *))
+bool gui_random_fixed_hidden_assist_edit_mode = false;
+
+int fixed_hidden_assist = 3;
+bool fixed_hidden_assist_symmetric = true;
 
 bool any_drop_down_active = false;
 
@@ -604,6 +623,14 @@ struct level *generate_random_level(void)
 {
     assert(rng_color_count() > 0);
 
+    if (options->rng_seed_str) {
+        if (!parse_random_seed_str(options->rng_seed_str)) {
+            errmsg("RNG seed \"%s\" is empty or unusable");
+            new_random_seed();
+            warnmsg("Using random RNG seed %d instead!", gui_random_seed_str);
+        }
+    }
+
     rng_seed();
 
     level_t *level = create_level(NULL);
@@ -613,6 +640,7 @@ struct level *generate_random_level(void)
     level_set_radius(level, options->create_level_radius);
     int n = level_get_enabled_tiles(level);
 
+    /*** Difficulty ***/
     switch (difficulty) {
     case 0: /* easy */
         options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_EASY_MIN_PATH;
@@ -637,6 +665,72 @@ struct level *generate_random_level(void)
         assert(false && "should never reach here");
     }
 
+    /*** Fixed/Hidden Assist ***/
+    switch (fixed_hidden_assist) {
+    case 0: /* Common (symmetric) */
+        options->create_level_min_fixed  = 2;
+        options->create_level_max_fixed  = 4;
+        options->create_level_min_hidden = 2;
+        options->create_level_max_hidden = 6;
+        fixed_hidden_assist_symmetric = true;
+        break;
+    case 1: /* Common (random)) */
+        options->create_level_min_fixed  = 2;
+        options->create_level_max_fixed  = 4;
+        options->create_level_min_hidden = 4;
+        options->create_level_max_hidden = 6;
+        fixed_hidden_assist_symmetric = false;
+        break;
+    case 2: /* Uncommon (symmetric) */
+        options->create_level_min_fixed  = 0;
+        options->create_level_max_fixed  = 3;
+        options->create_level_min_hidden = 0;
+        options->create_level_max_hidden = 4;
+        fixed_hidden_assist_symmetric = true;
+        break;
+    case 3: /* Uncommon (random)) */
+        options->create_level_min_fixed  = 0;
+        options->create_level_max_fixed  = 3;
+        options->create_level_min_hidden = 0;
+        options->create_level_max_hidden = 4;
+        fixed_hidden_assist_symmetric = false;
+        break;
+    case 4: /* Rare (symmetric) */
+        options->create_level_min_fixed  = 0;
+        options->create_level_max_fixed  = 2;
+        options->create_level_min_hidden = 0;
+        options->create_level_max_hidden = 2;
+        fixed_hidden_assist_symmetric = true;
+        break;
+    case 5: /* Rare (random)) */
+        options->create_level_min_fixed  = 0;
+        options->create_level_max_fixed  = 2;
+        options->create_level_min_hidden = 0;
+        options->create_level_max_hidden = 2;
+        fixed_hidden_assist_symmetric = false;
+        break;
+    case 6: /* None */
+        options->create_level_min_fixed  = 0;
+        options->create_level_max_fixed  = 0;
+        options->create_level_min_hidden = 0;
+        options->create_level_max_hidden = 0;
+        fixed_hidden_assist_symmetric = false;
+        break;
+    default:
+        __builtin_unreachable();
+        assert(false && "should never reach here");
+    }
+
+    switch (level->radius) {
+    case 1:
+        if (options->create_level_min_fixed  > 2) { options->create_level_min_fixed  = 2; }
+        if (options->create_level_max_fixed  > 2) { options->create_level_max_fixed  = 2; }
+        if (options->create_level_min_hidden > 2) { options->create_level_min_hidden = 2; }
+        if (options->create_level_max_hidden > 2) { options->create_level_max_hidden = 2; }
+       break;
+    }
+
+    /*** Feneration Style ***/
     switch (gen_style) {
     case 0:
         generate_random_paths(level, n);
@@ -730,6 +824,7 @@ void init_gui_random(void)
     SAFEFREE(gui_random_enter_seed_text);
     SAFEFREE(gui_random_gen_style_text);
     SAFEFREE(gui_random_difficulty_text);
+    SAFEFREE(gui_random_fixed_hidden_assist_text);
 
     //gui_random_enter_seed_text = strdup(GuiIconText(ICON_PENCIL, gui_random_enter_seed_text_str));
     gui_random_enter_seed_text = strdup(GuiIconText(ICON_PENCIL, NULL));
@@ -739,6 +834,9 @@ void init_gui_random(void)
 
     join_str = TextJoin(gui_random_difficulties, NUM_DIFFICULTIES, ";");
     gui_random_difficulty_text = strdup(join_str);
+
+    join_str = TextJoin(gui_random_fixed_hidden_assist, NUM_FIXED_HIDDEN_ASSIST, ";");
+    gui_random_fixed_hidden_assist_text = strdup(join_str);
 }
 
 void cleanup_gui_random(void)
@@ -753,6 +851,7 @@ void cleanup_gui_random(void)
     SAFEFREE(gui_random_enter_seed_text);
     SAFEFREE(gui_random_gen_style_text);
     SAFEFREE(gui_random_difficulty_text);
+    SAFEFREE(gui_random_fixed_hidden_assist_text);
 }
 
 void resize_gui_random(void)
@@ -847,9 +946,24 @@ void resize_gui_random(void)
     gui_random_difficulty_rect.y      = gui_random_difficulty_label_rect.y;
     gui_random_difficulty_rect.width  = gui_random_area_rect.width - (gui_random_difficulty_rect.x - gui_random_difficulty_label_rect.x);
     gui_random_difficulty_rect.height = gui_random_difficulty_label_rect.height;
-
+\
     gui_random_area_rect.y      += gui_random_difficulty_rect.height + RAYGUI_ICON_SIZE;
     gui_random_area_rect.height -= gui_random_difficulty_rect.height + RAYGUI_ICON_SIZE;
+
+    Vector2 gui_random_fixed_hidden_assist_label_text_size = measure_gui_text(gui_random_fixed_hidden_assist_label_text);
+
+    gui_random_fixed_hidden_assist_label_rect.x      = gui_random_area_rect.x;
+    gui_random_fixed_hidden_assist_label_rect.y      = gui_random_area_rect.y;
+    gui_random_fixed_hidden_assist_label_rect.width  = gui_random_fixed_hidden_assist_label_text_size.x + (2 * BUTTON_MARGIN);
+    gui_random_fixed_hidden_assist_label_rect.height = TOOL_BUTTON_HEIGHT;
+
+    gui_random_fixed_hidden_assist_rect.x      = gui_random_fixed_hidden_assist_label_rect.x + gui_random_fixed_hidden_assist_label_rect.width + RAYGUI_ICON_SIZE;
+    gui_random_fixed_hidden_assist_rect.y      = gui_random_fixed_hidden_assist_label_rect.y;
+    gui_random_fixed_hidden_assist_rect.width  = gui_random_area_rect.width - (gui_random_fixed_hidden_assist_rect.x - gui_random_fixed_hidden_assist_label_rect.x);
+    gui_random_fixed_hidden_assist_rect.height = gui_random_fixed_hidden_assist_label_rect.height;
+
+    gui_random_area_rect.y      += gui_random_fixed_hidden_assist_rect.height + RAYGUI_ICON_SIZE;
+    gui_random_area_rect.height -= gui_random_fixed_hidden_assist_rect.height + RAYGUI_ICON_SIZE;
 
     Vector2 gui_random_seed_text_size = measure_gui_text(gui_random_seed_text);
 
@@ -989,22 +1103,9 @@ static void draw_gui_random_colors(void)
     }
 }
 
-bool ask_for_random_seed(void)
+
+bool parse_random_seed_str(char *seedstr)
 {
-#if defined(PLATFORM_DESKTOP)
-    char *seedstr = tinyfd_inputBox("New Random Seed",
-                                    "Enter a randon number generator seed:",
-                                    "");
-#endif
-
-#if defined(PLATFORM_WEB)
-    char *seedstr = "";
-#endif
-
-            if (strlen(seedstr) < 1) {
-        return false;
-    }
-
     if (is_number(seedstr)) {
         const char *src = seedstr;
         char *endptr;
@@ -1042,6 +1143,25 @@ bool ask_for_random_seed(void)
     }
 
     return true;
+}
+
+bool ask_for_random_seed(void)
+{
+#if defined(PLATFORM_DESKTOP)
+    char *seedstr = tinyfd_inputBox("New Random Seed",
+                                    "Enter a randon number generator seed:",
+                                    "");
+#endif
+
+#if defined(PLATFORM_WEB)
+    char *seedstr = "";
+#endif
+
+    if (strlen(seedstr) < 1) {
+        return false;
+    }
+
+    return parse_random_seed_str(seedstr);
 }
 
 void draw_preview(void)
@@ -1172,6 +1292,18 @@ void draw_gui_random(void)
 
     GuiUnlock();
 
+    if (gui_random_fixed_hidden_assist_edit_mode) {
+        GuiLock();
+    }
+
+    GuiLabel(gui_random_fixed_hidden_assist_label_rect, gui_random_fixed_hidden_assist_label_text);
+    if (GuiDropdownBox(gui_random_fixed_hidden_assist_rect, gui_random_fixed_hidden_assist_text, &fixed_hidden_assist, gui_random_fixed_hidden_assist_edit_mode)) {
+        gui_random_fixed_hidden_assist_edit_mode = !gui_random_fixed_hidden_assist_edit_mode;
+        regen_level();
+    }
+
+    GuiUnlock();
+
     if (gui_random_gen_style_edit_mode) {
         GuiLock();
     }
@@ -1194,11 +1326,15 @@ void draw_gui_random(void)
         regen_level();
     }
 
-    any_drop_down_active = gui_random_difficulty_edit_mode || gui_random_gen_style_edit_mode;
+    any_drop_down_active = gui_random_difficulty_edit_mode || gui_random_gen_style_edit_mode || gui_random_fixed_hidden_assist_edit_mode;
 }
 
 void play_gui_random_level(void)
 {
+    if (!gui_random_level) {
+        regen_level();
+    }
+
     level_play(gui_random_level);
     played_level = true;
 }

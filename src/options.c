@@ -38,7 +38,7 @@
 options_t *options = NULL;
 
 /* command line options */
-static char short_options[] = "Cc:e:F:H:p:t:wvVW:PUL::hj";
+static char short_options[] = "Cc:e:F:H:p:t:wvVW:PUL::r::hj";
 
 static struct option long_options[] = {
     { "create-random-level", optional_argument, 0, 'L' },
@@ -48,10 +48,15 @@ static struct option long_options[] = {
     {                 "fps", required_argument, 0, 'F' },
     {              "height", required_argument, 0, 'H' },
     {               "width", required_argument, 0, 'W' },
-    {        "level-radius", required_argument, 0, 'R' },
+    {        "level-radius", required_argument, 0, '|' },
+    {     "level-min-fixed", required_argument, 0, '[' },
+    {     "level-max-fixed", required_argument, 0, ']' },
+    {    "level-min-hidden", required_argument, 0, '(' },
+    {    "level-max-hidden", required_argument, 0, ')' },
     {      "level-min-path", required_argument, 0, '<' },
     {      "level-max-path", required_argument, 0, '>' },
     {                "play", required_argument, 0, 'p' },
+    {              "random", optional_argument, 0, 'r' },
     {                "edit", required_argument, 0, 'e' },
     {       "cheat-autowin",       no_argument, 0, 'A' },
     {               "force",       no_argument, 0, '!' },
@@ -116,23 +121,28 @@ static char help_text[] =
     "                              not awaken immediately during resize events.\n"
     "\n"
     "ACTIONS\n"
-    "  -p, --play <file>           Play the given ." LEVEL_FILENAME_EXT " or ." COLLECTION_FILENAME_EXT " file\n"
-    "  -e, --edit <file>           Edit the given ." LEVEL_FILENAME_EXT " or ." COLLECTION_FILENAME_EXT " file\n"
-    "  -L, --create-level[=MODE] <NAME>  Create a new random level file.\n"
-    "                                Modes: [dfs, scatter, blank] Default: " OPTIONS_DEFAULT_CREATE_LEVEL_MODE_STR "\n"
-    "  -P, --pack <dir>            Packasge a directory of ." LEVEL_FILENAME_EXT " files\n"
-    "                                into a ." COLLECTION_FILENAME_EXT "\n"
+    "  -p, --play <file>                Play the given ." LEVEL_FILENAME_EXT " or ." COLLECTION_FILENAME_EXT " file\n"
+    "  -r, --random[=SEED]              Play a random level, optional using a given RNG seed\n"
+    "  -e, --edit <file>                Edit the given ." LEVEL_FILENAME_EXT " or ." COLLECTION_FILENAME_EXT " file\n"
+    "  -L, --create-level[=MODE] <NAME> Create a new random level file.\n"
+    "                                   Modes: [dfs, scatter, blank] Default: " OPTIONS_DEFAULT_CREATE_LEVEL_MODE_STR "\n"
+    "  -P, --pack <dir>                 Packasge a directory of ." LEVEL_FILENAME_EXT " files\n"
+    "                                   into a ." COLLECTION_FILENAME_EXT "\n"
     "  -U, --unpack <file." COLLECTION_FILENAME_EXT "> Unpack a " COLLECTION_FILENAME_EXT " file\n"
-    "                                into a directory of ." LEVEL_FILENAME_EXT "\n"
+    "                                   into a directory of ." LEVEL_FILENAME_EXT "\n"
     "\n"
     "ACTION OPTIONS\n"
-    "     --force                  Allow files to be overwritten (dangerous!)\n"
-    "     --level-radius=NUMBER    Tile radius of created levels.\n"
-    "                                Min: " STR(LEVEL_MIN_RADIUS) ", Max: " STR(LEVEL_MAX_RADIUS) ", Default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_RADIUS) "\n"
-    "     --level-min-path=NUMBER  Minimum number of paths on each created tile.\n"
-    "                                Min: 0, Max: 6, Default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MIN_PATH) "\n"
-    "     --level-max-path=NUMBER  Maximum number of paths on each created tile.\n"
-    "                                Min: 1, Max: 6, Default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MAX_PATH) "\n"
+    "     --force                   Allow files to be overwritten (dangerous!)\n"
+    "     --level-radius=NUMBER     Tile radius of created levels.\n"
+    "                                 Min: " STR(LEVEL_MIN_RADIUS) ", Max: " STR(LEVEL_MAX_RADIUS) ", Default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_RADIUS) "\n"
+    "     --level-min-fixed=NUMBER  Minimum number of fixed tiles.  (default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MIN_FIXED) ")\n"
+    "     --level-max-fixed=NUMBER  Maximum number of fixed tiles.  (default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MAX_FIXED) ")\n"
+    "     --level-min-hidden=NUMBER Minimum number of hidden tiles. (default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MIN_HIDDEN) ")\n"
+    "     --level-max-hidden=NUMBER Maximum number of hidden tiles. (default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MAX_HIDDEN) ")\n"
+    "     --level-min-path=NUMBER   Minimum number of paths on each created tile.\n"
+    "                                 Min: 0, Max: 6, Default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MIN_PATH) "\n"
+    "     --level-max-path=NUMBER   Maximum number of paths on each created tile.\n"
+    "                                 Min: 1, Max: 6, Default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MAX_PATH) "\n"
     ;
 
 
@@ -297,6 +307,10 @@ options_set_defaults(
     options->startup_action        = OPTIONS_DEFAULT_STARTUP_ACTION;
     options->create_level_mode     = OPTIONS_DEFAULT_CREATE_LEVEL_MODE;
     options->create_level_radius   = OPTIONS_DEFAULT_CREATE_LEVEL_RADIUS;
+    options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_MIN_FIXED;
+    options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_MAX_FIXED;
+    options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_MIN_HIDDEN;
+    options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_MAX_HIDDEN;
     options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_MIN_PATH;
     options->create_level_max_path = OPTIONS_DEFAULT_CREATE_LEVEL_MAX_PATH;
     options->create_level_max_path = OPTIONS_DEFAULT_CREATE_LEVEL_EXPOINTS;
@@ -321,6 +335,7 @@ options_set_defaults(
     }
 
     options->file_path = NULL;
+    options->rng_seed_str = NULL;
 
     options->cheat_autowin = false;
 
@@ -364,6 +379,13 @@ options_parse_args(
             options->startup_action = STARTUP_ACTION_PLAY;
             break;
 
+        case 'r':
+            if (optarg) {
+                options_set_string(&options->rng_seed_str);
+            }
+            options->startup_action = STARTUP_ACTION_RANDOM;
+            break;
+
         case 'e':
             options_set_string(&options->file_path);
             options->startup_action = STARTUP_ACTION_EDIT;
@@ -387,10 +409,38 @@ options_parse_args(
             options->startup_action = STARTUP_ACTION_CREATE_LEVEL;
             break;
 
-        case 'R':
+        case '|':
             if (!options_set_long_bounds(&options->create_level_radius, LEVEL_MIN_RADIUS, LEVEL_MAX_RADIUS)) {
                 errmsg("bad value for --level-radius (expected %d - %d)",
                        LEVEL_MIN_RADIUS, LEVEL_MAX_RADIUS);
+                return false;
+            }
+            break;
+
+        case '[':
+            if (!options_set_long_bounds(&options->create_level_min_fixed, 0, 9)) {
+                errmsg("bad value for --level-min-fixed (expected %d - %d)", 0, 9);
+                return false;
+            }
+            break;
+
+        case ']':
+            if (!options_set_long_bounds(&options->create_level_max_fixed, 0, 9)) {
+                errmsg("bad value for --level-max-fixed (expected %d - %d)", 0, 9);
+                return false;
+            }
+            break;
+
+        case '(':
+            if (!options_set_long_bounds(&options->create_level_min_hidden, 0, 9)) {
+                errmsg("bad value for --level-min-hidden (expected %d - %d)", 0, 9);
+                return false;
+            }
+            break;
+
+        case ')':
+            if (!options_set_long_bounds(&options->create_level_max_hidden, 0, 9)) {
+                errmsg("bad value for --level-max-hidden (expected %d - %d)", 0, 9);
                 return false;
             }
             break;

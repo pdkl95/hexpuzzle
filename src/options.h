@@ -46,6 +46,10 @@
 #define OPTIONS_DEFAULT_CREATE_LEVEL_MODE CREATE_LEVEL_MODE_DFS
 #define OPTIONS_DEFAULT_CREATE_LEVEL_MODE_STR "dfs"
 #define OPTIONS_DEFAULT_CREATE_LEVEL_RADIUS 2
+#define OPTIONS_DEFAULT_CREATE_LEVEL_MIN_FIXED 0
+#define OPTIONS_DEFAULT_CREATE_LEVEL_MAX_FIXED 2
+#define OPTIONS_DEFAULT_CREATE_LEVEL_MIN_HIDDEN 0
+#define OPTIONS_DEFAULT_CREATE_LEVEL_MAX_HIDDEN 2
 #define OPTIONS_DEFAULT_CREATE_LEVEL_EASY_MIN_PATH 2
 #define OPTIONS_DEFAULT_CREATE_LEVEL_EASY_MAX_PATH 3
 #define OPTIONS_DEFAULT_CREATE_LEVEL_EASY_EXPOINTS 1
@@ -110,8 +114,13 @@ struct options {
     /* action options */
     bool force;
 
+    char *rng_seed_str;
     create_level_mode_t create_level_mode;
     long create_level_radius;
+    long create_level_min_fixed;
+    long create_level_max_fixed;
+    long create_level_min_hidden;
+    long create_level_max_hidden;
     long create_level_min_path;
     long create_level_max_path;
     long create_level_expoints;

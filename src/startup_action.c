@@ -201,6 +201,8 @@ bool run_startup_action(void)
     switch (options->startup_action) {
     case STARTUP_ACTION_PLAY:
         /* fall through */
+    case STARTUP_ACTION_RANDOM:
+        /* fall through */
     case STARTUP_ACTION_EDIT:
         return false;
 
