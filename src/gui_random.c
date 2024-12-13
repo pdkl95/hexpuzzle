@@ -96,11 +96,14 @@ bool gui_random_difficulty_edit_mode = false;
 int difficulty = 1;
 
 const char *gui_random_fixed_hidden_assist[] = {
-    "Common (symmetric)",
+    "Common (symmetric: reflect)",
+    "Common (symmetric: rotate)",
     "Common (random)",
-    "Uncommon (symmetric)",
+    "Uncommon (symmetric: reflect)",
+    "Uncommon (symmetric: rotate)",
     "Uncommon (random)",
-    "Rare (symmetric)",
+    "Rare (symmetric: reflect)",
+    "Rare (symmetric: rotate)",
     "Rare (random)",
     "None"
 };
@@ -108,8 +111,15 @@ char *gui_random_fixed_hidden_assist_text = NULL;
 #define NUM_FIXED_HIDDEN_ASSIST (sizeof(gui_random_fixed_hidden_assist)/sizeof(char *))
 bool gui_random_fixed_hidden_assist_edit_mode = false;
 
-int fixed_hidden_assist = 3;
-bool fixed_hidden_assist_symmetric = true;
+int fixed_hidden_assist = 0;
+
+enum symmetry_mode {
+    SYMMETRY_MODE_NONE = 0,
+    SYMMETRY_MODE_REFLECT,
+    SYMMETRY_MODE_ROTATE
+};
+typedef enum symmetry_mode symmetry_mode_t;
+symmetry_mode_t fixed_hidden_assist_mode = SYMMETRY_MODE_NONE;
 
 bool any_drop_down_active = false;
 
@@ -603,7 +613,7 @@ static void generate_connect_to_point(level_t *level)
 static void shuffle_tiles(level_t *level)
 {
     level_use_unsolved_tile_pos(level);
-    int num_positions = level_get_enabled_positions(level);
+    int num_positions = level_get_movable_positions(level);
 
     for (int i=num_positions-1; i>0; i--) {
         int j = i;
@@ -613,9 +623,91 @@ static void shuffle_tiles(level_t *level)
 
         tile_pos_t *pos_i = level->enabled_positions[i];
         tile_pos_t *pos_j = level->enabled_positions[j];
+        assert(!pos_i->tile->hidden);
+        assert(!pos_j->tile->hidden);
         level_swap_tile_pos(level, pos_i, pos_j, false);
         level->enabled_positions[i] = pos_j;
         level->enabled_positions[j] = pos_i;
+    }
+}
+
+static void mark_tile_hidden(tile_t *tile)
+{
+    tile_pos_t *pos = tile->solved_pos;
+    pos->tile->hidden = true;
+    each_direction {
+        hex_direction_t opposite_dir = hex_opposite_direction(dir);
+        tile_pos_t *neighbor = pos->neighbors[dir];
+        if (!neighbor) {
+            printf("no neighbor\n");
+            continue;
+        }
+
+        pos->tile->path[dir] = PATH_TYPE_NONE;
+        neighbor->tile->path[opposite_dir] = PATH_TYPE_NONE;
+    }
+}
+
+void mark_symmetric_fixed_and_hidden(level_t *level, int num_tiles)
+{
+    level_use_solved_tile_pos(level);
+    int num_fixed = options->create_level_min_fixed
+        + rng_get(options->create_level_max_fixed -
+                  options->create_level_min_fixed);
+    int num_hidden = options->create_level_min_hidden
+        + rng_get(options->create_level_max_hidden -
+                  options->create_level_min_hidden);
+
+    hex_axial_t center_pos = level_get_center_tile_pos(level)->position;
+    bool reflect = fixed_hidden_assist_mode == SYMMETRY_MODE_REFLECT;
+
+    for (int i=0; i<num_fixed; i++) {
+        int idx = rng_get(num_tiles);
+        tile_t *tile = level->enabled_tiles[idx];
+        tile->fixed = true;
+        hex_axial_t rpos;
+        if (reflect) {
+            rpos = hex_axial_reflect_horiz(tile->solved_pos->position, center_pos);
+        } else {
+            rpos = hex_axial_rotate(tile->solved_pos->position, center_pos);
+        }
+        tile_t *refl = level_get_solved_tile(level, rpos);
+        refl->fixed = true;
+    }
+
+    for (int i=0; i<num_hidden; i++) {
+        int idx = rng_get(num_tiles);
+        tile_t *tile = level->enabled_tiles[idx];
+        mark_tile_hidden(tile);
+
+        hex_axial_t rpos;
+        if (reflect) {
+            rpos = hex_axial_reflect_horiz(tile->solved_pos->position, center_pos);
+        } else {
+            rpos = hex_axial_rotate(tile->solved_pos->position, center_pos);
+        }
+        tile_t *refl = level_get_solved_tile(level, rpos);
+        mark_tile_hidden(refl);
+    }
+}
+
+void mark_random_fixed_and_hidden(level_t *level, int num_tiles)
+{
+    int num_fixed = options->create_level_min_fixed
+        + rng_get(options->create_level_max_fixed -
+                  options->create_level_min_fixed);
+    int num_hidden = options->create_level_min_hidden
+        + rng_get(options->create_level_max_hidden -
+                  options->create_level_min_hidden);
+
+    for (int i=0; i<num_fixed; i++) {
+        int idx = rng_get(num_tiles);
+        level->enabled_tiles[idx]->fixed = true;
+    }
+
+    for (int i=0; i<num_hidden; i++) {
+        int idx = rng_get(num_tiles);
+        mark_tile_hidden(level->enabled_tiles[idx]);
     }
 }
 
@@ -667,54 +759,75 @@ struct level *generate_random_level(void)
 
     /*** Fixed/Hidden Assist ***/
     switch (fixed_hidden_assist) {
-    case 0: /* Common (symmetric) */
+    case 0: /* Common (symmetric: reflect) */
         options->create_level_min_fixed  = 2;
         options->create_level_max_fixed  = 4;
         options->create_level_min_hidden = 2;
         options->create_level_max_hidden = 6;
-        fixed_hidden_assist_symmetric = true;
+        fixed_hidden_assist_mode = SYMMETRY_MODE_REFLECT;
         break;
-    case 1: /* Common (random)) */
+    case 1: /* Common (symmetric: rotate) */
+        options->create_level_min_fixed  = 2;
+        options->create_level_max_fixed  = 4;
+        options->create_level_min_hidden = 2;
+        options->create_level_max_hidden = 6;
+        fixed_hidden_assist_mode = SYMMETRY_MODE_ROTATE;
+        break;
+    case 2: /* Common (random)) */
         options->create_level_min_fixed  = 2;
         options->create_level_max_fixed  = 4;
         options->create_level_min_hidden = 4;
         options->create_level_max_hidden = 6;
-        fixed_hidden_assist_symmetric = false;
+        fixed_hidden_assist_mode = SYMMETRY_MODE_NONE;
         break;
-    case 2: /* Uncommon (symmetric) */
+    case 3: /* Uncommon (symmetric: reflect) */
         options->create_level_min_fixed  = 0;
         options->create_level_max_fixed  = 3;
         options->create_level_min_hidden = 0;
         options->create_level_max_hidden = 4;
-        fixed_hidden_assist_symmetric = true;
+        fixed_hidden_assist_mode = SYMMETRY_MODE_REFLECT;
         break;
-    case 3: /* Uncommon (random)) */
+    case 4: /* Uncommon (symmetric: rotate) */
         options->create_level_min_fixed  = 0;
         options->create_level_max_fixed  = 3;
         options->create_level_min_hidden = 0;
         options->create_level_max_hidden = 4;
-        fixed_hidden_assist_symmetric = false;
+        fixed_hidden_assist_mode = SYMMETRY_MODE_ROTATE;
         break;
-    case 4: /* Rare (symmetric) */
+    case 5: /* Uncommon (random)) */
+        options->create_level_min_fixed  = 0;
+        options->create_level_max_fixed  = 3;
+        options->create_level_min_hidden = 0;
+        options->create_level_max_hidden = 4;
+        fixed_hidden_assist_mode = SYMMETRY_MODE_NONE;
+        break;
+    case 6: /* Rare (symmetric: reflect) */
         options->create_level_min_fixed  = 0;
         options->create_level_max_fixed  = 2;
         options->create_level_min_hidden = 0;
         options->create_level_max_hidden = 2;
-        fixed_hidden_assist_symmetric = true;
+        fixed_hidden_assist_mode = SYMMETRY_MODE_REFLECT;
         break;
-    case 5: /* Rare (random)) */
+    case 7: /* Rare (symmetric: rotate) */
         options->create_level_min_fixed  = 0;
         options->create_level_max_fixed  = 2;
         options->create_level_min_hidden = 0;
         options->create_level_max_hidden = 2;
-        fixed_hidden_assist_symmetric = false;
+        fixed_hidden_assist_mode = SYMMETRY_MODE_ROTATE;
         break;
-    case 6: /* None */
+    case 8: /* Rare (random)) */
+        options->create_level_min_fixed  = 0;
+        options->create_level_max_fixed  = 2;
+        options->create_level_min_hidden = 0;
+        options->create_level_max_hidden = 2;
+        fixed_hidden_assist_mode = SYMMETRY_MODE_NONE;
+        break;
+    case 9: /* None */
         options->create_level_min_fixed  = 0;
         options->create_level_max_fixed  = 0;
         options->create_level_min_hidden = 0;
         options->create_level_max_hidden = 0;
-        fixed_hidden_assist_symmetric = false;
+        fixed_hidden_assist_mode = SYMMETRY_MODE_NONE;
         break;
     default:
         __builtin_unreachable();
@@ -748,6 +861,19 @@ struct level *generate_random_level(void)
     default:
         __builtin_unreachable();
         assert(false && "should never reach here");
+    }
+
+    switch (fixed_hidden_assist_mode) {
+    case SYMMETRY_MODE_NONE:
+        mark_random_fixed_and_hidden(level, n);
+        break;
+    case SYMMETRY_MODE_REFLECT:
+        /* fall through */
+    case SYMMETRY_MODE_ROTATE:
+        mark_symmetric_fixed_and_hidden(level, n);
+        break;
+    default:
+        __builtin_unreachable();
     }
 
     level_update_path_counts(level);
@@ -859,7 +985,7 @@ void resize_gui_random(void)
     gui_random_panel_rect.width  = window_size.x * 0.4;
     gui_random_panel_rect.height = window_size.y * 0.45;
 
-    MINVAR(gui_random_panel_rect.width,  420);
+    MINVAR(gui_random_panel_rect.width,  480);
     MINVAR(gui_random_panel_rect.height, 550);
 
     gui_random_panel_rect.x = (window_size.x / 2) - (gui_random_panel_rect.width  / 2);

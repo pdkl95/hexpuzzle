@@ -625,6 +625,41 @@ int level_get_enabled_positions(level_t *level)
     return num_enabled;
 }
 
+int level_get_movable_positions(level_t *level)
+{
+    memset(level->enabled_positions, 0, sizeof(level->enabled_positions));
+
+    int num_movable = 0;
+
+    switch (level->currently_used_tiles) {
+    case USED_TILES_NULL:
+        assert(false && "null tile set");
+        break;
+
+    case USED_TILES_SOLVED:
+        for (int i=0; i<LEVEL_MAXTILES; i++) {
+            tile_t *tile = &(level->tiles[i]);
+            if (tile->enabled) {
+                level->enabled_positions[num_movable] = tile->solved_pos;
+                num_movable++;
+            }
+        }
+        break;
+
+    case USED_TILES_UNSOLVED:
+        for (int i=0; i<LEVEL_MAXTILES; i++) {
+            tile_t *tile = &(level->tiles[i]);
+            if (tile->enabled && !tile->fixed && !tile->hidden) {
+                level->enabled_positions[num_movable] = tile->unsolved_pos;
+                num_movable++;
+            }
+        }
+        break;
+    }
+
+    return num_movable;
+}
+
 tile_pos_t *level_get_center_tile_pos(level_t *level)
 {
     return level_get_current_tile_pos(level, LEVEL_CENTER_POSITION);
@@ -654,6 +689,18 @@ tile_pos_t *level_get_current_tile_pos(level_t *level,  hex_axial_t axial)
 tile_t *level_get_tile(level_t *level,  hex_axial_t axial)
 {
     tile_pos_t *pos = level_get_current_tile_pos(level, axial);
+    return pos->tile;
+}
+
+tile_t *level_get_solved_tile(level_t *level,  hex_axial_t axial)
+{
+    tile_pos_t *pos = level_get_solved_tile_pos(level, axial);
+    return pos->tile;
+}
+
+tile_t *level_get_unsolved_tile(level_t *level,  hex_axial_t axial)
+{
+    tile_pos_t *pos = level_get_unsolved_tile_pos(level, axial);
     return pos->tile;
 }
 

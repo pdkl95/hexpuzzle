@@ -169,6 +169,7 @@ bool level_eq_tiles(level_t *level, level_t *other);
 void level_sort_tiles(level_t *level);
 int level_get_enabled_tiles(level_t *level);
 int level_get_enabled_positions(level_t *level);
+int level_get_movable_positions(level_t *level);
 
 inline static bool level_using_solved_tiles(level_t *level)
 {
@@ -187,6 +188,8 @@ void level_use_null_tile_pos(level_t *level);
 void level_toggle_currently_used_tiles(level_t *level);
 
 tile_t *level_get_tile(level_t *level,  hex_axial_t axial);
+tile_t *level_get_solved_tile(level_t *level,  hex_axial_t axial);
+tile_t *level_get_unsolved_tile(level_t *level,  hex_axial_t axial);
 tile_pos_t *level_get_current_tile_pos(level_t *level,  hex_axial_t axial);
 
 bool level_parse_string(level_t *level, const char *str);

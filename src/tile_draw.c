@@ -334,16 +334,19 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
     rlPushMatrix();
     rlRotatef(TO_DEGREES(-pos->extra_rotate), 0.0, 0.0, 1.0);
 
+#if 0
 #ifdef USE_PHYSICS
     DrawLineEx(VEC2_ZERO, Vector2Scale(pos->physics_velocity, 0.2), 3.0, PINK);
 #endif
+#endif
 
-#if 0
+#if 1
     /* show each hex's axial coordinates */
     int font_size = GuiGetStyle(DEFAULT, TEXT_SIZE);
 
     const char *coord_text1 = TextFormat("#%d: %d,%d", pos->tile->id, pos->position.q, pos->position.r);
     Vector2 text_size1 = measure_gui_text(coord_text1);
+#if 0
 #ifdef USE_PHYSICS
     Vector2 pp = pos->physics_position;
     pp = Vector2Subtract(pp, window_center);
@@ -356,15 +359,18 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
     const char *coord_text3 = TextFormat("a = %3.2f", atan2f(pp.y, pp.x) );
     Vector2 text_size3 = measure_gui_text(coord_text3);
 #endif
+#endif
 
     float yoffset = 14;
-    float sep = 1;
     DrawTextDropShadow(coord_text1, pos->rel.center.x - (text_size1.x/2), pos->rel.center.y + yoffset, font_size, WHITE, BLACK);
+#if 0
 #ifdef USE_PHYSICS
+    float sep = 1;
     DrawTextDropShadow(coord_text2, pos->rel.center.x - (text_size2.x/2), pos->rel.center.y + yoffset + text_size1.y + sep, font_size, WHITE, BLACK);
     DrawTextDropShadow(coord_text3, pos->rel.center.x - (text_size3.x/2), pos->rel.center.y + yoffset - text_size1.y - sep, font_size, WHITE, BLACK);
     //Vector2 lineend = Vector2Add(pos->rel.center, (Vector2) { .x = -pp.x, -pp.y });
     //DrawLineEx(pos->rel.center, lineend, 3.0, PINK);
+#endif
 #endif
 #endif
 

@@ -130,6 +130,25 @@ struct hex_cubef {
 };
 typedef struct hex_cubef hex_cubef_t;
 
+static inline hex_axial_t cube_to_axial(hex_cube_t cube)
+{
+    hex_axial_t axial = {
+        .q = cube.q,
+        .r = cube.r
+    };
+    return axial;
+}
+
+static inline hex_cube_t axial_to_cube(hex_axial_t axial)
+{
+    hex_cube_t cube = {
+        .q = axial.q,
+        .r = axial.r,
+        .s = -axial.q - axial.r
+    };
+    return cube;
+}
+
 extern hex_cube_t hex_cube_direction_vectors[6];
 static inline hex_cube_t hex_cube_direction(hex_direction_t dir)
 {
@@ -214,6 +233,9 @@ Vector2 *hex_pixel_corners(Vector2 pos, float size);
 
 hex_offset_t hex_axial_to_offset(hex_axial_t axial, hex_offset_type_t type);
 hex_axial_t hex_offset_to_axial(hex_offset_t off);
+
+hex_axial_t hex_axial_reflect_horiz(hex_axial_t axial, hex_axial_t reflect_point);
+hex_axial_t hex_axial_rotate(hex_axial_t axial, hex_axial_t rotate_point);
 
 #endif /*HEX_H*/
 

@@ -152,7 +152,7 @@ void tile_pos_toggle_fixed(tile_pos_t *pos)
     level_undo_add_set_flags_event(current_level, include_prev_swap, pos->tile, old_flags, new_flags);
 }
 
-void tile_pos_toggle_hidden(tile_pos_t *pos)
+void tile_pos_toggle_hidden(tile_pos_t *pos, bool add_undo)
 {
     assert_not_null(pos);
 
@@ -162,8 +162,12 @@ void tile_pos_toggle_hidden(tile_pos_t *pos)
         include_prev_swap = true;
     }
 
-    tile_flags_t old_flags = tile_get_flags(pos->tile);
-    tile_neighbor_paths_t old_neighbor_paths = tile_get_neighbor_paths(pos->tile);
+    tile_flags_t old_flags;
+    tile_neighbor_paths_t old_neighbor_paths;
+    if (add_undo) {
+        old_flags = tile_get_flags(pos->tile);
+        old_neighbor_paths = tile_get_neighbor_paths(pos->tile);
+    }
 
     pos->tile->hidden = !pos->tile->hidden;
 
@@ -172,26 +176,34 @@ void tile_pos_toggle_hidden(tile_pos_t *pos)
             hex_opposite_direction(dir);
         tile_pos_t *neighbor = pos->neighbors[dir];
 
-        if (pos->tile->hidden) {
-            pos->tile->saved_path[dir] =  pos->tile->path[dir];
-            pos->tile->path[dir] = PATH_TYPE_NONE;;
-            neighbor->tile->path[opp_dir] = PATH_TYPE_NONE;
-        } else {
-            pos->tile->path[dir] =  pos->tile->saved_path[dir];
-            pos->tile->saved_path[dir] = PATH_TYPE_NONE;;
-            neighbor->tile->path[opp_dir] = pos->tile->path[dir];;
+        if (neighbor) {
+            if (pos->tile->hidden) {
+                //printf("hide neighbor path at (%d, %d) dir %d to (%d, %d)\n", pos->position.q, pos->position.r, dir, neighbor->position.q, neighbor->position.r);
+                pos->tile->saved_path[dir] =  pos->tile->path[dir];
+                pos->tile->path[dir] = PATH_TYPE_NONE;;
+                neighbor->tile->path[opp_dir] = PATH_TYPE_NONE;
+            } else {
+                pos->tile->path[dir] =  pos->tile->saved_path[dir];
+                pos->tile->saved_path[dir] = PATH_TYPE_NONE;;
+                neighbor->tile->path[opp_dir] = pos->tile->path[dir];;
+                //printf("show neighbor path at (%d, %d) dir %d to (%d, %d)\n", pos->position.q, pos->position.r, dir, neighbor->position.q, neighbor->position.r);
+            }
+            //} else {
+            //printf("no neighbor at (%d, %d) dir %d\n", pos->position.q, pos->position.r, dir);
         }
     }
 
     tile_update_path_count(pos->tile);
 
-    tile_flags_t new_flags = tile_get_flags(pos->tile);
-    tile_neighbor_paths_t new_neighbor_paths = tile_get_neighbor_paths(pos->tile);
-    level_undo_add_set_flags_event_with_neighbor_paths(current_level,
-                                                       include_prev_swap,
-                                                       pos->tile,
-                                                       old_flags, old_neighbor_paths,
-                                                       new_flags, new_neighbor_paths);
+    if (add_undo) {
+        tile_flags_t new_flags = tile_get_flags(pos->tile);
+        tile_neighbor_paths_t new_neighbor_paths = tile_get_neighbor_paths(pos->tile);
+        level_undo_add_set_flags_event_with_neighbor_paths(current_level,
+                                                           include_prev_swap,
+                                                           pos->tile,
+                                                           old_flags, old_neighbor_paths,
+                                                           new_flags, new_neighbor_paths);
+    }
 }
 
 void tile_pos_set_path_section(tile_pos_t *pos, hex_direction_t section, path_type_t type)
@@ -253,7 +265,7 @@ static void tile_pos_modify_center(tile_pos_t *pos)
     assert_not_null(pos);
 
     if (is_any_shift_down()) {
-        tile_pos_toggle_hidden(pos);
+        tile_pos_toggle_hidden(pos, true);
     } else {
         tile_pos_toggle_fixed(pos);
     }
@@ -264,7 +276,7 @@ void tile_pos_modify_hovered_feature(tile_pos_t *pos)
     assert_not_null(pos);
 
     if (pos->tile->hidden) {
-        tile_pos_toggle_hidden(pos);
+        tile_pos_toggle_hidden(pos, true);
     } else {
         if (pos->hover_center) {
             tile_pos_modify_center(pos);
@@ -279,7 +291,7 @@ void tile_pos_set_hovered_feature(tile_pos_t *pos, path_type_t type)
     assert_not_null(pos);
 
     if (pos->tile->hidden) {
-        tile_pos_toggle_hidden(pos);
+        tile_pos_toggle_hidden(pos, true);
     } else {
         if (pos->hover_center) {
             tile_pos_modify_center(pos);

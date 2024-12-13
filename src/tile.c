@@ -84,6 +84,24 @@ void print_tile(tile_t *tile)
     }
 }
 
+void print_tile_with_solved_neighbors(tile_t *tile)
+{
+    print_tile(tile);
+    each_direction {
+        printf("  neighbor[%d]: ", dir);
+        print_tile_pos(tile->solved_pos->neighbors[dir]);
+    }
+}
+
+void print_tile_with_unsolved_neighbors(tile_t *tile)
+{
+    print_tile(tile);
+    each_direction {
+        printf("  neighbor[%d]: ", dir);
+        print_tile_pos(tile->unsolved_pos->neighbors[dir]);
+    }
+}
+
 tile_t *init_tile(tile_t *tile)
 {
     assert_not_null(tile);

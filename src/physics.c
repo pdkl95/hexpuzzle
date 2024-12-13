@@ -274,7 +274,7 @@ void physics_build_tiles(physics_t *physics)
             verts[dir] = cpv(corner.x, corner.y);
         }
         pt->radius = pos->size;
-        pt->mass = 10; //pos->size;
+        pt->mass = 2.0f; //pos->size;
         pt->moment = cpMomentForPoly(pt->mass, 6, verts, cpvzero, 0.0f);
 
         pt->body = cpSpaceAddBody(physics->space, cpBodyNew(pt->mass, pt->moment));
@@ -294,7 +294,7 @@ void physics_build_tiles(physics_t *physics)
             cpBodySetVelocityUpdateFunc(pt->body, spin_velocity_update_func);
 
             cpShapeSetElasticity(pt->shape, 0.4f);
-            cpShapeSetFriction(pt->shape, 0.4f);
+            cpShapeSetFriction(pt->shape, 0.7f);
         /* } */
 
         tile->visited = false;

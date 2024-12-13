@@ -89,6 +89,9 @@ char *tile_path_string(tile_t *tile);
 char *tile_our_pos_string(struct tile_pos *pos);
 
 void print_tile(tile_t *tile);
+void print_tile_with_solved_neighbors(tile_t *tile);
+void print_tile_with_unsolved_neighbors(tile_t *tile);
+
 tile_t *init_tile(tile_t *tile);
 tile_t *create_tile(void);
 void destroy_tile(tile_t *tile);

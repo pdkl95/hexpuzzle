@@ -124,6 +124,7 @@ void tile_pos_modify_hovered_feature(tile_pos_t *pos);
 void tile_pos_set_hovered_feature(tile_pos_t *pos, path_type_t type);
 
 void tile_pos_clear(tile_pos_t *pos, struct level *level);
+void tile_pos_toggle_hidden(tile_pos_t *pos, bool add_undo);
 
 static inline bool tile_pos_dragable(tile_pos_t *pos)
 {

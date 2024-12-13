@@ -374,3 +374,25 @@ void hex_axial_foreach_in_spiral(hex_axial_t center, int radius, hex_axial_cb_t 
         hex_axial_foreach_in_ring(center, k, callback, data);
     }
 }
+
+hex_axial_t hex_axial_reflect_horiz(hex_axial_t axial, hex_axial_t reflect_point)
+{
+    hex_cube_t p = hex_axial_to_cube(hex_axial_subtract(axial, reflect_point));
+    hex_cube_t refl = {
+        .q = p.r,
+        .r = p.q,
+        .s = p.s
+    };
+    return hex_axial_add(hex_cube_to_axial(refl), reflect_point);
+}
+
+hex_axial_t hex_axial_rotate(hex_axial_t axial, hex_axial_t rotate_point)
+{
+    hex_cube_t p = hex_axial_to_cube(hex_axial_subtract(axial, rotate_point));
+    hex_cube_t rot = {
+        .q = -p.q,
+        .r = -p.r,
+        .s = -p.s
+    };
+    return hex_axial_add(hex_cube_to_axial(rot), rotate_point);
+}
