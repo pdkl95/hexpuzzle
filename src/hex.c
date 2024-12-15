@@ -379,9 +379,9 @@ hex_axial_t hex_axial_reflect_horiz(hex_axial_t axial, hex_axial_t reflect_point
 {
     hex_cube_t p = hex_axial_to_cube(hex_axial_subtract(axial, reflect_point));
     hex_cube_t refl = {
-        .q = p.r,
-        .r = p.q,
-        .s = p.s
+        .q = -p.q,
+        .r = -p.s,
+        .s = -p.r
     };
     return hex_axial_add(hex_cube_to_axial(refl), reflect_point);
 }
