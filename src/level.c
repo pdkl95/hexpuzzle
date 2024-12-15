@@ -1358,8 +1358,16 @@ void level_set_hover(level_t *level, IVector2 mouse_position)
         level->hover->hover = true;
 
         if (level->drag_target && (level->drag_target != level->hover)) {
-            level->hover->swap_target = level->drag_target;
-            level->drag_target->swap_target = level->hover;
+            if ((level->drag_target->tile->fixed) ||
+                (level->drag_target->tile->hidden) ||
+                (level->hover->tile->fixed) ||
+                (level->hover->tile->hidden)) {
+                level->hover->swap_target = NULL;
+                level->drag_target->swap_target = NULL;
+            } else {
+                level->hover->swap_target = level->drag_target;
+                level->drag_target->swap_target = level->hover;
+            }
         } else {
             level->hover->swap_target = NULL;
         }
