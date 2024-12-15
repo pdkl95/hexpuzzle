@@ -1737,6 +1737,7 @@ void level_win(level_t *level)
         set_game_mode(GAME_MODE_WIN_LEVEL);
     }
 
+    win_anim_select_random_mode(level->win_anim);
     win_anim_start(level->win_anim);
 
     if (level->radius > options->max_win_radius) {

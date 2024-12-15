@@ -39,8 +39,11 @@ const char *win_anim_mode_str(win_anim_mode_t mode)
         return "POPS";
 
 #ifdef USE_PHYSICS
-    case WIN_ANIM_MODE_PHYSICS:
-        return "PHYSICS";
+    case WIN_ANIM_MODE_PHYSICS_FALL:
+        return "PHYSICS_FALL";
+
+    case WIN_ANIM_MODE_PHYSICS_SWIRL:
+        return "PHYSICS_SWIRL";
 #endif
 
     default:
@@ -264,7 +267,9 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
         break;
 
 #ifdef USE_PHYSICS
-    case WIN_ANIM_MODE_PHYSICS:
+    case WIN_ANIM_MODE_PHYSICS_FALL:
+        /* fall through */
+    case WIN_ANIM_MODE_PHYSICS_SWIRL:
         win_anim_common_update_physics(win_anim);
         break;
 #endif
@@ -289,12 +294,17 @@ static void win_anim_osc_ramp_in_update(struct anim_fsm *anim_fsm, void *data)
     win_anim_common_update(anim_fsm, data);
 
     if (anim_fsm->state_progress == 0.0f) {
+        switch (win_anim->mode) {
 #ifdef USE_PHYSICS
-        if (win_anim->mode == WIN_ANIM_MODE_PHYSICS) {
+        case WIN_ANIM_MODE_PHYSICS_FALL:
+            /* fall through */
+        case WIN_ANIM_MODE_PHYSICS_SWIRL:
             assert(win_anim->level->finished);
             physics_start(win_anim->level->physics);
-        }
 #endif
+        default:
+            break;
+        }
     }
 }
 
@@ -325,15 +335,8 @@ anim_fsm_state_t states[] = {
 
 void init_win_anim(win_anim_t *win_anim)
 {
-#ifdef USE_PHYSICS
-# if 1
-    win_anim->mode = WIN_ANIM_MODE_PHYSICS;
-# else
-    win_anim->mode = WIN_ANIM_MODE_POPS;
-# endif
-#else
-    win_anim->mode = WIN_ANIM_MODE_POPS;
-#endif
+    win_anim_select_random_mode(win_anim);
+
     win_anim->running = false;
 
     win_anim->fade[0] = 0.0;
@@ -346,6 +349,11 @@ void init_win_anim(win_anim_t *win_anim)
         physics_reset(win_anim->level->physics);
     }
 #endif
+}
+
+void win_anim_select_random_mode(win_anim_t *win_anim)
+{
+    win_anim->mode = global_rng_get(WIN_ANIM_MODE_COUNT);
 }
 
 win_anim_t *create_win_anim(struct level *level)
@@ -376,11 +384,17 @@ void win_anim_update(win_anim_t *win_anim)
 {
     assert_not_null(win_anim);
 
+    switch (win_anim->mode) {
 #ifdef USE_PHYSICS
-    if (win_anim->mode == WIN_ANIM_MODE_PHYSICS) {
+    case WIN_ANIM_MODE_PHYSICS_FALL:
+        /* fall through */
+    case WIN_ANIM_MODE_PHYSICS_SWIRL:
         physics_update(win_anim->level->physics);
-    }
+        break;
 #endif
+    default:
+        break;
+    }
 
     anim_fsm_update(&win_anim->anim_fsm);
 }
@@ -409,14 +423,23 @@ void win_anim_start(win_anim_t *win_anim)
         win_anim->running = true;
         win_anim->start_time = GetTime();
 
-#ifdef USE_PHYSICS
         level_t *level = win_anim->level;
-        if (level->physics) {
-            if (level->physics->tiles_ready) {
-                physics_start(level->physics);
+
+        switch (win_anim->mode) {
+#ifdef USE_PHYSICS
+        case WIN_ANIM_MODE_PHYSICS_FALL:
+            /* fall through */
+        case WIN_ANIM_MODE_PHYSICS_SWIRL:
+            if (level->physics) {
+                if (level->physics->tiles_ready) {
+                    physics_start(level->physics);
+                }
             }
-        }
+            break;
 #endif
+        default:
+            break;
+        }
     }
 }
 
@@ -425,11 +448,20 @@ void win_anim_stop(win_anim_t *win_anim)
     assert_not_null(win_anim);
 
     if (win_anim->running) {
+        switch (win_anim->mode) {
 #ifdef USE_PHYSICS
-        if (win_anim->mode == WIN_ANIM_MODE_PHYSICS) {
-            physics_stop(win_anim->level->physics);
-        }
+        case WIN_ANIM_MODE_PHYSICS_FALL:
+            /* fall through */
+        case WIN_ANIM_MODE_PHYSICS_SWIRL:
+            if (win_anim->level->physics) {
+                physics_stop(win_anim->level->physics);
+            }
+            break;
 #endif
+        default:
+            break;
+        }
+
         win_anim->running = false;
         anim_fsm_stop(&win_anim->anim_fsm);
     }

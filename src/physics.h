@@ -83,6 +83,9 @@ typedef struct physics physics_t;
 physics_t *create_physics(struct level *level);
 void destroy_physics(physics_t *physics);
 
+void physics_init_fall(physics_t *physics);
+void physics_init_swirl(physics_t *physics);
+
 void physics_build_tiles(physics_t *physics);
 
 void physics_start(physics_t *physics);

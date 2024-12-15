@@ -639,7 +639,6 @@ static void mark_tile_hidden(tile_t *tile)
         hex_direction_t opposite_dir = hex_opposite_direction(dir);
         tile_pos_t *neighbor = pos->neighbors[dir];
         if (!neighbor) {
-            printf("no neighbor\n");
             continue;
         }
 

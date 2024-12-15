@@ -46,9 +46,6 @@ physics_t *create_physics(struct level *level)
 
     cpSpaceSetIterations(physics->space, 20);
 
-    /* cpVect gravity = cpv(0.0, gravity_strength); */
-    /* cpSpaceSetGravity(physics->space, gravity); */
-
     Vector2 size = window_center;
     size = Vector2Scale(size, 1.0);
     cpVect tl = cpv(-size.x,-size.x);
@@ -246,6 +243,22 @@ void physics_build_tiles(physics_t *physics)
     }
 
     level_t *level = physics->level;
+    win_anim_mode_t mode = level->win_anim->mode;
+
+    switch (mode) {
+    case WIN_ANIM_MODE_PHYSICS_FALL:
+        cpVect gravity = cpv(0.0, gravity_strength);
+        cpSpaceSetGravity(physics->space, gravity);
+        break;
+
+    case WIN_ANIM_MODE_PHYSICS_SWIRL:
+        cpSpaceSetGravity(physics->space, cpvzero);
+        break;
+
+    default:
+        assert(false && "invalid win_anim_mode_t");
+        __builtin_unreachable();
+    }
 
     //tile_pos_t *center = level_get_center_tile_pos(level);
 
@@ -284,18 +297,27 @@ void physics_build_tiles(physics_t *physics)
 
         cpBodySetPosition(pt->body, position);
 
-        /* if (pos == center) { */
-        /*     cpShapeSetElasticity(pt->shape, 0.0f); */
-        /*     cpShapeSetFriction(pt->shape, 1.0f); */
-        /*     //cpBodySetType(pt->body, CP_BODY_TYPE_STATIC); */
-        /* } else { */
+        switch (mode) {
+        case WIN_ANIM_MODE_PHYSICS_FALL:
+            cpBodySetVelocity(pt->body, cpvzero);
+
+            cpShapeSetElasticity(pt->shape, 0.4f);
+            cpShapeSetFriction(pt->shape, 0.7f);
+            break;
+
+        case WIN_ANIM_MODE_PHYSICS_SWIRL:
             cpBodySetVelocity(pt->body, tile_spin_velocity(pt));
 
             cpBodySetVelocityUpdateFunc(pt->body, spin_velocity_update_func);
 
             cpShapeSetElasticity(pt->shape, 0.4f);
             cpShapeSetFriction(pt->shape, 0.7f);
-        /* } */
+            break;
+
+        default:
+            assert(false && "invalid win_anim_mode_t");
+            __builtin_unreachable();
+        }
 
         tile->visited = false;
     }
@@ -313,7 +335,7 @@ void physics_reset(physics_t *physics)
     level_t *level = physics->level;
 
     for (int i=0; i<physics->num_tiles; i++) {
-        tile_t *tile = level->enabled_tiles[i];\
+        tile_t *tile = level->enabled_tiles[i];
         assert_not_null(tile);
         tile_pos_t *pos = tile->unsolved_pos;
         assert(tile->enabled);
