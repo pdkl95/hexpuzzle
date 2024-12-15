@@ -2970,9 +2970,13 @@ fi
 
 if test "x$enable_debug" = "xyes"; then :
 
-     CFLAGS="$CFLAGS -ggdb3"
-     LDFLAGS="$LDFLAGS -ggdb3"
-     OPTMODE="-O0"
+    CFLAGS="$CFLAGS -ggdb3"
+    LDFLAGS="$LDFLAGS -ggdb3"
+    OPTMODE="-O0"
+
+else
+
+    enable_debug="no"
 
 fi
 
@@ -3011,6 +3015,10 @@ else
 
 fi
 
+else
+
+    enable_web="no"
+
 fi
 
  if test "x$enable_web" = "xyes"; then
@@ -3036,6 +3044,16 @@ if test "${enable_chipmunk+set}" = set; then :
   enableval=$enable_chipmunk;
 fi
 
+
+if test "x$enable_chipmunk" != "xno"; then :
+
+    enable_chipmunk="yes"
+
+else
+
+    enable_chipmunk="no"
+
+fi
 
  if test "x$enable_chipmunk" != "xno"; then
   USE_CHIPMUNK_TRUE=
@@ -3090,6 +3108,15 @@ if test "${enable_system_raylib+set}" = set; then :
   enableval=$enable_system_raylib;
 fi
 
+
+if test "x$enable_system_raylib" = "xyes"; then :
+
+
+else
+
+    enable_system_raylib="no"
+
+fi
 
  if test "x$enable_system_raylib" = "xyes"; then
   USE_SYSTEM_RAYLIB_TRUE=
@@ -6414,6 +6441,41 @@ fi
 
 
 
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: " >&5
+$as_echo "$as_me: " >&6;}
+{ $as_echo "$as_me:${as_lineno-$LINENO}: ----------------------" >&5
+$as_echo "$as_me: ----------------------" >&6;}
+{ $as_echo "$as_me:${as_lineno-$LINENO}: " >&5
+$as_echo "$as_me: " >&6;}
+{ $as_echo "$as_me:${as_lineno-$LINENO}:         DEBUG = ${enable_debug}" >&5
+$as_echo "$as_me:         DEBUG = ${enable_debug}" >&6;}
+{ $as_echo "$as_me:${as_lineno-$LINENO}:           WEB = ${enable_web}" >&5
+$as_echo "$as_me:           WEB = ${enable_web}" >&6;}
+{ $as_echo "$as_me:${as_lineno-$LINENO}:      CHIPMUNK = ${enable_chipmunk}" >&5
+$as_echo "$as_me:      CHIPMUNK = ${enable_chipmunk}" >&6;}
+{ $as_echo "$as_me:${as_lineno-$LINENO}:       PHYSICS = ${enable_physics}" >&5
+$as_echo "$as_me:       PHYSICS = ${enable_physics}" >&6;}
+{ $as_echo "$as_me:${as_lineno-$LINENO}: SYSTEM_RAYLIB = ${enable_system_raylib}" >&5
+$as_echo "$as_me: SYSTEM_RAYLIB = ${enable_system_raylib}" >&6;}
+{ $as_echo "$as_me:${as_lineno-$LINENO}: " >&5
+$as_echo "$as_me: " >&6;}
+{ $as_echo "$as_me:${as_lineno-$LINENO}:       AR = ${AR}" >&5
+$as_echo "$as_me:       AR = ${AR}" >&6;}
+{ $as_echo "$as_me:${as_lineno-$LINENO}:      CPP = ${CPP}" >&5
+$as_echo "$as_me:      CPP = ${CPP}" >&6;}
+{ $as_echo "$as_me:${as_lineno-$LINENO}:       CC = ${CC}" >&5
+$as_echo "$as_me:       CC = ${CC}" >&6;}
+{ $as_echo "$as_me:${as_lineno-$LINENO}:   CFLAGS = ${APP_CFLAGS} ${ALL_PKG_CFLAGS}" >&5
+$as_echo "$as_me:   CFLAGS = ${APP_CFLAGS} ${ALL_PKG_CFLAGS}" >&6;}
+{ $as_echo "$as_me:${as_lineno-$LINENO}:     LIBS = ${APP_LIBS} ${ALL_PKG_LIBS}" >&5
+$as_echo "$as_me:     LIBS = ${APP_LIBS} ${ALL_PKG_LIBS}" >&6;}
+{ $as_echo "$as_me:${as_lineno-$LINENO}: " >&5
+$as_echo "$as_me: " >&6;}
+{ $as_echo "$as_me:${as_lineno-$LINENO}: ----------------------" >&5
+$as_echo "$as_me: ----------------------" >&6;}
+{ $as_echo "$as_me:${as_lineno-$LINENO}: " >&5
+$as_echo "$as_me: " >&6;}
 
 ac_config_files="$ac_config_files external/chipmunk/Makefile Makefile"
 

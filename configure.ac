@@ -50,9 +50,11 @@ AC_ARG_ENABLE([debug],
 
 
 AS_IF([test "x$enable_debug" = "xyes"], [
-     CFLAGS="$CFLAGS -ggdb3"
-     LDFLAGS="$LDFLAGS -ggdb3"
-     OPTMODE="-O0"
+    CFLAGS="$CFLAGS -ggdb3"
+    LDFLAGS="$LDFLAGS -ggdb3"
+    OPTMODE="-O0"
+],[
+    enable_debug="no"
 ])
 
 AM_CONDITIONAL([BUILD_DEBUG], [test "x$enable_debug" = "xyes"])
@@ -72,6 +74,8 @@ AS_IF([test "x$enable_web" = "xyes"], [
     ],[
         OPTMODE="-Os"
     ])
+],[
+    enable_web="no"
 ])
 
 AM_CONDITIONAL([BUILD_WEB], [test "x$enable_web" = "xyes"])
@@ -86,6 +90,12 @@ dnl     the provided version in external/chipmunk
 
 AC_ARG_ENABLE([chipmunk],
     AS_HELP_STRING([--disable-chipmunk], [Disable the Chipmunk physics engine)]))
+
+AS_IF([test "x$enable_chipmunk" != "xno"], [
+    enable_chipmunk="yes"
+],[
+    enable_chipmunk="no"
+])
 
 AM_CONDITIONAL([USE_CHIPMUNK], [test "x$enable_chipmunk" != "xno"])
 
@@ -113,6 +123,11 @@ dnl     the provided version in external/raylib
 
 AC_ARG_ENABLE([system-raylib],
     AS_HELP_STRING([--enable-system-raylib], [Use a locally installed version of raylib instead of the version iincluded with project_name)]))
+
+AS_IF([test "x$enable_system_raylib" = "xyes"], [
+],[
+    enable_system_raylib="no"
+])
 
 AM_CONDITIONAL([USE_SYSTEM_RAYLIB], [test "x$enable_system_raylib" = "xyes"])
 
@@ -245,6 +260,24 @@ AC_SUBST(APP_CFLAGS)
 AC_SUBST(APP_LIBS)
 AC_SUBST(ALL_PKG_CFLAGS)
 AC_SUBST(ALL_PKG_LIBS)
+
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([----------------------])
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([        DEBUG = ${enable_debug}])
+AC_MSG_NOTICE([          WEB = ${enable_web}])
+AC_MSG_NOTICE([     CHIPMUNK = ${enable_chipmunk}])
+AC_MSG_NOTICE([      PHYSICS = ${enable_physics}])
+AC_MSG_NOTICE([SYSTEM_RAYLIB = ${enable_system_raylib}])
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([      AR = ${AR}])
+AC_MSG_NOTICE([     CPP = ${CPP}])
+AC_MSG_NOTICE([      CC = ${CC}])
+AC_MSG_NOTICE([  CFLAGS = ${APP_CFLAGS} ${ALL_PKG_CFLAGS}])
+AC_MSG_NOTICE([    LIBS = ${APP_LIBS} ${ALL_PKG_LIBS}])
+AC_MSG_NOTICE([])
+AC_MSG_NOTICE([----------------------])
+AC_MSG_NOTICE([])
 
 AC_CONFIG_FILES([
         external/chipmunk/Makefile
