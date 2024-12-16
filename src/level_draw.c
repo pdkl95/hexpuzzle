@@ -259,21 +259,33 @@ void _level_preview(level_t *level, Rectangle rect, bool show_solved)
              1.0f);
 
     used_tiles_t save_currently_used_tiles = level->currently_used_tiles;
-    float save_fade_value = level->fade.value;
-    float save_fade_value_eased = level->fade.value_eased;
-    float save_fade_rotate_speed = level->fade.rotate_speed;
+    float save_fade_value                  = level->fade.value;
+    float save_fade_value_eased            = level->fade.value_eased;
+    float save_fade_rotate_speed           = level->fade.rotate_speed;
+    float save_fade_rotate_level           = level->fade.rotate_level;
+    float save_extra_rotate_level          = level->extra_rotate_level;
+    float save_extra_rotate_level_speed    = level->extra_rotate_level_speed;
+    float save_extra_rotate_level_velocity = level->extra_rotate_level_velocity;
 
     level->currently_used_tiles = show_solved ? USED_TILES_SOLVED : USED_TILES_UNSOLVED;
-    level->fade.value = 1.0;
-    level->fade.value_eased = 1.0;
-    level->fade.rotate_speed = 0.0;
+    level->fade.value                  = 1.0f;
+    level->fade.value_eased            = 1.0f;
+    level->fade.rotate_speed           = 0.0f;
+    level->fade.rotate_level           = 0.0f;
+    level->extra_rotate_level          = 0.0f;
+    level->extra_rotate_level_speed    = 0.0f;
+    level->extra_rotate_level_velocity = 0.0f;
 
     level_draw(level, false);
 
-    level->currently_used_tiles = save_currently_used_tiles;
-    level->fade.value = save_fade_value;
-    level->fade.value_eased = save_fade_value_eased;
-    level->fade.rotate_speed = save_fade_rotate_speed;
+    level->extra_rotate_level          = save_extra_rotate_level;
+    level->extra_rotate_level_speed    = save_extra_rotate_level_speed;
+    level->extra_rotate_level_velocity = save_extra_rotate_level_velocity;
+    level->currently_used_tiles        = save_currently_used_tiles;
+    level->fade.value                  = save_fade_value;
+    level->fade.value_eased            = save_fade_value_eased;
+    level->fade.rotate_speed           = save_fade_rotate_speed;
+    level->fade.rotate_level           = save_fade_rotate_level;
 
     rlPopMatrix();
 }

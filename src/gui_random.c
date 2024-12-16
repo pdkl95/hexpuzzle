@@ -41,6 +41,7 @@ Rectangle gui_random_radius_label_rect;
 Rectangle gui_random_radius_left_button_rect;
 Rectangle gui_random_radius_display_rect;
 Rectangle gui_random_radius_right_button_rect;
+Rectangle gui_random_save_button_rect;
 Rectangle gui_random_color_label_rect;
 Rectangle gui_random_gen_style_label_rect;
 Rectangle gui_random_gen_style_rect;
@@ -72,6 +73,10 @@ char gui_random_seed_text[] = "RNG Seed";
 char gui_random_rng_seed_text[] = "Randomize";
 char gui_random_enter_seed_text_str[] = "Enter";
 char *gui_random_enter_seed_text = NULL;
+
+char gui_random_save_button_text_str[] = "Save";
+#define GUI_RANDOM_SAVE_BUTTON_TEXT_LENGTH (6 + sizeof(gui_random_save_button_text_str))
+char gui_random_save_button_text[GUI_RANDOM_SAVE_BUTTON_TEXT_LENGTH];
 
 const char *gui_random_gen_styles[] = {
     "Density / Scatter",
@@ -994,6 +999,10 @@ void init_gui_random(void)
 
     join_str = TextJoin(gui_random_fixed_hidden_assist, NUM_FIXED_HIDDEN_ASSIST, ";");
     gui_random_fixed_hidden_assist_text = strdup(join_str);
+
+    memcpy(gui_random_save_button_text,
+           GuiIconText(ICON_FILE_SAVE_CLASSIC, gui_random_save_button_text_str),
+           GUI_RANDOM_SAVE_BUTTON_TEXT_LENGTH);
 }
 
 void cleanup_gui_random(void)
@@ -1063,6 +1072,13 @@ void resize_gui_random(void)
     radius_display_text_shadow_location = radius_display_text_location;
     radius_display_text_shadow_location.x += 1.0f;
     radius_display_text_shadow_location.y += 1.0f;
+
+    Vector2 gui_random_save_button_text_size = measure_gui_text(gui_random_save_button_text);
+    fflush(stdout);
+    gui_random_save_button_rect.x      = gui_random_area_rect.x + gui_random_area_rect.width - gui_random_save_button_text_size.x - PANEL_INNER_MARGIN;
+    gui_random_save_button_rect.y      = gui_random_radius_right_button_rect.y;
+    gui_random_save_button_rect.width  = gui_random_save_button_text_size.x;
+    gui_random_save_button_rect.height = TOOL_BUTTON_HEIGHT;
 
     gui_random_area_rect.y      += gui_random_radius_label_rect.height + RAYGUI_ICON_SIZE;
     gui_random_area_rect.height -= gui_random_radius_label_rect.height + RAYGUI_ICON_SIZE;
@@ -1404,6 +1420,25 @@ void draw_gui_random(void)
 
     draw_tile_radius_gui();
 
+#if defined(PLATFORM_DESKTOP)
+    bool save_ok = false;
+    if (current_level && (current_level->seed > 0)) {
+        save_ok = true;
+    }
+
+    if (!save_ok) {
+        //     GuiDisable();
+    }
+
+    if (GuiButton(gui_random_save_button_rect, gui_random_save_button_text)) {
+        save_gui_random_level();
+    }
+
+    if (!save_ok) {
+        GuiEnable();
+    }
+#endif
+
     draw_gui_random_colors();
 
     bool colors_ok = false;
@@ -1501,3 +1536,14 @@ void play_gui_random_level_preview(void)
     promote_preview_to_level();
     play_gui_random_level();
 }
+
+#if defined(PLATFORM_DESKTOP)
+void save_gui_random_level(void)
+{
+    if (gui_random_level) {
+        level_save_to_local_levels(gui_random_level,
+                                   GUI_RAMDOM_SAVE_PREFIX,
+                                   gui_random_level->name);
+    }
+}
+#endif

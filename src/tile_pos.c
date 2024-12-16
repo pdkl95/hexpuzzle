@@ -386,3 +386,18 @@ void tile_pos_set_size(tile_pos_t *pos, float tile_pos_size)
 
     tile_pos_rebuild(pos);
 }
+
+void tile_pos_reset_win_anim(tile_pos_t *pos)
+{
+    pos->physics_position = VEC2_ZERO;
+    pos->physics_velocity = VEC2_ZERO;
+    pos->physics_rotation = 0.0f;
+    pos->extra_rotate     = 0.0f;
+    pos->extra_translate  = VEC2_ZERO;
+    pos->extra_magnitude  = 0.0f;
+    pos->pop_out_phase    = 0.0f;
+    pos->pop_in_phase     = 0.0f;
+    pos->pop_magnitude    = 0.0f;
+    pos->pop_translate    = VEC2_ZERO;
+    pos->prev_ring_phase  = 0.0f;
+}

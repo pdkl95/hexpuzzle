@@ -131,5 +131,7 @@ static inline bool tile_pos_dragable(tile_pos_t *pos)
     return pos && pos->tile && tile_dragable(pos->tile);
 }
 
+void tile_pos_reset_win_anim(tile_pos_t *pos);
+
 #endif /*TILE_POS_H*/
 

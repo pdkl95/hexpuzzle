@@ -152,6 +152,7 @@ AX_CHECK_STDC
 AM_PROG_AR
 AC_PROG_RANLIB
 
+AC_PATH_PROG(XXD, xxd)
 
 dnl ===============================================================
 dnl ===  Export the project configuration into config.h macros  ===
@@ -179,7 +180,7 @@ dnl ====================================
 dnl ===  General Requirement Checks  ===
 dnl ====================================
 
-AC_DEFINE([_GNU_SOURCE], [], [We want GNU extensions])
+dnl AC_DEFINE([_GNU_SOURCE], [], [We want GNU extensions])
 
 AC_DEFUN([ERR_NOT_FOUND],
 	[AC_MSG_ERROR([$1 not found], [1])])

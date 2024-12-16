@@ -20,6 +20,7 @@
  ****************************************************************************/
 
 #include "common.h"
+#include "level.h"
 #include "game_mode.h"
 
 //#define DEBUG_GAME_MODE
@@ -74,6 +75,9 @@ static void on_enter_win_level_mode(void)
 static void on_exit_win_level_mode(void)
 {
     disable_postprocessing();
+    if (current_level) {
+        level_reset_win_anim(current_level);
+    }
 }
 
 static void _set_game_mode(game_mode_t new_mode)

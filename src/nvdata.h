@@ -29,5 +29,7 @@ void save_nvdata(void);
 
 void save_current_level_with_nvdata(void);
 
+extern char *nvdata_default_browse_path;
+
 #endif /*NVDATA_H*/
 

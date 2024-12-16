@@ -34,6 +34,7 @@
 #include "level.h"
 #include "level_undo.h"
 #include "collection.h"
+#include "nvdata.h"
 #include "gui_random.h"
 #include "win_anim.h"
 #include "solver.h"
@@ -931,6 +932,15 @@ void level_save_to_file(level_t *level, const char *dirpath)
     }
 
     level->changed = false;
+}
+
+void level_save_to_local_levels(level_t *level, const char *prefix, const char *name)
+{
+    if (!level->filename) {
+        safe_asprintf(&level->filename, "%s-%s.%s", prefix, name, LEVEL_FILENAME_EXT);
+    }
+
+    level_save_to_file(level, nvdata_default_browse_path);
 }
 
 void level_save_to_file_if_changed(level_t *level, const char *dirpath)
@@ -1937,4 +1947,19 @@ void level_shuffle_tiles(level_t *level)
 
     memcpy(level->enabled_positions, backup_enabled_positions, sizeof(backup_enabled_positions));
     level->currently_used_tiles = save_currently_used_tiles;
+}
+
+void level_reset_win_anim(level_t *level)
+{
+    level->extra_rotate_level          = 0.0f;
+    level->extra_rotate_level_speed    = 0.0f;
+    level->extra_rotate_level_velocity = 0.0f;
+
+    for (int i = 0; i < LEVEL_MAXTILES; i++) {
+        tile_pos_t *solved_pos = &level->solved_positions[i];
+        tile_pos_t *unsolved_pos = &level->unsolved_positions[i];
+
+        tile_pos_reset_win_anim(solved_pos);
+        tile_pos_reset_win_anim(unsolved_pos);
+    }
 }

@@ -33,6 +33,7 @@ struct level *generate_random_title_level(void);
 
 void regen_level_preview(void);
 
+void save_gui_random_level(void);
 void play_gui_random_level(void);
 void play_gui_random_level_preview(void);
 bool parse_random_seed_str(char *seedstr);

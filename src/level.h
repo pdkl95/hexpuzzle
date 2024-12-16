@@ -212,6 +212,7 @@ void level_set_file_path(level_t *level, const char *path);
 void level_save_to_filename(level_t *level, const char *filepath);
 void level_save_to_file(level_t *level, const char *dirpath);
 void level_save_to_file_if_changed(level_t *level, const char *dirpath);
+void level_save_to_local_levels(level_t *level, const char *prefix, const char *name);
 void level_save(level_t *level);
 bool level_from_json(level_t *level, cJSON *json);
 cJSON *level_to_json(level_t *level);
@@ -248,6 +249,7 @@ void level_fade_in(level_t *level, level_fade_finished_cb_t callback, void *data
 void level_fade_out(level_t *level, level_fade_finished_cb_t callback, void *data);
 void level_update_tile_pops(level_t *level);
 void level_shuffle_tiles(level_t *level);
+void level_reset_win_anim(level_t *level);
 
 extern level_t *current_level;
 
