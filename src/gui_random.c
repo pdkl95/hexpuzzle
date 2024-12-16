@@ -128,6 +128,7 @@ int gui_random_color_count = PATH_TYPE_COUNT - 1;
 
 bool played_level = false;
 level_t *gui_random_level = NULL;
+level_t *gui_random_level_preview = NULL;
 uint64_t gui_random_seed;
 char *gui_random_seed_str = NULL;
 
@@ -153,8 +154,6 @@ static void rng_seed(void)
 {
     pcg32_srandom_r(&rng, gui_random_seed, (uint64_t)options->create_level_radius);
 }
-
-
 
 static int rng_get(int bound)
 {
@@ -720,13 +719,17 @@ struct level *generate_random_level(void)
             new_random_seed();
             warnmsg("Using random RNG seed %d instead!", gui_random_seed_str);
         }
+        SAFEFREE(options->rng_seed_str);
+        options->rng_seed_str = NULL;
     }
 
+    assert(gui_random_seed != 0);
     rng_seed();
 
     level_t *level = create_level(NULL);
     level_reset(level);
 
+    level->seed = gui_random_seed;
     snprintf(level->name, NAME_MAXLEN, "%s", TextFormat("%d", gui_random_seed));
     level_set_radius(level, options->create_level_radius);
     int n = level_get_enabled_tiles(level);
@@ -934,6 +937,28 @@ static void regen_level(void)
 
     gui_random_level = generate_random_level();
     played_level = false;
+}
+
+void regen_level_preview(void)
+{
+    assert_not_null(gui_random_level);
+
+    if (gui_random_level_preview) {
+        destroy_level(gui_random_level_preview);
+    }
+
+    gui_random_seed = gui_random_level->seed + 1;
+    gui_random_level_preview = generate_random_level();
+}
+
+void promote_preview_to_level(void)
+{
+    if (gui_random_level) {
+        destroy_level(gui_random_level);
+    }
+
+    gui_random_level = gui_random_level_preview;
+    gui_random_level_preview = NULL;
 }
 
 void init_gui_random_minimal(void)
@@ -1469,4 +1494,10 @@ void play_gui_random_level(void)
 
     level_play(gui_random_level);
     played_level = true;
+}
+
+void play_gui_random_level_preview(void)
+{
+    promote_preview_to_level();
+    play_gui_random_level();
 }

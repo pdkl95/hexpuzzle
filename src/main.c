@@ -884,6 +884,11 @@ Rectangle goto_next_level_no_preview_panel_rect;
 Rectangle goto_next_level_label_rect;
 Rectangle goto_next_level_button_rect;
 Rectangle goto_next_level_preview_rect;
+Rectangle goto_next_seed_panel_rect;
+Rectangle goto_next_seed_no_preview_panel_rect;
+Rectangle goto_next_seed_label_rect;
+Rectangle goto_next_seed_button_rect;
+Rectangle goto_next_seed_preview_rect;
 
 float tool_panel_content_height;
 
@@ -895,6 +900,7 @@ Vector2 edit_tool_label_location;
 Vector2 edit_tool_label_shadow_location;
 Vector2 edit_shuffle_label_location;
 Vector2 goto_next_level_label_location;
+Vector2 goto_next_seed_label_location;
 
 #define MAX_RIGHT_SIDE_BUTTONS 9
 Rectangle right_side_button_rect[MAX_RIGHT_SIDE_BUTTONS];
@@ -960,6 +966,7 @@ char edit_mode_label_text[] = "Mode";
 char edit_tool_label_text[] = "Edit Tool";
 char edit_shuffle_label_text[] = "Shuffle";
 char goto_next_level_label_text[] = "Next level?";
+char goto_next_seed_label_text[] = "Next RNG Seed?";
 
 char edit_radius_left_button_text[6];
 char edit_radius_right_button_text[6];
@@ -1194,6 +1201,66 @@ static void gui_setup_goto_next_level_panel(void)
     goto_next_level_no_preview_panel_rect.height -= height_delta;
 }
 
+static void gui_setup_goto_next_seed_panel(void)
+{
+    Vector2 goto_next_seed_label_text_size = measure_panel_text(goto_next_seed_label_text);
+
+    Vector2 panel_bottom_right = {
+        .x = window_size.x - WINDOW_MARGIN,
+        .y = window_size.x - WINDOW_MARGIN
+    };
+    Vector2 content_bottom_right = Vector2Subtract(panel_bottom_right, inner_margin_vec2);
+
+    float preview_size = GOTO_NEXT_SEED_PREVIEW_SIZE;
+    goto_next_seed_label_rect.width    = goto_next_seed_label_text_size.x;
+    goto_next_seed_label_rect.height   = goto_next_seed_label_text_size.y;
+    goto_next_seed_preview_rect.width  = preview_size;
+    goto_next_seed_preview_rect.height = preview_size;
+
+    Rectangle inner_rect;
+    inner_rect.width  = MAX(goto_next_seed_label_rect.width,
+                            goto_next_seed_preview_rect.width);
+    inner_rect.height =
+        goto_next_seed_preview_rect.height
+        + goto_next_seed_label_rect.height
+        + PANEL_INNER_MARGIN;
+
+    inner_rect.x = content_bottom_right.x - inner_rect.width;
+    inner_rect.y = content_bottom_right.y - inner_rect.height;
+
+    goto_next_seed_label_location.x = inner_rect.x;
+    goto_next_seed_label_location.y =
+        inner_rect.y
+        + inner_rect.height
+        - goto_next_seed_label_rect.height;
+
+    goto_next_seed_label_rect.x = goto_next_seed_label_location.x;
+    goto_next_seed_label_rect.y = goto_next_seed_label_location.y;
+
+    goto_next_seed_preview_rect.x = inner_rect.x;
+    goto_next_seed_preview_rect.y = inner_rect.y;
+
+    if (goto_next_seed_label_rect.width > goto_next_seed_preview_rect.width) {
+        float delta = goto_next_seed_label_rect.width - goto_next_seed_preview_rect.width;
+        goto_next_seed_preview_rect.x += delta * 0.5;
+    } else if (goto_next_seed_label_rect.width < goto_next_seed_preview_rect.width) {
+        float delta = goto_next_seed_preview_rect.width - goto_next_seed_label_rect.width;
+        delta *= 0.5;
+        goto_next_seed_label_rect.x     += delta;
+        goto_next_seed_label_location.x += delta;
+    }
+
+    goto_next_seed_panel_rect.width  = inner_rect.width  + (2 * PANEL_INNER_MARGIN);
+    goto_next_seed_panel_rect.height = inner_rect.height + (2 * PANEL_INNER_MARGIN);
+    goto_next_seed_panel_rect.x      = inner_rect.x - PANEL_INNER_MARGIN;
+    goto_next_seed_panel_rect.y      = inner_rect.y - PANEL_INNER_MARGIN;
+
+    goto_next_seed_no_preview_panel_rect = goto_next_seed_panel_rect;
+    float height_delta = goto_next_seed_preview_rect.height + PANEL_INNER_MARGIN;
+    goto_next_seed_no_preview_panel_rect.y += height_delta;
+    goto_next_seed_no_preview_panel_rect.height -= height_delta;
+}
+
 void gui_setup(void)
 {
     cancel_ok_with_icons[0] = '\0';
@@ -1212,6 +1279,7 @@ void gui_setup(void)
     gui_setup_edit_tool_panel();
     gui_setup_edit_shuffle_panel();
     gui_setup_goto_next_level_panel();
+    gui_setup_goto_next_seed_panel();
 
     int right_side_button_text_width = 0;
 
@@ -1605,10 +1673,63 @@ static void draw_goto_next_level_panel(void)
     }
 }
 
+static void draw_goto_next_seed_panel(void)
+{
+    assert_null(current_collection);
+    assert_not_null(current_level);
+
+    bool hover = CheckCollisionPointRec(mouse_positionf, goto_next_seed_panel_rect);
+
+    Color bg_color   = panel_bg_color;
+    Color edge_color = panel_edge_color;
+    Color text_color = panel_header_text_color;
+
+    if (options->show_level_previews) {
+        DrawRectangleRounded(goto_next_seed_panel_rect, PANEL_ROUNDNES, 0, bg_color);
+        DrawRectangleRoundedLines(goto_next_seed_panel_rect, PANEL_ROUNDNES, 0, 2.0, edge_color);
+    } else {
+        if (hover) {
+            bg_color   = panel_bg_hover_color;
+            edge_color = panel_edge_hover_color;
+            text_color = panel_header_text_hover_color;
+        }
+
+        DrawRectangleRounded(goto_next_seed_no_preview_panel_rect, PANEL_ROUNDNES, 0, bg_color);
+        DrawRectangleRoundedLines(goto_next_seed_no_preview_panel_rect, PANEL_ROUNDNES, 0, 2.0, edge_color);
+    }
+
+    Vector2 text_pos = goto_next_seed_label_location;
+    Vector2 text_shadow_pos = {
+        .x = text_pos.x + 1,
+        .y = text_pos.y + 1
+    };
+    draw_panel_text(goto_next_seed_label_text,
+                    text_shadow_pos,
+                    text_shadow_color);
+
+    draw_panel_text(goto_next_seed_label_text,
+                    text_pos,
+                    text_color);
+
+    if (options->show_level_previews) {
+        if (draw_level_preview(gui_random_level_preview, goto_next_seed_preview_rect)) {
+            play_gui_random_level_preview();
+        }
+    } else {
+        if (hover && mouse_left_click) {
+            play_gui_random_level_preview();
+        }
+    }
+}
+
 static void draw_win_panels(void)
 {
-    if (current_collection && current_level) {
-        draw_goto_next_level_panel();
+    if (current_level) {
+        if (current_collection) {
+            draw_goto_next_level_panel();
+        } else {
+            draw_goto_next_seed_panel();
+        }
     }
 }
 

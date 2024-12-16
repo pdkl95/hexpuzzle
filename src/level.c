@@ -34,6 +34,7 @@
 #include "level.h"
 #include "level_undo.h"
 #include "collection.h"
+#include "gui_random.h"
 #include "win_anim.h"
 #include "solver.h"
 #ifdef USE_PHYSICS
@@ -310,6 +311,8 @@ static level_t *init_level(level_t *level)
 
     level->undo = NULL;
     level->next = NULL;
+
+    level->seed = 0;
 
     level->enabled_tile_count = 0;
 
@@ -1742,6 +1745,10 @@ void level_win(level_t *level)
 
     if (level->radius > options->max_win_radius) {
         options->max_win_radius = level->radius;
+    }
+
+    if (level->seed) {
+        regen_level_preview();
     }
 }
 

@@ -66,6 +66,8 @@ struct level {
     char *id;
     bool have_id;
 
+    uint64_t seed;
+
     char name[NAME_MAXLEN];
     char name_backup[NAME_MAXLEN];
 
