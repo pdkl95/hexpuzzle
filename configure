@@ -3045,13 +3045,23 @@ if test "${enable_chipmunk+set}" = set; then :
 fi
 
 
-if test "x$enable_chipmunk" != "xno"; then :
+if test "x$enable_web" = "xyes"; then :
 
-    enable_chipmunk="yes"
+    enable_chipmunk="no"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Chipmunk is currently incompatible with web build - forcing --disable-chipmunk" >&5
+$as_echo "$as_me: WARNING: Chipmunk is currently incompatible with web build - forcing --disable-chipmunk" >&2;}
 
 else
 
-    enable_chipmunk="no"
+    if test "x$enable_chipmunk" != "xno"; then :
+
+        enable_chipmunk="yes"
+
+else
+
+        enable_chipmunk="no"
+
+fi
 
 fi
 
@@ -3081,6 +3091,8 @@ $as_echo "chipmunk" >&6; }
 else
 
     enable_physics="no"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: none" >&5
+$as_echo "none" >&6; }
     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: No physics engine present - disabling physics features" >&5
 $as_echo "$as_me: WARNING: No physics engine present - disabling physics features" >&2;}
 

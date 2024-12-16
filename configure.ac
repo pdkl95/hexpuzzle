@@ -91,10 +91,15 @@ dnl     the provided version in external/chipmunk
 AC_ARG_ENABLE([chipmunk],
     AS_HELP_STRING([--disable-chipmunk], [Disable the Chipmunk physics engine)]))
 
-AS_IF([test "x$enable_chipmunk" != "xno"], [
-    enable_chipmunk="yes"
-],[
+AS_IF([test "x$enable_web" = "xyes"], [
     enable_chipmunk="no"
+    AC_MSG_WARN([Chipmunk is currently incompatible with web build - forcing --disable-chipmunk])
+],[
+    AS_IF([test "x$enable_chipmunk" != "xno"], [
+        enable_chipmunk="yes"
+    ],[
+        enable_chipmunk="no"
+    ])
 ])
 
 AM_CONDITIONAL([USE_CHIPMUNK], [test "x$enable_chipmunk" != "xno"])
@@ -109,6 +114,7 @@ AS_IF([test "x$enable_chipmunk" != "xno"], [
     AC_MSG_RESULT([chipmunk])
 ],[
     enable_physics="no"
+    AC_MSG_RESULT([none])
     AC_MSG_WARN([No physics engine present - disabling physics features])
 ])
 
