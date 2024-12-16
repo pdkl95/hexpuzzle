@@ -231,7 +231,7 @@ external_raylib_libraylib_a_CFLAGS = \
 	-Werror=implicit-function-declaration \
 	-I$(top_srcdir)/external/raylib \
 	-I$(top_srcdir)/external/raylib/external/glfw/include \
-	-Iext$(top_srcdir)/ernal/raylib/external/glfw/deps/mingw \
+	-I$(top_srcdir)/external/raylib/external/glfw/deps/mingw \
 	-fPIC \
 	-Wno-unused-function \
 	-Wno-unused-parameter \

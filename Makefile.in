@@ -565,7 +565,7 @@ external_raylib_libraylib_a_CFLAGS = $(ALL_PKG_CFLAGS) $(APP_CFLAGS) \
 	-Werror=implicit-function-declaration \
 	-I$(top_srcdir)/external/raylib \
 	-I$(top_srcdir)/external/raylib/external/glfw/include \
-	-Iext$(top_srcdir)/ernal/raylib/external/glfw/deps/mingw -fPIC \
+	-I$(top_srcdir)/external/raylib/external/glfw/deps/mingw -fPIC \
 	-Wno-unused-function -Wno-unused-parameter -Wno-sign-compare \
 	$(am__append_7)
 GLFW_SRC = \
