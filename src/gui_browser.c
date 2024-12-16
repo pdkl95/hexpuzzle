@@ -340,7 +340,7 @@ void init_gui_browser(void)
 {
     browser_tabbar_text[0] = "Classics";
 #if defined(PLATFORM_DESKTOP)
-    browser_tabbar_text[1] = "Local Level Files";
+    browser_tabbar_text[1] = "Local Files";
     browser_tabbar_text[2] = "Add File";
 
     change_gui_browser_path_to_home();
@@ -463,12 +463,17 @@ void draw_gui_browser_list(gui_list_vars_t *list, Rectangle list_rect)
 {
     GuiSetStyle(LISTVIEW, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
 
+    int save_bg_color = GuiGetStyle(DEFAULT, BACKGROUND_COLOR);
+    GuiSetStyle(DEFAULT, BACKGROUND_COLOR, GuiGetStyle(STATUSBAR, BASE_COLOR_NORMAL));
+
     GuiListViewEx(list_rect,
                   (const char **)list->names,
                   list->count,
                   &list->scroll_index,
                   &list->active,
                   &list->focus);
+
+    GuiSetStyle(DEFAULT, BACKGROUND_COLOR, save_bg_color);
 }
 
 int draw_gui_browser_big_button(gui_list_vars_t *list, const char *button_text)

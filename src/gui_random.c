@@ -908,8 +908,15 @@ struct level *generate_random_title_level(void)
     int save_gen_style = gen_style;
     gen_style = 1;
 
+    symmetry_mode_t save_fixed_hidden_assist_mode = fixed_hidden_assist_mode;
+    int save_fixed_hidden_assist = fixed_hidden_assist;
+    fixed_hidden_assist = 9;
+    fixed_hidden_assist_mode = SYMMETRY_MODE_NONE;
+
     level_t *level = generate_random_level();
 
+    fixed_hidden_assist_mode = save_fixed_hidden_assist_mode;
+    fixed_hidden_assist = save_fixed_hidden_assist;
     gen_style = save_gen_style;
     difficulty = save_difficulty;
     gui_random_seed = save_random_seed;

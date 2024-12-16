@@ -28,6 +28,8 @@
 #include "win_anim.h"
 #include "background.h"
 
+#define DEBUG_DRAW_LABELS
+
 extern float bloom_amount;
 
 background_t *create_background(void)
@@ -87,7 +89,6 @@ float smooth_change(float current, float target, float step)
 
 void background_draw(background_t *bg)
 {
-    bool draw_labels = false;;
     bool animate_bg = !options->wait_events && options->animate_bg;
 
     float fade = 0.0f;
@@ -218,14 +219,6 @@ void background_draw(background_t *bg)
                        (Vector2){ x+off.x, ymax },
                        minor_thickness,
                        bg->minor_color);
-        } else {
-            DrawLineEx((Vector2){ x+off.x, ymin },
-                       (Vector2){ x+off.x, ymax },
-                       major_thickness,
-                       bg->vmajor_color);
-            if (draw_labels) {
-                DrawText(TextFormat("%d", x), (float)x + 3.0, 8.0, 16, YELLOW);
-            }
         }
     }
 
@@ -235,14 +228,30 @@ void background_draw(background_t *bg)
                        (Vector2){ xmax, y+off.y },
                        minor_thickness,
                        bg->minor_color);
-        } else {
+        }
+    }
+
+    for (int x=xmin, n=0; x<xmax; x += minor_size, n = (n + 1) % minor_per_major) {
+        if (!n) {
+            DrawLineEx((Vector2){ x+off.x, ymin },
+                       (Vector2){ x+off.x, ymax },
+                       major_thickness,
+                       bg->vmajor_color);
+#ifdef DEBUG_DRAW_LABELS
+                DrawText(TextFormat("%d", x), (float)x + 3.0, 8.0, 16, YELLOW);
+#endif
+        }
+    }
+
+    for (int y=ymin, n=0; y<ymax; y += minor_size, n = (n + 1) % minor_per_major) {
+        if (!n) {
             DrawLineEx((Vector2){ xmin, y+off.y },
                        (Vector2){ xmax, y+off.y },
                        major_thickness,
                        bg->hmajor_color);
-            if (draw_labels) {
+#ifdef DEBUG_DRAW_LABELS
                 DrawText(TextFormat("%d", y), 3.0, (float)y + 3.9, 16, YELLOW);
-            }
+#endif
         }
     }
 

@@ -22,7 +22,7 @@ static const GuiStyleProp darkStyleProps[DARK_STYLE_PROPS_COUNT] = {
     { 0, 4, 0x5a5a5aff },    // DEFAULT_BASE_COLOR_FOCUSED
     { 0, 5, 0xffffffff },    // DEFAULT_TEXT_COLOR_FOCUSED
     { 0, 6, 0x000000ff },    // DEFAULT_BORDER_COLOR_PRESSED 
-    { 0, 7, 0xefefefff },    // DEFAULT_BASE_COLOR_PRESSED 
+    { 0, 7, 0xc3c3c3ff },    // DEFAULT_BASE_COLOR_PRESSED 
     { 0, 8, 0x202020ff },    // DEFAULT_TEXT_COLOR_PRESSED
     { 0, 9, 0x4a4a4aff },    // DEFAULT_BORDER_COLOR_DISABLED
     { 0, 10, 0x777777ff },    // DEFAULT_BASE_COLOR_DISABLED

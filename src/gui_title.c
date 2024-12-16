@@ -56,7 +56,9 @@ level_t *bg_level = NULL;
 
 Color hexpanel_bg_color;
 Color shade_overlay_color;
-Color title_shadow_color;
+Color title_bg_shadow_color;
+Color title_nshadow_color;
+Color title_pshadow_color;
 
 void init_gui_title(void)
 {
@@ -77,10 +79,13 @@ void init_gui_title(void)
     hexpanel_bg_color   = ColorAlpha(hexpanel_bg_color, 0.12f);
     shade_overlay_color = ColorAlpha(ColorBrightness(text_shadow_color,  0.22), 0.5);
 
-    title_shadow_color.r = 0;
-    title_shadow_color.g = 0;
-    title_shadow_color.b = 0;
-    title_shadow_color.a = 80;
+    title_bg_shadow_color.r = 0;
+    title_bg_shadow_color.g = 0;
+    title_bg_shadow_color.b = 0;
+    title_bg_shadow_color.a = 120;
+
+    title_nshadow_color = ColorAlpha(royal_blue, 0.8);
+    title_pshadow_color = ColorAlpha(   magenta, 0.7);
 
     resize_gui_title();
 }
@@ -133,8 +138,8 @@ void resize_gui_title(void)
 
 static inline void draw_title(void)
 {
-    DrawRectangleRounded(title1_text_rect, 0.25f, 8, title_shadow_color);
-    DrawRectangleRounded(title2_text_rect, 0.25f, 8, title_shadow_color);
+    DrawRectangleRounded(title1_text_rect, 0.25f, 8, title_bg_shadow_color);
+    DrawRectangleRounded(title2_text_rect, 0.25f, 8, title_bg_shadow_color);
 
     Vector2 shadow_offset = {
         .x = 1.0f,
@@ -145,14 +150,14 @@ static inline void draw_title(void)
     Vector2 noffset = Vector2Scale(shadow_offset, 2.7);
     title1_text_neg_shadow_position = Vector2Subtract(title1_text_position, noffset);
     title2_text_neg_shadow_position = Vector2Subtract(title2_text_position, noffset);
-    draw_text_with_font(title_font, title1_text, title1_text_neg_shadow_position, royal_blue);
-    draw_text_with_font(title_font, title2_text, title2_text_neg_shadow_position, royal_blue);
+    draw_text_with_font(title_font, title1_text, title1_text_neg_shadow_position, title_nshadow_color);
+    draw_text_with_font(title_font, title2_text, title2_text_neg_shadow_position, title_nshadow_color);
 
     Vector2 poffset = Vector2Scale(shadow_offset, 1.8);
     title1_text_pos_shadow_position = Vector2Add(title1_text_position, poffset);
     title2_text_pos_shadow_position = Vector2Add(title2_text_position, poffset);
-    draw_text_with_font(title_font, title1_text, title1_text_pos_shadow_position, magenta);
-    draw_text_with_font(title_font, title2_text, title2_text_pos_shadow_position, magenta);
+    draw_text_with_font(title_font, title1_text, title1_text_pos_shadow_position, title_pshadow_color);
+    draw_text_with_font(title_font, title2_text, title2_text_pos_shadow_position, title_pshadow_color);
 
     draw_text_with_font(title_font, title1_text, title1_text_position, title_text_color);
     draw_text_with_font(title_font, title2_text, title2_text_position, title_text_color);

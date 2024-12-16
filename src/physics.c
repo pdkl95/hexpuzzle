@@ -40,7 +40,7 @@ physics_t *create_physics(struct level *level)
     physics->time = 0.0;
     physics->time_step = 1.0 / options->max_fps;
 
-    physics->time *= 0.01;
+    physics->time *= 0.1;
 
     physics->space = cpSpaceNew();
 
