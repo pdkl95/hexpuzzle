@@ -35,8 +35,14 @@ extern float warp_amount;
 const char *win_anim_mode_str(win_anim_mode_t mode)
 {
     switch (mode) {
+    case WIN_ANIM_MODE_SIMPLE:
+        return "SIMPLE";
+
     case WIN_ANIM_MODE_POPS:
         return "POPS";
+
+    case WIN_ANIM_MODE_WAVES:
+        return "WAVES";
 
 #ifdef USE_PHYSICS
     case WIN_ANIM_MODE_PHYSICS_FALL:
@@ -96,6 +102,10 @@ static void win_anim_common_update_physics(UNUSED win_anim_t *win_anim)
 #endif
 }
 #endif
+
+static void win_anim_common_update_simple(UNUSED win_anim_t *win_anim)
+{
+}
 
 static void win_anim_common_update_pops(win_anim_t *win_anim)
 {
@@ -242,6 +252,46 @@ static void win_anim_common_update_pops(win_anim_t *win_anim)
     level_update_tile_pops(win_anim->level);
 }
 
+static void win_anim_common_update_waves(win_anim_t *win_anim)
+{
+    float fade_magnitude = win_anim->fade[2];
+
+#define WAVES_FREQ_SCALE 2.7
+#define WAVES_BLOOM_FREQ_SCALE (3.0 * WAVES_FREQ_SCALE)
+
+    float global_theta = fmodf(WAVES_FREQ_SCALE * current_time, TAU);
+    float bloom_theta = fmodf(WAVES_BLOOM_FREQ_SCALE * current_time, TAU);
+
+    for (int i=0; i<LEVEL_MAXTILES; i++) {
+        tile_t *tile = &(win_anim->level->tiles[i]);
+
+        if (tile->enabled) {
+            tile_pos_t *pos = tile->unsolved_pos;
+
+            float theta = global_theta + pos->radial_angle;
+
+            float raw_wave = sinf(theta);
+            float wave = 0.5 * (raw_wave + 1.0);
+
+            pos->extra_magnitude = wave * fade_magnitude * 0.25 * TILE_POP_AMPLIFY_DELTA;
+
+            float rotate_osc = cosf(theta);
+            pos->extra_rotate = rotate_osc * 0.12f * wave *
+                (((float)pos->ring_radius) / ((float)win_anim->level->radius));
+        }
+    }
+
+    float bloom_raw_wave = sinf(bloom_theta);
+    float bloom_wave = 0.5 * (bloom_raw_wave + 1.0);
+
+    bloom_amount = bloom_wave * fade_magnitude;
+
+    float run_time = GetTime() - win_anim->start_time;
+    warp_amount = tanhf(0.037 * run_time);
+
+    level_update_tile_pops(win_anim->level);
+}
+
 static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
 {
     win_anim_t *win_anim = (win_anim_t *)data;
@@ -262,8 +312,16 @@ static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
                    SHADER_UNIFORM_VEC4);
 
     switch (win_anim->mode) {
+    case WIN_ANIM_MODE_SIMPLE:
+        win_anim_common_update_simple(win_anim);
+        break;
+
     case WIN_ANIM_MODE_POPS:
         win_anim_common_update_pops(win_anim);
+        break;
+
+    case WIN_ANIM_MODE_WAVES:
+        win_anim_common_update_waves(win_anim);
         break;
 
 #ifdef USE_PHYSICS
@@ -344,11 +402,19 @@ void init_win_anim(win_anim_t *win_anim)
     win_anim->fade[2] = 0.0;
     win_anim->fade[3] = 0.0;
 
+    switch (win_anim->mode) {
 #ifdef USE_PHYSICS
-    if (win_anim->level->physics) {
-        physics_reset(win_anim->level->physics);
-    }
+    case WIN_ANIM_MODE_PHYSICS_FALL:
+        /* fall through */
+    case WIN_ANIM_MODE_PHYSICS_SWIRL:
+        if (win_anim->level->physics) {
+            physics_reset(win_anim->level->physics);
+        }
+        break;
 #endif
+    default:
+        break;
+    }
 }
 
 void win_anim_select_random_mode(win_anim_t *win_anim)
@@ -419,6 +485,10 @@ void win_anim_start(win_anim_t *win_anim)
     assert_not_null(win_anim);
 
     if (!win_anim->running) {
+        if (options->verbose) {
+            infomsg("Starting win_anim %s", win_anim_mode_str(win_anim->mode));
+        }
+
         anim_fsm_start(&win_anim->anim_fsm);
         win_anim->running = true;
         win_anim->start_time = GetTime();

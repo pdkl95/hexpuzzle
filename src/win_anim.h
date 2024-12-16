@@ -25,18 +25,20 @@
 #include "anim_fsm.h"
 
 enum win_anim_mode {
-    WIN_ANIM_MODE_POPS,
+    WIN_ANIM_MODE_SIMPLE        = 0,
+    WIN_ANIM_MODE_POPS          = 1,
+    WIN_ANIM_MODE_WAVES         = 2,
 #ifdef USE_PHYSICS
-    WIN_ANIM_MODE_PHYSICS_FALL,
-    WIN_ANIM_MODE_PHYSICS_SWIRL
+    WIN_ANIM_MODE_PHYSICS_FALL  = 3,
+    WIN_ANIM_MODE_PHYSICS_SWIRL = 4
 #endif
 };
 typedef enum win_anim_mode win_anim_mode_t;
 
 #ifdef USE_PHYSICS
-# define WIN_ANIM_MODE_COUNT 3
+# define WIN_ANIM_MODE_COUNT 5
 #else
-# define WIN_ANIM_MODE_COUNT 1
+# define WIN_ANIM_MODE_COUNT 3
 #endif
 
 struct win_anim {
