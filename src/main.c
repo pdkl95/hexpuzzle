@@ -712,6 +712,10 @@ handle_events(
         }
     }
 
+    if (IsKeyPressed(KEY_Q)) {
+        running = false;
+    }
+
     if (IsKeyPressed(KEY_F)) {
         show_fps = !show_fps;
     }
@@ -793,6 +797,8 @@ handle_events(
 #if defined(PLATFORM_DESKTOP)
             running = false;
             return true;
+#else
+            break;
 #endif
         }
     }
@@ -1713,11 +1719,13 @@ static void draw_gui_widgets(void)
             set_game_mode(GAME_MODE_OPTIONS);
         }
 
+#if defined(PLATFORM_DESKTOP)
         set_gui_narrow_font();
         if (GuiButton(right_side_button_rect[rsb++], savequit_button_text)) {
             savequit_current_level();
         }
         set_default_font();
+#endif
 
         if (GuiButton(right_side_button_rect[rsb++], reset_button_text)) {
             reset_current_level();

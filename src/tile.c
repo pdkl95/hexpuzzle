@@ -286,7 +286,8 @@ tile_neighbor_paths_t tile_get_neighbor_paths(tile_t *tile)
 {
     assert_not_null(tile);
 
-    tile_neighbor_paths_t paths = {0};
+    tile_neighbor_paths_t paths;
+    memset(&paths, 0, sizeof(paths));
 
     tile_pos_t *pos = tile->solved_pos;
     assert_not_null(pos);

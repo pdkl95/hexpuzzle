@@ -423,9 +423,11 @@ void win_anim_start(win_anim_t *win_anim)
         win_anim->running = true;
         win_anim->start_time = GetTime();
 
-        level_t *level = win_anim->level;
+#ifdef USE_PHYSICS
+       level_t *level = win_anim->level;
+#endif
 
-        switch (win_anim->mode) {
+       switch (win_anim->mode) {
 #ifdef USE_PHYSICS
         case WIN_ANIM_MODE_PHYSICS_FALL:
             /* fall through */
