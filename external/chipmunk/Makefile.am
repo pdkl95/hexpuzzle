@@ -1,6 +1,6 @@
 noinst_LIBRARIES = libchipmunk.a
 
-libchipmunk_a_CFLAGS = -std=gnu99 -O3 -DNDEBUG -ffast-math
+libchipmunk_a_CFLAGS = -std=gnu99 -O3 -DNDEBUG -ffast-math -I$(srcdir)/include
 
 #libchipmunk_a_LDFLAGS =
 

@@ -243,7 +243,7 @@ AS_IF([test "x$enable_system_raylib" = "xyes"], [
     ALL_PKG_LIBS="$ALL_PKG_LIBS $RAYLIB_LIBS"
 ],[
     APP_CFLAGS="$APP_CFLAGS -I\$(top_srcdir)/external/raylib"
-    APP_LIBS="$APP_LIBS -L\$(top_srcdir)/external/raylib/src -ldl -lpthread"
+    APP_LIBS="$APP_LIBS -L\$(top_srcdir)/external/raylib -ldl -lpthread"
 ])
 
 

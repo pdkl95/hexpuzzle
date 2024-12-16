@@ -6424,7 +6424,7 @@ fi
 else
 
     APP_CFLAGS="$APP_CFLAGS -I\$(top_srcdir)/external/raylib"
-    APP_LIBS="$APP_LIBS -L\$(top_srcdir)/external/raylib/src -ldl -lpthread"
+    APP_LIBS="$APP_LIBS -L\$(top_srcdir)/external/raylib -ldl -lpthread"
 
 fi
 
