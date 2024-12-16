@@ -24,6 +24,8 @@
 #include "collection.h"
 #include "gui_browser.h"
 
+extern char *home_dir;
+
 void open_game_file(const char *path);
 void open_classics_game_pack(int n);
 
@@ -70,6 +72,7 @@ Rectangle local_files_dir_label_rect;
 Rectangle local_files_dir_rect;
 Rectangle local_files_up_button_rect;
 Rectangle local_files_home_button_rect;
+Rectangle local_files_local_saved_levels_button_rect;
 
 char browser_panel_text[] = "Browser";
 char browser_play_button_text[] = "Play";
@@ -77,10 +80,12 @@ char browser_open_button_text[] = "Open";
 
 char local_files_dir_label_text[] = "Directory";
 char local_files_up_button_text_str[] = "Up";
+char local_files_local_saved_levels_button_text_str[] = "Local Saved Levels";
 char local_files_home_button_text_str[] = "Home";
 
 char *local_files_up_button_text = NULL;
 char *local_files_home_button_text = NULL;
+char *local_files_local_saved_levels_button_text = NULL;
 
 gui_list_entry_t classics_entries[] = {
     { .name = "01 - 10 (red)",    .path = NULL, .icon = ICON_SUITCASE, .icon_name = NULL },
@@ -307,6 +312,15 @@ void change_gui_browser_path_up(void)
 
 void change_gui_browser_path_to_home(void)
 {
+    if (home_dir) {
+        if (DirectoryExists(home_dir)) {
+            change_gui_browser_path(home_dir);
+        }
+    }
+}
+
+void change_gui_browser_path_to_local_saved_levels(void)
+{
     assert_not_null(nvdata_default_browse_path);
     change_gui_browser_path(nvdata_default_browse_path);
 }
@@ -343,7 +357,7 @@ void init_gui_browser(void)
     browser_tabbar_text[1] = "Local Files";
     browser_tabbar_text[2] = "Add File";
 
-    change_gui_browser_path_to_home();
+    change_gui_browser_path_to_local_saved_levels();
 
 #else
     browser_tabbar_text[1] = NULL;
@@ -365,6 +379,7 @@ void cleanup_gui_browser(void)
 
     SAFEFREE(local_files_up_button_text);
     SAFEFREE(local_files_home_button_text);
+    SAFEFREE(local_files_local_saved_levels_button_text);
 
     SAFEFREE(browse_path);
 }
@@ -436,9 +451,11 @@ void resize_gui_browser(void)
     }
     local_files_up_button_text   = strdup(GuiIconText(ICON_ARROW_LEFT, local_files_up_button_text_str));
     local_files_home_button_text = strdup(GuiIconText(ICON_HOUSE,      local_files_home_button_text_str));
+    local_files_local_saved_levels_button_text = strdup(GuiIconText(ICON_FOLDER_FILE_OPEN, local_files_local_saved_levels_button_text_str));
 
     Vector2 local_files_up_button_text_size   = measure_gui_text(local_files_up_button_text);
     Vector2 local_files_home_button_text_size = measure_gui_text(local_files_home_button_text);
+    Vector2 local_files_local_saved_levels_button_text_size = measure_gui_text(local_files_local_saved_levels_button_text);
 
     local_files_up_button_rect.x      = browser_area_rect.x;
     local_files_up_button_rect.y      = browser_area_rect.y;
@@ -449,6 +466,11 @@ void resize_gui_browser(void)
     local_files_home_button_rect.x      = browser_area_rect.x + browser_area_rect.width - local_files_home_button_rect.width;
     local_files_home_button_rect.y      = local_files_up_button_rect.y;
     local_files_home_button_rect.height = local_files_up_button_rect.height;
+
+    local_files_local_saved_levels_button_rect.width  = local_files_local_saved_levels_button_text_size.x;
+    local_files_local_saved_levels_button_rect.x      = local_files_home_button_rect.x - local_files_local_saved_levels_button_rect.width - RAYGUI_ICON_SIZE;
+    local_files_local_saved_levels_button_rect.y      = local_files_up_button_rect.y;
+    local_files_local_saved_levels_button_rect.height = local_files_up_button_rect.height;
 
     browser_area_rect.y      += local_files_up_button_rect.height + RAYGUI_ICON_SIZE;
     browser_area_rect.height -= local_files_up_button_rect.height + RAYGUI_ICON_SIZE;
@@ -530,6 +552,10 @@ void draw_gui_browser_local_level_file(void)
 
     if (GuiButton(local_files_up_button_rect, local_files_up_button_text)) {
         change_gui_browser_path_up();
+    }
+
+    if (GuiButton(local_files_local_saved_levels_button_rect, local_files_local_saved_levels_button_text)) {
+        change_gui_browser_path_to_local_saved_levels();
     }
 
     if (GuiButton(local_files_home_button_rect, local_files_home_button_text)) {

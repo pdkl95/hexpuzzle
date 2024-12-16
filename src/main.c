@@ -78,6 +78,7 @@ const char *progname    = PACKAGE_NAME;
 
 #define CONFIG_SUBDIR_NAME PACKAGE_NAME
 char *config_dir;
+char *home_dir;
 
 #ifdef DEBUG_ID_AND_DIR
 int debug_id = 0;
@@ -2418,7 +2419,7 @@ main(
     progname = basename(argv[0]);
 
     char *xdg_config_dir = getenv("XDG_CONFIG_HOME");
-    char *home_dir       = getenv("HOME");
+    home_dir = getenv("HOME");
     if (xdg_config_dir) {
         safe_asprintf(&config_dir, "%s/%s", xdg_config_dir, CONFIG_SUBDIR_NAME);
     } else {
