@@ -340,7 +340,7 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
 #endif
 #endif
 
-#if 1
+#if 0
     /* show each hex's axial coordinates */
     int font_size = GuiGetStyle(DEFAULT, TEXT_SIZE);
 

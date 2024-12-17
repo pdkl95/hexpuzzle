@@ -27,8 +27,11 @@
 #include "win_anim.h"
 #include "background.h"
 
-#define DEBUG_DRAW_LABELS
+//#define DEBUG_DRAW_LABELS
 
+#define USE_BG_TEXTURE
+
+extern Texture2D bg_grid_texture;
 extern float bloom_amount;
 
 background_t *create_background(void)
@@ -44,8 +47,8 @@ background_t *create_background(void)
     bg->vmajor_color = ColorBrightness(royal_blue, -0.15);
 
     bg->minor_color  = ColorAlpha(bg->minor_color,  0.65);
-    bg->hmajor_color = ColorAlpha(bg->hmajor_color, 0.95);
-    bg->vmajor_color = ColorAlpha(bg->vmajor_color, 0.95);
+    bg->hmajor_color = ColorAlpha(bg->hmajor_color, 1.0);
+    bg->vmajor_color = ColorAlpha(bg->vmajor_color, 1.0);
 
     background_resize(bg);
     return bg;
@@ -111,13 +114,16 @@ void background_draw(background_t *bg)
 #define cart_bg_delta_speed_per_second ((cart_bg_delta_speed) / (cart_bg_accel_duration))
 #define cart_bg_delta_speed_per_frame ((cart_bg_delta_speed_per_second) / (options->max_fps))
 
-    int minor_size = 25;
+    int minor_size = 15;
     int minor_per_major = 4;
     int major_size = minor_size * minor_per_major;
-    float wrap_size = (float)major_size;
+    float wrap_size = 75.0f;  //(float)major_size;
     //float half_wrap = wrap_size / 2.0;
-    float minor_thickness = 2.0;
-    float major_thickness = 3.0;
+
+#ifndef USE_BG_TEXTURE
+    float minor_thickness = 3.0;
+    float major_thickness = 4.0;
+#endif
 
     int margin = 5 * major_size;
     int xmin = -margin;
@@ -193,6 +199,8 @@ void background_draw(background_t *bg)
         float rot_z = 2.0 * sinf(current_time / 10.0);
         rot_z += 1.0f - (fade * bloom_fade);
 
+        rot_z -= TAU/10.0f;
+
         float scale_rot = 3.0f;
         rot_z *= scale_rot * fade;
 
@@ -212,6 +220,37 @@ void background_draw(background_t *bg)
         //printf("off=(%4f,%4f)\n", off.x, off.y);
     }
 
+#ifdef USE_BG_TEXTURE
+/*
+ * TEXTURE MODE
+ */
+    int texture_size = 75;
+
+    Rectangle src = {
+        .x = 0.0f,
+        .y = 0.0f,
+        .width  = texture_size,
+        .height = texture_size
+    };
+    Rectangle dst = {
+        .width  = texture_size,
+        .height = texture_size
+    };
+
+    for (int y=ymin; y<ymax; y += texture_size) {
+        for (int x=xmin; x<xmax; x += texture_size) {
+            dst.x = x + off.x;
+            dst.y = y + off.y;
+            DrawTexturePro(bg_grid_texture, src, dst, VEC2_ZERO, 0.0f, WHITE); 
+        }
+    }
+
+#else
+/*
+ * LINE-DRAWING MODE
+ */
+
+#if 0
     for (int x=xmin, n=0; x<xmax; x += minor_size, n = (n + 1) % minor_per_major) {
         if (n) {
             DrawLineEx((Vector2){ x+off.x, ymin },
@@ -229,31 +268,30 @@ void background_draw(background_t *bg)
                        bg->minor_color);
         }
     }
-
-    for (int x=xmin, n=0; x<xmax; x += minor_size, n = (n + 1) % minor_per_major) {
-        if (!n) {
-            DrawLineEx((Vector2){ x+off.x, ymin },
-                       (Vector2){ x+off.x, ymax },
-                       major_thickness,
-                       bg->vmajor_color);
-#ifdef DEBUG_DRAW_LABELS
-                DrawText(TextFormat("%d", x), (float)x + 3.0, 8.0, 16, YELLOW);
 #endif
-        }
+
+#if 0
+    for (int x=xmin, n=0; x<xmax; x += major_size, n = (n + 1) % minor_per_major) {
+        DrawLineEx((Vector2){ x+off.x, ymin },
+                   (Vector2){ x+off.x, ymax },
+                   major_thickness,
+                   bg->vmajor_color);
+#ifdef DEBUG_DRAW_LABELS
+        DrawText(TextFormat("%d", x), (float)x + 3.0, 8.0, 16, YELLOW);
+#endif
     }
 
-    for (int y=ymin, n=0; y<ymax; y += minor_size, n = (n + 1) % minor_per_major) {
-        if (!n) {
-            DrawLineEx((Vector2){ xmin, y+off.y },
-                       (Vector2){ xmax, y+off.y },
-                       major_thickness,
-                       bg->hmajor_color);
+    for (int y=ymin, n=0; y<ymax; y += major_size, n = (n + 1) % minor_per_major) {
+        DrawLineEx((Vector2){ xmin, y+off.y },
+                   (Vector2){ xmax, y+off.y },
+                   major_thickness,
+                   bg->hmajor_color);
 #ifdef DEBUG_DRAW_LABELS
-                DrawText(TextFormat("%d", y), 3.0, (float)y + 3.9, 16, YELLOW);
+        DrawText(TextFormat("%d", y), 3.0, (float)y + 3.9, 16, YELLOW);
 #endif
-        }
     }
-
+#endif
+#endif
     EndMode3D();
 
     rlPopMatrix();

@@ -23,6 +23,9 @@ SHADERS = \
 	shaders/postprocessing.frag.glsl \
 	shaders/win_border.frag.glsl
 
+TEXTURES = \
+	textures/bg_grid.png
+
 EXTRA_DIST = \
 	README.md \
 	lib/gnugetopt.h \
@@ -31,7 +34,8 @@ EXTRA_DIST = \
 	external/sglib/LICENSE \
 	$(CLASSICS_LEVELS) \
 	$(FONTS) \
-	$(SHADERS)
+	$(SHADERS) \
+	$(TEXTURES)
 
 #CHIPMUNK_DIR = /home/endymion/build/ChipmunkLatest/Chipmunk-7.0.3
 CHIPMUNK_DIR = external/chipmunk
@@ -144,6 +148,7 @@ hexpuzzle_SOURCES =                                    \
 	src/startup_action.h    src/startup_action.c   \
 	src/shader.h            src/shader.c           \
 	src/solver.h            src/solver.c           \
+	src/textures.h          src/textures.c         \
 	src/tile.h              src/tile.c             \
 	src/tile_draw.h         src/tile_draw.c        \
 	src/tile_pos.h          src/tile_pos.c         \
@@ -159,7 +164,8 @@ endif
 dist_EXTRA_hexpuzzle_SOURCES =      \
 	src/data_classics_levels.h  \
 	src/data_fonts.h            \
-	src/data_shaders.h
+	src/data_shaders.h	    \
+	src/data_textures.h
 
 src/data_classics_levels.h: $(CLASSICS_LEVELS)
 	$(AM_V_at)rm -f $@
@@ -174,6 +180,12 @@ src/data_fonts.h: $(FONTS)
 	done
 
 src/data_shaders.h: $(SHADERS)
+	$(AM_V_at)rm -f $@
+	$(AM_V_GEN)cd $(top_srcdir) && for file in $^ ; do \
+	    $(XXD) -i "$${file}" >> $@ ; \
+	done
+
+src/data_textures.h: $(TEXTURES)
 	$(AM_V_at)rm -f $@
 	$(AM_V_GEN)cd $(top_srcdir) && for file in $^ ; do \
 	    $(XXD) -i "$${file}" >> $@ ; \

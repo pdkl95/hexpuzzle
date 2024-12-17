@@ -50,6 +50,7 @@
 #include "level_undo.h"
 #include "collection.h"
 #include "shader.h"
+#include "textures.h"
 
 #include "gui_title.h"
 #include "gui_browser.h"
@@ -502,7 +503,7 @@ resize_pending() {
 }
 
 static void
-unload_textures(
+unload_render_textures(
     void
 ) {
     if (IsRenderTextureReady(scene_targets[0])) {
@@ -517,11 +518,11 @@ unload_textures(
 }
 
 static void
-create_textures(
+create_render_textures(
     void
 ) {
 
-    unload_textures();
+    unload_render_textures();
 
     scene_targets[0] = LoadRenderTexture(window_size.x, window_size.y);
     scene_targets[1] = LoadRenderTexture(window_size.x, window_size.y);
@@ -566,7 +567,7 @@ do_resize(
 #endif
 
     set_uniform_resolution();
-    create_textures();
+    create_render_textures();
     if (current_level) {
         level_resize(current_level);
     }
@@ -2438,6 +2439,7 @@ void gfx_init(void)
     prepare_global_colors();
 
     load_shaders();
+    load_textures();
 
     set_uniform_resolution();
 
@@ -2452,8 +2454,9 @@ gfx_cleanup(
 ) {
     rlDisableColorBlend();
 
-    unload_shaders();
     unload_textures();
+    unload_shaders();
+    unload_render_textures();
 
     GuiUnloadStyleDark();
 

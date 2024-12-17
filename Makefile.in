@@ -188,11 +188,11 @@ am__hexpuzzle_SOURCES_DIST = src/background.h src/background.c \
 	src/nvdata_finished.c src/options.h src/options.c src/path.h \
 	src/path.c src/raygui_impl.c src/raylib_helper.h \
 	src/raylib_helper.c src/startup_action.h src/startup_action.c \
-	src/shader.h src/shader.c src/solver.h src/solver.c src/tile.h \
-	src/tile.c src/tile_draw.h src/tile_draw.c src/tile_pos.h \
-	src/tile_pos.c src/util.h src/util.c src/win_anim.h \
-	src/win_anim.c src/common.h src/main.c src/physics.h \
-	src/physics.c
+	src/shader.h src/shader.c src/solver.h src/solver.c \
+	src/textures.h src/textures.c src/tile.h src/tile.c \
+	src/tile_draw.h src/tile_draw.c src/tile_pos.h src/tile_pos.c \
+	src/util.h src/util.c src/win_anim.h src/win_anim.c \
+	src/common.h src/main.c src/physics.h src/physics.c
 @USE_PHYSICS_TRUE@am__objects_3 = src/hexpuzzle-physics.$(OBJEXT)
 am_hexpuzzle_OBJECTS = src/hexpuzzle-background.$(OBJEXT) \
 	src/hexpuzzle-classics.$(OBJEXT) \
@@ -213,7 +213,8 @@ am_hexpuzzle_OBJECTS = src/hexpuzzle-background.$(OBJEXT) \
 	src/hexpuzzle-raylib_helper.$(OBJEXT) \
 	src/hexpuzzle-startup_action.$(OBJEXT) \
 	src/hexpuzzle-shader.$(OBJEXT) src/hexpuzzle-solver.$(OBJEXT) \
-	src/hexpuzzle-tile.$(OBJEXT) src/hexpuzzle-tile_draw.$(OBJEXT) \
+	src/hexpuzzle-textures.$(OBJEXT) src/hexpuzzle-tile.$(OBJEXT) \
+	src/hexpuzzle-tile_draw.$(OBJEXT) \
 	src/hexpuzzle-tile_pos.$(OBJEXT) src/hexpuzzle-util.$(OBJEXT) \
 	src/hexpuzzle-win_anim.$(OBJEXT) src/hexpuzzle-main.$(OBJEXT) \
 	$(am__objects_3)
@@ -479,9 +480,12 @@ SHADERS = \
 	shaders/postprocessing.frag.glsl \
 	shaders/win_border.frag.glsl
 
+TEXTURES = \
+	textures/bg_grid.png
+
 EXTRA_DIST = README.md lib/gnugetopt.h lib/getopt.c lib/getopt1.c \
 	external/sglib/LICENSE $(CLASSICS_LEVELS) $(FONTS) $(SHADERS) \
-	$(GLFW_SRC) $(RAYLIB_EXTERNAL_SRC) \
+	$(TEXTURES) $(GLFW_SRC) $(RAYLIB_EXTERNAL_SRC) \
 	external/raylib/platforms/rcore_desktop.c \
 	external/raylib/platforms/rcore_web.c \
 	external/raylib/external/glfw/LICENSE.md
@@ -529,14 +533,16 @@ hexpuzzle_SOURCES = src/background.h src/background.c src/classics.h \
 	src/options.h src/options.c src/path.h src/path.c \
 	src/raygui_impl.c src/raylib_helper.h src/raylib_helper.c \
 	src/startup_action.h src/startup_action.c src/shader.h \
-	src/shader.c src/solver.h src/solver.c src/tile.h src/tile.c \
-	src/tile_draw.h src/tile_draw.c src/tile_pos.h src/tile_pos.c \
-	src/util.h src/util.c src/win_anim.h src/win_anim.c \
-	src/common.h src/main.c $(am__append_5)
+	src/shader.c src/solver.h src/solver.c src/textures.h \
+	src/textures.c src/tile.h src/tile.c src/tile_draw.h \
+	src/tile_draw.c src/tile_pos.h src/tile_pos.c src/util.h \
+	src/util.c src/win_anim.h src/win_anim.c src/common.h \
+	src/main.c $(am__append_5)
 dist_EXTRA_hexpuzzle_SOURCES = \
 	src/data_classics_levels.h  \
 	src/data_fonts.h            \
-	src/data_shaders.h
+	src/data_shaders.h	    \
+	src/data_textures.h
 
 BUILT_SOURCES = \
 	$(dist_EXTRA_hexpuzzle_SOURCES)
@@ -883,6 +889,8 @@ src/hexpuzzle-shader.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-solver.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/hexpuzzle-textures.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-tile.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-tile_draw.$(OBJEXT): src/$(am__dirstamp) \
@@ -950,6 +958,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-shader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-solver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-startup_action.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-textures.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-tile.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-tile_draw.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-tile_pos.Po@am__quote@
@@ -1419,6 +1428,20 @@ src/hexpuzzle-solver.obj: src/solver.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/solver.c' object='src/hexpuzzle-solver.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-solver.obj `if test -f 'src/solver.c'; then $(CYGPATH_W) 'src/solver.c'; else $(CYGPATH_W) '$(srcdir)/src/solver.c'; fi`
+
+src/hexpuzzle-textures.o: src/textures.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-textures.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-textures.Tpo -c -o src/hexpuzzle-textures.o `test -f 'src/textures.c' || echo '$(srcdir)/'`src/textures.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-textures.Tpo src/$(DEPDIR)/hexpuzzle-textures.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/textures.c' object='src/hexpuzzle-textures.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-textures.o `test -f 'src/textures.c' || echo '$(srcdir)/'`src/textures.c
+
+src/hexpuzzle-textures.obj: src/textures.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-textures.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-textures.Tpo -c -o src/hexpuzzle-textures.obj `if test -f 'src/textures.c'; then $(CYGPATH_W) 'src/textures.c'; else $(CYGPATH_W) '$(srcdir)/src/textures.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-textures.Tpo src/$(DEPDIR)/hexpuzzle-textures.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/textures.c' object='src/hexpuzzle-textures.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-textures.obj `if test -f 'src/textures.c'; then $(CYGPATH_W) 'src/textures.c'; else $(CYGPATH_W) '$(srcdir)/src/textures.c'; fi`
 
 src/hexpuzzle-tile.o: src/tile.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-tile.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-tile.Tpo -c -o src/hexpuzzle-tile.o `test -f 'src/tile.c' || echo '$(srcdir)/'`src/tile.c
@@ -1982,6 +2005,12 @@ src/data_fonts.h: $(FONTS)
 	done
 
 src/data_shaders.h: $(SHADERS)
+	$(AM_V_at)rm -f $@
+	$(AM_V_GEN)cd $(top_srcdir) && for file in $^ ; do \
+	    $(XXD) -i "$${file}" >> $@ ; \
+	done
+
+src/data_textures.h: $(TEXTURES)
 	$(AM_V_at)rm -f $@
 	$(AM_V_GEN)cd $(top_srcdir) && for file in $^ ; do \
 	    $(XXD) -i "$${file}" >> $@ ; \
