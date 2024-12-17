@@ -67,7 +67,6 @@ void print_win_anim(win_anim_t *win_anim)
         printf("\t->fade[%d] = %f\n", i, win_anim->fade[i]);
     }
     printf("\t->start_time = %f\n", win_anim->start_time);
-    print_anim_fsm(&win_anim->anim_fsm);
 }
 
 static void trigger_pop(tile_pos_t *pos)
@@ -83,7 +82,7 @@ static void trigger_pop(tile_pos_t *pos)
 }
 
 #ifdef USE_PHYSICS
-static void win_anim_common_update_physics(UNUSED win_anim_t *win_anim)
+static void win_anim_update_physics(UNUSED win_anim_t *win_anim)
 {
 #if 0
     level_t *level = win_anim->level;
@@ -103,11 +102,11 @@ static void win_anim_common_update_physics(UNUSED win_anim_t *win_anim)
 }
 #endif
 
-static void win_anim_common_update_simple(UNUSED win_anim_t *win_anim)
+static void win_anim_update_simple(UNUSED win_anim_t *win_anim)
 {
 }
 
-static void win_anim_common_update_pops(win_anim_t *win_anim)
+static void win_anim_update_pops(win_anim_t *win_anim)
 {
     level_t *level = win_anim->level;
 
@@ -252,7 +251,7 @@ static void win_anim_common_update_pops(win_anim_t *win_anim)
     level_update_tile_pops(win_anim->level);
 }
 
-static void win_anim_common_update_waves(win_anim_t *win_anim)
+static void win_anim_update_waves(win_anim_t *win_anim)
 {
     float fade_magnitude = win_anim->fade[2];
 
@@ -292,108 +291,33 @@ static void win_anim_common_update_waves(win_anim_t *win_anim)
     level_update_tile_pops(win_anim->level);
 }
 
-static void win_anim_common_update(struct anim_fsm *anim_fsm, void *data)
-{
-    win_anim_t *win_anim = (win_anim_t *)data;
 
-    win_anim->fade[0] = anim_fsm->state_progress;
-    win_anim->fade[1] = ((float)win_anim->level->finished_hue) / 360.0;
-
-#if 0
-    printf("progress = %f. hue = %f, fadein = %f\n",
-           win_anim->fade[0],
-           win_anim->fade[1],
-           win_anim->fade[2]);
-#endif
-
-    SetShaderValue(win_border_shader,
-                   win_border_shader_loc.fade,
-                   &(win_anim->fade[0]),
-                   SHADER_UNIFORM_VEC4);
-
-    switch (win_anim->mode) {
-    case WIN_ANIM_MODE_SIMPLE:
-        win_anim_common_update_simple(win_anim);
-        break;
-
-    case WIN_ANIM_MODE_POPS:
-        win_anim_common_update_pops(win_anim);
-        break;
-
-    case WIN_ANIM_MODE_WAVES:
-        win_anim_common_update_waves(win_anim);
-        break;
-
-#ifdef USE_PHYSICS
-    case WIN_ANIM_MODE_PHYSICS_FALL:
-        /* fall through */
-    case WIN_ANIM_MODE_PHYSICS_SWIRL:
-        win_anim_common_update_physics(win_anim);
-        break;
-#endif
-    }
-}
-
-static void win_anim_fade_in_update(struct anim_fsm *anim_fsm, void *data)
-{
-    win_anim_t *win_anim = (win_anim_t *)data;
-
-    win_anim->fade[2] = anim_fsm->state_progress;
-    win_anim->fade[3] = 0.0f;
-    win_anim_common_update(anim_fsm, data);
-}
-
-static void win_anim_osc_ramp_in_update(struct anim_fsm *anim_fsm, void *data)
-{
-    win_anim_t *win_anim = (win_anim_t *)data;
-
-    win_anim->fade[2] = 1.0;
-    win_anim->fade[3] = anim_fsm->state_progress;
-    win_anim_common_update(anim_fsm, data);
-
-    if (anim_fsm->state_progress == 0.0f) {
+#ifdef USE_PHYSICSxxx
         switch (win_anim->mode) {
-#ifdef USE_PHYSICS
         case WIN_ANIM_MODE_PHYSICS_FALL:
             /* fall through */
         case WIN_ANIM_MODE_PHYSICS_SWIRL:
-            assert(win_anim->level->finished);
-            physics_start(win_anim->level->physics);
-#endif
+            //assert(win_anim->level->finished);
+            //physics_start(win_anim->level->physics);
+            break;
+
         default:
             break;
         }
-    }
-}
-
-static void win_anim_osc_stay_update(struct anim_fsm *anim_fsm, void *data)
-{
-    win_anim_t *win_anim = (win_anim_t *)data;
-
-    win_anim->fade[2] = 1.0f;
-    win_anim->fade[3] = 1.0f;
-    win_anim_common_update(anim_fsm, data);
-}
-
-anim_fsm_callbacks_t     fade_in_callbacks = { .update = win_anim_fade_in_update     };
-anim_fsm_callbacks_t osc_ramp_in_callbacks = { .update = win_anim_osc_ramp_in_update };
-anim_fsm_callbacks_t    osc_stay_callbacks = { .update = win_anim_osc_stay_update    };
-
-anim_fsm_state_t states[] = {
-#if 0
-    { "FADE_IN",       1/* 6.0 */, ANIM_FSM_STATE_NEXT,     &fade_in_callbacks },
-    { "OSC_RAMP_IN",   1/* 8.0 */, ANIM_FSM_STATE_NEXT, &osc_ramp_in_callbacks },
-#else
-    { "FADE_IN",       6.0, ANIM_FSM_STATE_NEXT,     &fade_in_callbacks },
-    { "OSC_RAMP_IN",   8.0, ANIM_FSM_STATE_NEXT, &osc_ramp_in_callbacks },
 #endif
-    { "OSC_STAY",     10.0, ANIM_FSM_STATE_STAY,    &osc_stay_callbacks },
-    { "STOP",          0.0, ANIM_FSM_STATE_STOP,                   NULL }
-};
 
 void init_win_anim(win_anim_t *win_anim)
 {
     win_anim_select_random_mode(win_anim);
+
+#ifndef DEBUG_BUILD
+        if (options->verbose) {
+#endif
+            infomsg("INIT win_anim %s", win_anim_mode_str(win_anim->mode));
+#ifndef DEBUG_BUILD
+        }
+#endif
+
 
     win_anim->running = false;
 
@@ -436,8 +360,6 @@ win_anim_t *create_win_anim(struct level *level)
 
     init_win_anim(win_anim);
 
-    init_anim_fsm(&win_anim->anim_fsm, states, NULL, win_anim);
-
     return win_anim;
 }
 
@@ -450,26 +372,57 @@ void win_anim_update(win_anim_t *win_anim)
 {
     assert_not_null(win_anim);
 
+    if (!win_anim->running) {
+        return;
+    }
+
+    win_anim->run_time = current_time - win_anim->start_time;
+
+    win_anim->fade[0] = fmodf(win_anim->run_time, 10.0f);
+    win_anim->fade[1] = ((float)win_anim->level->finished_hue) / 360.0;
+    win_anim->fade[2] = smoothstep(0.0f,  6.0f, win_anim->run_time);
+    win_anim->fade[3] = smoothstep(4.5f, 10.0f, win_anim->run_time);
+
+#if 0
+    printf("progress = %3.2f. hue = %3.2f, fadein = %3.2f, other = %3.2f\n",
+           win_anim->fade[0],
+           win_anim->fade[1],
+           win_anim->fade[2],
+           win_anim->fade[3]);
+#endif
+
+    SetShaderValue(win_border_shader,
+                   win_border_shader_loc.fade,
+                   &(win_anim->fade[0]),
+                   SHADER_UNIFORM_VEC4);
+
     switch (win_anim->mode) {
+    case WIN_ANIM_MODE_SIMPLE:
+        win_anim_update_simple(win_anim);
+        break;
+
+    case WIN_ANIM_MODE_POPS:
+        win_anim_update_pops(win_anim);
+        break;
+
+    case WIN_ANIM_MODE_WAVES:
+        win_anim_update_waves(win_anim);
+        break;
+
 #ifdef USE_PHYSICS
     case WIN_ANIM_MODE_PHYSICS_FALL:
         /* fall through */
     case WIN_ANIM_MODE_PHYSICS_SWIRL:
         physics_update(win_anim->level->physics);
+        win_anim_update_physics(win_anim);
         break;
 #endif
-    default:
-        break;
     }
-
-    anim_fsm_update(&win_anim->anim_fsm);
 }
 
 void win_anim_draw(win_anim_t *win_anim)
 {
     assert_not_null(win_anim);
-
-    anim_fsm_draw(&win_anim->anim_fsm);
 }
 
 bool win_anim_running(win_anim_t *win_anim)
@@ -485,11 +438,13 @@ void win_anim_start(win_anim_t *win_anim)
     assert_not_null(win_anim);
 
     if (!win_anim->running) {
+#ifndef DEBUG_BUILD
         if (options->verbose) {
-            infomsg("Starting win_anim %s", win_anim_mode_str(win_anim->mode));
+#endif
+            infomsg("START win_anim %s", win_anim_mode_str(win_anim->mode));
+#ifndef DEBUG_BUILD
         }
-
-        anim_fsm_start(&win_anim->anim_fsm);
+#endif
         win_anim->running = true;
         win_anim->start_time = GetTime();
 
@@ -520,6 +475,14 @@ void win_anim_stop(win_anim_t *win_anim)
     assert_not_null(win_anim);
 
     if (win_anim->running) {
+#ifndef DEBUG_BUILD
+        if (options->verbose) {
+#endif
+            infomsg("STOP win_anim %s", win_anim_mode_str(win_anim->mode));
+#ifndef DEBUG_BUILD
+        }
+#endif
+
         switch (win_anim->mode) {
 #ifdef USE_PHYSICS
         case WIN_ANIM_MODE_PHYSICS_FALL:
@@ -535,6 +498,5 @@ void win_anim_stop(win_anim_t *win_anim)
         }
 
         win_anim->running = false;
-        anim_fsm_stop(&win_anim->anim_fsm);
     }
 }

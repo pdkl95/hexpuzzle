@@ -175,27 +175,26 @@ external_raylib_libraylib_a_OBJECTS =  \
 	$(am_external_raylib_libraylib_a_OBJECTS)
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
-am__hexpuzzle_SOURCES_DIST = src/anim_fsm.h src/anim_fsm.c \
-	src/background.h src/background.c src/classics.h \
-	src/classics.c src/collection.h src/collection.c src/color.h \
-	src/color.c src/const.h src/fonts.h src/fonts.c \
-	src/game_mode.h src/game_mode.c src/gui_browser.h \
-	src/gui_browser.c src/gui_options.h src/gui_options.c \
-	src/gui_random.h src/gui_random.c src/gui_title.h \
-	src/gui_title.c src/hex.h src/hex.c src/level.h src/level.c \
-	src/level_draw.h src/level_draw.c src/level_undo.h \
-	src/level_undo.c src/logging.h src/logging.c src/nvdata.h \
-	src/nvdata.c src/nvdata_finished.h src/nvdata_finished.c \
-	src/options.h src/options.c src/path.h src/path.c \
-	src/raygui_impl.c src/raylib_helper.h src/raylib_helper.c \
-	src/startup_action.h src/startup_action.c src/shader.h \
-	src/shader.c src/solver.h src/solver.c src/tile.h src/tile.c \
-	src/tile_draw.h src/tile_draw.c src/tile_pos.h src/tile_pos.c \
-	src/util.h src/util.c src/win_anim.h src/win_anim.c \
-	src/common.h src/main.c src/physics.h src/physics.c
+am__hexpuzzle_SOURCES_DIST = src/background.h src/background.c \
+	src/classics.h src/classics.c src/collection.h \
+	src/collection.c src/color.h src/color.c src/const.h \
+	src/fonts.h src/fonts.c src/game_mode.h src/game_mode.c \
+	src/gui_browser.h src/gui_browser.c src/gui_options.h \
+	src/gui_options.c src/gui_random.h src/gui_random.c \
+	src/gui_title.h src/gui_title.c src/hex.h src/hex.c \
+	src/level.h src/level.c src/level_draw.h src/level_draw.c \
+	src/level_undo.h src/level_undo.c src/logging.h src/logging.c \
+	src/nvdata.h src/nvdata.c src/nvdata_finished.h \
+	src/nvdata_finished.c src/options.h src/options.c src/path.h \
+	src/path.c src/raygui_impl.c src/raylib_helper.h \
+	src/raylib_helper.c src/startup_action.h src/startup_action.c \
+	src/shader.h src/shader.c src/solver.h src/solver.c src/tile.h \
+	src/tile.c src/tile_draw.h src/tile_draw.c src/tile_pos.h \
+	src/tile_pos.c src/util.h src/util.c src/win_anim.h \
+	src/win_anim.c src/common.h src/main.c src/physics.h \
+	src/physics.c
 @USE_PHYSICS_TRUE@am__objects_3 = src/hexpuzzle-physics.$(OBJEXT)
-am_hexpuzzle_OBJECTS = src/hexpuzzle-anim_fsm.$(OBJEXT) \
-	src/hexpuzzle-background.$(OBJEXT) \
+am_hexpuzzle_OBJECTS = src/hexpuzzle-background.$(OBJEXT) \
 	src/hexpuzzle-classics.$(OBJEXT) \
 	src/hexpuzzle-collection.$(OBJEXT) \
 	src/hexpuzzle-color.$(OBJEXT) src/hexpuzzle-fonts.$(OBJEXT) \
@@ -517,24 +516,23 @@ hexpuzzle_LDADD = $(COMMON_PROG_LDADD) $(am__append_1) $(am__append_4)
 @BUILD_WEB_TRUE@	GL_ENABLE_GET_PROC_ADDRESS=1 -s \
 @BUILD_WEB_TRUE@	ALLOW_MEMORY_GROWTH=1 $(am__append_2) \
 @BUILD_WEB_TRUE@	-lidbfs.js --shell-file minshell.html
-hexpuzzle_SOURCES = src/anim_fsm.h src/anim_fsm.c src/background.h \
-	src/background.c src/classics.h src/classics.c \
-	src/collection.h src/collection.c src/color.h src/color.c \
-	src/const.h src/fonts.h src/fonts.c src/game_mode.h \
-	src/game_mode.c src/gui_browser.h src/gui_browser.c \
-	src/gui_options.h src/gui_options.c src/gui_random.h \
-	src/gui_random.c src/gui_title.h src/gui_title.c src/hex.h \
-	src/hex.c src/level.h src/level.c src/level_draw.h \
-	src/level_draw.c src/level_undo.h src/level_undo.c \
-	src/logging.h src/logging.c src/nvdata.h src/nvdata.c \
-	src/nvdata_finished.h src/nvdata_finished.c src/options.h \
-	src/options.c src/path.h src/path.c src/raygui_impl.c \
-	src/raylib_helper.h src/raylib_helper.c src/startup_action.h \
-	src/startup_action.c src/shader.h src/shader.c src/solver.h \
-	src/solver.c src/tile.h src/tile.c src/tile_draw.h \
-	src/tile_draw.c src/tile_pos.h src/tile_pos.c src/util.h \
-	src/util.c src/win_anim.h src/win_anim.c src/common.h \
-	src/main.c $(am__append_5)
+hexpuzzle_SOURCES = src/background.h src/background.c src/classics.h \
+	src/classics.c src/collection.h src/collection.c src/color.h \
+	src/color.c src/const.h src/fonts.h src/fonts.c \
+	src/game_mode.h src/game_mode.c src/gui_browser.h \
+	src/gui_browser.c src/gui_options.h src/gui_options.c \
+	src/gui_random.h src/gui_random.c src/gui_title.h \
+	src/gui_title.c src/hex.h src/hex.c src/level.h src/level.c \
+	src/level_draw.h src/level_draw.c src/level_undo.h \
+	src/level_undo.c src/logging.h src/logging.c src/nvdata.h \
+	src/nvdata.c src/nvdata_finished.h src/nvdata_finished.c \
+	src/options.h src/options.c src/path.h src/path.c \
+	src/raygui_impl.c src/raylib_helper.h src/raylib_helper.c \
+	src/startup_action.h src/startup_action.c src/shader.h \
+	src/shader.c src/solver.h src/solver.c src/tile.h src/tile.c \
+	src/tile_draw.h src/tile_draw.c src/tile_pos.h src/tile_pos.c \
+	src/util.h src/util.c src/win_anim.h src/win_anim.c \
+	src/common.h src/main.c $(am__append_5)
 dist_EXTRA_hexpuzzle_SOURCES = \
 	src/data_classics_levels.h  \
 	src/data_fonts.h            \
@@ -837,8 +835,6 @@ src/$(am__dirstamp):
 src/$(DEPDIR)/$(am__dirstamp):
 	@$(MKDIR_P) src/$(DEPDIR)
 	@: > src/$(DEPDIR)/$(am__dirstamp)
-src/hexpuzzle-anim_fsm.$(OBJEXT): src/$(am__dirstamp) \
-	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-background.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-classics.$(OBJEXT): src/$(am__dirstamp) \
@@ -928,7 +924,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rtextures.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@external/raylib/$(DEPDIR)/external_raylib_libraylib_a-utils.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@external/tinyfiledialogs/$(DEPDIR)/tinyfiledialogs.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-anim_fsm.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-background.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-classics.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-collection.Po@am__quote@
@@ -1088,20 +1083,6 @@ external/raylib/external_raylib_libraylib_a-rglfw.obj: external/raylib/rglfw.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='external/raylib/rglfw.c' object='external/raylib/external_raylib_libraylib_a-rglfw.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(external_raylib_libraylib_a_CFLAGS) $(CFLAGS) -c -o external/raylib/external_raylib_libraylib_a-rglfw.obj `if test -f 'external/raylib/rglfw.c'; then $(CYGPATH_W) 'external/raylib/rglfw.c'; else $(CYGPATH_W) '$(srcdir)/external/raylib/rglfw.c'; fi`
-
-src/hexpuzzle-anim_fsm.o: src/anim_fsm.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-anim_fsm.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-anim_fsm.Tpo -c -o src/hexpuzzle-anim_fsm.o `test -f 'src/anim_fsm.c' || echo '$(srcdir)/'`src/anim_fsm.c
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-anim_fsm.Tpo src/$(DEPDIR)/hexpuzzle-anim_fsm.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/anim_fsm.c' object='src/hexpuzzle-anim_fsm.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-anim_fsm.o `test -f 'src/anim_fsm.c' || echo '$(srcdir)/'`src/anim_fsm.c
-
-src/hexpuzzle-anim_fsm.obj: src/anim_fsm.c
-@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-anim_fsm.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-anim_fsm.Tpo -c -o src/hexpuzzle-anim_fsm.obj `if test -f 'src/anim_fsm.c'; then $(CYGPATH_W) 'src/anim_fsm.c'; else $(CYGPATH_W) '$(srcdir)/src/anim_fsm.c'; fi`
-@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-anim_fsm.Tpo src/$(DEPDIR)/hexpuzzle-anim_fsm.Po
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/anim_fsm.c' object='src/hexpuzzle-anim_fsm.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-anim_fsm.obj `if test -f 'src/anim_fsm.c'; then $(CYGPATH_W) 'src/anim_fsm.c'; else $(CYGPATH_W) '$(srcdir)/src/anim_fsm.c'; fi`
 
 src/hexpuzzle-background.o: src/background.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-background.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-background.Tpo -c -o src/hexpuzzle-background.o `test -f 'src/background.c' || echo '$(srcdir)/'`src/background.c

@@ -23,7 +23,6 @@
 
 #include "options.h"
 
-#include "anim_fsm.h"
 #include "level.h"
 #include "win_anim.h"
 #include "background.h"

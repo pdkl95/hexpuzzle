@@ -94,6 +94,21 @@ float ease_back_out(float t);
 
 float ease_quartic_inout(float t);
 
+static inline float clamp(float x, float lowerlimit, float upperlimit) {
+  if (x < lowerlimit) return lowerlimit;
+  if (x > upperlimit) return upperlimit;
+  return x;
+}
+
+static inline float saturate(float x)
+{
+    return clamp(x, 0.0f, 1.0f);
+}
+
+float smoothstep(float edge0, float edge1, float x);
+float smootherstep(float edge0, float edge1, float x);
+float exp_sustained_impulse(float x, float f, float k);
+
 /****************
  * fatal errors *
  ****************/

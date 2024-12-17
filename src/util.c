@@ -291,6 +291,22 @@ float ease_quartic_inout(float t)
 	}
 }
 
+float smoothstep(float edge0, float edge1, float x) {
+    x = saturate((x - edge0) / (edge1 - edge0));
+    return x * x * (3.0f - 2.0f * x);
+}
+
+float smootherstep(float edge0, float edge1, float x) {
+  x = saturate((x - edge0) / (edge1 - edge0));
+
+  return x * x * x * (x * (6.0f * x - 15.0f) + 10.0f);
+}
+
+float exp_sustained_impulse(float x, float f, float k)
+{
+    float s = fmaxf(x-f, 0.0f);
+    return fminf((x * x)/(f * f), 1.0f + (2.0f / f) * s * exp(-k * s));
+}
 
 void
 halt_and_catch_fire(

@@ -22,8 +22,6 @@
 #ifndef WIN_ANIM_H
 #define WIN_ANIM_H
 
-#include "anim_fsm.h"
-
 enum win_anim_mode {
     WIN_ANIM_MODE_SIMPLE        = 0,
     WIN_ANIM_MODE_POPS          = 1,
@@ -43,11 +41,11 @@ typedef enum win_anim_mode win_anim_mode_t;
 
 struct win_anim {
     win_anim_mode_t mode;
-    anim_fsm_t anim_fsm;
     struct level *level;
     bool running;
     float fade[4];
     float start_time;
+    float run_time;
 };
 typedef struct win_anim win_anim_t;
 
