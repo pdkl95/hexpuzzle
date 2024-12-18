@@ -80,6 +80,7 @@ struct physics {
 };
 typedef struct physics physics_t;
 
+void init_physics(physics_t *physics, struct level *level);
 physics_t *create_physics(struct level *level);
 void destroy_physics(physics_t *physics);
 

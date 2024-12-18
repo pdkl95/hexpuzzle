@@ -137,10 +137,6 @@ struct level {
 
     struct undo *undo;
 
-#ifdef USE_PHYSICS
-    struct physics *physics;
-#endif
-
     struct collection *collection;
 
     struct level *prev, *next;

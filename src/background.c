@@ -181,17 +181,21 @@ void background_draw(background_t *bg)
         float circ_time_scale = 3.0;
         float circ_mag = TAU/36.0f;
 
-        float rot_x, rot_y;
+        float rot_x, rot_y; 
         if (current_level) {
-            finished_fract = smooth_change(finished_fract,
+           finished_fract = smooth_change(finished_fract,
                                            current_level->finished_fract,
                                            0.005f);
             circ_mag *= finished_fract;
-            rot_x = circ_mag * cosf(current_time / circ_time_scale);
-            rot_y = circ_mag * sinf(current_time / circ_time_scale);
         } else {
             circ_mag *= bloom_fade;
             circ_mag *= fade;
+        }
+
+        if (current_level) {
+            rot_x = circ_mag * cosf(current_time / circ_time_scale);
+            rot_y = circ_mag * sinf(current_time / circ_time_scale);
+        } else {
             rot_x = circ_mag * -dir.x;
             rot_y = circ_mag * -dir.y;
         }
@@ -204,14 +208,23 @@ void background_draw(background_t *bg)
         float scale_rot = 3.0f;
         rot_z *= scale_rot * fade;
 
-        rlRotatef(rot_z, 0.0, 0.0, 1.0);
+        static float limit_rot_x = 0.0f;
+        static float limit_rot_y = 0.0f;
+        static float limit_rot_z = 0.0f;
+
+        float turn_limit = TAU/options->max_fps;
+        limit_rot_x = slew_limit(limit_rot_x, rot_x, turn_limit);
+        limit_rot_y = slew_limit(limit_rot_y, rot_y, turn_limit);
+        limit_rot_z = slew_limit(limit_rot_z, rot_z, turn_limit);
+
+        rlRotatef(limit_rot_z, 0.0, 0.0, 1.0);
 
         rlTranslatef(-window_size.x,
                      -window_size.y,
                      0.0);
 
-        rlRotatef(TO_DEGREES(rot_x), 1.0, 0.0, 0.0);
-        rlRotatef(TO_DEGREES(rot_y), 0.0, 1.0, 0.0);
+        rlRotatef(TO_DEGREES(limit_rot_x), 1.0, 0.0, 0.0);
+        rlRotatef(TO_DEGREES(limit_rot_y), 0.0, 1.0, 0.0);
 
         off = Vector2Add(off, Vector2Scale(dir, speed * bg->amp));
         off.x = fmodf(off.x, wrap_size);

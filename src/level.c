@@ -38,9 +38,6 @@
 #include "gui_random.h"
 #include "win_anim.h"
 #include "solver.h"
-#ifdef USE_PHYSICS
-#include "physics.h"
-#endif
 
 //#define DEBUG_DRAG_AND_DROP 1
 //#define DEBUG_LEVEL_FADE
@@ -260,10 +257,6 @@ static level_t *init_level(level_t *level)
     assert_not_null(level);
 
     memset(level, 0, sizeof(level_t));
-
-#ifdef USE_PHYSICS
-    level->physics = NULL;
-#endif
 
     level->center = LEVEL_CENTER_POSITION;
 
@@ -524,13 +517,6 @@ level_t *create_level(struct collection *collection)
 void destroy_level(level_t *level)
 {
     if (level) {
-#ifdef USE_PHYSICS
-        if (level->physics) {
-            destroy_physics(level->physics);
-            level->physics = NULL;
-        }
-#endif
-
         if (level->undo) {
             destroy_level_undo(level->undo);
             level->undo = NULL;
@@ -1962,4 +1948,6 @@ void level_reset_win_anim(level_t *level)
         tile_pos_reset_win_anim(solved_pos);
         tile_pos_reset_win_anim(unsolved_pos);
     }
+
+    printf("level_reset_win_anim()\n");
 }

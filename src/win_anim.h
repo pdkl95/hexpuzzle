@@ -22,6 +22,10 @@
 #ifndef WIN_ANIM_H
 #define WIN_ANIM_H
 
+#ifdef USE_PHYSICS
+#include "physics.h"
+#endif
+
 enum win_anim_mode {
     WIN_ANIM_MODE_SIMPLE        = 0,
     WIN_ANIM_MODE_POPS          = 1,
@@ -40,12 +44,16 @@ typedef enum win_anim_mode win_anim_mode_t;
 #endif
 
 struct win_anim {
+    int id;
     win_anim_mode_t mode;
     struct level *level;
     bool running;
     float fade[4];
     float start_time;
     float run_time;
+#ifdef USE_PHYSICS
+    physics_t physics;
+#endif
 };
 typedef struct win_anim win_anim_t;
 

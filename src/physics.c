@@ -27,10 +27,8 @@
 
 float gravity_strength = 250.0;
 
-physics_t *create_physics(struct level *level)
+void init_physics(physics_t *physics, struct level *level)
 {
-    physics_t *physics = calloc(1, sizeof(physics_t));
-
     physics->level = level;
 
     physics->state = PHYSICS_STOP;
@@ -65,6 +63,13 @@ physics_t *create_physics(struct level *level)
         cpSpaceAddShape(physics->space, physics->wall[i]);
     }
 
+    physics_reset(physics);
+}
+
+physics_t *create_physics(struct level *level)
+{
+    physics_t *physics = calloc(1, sizeof(physics_t));
+    init_physics(physics, level);
     return physics;
 }
 

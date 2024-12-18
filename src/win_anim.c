@@ -88,7 +88,7 @@ static void win_anim_update_physics(UNUSED win_anim_t *win_anim)
     level_t *level = win_anim->level;
 
     for (int i=0; i<4; i++) {
-        cpShape *wall = level->physics->wall[i];
+        cpShape *wall = win_anim.physics->wall[i];
 
         Vector2 a = cpVectToVector2(cpSegmentShapeGetA(wall));
         Vector2 b = cpVectToVector2(cpSegmentShapeGetB(wall));
@@ -298,7 +298,7 @@ static void win_anim_update_waves(win_anim_t *win_anim)
             /* fall through */
         case WIN_ANIM_MODE_PHYSICS_SWIRL:
             //assert(win_anim->level->finished);
-            //physics_start(win_anim->level->physics);
+            //physics_start(win_anim->win_anim.physics);
             break;
 
         default:
@@ -306,18 +306,23 @@ static void win_anim_update_waves(win_anim_t *win_anim)
         }
 #endif
 
-void init_win_anim(win_anim_t *win_anim)
+void init_win_anim(win_anim_t *win_anim, level_t *level)
 {
+    static int id_seq = 0;
+    id_seq++;
+    win_anim->id = id_seq;
+
+    win_anim->level = level;
+
     win_anim_select_random_mode(win_anim);
 
 #ifndef DEBUG_BUILD
         if (options->verbose) {
 #endif
-            infomsg("INIT win_anim %s", win_anim_mode_str(win_anim->mode));
+            infomsg(" INIT win_anim[%02d] %s", win_anim->id, win_anim_mode_str(win_anim->mode));
 #ifndef DEBUG_BUILD
         }
 #endif
-
 
     win_anim->running = false;
 
@@ -331,9 +336,7 @@ void init_win_anim(win_anim_t *win_anim)
     case WIN_ANIM_MODE_PHYSICS_FALL:
         /* fall through */
     case WIN_ANIM_MODE_PHYSICS_SWIRL:
-        if (win_anim->level->physics) {
-            physics_reset(win_anim->level->physics);
-        }
+        init_physics(&win_anim->physics, level);
         break;
 #endif
     default:
@@ -349,23 +352,16 @@ void win_anim_select_random_mode(win_anim_t *win_anim)
 win_anim_t *create_win_anim(struct level *level)
 {
     win_anim_t *win_anim = calloc(1, sizeof(win_anim_t));
-
-    win_anim->level = level;
-
-#ifdef USE_PHYSICS
-    if (!level->physics) {
-        level->physics = create_physics(level);
-    }
-#endif
-
-    init_win_anim(win_anim);
-
+    init_win_anim(win_anim, level);
     return win_anim;
 }
 
 void destroy_win_anim(win_anim_t *win_anim)
 {
-    SAFEFREE(win_anim);
+    if (win_anim) {
+        infomsg("DESTR win_anim[%02d] %s", win_anim->id, win_anim_mode_str(win_anim->mode));
+        FREE(win_anim);
+    }
 }
 
 void win_anim_update(win_anim_t *win_anim)
@@ -413,7 +409,7 @@ void win_anim_update(win_anim_t *win_anim)
     case WIN_ANIM_MODE_PHYSICS_FALL:
         /* fall through */
     case WIN_ANIM_MODE_PHYSICS_SWIRL:
-        physics_update(win_anim->level->physics);
+        physics_update(&win_anim->physics);
         win_anim_update_physics(win_anim);
         break;
 #endif
@@ -441,26 +437,20 @@ void win_anim_start(win_anim_t *win_anim)
 #ifndef DEBUG_BUILD
         if (options->verbose) {
 #endif
-            infomsg("START win_anim %s", win_anim_mode_str(win_anim->mode));
+            infomsg("START win_anim[%02d] %s", win_anim->id, win_anim_mode_str(win_anim->mode));
 #ifndef DEBUG_BUILD
         }
 #endif
         win_anim->running = true;
         win_anim->start_time = GetTime();
 
-#ifdef USE_PHYSICS
-       level_t *level = win_anim->level;
-#endif
-
-       switch (win_anim->mode) {
+        switch (win_anim->mode) {
 #ifdef USE_PHYSICS
         case WIN_ANIM_MODE_PHYSICS_FALL:
             /* fall through */
         case WIN_ANIM_MODE_PHYSICS_SWIRL:
-            if (level->physics) {
-                if (level->physics->tiles_ready) {
-                    physics_start(level->physics);
-                }
+            if (win_anim->physics.tiles_ready) {
+                physics_start(&win_anim->physics);
             }
             break;
 #endif
@@ -478,7 +468,7 @@ void win_anim_stop(win_anim_t *win_anim)
 #ifndef DEBUG_BUILD
         if (options->verbose) {
 #endif
-            infomsg("STOP win_anim %s", win_anim_mode_str(win_anim->mode));
+            infomsg(" STOP win_anim[%02d] %s", win_anim->id, win_anim_mode_str(win_anim->mode));
 #ifndef DEBUG_BUILD
         }
 #endif
@@ -488,9 +478,7 @@ void win_anim_stop(win_anim_t *win_anim)
         case WIN_ANIM_MODE_PHYSICS_FALL:
             /* fall through */
         case WIN_ANIM_MODE_PHYSICS_SWIRL:
-            if (win_anim->level->physics) {
-                physics_stop(win_anim->level->physics);
-            }
+            physics_stop(&win_anim->physics);
             break;
 #endif
         default:
@@ -498,5 +486,7 @@ void win_anim_stop(win_anim_t *win_anim)
         }
 
         win_anim->running = false;
+
+        level_reset_win_anim(win_anim->level);
     }
 }
