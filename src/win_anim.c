@@ -28,6 +28,8 @@
 #include "physics.h"
 #endif
 
+//#define DEBUG_TRACE_WIN_ANIM
+
 extern bool do_postprocessing;
 extern float bloom_amount;
 extern float warp_amount;
@@ -316,12 +318,14 @@ void init_win_anim(win_anim_t *win_anim, level_t *level)
 
     win_anim_select_random_mode(win_anim);
 
+#ifdef DEBUG_TRACE_WIN_ANIM
 #ifndef DEBUG_BUILD
-        if (options->verbose) {
+    if (options->verbose) {
 #endif
-            infomsg(" INIT win_anim[%02d] %s", win_anim->id, win_anim_mode_str(win_anim->mode));
+        infomsg(" INIT win_anim[%02d] %s", win_anim->id, win_anim_mode_str(win_anim->mode));
 #ifndef DEBUG_BUILD
-        }
+    }
+#endif
 #endif
 
     win_anim->running = false;
@@ -347,6 +351,8 @@ void init_win_anim(win_anim_t *win_anim, level_t *level)
 void win_anim_select_random_mode(win_anim_t *win_anim)
 {
     win_anim->mode = global_rng_get(WIN_ANIM_MODE_COUNT);
+
+    win_anim->mode = WIN_ANIM_MODE_PHYSICS_SWIRL;
 }
 
 win_anim_t *create_win_anim(struct level *level)
@@ -359,7 +365,9 @@ win_anim_t *create_win_anim(struct level *level)
 void destroy_win_anim(win_anim_t *win_anim)
 {
     if (win_anim) {
+#ifdef DEBUG_TRACE_WIN_ANIM
         infomsg("DESTR win_anim[%02d] %s", win_anim->id, win_anim_mode_str(win_anim->mode));
+#endif
         FREE(win_anim);
     }
 }
@@ -434,12 +442,14 @@ void win_anim_start(win_anim_t *win_anim)
     assert_not_null(win_anim);
 
     if (!win_anim->running) {
+#ifdef DEBUG_TRACE_WIN_ANIM
 #ifndef DEBUG_BUILD
         if (options->verbose) {
 #endif
             infomsg("START win_anim[%02d] %s", win_anim->id, win_anim_mode_str(win_anim->mode));
 #ifndef DEBUG_BUILD
         }
+#endif
 #endif
         win_anim->running = true;
         win_anim->start_time = GetTime();
@@ -449,9 +459,7 @@ void win_anim_start(win_anim_t *win_anim)
         case WIN_ANIM_MODE_PHYSICS_FALL:
             /* fall through */
         case WIN_ANIM_MODE_PHYSICS_SWIRL:
-            if (win_anim->physics.tiles_ready) {
-                physics_start(&win_anim->physics);
-            }
+            physics_start(&win_anim->physics);
             break;
 #endif
         default:
@@ -465,12 +473,14 @@ void win_anim_stop(win_anim_t *win_anim)
     assert_not_null(win_anim);
 
     if (win_anim->running) {
+#ifdef DEBUG_TRACE_WIN_ANIM
 #ifndef DEBUG_BUILD
         if (options->verbose) {
 #endif
             infomsg(" STOP win_anim[%02d] %s", win_anim->id, win_anim_mode_str(win_anim->mode));
 #ifndef DEBUG_BUILD
         }
+#endif
 #endif
 
         switch (win_anim->mode) {

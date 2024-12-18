@@ -337,6 +337,12 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
 #if 0
 #ifdef USE_PHYSICS
     DrawLineEx(VEC2_ZERO, Vector2Scale(pos->physics_velocity, 0.2), 3.0, PINK);
+
+    if (pos->tile->physics_tile) {
+        float energy = cpBodyKineticEnergy(pos->tile->physics_tile->body);
+        energy *= 0.0001;
+        DrawCircleGradient(0.0f, 0.0f, energy, BLANK, YELLOW);
+    }
 #endif
 #endif
 

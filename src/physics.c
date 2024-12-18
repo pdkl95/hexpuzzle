@@ -204,7 +204,7 @@ static bool constrain_random_spanning_tree(physics_t *physics, tile_t *tile, hex
                 Vector2TocpVect(neighbor_tile->unsolved_pos->rel.midpoints[opposite_dir]),
                 2.0f,
                 120.0f,
-                25.0f);
+                125.0f);
 
             cpConstraintSetMaxForce(c2, 10000);
             //cpConstraintSetMaxBias(c2, 1)
@@ -226,7 +226,13 @@ static cpVect tile_spin_velocity(physics_tile_t *pt)
     cpVect pos = cpBodyGetPosition(pt->body);
     cpVect vel = cpBodyGetVelocity(pt->body);
     cpVect v = cpv(-pos.y, pos.x);
-    v = cpvadd(v, vel);
+    cpVect nv = cpvnormalize(v);
+    float plen = cpvlength(pos);
+    plen = sqrtf(plen);
+    plen = MAX(plen, 25.0f);
+    plen *= 2.0;
+    nv = cpvmult(nv, plen);
+    v = cpvadd(nv, vel);
     return v;
 }
 
@@ -246,6 +252,7 @@ void physics_build_tiles(physics_t *physics)
     if (physics->tiles_ready) {
         return;
     }
+    //printf("physics_build_tiles()\n");
 
     level_t *level = physics->level;
     win_anim_mode_t mode = level->win_anim->mode;
@@ -337,6 +344,11 @@ void physics_reset(physics_t *physics)
 {
     assert_not_null(physics);
 
+    if (!physics->tiles_ready) {
+        //printf("SKIP physics_reset()\n");
+        return;
+    }
+    //printf("physics_reset()\n");
     level_t *level = physics->level;
 
     for (int i=0; i<physics->num_tiles; i++) {
@@ -368,10 +380,14 @@ void physics_start(physics_t *physics)
     assert_not_null(physics);
 
     if (physics->state == PHYSICS_RUNNING) {
+        //printf("SKIP physics_start()\n");
         return;
     }
+    //printf("physics_start()\n");
 
-    physics_build_tiles(physics);
+    if (!physics->tiles_ready) {
+        physics_build_tiles(physics);
+    }
 
     physics->state = PHYSICS_RUNNING;
     physics_reset(physics);
@@ -382,8 +398,10 @@ void physics_stop(physics_t *physics)
     assert_not_null(physics);
 
     if (physics->state == PHYSICS_STOP) {
+        //printf("SKIP physics_stop()\n");
         return;
     }
+    //printf("physics_stop()\n");
 
     physics->state = PHYSICS_STOP;
 

@@ -30,6 +30,9 @@
 
 struct tile_pos;
 struct level;
+#ifdef USE_PHYSICS
+struct physics_tile;
+#endif
 
 struct tile_flags {
     bool enabled;
@@ -59,7 +62,9 @@ struct tile {
     struct tile_pos *solved_pos;
     struct tile_pos *unsolved_pos;
 
+#ifdef USE_PHYSICS
     struct physics_tile *physics_tile;
+#endif
 };
 typedef struct tile tile_t;
 
