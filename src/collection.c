@@ -586,7 +586,7 @@ bool collection_add_level_file(collection_t *collection, const char *filename)
     }
 }
 
-level_t *collection_get_level_after(collection_t *collection, level_t *level)
+level_t *collection_get_level_after(UNUSED collection_t *collection, level_t *level)
 {
     assert_not_null(collection);
     assert_not_null(level);

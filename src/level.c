@@ -1541,9 +1541,6 @@ void level_solve_tile(level_t *level, hex_axial_t position, bool save_to_undo)
     tile_t *tile = level_get_tile(level, position);
     assert_not_null(tile);
 
-    tile_pos_t *pos = tile->unsolved_pos;
-    assert_not_null(pos);
-
     hex_axial_t solved_p   = tile->solved_pos->position;
     hex_axial_t unsolved_p = tile->unsolved_pos->position;
 

@@ -424,7 +424,7 @@ void win_anim_update(win_anim_t *win_anim)
     }
 }
 
-void win_anim_draw(win_anim_t *win_anim)
+void win_anim_draw(UNUSED win_anim_t *win_anim)
 {
     assert_not_null(win_anim);
 }
