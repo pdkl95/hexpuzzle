@@ -850,7 +850,7 @@ static void collection_move_level_later(collection_t *collection, int level_idx)
     collection->changed = true;
 }
 
-static void cellection_launch_active_gui_list_level(collection_t *collection, bool edit)
+void cellection_launch_active_gui_list_level(collection_t *collection, bool edit)
 {
     level_t *level = collection->levels;
     int n = collection->gui_list_active;

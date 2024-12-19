@@ -78,7 +78,56 @@ void resize_gui_collection(void)
         + PANEL_INNER_MARGIN;
 }
 
+static int draw_play_button(void)
+{
+    int rv = -1;
+
+    set_big_button_font();
+
+    bool disable_button = true;
+    if (current_collection) {
+        if (current_collection->gui_list_active != -1) {
+            disable_button = false;
+        }
+    }
+
+    if (disable_button) {
+        GuiDisable();
+    }
+
+    if (GuiButton(collection_play_button_rect, collection_play_button_text)) {
+        if (current_collection->gui_list_active >= 0 && current_collection->gui_list_active < current_collection->level_count) {
+            rv = current_collection->gui_list_active;
+            goto play_button_cleanup;
+        }
+    }
+
+    if (mouse_left_doubleclick) {
+        if (current_collection->gui_list_active >= 0 && current_collection->gui_list_active < current_collection->level_count) {
+            rv = current_collection->gui_list_active;
+            goto play_button_cleanup;
+        }
+    }
+
+  play_button_cleanup:
+    if (disable_button) {
+        GuiEnable();
+    }
+
+    set_default_font();
+
+    return rv;
+}
+
 void draw_gui_collection(void)
 {
     GuiPanel(collection_panel_rect, collection_panel_text);
+
+    int selected = draw_play_button();
+    bool preview_clicked = draw_level_preview(collection_preview_level, collection_preview_rect);
+
+    if ((selected > -1) || preview_clicked) {
+        cellection_launch_active_gui_list_level(current_collection,
+                                                game_mode == GAME_MODE_EDIT_COLLECTION);
+    }
 }
