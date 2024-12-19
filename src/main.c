@@ -890,7 +890,9 @@ Rectangle goto_next_seed_no_preview_panel_rect;
 Rectangle goto_next_seed_label_rect;
 Rectangle goto_next_seed_button_rect;
 Rectangle goto_next_seed_preview_rect;
+Rectangle main_gui_area_rect;
 
+float right_side_width;
 float tool_panel_content_height;
 
 Vector2 edit_radius_label_location;
@@ -1327,6 +1329,13 @@ void gui_setup(void)
         right_side_button_rect[i].width  = right_side_button_rect[i-1].width;
         right_side_button_rect[i].height = ICON_BUTTON_SIZE;
     }
+
+    right_side_width = right_side_button_rect[0].width + (2 * WINDOW_MARGIN);
+
+    main_gui_area_rect.x      = WINDOW_MARGIN;
+    main_gui_area_rect.y      = WINDOW_MARGIN;
+    main_gui_area_rect.width  = window_size.x - WINDOW_MARGIN - right_side_width;
+    main_gui_area_rect.height = window_size.y - (2 * WINDOW_MARGIN);
 
     Vector2 open_file_button_text_size = measure_gui_text(open_file_button_text_str);
     open_file_button_rect.x      = window_size.x - WINDOW_MARGIN - ICON_BUTTON_SIZE - open_file_button_text_size.x;

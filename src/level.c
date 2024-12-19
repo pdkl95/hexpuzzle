@@ -1946,5 +1946,5 @@ void level_reset_win_anim(level_t *level)
         tile_pos_reset_win_anim(unsolved_pos);
     }
 
-    printf("level_reset_win_anim()\n");
+    //printf("level_reset_win_anim()\n");
 }

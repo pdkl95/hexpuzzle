@@ -21,13 +21,16 @@
 
 #include "common.h"
 #include "options.h"
+#include "level.h"
 #include "collection.h"
 #include "gui_browser.h"
 
+extern Rectangle main_gui_area_rect;
 extern char *home_dir;
 
 void open_game_file(const char *path);
 void open_classics_game_pack(int n);
+bool draw_level_preview(level_t *level, Rectangle bounds);
 
 enum gui_list_entry_type {
     ENTRY_TYPE_NULL = 0,
@@ -56,6 +59,11 @@ struct gui_list_vars {
 
     int count;
 
+    Rectangle *list_rect;
+    Rectangle *list_rect_preview;
+    Rectangle *btn_rect;
+    Rectangle *btn_rect_preview;
+
     int scroll_index;
     int active;
     int focus;
@@ -63,11 +71,15 @@ struct gui_list_vars {
 typedef struct gui_list_vars gui_list_vars_t;
 
 Rectangle browser_panel_rect;
+Rectangle browser_preview_rect;
 Rectangle browser_tabbar_rect;
 Rectangle browser_area_rect;
 Rectangle browser_list_rect;
 Rectangle browser_play_button_rect;
+Rectangle browser_list_with_preview_rect;
+Rectangle browser_play_button_with_preview_rect;
 Rectangle local_files_list_rect;
+Rectangle local_files_list_with_preview_rect;
 Rectangle local_files_dir_label_rect;
 Rectangle local_files_dir_rect;
 Rectangle local_files_up_button_rect;
@@ -96,12 +108,16 @@ gui_list_entry_t classics_entries[] = {
 #define NUM_CLASSICS_NAMES (sizeof(classics_entries)/sizeof(gui_list_entry_t))
 
 gui_list_vars_t classics = {
-    .names        = NULL,
-    .entries      = classics_entries,
-    .count        = NUM_CLASSICS_NAMES,
-    .scroll_index = -1,
-    .active       = -1,
-    .focus        = -1
+    .names             = NULL,
+    .entries           = classics_entries,
+    .count             = NUM_CLASSICS_NAMES,
+    .list_rect         = &browser_list_rect,
+    .list_rect_preview = &browser_list_with_preview_rect,
+    .btn_rect          = &browser_play_button_rect,
+    .btn_rect_preview  = &browser_play_button_with_preview_rect,
+    .scroll_index      = -1,
+    .active            = -1,
+    .focus             = -1
 };
 
 extern char *nvdata_default_browse_path;
@@ -110,18 +126,24 @@ char *browse_path = NULL;
 FilePathList browse_file_list;
 
 gui_list_vars_t local_files = {
-    .names        = NULL,
-    .entries      = NULL,
-    .count        = 0,
-    .scroll_index = -1,
-    .active       = -1,
-    .focus        = -1
+    .names             = NULL,
+    .entries           = NULL,
+    .count             = 0,
+    .list_rect         = &local_files_list_rect,
+    .list_rect_preview = &local_files_list_with_preview_rect,
+    .btn_rect          = &browser_play_button_rect,
+    .btn_rect_preview  = &browser_play_button_with_preview_rect,
+    .scroll_index      = -1,
+    .active            = -1,
+    .focus             = -1
 };
 
 #define NUM_TABS 3
 const char *browser_tabbar_text[NUM_TABS];
 
 int active_tab = 0;
+
+level_t *browse_preview_level;
 
 const char *entry_type_str(gui_list_entry_type_t type)
 {
@@ -386,14 +408,20 @@ void cleanup_gui_browser(void)
 
 void resize_gui_browser(void)
 {
-    browser_panel_rect.width  = window_size.x * 0.7;
-    browser_panel_rect.height = window_size.y * 0.8;
+    browser_panel_rect = main_gui_area_rect;
 
-    MINVAR(browser_panel_rect.width,  400);
-    MINVAR(browser_panel_rect.height, 450);
-
-    browser_panel_rect.x = (window_size.x / 2) - (browser_panel_rect.width  / 2);
-    browser_panel_rect.y = (window_size.y / 2) - (browser_panel_rect.height / 2);
+    browser_preview_rect.width  = BROWSER_LEVEL_PREVIEW_SIZE;
+    browser_preview_rect.height = BROWSER_LEVEL_PREVIEW_SIZE;
+    browser_preview_rect.x =
+        main_gui_area_rect.x
+        + main_gui_area_rect.width
+        - browser_preview_rect.width
+        - PANEL_INNER_MARGIN;
+    browser_preview_rect.y =
+        main_gui_area_rect.y
+        + main_gui_area_rect.height
+        - browser_preview_rect.height
+        - PANEL_INNER_MARGIN;
 
     float panel_bottom = browser_panel_rect.y + browser_panel_rect.height;
 
@@ -420,6 +448,9 @@ void resize_gui_browser(void)
     browser_play_button_rect.y = area_bottom - browser_play_button_rect.height;
     browser_play_button_rect.width  = browser_area_rect.width;
 
+    browser_play_button_with_preview_rect = browser_play_button_rect;
+    browser_play_button_with_preview_rect.width -= browser_preview_rect.width + (2 * PANEL_INNER_MARGIN);
+
     area_bottom -= browser_play_button_rect.height;
     area_bottom -= 2 * PANEL_INNER_MARGIN;
 
@@ -427,6 +458,9 @@ void resize_gui_browser(void)
     browser_list_rect.y      = browser_area_rect.y + PANEL_INNER_MARGIN;
     browser_list_rect.width  = browser_area_rect.width;
     browser_list_rect.height = area_bottom - browser_list_rect.y;
+
+    browser_list_with_preview_rect = browser_list_rect;
+    browser_list_with_preview_rect.height -= browser_preview_rect.height + (2 * PANEL_INNER_MARGIN);
 
     Vector2 local_files_dir_label_text_size = measure_gui_text(local_files_dir_label_text);
 
@@ -479,16 +513,24 @@ void resize_gui_browser(void)
     local_files_list_rect.y      = browser_area_rect.y;
     local_files_list_rect.width  = browser_area_rect.width;
     local_files_list_rect.height = area_bottom - local_files_list_rect.y;
+
+    local_files_list_with_preview_rect = local_files_list_rect;
+    local_files_list_with_preview_rect.height -= browser_preview_rect.height + (2 * PANEL_INNER_MARGIN);
 }
 
-void draw_gui_browser_list(gui_list_vars_t *list, Rectangle list_rect)
+void draw_gui_browser_list(gui_list_vars_t *list)
 {
     GuiSetStyle(LISTVIEW, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
 
     int save_bg_color = GuiGetStyle(DEFAULT, BACKGROUND_COLOR);
     GuiSetStyle(DEFAULT, BACKGROUND_COLOR, GuiGetStyle(STATUSBAR, BASE_COLOR_NORMAL));
 
-    GuiListViewEx(list_rect,
+    Rectangle *list_rect =
+        browse_preview_level
+        ? list->list_rect_preview
+        : list->list_rect;
+
+    GuiListViewEx(*list_rect,
                   (const char **)list->names,
                   list->count,
                   &list->scroll_index,
@@ -510,7 +552,12 @@ int draw_gui_browser_big_button(gui_list_vars_t *list, const char *button_text)
         GuiDisable();
     }
 
-    if (GuiButton(browser_play_button_rect, button_text)) {
+    Rectangle *btn_rect =
+        browse_preview_level
+        ? list->btn_rect_preview
+        : list->btn_rect;
+
+    if (GuiButton(*btn_rect, button_text)) {
         if (list->active >= 0 && list->active < list->count) {
             rv = list->active;
             goto big_button_cleanup;
@@ -535,7 +582,7 @@ int draw_gui_browser_big_button(gui_list_vars_t *list, const char *button_text)
 
 void draw_gui_browser_classics(void)
 {
-    draw_gui_browser_list(&classics, browser_list_rect);
+    draw_gui_browser_list(&classics);
 
     int selected = draw_gui_browser_big_button(&classics, browser_play_button_text);
 
@@ -562,7 +609,7 @@ void draw_gui_browser_local_level_file(void)
         change_gui_browser_path_to_home();
     }
 
-    draw_gui_browser_list(&local_files, local_files_list_rect);
+    draw_gui_browser_list(&local_files);
 
     char *button_text =  browser_play_button_text;
     gui_list_entry_t *entry = &(local_files.entries[local_files.active]);
@@ -609,6 +656,10 @@ void draw_gui_browser(void)
         draw_gui_browser_local_level_file();
         break;
 #endif
+    }
+
+    if (browse_preview_level) {
+        draw_level_preview(browse_preview_level, browser_preview_rect);
     }
 }
 
