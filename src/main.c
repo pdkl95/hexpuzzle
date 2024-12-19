@@ -54,6 +54,7 @@
 
 #include "gui_title.h"
 #include "gui_browser.h"
+#include "gui_collection.h"
 #include "gui_options.h"
 #include "gui_random.h"
 #include "background.h"
@@ -577,6 +578,7 @@ do_resize(
     gui_setup();
     resize_gui_title();
     resize_gui_browser();
+    resize_gui_collection();
     resize_gui_options();
     resize_gui_random();
 
@@ -2184,9 +2186,7 @@ static void draw_gui(void)
     case GAME_MODE_PLAY_COLLECTION:
         /* fall through */
     case GAME_MODE_EDIT_COLLECTION:
-        if (current_collection) {
-            collection_draw(current_collection);
-        }
+        draw_gui_collection();
         break;
 
     default:
@@ -2493,6 +2493,7 @@ static void game_init(void)
     init_gui_options();
     init_nvdata();
     init_gui_browser();
+    init_gui_collection();
     init_gui_random();
     init_gui_title();
 
@@ -2538,6 +2539,7 @@ static void game_cleanup(void)
     save_nvdata();
 
     cleanup_gui_random();
+    cleanup_gui_collection();
     cleanup_gui_browser();
     cleanup_gui_title();
     cleanup_nvdata();

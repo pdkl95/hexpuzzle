@@ -25,7 +25,6 @@
 #include "collection.h"
 #include "gui_browser.h"
 
-extern Rectangle main_gui_area_rect;
 extern char *home_dir;
 
 void open_game_file(const char *path);
@@ -86,7 +85,7 @@ Rectangle local_files_up_button_rect;
 Rectangle local_files_home_button_rect;
 Rectangle local_files_local_saved_levels_button_rect;
 
-char browser_panel_text[] = "Browser";
+char browser_panel_text[] = "Browse Levels";
 char browser_play_button_text[] = "Play";
 char browser_open_button_text[] = "Open";
 

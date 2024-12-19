@@ -167,6 +167,7 @@ static inline IVector2 vector2_to_ivector2(Vector2 vec)
 extern IVector2 window_size;
 extern Vector2 window_center;
 extern float window_corner_dist;
+extern Rectangle main_gui_area_rect;
 
 extern IVector2 mouse_position;
 extern Vector2 mouse_positionf;
