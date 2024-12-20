@@ -20,6 +20,9 @@
  ****************************************************************************/
 
 #include "common.h"
+
+#include "sglib/sglib.h"
+
 #include "level.h"
 #include "collection.h"
 #include "gui_collection.h"
@@ -29,15 +32,27 @@ bool draw_level_preview(level_t *level, Rectangle bounds);
 Rectangle collection_panel_rect;
 Rectangle collection_preview_rect;
 Rectangle collection_list_rect;
+Rectangle collection_new_button_rect;
 Rectangle collection_play_button_rect;
+Rectangle collection_edit_button_rect;
+Rectangle collection_name_label_rect;
+Rectangle collection_name_value_rect;
+
+Vector2 collection_name_value_location;
+
+Color name_value_bg_color;
 
 char collection_panel_text[] = "Level Collection";
+char collection_new_button_text[] = "New\nLevel";
 char collection_play_button_text[] = "Play";
+char collection_edit_button_text[] = "Edit";
+char collection_name_label_text[] = "Name";
 
 level_t *collection_preview_level;
 
 void init_gui_collection(void)
 {
+    name_value_bg_color = ColorBrightness(tile_bg_color, -0.25);
     resize_gui_collection();
 }
 
@@ -49,10 +64,14 @@ void resize_gui_collection(void)
 {
     collection_panel_rect = main_gui_area_rect;
 
+    Vector2 collection_new_button_text_size  = measure_big_button_text(collection_new_button_text);
     Vector2 collection_play_button_text_size = measure_big_button_text(collection_play_button_text);
+    Vector2 collection_edit_button_text_size = measure_big_button_text(collection_edit_button_text);
 
     float preview_play_width = MAX(COLLECTION_LEVEL_PREVIEW_SIZE,
                                    collection_play_button_text_size.x);
+    preview_play_width = MAX(preview_play_width, collection_new_button_text_size.x);
+    preview_play_width = MAX(preview_play_width, collection_edit_button_text_size.x);
 
     collection_preview_rect.width  = preview_play_width;
     collection_preview_rect.height = COLLECTION_LEVEL_PREVIEW_SIZE;
@@ -76,9 +95,246 @@ void resize_gui_collection(void)
         collection_preview_rect.y
         + collection_preview_rect.height
         + PANEL_INNER_MARGIN;
+
+    collection_edit_button_rect.width  = preview_play_width;
+    collection_edit_button_rect.height = collection_edit_button_text_size.y + WINDOW_MARGIN;
+    collection_edit_button_rect.x = collection_play_button_rect.x;
+    collection_edit_button_rect.y =
+        collection_play_button_rect.y
+        + collection_play_button_rect.height
+        + PANEL_INNER_MARGIN;
+
+    collection_new_button_rect.width  = preview_play_width;
+    collection_new_button_rect.height = (1 * collection_new_button_text_size.y) + WINDOW_MARGIN;
+    collection_new_button_rect.x = collection_preview_rect.x;
+    collection_new_button_rect.y =
+        collection_preview_rect.y
+        - collection_new_button_rect.height
+        - (3 * PANEL_INNER_MARGIN);
+
+    Vector2 collection_name_label_text_size = measure_gui_text(collection_name_label_text);
+
+    collection_name_label_rect.x      = collection_panel_rect.x + PANEL_INNER_MARGIN;
+    collection_name_label_rect.y      = collection_panel_rect.y + PANEL_INNER_MARGIN + TOOL_BUTTON_HEIGHT;
+    collection_name_label_rect.width  = collection_name_label_text_size.x + 5;
+    collection_name_label_rect.height = collection_name_label_text_size.y;
+
+    collection_name_value_rect.x      = collection_name_label_rect.x + collection_name_label_rect.width + PANEL_INNER_MARGIN;
+    collection_name_value_rect.y      = collection_name_label_rect.y;
+    collection_name_value_rect.width  = collection_panel_rect.width - collection_name_label_rect.width - (3 * PANEL_INNER_MARGIN);
+    collection_name_value_rect.height = collection_name_label_rect.height + 7;
+
+    collection_name_value_location = getVector2FromRectangle(collection_name_value_rect);
+    collection_name_value_location.x += 4;
+    collection_name_value_location.y += 1;
+    collection_name_label_rect.y += 3;
+
+    collection_list_rect.x      = collection_name_label_rect.x;
+    collection_list_rect.y      = collection_name_label_rect.y + collection_name_label_rect.height + PANEL_INNER_MARGIN;
+    collection_list_rect.width  = collection_play_button_rect.x - collection_list_rect.x - PANEL_INNER_MARGIN;
+    collection_list_rect.height = collection_panel_rect.height - (collection_list_rect.y - collection_panel_rect.y) - PANEL_INNER_MARGIN;
 }
 
-static int draw_play_button(void)
+static level_t *collection_find_level_by_idx(collection_t *collection, int level_idx)
+{
+    level_t *p = collection->levels;
+
+    while (p && level_idx > 0) {
+        p = p->next;
+        level_idx--;
+    }
+
+    return p;
+}
+
+static level_t *collection_find_active_levwl(collection_t *collection)
+{
+    return collection_find_level_by_idx(collection,
+                                        collection->gui_list_active);
+}
+
+static void collection_check_gui_list_active_bounds(collection_t *collection)
+{
+    if (collection->gui_list_active < 0) {
+        collection->gui_list_active = 0;
+    }
+    if (collection->gui_list_active >= collection->level_count) {
+        collection->gui_list_active = collection->level_count - 1;
+    }
+}
+
+static void collection_move_level_earlier(collection_t *collection, int level_idx)
+{
+    level_t *level = collection_find_level_by_idx(collection, level_idx);
+    if (!level) {
+        return;
+    }
+
+    level_t *target = level->prev;
+    if (!target) {
+        return;
+    }
+
+    SGLIB_DL_LIST_DELETE(level_t, collection->levels, level, prev, next);
+    SGLIB_DL_LIST_ADD_BEFORE(level_t, target, level, prev, next);
+
+    level_t *first;
+    SGLIB_DL_LIST_GET_FIRST(level_t, target, prev, next, first);
+    collection->levels = first;
+
+    collection_update_level_names(collection);
+
+    collection->gui_list_active = level_idx - 1;
+    collection_check_gui_list_active_bounds(collection);
+
+    collection->changed = true;
+}
+
+static void collection_move_level_later(collection_t *collection, int level_idx)
+{
+    level_t *level = collection_find_level_by_idx(collection, level_idx);
+    if (!level) {
+        return;
+    }
+
+    level_t *target = level->next;
+    if (!target) {
+        return;
+    }
+
+    SGLIB_DL_LIST_DELETE(level_t, collection->levels, level, prev, next);
+    SGLIB_DL_LIST_ADD_AFTER(level_t, target, level, prev, next);
+
+    level_t *first;
+    SGLIB_DL_LIST_GET_FIRST(level_t, target, prev, next, first);
+    collection->levels = first;
+
+    collection_update_level_names(collection);
+
+    collection->gui_list_active = level_idx + 1;
+    collection_check_gui_list_active_bounds(collection);
+
+    collection->changed = true;
+}
+
+static void draw_move_buttons(Rectangle bounds)
+{
+    collection_t *collection = current_collection;
+
+    int count = collection->level_count;
+    int *scrollIndex = &collection->gui_list_scroll_index;
+
+    /* adapted from GuiListViewEx() */
+    bool useScrollBar = false;
+    if ((GuiGetStyle(LISTVIEW, LIST_ITEMS_HEIGHT) + GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING))*count > bounds.height) useScrollBar = true;
+
+    Rectangle itemBounds = { 0 };
+    itemBounds.x = bounds.x + GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING);
+    itemBounds.y = bounds.y + GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING) + GuiGetStyle(DEFAULT, BORDER_WIDTH);
+    itemBounds.width = bounds.width - 2*GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING) - GuiGetStyle(DEFAULT, BORDER_WIDTH);
+    itemBounds.height = (float)GuiGetStyle(LISTVIEW, LIST_ITEMS_HEIGHT);
+    if (useScrollBar) itemBounds.width -= GuiGetStyle(LISTVIEW, SCROLLBAR_WIDTH);
+
+    int visibleItems = (int)bounds.height/(GuiGetStyle(LISTVIEW, LIST_ITEMS_HEIGHT) + GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING));
+    if (visibleItems > count) visibleItems = count;
+
+    int startIndex = (scrollIndex == NULL)? 0 : *scrollIndex;
+    if ((startIndex < 0) || (startIndex > (count - visibleItems))) startIndex = 0;
+
+    char btn_text[1024];
+
+    Rectangle defered_draw_btn_rect;
+    char defered_draw_btn_text[1024];
+    char *defered_draw_btn_tt   = NULL;
+
+    itemBounds.x -= 64;
+
+    for (int i = 0; i < visibleItems; i++) {
+        float ymargin = (itemBounds.height - RAYGUI_ICON_SIZE) / 2.0f;
+        Rectangle up_btn_rect = {
+            .x = itemBounds.x + itemBounds.width + 1 * (RAYGUI_ICON_SIZE),
+            .y = itemBounds.y + ymargin,
+            .width  = RAYGUI_ICON_SIZE,
+            .height = RAYGUI_ICON_SIZE
+        };
+        Rectangle down_btn_rect = {
+            .x = itemBounds.x + itemBounds.width + 2.5 * (RAYGUI_ICON_SIZE),
+            .y = itemBounds.y + ymargin,
+            .width  = RAYGUI_ICON_SIZE,
+            .height = RAYGUI_ICON_SIZE
+        };
+
+        if (i > 0) {
+            strncpy(btn_text, GuiIconText(ICON_ARROW_UP, NULL), 1024);
+            btn_text[1023] = '\0';
+
+            if (CheckCollisionPointRec(mouse_positionf, up_btn_rect)) {
+                defered_draw_btn_rect = up_btn_rect;
+                memcpy(defered_draw_btn_text, btn_text, 1024);
+                defered_draw_btn_tt = "Move Up";
+            }
+
+            if (GuiButton(up_btn_rect, btn_text)) {
+                collection_move_level_earlier(collection, i);
+            }
+        }
+
+        if (i < visibleItems - 1) {
+            strncpy(btn_text, GuiIconText(ICON_ARROW_DOWN, NULL), 1024);
+            btn_text[1023] = '\0';
+
+            if (CheckCollisionPointRec(mouse_positionf, down_btn_rect)) {
+                defered_draw_btn_rect = down_btn_rect;
+                memcpy(defered_draw_btn_text, btn_text, 1024);
+                defered_draw_btn_tt = "Move Down";
+            }
+
+            if (GuiButton(down_btn_rect, btn_text)) {
+                collection_move_level_later(collection, i);
+            }
+        }
+
+        if (defered_draw_btn_tt) {
+            GuiEnableTooltip();
+            GuiSetTooltip(defered_draw_btn_tt);
+
+            GuiButton(defered_draw_btn_rect, defered_draw_btn_text);
+
+            GuiDisableTooltip();
+            GuiSetTooltip(NULL);
+        }
+
+        itemBounds.y += (GuiGetStyle(LISTVIEW, LIST_ITEMS_HEIGHT) + GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING));
+    }
+}
+
+static void draw_level_list(void)
+{
+    assert_not_null(current_collection);
+
+    GuiSetStyle(LISTVIEW, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
+
+    int save_bg_color = GuiGetStyle(DEFAULT, BACKGROUND_COLOR);
+    GuiSetStyle(DEFAULT, BACKGROUND_COLOR, GuiGetStyle(STATUSBAR, BASE_COLOR_NORMAL));
+
+    GuiListViewEx(collection_list_rect,
+                  current_collection->level_names,
+                  current_collection->level_count,
+                  &current_collection->gui_list_scroll_index,
+                  &current_collection->gui_list_active,
+                  &current_collection->gui_list_focus);
+#if 0
+    printf("LIST[n=%d] scroll_index=%d, active=%d, focus=%d\n",
+           current_collection->level_count,
+           current_collection->gui_list_scroll_index,
+           current_collection->gui_list_active,
+           current_collection->gui_list_focus);
+#endif
+
+    GuiSetStyle(DEFAULT, BACKGROUND_COLOR, save_bg_color);
+}
+
+static int draw_big_button(Rectangle bounds, const char *text, bool do_doubleclick)
 {
     int rv = -1;
 
@@ -95,14 +351,14 @@ static int draw_play_button(void)
         GuiDisable();
     }
 
-    if (GuiButton(collection_play_button_rect, collection_play_button_text)) {
+    if (GuiButton(bounds, text)) {
         if (current_collection->gui_list_active >= 0 && current_collection->gui_list_active < current_collection->level_count) {
             rv = current_collection->gui_list_active;
             goto play_button_cleanup;
         }
     }
 
-    if (mouse_left_doubleclick) {
+    if (do_doubleclick && mouse_left_doubleclick) {
         if (current_collection->gui_list_active >= 0 && current_collection->gui_list_active < current_collection->level_count) {
             rv = current_collection->gui_list_active;
             goto play_button_cleanup;
@@ -119,15 +375,62 @@ static int draw_play_button(void)
     return rv;
 }
 
+static void draw_edit_mode_buttons(void)
+{
+    int selected = draw_big_button(collection_edit_button_rect, collection_edit_button_text, false);
+    if (selected > -1) {
+        level_t *level = collection_find_active_levwl(current_collection);
+        if (level) {
+            level_edit(level);
+        }
+    }
+
+    set_panel_font();
+
+    if (GuiButton(collection_new_button_rect, collection_new_button_text)) {
+        printf("new level\n");
+    }
+
+    set_default_font();
+}
+
+void gui_collection_update_level_preview(void)
+{
+    assert_not_null(current_collection);
+    if (current_collection->gui_list_active < 0) {
+        current_collection->gui_list_active = 0;
+    }
+    collection_preview_level = collection_find_active_levwl(current_collection);
+}
+
 void draw_gui_collection(void)
 {
+    assert_not_null(current_collection);
+
     GuiPanel(collection_panel_rect, collection_panel_text);
 
-    int selected = draw_play_button();
+    GuiLabel(collection_name_label_rect, collection_name_label_text);
+    DrawRectangleRec(collection_name_value_rect, name_value_bg_color);
+    draw_panel_text(collection_name(current_collection), collection_name_value_location, panel_header_text_color);
+
+    int old_active = current_collection->gui_list_active;
+
+    draw_level_list();
+
+    if (game_mode == GAME_MODE_EDIT_COLLECTION) {
+        draw_move_buttons(collection_list_rect);
+        draw_edit_mode_buttons();
+    }
+
+    int selected = draw_big_button(collection_play_button_rect, collection_play_button_text, true);
     bool preview_clicked = draw_level_preview(collection_preview_level, collection_preview_rect);
 
     if ((selected > -1) || preview_clicked) {
-        cellection_launch_active_gui_list_level(current_collection,
-                                                game_mode == GAME_MODE_EDIT_COLLECTION);
+        level_t *level = collection_find_active_levwl(current_collection);
+        if (level) {
+            level_play(level);
+        }
+    } else if (current_collection->gui_list_active != old_active) {
+        gui_collection_update_level_preview();
     }
 }

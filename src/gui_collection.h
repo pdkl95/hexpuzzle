@@ -26,6 +26,7 @@ void init_gui_collection(void);
 void cleanup_gui_collection(void);
 void resize_gui_collection(void);
 void draw_gui_collection(void);
+void gui_collection_update_level_preview(void);
 
 #endif /*GUI_COLLECTION_H*/
 

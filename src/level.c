@@ -35,6 +35,7 @@
 #include "level_undo.h"
 #include "collection.h"
 #include "nvdata.h"
+#include "nvdata_finished.h"
 #include "gui_random.h"
 #include "win_anim.h"
 #include "solver.h"
@@ -475,7 +476,7 @@ void level_update_id(level_t *level)
         level->have_id = true;
         safe_asprintf(&level->id, "%s:%s", level->collection->id, level->name);
 
-        printf("level_update_id() -> \"%s\"\n", level->id);
+        //printf("level_update_id() -> \"%s\"\n", level->id);
     } else {
         level->have_id = false;
     }
@@ -793,11 +794,19 @@ void level_update_ui_name(level_t *level, int idx)
 {
     assert_not_null(level);
 
-    int icon = level->finished
+    bool is_finished = nvdata_is_finished(level);
+    int icon = is_finished
         ? ICON_OK_TICK
         : ICON_CROSS_SMALL;
 
     snprintf(level->ui_name, UI_NAME_MAXLEN, "%s% 2d. %s", GuiIconText(icon, NULL), idx, level->name);
+
+#if 0
+    printf("update_ui id=\"%s\" %s \"%s\"\n",
+           level->id,
+           is_finished ? "true" : "false",
+           level->ui_name);
+#endif
 }
 
 void level_unload(void)
@@ -1743,6 +1752,8 @@ void level_win(level_t *level)
     if (level->seed) {
         regen_level_preview();
     }
+
+    nvdata_mark_finished(level);
 }
 
 void level_unwin(level_t *level)

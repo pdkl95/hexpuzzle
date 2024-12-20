@@ -22,6 +22,7 @@
 #include "common.h"
 #include "level.h"
 #include "game_mode.h"
+#include "gui_collection.h"
 
 //#define DEBUG_GAME_MODE
 
@@ -65,6 +66,16 @@ char *game_mode_t_str(game_mode_t mode)
     default:
         __builtin_unreachable();
     }
+}
+
+static void on_enter_play_collection_mode(void)
+{
+    gui_collection_update_level_preview();
+}
+
+static void on_enter_edit_collection_mode(void)
+{
+    gui_collection_update_level_preview();
 }
 
 static void on_enter_win_level_mode(void)
@@ -144,6 +155,14 @@ static void _set_game_mode(game_mode_t new_mode)
 
     /* enter events */
     switch (new_mode) {
+    case GAME_MODE_PLAY_COLLECTION:
+        on_enter_play_collection_mode();
+        break;
+
+    case GAME_MODE_EDIT_COLLECTION:
+        on_enter_edit_collection_mode();
+        break;
+
     case GAME_MODE_WIN_LEVEL:
         on_enter_win_level_mode();
         break;

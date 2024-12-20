@@ -59,12 +59,16 @@ typedef struct collection collection_t;
 extern collection_t *current_collection;
 
 collection_t *create_collection(void);
+void collection_set_id(collection_t *collection, const char *new_id);
+
 collection_t *load_collection_dir(const char *dirpath);
 collection_t *load_collection_level_file(const char *filename);
 collection_t *load_collection_pack_compressed_data(const char *name, unsigned char *compressed, int compsize);
 collection_t *load_collection_pack_file(const char *filename);
 collection_t *load_collection_file(const char *filename);
 collection_t *load_collection_path(const char *path);
+
+void collection_show_level_names(collection_t *collection);
 
 void destroy_collection(collection_t *collection);
 

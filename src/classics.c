@@ -2,20 +2,20 @@
  *                                                                          *
  * classics.c                                                               *
  *                                                                          *
- * This file is part of hexpuzzle.                                              *
+ * This file is part of hexpuzzle.                                          *
  *                                                                          *
- * hexpuzzle is free software: you can redistribute it and/or                   *
+ * hexpuzzle is free software: you can redistribute it and/or               *
  * modify it under the terms of the GNU General Public License as published *
  * by the Free Software Foundation, either version 3 of the License,        *
  * or (at your option) any later version.                                   *
  *                                                                          *
- * hexpuzzle is distributed in the hope that it will be useful,                 *
+ * hexpuzzle is distributed in the hope that it will be useful,             *
  * but WITHOUT ANY WARRANTY; without even the implied warranty of           *
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General *
  * Public License for more details.                                         *
  *                                                                          *
  * You should have received a copy of the GNU General Public License along  *
- * with hexpuzzle. If not, see <https://www.gnu.org/licenses/>.                 *
+ * with hexpuzzle. If not, see <https://www.gnu.org/licenses/>.             *
  *                                                                          *
  ****************************************************************************/
 
@@ -33,24 +33,29 @@ void open_classics_game_pack(int n)
     unsigned char *data = NULL;
     unsigned int ulen = 0;
     char *filename = NULL;
+    char *id = NULL;
 
     switch (n) {
     case 1:
+        id = "classic/1-red";
         filename = "1-red.hexlevelpack";
         data = levels_classics_1_red_hexlevelpack;
         ulen = levels_classics_1_red_hexlevelpack_len;
         break;
-    case 2:
+    case 2: 
+        id = "classic/2-blue";
         filename = "2-blue.hexlevelpack";
         data = levels_classics_2_blue_hexlevelpack;
         ulen = levels_classics_2_blue_hexlevelpack_len;
         break;
     case 3:
+        id = "classic/3-green";
         filename = "3-green.hexlevelpack";
         data = levels_classics_3_green_hexlevelpack;
         ulen = levels_classics_3_green_hexlevelpack_len;
         break;
     case 4:
+        id = "classic/4-yellow";
         filename = "4-yellow.hexlevelpack";
         data = levels_classics_4_yellow_hexlevelpack;
         ulen = levels_classics_4_yellow_hexlevelpack_len;
@@ -68,6 +73,8 @@ void open_classics_game_pack(int n)
         errmsg("Error loading \"%s\"", filename);
         return;
     }
+
+    collection_set_id(collection, id);
 
     if (current_collection) {
         destroy_collection(current_collection);

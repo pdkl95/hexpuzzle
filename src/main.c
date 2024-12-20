@@ -845,15 +845,11 @@ handle_events(
     if (current_level) {
         if (level_check(current_level)) {
             if (!level_finished) {
-                level_finished = true;
                 level_win(current_level);
-                nvdata_mark_finished(current_level);
             }
         } else {
             if (level_finished) {
-                level_finished = false;
                 level_unwin(current_level);
-                nvdata_unmark_finished(current_level);
             }
         }
     } else {
@@ -933,6 +929,10 @@ char save_button_text[SAVE_BUTTON_TEXT_LENGTH];
 char edit_button_text_str[] = "Edit";
 #define EDIT_BUTTON_TEXT_LENGTH (6 + sizeof(edit_button_text_str))
 char edit_button_text[EDIT_BUTTON_TEXT_LENGTH];
+
+char unedit_button_text_str[] = "Stop Edit";
+#define UNEDIT_BUTTON_TEXT_LENGTH (6 + sizeof(unedit_button_text_str))
+char unedit_button_text[UNEDIT_BUTTON_TEXT_LENGTH];
 
 char savequit_button_text_str[] = "Save&Quit";
 #define SAVEQUIT_BUTTON_TEXT_LENGTH (6 + sizeof(savequit_button_text_str))
@@ -1309,8 +1309,9 @@ void gui_setup(void)
     right_side_button_text_width += 2 * BUTTON_MARGIN;
 
     memcpy(   close_button_text, GuiIconText(ICON_EXIT,                 close_button_text_str),    CLOSE_BUTTON_TEXT_LENGTH);
-    memcpy(    edit_button_text, GuiIconText(ICON_FILE_SAVE_CLASSIC,     edit_button_text_str),     EDIT_BUTTON_TEXT_LENGTH);
-    memcpy(    save_button_text, GuiIconText(ICON_TOOLS,                 save_button_text_str),     SAVE_BUTTON_TEXT_LENGTH);
+    memcpy(    edit_button_text, GuiIconText(ICON_TOOLS,                 edit_button_text_str),     EDIT_BUTTON_TEXT_LENGTH);
+    memcpy(  unedit_button_text, GuiIconText(ICON_TOOLS,               unedit_button_text_str),   UNEDIT_BUTTON_TEXT_LENGTH);
+    memcpy(    save_button_text, GuiIconText(ICON_FILE_SAVE_CLASSIC,     save_button_text_str),     SAVE_BUTTON_TEXT_LENGTH);
     memcpy(savequit_button_text, GuiIconText(ICON_FILE_SAVE_CLASSIC, savequit_button_text_str), SAVEQUIT_BUTTON_TEXT_LENGTH);
     memcpy(   reset_button_text, GuiIconText(ICON_EXPLOSION,            reset_button_text_str),    RESET_BUTTON_TEXT_LENGTH);
     memcpy(  return_button_text, GuiIconText(ICON_CROSS,               return_button_text_str),   RETURN_BUTTON_TEXT_LENGTH);
@@ -1908,12 +1909,13 @@ static void draw_gui_widgets(void)
         break;
 
     case GAME_MODE_EDIT_COLLECTION:
-        gm_button(options, OPTIONS);
-        gm_button(browser, BROWSER);
+        standard_buttons();
 
-        if (GuiButton(right_side_button_rect[rsb++], edit_button_text)) {
+        set_gui_narrow_font();
+        if (GuiButton(right_side_button_rect[rsb++], unedit_button_text)) {
             toggle_edit_mode();
         }
+        set_default_font();
 
 #if defined(PLATFORM_DESKTOP)
         if (current_collection && current_collection->changed) {
@@ -1925,8 +1927,7 @@ static void draw_gui_widgets(void)
         break;
 
     case GAME_MODE_PLAY_COLLECTION:
-        gm_button(options, OPTIONS);
-        gm_button(browser, BROWSER);
+        standard_buttons();
 
         if (GuiButton(right_side_button_rect[rsb++], edit_button_text)) {
             toggle_edit_mode();

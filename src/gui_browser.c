@@ -583,7 +583,7 @@ void draw_gui_browser_classics(void)
 {
     draw_gui_browser_list(&classics);
 
-    int selected = draw_gui_browser_big_button(&classics, browser_play_button_text);
+    int selected = draw_gui_browser_big_button(&classics, browser_open_button_text);
 
     if (selected > -1) {
         open_classics_game_pack(selected + 1);
