@@ -845,10 +845,12 @@ handle_events(
     if (current_level) {
         if (level_check(current_level)) {
             if (!level_finished) {
+                level_finished = true;
                 level_win(current_level);
             }
         } else {
             if (level_finished) {
+                level_finished = false;
                 level_unwin(current_level);
             }
         }
