@@ -83,6 +83,8 @@ float slew_limit_down(float current, float target, float step);
 
 float ease_circular_in(float t);
 float ease_circular_out(float t);
+float ease_quad_in(float t);
+float ease_quad_out(float t);
 float ease_cuhic_in(float t);
 float ease_cubic_out(float t);
 float ease_quint_in(float t);

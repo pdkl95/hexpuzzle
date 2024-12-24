@@ -117,6 +117,8 @@ extern int debug_dir;
 #endif
 
 int global_rng_get(int bound);
+bool global_rng_bool(int true_chances, int false_chances);
+int global_rng_sign(int pos_chances, int neg_chances);
 
 void disable_automatic_events(void);
 void enable_automatic_events(void);

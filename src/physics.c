@@ -47,7 +47,7 @@ void init_physics(physics_t *physics, struct level *level)
     physics->time = 0.0;
     physics->time_step = 1.0 / options->max_fps;
 
-    physics->time *= 0.1;
+    physics->time *= 0.25;
 
     physics->space = cpSpaceNew();
 
@@ -77,6 +77,8 @@ void init_physics(physics_t *physics, struct level *level)
 
 physics_t *create_physics(struct level *level)
 {
+    assert_not_null(level);
+
     physics_t *physics = calloc(1, sizeof(physics_t));
     init_physics(physics, level);
     return physics;
@@ -192,7 +194,7 @@ static bool constrain_random_spanning_tree(physics_t *physics, tile_t *tile, hex
             physics_tile_t *neighbor_pt = neighbor_tile->physics_tile;
 
 #if 1
-            float arcsize = TAU/6.0f;
+            float arcsize = TAU/12.0f;
             cpConstraint *c1 = cpRotaryLimitJointNew(
                 pt->body,
                 neighbor_pt->body,
@@ -212,8 +214,8 @@ static bool constrain_random_spanning_tree(physics_t *physics, tile_t *tile, hex
                 Vector2TocpVect(tile->unsolved_pos->rel.midpoints[dir]),
                 Vector2TocpVect(neighbor_tile->unsolved_pos->rel.midpoints[opposite_dir]),
                 2.0f,
-                120.0f,
-                125.0f);
+                220.0f,
+                25.0f);
 
             cpConstraintSetMaxForce(c2, 10000);
             //cpConstraintSetMaxBias(c2, 1)
@@ -258,16 +260,12 @@ static void spin_velocity_update_func(cpBody *body, UNUSED cpVect gravity, cpFlo
 
 void physics_build_tiles(physics_t *physics)
 {
-    if (!physics || physics->tiles_ready) {
+    assert_not_null(physics);
+    assert_not_null(physics->level);
+
+    if (physics->tiles_ready) {
 #ifdef DEBUG_TRACE_WIN_ANIM
         printf("physics_build_tiles() SKIP (not ready)\n");
-#endif
-        return;
-    }
-
-    if (!physics->level) {
-#ifdef DEBUG_TRACE_WIN_ANIM
-        printf("physics_build_tiles() SKIP (no level)\n");
 #endif
         return;
     }
@@ -282,6 +280,22 @@ void physics_build_tiles(physics_t *physics)
     switch (mode) {
     case WIN_ANIM_MODE_PHYSICS_FALL:
         cpVect gravity = cpv(0.0, gravity_strength);
+
+        if (global_rng_bool(1, 7)) {
+            if (global_rng_bool(11, 11)) {
+                gravity = cpvperp(gravity);
+            } else {
+                gravity = cpvrperp(gravity);
+            }
+        } else {
+            if (global_rng_bool(1, 9)) {
+                gravity.x = gravity_strength * global_rng_sign(11, 11);
+                gravity = cpvmult(gravity, 0.5);
+            } else {
+                // down (unchanged)
+            }
+        }
+
         cpSpaceSetGravity(physics->space, gravity);
         break;
 
@@ -321,7 +335,7 @@ void physics_build_tiles(physics_t *physics)
             verts[dir] = cpv(corner.x, corner.y);
         }
         pt->radius = pos->size;
-        pt->mass = 2.0f; //pos->size;
+        pt->mass = 11.0f; //pos->size;
         pt->moment = cpMomentForPoly(pt->mass, 6, verts, cpvzero, 0.0f);
 
         pt->body = cpSpaceAddBody(physics->space, cpBodyNew(pt->mass, pt->moment));
@@ -335,8 +349,8 @@ void physics_build_tiles(physics_t *physics)
         case WIN_ANIM_MODE_PHYSICS_FALL:
             cpBodySetVelocity(pt->body, cpvzero);
 
-            cpShapeSetElasticity(pt->shape, 0.4f);
-            cpShapeSetFriction(pt->shape, 0.7f);
+            cpShapeSetElasticity(pt->shape, 0.01f);
+            cpShapeSetFriction(pt->shape, 0.01f);
             break;
 
         case WIN_ANIM_MODE_PHYSICS_SWIRL:
@@ -345,7 +359,7 @@ void physics_build_tiles(physics_t *physics)
             cpBodySetVelocityUpdateFunc(pt->body, spin_velocity_update_func);
 
             cpShapeSetElasticity(pt->shape, 0.4f);
-            cpShapeSetFriction(pt->shape, 0.7f);
+            cpShapeSetFriction(pt->shape, 0.6f);
             break;
 
         default:
@@ -446,7 +460,7 @@ void physics_update(physics_t *physics)
 {
     assert_not_null(physics);
 
-    if (physics->state != PHYSICS_RUNNING) {// || !physics->level) {
+    if (physics->state != PHYSICS_RUNNING) {
         return;
     }
 

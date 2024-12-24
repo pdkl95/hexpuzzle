@@ -353,10 +353,19 @@ void init_win_anim(win_anim_t *win_anim, level_t *level)
 
 void win_anim_select_random_mode(win_anim_t *win_anim)
 {
+#ifdef DEBUG_TRACE_WIN_ANIM
+    win_anim_mode_t old_mode = win_anim->mode;;
+#endif
+
     win_anim->mode = global_rng_get(WIN_ANIM_MODE_COUNT);
 
     //win_anim->mode = WIN_ANIM_MODE_POPS;;
     //win_anim->mode = WIN_ANIM_MODE_PHYSICS_SWIRL;
+    win_anim->mode = WIN_ANIM_MODE_PHYSICS_FALL;
+
+#ifdef DEBUG_TRACE_WIN_ANIM
+    infomsg("win_anim[%02d] NEW RANDOM MODE <old:%s => new:%s>", win_anim->id, win_anim_mode_str(old_mode), win_anim_mode_str(win_anim->mode));
+#endif
 }
 
 win_anim_t *create_win_anim(struct level *level)
@@ -388,8 +397,19 @@ void win_anim_update(win_anim_t *win_anim)
 
     win_anim->fade[0] = fmodf(win_anim->run_time, 10.0f);
     win_anim->fade[1] = ((float)win_anim->level->finished_hue) / 360.0;
-    win_anim->fade[2] = smoothstep(0.0f,  6.0f, win_anim->run_time);
-    win_anim->fade[3] = smoothstep(4.5f, 10.0f, win_anim->run_time);
+    win_anim->fade[2] = smoothstep(0.0f,  5.0f, win_anim->run_time);
+    win_anim->fade[3] = smoothstep(3.5f, 8.0f, win_anim->run_time);
+
+
+    switch (win_anim->mode) {
+#ifdef USE_PHYSICS
+    case WIN_ANIM_MODE_PHYSICS_FALL:
+        win_anim->fade[2] = 1.0;
+        break;
+#endif
+    default:
+        break;
+    }
 
 #if 0
     printf("progress = %3.2f. hue = %3.2f, fadein = %3.2f, other = %3.2f\n",

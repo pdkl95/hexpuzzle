@@ -28,6 +28,7 @@
 #include "level_draw.h"
 #include "shader.h"
 #include "win_anim.h"
+#include "util.h"
 
 extern float postprocessing_effect_amount1[4];
 extern float postprocessing_effect_amount2[4];
@@ -51,7 +52,7 @@ static void level_set_fade_transition(level_t *level, tile_pos_t *pos)
 
 static void level_set_transition(level_t *level, tile_pos_t *pos, bool do_fade, float fade_ammount)
 {
-    Vector2 extra_tvec = Vector2Scale(pos->extra_translate, fade_ammount);
+    Vector2 extra_tvec = Vector2Scale(pos->extra_translate, ease_quad_out(fade_ammount));
     Vector2 tvec = Vector2Add(pos->win.center, Vector2Add(extra_tvec, pos->pop_translate));
 
 

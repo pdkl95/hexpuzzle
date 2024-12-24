@@ -169,6 +169,22 @@ int global_rng_get(int bound)
     }
 }
 
+bool global_rng_bool(int true_chances, int false_chances)
+{
+    int total_chances = true_chances + false_chances;
+    int random_value = global_rng_get(total_chances);
+    return random_value <= true_chances;
+}
+
+int global_rng_sign(int pos_chances, int neg_chances)
+{
+    if (global_rng_bool(pos_chances, neg_chances)) {
+        return 1;
+    } else {
+        return -1;
+    }
+}
+
 static inline bool do_level_ui_interaction(void)
 {
     return current_level && !modal_ui_active;
