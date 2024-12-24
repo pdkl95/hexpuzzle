@@ -25,6 +25,8 @@
 #include "win_anim.h"
 #include "physics.h"
 
+#define DEBUG_TRACE_WIN_ANIM
+
 float gravity_strength = 250.0;
 
 void init_physics(physics_t *physics, struct level *level)
@@ -249,10 +251,23 @@ static void spin_velocity_update_func(cpBody *body, UNUSED cpVect gravity, cpFlo
 
 void physics_build_tiles(physics_t *physics)
 {
-    if (physics->tiles_ready) {
+    if (!physics || physics->tiles_ready) {
+#ifdef DEBUG_TRACE_WIN_ANIM
+        printf("physics_build_tiles() SKIP (not ready)\n");
+#endif
         return;
     }
-    //printf("physics_build_tiles()\n");
+
+    if (!physics->level) {
+#ifdef DEBUG_TRACE_WIN_ANIM
+        printf("physics_build_tiles() SKIP (no level)\n");
+#endif
+        return;
+    }
+
+#ifdef DEBUG_TRACE_WIN_ANIM
+    printf("physics_build_tiles()\n");
+#endif
 
     level_t *level = physics->level;
     win_anim_mode_t mode = level->win_anim->mode;
@@ -345,10 +360,14 @@ void physics_reset(physics_t *physics)
     assert_not_null(physics);
 
     if (!physics->tiles_ready) {
-        //printf("SKIP physics_reset()\n");
+#ifdef DEBUG_TRACE_WIN_ANIM
+        printf("SKIP physics_reset()\n");
+#endif
         return;
     }
-    //printf("physics_reset()\n");
+#ifdef DEBUG_TRACE_WIN_ANIM
+    printf("physics_reset()\n");
+#endif
     level_t *level = physics->level;
 
     for (int i=0; i<physics->num_tiles; i++) {
@@ -380,10 +399,14 @@ void physics_start(physics_t *physics)
     assert_not_null(physics);
 
     if (physics->state == PHYSICS_RUNNING) {
-        //printf("SKIP physics_start()\n");
+#ifdef DEBUG_TRACE_WIN_ANIM
+        printf("SKIP physics_start()\n");
+#endif
         return;
     }
-    //printf("physics_start()\n");
+#ifdef DEBUG_TRACE_WIN_ANIM
+    printf("physics_start()\n");
+#endif
 
     if (!physics->tiles_ready) {
         physics_build_tiles(physics);
@@ -398,10 +421,14 @@ void physics_stop(physics_t *physics)
     assert_not_null(physics);
 
     if (physics->state == PHYSICS_STOP) {
-        //printf("SKIP physics_stop()\n");
+#ifdef DEBUG_TRACE_WIN_ANIM
+        printf("SKIP physics_stop()\n");
+#endif
         return;
     }
-    //printf("physics_stop()\n");
+#ifdef DEBUG_TRACE_WIN_ANIM
+    printf("physics_stop()\n");
+#endif
 
     physics->state = PHYSICS_STOP;
 
@@ -412,7 +439,7 @@ void physics_update(physics_t *physics)
 {
     assert_not_null(physics);
 
-    if (physics->state != PHYSICS_RUNNING) {
+    if (physics->state != PHYSICS_RUNNING) {// || !physics->level) {
         return;
     }
 

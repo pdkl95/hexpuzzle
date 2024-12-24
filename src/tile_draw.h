@@ -25,11 +25,12 @@
 #include "tile.h"
 #include "tile_pos.h"
 #include "level.h"
+#include "win_anim.h"
 
 void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color finished_color, float finished_fade_in);
 void tile_draw_ghost(tile_pos_t *pos);
 void tile_draw_win_anim(tile_pos_t *pos);
-void tile_draw_corner_connections(tile_pos_t *pos);
+void tile_draw_corner_connections(tile_pos_t *pos, win_anim_mode_t win_mode);
 
 #endif /*TILE_DRAW_H*/
 

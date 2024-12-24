@@ -1350,6 +1350,10 @@ void level_set_hover(level_t *level, IVector2 mouse_position)
         level->drag_offset.y = 0.0f;
     }
 
+    if (game_mode == GAME_MODE_WIN_LEVEL) {
+        return;
+    }
+
     Vector2 mouse_tile_pos = Vector2Subtract(level->mouse_pos, level->px_offset);
     hex_axial_t mouse_hex = pixel_to_hex_axial(mouse_tile_pos, level->tile_size);
 

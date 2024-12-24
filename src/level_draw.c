@@ -66,7 +66,7 @@ static void level_set_transition(level_t *level, tile_pos_t *pos, bool do_fade, 
     rlRotatef(TO_DEGREES(pos->extra_rotate), 0.0, 0.0, 1.0);
 }
 
-static void level_draw_corner_connections(level_t *level)
+static void level_draw_corner_connections(level_t *level, win_anim_mode_t win_mode)
 {
     postprocessing_effect_amount1[3] = 1.0f;
 
@@ -86,7 +86,7 @@ static void level_draw_corner_connections(level_t *level)
                 rlPushMatrix();
 
                 //level_set_transition(level, pos, do_fade, finished_fade_in);
-                tile_draw_corner_connections(pos);
+                tile_draw_corner_connections(pos, win_mode);
 
                 rlPopMatrix();
             }
@@ -126,7 +126,7 @@ void level_draw(level_t *level, bool finished)
     rlTranslatef(level->px_offset.x, level->px_offset.y, 0.0);
 
     if (finished) {
-        level_draw_corner_connections(level);
+        level_draw_corner_connections(level, level->win_anim ? level->win_anim->mode : WIN_ANIM_MODE_SIMPLE);
     }
     for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
         for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {

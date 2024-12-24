@@ -431,7 +431,7 @@ void tile_draw_win_anim(tile_pos_t *pos)
 
 extern float bloom_amount;
 #define MIN_CORNER_DIST_SQR 120.0f
-void tile_draw_corner_connections(tile_pos_t *pos)
+void tile_draw_corner_connections(tile_pos_t *pos, win_anim_mode_t win_mode)
 {
     tile_t *tile = pos->tile;
     if (!tile->enabled || tile->hidden) {
@@ -445,11 +445,12 @@ void tile_draw_corner_connections(tile_pos_t *pos)
 
 #ifdef USE_PHYSICS
     physics_tile_t *pt = pos->tile->physics_tile;
+#if 0
     if (!pt) {
         return;
     }
 #endif
-
+#endif
     Color color = get_win_border_color(pos);
 
     each_direction {
@@ -514,7 +515,7 @@ void tile_draw_corner_connections(tile_pos_t *pos)
 
             float outside_dist = Vector2Distance(pos_m_p, nbr_m_p) * bloom_amount;  //0.7;
 #ifdef USE_PHYSICS
-            if (!pt->path_has_spring[dir]) {
+            if (pt && !pt->path_has_spring[dir]) {
                 outside_dist *= 0.3;
             }
 #endif
@@ -578,7 +579,7 @@ void tile_draw_corner_connections(tile_pos_t *pos)
             }
 
 #ifdef USE_PHYSICS
-            if (!pt->path_has_spring[dir]) {
+            if (pt && !pt->path_has_spring[dir]) {
 #endif
                 thickness *= 0.3334 * fade;
                 color.r = fade;
@@ -588,13 +589,23 @@ void tile_draw_corner_connections(tile_pos_t *pos)
             }
 #endif
 
-            DrawSplineSegmentBezierCubic(
-                pos_m_p,
-                pos_m_c,
-                nbr_m_c,
-                nbr_m_p,
-                thickness,
-                color);
+            switch (win_mode) {
+            case WIN_ANIM_MODE_POPS:
+                /* fall through */
+            case WIN_ANIM_MODE_WAVES:
+                DrawLineEx(pos_m_p, nbr_m_p, thickness, color);
+                break;
+
+            default:
+                DrawSplineSegmentBezierCubic(
+                    pos_m_p,
+                    pos_m_c,
+                    nbr_m_c,
+                    nbr_m_p,
+                    thickness,
+                    color);
+                break;
+            }
 
 #if 0
                 color.a = 1.0;
