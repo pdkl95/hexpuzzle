@@ -310,6 +310,9 @@ static void win_anim_update_waves(win_anim_t *win_anim)
 
 void init_win_anim(win_anim_t *win_anim, level_t *level)
 {
+    assert_not_null(win_anim);
+    assert_not_null(level);
+
     static int id_seq = 0;
     id_seq++;
     win_anim->id = id_seq;
@@ -352,6 +355,7 @@ void win_anim_select_random_mode(win_anim_t *win_anim)
 {
     win_anim->mode = global_rng_get(WIN_ANIM_MODE_COUNT);
 
+    //win_anim->mode = WIN_ANIM_MODE_POPS;;
     //win_anim->mode = WIN_ANIM_MODE_PHYSICS_SWIRL;
 }
 

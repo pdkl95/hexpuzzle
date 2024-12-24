@@ -530,34 +530,6 @@ void tile_draw_corner_connections(tile_pos_t *pos, win_anim_mode_t win_mode)
             nbr_m_c = Vector2RotateAroundPoint(nbr_m_c,  neighbor->extra_rotate, neighbor->win.center);
             nbr_m_c = Vector2Add(nbr_m_c, neighbor->extra_translate);
 
-#if 0
-            Vector2 pos_cw1_p  = pos->win.midpoint_path_cw[dir];
-            Vector2 pos_cw1_c  = Vector2Add(pos->win.midpoint_path_cw[dir], outside);
-            Vector2 nbr_ccw1_c = Vector2Add(neighbor->win.midpoint_path_ccw[opposite_dir], neighbor_outside);
-            Vector2 nbr_ccw1_p = neighbor->win.midpoint_path_ccw[opposite_dir];
-            pos_cw1_p  = Vector2RotateAroundPoint(pos_cw1_p,  pos->extra_rotate, pos->win.center);
-            pos_cw1_p  = Vector2Add(pos_cw1_p,  pos->extra_translate);
-            pos_cw1_c  = Vector2RotateAroundPoint(pos_cw1_c,  pos->extra_rotate, pos->win.center);
-            pos_cw1_c  = Vector2Add(pos_cw1_c,  pos->extra_translate);
-            nbr_ccw1_c = Vector2RotateAroundPoint(nbr_ccw1_c,  neighbor->extra_rotate, neighbor->win.center);
-            nbr_ccw1_c = Vector2Add(nbr_ccw1_c, neighbor->extra_translate);
-            nbr_ccw1_p = Vector2RotateAroundPoint(nbr_ccw1_p,  neighbor->extra_rotate, neighbor->win.center);
-            nbr_ccw1_p = Vector2Add(nbr_ccw1_p, neighbor->extra_translate);
-
-            Vector2 pos_ccw2_p = pos->win.midpoint_path_ccw[dir];
-            Vector2 pos_ccw2_c = Vector2Add(pos->win.midpoint_path_ccw[dir], outside);
-            Vector2 nbr_cw2_c  = Vector2Add(neighbor->win.midpoint_path_cw[opposite_dir], neighbor_outside);
-            Vector2 nbr_cw2_p  = neighbor->win.midpoint_path_cw[opposite_dir];
-            pos_ccw2_p = Vector2RotateAroundPoint(pos_ccw2_p,  pos->extra_rotate, pos->win.center);
-            pos_ccw2_p = Vector2Add(pos_ccw2_p,  pos->extra_translate);
-            pos_ccw2_c = Vector2RotateAroundPoint(pos_ccw2_c,  pos->extra_rotate, pos->win.center);
-            pos_ccw2_c = Vector2Add(pos_ccw2_c,  pos->extra_translate);
-            nbr_cw2_c  = Vector2RotateAroundPoint(nbr_cw2_c,  neighbor->extra_rotate, neighbor->win.center);
-            nbr_cw2_c  = Vector2Add(nbr_cw2_c, neighbor->extra_translate);
-            nbr_cw2_p  = Vector2RotateAroundPoint(nbr_cw2_p,  neighbor->extra_rotate, neighbor->win.center);
-            nbr_cw2_p  = Vector2Add(nbr_cw2_p, neighbor->extra_translate);
-#endif
-
 #ifdef DEBUG_ID_AND_DIR
             if (debug_dir == (int)dir && debug_id == pos->tile->id) {
                 float r = 12.0f;
@@ -589,28 +561,52 @@ void tile_draw_corner_connections(tile_pos_t *pos, win_anim_mode_t win_mode)
             }
 #endif
 
+#if 0
+            Vector2 pos_cw1_p;
+            Vector2 pos_cw1_c;
+            Vector2 nbr_ccw1_c;
+            Vector2 nbr_ccw1_p;
+            Vector2 pos_ccw2_p;
+            Vector2 pos_ccw2_c;
+            Vector2 nbr_cw2_c;
+            Vector2 nbr_cw2_p;
+
+            float edge_thickness = 25.0;
+#endif
+
             switch (win_mode) {
             case WIN_ANIM_MODE_POPS:
                 /* fall through */
             case WIN_ANIM_MODE_WAVES:
-                DrawLineEx(pos_m_p, nbr_m_p, thickness, color);
-                break;
+#if 0
+                pos_cw1_p  = pos->win.midpoint_path_cw[dir];
+                pos_cw1_c  = Vector2Add(pos->win.midpoint_path_cw[dir], outside);
+                nbr_ccw1_c = Vector2Add(neighbor->win.midpoint_path_ccw[opposite_dir], neighbor_outside);
+                nbr_ccw1_p = neighbor->win.midpoint_path_ccw[opposite_dir];
+                pos_cw1_p  = Vector2RotateAroundPoint(pos_cw1_p,  pos->extra_rotate, pos->win.center);
+                pos_cw1_p  = Vector2Add(pos_cw1_p,  pos->extra_translate);
+                pos_cw1_c  = Vector2RotateAroundPoint(pos_cw1_c,  pos->extra_rotate, pos->win.center);
+                pos_cw1_c  = Vector2Add(pos_cw1_c,  pos->extra_translate);
+                nbr_ccw1_c = Vector2RotateAroundPoint(nbr_ccw1_c,  neighbor->extra_rotate, neighbor->win.center);
+                nbr_ccw1_c = Vector2Add(nbr_ccw1_c, neighbor->extra_translate);
+                nbr_ccw1_p = Vector2RotateAroundPoint(nbr_ccw1_p,  neighbor->extra_rotate, neighbor->win.center);
+                nbr_ccw1_p = Vector2Add(nbr_ccw1_p, neighbor->extra_translate);
 
-            default:
-                DrawSplineSegmentBezierCubic(
-                    pos_m_p,
-                    pos_m_c,
-                    nbr_m_c,
-                    nbr_m_p,
-                    thickness,
-                    color);
-                break;
-            }
+                pos_ccw2_p = pos->win.midpoint_path_ccw[dir];
+                pos_ccw2_c = Vector2Add(pos->win.midpoint_path_ccw[dir], outside);
+                nbr_cw2_c  = Vector2Add(neighbor->win.midpoint_path_cw[opposite_dir], neighbor_outside);
+                nbr_cw2_p  = neighbor->win.midpoint_path_cw[opposite_dir];
+                pos_ccw2_p = Vector2RotateAroundPoint(pos_ccw2_p,  pos->extra_rotate, pos->win.center);
+                pos_ccw2_p = Vector2Add(pos_ccw2_p,  pos->extra_translate);
+                pos_ccw2_c = Vector2RotateAroundPoint(pos_ccw2_c,  pos->extra_rotate, pos->win.center);
+                pos_ccw2_c = Vector2Add(pos_ccw2_c,  pos->extra_translate);
+                nbr_cw2_c  = Vector2RotateAroundPoint(nbr_cw2_c,  neighbor->extra_rotate, neighbor->win.center);
+                nbr_cw2_c  = Vector2Add(nbr_cw2_c, neighbor->extra_translate);
+                nbr_cw2_p  = Vector2RotateAroundPoint(nbr_cw2_p,  neighbor->extra_rotate, neighbor->win.center);
+                nbr_cw2_p  = Vector2Add(nbr_cw2_p, neighbor->extra_translate);
+#endif
 
 #if 0
-                color.a = 1.0;
-                float edge_thickness = 2.0;
-
                 DrawSplineSegmentBezierCubic(
                     pos_cw1_p,
                     pos_cw1_c,
@@ -626,7 +622,37 @@ void tile_draw_corner_connections(tile_pos_t *pos, win_anim_mode_t win_mode)
                     nbr_cw2_p,
                     edge_thickness,
                     color);
+#else
+                float rand_thickness = 2.0 + (drand48() * 4.0);
+                DrawSplineSegmentBezierCubic(
+                    pos_m_p,
+                    pos_m_c,
+                    nbr_m_c,
+                    nbr_m_p,
+                    rand_thickness,
+                    color);
+
+#if 0
+                color.r = rand();
+                color.b = 0;
+                color.a = 255;
+                DrawLineEx(pos_cw1_c, nbr_ccw1_c, edge_thickness, color);
+                DrawLineEx(pos_ccw2_c, nbr_cw2_c, edge_thickness, color);
 #endif
+#endif
+                break;
+
+            default:
+                DrawSplineSegmentBezierCubic(
+                    pos_m_p,
+                    pos_m_c,
+                    nbr_m_c,
+                    nbr_m_p,
+                    thickness,
+                    color);
+                break;
+            }
+
         }
 
       pos_neighbor_cleanup:

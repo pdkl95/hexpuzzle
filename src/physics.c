@@ -27,11 +27,18 @@
 
 #define DEBUG_TRACE_WIN_ANIM
 
-float gravity_strength = 250.0;
+float gravity_strength = 420.0f;; //250.0;
 
 void init_physics(physics_t *physics, struct level *level)
 {
-    physics->level = level;
+    assert_not_null(physics);
+    assert_not_null(level);
+
+    physics->level = level;\
+
+#ifdef DEBUG_TRACE_WIN_ANIM
+    printf("init_physics() level->name=\"%s\"\n", level->name);
+#endif
 
     physics->state = PHYSICS_STOP;
 
