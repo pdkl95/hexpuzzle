@@ -22,6 +22,8 @@
 #ifndef WIN_ANIM_H
 #define WIN_ANIM_H
 
+#include "config.h"
+
 #ifdef USE_PHYSICS
 #include "physics.h"
 #endif
@@ -39,13 +41,16 @@ typedef enum win_anim_mode win_anim_mode_t;
 
 #ifdef USE_PHYSICS
 # define WIN_ANIM_MODE_COUNT 5
+# define WIN_ANIM_PHYSICS_MODE_COUNT 2
 #else
 # define WIN_ANIM_MODE_COUNT 3
+# define WIN_ANIM_PHYSICS_MODE_COUNT 0
 #endif
 
 struct win_anim {
     int id;
     win_anim_mode_t mode;
+    bool use_background_3d;
     struct level *level;
     bool running;
     float fade[4];

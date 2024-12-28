@@ -29,6 +29,8 @@
 #include "shader.h"
 #include "win_anim.h"
 #include "util.h"
+#include "background.h"
+
 
 extern float postprocessing_effect_amount1[4];
 extern float postprocessing_effect_amount2[4];
@@ -218,7 +220,6 @@ void level_draw(level_t *level, bool finished)
 
         rlPopMatrix();
     }
-
 
     //DrawRectangleLinesEx(level->px_bounding_box, 5.0, LIME);
     rlSetBlendMode(RL_BLEND_ALPHA);

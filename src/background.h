@@ -42,6 +42,11 @@ void destroy_background(background_t *bg);
 void background_resize(background_t *bg);
 void background_draw(background_t *bg);
 
-                     
+void background_begin_3d(background_t *bg, float amount);
+void background_end_3d(background_t *bg);
+
+void bg_begin_3d(float amount);
+void bg_end_3d(void);
+
 #endif /*BACKGROUND_H*/
 

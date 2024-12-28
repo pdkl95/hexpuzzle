@@ -34,6 +34,8 @@
 extern Texture2D bg_grid_texture;
 extern float bloom_amount;
 
+extern background_t *background;
+
 background_t *create_background(void)
 {
     background_t *bg = calloc(1, sizeof(background_t));
@@ -89,6 +91,45 @@ float smooth_change(float current, float target, float step)
     }
 }
 
+float limit_rot_x = 0.0f;
+float limit_rot_y = 0.0f;
+float limit_rot_z = 0.0f;
+
+void background_begin_3d(background_t *bg, float amount)
+{
+    rlPushMatrix();
+    BeginMode3D(bg->camera);
+
+    rlTranslatef(window_center.x,
+                 window_center.y,
+                 0.0);
+
+    rlRotatef(amount * limit_rot_z, 0.0, 0.0, 1.0);
+
+    rlTranslatef(-window_size.x,
+                 -window_size.y,
+                 0.0);
+
+    rlRotatef(amount * TO_DEGREES(limit_rot_x), 1.0, 0.0, 0.0);
+    rlRotatef(amount * TO_DEGREES(limit_rot_y), 0.0, 1.0, 0.0);
+}
+
+void background_end_3d(UNUSED background_t *bg)
+{
+    EndMode3D();
+    rlPopMatrix();
+}
+
+void bg_begin_3d(float amount)
+{
+    background_begin_3d(background, amount);
+}
+
+void bg_end_3d(void)
+{
+    background_end_3d(background);
+}
+
 void background_draw(background_t *bg)
 {
     bool animate_bg = !options->wait_events && options->animate_bg;
@@ -97,15 +138,6 @@ void background_draw(background_t *bg)
     if (current_level && current_level->finished) {
         fade = 0.5 * (current_level->win_anim->fade[2] + current_level->win_anim->fade[3]);
     }
-
-    rlPushMatrix();
-
-    BeginMode3D(bg->camera);
-
-    Vector2 hwin = {
-        .x = window_size.x / 2.0,
-        .y = window_size.y / 2.0
-    };
 
 #define cart_bg_normal_speed   1.0
 #define cart_bg_finished_speed 3.5
@@ -172,10 +204,6 @@ void background_draw(background_t *bg)
         dir = Vector2Rotate((Vector2) { .x = 0.0f, .y = 1.0f }, angle);
         dir = Vector2Scale(dir, speed);
 
-        rlTranslatef(hwin.x,
-                     hwin.y,
-                     0.0);
-
         float bloom_fade = 0.5 * bloom_amount;
         bloom_fade += 0.5;
         float circ_time_scale = 3.0;
@@ -208,23 +236,12 @@ void background_draw(background_t *bg)
         float scale_rot = 3.0f;
         rot_z *= scale_rot * fade;
 
-        static float limit_rot_x = 0.0f;
-        static float limit_rot_y = 0.0f;
-        static float limit_rot_z = 0.0f;
-
-        float turn_limit = TAU/options->max_fps;
+        float turn_limit = 0.25 * (TAU/options->max_fps);
         limit_rot_x = slew_limit(limit_rot_x, rot_x, turn_limit);
         limit_rot_y = slew_limit(limit_rot_y, rot_y, turn_limit);
         limit_rot_z = slew_limit(limit_rot_z, rot_z, turn_limit);
 
-        rlRotatef(limit_rot_z, 0.0, 0.0, 1.0);
-
-        rlTranslatef(-window_size.x,
-                     -window_size.y,
-                     0.0);
-
-        rlRotatef(TO_DEGREES(limit_rot_x), 1.0, 0.0, 0.0);
-        rlRotatef(TO_DEGREES(limit_rot_y), 0.0, 1.0, 0.0);
+        background_begin_3d(bg, 1.0f);
 
         off = Vector2Add(off, Vector2Scale(dir, speed * bg->amp));
         off.x = fmodf(off.x, wrap_size);
@@ -263,7 +280,7 @@ void background_draw(background_t *bg)
  * LINE-DRAWING MODE
  */
 
-#if 0
+#if 1
     for (int x=xmin, n=0; x<xmax; x += minor_size, n = (n + 1) % minor_per_major) {
         if (n) {
             DrawLineEx((Vector2){ x+off.x, ymin },
@@ -283,7 +300,7 @@ void background_draw(background_t *bg)
     }
 #endif
 
-#if 0
+#if 1
     for (int x=xmin, n=0; x<xmax; x += major_size, n = (n + 1) % minor_per_major) {
         DrawLineEx((Vector2){ x+off.x, ymin },
                    (Vector2){ x+off.x, ymax },
@@ -305,8 +322,7 @@ void background_draw(background_t *bg)
     }
 #endif
 #endif
-    EndMode3D();
 
-    rlPopMatrix();
+    background_end_3d(bg);
 }
 

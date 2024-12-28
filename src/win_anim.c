@@ -28,7 +28,7 @@
 #include "physics.h"
 #endif
 
-#define DEBUG_TRACE_WIN_ANIM
+//#define DEBUG_TRACE_WIN_ANIM
 
 extern bool do_postprocessing;
 extern float bloom_amount;
@@ -357,11 +357,17 @@ void win_anim_select_random_mode(win_anim_t *win_anim)
     win_anim_mode_t old_mode = win_anim->mode;;
 #endif
 
-    win_anim->mode = global_rng_get(WIN_ANIM_MODE_COUNT);
+    win_anim->mode = global_rng_get(WIN_ANIM_MODE_COUNT + WIN_ANIM_PHYSICS_MODE_COUNT);
+    int rng_mode = win_anim->mode;
+    if (win_anim->mode >= WIN_ANIM_MODE_COUNT) {
+        win_anim->mode -= 2;
+    }
+    //printf("rng_mode = %d, win_anim->mode = %d (%s)\n", rng_mode, win_anim->mode, win_anim_mode_str(win_anim->mode));
 
-    //win_anim->mode = WIN_ANIM_MODE_POPS;;
+    //win_anim->mode = WIN_ANIM_MODE_SIMPLE;
+    //win_anim->mode = WIN_ANIM_MODE_POPS;
     //win_anim->mode = WIN_ANIM_MODE_PHYSICS_SWIRL;
-    win_anim->mode = WIN_ANIM_MODE_PHYSICS_FALL;
+    //win_anim->mode = WIN_ANIM_MODE_PHYSICS_FALL;
 
 #ifdef DEBUG_TRACE_WIN_ANIM
     infomsg("win_anim[%02d] NEW RANDOM MODE <old:%s => new:%s>", win_anim->id, win_anim_mode_str(old_mode), win_anim_mode_str(win_anim->mode));
@@ -400,6 +406,13 @@ void win_anim_update(win_anim_t *win_anim)
     win_anim->fade[2] = smoothstep(0.0f,  5.0f, win_anim->run_time);
     win_anim->fade[3] = smoothstep(3.5f, 8.0f, win_anim->run_time);
 
+    float mixed_fade = 0.5f * (win_anim->fade[2] + win_anim->fade[3]);
+
+    if (win_anim->use_background_3d) {
+        win_anim->level->background_transform_amount = mixed_fade;
+    } else {
+        win_anim->level->background_transform_amount = 0.0f;
+    }
 
     switch (win_anim->mode) {
 #ifdef USE_PHYSICS
@@ -477,8 +490,17 @@ void win_anim_start(win_anim_t *win_anim)
 #endif
         win_anim->running = true;
         win_anim->start_time = GetTime();
+        win_anim->use_background_3d = false;
 
         switch (win_anim->mode) {
+        case WIN_ANIM_MODE_SIMPLE:\
+            /* fall through */
+        case WIN_ANIM_MODE_WAVES:
+            if (global_rng_bool(11, 11)) {
+                win_anim->use_background_3d = true;
+            }
+            break;
+
 #ifdef USE_PHYSICS
         case WIN_ANIM_MODE_PHYSICS_FALL:
             /* fall through */

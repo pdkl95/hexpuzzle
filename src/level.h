@@ -129,6 +129,8 @@ struct level {
     float extra_rotate_level_speed;
     float extra_rotate_level_velocity;
 
+    float background_transform_amount;
+
     level_fade_t fade;
 
     struct solver *solver;

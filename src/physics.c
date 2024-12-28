@@ -25,7 +25,7 @@
 #include "win_anim.h"
 #include "physics.h"
 
-#define DEBUG_TRACE_WIN_ANIM
+//#define DEBUG_TRACE_WIN_ANIM
 
 float gravity_strength = 420.0f;; //250.0;
 
@@ -34,7 +34,7 @@ void init_physics(physics_t *physics, struct level *level)
     assert_not_null(physics);
     assert_not_null(level);
 
-    physics->level = level;\
+    physics->level = level;
 
 #ifdef DEBUG_TRACE_WIN_ANIM
     printf("init_physics() level->name=\"%s\"\n", level->name);
@@ -47,7 +47,8 @@ void init_physics(physics_t *physics, struct level *level)
     physics->time = 0.0;
     physics->time_step = 1.0 / options->max_fps;
 
-    physics->time *= 0.25;
+    //physics->time *= 0.25;
+    physics->time *= 0.01;
 
     physics->space = cpSpaceNew();
 
@@ -281,14 +282,14 @@ void physics_build_tiles(physics_t *physics)
     case WIN_ANIM_MODE_PHYSICS_FALL:
         cpVect gravity = cpv(0.0, gravity_strength);
 
-        if (global_rng_bool(1, 7)) {
+        if (global_rng_bool(1, 17)) {
             if (global_rng_bool(11, 11)) {
                 gravity = cpvperp(gravity);
             } else {
                 gravity = cpvrperp(gravity);
             }
         } else {
-            if (global_rng_bool(1, 9)) {
+            if (global_rng_bool(1, 25)) {
                 gravity.x = gravity_strength * global_rng_sign(11, 11);
                 gravity = cpvmult(gravity, 0.5);
             } else {
