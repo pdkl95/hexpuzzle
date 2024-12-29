@@ -490,6 +490,8 @@ static void redo(void)
     default:
         warnmsg("REDO only works in PLAY of EDIT mode");
     }
+
+
 }
 
 static void
@@ -2521,6 +2523,8 @@ static void game_init(void)
     //set_game_mode(GAME_MODE_BROWSER);
     //set_game_mode(GAME_MODE_RANDOM);
     set_game_mode(GAME_MODE_TITLE);
+
+    win_anim_mode_config_reset_to_defaut(&(win_anim_mode_config[0]));
 
     load_nvdata();
 }

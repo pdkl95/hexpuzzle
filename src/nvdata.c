@@ -29,6 +29,9 @@
 
 #include "options.h"
 #include "level.h"
+#include "win_anim.h"
+#include "win_anim_mode_config.h"
+
 #include "nvdata.h"
 #include "nvdata_finished.h"
 
@@ -318,6 +321,17 @@ static bool program_state_from_json(cJSON *json)
 #undef mk_bool_json
     }
 
+    cJSON *win_anim_json = cJSON_GetObjectItem(json, "win_animation");
+
+    if (win_anim_json) {
+        if (!win_anim_config_from_json(win_anim_json)) {
+            errmsg("Error parsing program state JSON['win_animation']");
+            return false;
+        }
+    } else {
+        warnmsg("Program state JSON is missing \"win_animation\"");
+    }
+
     return true;
 }
 
@@ -459,7 +473,7 @@ static cJSON *program_state_to_json(void)
         bool_json = cJSON_AddFalseToObject(graphics_json, STR(name));   \
     }                                                                   \
     if (!bool_json) {                                                   \
-        errmsg("Error adding bool \"%s\" to JSON.graphics", STR(name));          \
+        errmsg("Error adding bool \"%s\" to JSON.graphics", STR(name)); \
         goto to_json_error;                                             \
     }
 
@@ -469,6 +483,18 @@ static cJSON *program_state_to_json(void)
     mk_bool_json(show_level_previews, show_level_previews);
 #undef mk_bool_json
 
+    cJSON *win_anim_json = win_anim_config_to_json();
+    if (win_anim_json) {
+        if (!cJSON_AddItemToObject(json, "win_animation", win_anim_json)) {
+            errmsg("Error adding win_animation config JSON");
+            cJSON_Delete(win_anim_json);
+            goto to_json_error;
+        }
+    } else {
+        errmsg("Error building win_animation config JSON");
+        goto to_json_error;
+    }
+\
     return json;
 
   to_json_error:

@@ -24,6 +24,8 @@
 
 #include "config.h"
 
+#include "cJSON/cJSON.h"
+
 #ifdef USE_PHYSICS
 #include "physics.h"
 #endif
@@ -50,11 +52,12 @@ typedef enum win_anim_mode win_anim_mode_t;
 
 #define WIN_ANIM_MODE_COUNT (WIN_ANIM_NON_PHYSICS_MODE_COUNT + WIN_ANIM_PHYSICS_MODE_COUNT)
 
+#include "win_anim_mode_config.h"
+
 struct win_anim {
     int id;
     win_anim_mode_t mode;
-    bool mode_enabled[WIN_ANIM_MODE_COUNT];
-    int mode_chances[WIN_ANIM_MODE_COUNT];
+    win_anim_mode_config_t *mode_config;
     int total_mode_chances;
     bool use_background_3d;
     struct level *level;
@@ -68,6 +71,7 @@ struct win_anim {
 };
 typedef struct win_anim win_anim_t;
 
+const char *win_anim_mode_str(win_anim_mode_t mode);
 void print_win_anim(win_anim_t *win_anim);
 
 win_anim_t *create_win_anim(struct level *level);

@@ -116,6 +116,15 @@ extern int debug_id;
 extern int debug_dir;
 #endif
 
+#define print_cjson(json) do {                \
+        char *str = cJSON_Print(json);        \
+        if (str) {                            \
+            printf("JSON>>>\n%s\n<<<JSON\n",  \
+                   str);                      \
+            free(str);                        \
+        }                                     \
+    } while(0)
+
 int global_rng_get(int bound);
 bool global_rng_bool(int true_chances, int false_chances);
 int global_rng_sign(int pos_chances, int neg_chances);

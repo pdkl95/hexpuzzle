@@ -192,8 +192,9 @@ am__hexpuzzle_SOURCES_DIST = src/background.h src/background.c \
 	src/shader.c src/solver.h src/solver.c src/textures.h \
 	src/textures.c src/tile.h src/tile.c src/tile_draw.h \
 	src/tile_draw.c src/tile_pos.h src/tile_pos.c src/util.h \
-	src/util.c src/win_anim.h src/win_anim.c src/common.h \
-	src/main.c src/physics.h src/physics.c
+	src/util.c src/win_anim.h src/win_anim.c \
+	src/win_anim_mode_config.h src/win_anim_mode_config.c \
+	src/common.h src/main.c src/physics.h src/physics.c
 @USE_PHYSICS_TRUE@am__objects_3 = src/hexpuzzle-physics.$(OBJEXT)
 am_hexpuzzle_OBJECTS = src/hexpuzzle-background.$(OBJEXT) \
 	src/hexpuzzle-classics.$(OBJEXT) \
@@ -218,8 +219,9 @@ am_hexpuzzle_OBJECTS = src/hexpuzzle-background.$(OBJEXT) \
 	src/hexpuzzle-textures.$(OBJEXT) src/hexpuzzle-tile.$(OBJEXT) \
 	src/hexpuzzle-tile_draw.$(OBJEXT) \
 	src/hexpuzzle-tile_pos.$(OBJEXT) src/hexpuzzle-util.$(OBJEXT) \
-	src/hexpuzzle-win_anim.$(OBJEXT) src/hexpuzzle-main.$(OBJEXT) \
-	$(am__objects_3)
+	src/hexpuzzle-win_anim.$(OBJEXT) \
+	src/hexpuzzle-win_anim_mode_config.$(OBJEXT) \
+	src/hexpuzzle-main.$(OBJEXT) $(am__objects_3)
 hexpuzzle_OBJECTS = $(am_hexpuzzle_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
@@ -539,7 +541,9 @@ hexpuzzle_SOURCES = src/background.h src/background.c src/classics.h \
 	src/solver.c src/textures.h src/textures.c src/tile.h \
 	src/tile.c src/tile_draw.h src/tile_draw.c src/tile_pos.h \
 	src/tile_pos.c src/util.h src/util.c src/win_anim.h \
-	src/win_anim.c src/common.h src/main.c $(am__append_5)
+	src/win_anim.c src/win_anim_mode_config.h \
+	src/win_anim_mode_config.c src/common.h src/main.c \
+	$(am__append_5)
 dist_EXTRA_hexpuzzle_SOURCES = \
 	src/data_classics_levels.h  \
 	src/data_fonts.h            \
@@ -905,6 +909,8 @@ src/hexpuzzle-util.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-win_anim.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/hexpuzzle-win_anim_mode_config.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-main.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-physics.$(OBJEXT): src/$(am__dirstamp) \
@@ -969,6 +975,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-tile_pos.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-util.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-win_anim.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-win_anim_mode_config.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)depbase=`echo $@ | sed 's|[^/]*$$|$(DEPDIR)/&|;s|\.o$$||'`;\
@@ -1531,6 +1538,20 @@ src/hexpuzzle-win_anim.obj: src/win_anim.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/win_anim.c' object='src/hexpuzzle-win_anim.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-win_anim.obj `if test -f 'src/win_anim.c'; then $(CYGPATH_W) 'src/win_anim.c'; else $(CYGPATH_W) '$(srcdir)/src/win_anim.c'; fi`
+
+src/hexpuzzle-win_anim_mode_config.o: src/win_anim_mode_config.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-win_anim_mode_config.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-win_anim_mode_config.Tpo -c -o src/hexpuzzle-win_anim_mode_config.o `test -f 'src/win_anim_mode_config.c' || echo '$(srcdir)/'`src/win_anim_mode_config.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-win_anim_mode_config.Tpo src/$(DEPDIR)/hexpuzzle-win_anim_mode_config.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/win_anim_mode_config.c' object='src/hexpuzzle-win_anim_mode_config.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-win_anim_mode_config.o `test -f 'src/win_anim_mode_config.c' || echo '$(srcdir)/'`src/win_anim_mode_config.c
+
+src/hexpuzzle-win_anim_mode_config.obj: src/win_anim_mode_config.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-win_anim_mode_config.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-win_anim_mode_config.Tpo -c -o src/hexpuzzle-win_anim_mode_config.obj `if test -f 'src/win_anim_mode_config.c'; then $(CYGPATH_W) 'src/win_anim_mode_config.c'; else $(CYGPATH_W) '$(srcdir)/src/win_anim_mode_config.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-win_anim_mode_config.Tpo src/$(DEPDIR)/hexpuzzle-win_anim_mode_config.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/win_anim_mode_config.c' object='src/hexpuzzle-win_anim_mode_config.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-win_anim_mode_config.obj `if test -f 'src/win_anim_mode_config.c'; then $(CYGPATH_W) 'src/win_anim_mode_config.c'; else $(CYGPATH_W) '$(srcdir)/src/win_anim_mode_config.c'; fi`
 
 src/hexpuzzle-main.o: src/main.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-main.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-main.Tpo -c -o src/hexpuzzle-main.o `test -f 'src/main.c' || echo '$(srcdir)/'`src/main.c
