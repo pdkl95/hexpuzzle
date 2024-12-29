@@ -46,6 +46,9 @@ const char *win_anim_mode_str(win_anim_mode_t mode)
     case WIN_ANIM_MODE_WAVES:
         return "WAVES";
 
+    case WIN_ANIM_MODE_SPIN:
+        return "SPIN";
+
 #ifdef USE_PHYSICS
     case WIN_ANIM_MODE_PHYSICS_FALL:
         return "PHYSICS_FALL";
@@ -293,6 +296,39 @@ static void win_anim_update_waves(win_anim_t *win_anim)
     level_update_tile_pops(win_anim->level);
 }
 
+static void win_anim_update_spin(win_anim_t *win_anim)
+{
+    float envelope_speed = 0.13f;
+    float spin_envelope_speed = envelope_speed * 3.0f;
+
+    float envelope_phase = current_time * envelope_speed;
+    float envelope = 1.0f - sqrtf(1.0f - fabs(sinf(envelope_phase)));
+
+    envelope = (0.666 * envelope) + 0.333;
+
+    float fade_magnitude = win_anim->fade[2];
+
+    for (int i=0; i<LEVEL_MAXTILES; i++) {
+        tile_t *tile = &(win_anim->level->tiles[i]);
+
+        if (tile->enabled) {
+            tile_pos_t *pos = tile->unsolved_pos;
+
+            float theta = pos->radial_angle;
+
+            float spin_envelope_phase = (current_time * spin_envelope_speed) + theta - pos->center_distance;
+            float spin_envelope = powf(1.0f - sqrtf(1.0f - fabs(sinf(spin_envelope_phase))), 3.0f);
+            pos->extra_magnitude = spin_envelope * fade_magnitude * envelope;
+            float rotate_speed = spin_envelope * pos->extra_magnitude * 0.333;
+            pos->extra_rotate_magnitude = slew_limit_down(pos->extra_rotate_magnitude, rotate_speed, 0.00333);
+            pos->extra_rotate += pos->extra_rotate_magnitude;
+
+            pos->extra_magnitude *= (1.0f + (25.0f * spin_envelope));
+        }
+    }
+
+    level_update_tile_pops(win_anim->level);
+}
 
 #ifdef USE_PHYSICSxxx
         switch (win_anim->mode) {
@@ -366,6 +402,8 @@ void win_anim_select_random_mode(win_anim_t *win_anim)
 
     //win_anim->mode = WIN_ANIM_MODE_SIMPLE;
     //win_anim->mode = WIN_ANIM_MODE_POPS;
+    //win_anim->mode = WIN_ANIM_MODE_WAVES;
+    //win_anim->mode = WIN_ANIM_MODE_SPIN;
     //win_anim->mode = WIN_ANIM_MODE_PHYSICS_SWIRL;
     //win_anim->mode = WIN_ANIM_MODE_PHYSICS_FALL;
 
@@ -448,6 +486,10 @@ void win_anim_update(win_anim_t *win_anim)
 
     case WIN_ANIM_MODE_WAVES:
         win_anim_update_waves(win_anim);
+        break;
+
+    case WIN_ANIM_MODE_SPIN:
+        win_anim_update_spin(win_anim);
         break;
 
 #ifdef USE_PHYSICS

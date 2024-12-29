@@ -70,6 +70,7 @@ struct tile_pos {
 #endif
 
     float   extra_rotate;
+    float   extra_rotate_magnitude;
     Vector2 extra_translate;
     float   extra_magnitude;
 

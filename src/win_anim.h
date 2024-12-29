@@ -32,18 +32,19 @@ enum win_anim_mode {
     WIN_ANIM_MODE_SIMPLE        = 0,
     WIN_ANIM_MODE_POPS          = 1,
     WIN_ANIM_MODE_WAVES         = 2,
+    WIN_ANIM_MODE_SPIN          = 3,
 #ifdef USE_PHYSICS
-    WIN_ANIM_MODE_PHYSICS_FALL  = 3,
-    WIN_ANIM_MODE_PHYSICS_SWIRL = 4
+    WIN_ANIM_MODE_PHYSICS_FALL  = 4,
+    WIN_ANIM_MODE_PHYSICS_SWIRL = 5
 #endif
 };
 typedef enum win_anim_mode win_anim_mode_t;
 
 #ifdef USE_PHYSICS
-# define WIN_ANIM_MODE_COUNT 5
+# define WIN_ANIM_MODE_COUNT 6
 # define WIN_ANIM_PHYSICS_MODE_COUNT 2
 #else
-# define WIN_ANIM_MODE_COUNT 3
+# define WIN_ANIM_MODE_COUNT 4
 # define WIN_ANIM_PHYSICS_MODE_COUNT 0
 #endif
 
