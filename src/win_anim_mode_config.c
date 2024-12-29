@@ -51,7 +51,7 @@ win_anim_mode_config_t default_win_anim_mode_config[WIN_ANIM_MODE_COUNT] = {
     { /* WIN_ANIM_MODE_PHYSICS_FALL */
       .enabled = true,
       .chances = 20,
-      .do_fade_rotate = true
+      .do_fade_rotate = false
     },
     { /* WIN_ANIM_MODE_PHYSICS_SWIRL */
       .enabled = true,

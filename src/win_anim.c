@@ -65,13 +65,13 @@ const char *win_anim_mode_str(win_anim_mode_t mode)
 void print_win_anim_modes(win_anim_t *win_anim)
 {
     for (win_anim_mode_t mode = 0; mode < WIN_ANIM_MODE_COUNT; mode++) {
-        win_anim_mode_config_t *config = &(win_anim->mode_config[mode]);
+        win_anim_mode_config_t *config = win_anim->mode_config;
         printf("\tmode[%d] %s \"%s\"\t%d chances (%f%%)\n",
                mode,
                config->enabled ? "ON " : "OFF",
                win_anim_mode_str(mode),
                config->chances,
-               100.0f * ((float)win_anim->mode_config[mode].chances) / ((float)win_anim->total_mode_chances));
+               100.0f * ((float)win_anim_mode_config[mode].chances) / ((float)win_anim->total_mode_chances));
     }
 }
 
@@ -372,7 +372,6 @@ void init_win_anim(win_anim_t *win_anim, level_t *level)
 
     win_anim->level = level;
 
-    win_anim->mode_config = win_anim_mode_config;
     win_anim_select_random_mode(win_anim);
 
 #ifdef DEBUG_TRACE_WIN_ANIM
@@ -413,20 +412,20 @@ void win_anim_select_random_mode(win_anim_t *win_anim)
 
     win_anim->total_mode_chances = 0;
     for (win_anim_mode_t mode = 0; mode < WIN_ANIM_MODE_COUNT; mode++) {
-        if (win_anim->mode_config[mode].enabled) {
-            win_anim->total_mode_chances += win_anim->mode_config[mode].chances;
+        if (win_anim_mode_config[mode].enabled) {
+            win_anim->total_mode_chances += win_anim_mode_config[mode].chances;
         }
     }
 
     int roll = global_rng_get(win_anim->total_mode_chances);
     for (win_anim_mode_t mode = 0; mode < WIN_ANIM_MODE_COUNT; mode++) {
         assert(roll >= 0);
-        if (win_anim->mode_config[mode].enabled) {
-            if (roll <= win_anim->mode_config[mode].chances) {
+        if (win_anim_mode_config[mode].enabled) {
+            if (roll <= win_anim_mode_config[mode].chances) {
                 win_anim->mode = mode;
                 goto finish_select_random_mode;
             } else {
-                roll -= win_anim->mode_config[mode].chances;
+                roll -= win_anim_mode_config[mode].chances;
             }
         }
     }
@@ -441,6 +440,8 @@ void win_anim_select_random_mode(win_anim_t *win_anim)
     //win_anim->mode = WIN_ANIM_MODE_SPIN;
     //win_anim->mode = WIN_ANIM_MODE_PHYSICS_SWIRL;
     //win_anim->mode = WIN_ANIM_MODE_PHYSICS_FALL;
+
+    win_anim->mode_config = &(win_anim_mode_config[win_anim->mode]);
 
 #ifdef DEBUG_TRACE_WIN_ANIM
     infomsg("win_anim[%02d] NEW RANDOM MODE <old:%s => new:%s>", win_anim->id, win_anim_mode_str(old_mode), win_anim_mode_str(win_anim->mode));
@@ -569,10 +570,10 @@ void win_anim_start(win_anim_t *win_anim)
         win_anim->start_time = GetTime();
         win_anim->use_background_3d = false;
 
-        win_anim->level->fade.do_rotate = true;
+        win_anim->level->fade.do_rotate = win_anim->mode_config->do_fade_rotate;
 
         switch (win_anim->mode) {
-        case WIN_ANIM_MODE_SIMPLE:\
+        case WIN_ANIM_MODE_SIMPLE:
             /* fall through */
         case WIN_ANIM_MODE_WAVES:
             if (global_rng_bool(11, 11)) {
@@ -582,7 +583,6 @@ void win_anim_start(win_anim_t *win_anim)
 
 #ifdef USE_PHYSICS
         case WIN_ANIM_MODE_PHYSICS_FALL:
-            win_anim->level->fade.do_rotate = false;
             /* fall through */
         case WIN_ANIM_MODE_PHYSICS_SWIRL:
             physics_start(&win_anim->physics);
