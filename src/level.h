@@ -50,6 +50,7 @@ typedef void (*level_fade_finished_cb_t)(struct level *level, void *data);
 
 struct level_fade {
     bool  active;
+    bool  do_rotate;
     float value;
     float value_eased;
     float rotate_level;

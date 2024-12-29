@@ -358,7 +358,7 @@ void win_anim_select_random_mode(win_anim_t *win_anim)
 #endif
 
     win_anim->mode = global_rng_get(WIN_ANIM_MODE_COUNT + WIN_ANIM_PHYSICS_MODE_COUNT);
-    int rng_mode = win_anim->mode;
+    //int rng_mode = win_anim->mode;
     if (win_anim->mode >= WIN_ANIM_MODE_COUNT) {
         win_anim->mode -= 2;
     }
@@ -492,6 +492,8 @@ void win_anim_start(win_anim_t *win_anim)
         win_anim->start_time = GetTime();
         win_anim->use_background_3d = false;
 
+        win_anim->level->fade.do_rotate = true;
+
         switch (win_anim->mode) {
         case WIN_ANIM_MODE_SIMPLE:\
             /* fall through */
@@ -503,6 +505,7 @@ void win_anim_start(win_anim_t *win_anim)
 
 #ifdef USE_PHYSICS
         case WIN_ANIM_MODE_PHYSICS_FALL:
+            win_anim->level->fade.do_rotate = false;
             /* fall through */
         case WIN_ANIM_MODE_PHYSICS_SWIRL:
             physics_start(&win_anim->physics);

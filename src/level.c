@@ -314,6 +314,7 @@ static level_t *init_level(level_t *level)
     level->finished_hue = 0.0f;
 
     level->fade.active = false;
+    level->fade.do_rotate = true;
     level->fade.value        = 0.0f;
     level->fade.value_eased  = 0.0f;
     level->fade.delta        = 0.0f;
@@ -1810,8 +1811,12 @@ bool level_update_fade(level_t *level)
 #endif
         }
 
-        level->fade.rotate_level = (1.0 - ease_circular_out(level->fade.value)) * (TAU/2.0);
-        level->fade.rotate_level *= level->fade.rotate_speed;
+        if (level->fade.do_rotate) {
+            level->fade.rotate_level = (1.0 - ease_circular_out(level->fade.value)) * (TAU/2.0);
+            level->fade.rotate_level *= level->fade.rotate_speed;
+        } else {
+            level->fade.rotate_level = 0.0f;
+        }
     }
 
     return level->fade.value != 1.0f;
