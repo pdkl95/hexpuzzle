@@ -62,15 +62,32 @@ const char *win_anim_mode_str(win_anim_mode_t mode)
     }
 }
 
+void print_win_anim_modes(win_anim_t *win_anim)
+{
+
+    for (win_anim_mode_t mode = 0; mode < WIN_ANIM_MODE_COUNT; mode++) {
+        printf("\tmode[%d] %s \"%s\"\t%d chances (%f%%)\n",
+               mode,
+               win_anim->mode_enabled[mode] ? "ON " : "OFF",
+               win_anim_mode_str(mode),
+               win_anim->mode_chances[mode],
+               100.0f * ((float)win_anim->mode_chances[mode]) / ((float)win_anim->total_mode_chances));
+    }
+}
+
 void print_win_anim(win_anim_t *win_anim)
 {
     printf(">>> win_anim[%p] %s %s\n",
            win_anim,
            win_anim_mode_str(win_anim->mode),
            win_anim->running ? "running" : "off");
+
+    print_win_anim_modes(win_anim);
+
     for (int i=0; i<4; i++) {
         printf("\t->fade[%d] = %f\n", i, win_anim->fade[i]);
     }
+
     printf("\t->start_time = %f\n", win_anim->start_time);
 }
 
@@ -344,6 +361,19 @@ static void win_anim_update_spin(win_anim_t *win_anim)
         }
 #endif
 
+void win_anim_reset_modes(win_anim_t *win_anim)
+{
+    for (win_anim_mode_t mode = 0; mode < WIN_ANIM_MODE_COUNT; mode++) {
+        win_anim->mode_enabled[mode] = true;
+        if (mode >= WIN_ANIM_NON_PHYSICS_MODE_COUNT) {
+            // weight the physics modes higher
+            win_anim->mode_chances[mode] = 20;
+        } else {
+            win_anim->mode_chances[mode] = 10;
+        }
+    }
+}
+
 void init_win_anim(win_anim_t *win_anim, level_t *level)
 {
     assert_not_null(win_anim);
@@ -355,6 +385,7 @@ void init_win_anim(win_anim_t *win_anim, level_t *level)
 
     win_anim->level = level;
 
+    win_anim_reset_modes(win_anim);
     win_anim_select_random_mode(win_anim);
 
 #ifdef DEBUG_TRACE_WIN_ANIM
@@ -393,13 +424,30 @@ void win_anim_select_random_mode(win_anim_t *win_anim)
     win_anim_mode_t old_mode = win_anim->mode;;
 #endif
 
-    win_anim->mode = global_rng_get(WIN_ANIM_MODE_COUNT + WIN_ANIM_PHYSICS_MODE_COUNT);
-    //int rng_mode = win_anim->mode;
-    if (win_anim->mode >= WIN_ANIM_MODE_COUNT) {
-        win_anim->mode -= 2;
+    win_anim->total_mode_chances = 0;
+    for (win_anim_mode_t mode = 0; mode < WIN_ANIM_MODE_COUNT; mode++) {
+        if (win_anim->mode_enabled[mode]) {
+            win_anim->total_mode_chances += win_anim->mode_chances[mode];
+        }
     }
-    //printf("rng_mode = %d, win_anim->mode = %d (%s)\n", rng_mode, win_anim->mode, win_anim_mode_str(win_anim->mode));
 
+    int roll = global_rng_get(win_anim->total_mode_chances);
+    for (win_anim_mode_t mode = 0; mode < WIN_ANIM_MODE_COUNT; mode++) {
+        assert(roll >= 0);
+        if (win_anim->mode_enabled[mode]) {
+            if (roll <= win_anim->mode_chances[mode]) {
+                win_anim->mode = mode;
+                goto finish_select_random_mode;
+            } else {
+                roll -= win_anim->mode_chances[mode];
+            }
+        }
+    }
+
+    assert(false && "RGG went past the end of the mode table");
+    __builtin_unreachable();
+
+  finish_select_random_mode:
     //win_anim->mode = WIN_ANIM_MODE_SIMPLE;
     //win_anim->mode = WIN_ANIM_MODE_POPS;
     //win_anim->mode = WIN_ANIM_MODE_WAVES;

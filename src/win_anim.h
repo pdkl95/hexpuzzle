@@ -40,17 +40,22 @@ enum win_anim_mode {
 };
 typedef enum win_anim_mode win_anim_mode_t;
 
+#define WIN_ANIM_NON_PHYSICS_MODE_COUNT 4
+
 #ifdef USE_PHYSICS
-# define WIN_ANIM_MODE_COUNT 6
 # define WIN_ANIM_PHYSICS_MODE_COUNT 2
 #else
-# define WIN_ANIM_MODE_COUNT 4
 # define WIN_ANIM_PHYSICS_MODE_COUNT 0
 #endif
+
+#define WIN_ANIM_MODE_COUNT (WIN_ANIM_NON_PHYSICS_MODE_COUNT + WIN_ANIM_PHYSICS_MODE_COUNT)
 
 struct win_anim {
     int id;
     win_anim_mode_t mode;
+    bool mode_enabled[WIN_ANIM_MODE_COUNT];
+    int mode_chances[WIN_ANIM_MODE_COUNT];
+    int total_mode_chances;
     bool use_background_3d;
     struct level *level;
     bool running;
