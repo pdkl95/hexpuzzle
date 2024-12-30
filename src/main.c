@@ -910,7 +910,6 @@ Rectangle goto_next_seed_button_rect;
 Rectangle goto_next_seed_preview_rect;
 Rectangle main_gui_area_rect;
 
-float right_side_width;
 float tool_panel_content_height;
 
 Vector2 edit_radius_label_location;
@@ -923,8 +922,14 @@ Vector2 edit_shuffle_label_location;
 Vector2 goto_next_level_label_location;
 Vector2 goto_next_seed_label_location;
 
-#define MAX_RIGHT_SIDE_BUTTONS 9
-Rectangle right_side_button_rect[MAX_RIGHT_SIDE_BUTTONS];
+struct right_side_button {
+    Rectangle single_line_rect;
+    Rectangle double_line_rect;
+    float top_y;
+    float vert_spacing;
+    float area_width;
+};
+struct right_side_button right_side_button;
 
 char close_button_text_str[] = "Quit";
 #define CLOSE_BUTTON_TEXT_LENGTH (6 + sizeof(close_button_text_str))
@@ -1341,23 +1346,22 @@ void gui_setup(void)
     memcpy( browser_button_text, GuiIconText(ICON_FOLDER_FILE_OPEN,   browser_button_text_str),  BROWSER_BUTTON_TEXT_LENGTH);
     memcpy(  random_button_text, GuiIconText(ICON_SHUFFLE_FILL,        random_button_text_str),   RANDOM_BUTTON_TEXT_LENGTH);
 
-    right_side_button_rect[0].y      = WINDOW_MARGIN;
-    right_side_button_rect[0].width  = ICON_BUTTON_SIZE + right_side_button_text_width;
-    right_side_button_rect[0].x      = window_size.x - WINDOW_MARGIN - right_side_button_rect[0].width;
-    right_side_button_rect[0].height = ICON_BUTTON_SIZE * 2;
+    right_side_button.single_line_rect.y      = WINDOW_MARGIN;
+    right_side_button.single_line_rect.width  = ICON_BUTTON_SIZE + right_side_button_text_width;
+    right_side_button.single_line_rect.x      = window_size.x - WINDOW_MARGIN - right_side_button.single_line_rect.width;
+    right_side_button.single_line_rect.height = ICON_BUTTON_SIZE;
 
-    for (int i=1; i<MAX_RIGHT_SIDE_BUTTONS; i++) {
-        right_side_button_rect[i].x      = right_side_button_rect[i-1].x;
-        right_side_button_rect[i].y      = right_side_button_rect[i-1].y + right_side_button_rect[i-1].height + (4 * WINDOW_MARGIN);
-        right_side_button_rect[i].width  = right_side_button_rect[i-1].width;
-        right_side_button_rect[i].height = ICON_BUTTON_SIZE * 2;
-    }
+    right_side_button.double_line_rect = right_side_button.single_line_rect;\
+    right_side_button.double_line_rect.height += ICON_BUTTON_SIZE;
 
-    right_side_width = right_side_button_rect[0].width + (2 * WINDOW_MARGIN);
+    right_side_button.top_y = right_side_button.single_line_rect.y;
+    right_side_button.vert_spacing = WINDOW_MARGIN;
+
+    right_side_button.area_width = right_side_button.single_line_rect.width + (2 * WINDOW_MARGIN);
 
     main_gui_area_rect.x      = WINDOW_MARGIN;
     main_gui_area_rect.y      = WINDOW_MARGIN;
-    main_gui_area_rect.width  = window_size.x - WINDOW_MARGIN - right_side_width;
+    main_gui_area_rect.width  = window_size.x - WINDOW_MARGIN - right_side_button.area_width;
     main_gui_area_rect.height = window_size.y - (2 * WINDOW_MARGIN);
 
     Vector2 open_file_button_text_size = measure_gui_text(open_file_button_text_str);
@@ -1766,7 +1770,10 @@ static void draw_win_panels(void)
     }
 }
 
-int rsb = 0;
+static bool rsb_single_line(const char *text)
+{
+    
+}
 
 static bool game_mode_button(const char *text, game_mode_t mode)
 {

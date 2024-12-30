@@ -347,20 +347,6 @@ static void win_anim_update_spin(win_anim_t *win_anim)
     level_update_tile_pops(win_anim->level);
 }
 
-#ifdef USE_PHYSICSxxx
-        switch (win_anim->mode) {
-        case WIN_ANIM_MODE_PHYSICS_FALL:
-            /* fall through */
-        case WIN_ANIM_MODE_PHYSICS_SWIRL:
-            //assert(win_anim->level->finished);
-            //physics_start(win_anim->win_anim.physics);
-            break;
-
-        default:
-            break;
-        }
-#endif
-
 void init_win_anim(win_anim_t *win_anim, level_t *level)
 {
     assert_not_null(win_anim);
