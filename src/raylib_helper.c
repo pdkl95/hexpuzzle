@@ -450,7 +450,7 @@ int GuiButtonMultiLine(Rectangle bounds, const char **text, int count)
         Vector2 mousePoint = GetMousePosition();
 
         // Check button state
-        if (CheckCollisionPointRec(mousePoint, bounds))
+        if (CheckCollisionPointRec(mousePoint, outer_bounds))
         {
             if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) state = STATE_PRESSED;
             else state = STATE_FOCUSED;

@@ -925,9 +925,13 @@ Vector2 goto_next_seed_label_location;
 struct right_side_button {
     Rectangle single_line_rect;
     Rectangle double_line_rect;
+
     float top_y;
     float vert_spacing;
     float area_width;
+
+    float single_line_y_offset;
+    float double_line_y_offset;
 };
 struct right_side_button right_side_button;
 
@@ -939,11 +943,11 @@ char options_button_text_str[] = "Options";
 #define OPTIONS_BUTTON_TEXT_LENGTH (6 + sizeof(options_button_text_str))
 char options_button_text[OPTIONS_BUTTON_TEXT_LENGTH];
 
-char browser_button_text_str[] = "Browse\nLevels";
+char browser_button_text_str[] = "Browse\n#000#Levels";
 #define BROWSER_BUTTON_TEXT_LENGTH (6 + sizeof(browser_button_text_str))
 char browser_button_text[BROWSER_BUTTON_TEXT_LENGTH];
 
-char random_button_text_str[] = "Random\nLevel";
+char random_button_text_str[] = "Random\n#000#Level";
 #define RANDOM_BUTTON_TEXT_LENGTH (6 + sizeof(random_button_text_str))
 char random_button_text[RANDOM_BUTTON_TEXT_LENGTH];
 
@@ -1355,7 +1359,10 @@ void gui_setup(void)
     right_side_button.double_line_rect.height += ICON_BUTTON_SIZE;
 
     right_side_button.top_y = right_side_button.single_line_rect.y;
-    right_side_button.vert_spacing = WINDOW_MARGIN;
+    right_side_button.vert_spacing = 3 * WINDOW_MARGIN;
+
+    right_side_button.single_line_y_offset = right_side_button.single_line_rect.height + right_side_button.vert_spacing;
+    right_side_button.double_line_y_offset = right_side_button.double_line_rect.height + right_side_button.vert_spacing;
 
     right_side_button.area_width = right_side_button.single_line_rect.width + (2 * WINDOW_MARGIN);
 
@@ -1770,9 +1777,30 @@ static void draw_win_panels(void)
     }
 }
 
-static bool rsb_single_line(const char *text)
+static inline void reset_right_side_button(void)
 {
-    
+    right_side_button.single_line_rect.y = right_side_button.top_y;
+    right_side_button.double_line_rect.y = right_side_button.top_y;
+}
+
+static inline void shift_down_right_side_button(float yoffset)
+{
+    right_side_button.single_line_rect.y += yoffset;
+    right_side_button.double_line_rect.y += yoffset;
+}
+
+static inline bool rsb_single_line_button(const char *text)
+{
+    bool pressed = GuiButton(right_side_button.single_line_rect, text);
+    shift_down_right_side_button(right_side_button.single_line_y_offset);
+    return pressed;
+}
+
+static inline bool rsb_double_line_button(const char **lines, int line_count)
+{
+    bool pressed = GuiButtonMultiLine(right_side_button.double_line_rect, lines, line_count);
+    shift_down_right_side_button(right_side_button.double_line_y_offset);
+    return pressed;
 }
 
 static bool game_mode_button(const char *text, game_mode_t mode)
@@ -1788,9 +1816,9 @@ static bool game_mode_button(const char *text, game_mode_t mode)
 
     bool pressed = false;
     if (line_count > 1) {
-        pressed = GuiButtonMultiLine(right_side_button_rect[rsb++], lines, line_count);
+        pressed = rsb_double_line_button(lines, line_count);
     } else {
-        pressed = GuiButton(right_side_button_rect[rsb++], text);
+        pressed = rsb_single_line_button(text);
     }
 
     if (pressed) {
@@ -1817,13 +1845,15 @@ static void standard_buttons(void)
 
 static void draw_gui_widgets(void)
 {
+    reset_right_side_button();
+
     int prev_align = GuiGetStyle(BUTTON, TEXT_ALIGNMENT);
     GuiSetStyle(BUTTON, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
 
-    rsb = 0;
-
 #if defined(PLATFORM_DESKTOP)
-    if (GuiButton(right_side_button_rect[rsb++], close_button_text)) {
+    bool pressed = rsb_single_line_button(close_button_text);
+
+    if (pressed) {
         running = false;
     }
 #endif
@@ -1846,7 +1876,7 @@ static void draw_gui_widgets(void)
         break;
 
     case GAME_MODE_OPTIONS:
-        if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
+        if (rsb_single_line_button(return_button_text)) {
             prev_game_mode();
         }
         break;
@@ -1867,18 +1897,18 @@ static void draw_gui_widgets(void)
 
         gm_button(options, OPTIONS);
 
-        if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
+        if (rsb_single_line_button(return_button_text)) {
             show_ask_save_box = true;
         }
 
         // skip one position
-        rsb++;
+        shift_down_right_side_button(right_side_button.single_line_y_offset);
 
-        if (GuiButton(right_side_button_rect[rsb++], undo_button_text)) {
+        if (rsb_single_line_button(undo_button_text)) {
             undo_edit();
         }
 
-        if (GuiButton(right_side_button_rect[rsb++], redo_button_text)) {
+        if (rsb_single_line_button(redo_button_text)) {
             redo_edit();
         }
         break;
@@ -1886,34 +1916,34 @@ static void draw_gui_widgets(void)
     case GAME_MODE_PLAY_LEVEL:
         draw_name_header();
 
-        if (GuiButton(right_side_button_rect[rsb++], options_button_text)) {
+        if (rsb_single_line_button(options_button_text)) {
             set_game_mode(GAME_MODE_OPTIONS);
         }
 
 #if defined(PLATFORM_DESKTOP)
         set_gui_narrow_font();
-        if (GuiButton(right_side_button_rect[rsb++], savequit_button_text)) {
+        if (rsb_single_line_button(savequit_button_text)) {
             savequit_current_level();
         }
         set_default_font();
 #endif
 
-        if (GuiButton(right_side_button_rect[rsb++], reset_button_text)) {
+        if (rsb_single_line_button(reset_button_text)) {
             reset_current_level();
         }
 
-        if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
+        if (rsb_single_line_button(return_button_text)) {
             return_from_level();
         }
 
         // skip one position
-        rsb++;
+        shift_down_right_side_button(right_side_button.single_line_y_offset);
 
-        if (GuiButton(right_side_button_rect[rsb++], undo_button_text)) {
+        if (rsb_single_line_button(undo_button_text)) {
             undo_play();
         }
 
-        if (GuiButton(right_side_button_rect[rsb++], redo_button_text)) {
+        if (rsb_single_line_button(redo_button_text)) {
             redo_play();
         }
         break;
@@ -1924,23 +1954,22 @@ static void draw_gui_widgets(void)
 
         gm_button(options, OPTIONS);
 
-        if (GuiButton(right_side_button_rect[rsb++], reset_button_text)) {
+        if (rsb_single_line_button(reset_button_text)) {
             reset_current_level();
         }
 
-        if (GuiButton(right_side_button_rect[rsb++], return_button_text)) {
+        if (rsb_single_line_button(return_button_text)) {
             return_from_level();
         }
 
         // skip two positions
-        rsb++;
-        rsb++;
+        shift_down_right_side_button(right_side_button.double_line_y_offset);
 
-        if (GuiButton(right_side_button_rect[rsb++], undo_button_text)) {
+        if (rsb_single_line_button(undo_button_text)) {
             undo_play();
         }
 
-        if (GuiButton(right_side_button_rect[rsb++], redo_button_text)) {
+        if (rsb_single_line_button(redo_button_text)) {
             redo_play();
         }
         break;
@@ -1949,14 +1978,14 @@ static void draw_gui_widgets(void)
         standard_buttons();
 
         set_gui_narrow_font();
-        if (GuiButton(right_side_button_rect[rsb++], unedit_button_text)) {
+        if (rsb_single_line_button(unedit_button_text)) {
             toggle_edit_mode();
         }
         set_default_font();
 
 #if defined(PLATFORM_DESKTOP)
         if (current_collection && current_collection->changed) {
-            if (GuiButton(right_side_button_rect[rsb++], save_button_text)) {
+            if (rsb_single_line_button(save_button_text)) {
                 show_ask_save_box = true;
             }
         }
@@ -1966,7 +1995,7 @@ static void draw_gui_widgets(void)
     case GAME_MODE_PLAY_COLLECTION:
         standard_buttons();
 
-        if (GuiButton(right_side_button_rect[rsb++], edit_button_text)) {
+        if (rsb_single_line_button(edit_button_text)) {
             toggle_edit_mode();
         }
 
@@ -1975,8 +2004,6 @@ static void draw_gui_widgets(void)
     default:
         break;
     }
-
-    assert(rsb < MAX_RIGHT_SIDE_BUTTONS);
 
     GuiSetStyle(BUTTON, TEXT_ALIGNMENT, prev_align);
 }
