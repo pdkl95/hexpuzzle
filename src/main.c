@@ -934,11 +934,11 @@ char options_button_text_str[] = "Options";
 #define OPTIONS_BUTTON_TEXT_LENGTH (6 + sizeof(options_button_text_str))
 char options_button_text[OPTIONS_BUTTON_TEXT_LENGTH];
 
-char browser_button_text_str[] = "Browse";
+char browser_button_text_str[] = "Browse\nLevels";
 #define BROWSER_BUTTON_TEXT_LENGTH (6 + sizeof(browser_button_text_str))
 char browser_button_text[BROWSER_BUTTON_TEXT_LENGTH];
 
-char random_button_text_str[] = "Random";
+char random_button_text_str[] = "Random\nLevel";
 #define RANDOM_BUTTON_TEXT_LENGTH (6 + sizeof(random_button_text_str))
 char random_button_text[RANDOM_BUTTON_TEXT_LENGTH];
 
@@ -1344,13 +1344,13 @@ void gui_setup(void)
     right_side_button_rect[0].y      = WINDOW_MARGIN;
     right_side_button_rect[0].width  = ICON_BUTTON_SIZE + right_side_button_text_width;
     right_side_button_rect[0].x      = window_size.x - WINDOW_MARGIN - right_side_button_rect[0].width;
-    right_side_button_rect[0].height = ICON_BUTTON_SIZE;
+    right_side_button_rect[0].height = ICON_BUTTON_SIZE * 2;
 
     for (int i=1; i<MAX_RIGHT_SIDE_BUTTONS; i++) {
         right_side_button_rect[i].x      = right_side_button_rect[i-1].x;
-        right_side_button_rect[i].y      = right_side_button_rect[i-1].y + right_side_button_rect[i-1].height + WINDOW_MARGIN;
+        right_side_button_rect[i].y      = right_side_button_rect[i-1].y + right_side_button_rect[i-1].height + (4 * WINDOW_MARGIN);
         right_side_button_rect[i].width  = right_side_button_rect[i-1].width;
-        right_side_button_rect[i].height = ICON_BUTTON_SIZE;
+        right_side_button_rect[i].height = ICON_BUTTON_SIZE * 2;
     }
 
     right_side_width = right_side_button_rect[0].width + (2 * WINDOW_MARGIN);
@@ -1776,7 +1776,17 @@ static bool game_mode_button(const char *text, game_mode_t mode)
         GuiDisable();
     }
 
-    if (GuiButton(right_side_button_rect[rsb++], text)) {
+    int line_count = 0;
+    const char **lines = TextSplit(text, '\n', &line_count);
+
+    bool pressed = false;
+    if (line_count > 1) {
+        pressed = GuiButtonMultiLine(right_side_button_rect[rsb++], lines, line_count);
+    } else {
+        pressed = GuiButton(right_side_button_rect[rsb++], text);
+    }
+
+    if (pressed) {
         set_game_mode(mode);
         rv = true;
     }

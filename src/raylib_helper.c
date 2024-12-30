@@ -23,6 +23,8 @@
 #include "raygui/raygui.h"
 #include "raylib_helper.h"
 
+typedef enum { BORDER = 0, BASE, TEXT, OTHER } GuiPropertyElement;
+
 Color TEXT_LIGHT_SHADOW = { 0x11, 0x11, 0x11, 0x33 };
 Color TEXT_DARK_SHADOW  = {    0,    0,    0, 0xAA };
 
@@ -425,4 +427,49 @@ void GuiSimpleTabBar(Rectangle bounds, const char **text, int count, int *active
     // Draw tab-bar bottom line
     GuiDrawRectangle((Rectangle){ bounds.x, bounds.y + bounds.height - 1, bounds.width, 1 }, 0, BLANK, GetColor(GuiGetStyle(TOGGLE, BORDER_COLOR_NORMAL)));
     //--------------------------------------------------------------------
+}
+
+int GuiButtonMultiLine(Rectangle bounds, const char **text, int count)
+{
+    int result = 0;
+    GuiState state = GuiGetState();
+
+    bool locked = GuiIsLocked();
+    bool slider_dragging = GuiIsSliderDragging();
+
+    float line_height = bounds.height;
+
+    Rectangle line_bounds = bounds;
+    Rectangle outer_bounds = bounds;
+    outer_bounds.height = line_height * count;
+
+    // Update control
+    //--------------------------------------------------------------------
+    if ((state != STATE_DISABLED) && !locked && !slider_dragging)
+    {
+        Vector2 mousePoint = GetMousePosition();
+
+        // Check button state
+        if (CheckCollisionPointRec(mousePoint, bounds))
+        {
+            if (IsMouseButtonDown(MOUSE_LEFT_BUTTON)) state = STATE_PRESSED;
+            else state = STATE_FOCUSED;
+
+            if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) result = 1;
+        }
+    }
+    //--------------------------------------------------------------------
+
+    // Draw control
+    //--------------------------------------------------------------------
+    GuiDrawRectangle(outer_bounds, GuiGetStyle(BUTTON, BORDER_WIDTH), GetColor(GuiGetStyle(BUTTON, BORDER + (state*3))), GetColor(GuiGetStyle(BUTTON, BASE + (state*3))));
+    for (int i=0; i<count; i++) {
+        GuiDrawText(text[i], GetTextBounds(BUTTON, line_bounds), GuiGetStyle(BUTTON, TEXT_ALIGNMENT), GetColor(GuiGetStyle(BUTTON, TEXT + (state*3))));
+        line_bounds.y += line_height;
+    }
+
+    if (state == STATE_FOCUSED) GuiTooltip(bounds);
+    //------------------------------------------------------------------
+
+    return result;
 }

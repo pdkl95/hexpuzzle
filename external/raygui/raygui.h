@@ -668,11 +668,12 @@ RAYGUIAPI void GuiDisable(void);                                // Disable gui c
 RAYGUIAPI void GuiLock(void);                                   // Lock gui controls (global state)
 RAYGUIAPI void GuiUnlock(void);                                 // Unlock gui controls (global state)
 RAYGUIAPI bool GuiIsLocked(void);                               // Check if gui is locked (global state)
+RAYGUIAPI bool GuiIsSliderDragging(void);
 RAYGUIAPI void GuiSetAlpha(float alpha);                        // Set gui controls alpha (global state), alpha goes from 0.0f to 1.0f
 RAYGUIAPI float GuiGetAlpha(void);
 RAYGUIAPI void GuiSetState(int state);                          // Set gui state (global state)
 RAYGUIAPI int GuiGetState(void);                                // Get gui state (global state)
-
+RAYGUIAPI void GuiTooltip(Rectangle controlRec);
 // Font set/get functions
 RAYGUIAPI void GuiSetFont(Font font);                           // Set gui custom font (global state)
 RAYGUIAPI Font GuiGetFont(void);                                // Get gui custom font (global state)
@@ -1477,7 +1478,6 @@ static Vector3 ConvertHSVtoRGB(Vector3 hsv);                    // Convert color
 static Vector3 ConvertRGBtoHSV(Vector3 rgb);                    // Convert color data from RGB to HSV
 
 static int GuiScrollBar(Rectangle bounds, int value, int minValue, int maxValue);   // Scroll bar control, used by GuiScrollPanel()
-static void GuiTooltip(Rectangle controlRec);                   // Draw tooltip using control rec position
 
 static Color GuiFade(Color color, float alpha);         // Fade color by an alpha factor
 
@@ -1500,6 +1500,8 @@ void GuiUnlock(void) { guiLocked = false; }
 
 // Check if gui is locked (global state)
 bool GuiIsLocked(void) { return guiLocked; }
+
+bool GuiIsSliderDragging(void) { return guiSliderDragging; }
 
 // Set gui controls alpha global state
 void GuiSetAlpha(float alpha)
@@ -4945,7 +4947,7 @@ static void GuiDrawRectangle(Rectangle rec, int borderWidth, Color borderColor, 
 }
 
 // Draw tooltip using control bounds
-static void GuiTooltip(Rectangle controlRec)
+void GuiTooltip(Rectangle controlRec)
 {
     if (!guiLocked && guiTooltip && (guiTooltipPtr != NULL) && !guiSliderDragging)
     {

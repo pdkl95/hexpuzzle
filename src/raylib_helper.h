@@ -162,6 +162,7 @@ RenderTexture2D LoadRenderTextureWithFormat(int width, int height, int pixel_for
 
 /*** Custom RayGui widgets ***/
 void GuiSimpleTabBar(Rectangle bounds, const char **text, int count, int *active);
+int GuiButtonMultiLine(Rectangle bounds, const char **text, int count);
 
 #endif /*RAYLIB_HELPER_H*/
 
