@@ -437,11 +437,17 @@ int GuiButtonMultiLine(Rectangle bounds, const char **text, int count)
     bool locked = GuiIsLocked();
     bool slider_dragging = GuiIsSliderDragging();
 
-    float line_height = bounds.height;
+    int border_width = GuiGetStyle(BUTTON, BORDER_WIDTH);
 
-    Rectangle line_bounds = bounds;
-    Rectangle outer_bounds = bounds;
-    outer_bounds.height = line_height * count;
+    float line_height = bounds.height - (2 * border_width);
+
+    Rectangle line_bounds = GetTextBounds(BUTTON, bounds);
+    Rectangle outer_bounds = {
+        .x      = bounds.x,
+        .y      = bounds.y,
+        .width  = bounds.width,
+        .height = (line_height * count) + (2 * border_width)
+    };
 
     // Update control
     //--------------------------------------------------------------------
@@ -462,9 +468,9 @@ int GuiButtonMultiLine(Rectangle bounds, const char **text, int count)
 
     // Draw control
     //--------------------------------------------------------------------
-    GuiDrawRectangle(outer_bounds, GuiGetStyle(BUTTON, BORDER_WIDTH), GetColor(GuiGetStyle(BUTTON, BORDER + (state*3))), GetColor(GuiGetStyle(BUTTON, BASE + (state*3))));
+    GuiDrawRectangle(outer_bounds, border_width, GetColor(GuiGetStyle(BUTTON, BORDER + (state*3))), GetColor(GuiGetStyle(BUTTON, BASE + (state*3))));
     for (int i=0; i<count; i++) {
-        GuiDrawText(text[i], GetTextBounds(BUTTON, line_bounds), GuiGetStyle(BUTTON, TEXT_ALIGNMENT), GetColor(GuiGetStyle(BUTTON, TEXT + (state*3))));
+        GuiDrawText(text[i], line_bounds, GuiGetStyle(BUTTON, TEXT_ALIGNMENT), GetColor(GuiGetStyle(BUTTON, TEXT + (state*3))));
         line_bounds.y += line_height;
     }
 

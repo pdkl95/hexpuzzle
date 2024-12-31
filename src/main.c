@@ -923,8 +923,7 @@ Vector2 goto_next_level_label_location;
 Vector2 goto_next_seed_label_location;
 
 struct right_side_button {
-    Rectangle single_line_rect;
-    Rectangle double_line_rect;
+    Rectangle rect;
 
     float top_y;
     float vert_spacing;
@@ -943,13 +942,17 @@ char options_button_text_str[] = "Options";
 #define OPTIONS_BUTTON_TEXT_LENGTH (6 + sizeof(options_button_text_str))
 char options_button_text[OPTIONS_BUTTON_TEXT_LENGTH];
 
-char browser_button_text_str[] = "Browse\n#000#Levels";
+char browser_button_text_str[] = "Browse";
 #define BROWSER_BUTTON_TEXT_LENGTH (6 + sizeof(browser_button_text_str))
 char browser_button_text[BROWSER_BUTTON_TEXT_LENGTH];
 
-char random_button_text_str[] = "Random\n#000#Level";
+char random_button_text_str[] = "Random";
 #define RANDOM_BUTTON_TEXT_LENGTH (6 + sizeof(random_button_text_str))
 char random_button_text[RANDOM_BUTTON_TEXT_LENGTH];
+
+char levels_button_text_str[] = "Levels";
+#define LEVELS_BUTTON_TEXT_LENGTH (6 + sizeof(levels_button_text_str))
+char levels_button_text[LEVELS_BUTTON_TEXT_LENGTH];
 
 char save_button_text_str[] = "Save";
 #define SAVE_BUTTON_TEXT_LENGTH (6 + sizeof(save_button_text_str))
@@ -994,6 +997,16 @@ char cycle_tool_button_text[CYCLE_TOOL_BUTTON_TEXT_LENGTH];
 char erase_tool_button_text_str[] = "Erase";
 #define ERASE_TOOL_BUTTON_TEXT_LENGTH (6 + sizeof(erase_tool_button_text_str))
 char erase_tool_button_text[ERASE_TOOL_BUTTON_TEXT_LENGTH];
+
+char *browser_button_lines[2] = {
+    browser_button_text,
+    levels_button_text
+};
+
+char *random_button_lines[2] = {
+    random_button_text,
+    levels_button_text
+};
 
 char edit_radius_label_text[] = "Radius";
 char edit_mode_label_text[] = "Mode";
@@ -1315,28 +1328,6 @@ void gui_setup(void)
     gui_setup_goto_next_level_panel();
     gui_setup_goto_next_seed_panel();
 
-    int right_side_button_text_width = 0;
-
-    Vector2 savequit_button_text_size = measure_gui_narrow_text(savequit_button_text_str);
-    right_side_button_text_width = MAX(right_side_button_text_width, savequit_button_text_size.x);
-
-#define rsbw(name) do {                                                 \
-        Vector2 name##_button_text_size = measure_gui_text(name##_button_text_str); \
-        right_side_button_text_width = MAX(right_side_button_text_width,          \
-                                           name##_button_text_size.x);            \
-    } while(0)
-
-    rsbw(close);
-    rsbw(edit);
-    rsbw(save);
-    rsbw(return);
-    rsbw(browser);
-    rsbw(options);
-    rsbw(reset);
-#undef rsbw
-
-    right_side_button_text_width += 2 * BUTTON_MARGIN;
-
     memcpy(   close_button_text, GuiIconText(ICON_EXIT,                 close_button_text_str),    CLOSE_BUTTON_TEXT_LENGTH);
     memcpy(    edit_button_text, GuiIconText(ICON_TOOLS,                 edit_button_text_str),     EDIT_BUTTON_TEXT_LENGTH);
     memcpy(  unedit_button_text, GuiIconText(ICON_TOOLS,               unedit_button_text_str),   UNEDIT_BUTTON_TEXT_LENGTH);
@@ -1349,22 +1340,49 @@ void gui_setup(void)
     memcpy( options_button_text, GuiIconText(ICON_GEAR,               options_button_text_str),  OPTIONS_BUTTON_TEXT_LENGTH);
     memcpy( browser_button_text, GuiIconText(ICON_FOLDER_FILE_OPEN,   browser_button_text_str),  BROWSER_BUTTON_TEXT_LENGTH);
     memcpy(  random_button_text, GuiIconText(ICON_SHUFFLE_FILL,        random_button_text_str),   RANDOM_BUTTON_TEXT_LENGTH);
+    memcpy(  levels_button_text, GuiIconText(ICON_NONE,                levels_button_text_str),   LEVELS_BUTTON_TEXT_LENGTH);
 
-    right_side_button.single_line_rect.y      = WINDOW_MARGIN;
-    right_side_button.single_line_rect.width  = ICON_BUTTON_SIZE + right_side_button_text_width;
-    right_side_button.single_line_rect.x      = window_size.x - WINDOW_MARGIN - right_side_button.single_line_rect.width;
-    right_side_button.single_line_rect.height = ICON_BUTTON_SIZE;
+    int right_side_button_text_width = 0;
 
-    right_side_button.double_line_rect = right_side_button.single_line_rect;\
-    right_side_button.double_line_rect.height += ICON_BUTTON_SIZE;
+#define rsbw(name) do {                                                 \
+        Vector2 name##_button_text_size = measure_gui_text(name##_button_text_str); \
+        right_side_button_text_width = MAX(right_side_button_text_width,        \
+                                           name##_button_text_size.x);          \
+        printf("rsb width %4.2f - \"%s\"\n", name##_button_text_size.x, STR(name)); \
+    } while(0)
 
-    right_side_button.top_y = right_side_button.single_line_rect.y;
-    right_side_button.vert_spacing = 3 * WINDOW_MARGIN;
+#define rsbnw(name) do {                                                 \
+        Vector2 name##_button_text_size = measure_gui_narrow_text(name##_button_text_str); \
+        right_side_button_text_width = MAX(right_side_button_text_width,        \
+                                           name##_button_text_size.x);          \
+        printf("rsb width %4.2f - \"%s\" (narrow))\n", name##_button_text_size.x, STR(name)); \
+    } while(0)
 
-    right_side_button.single_line_y_offset = right_side_button.single_line_rect.height + right_side_button.vert_spacing;
-    right_side_button.double_line_y_offset = right_side_button.double_line_rect.height + right_side_button.vert_spacing;
+    rsbw(close);
+    rsbw(edit);
+    rsbw(save);
+    rsbw(return);
+    rsbw(browser);
+    rsbw(options);
+    rsbw(reset);
+    rsbnw(savequit);
+#undef rsbw
 
-    right_side_button.area_width = right_side_button.single_line_rect.width + (2 * WINDOW_MARGIN);
+    right_side_button_text_width += 2 * BUTTON_MARGIN;
+
+    right_side_button.rect.y      = 1.5 * WINDOW_MARGIN;
+    right_side_button.rect.width  = ICON_BUTTON_SIZE +
+        right_side_button_text_width;
+    right_side_button.rect.x      = window_size.x - WINDOW_MARGIN - right_side_button.rect.width;
+    right_side_button.rect.height = ICON_BUTTON_SIZE;
+
+    right_side_button.top_y = right_side_button.rect.y;
+    right_side_button.vert_spacing = 1.0 * WINDOW_MARGIN;
+
+    right_side_button.single_line_y_offset = right_side_button.rect.height + right_side_button.vert_spacing;
+    right_side_button.double_line_y_offset = (2 * right_side_button.rect.height) + right_side_button.vert_spacing;
+
+    right_side_button.area_width = right_side_button.rect.width + (2 * WINDOW_MARGIN);
 
     main_gui_area_rect.x      = WINDOW_MARGIN;
     main_gui_area_rect.y      = WINDOW_MARGIN;
@@ -1779,31 +1797,29 @@ static void draw_win_panels(void)
 
 static inline void reset_right_side_button(void)
 {
-    right_side_button.single_line_rect.y = right_side_button.top_y;
-    right_side_button.double_line_rect.y = right_side_button.top_y;
+    right_side_button.rect.y = right_side_button.top_y;
 }
 
 static inline void shift_down_right_side_button(float yoffset)
 {
-    right_side_button.single_line_rect.y += yoffset;
-    right_side_button.double_line_rect.y += yoffset;
+    right_side_button.rect.y += yoffset;
 }
 
 static inline bool rsb_single_line_button(const char *text)
 {
-    bool pressed = GuiButton(right_side_button.single_line_rect, text);
+    bool pressed = GuiButton(right_side_button.rect, text);
     shift_down_right_side_button(right_side_button.single_line_y_offset);
     return pressed;
 }
 
 static inline bool rsb_double_line_button(const char **lines, int line_count)
 {
-    bool pressed = GuiButtonMultiLine(right_side_button.double_line_rect, lines, line_count);
+    bool pressed = GuiButtonMultiLine(right_side_button.rect, lines, line_count);
     shift_down_right_side_button(right_side_button.double_line_y_offset);
     return pressed;
 }
 
-static bool game_mode_button(const char *text, game_mode_t mode)
+static bool game_mode_button(void *ptr, game_mode_t mode, int line_count)
 {
     bool rv = false;
 
@@ -1811,13 +1827,12 @@ static bool game_mode_button(const char *text, game_mode_t mode)
         GuiDisable();
     }
 
-    int line_count = 0;
-    const char **lines = TextSplit(text, '\n', &line_count);
-
     bool pressed = false;
     if (line_count > 1) {
+        const char **lines = ptr;
         pressed = rsb_double_line_button(lines, line_count);
     } else {
+        const char *text = ptr;
         pressed = rsb_single_line_button(text);
     }
 
@@ -1833,14 +1848,11 @@ static bool game_mode_button(const char *text, game_mode_t mode)
     return rv;
 }
 
-#define gm_button(text_name, mode_name)                                 \
-    game_mode_button(text_name##_button_text, GAME_MODE_##mode_name)
-
 static void standard_buttons(void)
 {
-    gm_button(options, OPTIONS);
-    gm_button(browser, BROWSER);
-    gm_button(random, RANDOM);
+    game_mode_button(options_button_text,  GAME_MODE_OPTIONS, 1);
+    game_mode_button(browser_button_lines, GAME_MODE_BROWSER, 2);
+    game_mode_button( random_button_lines, GAME_MODE_RANDOM,  2);
 }
 
 static void draw_gui_widgets(void)
@@ -1895,7 +1907,7 @@ static void draw_gui_widgets(void)
             draw_shuffle_panel();
         }
 
-        gm_button(options, OPTIONS);
+        game_mode_button(options_button_text,  GAME_MODE_OPTIONS, 1);
 
         if (rsb_single_line_button(return_button_text)) {
             show_ask_save_box = true;
@@ -1951,8 +1963,7 @@ static void draw_gui_widgets(void)
     case GAME_MODE_WIN_LEVEL:
         draw_name_header();
         draw_win_panels();
-
-        gm_button(options, OPTIONS);
+        game_mode_button(options_button_text,  GAME_MODE_OPTIONS, 1);
 
         if (rsb_single_line_button(reset_button_text)) {
             reset_current_level();
