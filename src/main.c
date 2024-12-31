@@ -999,13 +999,13 @@ char erase_tool_button_text_str[] = "Erase";
 char erase_tool_button_text[ERASE_TOOL_BUTTON_TEXT_LENGTH];
 
 char *browser_button_lines[2] = {
-    browser_button_text,
-    levels_button_text
+    browser_button_text_str,
+    levels_button_text_str
 };
 
 char *random_button_lines[2] = {
-    random_button_text,
-    levels_button_text
+    random_button_text_str,
+    levels_button_text_str
 };
 
 char edit_radius_label_text[] = "Radius";
@@ -1344,18 +1344,16 @@ void gui_setup(void)
 
     int right_side_button_text_width = 0;
 
-#define rsbw(name) do {                                                 \
+#define rsbw(name) do {                                                             \
         Vector2 name##_button_text_size = measure_gui_text(name##_button_text_str); \
-        right_side_button_text_width = MAX(right_side_button_text_width,        \
-                                           name##_button_text_size.x);          \
-        printf("rsb width %4.2f - \"%s\"\n", name##_button_text_size.x, STR(name)); \
+        right_side_button_text_width = MAX(right_side_button_text_width,            \
+                                           name##_button_text_size.x);              \
     } while(0)
 
-#define rsbnw(name) do {                                                 \
+#define rsbnw(name) do {                                                                   \
         Vector2 name##_button_text_size = measure_gui_narrow_text(name##_button_text_str); \
-        right_side_button_text_width = MAX(right_side_button_text_width,        \
-                                           name##_button_text_size.x);          \
-        printf("rsb width %4.2f - \"%s\" (narrow))\n", name##_button_text_size.x, STR(name)); \
+        right_side_button_text_width = MAX(right_side_button_text_width,                   \
+                                           name##_button_text_size.x);                     \
     } while(0)
 
     rsbw(close);
@@ -1812,14 +1810,14 @@ static inline bool rsb_single_line_button(const char *text)
     return pressed;
 }
 
-static inline bool rsb_double_line_button(const char **lines, int line_count)
+static inline bool rsb_double_line_button(const char **lines, int line_count, int icon)
 {
-    bool pressed = GuiButtonMultiLine(right_side_button.rect, lines, line_count);
+    bool pressed = GuiButtonMultiLine(right_side_button.rect, lines, line_count, icon);
     shift_down_right_side_button(right_side_button.double_line_y_offset);
     return pressed;
 }
 
-static bool game_mode_button(void *ptr, game_mode_t mode, int line_count)
+static bool game_mode_button(void *ptr, game_mode_t mode, int line_count, int icon)
 {
     bool rv = false;
 
@@ -1830,7 +1828,7 @@ static bool game_mode_button(void *ptr, game_mode_t mode, int line_count)
     bool pressed = false;
     if (line_count > 1) {
         const char **lines = ptr;
-        pressed = rsb_double_line_button(lines, line_count);
+        pressed = rsb_double_line_button(lines, line_count, icon);
     } else {
         const char *text = ptr;
         pressed = rsb_single_line_button(text);
@@ -1850,9 +1848,9 @@ static bool game_mode_button(void *ptr, game_mode_t mode, int line_count)
 
 static void standard_buttons(void)
 {
-    game_mode_button(options_button_text,  GAME_MODE_OPTIONS, 1);
-    game_mode_button(browser_button_lines, GAME_MODE_BROWSER, 2);
-    game_mode_button( random_button_lines, GAME_MODE_RANDOM,  2);
+    game_mode_button(options_button_text,  GAME_MODE_OPTIONS, 1, 0);
+    game_mode_button(browser_button_lines, GAME_MODE_BROWSER, 2, ICON_FOLDER_FILE_OPEN);
+    game_mode_button( random_button_lines, GAME_MODE_RANDOM,  2, ICON_SHUFFLE_FILL);
 }
 
 static void draw_gui_widgets(void)
@@ -1907,7 +1905,7 @@ static void draw_gui_widgets(void)
             draw_shuffle_panel();
         }
 
-        game_mode_button(options_button_text,  GAME_MODE_OPTIONS, 1);
+        game_mode_button(options_button_text,  GAME_MODE_OPTIONS, 1, 0);
 
         if (rsb_single_line_button(return_button_text)) {
             show_ask_save_box = true;
@@ -1963,7 +1961,7 @@ static void draw_gui_widgets(void)
     case GAME_MODE_WIN_LEVEL:
         draw_name_header();
         draw_win_panels();
-        game_mode_button(options_button_text,  GAME_MODE_OPTIONS, 1);
+        game_mode_button(options_button_text,  GAME_MODE_OPTIONS, 1, 0);
 
         if (rsb_single_line_button(reset_button_text)) {
             reset_current_level();

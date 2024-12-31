@@ -429,7 +429,7 @@ void GuiSimpleTabBar(Rectangle bounds, const char **text, int count, int *active
     //--------------------------------------------------------------------
 }
 
-int GuiButtonMultiLine(Rectangle bounds, const char **text, int count)
+int GuiButtonMultiLine(Rectangle bounds, const char **text, int count, int icon)
 {
     int result = 0;
     GuiState state = GuiGetState();
@@ -448,6 +448,16 @@ int GuiButtonMultiLine(Rectangle bounds, const char **text, int count)
         .width  = bounds.width,
         .height = (line_height * count) + ((count)* border_width)
     };
+
+    Vector2 icon_pos = {
+        .x = line_bounds.x,
+        .y = outer_bounds.y + (outer_bounds.height / 2) - (RAYGUI_ICON_SIZE / 2)
+    };
+
+    if (icon) {
+        line_bounds.x     += RAYGUI_ICON_SIZE + GuiGetStyle(DEFAULT, TEXT_PADDING) + border_width;
+        line_bounds.width -= RAYGUI_ICON_SIZE;
+    }
 
     // Update control
     //--------------------------------------------------------------------
@@ -469,6 +479,11 @@ int GuiButtonMultiLine(Rectangle bounds, const char **text, int count)
     // Draw control
     //--------------------------------------------------------------------
     GuiDrawRectangle(outer_bounds, border_width, GetColor(GuiGetStyle(BUTTON, BORDER + (state*3))), GetColor(GuiGetStyle(BUTTON, BASE + (state*3))));
+
+    //GuiDrawIcon(icon, icon_pos.x + 1, icon_pos.y + 1, 1, ColorAlpha(BLACK, 0.5));
+
+    GuiDrawIcon(icon, icon_pos.x, icon_pos.y, 1, RAYWHITE);
+
     for (int i=0; i<count; i++) {
         GuiDrawText(text[i], line_bounds, GuiGetStyle(BUTTON, TEXT_ALIGNMENT), GetColor(GuiGetStyle(BUTTON, TEXT + (state*3))));
         line_bounds.y += line_height - border_width;
