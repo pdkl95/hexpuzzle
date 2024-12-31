@@ -446,7 +446,7 @@ int GuiButtonMultiLine(Rectangle bounds, const char **text, int count)
         .x      = bounds.x,
         .y      = bounds.y,
         .width  = bounds.width,
-        .height = (line_height * count) + (2 * border_width)
+        .height = (line_height * count) + ((count)* border_width)
     };
 
     // Update control
@@ -471,7 +471,7 @@ int GuiButtonMultiLine(Rectangle bounds, const char **text, int count)
     GuiDrawRectangle(outer_bounds, border_width, GetColor(GuiGetStyle(BUTTON, BORDER + (state*3))), GetColor(GuiGetStyle(BUTTON, BASE + (state*3))));
     for (int i=0; i<count; i++) {
         GuiDrawText(text[i], line_bounds, GuiGetStyle(BUTTON, TEXT_ALIGNMENT), GetColor(GuiGetStyle(BUTTON, TEXT + (state*3))));
-        line_bounds.y += line_height;
+        line_bounds.y += line_height - border_width;
     }
 
     if (state == STATE_FOCUSED) GuiTooltip(bounds);
