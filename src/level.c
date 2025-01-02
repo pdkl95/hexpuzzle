@@ -292,8 +292,6 @@ static level_t *init_level(level_t *level)
         }
     }
 
-    level->win_anim = create_win_anim(level);
-
     level->name[0] = '\0';
 
     level->have_id = false;
@@ -1332,6 +1330,7 @@ void level_set_hover(level_t *level, IVector2 mouse_position)
 
     level->mouse_pos.x = (float)mouse_position.x;
     level->mouse_pos.y = (float)mouse_position.y;
+    level->mouse_pos = Vector2Subtract(level->mouse_pos, level->px_offset);
 
     if (level->drag_target) {
         if (level->drag_reset_frames > 0) {
@@ -1355,10 +1354,18 @@ void level_set_hover(level_t *level, IVector2 mouse_position)
         return;
     }
 
-    Vector2 mouse_tile_pos = Vector2Subtract(level->mouse_pos, level->px_offset);
-    hex_axial_t mouse_hex = pixel_to_hex_axial(mouse_tile_pos, level->tile_size);
+    hex_axial_t mouse_hex = pixel_to_hex_axial(level->mouse_pos, level->tile_size);
 
     level->hover = level_get_current_tile_pos(level, mouse_hex);
+    if (level->hover) {
+        if (level->hover->tile->enabled) {
+            if (level->hover->tile->hidden) {
+                level->hover = NULL;
+            }
+        } else {
+            level->hover = NULL;
+        }
+    }
 
 #if 0
     printf("set_hover() m=(%3f,%3f) mh-[%d,%d] hover=%p\n",
@@ -1386,7 +1393,7 @@ void level_set_hover(level_t *level, IVector2 mouse_position)
         }
 
         if (edit_mode_solved) {
-            tile_pos_set_hover(level->hover, Vector2Subtract(level->mouse_pos, level->px_offset));
+            tile_pos_set_hover(level->hover, level->mouse_pos);//Vector2Subtract(level->mouse_pos, level->px_offset));
             level->hover_section  = level->hover->hover_section;
             level->hover_adjacent = level->hover->neighbors[level->hover_section];
 
@@ -1413,11 +1420,12 @@ void level_set_hover(level_t *level, IVector2 mouse_position)
                 print_tile_pos(level->hover_adjacent);
                 printf("</rollback>\n");
 #endif
-
-                tile_pos_unset_hover(level->hover);
                 tile_pos_unset_hover(level->hover_adjacent);
-                level->hover = NULL;
                 level->hover_adjacent = NULL;
+                if (!level->hover->hover_center) {
+                    tile_pos_unset_hover(level->hover);
+                    level->hover = NULL;
+                }
             }
 
             if (level->hover_adjacent) {
@@ -1737,6 +1745,10 @@ void level_set_radius(level_t *level, int new_radius)
 void level_win(level_t *level)
 {
     assert_not_null(level);
+
+    if (!level->win_anim) {
+        level->win_anim = create_win_anim(level);
+    }
 
     if (win_anim_running(level->win_anim)) {
         return;

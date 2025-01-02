@@ -413,6 +413,11 @@ options_parse_args(
             options->startup_action = STARTUP_ACTION_CREATE_LEVEL;
             break;
 
+        case 'K':
+            options->create_level_mode = CREATE_LEVEL_MODE_BLANK;
+            options->startup_action = STARTUP_ACTION_CREATE_LEVEL;
+            break;
+
         case '|':
             if (!options_set_long_bounds(&options->create_level_radius, LEVEL_MIN_RADIUS, LEVEL_MAX_RADIUS)) {
                 errmsg("bad value for --level-radius (expected %d - %d)",

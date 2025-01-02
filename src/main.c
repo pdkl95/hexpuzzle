@@ -142,6 +142,7 @@ bool modal_ui_active = false;
 ui_result_t modal_ui_result;
 bool show_name_edit_box = false;
 bool show_ask_save_box = false;
+bool return_after_save_box = true;
 bool show_open_file_box = false;
 
 bool edit_tool_cycle = true;
@@ -1909,6 +1910,7 @@ static void draw_gui_widgets(void)
 
         if (rsb_single_line_button(return_button_text)) {
             show_ask_save_box = true;
+            return_after_save_box = true;
         }
 
         // skip one position
@@ -1920,6 +1922,17 @@ static void draw_gui_widgets(void)
 
         if (rsb_single_line_button(redo_button_text)) {
             redo_edit();
+        }
+
+        if (current_level && current_level->changed) {
+            if (rsb_single_line_button(save_button_text)) {
+                show_ask_save_box = true;
+                return_after_save_box = false;
+            }
+        } else {
+            GuiDisable();
+            rsb_single_line_button(save_button_text);
+            GuiEnable();
         }
         break;
 
@@ -2090,7 +2103,9 @@ static void draw_ask_save_dialog(void)
             if (current_level) {
                 level_save(current_level);
             }
-            return_from_level();
+            if (return_after_save_box) {
+                return_from_level();
+            }
             break;
 
         default:
@@ -2110,7 +2125,9 @@ static void draw_ask_save_dialog(void)
             if (current_collection) {
                 current_collection->changed = true;
             }
-            return_from_level();
+            if (return_after_save_box) {
+                return_from_level();
+            }
             break;
 
         default:

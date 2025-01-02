@@ -112,10 +112,7 @@ void tile_pos_set_hover(tile_pos_t *pos, Vector2 mouse_pos)
     pos->hover = true;
     pos->hover_section = (int)(theta/TO_RADIANS(60.0));
     //printf("tile_pos->hover_section = %d (theta = %f)\n", pos->hover_section, theta);
-    pos->hover_center =
-        (Vector2DistanceSqr(mouse_pos, pos->win.center)
-         < (pos->center_circle_hover_radius *
-            pos->center_circle_hover_radius));
+    pos->hover_center = (Vector2Length(relvec) < pos->center_circle_hover_radius);
 }
 
 void tile_pos_unset_hover(tile_pos_t *pos)
@@ -329,8 +326,8 @@ void tile_pos_rebuild(tile_pos_t *pos)
     pos->prev_ring_phase = 0.0f;
 
     pos->line_width = pos->size / 6.0;
-    pos->center_circle_draw_radius = pos->line_width * 1.2;
-    pos->center_circle_hover_radius = pos->line_width * 1.75;
+    pos->center_circle_draw_radius = pos->size * 1.0/4.0;
+    pos->center_circle_hover_radius = pos->size * 1.0/3.3;
     pos->win.center = hex_axial_to_pixel(pos->position, pos->size);
 
     pos->rel.center = Vector2Zero();

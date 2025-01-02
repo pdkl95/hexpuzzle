@@ -453,9 +453,7 @@ void destroy_win_anim(win_anim_t *win_anim)
 
 void win_anim_update(win_anim_t *win_anim)
 {
-    assert_not_null(win_anim);
-
-    if (!win_anim->running) {
+    if (!win_anim || !win_anim->running) {
         return;
     }
 
@@ -532,9 +530,11 @@ void win_anim_draw(UNUSED win_anim_t *win_anim)
 
 bool win_anim_running(win_anim_t *win_anim)
 {
-    assert_not_null(win_anim);
-
-    return win_anim->running;
+    if (win_anim) {
+        return win_anim->running;
+    } else {
+        return false;
+    }
 }
 
 

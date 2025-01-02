@@ -111,7 +111,7 @@ void level_draw(level_t *level, bool finished)
     win_anim_update(level->win_anim);
 
     Color finished_color = ColorFromHSV(level->finished_hue, 0.7, 1.0);
-    float finished_fade_in = level->win_anim->fade[2];
+    float finished_fade_in = level->win_anim ? level->win_anim->fade[2] : 1.0;
 
     rlPushMatrix();
 

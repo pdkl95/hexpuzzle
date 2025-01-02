@@ -193,7 +193,10 @@ void tile_draw(tile_pos_t *pos, tile_pos_t *drag_target, bool finished, Color fi
         return;
     }
 
-    float fade = current_level ? fade = current_level->win_anim->fade[2] : 1.0f;
+    float fade = 1.0;
+    if (current_level && current_level->win_anim) {
+        fade = current_level->win_anim->fade[2];
+    }
 
     bool drag = (pos == drag_target) && !edit_mode_solved;
     bool dragged_over = false;
