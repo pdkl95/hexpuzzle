@@ -295,9 +295,7 @@ tile_neighbor_paths_t tile_get_neighbor_paths(tile_t *tile)
     each_direction {
         hex_direction_t opposite_dir = hex_opposite_direction(dir);
         tile_pos_t *neighbor = pos->neighbors[dir];
-        printf("dir(%d) ", dir);
         if (neighbor) { // && neighbor->enabled)
-            //print_tile_pos(neighbor);
             assert_not_null(neighbor->tile);
 
             paths.sections[dir].neighbor.section    = opposite_dir;
@@ -321,17 +319,19 @@ void tile_set_neighbor_paths(tile_t *tile, tile_neighbor_paths_t paths)
 {
     assert_not_null(tile);
 
+#if 0
     printf("--\n\nTILE: ");
     print_tile(tile);
     printf("UNSOLVED: ");
     print_tile_pos(tile->unsolved_pos);
     printf("LOAD >>>\n");
+#endif
 
     each_direction {
         tile_t *neighbor = paths.sections[dir].neighbor.tile;
-        printf("dir(%d) ", dir);
+        //printf("dir(%d) ", dir);
         if (neighbor) {
-            print_tile(neighbor);
+            //print_tile(neighbor);
             hex_direction_t section       = paths.sections[dir].neighbor.section;
             neighbor->path[section]       = paths.sections[dir].neighbor.path;
             neighbor->saved_path[section] = paths.sections[dir].neighbor.saved_path;
