@@ -71,6 +71,7 @@ Color path_color_none = OPTIONS_DEFAULT_PATH_COLOR_0;
 #define FEEDBACK_BG_TINT 0xb0
 Color feedback_bg_tint_color = { FEEDBACK_BG_TINT, FEEDBACK_BG_TINT, FEEDBACK_BG_TINT, 0xcc };
 
+Color modal_dialog_shading_color = { 0x33, 0x33, 0x33, 0x77 };
 
 void prepare_global_colors()
 {

@@ -152,6 +152,8 @@ enum ui_result {
 };
 typedef enum ui_result ui_result_t;
 
+extern ui_result_t modal_ui_result;
+
 typedef struct IVector2 {
     int x;
     int y;

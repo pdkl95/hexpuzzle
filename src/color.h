@@ -87,6 +87,7 @@ extern Color text_shadow_color;
 extern Color path_color_none;
 
 extern Color feedback_bg_tint_color;
+extern Color modal_dialog_shading_color;
 
 void prepare_global_colors();
 bool color_eq(Color a, Color b);
