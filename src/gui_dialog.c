@@ -39,6 +39,8 @@ char dialog_cancel_button_text[MAX_DIALOG_BUTTON_TEXT_LENGTH];
 
 #define MINIMUM_BUTTON_WIDTH 100.0f
 
+extern gui_dialog_t dialog;
+
 static const char *default_dialog_title(gui_dialog_t *dialog)
 {
     switch (dialog->type) {
@@ -144,7 +146,8 @@ void prepare_gui_dialog(void)
         break;
 
     case GUI_DIALOG_COLOR:
-        total_gui_controls_width = 0.0f;
+        total_gui_controls_width = 192.0f;
+        total_height += total_gui_controls_width;
         break;
 
     default:
@@ -167,7 +170,7 @@ void prepare_gui_dialog(void)
     dialog_panel_rect.x      = area.x - PANEL_INNER_MARGIN;
     dialog_panel_rect.y      = area.y - PANEL_INNER_MARGIN - TOOL_BUTTON_HEIGHT;;
     dialog_panel_rect.width  = area.width  + (2 * PANEL_INNER_MARGIN);
-    dialog_panel_rect.height = area.height + (3 * PANEL_INNER_MARGIN) + TOOL_BUTTON_HEIGHT;
+    dialog_panel_rect.height = area.height + (2 * PANEL_INNER_MARGIN) + TOOL_BUTTON_HEIGHT;
 
     if (current_dialog->question) {
         dialog_question_label_rect.x = area.x;
@@ -184,7 +187,7 @@ void prepare_gui_dialog(void)
     case GUI_DIALOG_STRING:
         dialog_controls_rect.x      = area.x;
         dialog_controls_rect.y      = area.y;
-        dialog_controls_rect.width  = area.width = total_gui_controls_width;
+        dialog_controls_rect.width  = total_gui_controls_width;
         dialog_controls_rect.height = TOOL_BUTTON_HEIGHT;
 
         memset(current_dialog->string, 0, GUI_DIALOG_STRING_MAX_LENGTH);
@@ -201,6 +204,10 @@ void prepare_gui_dialog(void)
         break;
 
     case GUI_DIALOG_COLOR:
+        dialog_controls_rect.x      = area.x;
+        dialog_controls_rect.y      = area.y;
+        dialog_controls_rect.width  = total_gui_controls_width;
+        dialog_controls_rect.height = dialog_controls_rect.width;
         break;
 
     default:
@@ -298,6 +305,7 @@ void draw_gui_dialog(void)
         break;
 
     case GUI_DIALOG_COLOR:
+        GuiColorPicker(dialog_controls_rect, NULL, &current_dialog->color);
         break;
 
     default:
@@ -331,4 +339,18 @@ void gui_dialog_clesr(gui_dialog_t *dialog, gui_dialog_type_t type)
     memset(dialog, 0, sizeof(gui_dialog_t));
     dialog->type = type;
     dialog->title = default_dialog_title(dialog);
+}
+
+void gui_dialog_pick_color(struct color_option *c_opt, gui_dialog_finished_cb_t callback)
+{
+    if (current_dialog) {
+        return;
+    }
+
+    gui_dialog_clesr(&dialog, GUI_DIALOG_COLOR);
+    dialog.question = NULL;
+    dialog.color = c_opt->color;
+    dialog.color_opt = c_opt;
+    dialog.callback = callback;
+    gui_dialog_show(&dialog);
 }

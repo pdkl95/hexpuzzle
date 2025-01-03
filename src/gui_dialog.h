@@ -24,6 +24,9 @@
 
 #define GUI_DIALOG_STRING_MAX_LENGTH 2048
 
+struct gui_dialog;
+struct color_option;
+
 enum gui_dialog_type {
     GUI_DIALOG_NULL = 0,
     GUI_DIALOG_YN,
@@ -32,8 +35,6 @@ enum gui_dialog_type {
     GUI_DIALOG_COLOR
 };
 typedef enum gui_dialog_type gui_dialog_type_t;
-
-struct gui_dialog;
 
 typedef void (*gui_dialog_finished_cb_t)(struct gui_dialog *dialog);
 
@@ -46,6 +47,7 @@ struct gui_dialog {
     char *default_input;
 
     bool textbox_edit_mode;
+    struct color_option *color_opt;
 
     /* results */
     bool status;
@@ -69,6 +71,7 @@ static inline bool gui_dialog_active(void)
 }
 
 void gui_dialog_clesr(gui_dialog_t *dialog, gui_dialog_type_t type);
+void gui_dialog_pick_color(struct color_option *c_opt, gui_dialog_finished_cb_t callback);
 
 #endif /*GUI_DIALOG_H*/
 

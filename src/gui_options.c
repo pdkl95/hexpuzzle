@@ -29,6 +29,7 @@
 #include "color.h"
 #include "level.h"
 #include "gui_options.h"
+#include "gui_dialog.h"
 
 Rectangle options_panel_rect;
 Rectangle options_tabbar_rect;
@@ -338,6 +339,11 @@ void draw_gui_graphics_options(void)
 }
 
 #if defined(PLATFORM_DESKTOP)
+static void pick_color_finished(gui_dialog_t *dialog)
+{
+    color_option_set(dialog->color_opt, dialog->color);
+}
+
 void draw_gui_color_option(gui_color_option_t *gui_opt, color_option_t *c_opt)
 {
     GuiLabel(gui_opt->label_rect, gui_opt->label_text);
@@ -349,12 +355,7 @@ void draw_gui_color_option(gui_color_option_t *gui_opt, color_option_t *c_opt)
     DrawRectangleRoundedLines(gui_opt->color_sample_rect, PANEL_ROUNDNES, 0, 2.0, edge_color);
 
     if (GuiButton(gui_opt->pick_color_button_rect, gui_opt->pick_color_button_text)) {
-        unsigned char result[3];
-        char *new_color = tinyfd_colorChooser(NULL,
-                                              c_opt->rgb_string,
-                                              c_opt->rgba,
-                                              result);
-        color_option_set_string(c_opt, new_color);
+        gui_dialog_pick_color(c_opt, pick_color_finished);
     }
 
     bool do_disable = color_eq(c_opt->color, c_opt->default_color);
