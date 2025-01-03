@@ -221,13 +221,6 @@ external_libcombined_deps_a_SOURCES =	 \
 	external/cJSON/cJSON.c		 \
 	external/cJSON/cJSON.h
 
-if ! BUILD_WEB
-external_libcombined_deps_a_SOURCES +=	   	   \
-	external/tinyfiledialogs/tinyfiledialogs.c \
-	external/tinyfiledialogs/tinyfiledialogs.h
-endif
-
-
 
 ######################################################################
 # libraylib.a

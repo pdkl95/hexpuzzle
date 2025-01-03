@@ -106,12 +106,8 @@ bin_PROGRAMS = hexpuzzle$(EXEEXT)
 @USE_PHYSICS_TRUE@am__append_5 = \
 @USE_PHYSICS_TRUE@	src/physics.h           src/physics.c
 
-@BUILD_WEB_FALSE@am__append_6 = \
-@BUILD_WEB_FALSE@	external/tinyfiledialogs/tinyfiledialogs.c \
-@BUILD_WEB_FALSE@	external/tinyfiledialogs/tinyfiledialogs.h
-
-@BUILD_DEBUG_TRUE@am__append_7 = -D_DEBUG
-@BUILD_WEB_FALSE@am__append_8 = \
+@BUILD_DEBUG_TRUE@am__append_6 = -D_DEBUG
+@BUILD_WEB_FALSE@am__append_7 = \
 @BUILD_WEB_FALSE@	external/raylib/rglfw.c
 
 subdir = .
@@ -138,18 +134,10 @@ am__v_AR_0 = @echo "  AR      " $@;
 am__v_AR_1 = 
 external_libcombined_deps_a_AR = $(AR) $(ARFLAGS)
 external_libcombined_deps_a_LIBADD =
-am__external_libcombined_deps_a_SOURCES_DIST =  \
-	external/raygui/raygui.h external/raygui/style/dark_alt.h \
-	external/stb/stb_perlin.h external/sglib/sglib.h \
-	external/pcg/pcg_basic.c external/pcg/pcg_basic.h \
-	external/cJSON/cJSON.c external/cJSON/cJSON.h \
-	external/tinyfiledialogs/tinyfiledialogs.c \
-	external/tinyfiledialogs/tinyfiledialogs.h
 am__dirstamp = $(am__leading_dot)dirstamp
-@BUILD_WEB_FALSE@am__objects_1 = external/tinyfiledialogs/tinyfiledialogs.$(OBJEXT)
 am_external_libcombined_deps_a_OBJECTS =  \
 	external/pcg/pcg_basic.$(OBJEXT) \
-	external/cJSON/cJSON.$(OBJEXT) $(am__objects_1)
+	external/cJSON/cJSON.$(OBJEXT)
 external_libcombined_deps_a_OBJECTS =  \
 	$(am_external_libcombined_deps_a_OBJECTS)
 external_raylib_libraylib_a_AR = $(AR) $(ARFLAGS)
@@ -161,7 +149,7 @@ am__external_raylib_libraylib_a_SOURCES_DIST =  \
 	external/raylib/rshapes.c external/raylib/rtext.c \
 	external/raylib/rtextures.c external/raylib/utils.c \
 	external/raylib/utils.h external/raylib/rglfw.c
-@BUILD_WEB_FALSE@am__objects_2 = external/raylib/external_raylib_libraylib_a-rglfw.$(OBJEXT)
+@BUILD_WEB_FALSE@am__objects_1 = external/raylib/external_raylib_libraylib_a-rglfw.$(OBJEXT)
 am_external_raylib_libraylib_a_OBJECTS =  \
 	external/raylib/external_raylib_libraylib_a-raudio.$(OBJEXT) \
 	external/raylib/external_raylib_libraylib_a-rcore.$(OBJEXT) \
@@ -170,7 +158,7 @@ am_external_raylib_libraylib_a_OBJECTS =  \
 	external/raylib/external_raylib_libraylib_a-rtext.$(OBJEXT) \
 	external/raylib/external_raylib_libraylib_a-rtextures.$(OBJEXT) \
 	external/raylib/external_raylib_libraylib_a-utils.$(OBJEXT) \
-	$(am__objects_2)
+	$(am__objects_1)
 external_raylib_libraylib_a_OBJECTS =  \
 	$(am_external_raylib_libraylib_a_OBJECTS)
 am__installdirs = "$(DESTDIR)$(bindir)"
@@ -196,7 +184,7 @@ am__hexpuzzle_SOURCES_DIST = src/background.h src/background.c \
 	src/win_anim.c src/win_anim_mode_config.h \
 	src/win_anim_mode_config.c src/common.h src/main.c \
 	src/physics.h src/physics.c
-@USE_PHYSICS_TRUE@am__objects_3 = src/hexpuzzle-physics.$(OBJEXT)
+@USE_PHYSICS_TRUE@am__objects_2 = src/hexpuzzle-physics.$(OBJEXT)
 am_hexpuzzle_OBJECTS = src/hexpuzzle-background.$(OBJEXT) \
 	src/hexpuzzle-classics.$(OBJEXT) \
 	src/hexpuzzle-collection.$(OBJEXT) \
@@ -223,7 +211,7 @@ am_hexpuzzle_OBJECTS = src/hexpuzzle-background.$(OBJEXT) \
 	src/hexpuzzle-tile_pos.$(OBJEXT) src/hexpuzzle-util.$(OBJEXT) \
 	src/hexpuzzle-win_anim.$(OBJEXT) \
 	src/hexpuzzle-win_anim_mode_config.$(OBJEXT) \
-	src/hexpuzzle-main.$(OBJEXT) $(am__objects_3)
+	src/hexpuzzle-main.$(OBJEXT) $(am__objects_2)
 hexpuzzle_OBJECTS = $(am_hexpuzzle_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
@@ -269,7 +257,7 @@ am__v_CCLD_1 =
 SOURCES = $(external_libcombined_deps_a_SOURCES) \
 	$(external_raylib_libraylib_a_SOURCES) $(hexpuzzle_SOURCES) \
 	$(dist_EXTRA_hexpuzzle_SOURCES)
-DIST_SOURCES = $(am__external_libcombined_deps_a_SOURCES_DIST) \
+DIST_SOURCES = $(external_libcombined_deps_a_SOURCES) \
 	$(am__external_raylib_libraylib_a_SOURCES_DIST) \
 	$(am__hexpuzzle_SOURCES_DIST) $(dist_EXTRA_hexpuzzle_SOURCES)
 RECURSIVE_TARGETS = all-recursive check-recursive cscopelist-recursive \
@@ -564,11 +552,16 @@ MAINTAINERCLEANFILES = \
 
 #external_libcombined_deps_a_LIBADD = \
 #	external/raylib/libraylib.a
-external_libcombined_deps_a_SOURCES = external/raygui/raygui.h \
-	external/raygui/style/dark_alt.h external/stb/stb_perlin.h \
-	external/sglib/sglib.h external/pcg/pcg_basic.c \
-	external/pcg/pcg_basic.h external/cJSON/cJSON.c \
-	external/cJSON/cJSON.h $(am__append_6)
+external_libcombined_deps_a_SOURCES = \
+	external/raygui/raygui.h 	 \
+	external/raygui/style/dark_alt.h \
+	external/stb/stb_perlin.h	 \
+	external/sglib/sglib.h		 \
+	external/pcg/pcg_basic.c	 \
+	external/pcg/pcg_basic.h	 \
+	external/cJSON/cJSON.c		 \
+	external/cJSON/cJSON.h
+
 
 ######################################################################
 # libraylib.a
@@ -580,7 +573,7 @@ external_raylib_libraylib_a_CFLAGS = $(ALL_PKG_CFLAGS) $(APP_CFLAGS) \
 	-I$(top_srcdir)/external/raylib/external/glfw/include \
 	-I$(top_srcdir)/external/raylib/external/glfw/deps/mingw -fPIC \
 	-Wno-unused-function -Wno-unused-parameter -Wno-sign-compare \
-	$(am__append_7)
+	$(am__append_6)
 GLFW_SRC = \
 	external/raylib/external/glfw/src/cocoa_joystick.h \
 	external/raylib/external/glfw/src/cocoa_platform.h \
@@ -676,7 +669,7 @@ external_raylib_libraylib_a_SOURCES = external/raylib/raylib_config.h \
 	external/raylib/rmodels.c external/raylib/rshapes.c \
 	external/raylib/rtext.c external/raylib/rtextures.c \
 	external/raylib/utils.c external/raylib/utils.h \
-	$(am__append_8)
+	$(am__append_7)
 all: $(BUILT_SOURCES) config.h
 	$(MAKE) $(AM_MAKEFLAGS) all-recursive
 
@@ -749,15 +742,6 @@ external/cJSON/$(DEPDIR)/$(am__dirstamp):
 	@: > external/cJSON/$(DEPDIR)/$(am__dirstamp)
 external/cJSON/cJSON.$(OBJEXT): external/cJSON/$(am__dirstamp) \
 	external/cJSON/$(DEPDIR)/$(am__dirstamp)
-external/tinyfiledialogs/$(am__dirstamp):
-	@$(MKDIR_P) external/tinyfiledialogs
-	@: > external/tinyfiledialogs/$(am__dirstamp)
-external/tinyfiledialogs/$(DEPDIR)/$(am__dirstamp):
-	@$(MKDIR_P) external/tinyfiledialogs/$(DEPDIR)
-	@: > external/tinyfiledialogs/$(DEPDIR)/$(am__dirstamp)
-external/tinyfiledialogs/tinyfiledialogs.$(OBJEXT):  \
-	external/tinyfiledialogs/$(am__dirstamp) \
-	external/tinyfiledialogs/$(DEPDIR)/$(am__dirstamp)
 external/$(am__dirstamp):
 	@$(MKDIR_P) external
 	@: > external/$(am__dirstamp)
@@ -929,7 +913,6 @@ mostlyclean-compile:
 	-rm -f external/cJSON/*.$(OBJEXT)
 	-rm -f external/pcg/*.$(OBJEXT)
 	-rm -f external/raylib/*.$(OBJEXT)
-	-rm -f external/tinyfiledialogs/*.$(OBJEXT)
 	-rm -f src/*.$(OBJEXT)
 
 distclean-compile:
@@ -945,7 +928,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rtext.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rtextures.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@external/raylib/$(DEPDIR)/external_raylib_libraylib_a-utils.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@external/tinyfiledialogs/$(DEPDIR)/tinyfiledialogs.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-background.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-classics.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-collection.Po@am__quote@
@@ -1936,8 +1918,6 @@ distclean-generic:
 	-rm -f external/pcg/$(am__dirstamp)
 	-rm -f external/raylib/$(DEPDIR)/$(am__dirstamp)
 	-rm -f external/raylib/$(am__dirstamp)
-	-rm -f external/tinyfiledialogs/$(DEPDIR)/$(am__dirstamp)
-	-rm -f external/tinyfiledialogs/$(am__dirstamp)
 	-rm -f src/$(DEPDIR)/$(am__dirstamp)
 	-rm -f src/$(am__dirstamp)
 
@@ -1954,7 +1934,7 @@ clean-am: clean-binPROGRAMS clean-generic clean-local \
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf external/cJSON/$(DEPDIR) external/pcg/$(DEPDIR) external/raylib/$(DEPDIR) external/tinyfiledialogs/$(DEPDIR) src/$(DEPDIR)
+	-rm -rf external/cJSON/$(DEPDIR) external/pcg/$(DEPDIR) external/raylib/$(DEPDIR) src/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-tags
@@ -2002,7 +1982,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf external/cJSON/$(DEPDIR) external/pcg/$(DEPDIR) external/raylib/$(DEPDIR) external/tinyfiledialogs/$(DEPDIR) src/$(DEPDIR)
+	-rm -rf external/cJSON/$(DEPDIR) external/pcg/$(DEPDIR) external/raylib/$(DEPDIR) src/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic
 
