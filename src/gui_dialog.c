@@ -296,8 +296,8 @@ void draw_gui_dialog(void)
         if (GuiTextBox(dialog_controls_rect,
                        &(current_dialog->string[0]),
                        GUI_DIALOG_STRING_MAX_LENGTH,
-                       current_dialog->textbox_edit_mode)) {
-            current_dialog->textbox_edit_mode = !current_dialog->textbox_edit_mode;
+                       true)) {
+            gui_dialog_ok();
         }
         break;
 
@@ -351,6 +351,25 @@ void gui_dialog_pick_color(struct color_option *c_opt, gui_dialog_finished_cb_t 
     dialog.question = NULL;
     dialog.color = c_opt->color;
     dialog.color_opt = c_opt;
+    dialog.callback = callback;
+    gui_dialog_show(&dialog);
+}
+
+void gui_dialog_ask_for_string(const char *question, const char *default_string, gui_dialog_finished_cb_t callback)
+{
+    if (current_dialog) {
+        return;
+    }
+
+    gui_dialog_clesr(&dialog, GUI_DIALOG_STRING);
+    memset(dialog.string, 0, GUI_DIALOG_STRING_MAX_LENGTH);
+    if (default_string) {
+        snprintf(dialog.string,
+                 GUI_DIALOG_STRING_MAX_LENGTH,
+                 "%s",
+                 default_string);
+    }
+    dialog.question = question;
     dialog.callback = callback;
     gui_dialog_show(&dialog);
 }

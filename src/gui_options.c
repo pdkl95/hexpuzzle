@@ -21,10 +21,6 @@
 
 #include "common.h"
 
-#if defined(PLATFORM_DESKTOP)
-# include "tinyfiledialogs/tinyfiledialogs.h"
-#endif
-
 #include "options.h"
 #include "color.h"
 #include "level.h"

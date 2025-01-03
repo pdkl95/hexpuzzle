@@ -22,7 +22,6 @@
 #include "common.h"
 
 #include <limits.h>
-#include "tinyfiledialogs/tinyfiledialogs.h"
 
 #include "options.h"
 #include "gui_random.h"
@@ -31,6 +30,7 @@
 #include "tile_pos.h"
 #include "tile_draw.h"
 #include "level.h"
+#include "gui_dialog.h"
 
 #include "pcg/pcg_basic.h"
 
@@ -1318,23 +1318,19 @@ bool parse_random_seed_str(char *seedstr)
     return true;
 }
 
+void ask_for_random_seed_callback(gui_dialog_t *dialog)
+{
+    if (dialog->status) {
+        if (strlen(dialog->string) > 0) {
+            parse_random_seed_str(dialog->string);
+        }
+    }
+}
+
 bool ask_for_random_seed(void)
 {
-#if defined(PLATFORM_DESKTOP)
-    char *seedstr = tinyfd_inputBox("New Random Seed",
-                                    "Enter a randon number generator seed:",
-                                    "");
-#endif
-
-#if defined(PLATFORM_WEB)
-    char *seedstr = "";
-#endif
-
-    if (strlen(seedstr) < 1) {
-        return false;
-    }
-
-    return parse_random_seed_str(seedstr);
+    gui_dialog_ask_for_string("", NULL, ask_for_random_seed_callback);
+    return true;
 }
 
 void draw_preview(void)
