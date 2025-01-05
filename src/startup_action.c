@@ -93,6 +93,8 @@ void action_create_level(void)
         case CREATE_LEVEL_MODE_DFS:
             //* fall through */
         case CREATE_LEVEL_MODE_SCATTER:
+            window_size.x = OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH;
+            window_size.y = OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT;
             level = generate_random_level();
             break;
 

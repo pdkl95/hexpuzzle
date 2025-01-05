@@ -736,6 +736,10 @@ struct level *generate_random_level(void)
 
     level->seed = gui_random_seed;
     snprintf(level->name, NAME_MAXLEN, "%s", TextFormat("%d", gui_random_seed));
+    if (options->verbose) {
+        infomsg("Generating random level \"%s\"", level->name);
+    }
+
     level_set_radius(level, options->create_level_radius);
     int n = level_get_enabled_tiles(level);
 
