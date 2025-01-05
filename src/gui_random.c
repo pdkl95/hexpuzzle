@@ -1284,6 +1284,10 @@ static void draw_gui_random_colors(void)
 bool parse_random_seed_str(char *seedstr)
 {
     if (is_number(seedstr)) {
+        if (options->verbose) {
+            infomsg("Parsing RNG seed \"%s\" as an INTEGER", seedstr);
+        }
+
         const char *src = seedstr;
         char *endptr;
 
@@ -1316,6 +1320,9 @@ bool parse_random_seed_str(char *seedstr)
             p++;
         }
 
+        if (options->verbose) {
+            infomsg("Hashed RNG seed \"%s\" into %d", seedstr, value);
+        }
         set_random_seed(value);
     }
 

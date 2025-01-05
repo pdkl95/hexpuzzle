@@ -38,7 +38,7 @@
 options_t *options = NULL;
 
 /* command line options */
-static char short_options[] = "Cc:e:F:H:p:t:wvVW:PUL::r::hj";
+static char short_options[] = "Cc:e:F:H:p:s:t:wvVW:PUL::r::hj";
 
 static struct option long_options[] = {
     { "create-random-level", optional_argument, 0, 'L' },
@@ -55,6 +55,7 @@ static struct option long_options[] = {
     {    "level-max-hidden", required_argument, 0, ')' },
     {      "level-min-path", required_argument, 0, '<' },
     {      "level-max-path", required_argument, 0, '>' },
+    {                "seed", required_argument, 0, 's' },
     {                "play", required_argument, 0, 'p' },
     {              "random", optional_argument, 0, 'r' },
     {                "edit", required_argument, 0, 'e' },
@@ -124,7 +125,7 @@ static char help_text[] =
     "  -p, --play <file>                Play the given ." LEVEL_FILENAME_EXT "\n"
     "                                     or ." COLLECTION_FILENAME_EXT " file\n"
     "  -r, --random[=SEED]              Play a random level, optionally using\n"
-    "                                     a given RNG seed\n"
+    "                                     a given RNG seed (see --seed)\n"
     "  -e, --edit <file>                Edit the given ." LEVEL_FILENAME_EXT "\n"
     "                                     or ." COLLECTION_FILENAME_EXT " file\n"
     "      --create-blank-level <NAME>  Create a new level file that is blank.\n"
@@ -136,17 +137,20 @@ static char help_text[] =
     "                                     into a directory of ." LEVEL_FILENAME_EXT "\n"
     "\n"
     "ACTION OPTIONS\n"
-    "     --force                   Allow files to be overwritten (dangerous!)\n"
-    "     --level-radius=NUMBER     Tile radius of created levels.\n"
-    "                                 Min: " STR(LEVEL_MIN_RADIUS) ", Max: " STR(LEVEL_MAX_RADIUS) ", Default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_RADIUS) "\n"
-    "     --level-min-fixed=NUMBER  Minimum number of fixed tiles.  (default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MIN_FIXED) ")\n"
-    "     --level-max-fixed=NUMBER  Maximum number of fixed tiles.  (default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MAX_FIXED) ")\n"
-    "     --level-min-hidden=NUMBER Minimum number of hidden tiles. (default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MIN_HIDDEN) ")\n"
-    "     --level-max-hidden=NUMBER Maximum number of hidden tiles. (default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MAX_HIDDEN) ")\n"
-    "     --level-min-path=NUMBER   Minimum number of paths on each created tile.\n"
-    "                                 Min: 0, Max: 6, Default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MIN_PATH) "\n"
-    "     --level-max-path=NUMBER   Maximum number of paths on each created tile.\n"
-    "                                 Min: 1, Max: 6, Default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MAX_PATH) "\n"
+    "      --force                   Allow files to be overwritten (dangerous!)\n"
+    "  -s, --seed <SEED_INT_OR_STR>    Set the RNG seed used for level creation.\n"
+    "                                  Integers are used directly as the seed;\n"
+    "                                  non-integer strings are hashed.\n"
+    "      --level-radius=NUMBER     Tile radius of created levels.\n"
+    "                                  Min: " STR(LEVEL_MIN_RADIUS) ", Max: " STR(LEVEL_MAX_RADIUS) ", Default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_RADIUS) "\n"
+    "      --level-min-fixed=NUMBER  Minimum number of fixed tiles.  (default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MIN_FIXED) ")\n"
+    "      --level-max-fixed=NUMBER  Maximum number of fixed tiles.  (default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MAX_FIXED) ")\n"
+    "      --level-min-hidden=NUMBER Minimum number of hidden tiles. (default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MIN_HIDDEN) ")\n"
+    "      --level-max-hidden=NUMBER Maximum number of hidden tiles. (default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MAX_HIDDEN) ")\n"
+    "      --level-min-path=NUMBER   Minimum number of paths on each created tile.\n"
+    "                                  Min: 0, Max: 6, Default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MIN_PATH) "\n"
+    "      --level-max-path=NUMBER   Maximum number of paths on each created tile.\n"
+    "                                  Min: 1, Max: 6, Default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MAX_PATH) "\n"
     ;
 
 
@@ -388,6 +392,10 @@ options_parse_args(
                 options_set_string(&options->rng_seed_str);
             }
             options->startup_action = STARTUP_ACTION_RANDOM;
+            break;
+
+        case 's':
+            options_set_string(&options->rng_seed_str);
             break;
 
         case 'e':
