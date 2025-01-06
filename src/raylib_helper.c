@@ -439,7 +439,7 @@ int GuiButtonMultiLine(Rectangle bounds, const char **text, int count, int icon)
 
     int border_width = GuiGetStyle(BUTTON, BORDER_WIDTH);
 
-    float line_height = bounds.height - (2 * border_width);
+    float line_height = bounds.height - (2 * border_width) - 2;
 
     Rectangle line_bounds = GetTextBounds(BUTTON, bounds);
     Rectangle outer_bounds = {
@@ -455,8 +455,10 @@ int GuiButtonMultiLine(Rectangle bounds, const char **text, int count, int icon)
     };
 
     if (icon) {
-        line_bounds.x     += RAYGUI_ICON_SIZE + GuiGetStyle(DEFAULT, TEXT_PADDING) + border_width;
-        line_bounds.width -= RAYGUI_ICON_SIZE;
+        float icon_space = RAYGUI_ICON_SIZE + GuiGetStyle(DEFAULT, TEXT_PADDING) + border_width;
+        line_bounds.x     += icon_space;
+        line_bounds.width -= icon_space;
+
     }
 
     // Update control
@@ -478,6 +480,7 @@ int GuiButtonMultiLine(Rectangle bounds, const char **text, int count, int icon)
 
     // Draw control
     //--------------------------------------------------------------------
+    // Draw tabs as toggle controls
     GuiDrawRectangle(outer_bounds, border_width, GetColor(GuiGetStyle(BUTTON, BORDER + (state*3))), GetColor(GuiGetStyle(BUTTON, BASE + (state*3))));
 
     //GuiDrawIcon(icon, icon_pos.x + 1, icon_pos.y + 1, 1, ColorAlpha(BLACK, 0.5));
@@ -486,7 +489,7 @@ int GuiButtonMultiLine(Rectangle bounds, const char **text, int count, int icon)
 
     for (int i=0; i<count; i++) {
         GuiDrawText(text[i], line_bounds, GuiGetStyle(BUTTON, TEXT_ALIGNMENT), GetColor(GuiGetStyle(BUTTON, TEXT + (state*3))));
-        line_bounds.y += line_height - border_width;
+        line_bounds.y += line_height - (2 * border_width);
     }
 
     if (state == STATE_FOCUSED) GuiTooltip(bounds);

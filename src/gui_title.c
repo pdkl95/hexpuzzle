@@ -173,8 +173,8 @@ void draw_gui_title(void)
     level_preview_solved(bg_level, bg_level_rect);
     DrawPoly(       window_center, 6, hexpanel_size + 2.0f, hexpanel_rotation, shade_overlay_color);
 
-    DrawPolyLinesEx(window_center, 6, hexpanel_size - 0.0f, hexpanel_rotation, 5.0f, text_shadow_color);
-    DrawPolyLinesEx(window_center, 6, hexpanel_size - 2.0f, hexpanel_rotation, 1.0f, magenta);
+    DrawPolyLinesEx(window_center, 6, hexpanel_size + 2.0f, hexpanel_rotation, 5.0f, text_shadow_color);
+    DrawPolyLinesEx(window_center, 6, hexpanel_size - 2.0f, hexpanel_rotation, 1.5f, magenta);
     DrawPolyLinesEx(window_center, 6, hexpanel_size + 2.0f, hexpanel_rotation, 3.0f, royal_blue);
 
     draw_title();
