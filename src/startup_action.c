@@ -28,6 +28,7 @@
 
 bool startup_action_ok = false;
 
+#if 0
 create_level_mode_t parse_create_level_mode(const char *str)
 {
     if (str) {
@@ -44,6 +45,7 @@ create_level_mode_t parse_create_level_mode(const char *str)
 
     return CREATE_LEVEL_MODE_NULL;
 }
+#endif
 
 level_t *generate_blank_level(void)
 {
@@ -90,9 +92,7 @@ void action_create_level(void)
             level = generate_blank_level();
             break;
 
-        case CREATE_LEVEL_MODE_DFS:
-            //* fall through */
-        case CREATE_LEVEL_MODE_SCATTER:
+        case CREATE_LEVEL_MODE_RANDOM:
             window_size.x = OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH;
             window_size.y = OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT;
             level = generate_random_level();

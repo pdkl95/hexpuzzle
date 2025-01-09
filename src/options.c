@@ -41,7 +41,7 @@ options_t *options = NULL;
 static char short_options[] = "Cc:e:F:H:p:s:t:wvVW:PUL::r::hj";
 
 static struct option long_options[] = {
-    { "create-random-level", optional_argument, 0, 'L' },
+    { "create-random-level",       no_argument, 0, 'L' },
     {  "create-blank-level",       no_argument, 0, 'K' },
     {           "no-config", required_argument, 0, 'C' },
     {          "config-dir", required_argument, 0, 'c' },
@@ -413,11 +413,7 @@ options_parse_args(
             break;
 
         case 'L':
-            if (optarg) {
-                options->create_level_mode = parse_create_level_mode(optarg);
-            } else {
-                options->create_level_mode = CREATE_LEVEL_MODE_DFS;
-            }
+            options->create_level_mode = CREATE_LEVEL_MODE_RANDOM;
             options->startup_action = STARTUP_ACTION_CREATE_LEVEL;
             break;
 

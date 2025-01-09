@@ -36,14 +36,13 @@ typedef enum startup_action startup_action_t;
 enum create_level_mode {
     CREATE_LEVEL_MODE_NULL = 0,
     CREATE_LEVEL_MODE_BLANK,
-    CREATE_LEVEL_MODE_DFS,
-    CREATE_LEVEL_MODE_SCATTER
+    CREATE_LEVEL_MODE_RANDOM
 };
 typedef enum create_level_mode create_level_mode_t;
 
 extern bool startup_action_ok;
 
-create_level_mode_t parse_create_level_mode(const char *str);
+//create_level_mode_t parse_create_level_mode(const char *str);
 bool run_startup_action(void);
 
 #endif /*STARTUP_ACTION_H*/
