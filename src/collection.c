@@ -228,7 +228,7 @@ bool collection_from_json(collection_t *collection, cJSON *json)
         return false;
     }
 
-    cJSON *version_json = cJSON_GetObjectItemCaseSensitive(json, "version");
+    cJSON *version_json = cJSON_GetObjectItem(json, "version");
     if (!cJSON_IsNumber(version_json)) {
         errmsg("Error parsing pack JSON: 'version' is not a Number");
         return false;
@@ -240,14 +240,14 @@ bool collection_from_json(collection_t *collection, cJSON *json)
         return false;
     }
 
-    cJSON *id_json = cJSON_GetObjectItemCaseSensitive(json, "id");
+    cJSON *id_json = cJSON_GetObjectItem(json, "id");
     if (!cJSON_IsString(id_json)) {
         errmsg("Error parsing pack JSON: 'id' is not a String");
         return false;
     }
     snprintf(collection->id, COLLECTION_ID_LENGTH, "%s", id_json->valuestring);
 
-    cJSON *levels_json = cJSON_GetObjectItemCaseSensitive(json, "levels");
+    cJSON *levels_json = cJSON_GetObjectItem(json, "levels");
     if (!cJSON_IsObject(levels_json)) {
         errmsg("Error parsing pack JSON: 'levels' is not an Object");
         return false;

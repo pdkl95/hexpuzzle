@@ -388,8 +388,8 @@ bool tile_from_json_addr(cJSON *json, hex_axial_t *addr)
         return false;
     }
 
-    cJSON *q_json = cJSON_GetObjectItemCaseSensitive(json, "q");
-    cJSON *r_json = cJSON_GetObjectItemCaseSensitive(json, "r");
+    cJSON *q_json = cJSON_GetObjectItem(json, "q");
+    cJSON *r_json = cJSON_GetObjectItem(json, "r");
 
     if (!cJSON_IsNumber(q_json)) {
         errmsg("Error parsing tile addr JSON: Object missing Number 'q'");
@@ -413,12 +413,12 @@ bool tile_from_json(tile_t *tile, level_t *level, cJSON *json)
         return false;
     }
 
-    cJSON   *solved_json = cJSON_GetObjectItemCaseSensitive(json, "solved");
-    cJSON *unsolved_json = cJSON_GetObjectItemCaseSensitive(json, "unsolved");
-    cJSON     *path_json = cJSON_GetObjectItemCaseSensitive(json, "path");
-    cJSON  *enabled_json = cJSON_GetObjectItemCaseSensitive(json, "enabled");
-    cJSON   *hidden_json = cJSON_GetObjectItemCaseSensitive(json, "hidden");
-    cJSON    *fixed_json = cJSON_GetObjectItemCaseSensitive(json, "fixed");
+    cJSON   *solved_json = cJSON_GetObjectItem(json, "solved");
+    cJSON *unsolved_json = cJSON_GetObjectItem(json, "unsolved");
+    cJSON     *path_json = cJSON_GetObjectItem(json, "path");
+    cJSON  *enabled_json = cJSON_GetObjectItem(json, "enabled");
+    cJSON   *hidden_json = cJSON_GetObjectItem(json, "hidden");
+    cJSON    *fixed_json = cJSON_GetObjectItem(json, "fixed");
 
     hex_axial_t solved_addr, unsolved_addr;
 

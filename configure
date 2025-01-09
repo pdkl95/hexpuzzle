@@ -6061,6 +6061,13 @@ else
   as_fn_error 1 "strsep not found" "$LINENO" 5
 fi
 
+ac_fn_c_check_func "$LINENO" "strncasecmp" "ac_cv_func_strncasecmp"
+if test "x$ac_cv_func_strncasecmp" = xyes; then :
+
+else
+  as_fn_error 1 "strncasecmp not found" "$LINENO" 5
+fi
+
   # clean out junk possibly left behind by a previous configuration
   rm -f lib/getopt.h
   # Check for getopt_long support

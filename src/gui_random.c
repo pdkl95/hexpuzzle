@@ -34,6 +34,74 @@
 
 #include "pcg/pcg_basic.h"
 
+generate_features_t default_generate_feature_options[] = {
+    {
+        .name = "Common (symmetric: reflect)",
+        .fixed  = { .min = 0, .max = 2 },
+        .hidden = { .min = 0, .max = 2 },
+        .symmetry_mode = SYMMETRY_MODE_REFLECT
+    },
+    {
+        .name = "Common (symmetric: rotate)",
+        .fixed  = { .min = 0, .max = 2 },
+        .hidden = { .min = 0, .max = 2 },
+        .symmetry_mode = SYMMETRY_MODE_ROTATE
+    },
+    {
+        .name = "Common (random)",
+        .fixed  = { .min = 0, .max = 2 },
+        .hidden = { .min = 0, .max = 2 },
+        .symmetry_mode = SYMMETRY_MODE_NONE
+    },
+    {
+        .name = "Uncommon (symmetric: reflect)",
+        .fixed  = { .min = 0, .max = 2 },
+        .hidden = { .min = 0, .max = 2 },
+        .symmetry_mode = SYMMETRY_MODE_REFLECT
+    },
+    {
+        .name = "Uncommon (symmetric: rotate)",
+        .fixed  = { .min = 0, .max = 2 },
+        .hidden = { .min = 0, .max = 2 },
+        .symmetry_mode = SYMMETRY_MODE_ROTATE
+    },
+    {
+        .name = "Uncommon (random)",
+        .fixed  = { .min = 0, .max = 2 },
+        .hidden = { .min = 0, .max = 2 },
+        .symmetry_mode = SYMMETRY_MODE_NONE
+    },
+    {
+        .name = "Rare (symmetric: reflect)",
+        .fixed  = { .min = 0, .max = 2 },
+        .hidden = { .min = 0, .max = 2 },
+        .symmetry_mode = SYMMETRY_MODE_REFLECT
+    },
+    {
+        .name = "Rare (symmetric: rotate)",
+        .fixed  = { .min = 0, .max = 2 },
+        .hidden = { .min = 0, .max = 2 },
+        .symmetry_mode = SYMMETRY_MODE_ROTATE
+    },
+    {
+        .name = "Rare (random)",
+        .fixed  = { .min = 0, .max = 2 },
+        .hidden = { .min = 0, .max = 2 },
+        .symmetry_mode = SYMMETRY_MODE_NONE
+    },
+    {
+        .name = "None",
+        .fixed  = { .min = 0, .max = 0 },
+        .hidden = { .min = 0, .max = 0 },
+        .symmetry_mode = SYMMETRY_MODE_NONE
+    }
+};
+#define NUM_DEFAULT_GENERATE_FEATURE_OPTIONS NUM_ELEMENTS(generate_features_t,default_generate_feature_options)
+
+generate_features_t *generate_feature_options_loaded = NULL;
+generate_features_t *generate_feature_options = &(default_generate_feature_options[0]);
+int num_generate_feature_options = NUM_DEFAULT_GENERATE_FEATURE_OPTIONS;
+
 Rectangle gui_random_panel_rect;
 Rectangle gui_random_area_rect;
 Rectangle gui_random_play_button_rect;
@@ -118,12 +186,6 @@ bool gui_random_fixed_hidden_assist_edit_mode = false;
 
 int fixed_hidden_assist = 0;
 
-enum symmetry_mode {
-    SYMMETRY_MODE_NONE = 0,
-    SYMMETRY_MODE_REFLECT,
-    SYMMETRY_MODE_ROTATE
-};
-typedef enum symmetry_mode symmetry_mode_t;
 symmetry_mode_t fixed_hidden_assist_mode = SYMMETRY_MODE_NONE;
 
 bool any_drop_down_active = false;
@@ -968,6 +1030,198 @@ void promote_preview_to_level(void)
 
     gui_random_level = gui_random_level_preview;
     gui_random_level_preview = NULL;
+}
+
+const char *symmetry_mode_string(symmetry_mode_t mode)
+{
+    switch (mode) {
+    case SYMMETRY_MODE_NONE:
+        return "none";
+    case SYMMETRY_MODE_REFLECT:
+        return "reflect";
+    case SYMMETRY_MODE_ROTATE:
+        return "rotate";
+    default:
+        __builtin_unreachable();
+    }
+}
+
+symmetry_mode_t parse_symmetry_mode_string(const char *string)
+{
+    if (string) {
+#define mode(name, id)                                  \
+    if (0 == strncasecmp(string, name, strlen(name))) { \
+        return id;                                      \
+    }
+        mode("none",    SYMMETRY_MODE_NONE);
+        mode("reflect", SYMMETRY_MODE_REFLECT);
+        mode("rotate",  SYMMETRY_MODE_ROTATE);
+#undef mode
+
+        errmsg("Invalid symmetry_mode: \"%s\"", string);
+    }
+
+    return SYMMETRY_MODE_NONE;
+}
+
+cJSON *generate_features_to_json(generate_features_t features)
+{
+    cJSON *json = cJSON_CreateObject();
+
+    if (cJSON_AddStringToObject(json, "name", features.name) == NULL) {
+        goto features_json_error;
+    }
+
+    if (cJSON_AddStringToObject(json, "symmetry_mode", symmetry_mode_string(features.symmetry_mode)) == NULL) {
+        goto features_json_error;
+    }
+
+    cJSON *fixed_json = int_range_to_json(&features.fixed);
+    if (fixed_json) {
+        if (!cJSON_AddItemToObject(json, "fixed", fixed_json)) {
+            goto features_json_error;
+        }
+    } else {
+        goto features_json_error;
+    }
+
+    cJSON *hidden_json = int_range_to_json(&features.hidden);
+    if (hidden_json) {
+        if (!cJSON_AddItemToObject(json, "hidden", hidden_json)) {
+            goto features_json_error;
+        }
+    } else {
+        goto features_json_error;
+    }
+
+    return json;
+
+  features_json_error:
+    cJSON_Delete(json);
+    return NULL;
+
+}
+
+bool generate_features_from_json(cJSON *json, generate_features_t *features)
+{
+    if (!cJSON_IsObject(json)) {
+        errmsg("JSON['generate_feature_options'][n] should be an Object");
+        return false;
+    }
+
+    cJSON *name_json = cJSON_GetObjectItem(json, "name");
+    if (name_json) {
+        if (!cJSON_IsString(name_json)) {
+            errmsg("Error parsing program state: JSON['generate_feature_options']['name'] is not a String");
+            return false;
+        }
+
+        char *name = cJSON_GetStringValue(name_json);
+        if (name) {
+            features->name = strdup(name);
+        } else {
+            errmsg("Error parsing program state: JSON['generate_feature_options']['name'] is NULL");
+            return false;
+        }
+    } else {
+        warnmsg("Program state JSON['generate_feature_options'] is missing \"name\"");
+    }
+
+    cJSON *mode_json = cJSON_GetObjectItem(json, "symmetry_mode");
+    if (mode_json) {
+        if (!cJSON_IsString(mode_json)) {
+            errmsg("Error parsing program state: JSON['generate_feature_options']['symmetry_mode'] is not a String");
+            return false;
+        }
+
+        char *mode = cJSON_GetStringValue(mode_json);
+        if (mode) {
+            features->symmetry_mode = parse_symmetry_mode_string(mode);
+        } else {
+            errmsg("Error parsing program state: JSON['generate_feature_options']['mode'] is NULL");
+            return false;
+        }
+    } else {
+        warnmsg("Program state JSON['generate_feature_options'] is missing \"symmetry_mode\"");
+    }
+
+    cJSON *fixed_json = cJSON_GetObjectItem(json, "fixed");
+    if (fixed_json) {
+        if (!int_range_from_json(fixed_json, &features->fixed)) {
+            errmsg("Error parsing program state: JSON['generate_feature_options']['fixed']");
+            return false;
+        }
+    } else {
+        warnmsg("Program state JSON['generate_feature_options'] is missing \"fixed\"");
+    }
+
+    cJSON *hidden_json = cJSON_GetObjectItem(json, "hidden");
+    if (hidden_json) {
+        if (!int_range_from_json(hidden_json, &features->hidden)) {
+            errmsg("Error parsing program state: JSON['generate_feature_options']['hidden']");            return false;
+        }
+    } else {
+        warnmsg("Program state JSON['generate_feature_options'] is missing \"hidden\"");
+    }
+
+    return true;
+}
+
+cJSON *generate_feature_options_to_json(void)
+{
+    cJSON *json = cJSON_CreateArray();
+
+    for (int i=0; i<num_generate_feature_options; i++) {
+        generate_features_t *opt = &(generate_feature_options[i]);
+        cJSON *json_opt = generate_features_to_json(*opt);
+        if (json_opt) {
+            cJSON_AddItemToArray(json, json_opt);
+        } else {
+            goto feature_opts_json_error;
+        }
+    }
+
+    return json;
+
+  feature_opts_json_error:
+    cJSON_Delete(json);
+    return NULL;
+}
+
+bool generate_feature_options_from_json(cJSON *json)
+{
+    if (!cJSON_IsArray(json)) {
+        errmsg("JSON['generate_feature_options'] should be an Array");
+        return false;
+    }
+
+    int size = cJSON_GetArraySize(json);
+
+    generate_features_t *loaded = calloc(size, sizeof(generate_features_t));
+
+    for (int i=0; i<size; i++) {
+        cJSON *item_json = cJSON_GetArrayItem(json, i);
+        generate_features_t *features = &(loaded[i]);
+        if (!generate_features_from_json(item_json, features)) {
+            errmsg("Could not parse JSON['generate_feature_options'][%d]", i);
+            return false;
+        }
+    }
+
+    if (generate_feature_options_loaded) {
+        for (int i=0; i<num_generate_feature_options; i++) {
+            generate_features_t *features = &(generate_feature_options_loaded[i]);
+            SAFEFREE(features->name);
+        }
+
+        FREE(generate_feature_options_loaded);
+    }
+
+    generate_feature_options_loaded = loaded;
+    generate_feature_options = generate_feature_options_loaded;
+    num_generate_feature_options = size;
+
+    return true;
 }
 
 void init_gui_random_minimal(void)

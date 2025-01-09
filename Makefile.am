@@ -145,6 +145,7 @@ hexpuzzle_SOURCES =                                          \
 	src/nvdata_finished.h      src/nvdata_finished.c     \
 	src/options.h              src/options.c             \
 	src/path.h                 src/path.c                \
+	src/range.h                src/range.c               \
 	src/raygui_impl.c 			             \
 	src/raylib_helper.h        src/raylib_helper.c       \
 	src/startup_action.h       src/startup_action.c      \

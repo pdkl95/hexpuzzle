@@ -34,6 +34,7 @@
 
 #include "nvdata.h"
 #include "nvdata_finished.h"
+#include "gui_random.h"
 
 uint16_t state_version = 1;
 
@@ -110,7 +111,7 @@ static bool program_state_from_json(cJSON *json)
         return false;
     }
 
-    cJSON *version_json = cJSON_GetObjectItemCaseSensitive(json, "version");
+    cJSON *version_json = cJSON_GetObjectItem(json, "version");
     if (version_json) {
         if (!cJSON_IsNumber(version_json)) {
             errmsg("Error parsing program state: JSON['version'] is not a Number");
@@ -125,7 +126,7 @@ static bool program_state_from_json(cJSON *json)
         warnmsg("Program state JSON is missing \"version\"");
     }
 
-    cJSON *current_level_save_file_json = cJSON_GetObjectItemCaseSensitive(json, "current_level_save_file");
+    cJSON *current_level_save_file_json = cJSON_GetObjectItem(json, "current_level_save_file");
     if (current_level_save_file_json) {
         if (!cJSON_IsString(current_level_save_file_json)) {
             errmsg("Error parsing program state: JSON['current_level_save_file_json'] is not a String");
@@ -153,10 +154,10 @@ static bool program_state_from_json(cJSON *json)
         }
     }
 
-    cJSON *window_json = cJSON_GetObjectItemCaseSensitive(json, "window");
+    cJSON *window_json = cJSON_GetObjectItem(json, "window");
     if (window_json) {
-        cJSON  *width_json = cJSON_GetObjectItemCaseSensitive(window_json, "width");
-        cJSON *height_json = cJSON_GetObjectItemCaseSensitive(window_json, "height");
+        cJSON  *width_json = cJSON_GetObjectItem(window_json, "width");
+        cJSON *height_json = cJSON_GetObjectItem(window_json, "height");
 
         if (!width_json) {
             warnmsg("Program state JSON['window'] is missing \"width\"");
@@ -187,8 +188,8 @@ static bool program_state_from_json(cJSON *json)
             }
         }
 
-        cJSON *position_x_json = cJSON_GetObjectItemCaseSensitive(window_json, "position_x");
-        cJSON *position_y_json = cJSON_GetObjectItemCaseSensitive(window_json, "position_y");
+        cJSON *position_x_json = cJSON_GetObjectItem(window_json, "position_x");
+        cJSON *position_y_json = cJSON_GetObjectItem(window_json, "position_y");
 
         if (!position_x_json) {
             warnmsg("Program state JSON['window'] is missing \"position_x\"");
@@ -223,11 +224,11 @@ static bool program_state_from_json(cJSON *json)
     }
 
     if (options->load_color_opt) {
-        cJSON *colors_json = cJSON_GetObjectItemCaseSensitive(json, "colors");
+        cJSON *colors_json = cJSON_GetObjectItem(json, "colors");
         if (colors_json) {
             for (int i=1; i<PATH_TYPE_COUNT; i++) {
                 const char *field = TextFormat("path_%d", i);
-                cJSON *path_json = cJSON_GetObjectItemCaseSensitive(colors_json, field);
+                cJSON *path_json = cJSON_GetObjectItem(colors_json, field);
                 if (path_json) {
                     if (!cJSON_IsString(path_json)) {
                         errmsg("Program state JSON['colors']['%s'] is not a STRING", field);
@@ -242,9 +243,9 @@ static bool program_state_from_json(cJSON *json)
         }
     }
 
-    cJSON *ui_json = cJSON_GetObjectItemCaseSensitive(json, "ui");
+    cJSON *ui_json = cJSON_GetObjectItem(json, "ui");
     if (ui_json) {
-        cJSON *cursor_size_json = cJSON_GetObjectItemCaseSensitive(ui_json, "cursor_size");
+        cJSON *cursor_size_json = cJSON_GetObjectItem(ui_json, "cursor_size");
         if (cursor_size_json) {
             if (cJSON_IsNumber(cursor_size_json)) {
                 int value = cursor_size_json->valueint;
@@ -257,7 +258,7 @@ static bool program_state_from_json(cJSON *json)
             warnmsg("Program state JSON['ui'] is missing \"cursor_size\"");
         }
 
-        cJSON *double_click_ms_json = cJSON_GetObjectItemCaseSensitive(ui_json, "double_click_ms");
+        cJSON *double_click_ms_json = cJSON_GetObjectItem(ui_json, "double_click_ms");
         if (double_click_ms_json) {
             if (cJSON_IsNumber(double_click_ms_json)) {
                 int value = double_click_ms_json->valueint;
@@ -270,7 +271,7 @@ static bool program_state_from_json(cJSON *json)
             warnmsg("Program state JSON['ui'] is missing \"double_click_ms\"");
         }
 
-        cJSON *max_win_radius_json = cJSON_GetObjectItemCaseSensitive(ui_json, "max_win_radius");
+        cJSON *max_win_radius_json = cJSON_GetObjectItem(ui_json, "max_win_radius");
         if (max_win_radius_json) {
             if (cJSON_IsNumber(max_win_radius_json)) {
                 int value = max_win_radius_json->valueint;
@@ -284,12 +285,12 @@ static bool program_state_from_json(cJSON *json)
         }
     }
 
-    cJSON *graphics_json = cJSON_GetObjectItemCaseSensitive(json, "graphics");
+    cJSON *graphics_json = cJSON_GetObjectItem(json, "graphics");
     if (graphics_json) {
         cJSON *bool_json = NULL;
 
 #define mk_bool_json(field, name)                                           \
-    bool_json = cJSON_GetObjectItemCaseSensitive(graphics_json, STR(name)); \
+    bool_json = cJSON_GetObjectItem(graphics_json, STR(name)); \
     if (bool_json) {                                                        \
         if (cJSON_IsBool(bool_json)) {                                      \
             if (cJSON_IsTrue(bool_json)) {                                  \
@@ -322,7 +323,6 @@ static bool program_state_from_json(cJSON *json)
     }
 
     cJSON *win_anim_json = cJSON_GetObjectItem(json, "win_animation");
-
     if (win_anim_json) {
         if (!win_anim_config_from_json(win_anim_json)) {
             errmsg("Error parsing program state JSON['win_animation']");
@@ -330,6 +330,16 @@ static bool program_state_from_json(cJSON *json)
         }
     } else {
         warnmsg("Program state JSON is missing \"win_animation\"");
+    }
+
+    cJSON *generate_feature_options_json = cJSON_GetObjectItem(json, "generate_feature_options");
+    if (generate_feature_options_json) {
+        if (!generate_feature_options_from_json(generate_feature_options_json)) {
+            errmsg("Error parsing program state JSON['generate_feature_options']");
+            return false;
+        }
+    } else {
+        warnmsg("Program state JSON is missing \"generate_feature_options\"");
     }
 
     return true;
@@ -494,7 +504,19 @@ static cJSON *program_state_to_json(void)
         errmsg("Error building win_animation config JSON");
         goto to_json_error;
     }
-\
+
+    cJSON *generate_feature_options_json = generate_feature_options_to_json();
+    if (generate_feature_options_json) {
+        if (!cJSON_AddItemToObject(json, "generate_feature_options", generate_feature_options_json)) {
+            errmsg("Error adding generate_feature_options config JSON");
+            cJSON_Delete(generate_feature_options_json);
+            goto to_json_error;
+        }
+    } else {
+        errmsg("Error building generate_feature_options config JSON");
+        goto to_json_error;
+    }
+
     return json;
 
   to_json_error:

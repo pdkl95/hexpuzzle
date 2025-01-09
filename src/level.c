@@ -977,7 +977,7 @@ bool level_from_json(level_t *level, cJSON *json)
         return false;
     }
 
-    cJSON *version_json = cJSON_GetObjectItemCaseSensitive(json, "version");
+    cJSON *version_json = cJSON_GetObjectItem(json, "version");
     if (!cJSON_IsNumber(version_json)) {
         errmsg("Error parsing level JSON: 'version' is not a Number");
         return false;
@@ -989,7 +989,7 @@ bool level_from_json(level_t *level, cJSON *json)
         return false;
     }
 
-    cJSON *name_json = cJSON_GetObjectItemCaseSensitive(json, "name");
+    cJSON *name_json = cJSON_GetObjectItem(json, "name");
     if (!cJSON_IsString(name_json)) {
         errmsg("Error parsing level JSON: 'name' is not a String");
         return false;
@@ -997,14 +997,14 @@ bool level_from_json(level_t *level, cJSON *json)
     snprintf(level->name, NAME_MAXLEN, "%s", name_json->valuestring);
     level_update_id(level);
 
-    cJSON *radius_json = cJSON_GetObjectItemCaseSensitive(json, "radius");
+    cJSON *radius_json = cJSON_GetObjectItem(json, "radius");
     if (!cJSON_IsNumber(radius_json)) {
         errmsg("Error parsing level JSON: 'radius' is not a Number");
         return false;
     }
     level->radius = radius_json->valueint;
 
-    cJSON *tiles_json = cJSON_GetObjectItemCaseSensitive(json, "tiles");
+    cJSON *tiles_json = cJSON_GetObjectItem(json, "tiles");
     if (!cJSON_IsArray(tiles_json)) {
         errmsg("Error parsing level JSON: 'tiles' is not an Array");
         return false;

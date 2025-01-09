@@ -68,7 +68,7 @@ bool win_anim_mode_config_from_json(win_anim_mode_config_t *config, cJSON *json)
         return false;
     }
 
-    cJSON *chances_json = cJSON_GetObjectItemCaseSensitive(json, "chances");
+    cJSON *chances_json = cJSON_GetObjectItem(json, "chances");
     if (!cJSON_IsNumber(chances_json)) {
         errmsg("Error parsing mode config JSON: 'chances' is not a Number");
         return false;
@@ -77,7 +77,7 @@ bool win_anim_mode_config_from_json(win_anim_mode_config_t *config, cJSON *json)
 
     cJSON *bool_json = NULL;
 #define mk_bool_json(field, name)                                       \
-    bool_json = cJSON_GetObjectItemCaseSensitive(json, STR(name));      \
+    bool_json = cJSON_GetObjectItem(json, STR(name));      \
     if (bool_json) {                                                    \
         if (cJSON_IsBool(bool_json)) {                                  \
             if (cJSON_IsTrue(bool_json)) {                              \

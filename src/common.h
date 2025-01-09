@@ -78,6 +78,8 @@
         }                  \
     } while(0)
 
+#define NUM_ELEMENTS(type,arr) (sizeof(arr)/sizeof(type))
+
 extern const char *progname;
 extern const char *progversion;
 

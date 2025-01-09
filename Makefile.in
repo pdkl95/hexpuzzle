@@ -175,15 +175,15 @@ am__hexpuzzle_SOURCES_DIST = src/background.h src/background.c \
 	src/level_draw.c src/level_undo.h src/level_undo.c \
 	src/logging.h src/logging.c src/nvdata.h src/nvdata.c \
 	src/nvdata_finished.h src/nvdata_finished.c src/options.h \
-	src/options.c src/path.h src/path.c src/raygui_impl.c \
-	src/raylib_helper.h src/raylib_helper.c src/startup_action.h \
-	src/startup_action.c src/shader.h src/shader.c src/solver.h \
-	src/solver.c src/textures.h src/textures.c src/tile.h \
-	src/tile.c src/tile_draw.h src/tile_draw.c src/tile_pos.h \
-	src/tile_pos.c src/util.h src/util.c src/win_anim.h \
-	src/win_anim.c src/win_anim_mode_config.h \
-	src/win_anim_mode_config.c src/common.h src/main.c \
-	src/physics.h src/physics.c
+	src/options.c src/path.h src/path.c src/range.h src/range.c \
+	src/raygui_impl.c src/raylib_helper.h src/raylib_helper.c \
+	src/startup_action.h src/startup_action.c src/shader.h \
+	src/shader.c src/solver.h src/solver.c src/textures.h \
+	src/textures.c src/tile.h src/tile.c src/tile_draw.h \
+	src/tile_draw.c src/tile_pos.h src/tile_pos.c src/util.h \
+	src/util.c src/win_anim.h src/win_anim.c \
+	src/win_anim_mode_config.h src/win_anim_mode_config.c \
+	src/common.h src/main.c src/physics.h src/physics.c
 @USE_PHYSICS_TRUE@am__objects_2 = src/hexpuzzle-physics.$(OBJEXT)
 am_hexpuzzle_OBJECTS = src/hexpuzzle-background.$(OBJEXT) \
 	src/hexpuzzle-classics.$(OBJEXT) \
@@ -202,6 +202,7 @@ am_hexpuzzle_OBJECTS = src/hexpuzzle-background.$(OBJEXT) \
 	src/hexpuzzle-logging.$(OBJEXT) src/hexpuzzle-nvdata.$(OBJEXT) \
 	src/hexpuzzle-nvdata_finished.$(OBJEXT) \
 	src/hexpuzzle-options.$(OBJEXT) src/hexpuzzle-path.$(OBJEXT) \
+	src/hexpuzzle-range.$(OBJEXT) \
 	src/hexpuzzle-raygui_impl.$(OBJEXT) \
 	src/hexpuzzle-raylib_helper.$(OBJEXT) \
 	src/hexpuzzle-startup_action.$(OBJEXT) \
@@ -526,14 +527,15 @@ hexpuzzle_SOURCES = src/background.h src/background.c src/classics.h \
 	src/level_undo.h src/level_undo.c src/logging.h src/logging.c \
 	src/nvdata.h src/nvdata.c src/nvdata_finished.h \
 	src/nvdata_finished.c src/options.h src/options.c src/path.h \
-	src/path.c src/raygui_impl.c src/raylib_helper.h \
-	src/raylib_helper.c src/startup_action.h src/startup_action.c \
-	src/shader.h src/shader.c src/solver.h src/solver.c \
-	src/textures.h src/textures.c src/tile.h src/tile.c \
-	src/tile_draw.h src/tile_draw.c src/tile_pos.h src/tile_pos.c \
-	src/util.h src/util.c src/win_anim.h src/win_anim.c \
-	src/win_anim_mode_config.h src/win_anim_mode_config.c \
-	src/common.h src/main.c $(am__append_5)
+	src/path.c src/range.h src/range.c src/raygui_impl.c \
+	src/raylib_helper.h src/raylib_helper.c src/startup_action.h \
+	src/startup_action.c src/shader.h src/shader.c src/solver.h \
+	src/solver.c src/textures.h src/textures.c src/tile.h \
+	src/tile.c src/tile_draw.h src/tile_draw.c src/tile_pos.h \
+	src/tile_pos.c src/util.h src/util.c src/win_anim.h \
+	src/win_anim.c src/win_anim_mode_config.h \
+	src/win_anim_mode_config.c src/common.h src/main.c \
+	$(am__append_5)
 dist_EXTRA_hexpuzzle_SOURCES = \
 	src/data_classics_levels.h  \
 	src/data_fonts.h            \
@@ -875,6 +877,8 @@ src/hexpuzzle-options.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-path.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/hexpuzzle-range.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-raygui_impl.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-raylib_helper.$(OBJEXT): src/$(am__dirstamp) \
@@ -951,6 +955,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-options.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-path.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-physics.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-range.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raygui_impl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raylib_helper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-shader.Po@am__quote@
@@ -1385,6 +1390,20 @@ src/hexpuzzle-path.obj: src/path.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/path.c' object='src/hexpuzzle-path.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-path.obj `if test -f 'src/path.c'; then $(CYGPATH_W) 'src/path.c'; else $(CYGPATH_W) '$(srcdir)/src/path.c'; fi`
+
+src/hexpuzzle-range.o: src/range.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-range.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-range.Tpo -c -o src/hexpuzzle-range.o `test -f 'src/range.c' || echo '$(srcdir)/'`src/range.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-range.Tpo src/$(DEPDIR)/hexpuzzle-range.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/range.c' object='src/hexpuzzle-range.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-range.o `test -f 'src/range.c' || echo '$(srcdir)/'`src/range.c
+
+src/hexpuzzle-range.obj: src/range.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-range.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-range.Tpo -c -o src/hexpuzzle-range.obj `if test -f 'src/range.c'; then $(CYGPATH_W) 'src/range.c'; else $(CYGPATH_W) '$(srcdir)/src/range.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-range.Tpo src/$(DEPDIR)/hexpuzzle-range.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/range.c' object='src/hexpuzzle-range.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-range.obj `if test -f 'src/range.c'; then $(CYGPATH_W) 'src/range.c'; else $(CYGPATH_W) '$(srcdir)/src/range.c'; fi`
 
 src/hexpuzzle-raygui_impl.o: src/raygui_impl.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-raygui_impl.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-raygui_impl.Tpo -c -o src/hexpuzzle-raygui_impl.o `test -f 'src/raygui_impl.c' || echo '$(srcdir)/'`src/raygui_impl.c

@@ -1,6 +1,6 @@
 /****************************************************************************
  *                                                                          *
- * gui_random.h                                                             *
+ * range.h                                                                  *
  *                                                                          *
  * This file is part of hexpuzzle.                                          *
  *                                                                          *
@@ -19,56 +19,19 @@
  *                                                                          *
  ****************************************************************************/
 
-#ifndef GUI_RANDOM_H
-#define GUI_RANDOM_H
+#ifndef RANGE_H
+#define RANGE_H
 
-#include "range.h"
+#include "cJSON/cJSON.h"
 
-enum symmetry_mode {
-    SYMMETRY_MODE_NONE = 0,
-    SYMMETRY_MODE_REFLECT,
-    SYMMETRY_MODE_ROTATE
+struct int_range {
+    int min;
+    int max;
 };
-typedef enum symmetry_mode symmetry_mode_t;
+typedef struct int_range int_range_t;
 
-const char *symmetry_mode_string(symmetry_mode_t mode);
-symmetry_mode_t parse_symmetry_mode_string(const char *string);
+cJSON *int_range_to_json(int_range_t *ir);
+bool int_range_from_json(cJSON *json, int_range_t *ir);
 
-struct generate_features {
-    char *name;
-    int_range_t fixed;
-    int_range_t hidden;
-    symmetry_mode_t symmetry_mode;
-};
-typedef struct generate_features generate_features_t;
-
-cJSON *generate_features_to_json(generate_features_t features);
-bool generate_features_from_json(cJSON *json, generate_features_t *features);
-
-extern generate_features_t *generate_feature_options;
-extern int num_generate_feature_options;
-
-cJSON *generate_feature_options_to_json(void);
-bool generate_feature_options_from_json(cJSON *json);
-
-void init_gui_random_minimal(void);
-void init_gui_random(void);
-void cleanup_gui_random(void);
-void resize_gui_random(void);
-void draw_gui_random(void);
-
-struct level *generate_random_level(void);
-struct level *generate_random_title_level(void);
-
-void regen_level_preview(void);
-
-void save_gui_random_level(void);
-void play_gui_random_level(void);
-void play_gui_random_level_preview(void);
-bool parse_random_seed_str(char *seedstr);
-
-extern struct level *gui_random_level;
-extern struct level *gui_random_level_preview;
-
-#endif /*GUI_RANDOM_H*/
+#endif /*RANGE_H*/
 

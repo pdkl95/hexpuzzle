@@ -1,6 +1,6 @@
 /****************************************************************************
  *                                                                          *
- * gui_random.h                                                             *
+ * range.c                                                                  *
  *                                                                          *
  * This file is part of hexpuzzle.                                          *
  *                                                                          *
@@ -19,56 +19,57 @@
  *                                                                          *
  ****************************************************************************/
 
-#ifndef GUI_RANDOM_H
-#define GUI_RANDOM_H
-
+#include "common.h"
 #include "range.h"
 
-enum symmetry_mode {
-    SYMMETRY_MODE_NONE = 0,
-    SYMMETRY_MODE_REFLECT,
-    SYMMETRY_MODE_ROTATE
-};
-typedef enum symmetry_mode symmetry_mode_t;
+cJSON *int_range_to_json(int_range_t *ir)
+{
+    cJSON *json = cJSON_CreateObject();
 
-const char *symmetry_mode_string(symmetry_mode_t mode);
-symmetry_mode_t parse_symmetry_mode_string(const char *string);
+    if (cJSON_AddNumberToObject(json, "min", ir->min) == NULL) {
+        goto int_range_json_error;
+    }
+    
+    if (cJSON_AddNumberToObject(json, "max", ir->max) == NULL) {
+        goto int_range_json_error;
+    }
 
-struct generate_features {
-    char *name;
-    int_range_t fixed;
-    int_range_t hidden;
-    symmetry_mode_t symmetry_mode;
-};
-typedef struct generate_features generate_features_t;
+    return json;
 
-cJSON *generate_features_to_json(generate_features_t features);
-bool generate_features_from_json(cJSON *json, generate_features_t *features);
+  int_range_json_error:
+    cJSON_Delete(json);
+    return NULL;
+}
 
-extern generate_features_t *generate_feature_options;
-extern int num_generate_feature_options;
+bool int_range_from_json(cJSON *json, int_range_t *ir)
+{
+    if (!cJSON_IsObject(json)) {
+        errmsg("int range JSON should be an Object");
+        return false;
+    }
 
-cJSON *generate_feature_options_to_json(void);
-bool generate_feature_options_from_json(cJSON *json);
+    cJSON *min_json = cJSON_GetObjectItem(json, "min");
+    if (!min_json) {
+        errmsg("int range JSON Object should have Number 'min'");
+        return false;
+    }
+    if (!cJSON_IsNumber(min_json)) {
+        errmsg("int range JSON Object item 'min' is not a Number");
+        return false;
+    }
 
-void init_gui_random_minimal(void);
-void init_gui_random(void);
-void cleanup_gui_random(void);
-void resize_gui_random(void);
-void draw_gui_random(void);
+    cJSON *max_json = cJSON_GetObjectItem(json, "max");
+    if (!max_json) {
+        errmsg("int range JSON Object should have Number 'max'");
+        return false;
+    }
+    if (!cJSON_IsNumber(max_json)) {
+        errmsg("int range JSON Object item 'max' is not a Number");
+        return false;
+    }
 
-struct level *generate_random_level(void);
-struct level *generate_random_title_level(void);
+    ir->min = min_json->valueint;
+    ir->max = max_json->valueint;
 
-void regen_level_preview(void);
-
-void save_gui_random_level(void);
-void play_gui_random_level(void);
-void play_gui_random_level_preview(void);
-bool parse_random_seed_str(char *seedstr);
-
-extern struct level *gui_random_level;
-extern struct level *gui_random_level_preview;
-
-#endif /*GUI_RANDOM_H*/
-
+    return true;
+}

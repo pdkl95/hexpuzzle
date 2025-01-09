@@ -220,6 +220,7 @@ AC_CHECK_FUNC([scandir], [], [ERR_NOT_FOUND([scandir])])
 AC_CHECK_FUNC([strcspn], [], [ERR_NOT_FOUND([strcspn])])
 AC_CHECK_FUNC([strpbrk], [], [ERR_NOT_FOUND([strpbrk])])
 AC_CHECK_FUNC([strsep], [], [ERR_NOT_FOUND([strsep])])
+AC_CHECK_FUNC([strncasecmp], [], [ERR_NOT_FOUND([strncasecmp])])
 AX_FUNC_GETOPT_LONG
 
 dnl Checks for other declarations
