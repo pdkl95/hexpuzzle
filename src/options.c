@@ -302,6 +302,7 @@ options_set_defaults(
     options->initial_window_height = OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT;
     options->cursor_scale          = OPTIONS_DEFAULT_CURSOR_SCALE;
     options->double_click_ms       = OPTIONS_DEFAULT_DOUBLE_CLICK_MS;
+    options->max_win_radius        = OPTIONS_DEFAULT_MAX_WIN_RADIUS;
 
     options->load_state_animate_bg  = true;
     options->load_state_animate_win = true;
@@ -312,16 +313,16 @@ options_set_defaults(
 
     options->force = false;
 
-    options->startup_action        = OPTIONS_DEFAULT_STARTUP_ACTION;
-    options->create_level_mode     = OPTIONS_DEFAULT_CREATE_LEVEL_MODE;
-    options->create_level_radius   = OPTIONS_DEFAULT_CREATE_LEVEL_RADIUS;
-    options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_MIN_FIXED;
-    options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_MAX_FIXED;
-    options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_MIN_HIDDEN;
-    options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_MAX_HIDDEN;
-    options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_MIN_PATH;
-    options->create_level_max_path = OPTIONS_DEFAULT_CREATE_LEVEL_MAX_PATH;
-    options->create_level_max_path = OPTIONS_DEFAULT_CREATE_LEVEL_EXPOINTS;
+    options->startup_action          = OPTIONS_DEFAULT_STARTUP_ACTION;
+    options->create_level_mode       = OPTIONS_DEFAULT_CREATE_LEVEL_MODE;
+    options->create_level_radius     = OPTIONS_DEFAULT_CREATE_LEVEL_RADIUS;
+    options->create_level_min_fixed  = OPTIONS_DEFAULT_CREATE_LEVEL_MIN_FIXED;
+    options->create_level_min_fixed  = OPTIONS_DEFAULT_CREATE_LEVEL_MAX_FIXED;
+    options->create_level_min_hidden = OPTIONS_DEFAULT_CREATE_LEVEL_MIN_HIDDEN;
+    options->create_level_min_hidden = OPTIONS_DEFAULT_CREATE_LEVEL_MAX_HIDDEN;
+    options->create_level_min_path   = OPTIONS_DEFAULT_CREATE_LEVEL_MIN_PATH;
+    options->create_level_max_path   = OPTIONS_DEFAULT_CREATE_LEVEL_MAX_PATH;
+    options->create_level_max_path   = OPTIONS_DEFAULT_CREATE_LEVEL_EXPOINTS;
 
     color_option_set(&(options->path_color[0]), OPTIONS_DEFAULT_PATH_COLOR_0);
     color_option_set(&(options->path_color[1]), OPTIONS_DEFAULT_PATH_COLOR_1);
