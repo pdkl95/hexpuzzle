@@ -39,60 +39,70 @@ generate_features_t default_generate_feature_options[] = {
         .name = "Common (symmetric: reflect)",
         .fixed  = { .min = 3, .max = 5 },
         .hidden = { .min = 3, .max = 6 },
+        .minimum_path_density = 2.5,
         .symmetry_mode = SYMMETRY_MODE_REFLECT
     },
     {
         .name = "Common (symmetric: rotate)",
         .fixed  = { .min = 3, .max = 5 },
         .hidden = { .min = 3, .max = 6 },
+        .minimum_path_density = 0.0,
         .symmetry_mode = SYMMETRY_MODE_ROTATE
     },
     {
         .name = "Common (random)",
         .fixed  = { .min = 4, .max = 6 },
         .hidden = { .min = 4, .max = 6 },
+        .minimum_path_density = 0.0,
         .symmetry_mode = SYMMETRY_MODE_NONE
     },
     {
         .name = "Uncommon (symmetric: reflect)",
         .fixed  = { .min = 1, .max = 3 },
         .hidden = { .min = 1, .max = 4 },
+        .minimum_path_density = 0.0,
         .symmetry_mode = SYMMETRY_MODE_REFLECT
     },
     {
         .name = "Uncommon (symmetric: rotate)",
         .fixed  = { .min = 1, .max = 3 },
         .hidden = { .min = 1, .max = 4 },
+        .minimum_path_density = 0.0,
         .symmetry_mode = SYMMETRY_MODE_ROTATE
     },
     {
         .name = "Uncommon (random)",
         .fixed  = { .min = 2, .max = 3 },
         .hidden = { .min = 2, .max = 4 },
+        .minimum_path_density = 0.0,
         .symmetry_mode = SYMMETRY_MODE_NONE
     },
     {
         .name = "Rare (symmetric: reflect)",
         .fixed  = { .min = 0, .max = 2 },
         .hidden = { .min = 0, .max = 2 },
+        .minimum_path_density = 0.0,
         .symmetry_mode = SYMMETRY_MODE_REFLECT
     },
     {
         .name = "Rare (symmetric: rotate)",
         .fixed  = { .min = 0, .max = 2 },
         .hidden = { .min = 0, .max = 2 },
+        .minimum_path_density = 0.0,
         .symmetry_mode = SYMMETRY_MODE_ROTATE
     },
     {
         .name = "Rare (random)",
         .fixed  = { .min = 0, .max = 2 },
         .hidden = { .min = 0, .max = 2 },
+        .minimum_path_density = 0.0,
         .symmetry_mode = SYMMETRY_MODE_NONE
     },
     {
         .name = "None",
         .fixed  = { .min = 0, .max = 0 },
         .hidden = { .min = 0, .max = 0 },
+        .minimum_path_density = 0.0,
         .symmetry_mode = SYMMETRY_MODE_NONE
     }
 };
@@ -101,6 +111,17 @@ generate_features_t default_generate_feature_options[] = {
 generate_features_t *generate_feature_options_loaded = NULL;
 generate_features_t *generate_feature_options = &(default_generate_feature_options[0]);
 int num_generate_feature_options = NUM_DEFAULT_GENERATE_FEATURE_OPTIONS;
+
+void print_generate_features(generate_features_t *features)
+{
+    printf("<generate_feature>\n");
+    printf("  name          = %s\n", features->name);
+    printf("  fixed         = %s\n", int_range_string(&features->fixed));
+    printf("  hidden        = %s\n", int_range_string(&features->hidden));
+    printf("  sym_mode      = %s\n", symmetry_mode_string(features->symmetry_mode));
+    printf("  min_path_dens = %f\n", features->minimum_path_density);
+    printf("</generate_feature>\n");
+}
 
 Rectangle gui_random_panel_rect;
 Rectangle gui_random_area_rect;
@@ -320,6 +341,19 @@ static path_type_t rng_color(void)
     return PATH_TYPE_NONE;
 }
 
+static bool set_tile_and_neighbor_path(tile_pos_t *pos, hex_direction_t dir, path_type_t type)
+{
+    tile_pos_t *neighbor = pos->neighbors[dir];
+    if (neighbor && neighbor->tile && neighbor->tile->enabled) {
+        hex_direction_t opp_dir = hex_opposite_direction(dir);
+        pos->tile->path[dir] = type;
+        neighbor->tile->path[opp_dir] = pos->tile->path[dir];
+        return true;
+    } else {
+        return false;
+    }
+}
+
 static void generate_random_paths(level_t *level, int num_tiles)
 {
     for (int i=0; i<num_tiles; i++) {
@@ -353,11 +387,7 @@ static void generate_random_paths(level_t *level, int num_tiles)
                     continue;
                 }
 
-                tile_pos_t *neighbor = pos->neighbors[idx];
-                if (neighbor && neighbor->tile && neighbor->tile->enabled) {
-                    hex_direction_t opp_idx = hex_opposite_direction(idx);
-                    tile->path[idx] = rng_color();
-                    neighbor->tile->path[opp_idx] = tile->path[idx];
+                if (set_tile_and_neighbor_path(pos, idx, rng_color())) {
                     num_paths--;
                     break;
                 }
@@ -644,7 +674,26 @@ static bool generate_connect_to_point_once(level_t *level)
     return false;
 }
 
-static void generate_connect_to_point(level_t *level)
+static void add_random_path(level_t *level)
+{
+    tile_pos_t *pos = find_random_empty_tile(level, NULL, false);
+    assert_not_null(pos);
+    tile_t *tile = pos->tile;
+    assert_not_null(tile);
+
+    int offset = rng_get(6);
+    path_type_t color = rng_color();
+
+    each_direction {
+        int d = (dir + offset) % 6;
+        if (tile->path[d] == PATH_TYPE_NONE) {
+            set_tile_and_neighbor_path(pos, d, color);
+            return;
+        }
+    }
+}
+
+static void generate_connect_to_point(level_t *level, generate_features_t *features)
 {
     assert_not_null(level);
     while (level_has_empty_tiles(level)) {
@@ -659,6 +708,15 @@ static void generate_connect_to_point(level_t *level)
         if (generate_connect_to_point_once(level)) {
             //break;
         }
+    }
+
+    for (int i=0; i<MAX_PATH_DENSITY_ITER; i++) {
+        float path_density = level_average_paths_per_tile(level);
+        if (path_density >= features->minimum_path_density) {
+            break;
+        }
+
+        add_random_path(level);
     }
 }
 
@@ -832,10 +890,13 @@ struct level *_generate_random_level(generate_features_t *given_features)
         assert(false && "should never reach here");
     }
 
+    pint(fixed_hidden_assist);
     generate_features_t *features = &(generate_feature_options[fixed_hidden_assist]);
+    print_generate_features(features);
     if (given_features) {
         features = given_features;
     }
+    print_generate_features(features);
 
 #define override(feat_field, opt_field)           \
     if (options->opt_field >= 0) {                \
@@ -870,7 +931,7 @@ struct level *_generate_random_level(generate_features_t *given_features)
         break;
 
     case 2:
-        generate_connect_to_point(level);
+        generate_connect_to_point(level, features);
         break;
 
     default:
@@ -922,6 +983,7 @@ struct level *generate_random_title_level(void)
         .name = "Title",
         .fixed  = { .min = 0, .max = 0 },
         .hidden = { .min = 0, .max = 0 },
+        .minimum_path_density = 1.5,
         .symmetry_mode = SYMMETRY_MODE_NONE
     };
     level_t *level = _generate_random_level(&features);

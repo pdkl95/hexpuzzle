@@ -1992,3 +1992,29 @@ void level_reset_win_anim(level_t *level)
 
     //printf("level_reset_win_anim()\n");
 }
+
+float level_average_paths_per_tile(level_t *level)
+{
+    int path_count = 0;
+    int enabled_tile_count = 0;
+
+    for (int i = 0; i < LEVEL_MAXTILES; i++) {
+        tile_t *tile = &(level->tiles[i]);
+        if (!tile->enabled) {
+            continue;
+        }
+
+        enabled_tile_count++;
+
+        each_direction {
+            if (tile->path[dir] != PATH_TYPE_NONE) {
+                path_count++;
+            }
+        }
+    }
+
+    assert(path_count > 0);
+    assert(enabled_tile_count > 0);
+
+    return ((float)path_count) / ((float)enabled_tile_count);
+}

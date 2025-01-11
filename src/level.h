@@ -249,6 +249,7 @@ void level_fade_out(level_t *level, level_fade_finished_cb_t callback, void *dat
 void level_update_tile_pops(level_t *level);
 void level_shuffle_tiles(level_t *level);
 void level_reset_win_anim(level_t *level);
+float level_average_paths_per_tile(level_t *level);
 
 extern level_t *current_level;
 

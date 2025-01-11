@@ -39,9 +39,11 @@ struct generate_features {
     int_range_t fixed;
     int_range_t hidden;
     symmetry_mode_t symmetry_mode;
+    float minimum_path_density;
 };
 typedef struct generate_features generate_features_t;
 
+void print_generate_features(generate_features_t *features);
 cJSON *generate_features_to_json(generate_features_t features);
 bool generate_features_from_json(cJSON *json, generate_features_t *features);
 

@@ -22,6 +22,19 @@
 #include "common.h"
 #include "range.h"
 
+#define RANGE_STR_MAX 256
+const char *int_range_string(int_range_t *ir)
+{
+    static char buf[RANGE_STR_MAX];
+    if (ir->min == ir->max) {
+        snprintf(buf, RANGE_STR_MAX, "%d", ir->max);
+    } else {
+        snprintf(buf, RANGE_STR_MAX, "%d..%d", ir->min, ir->max);
+    }
+
+    return buf;
+}
+
 cJSON *int_range_to_json(int_range_t *ir)
 {
     cJSON *json = cJSON_CreateObject();
