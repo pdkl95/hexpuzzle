@@ -33,6 +33,7 @@ typedef struct int_range int_range_t;
 const char *int_range_string(int_range_t *ir);
 cJSON *int_range_to_json(int_range_t *ir);
 bool int_range_from_json(cJSON *json, int_range_t *ir);
+void int_range_clamp(int_range_t *ir, int min, int max);
 
 #endif /*RANGE_H*/
 

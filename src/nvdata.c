@@ -332,14 +332,14 @@ static bool program_state_from_json(cJSON *json)
         warnmsg("Program state JSON is missing \"win_animation\"");
     }
 
-    cJSON *generate_feature_options_json = cJSON_GetObjectItem(json, "generate_feature_options");
-    if (generate_feature_options_json) {
-        if (!generate_feature_options_from_json(generate_feature_options_json)) {
-            errmsg("Error parsing program state JSON['generate_feature_options']");
+    cJSON *create_level_json = cJSON_GetObjectItem(json, "create_level");
+    if (create_level_json) {
+        if (!create_level_from_json(create_level_json)) {
+            errmsg("Error parsing program state JSON['create_level']");
             return false;
         }
     } else {
-        warnmsg("Program state JSON is missing \"generate_feature_options\"");
+        warnmsg("Program state JSON is missing \"create_level\"");
     }
 
     return true;
@@ -505,15 +505,15 @@ static cJSON *program_state_to_json(void)
         goto to_json_error;
     }
 
-    cJSON *generate_feature_options_json = generate_feature_options_to_json();
-    if (generate_feature_options_json) {
-        if (!cJSON_AddItemToObject(json, "generate_feature_options", generate_feature_options_json)) {
-            errmsg("Error adding generate_feature_options config JSON");
-            cJSON_Delete(generate_feature_options_json);
+    cJSON *create_level_json = create_level_to_json();
+    if (create_level_json) {
+        if (!cJSON_AddItemToObject(json, "create_level", create_level_json)) {
+            errmsg("Error adding create_level config JSON");
+            cJSON_Delete(create_level_json);
             goto to_json_error;
         }
     } else {
-        errmsg("Error building generate_feature_options config JSON");
+        errmsg("Error building create_level config JSON");
         goto to_json_error;
     }
 

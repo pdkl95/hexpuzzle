@@ -23,6 +23,7 @@
 #define OPTIONS_H
 
 #include "common.h"
+#include "range.h"
 #include "color.h"
 //#include "path.h"
 #include "startup_action.h"
@@ -45,22 +46,12 @@
 
 #define OPTIONS_DEFAULT_CREATE_LEVEL_MODE CREATE_LEVEL_MODE_RANDOM
 #define OPTIONS_DEFAULT_CREATE_LEVEL_RADIUS 2
-#define OPTIONS_DEFAULT_CREATE_LEVEL_MIN_FIXED -1
-#define OPTIONS_DEFAULT_CREATE_LEVEL_MAX_FIXED -1
-#define OPTIONS_DEFAULT_CREATE_LEVEL_MIN_HIDDEN -1
-#define OPTIONS_DEFAULT_CREATE_LEVEL_MAX_HIDDEN -1
-#define OPTIONS_DEFAULT_CREATE_LEVEL_EASY_MIN_PATH 2
-#define OPTIONS_DEFAULT_CREATE_LEVEL_EASY_MAX_PATH 3
-#define OPTIONS_DEFAULT_CREATE_LEVEL_EASY_EXPOINTS 1
-#define OPTIONS_DEFAULT_CREATE_LEVEL_MEDIUM_MIN_PATH 3
-#define OPTIONS_DEFAULT_CREATE_LEVEL_MEDIUM_MAX_PATH 4
-#define OPTIONS_DEFAULT_CREATE_LEVEL_MEDIUM_EXPOINTS 3
-#define OPTIONS_DEFAULT_CREATE_LEVEL_HARD_MIN_PATH 4
-#define OPTIONS_DEFAULT_CREATE_LEVEL_HARD_MAX_PATH 6
-#define OPTIONS_DEFAULT_CREATE_LEVEL_HARD_EXPOINTS 6
-#define OPTIONS_DEFAULT_CREATE_LEVEL_MIN_PATH OPTIONS_DEFAULT_CREATE_LEVEL_MEDIUM_MIN_PATH
-#define OPTIONS_DEFAULT_CREATE_LEVEL_MAX_PATH OPTIONS_DEFAULT_CREATE_LEVEL_MEDIUM_MAX_PATH
-#define OPTIONS_DEFAULT_CREATE_LEVEL_EXPOINTS OPTIONS_DEFAULT_CREATE_LEVEL_MEDIUM_EXPOINTS
+#define OPTIONS_DEFAULT_CREATE_LEVEL_FIXED  ((int_range_t){ .min = 2, .max = 4 })
+#define OPTIONS_DEFAULT_CREATE_LEVEL_HIDDEN ((int_range_t){ .min = 1, .max = 4 })
+#define OPTIONS_DEFAULT_CREATE_LEVEL_PATH   ((int_range_t){ .min = 2, .max = 4 })
+#define OPTIONS_DEFAULT_CREATE_LEVEL_EXPOINTS 3
+#define OPTIONS_DFFAULT_CREATE_LEVEL_SYMMETRY_MODE SYMMETRY_MODE_REFLECT
+#define OPTIONS_DFFAULT_CREATE_LEVEL_MINIMUM_PATH_DENSITY 2.5
 
 #define OPTIONS_DEFAULT_PATH_COLOR_0 (Color){ 0, 0, 0, 0 }
 #define OPTIONS_DEFAULT_PATH_COLOR_1 RED
@@ -78,8 +69,14 @@
 #define OPTIONS_WINDOW_MAX_WIDTH  (MAX(GetScreenWidth(),  OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH ))
 #define OPTIONS_WINDOW_MAX_HEIGHT (MAX(GetScreenHeight(), OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT))
 
-struct options {
+enum symmetry_mode {
+    SYMMETRY_MODE_NONE = 0,
+    SYMMETRY_MODE_REFLECT,
+    SYMMETRY_MODE_ROTATE
+};
+typedef enum symmetry_mode symmetry_mode_t;
 
+struct options {
     bool safe_mode;
     bool verbose;
     bool wait_events;
@@ -116,13 +113,12 @@ struct options {
     char *rng_seed_str;
     create_level_mode_t create_level_mode;
     long create_level_radius;
-    long create_level_min_fixed;
-    long create_level_max_fixed;
-    long create_level_min_hidden;
-    long create_level_max_hidden;
-    long create_level_min_path;
-    long create_level_max_path;
+    int_range_t create_level_fixed;
+    int_range_t create_level_hidden;
+    int_range_t create_level_path;
     long create_level_expoints;
+    symmetry_mode_t create_level_symmetry_mode;
+    float create_level_minimum_path_density;
 
     char *file_path;
 

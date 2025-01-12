@@ -284,6 +284,53 @@ options_set_long_bounds(
     }
 }
 
+static void
+options_set_int(
+    int *opt
+) {
+    assert_not_null(opt);
+    assert_not_null(optarg);
+
+    const char *src = optarg;
+    char *endptr;
+
+    long value = 0;
+
+    errno = 0;
+    value = strtol(src, &endptr, 10);
+
+    if (  ( errno == ERANGE &&
+            (  value == LONG_MAX ||
+               value == LONG_MIN )  ) ||
+          ( errno != 0 && value == 0)
+    ) {
+        perror("strtol");
+        DIE("cannot parse numewric option");
+    }
+
+    if (endptr == src) {
+        DIE("No digits were found");
+    }
+
+    *opt = (int)value;
+}
+
+static bool
+options_set_int_bounds(
+    int *opt,
+    int min,
+    int max
+) {
+    int value = 0;
+    options_set_int(&value);
+    if ((value < min) || (value > max)) {
+        return false;
+    } else {
+        *opt = value;
+        return true;
+    }
+}
+
 void
 options_set_defaults(
     options_t *options
@@ -313,16 +360,15 @@ options_set_defaults(
 
     options->force = false;
 
-    options->startup_action          = OPTIONS_DEFAULT_STARTUP_ACTION;
-    options->create_level_mode       = OPTIONS_DEFAULT_CREATE_LEVEL_MODE;
-    options->create_level_radius     = OPTIONS_DEFAULT_CREATE_LEVEL_RADIUS;
-    options->create_level_min_fixed  = OPTIONS_DEFAULT_CREATE_LEVEL_MIN_FIXED;
-    options->create_level_min_fixed  = OPTIONS_DEFAULT_CREATE_LEVEL_MAX_FIXED;
-    options->create_level_min_hidden = OPTIONS_DEFAULT_CREATE_LEVEL_MIN_HIDDEN;
-    options->create_level_min_hidden = OPTIONS_DEFAULT_CREATE_LEVEL_MAX_HIDDEN;
-    options->create_level_min_path   = OPTIONS_DEFAULT_CREATE_LEVEL_MIN_PATH;
-    options->create_level_max_path   = OPTIONS_DEFAULT_CREATE_LEVEL_MAX_PATH;
-    options->create_level_max_path   = OPTIONS_DEFAULT_CREATE_LEVEL_EXPOINTS;
+    options->startup_action             = OPTIONS_DEFAULT_STARTUP_ACTION;
+    options->create_level_mode          = OPTIONS_DEFAULT_CREATE_LEVEL_MODE;
+    options->create_level_radius        = OPTIONS_DEFAULT_CREATE_LEVEL_RADIUS;
+    options->create_level_fixed         = OPTIONS_DEFAULT_CREATE_LEVEL_FIXED;
+    options->create_level_hidden        = OPTIONS_DEFAULT_CREATE_LEVEL_HIDDEN;
+    options->create_level_path          = OPTIONS_DEFAULT_CREATE_LEVEL_PATH;
+    options->create_level_expoints      = OPTIONS_DEFAULT_CREATE_LEVEL_EXPOINTS;
+    options->create_level_symmetry_mode = OPTIONS_DFFAULT_CREATE_LEVEL_SYMMETRY_MODE;
+    options->create_level_minimum_path_density = OPTIONS_DFFAULT_CREATE_LEVEL_MINIMUM_PATH_DENSITY;
 
     color_option_set(&(options->path_color[0]), OPTIONS_DEFAULT_PATH_COLOR_0);
     color_option_set(&(options->path_color[1]), OPTIONS_DEFAULT_PATH_COLOR_1);
@@ -432,42 +478,42 @@ options_parse_args(
             break;
 
         case '[':
-            if (!options_set_long_bounds(&options->create_level_min_fixed, 0, 9)) {
+            if (!options_set_int_bounds(&options->create_level_fixed.min, 0, 9)) {
                 errmsg("bad value for --level-min-fixed (expected %d - %d)", 0, 9);
                 return false;
             }
             break;
 
         case ']':
-            if (!options_set_long_bounds(&options->create_level_max_fixed, 0, 9)) {
+            if (!options_set_int_bounds(&options->create_level_fixed.max, 0, 9)) {
                 errmsg("bad value for --level-max-fixed (expected %d - %d)", 0, 9);
                 return false;
             }
             break;
 
         case '(':
-            if (!options_set_long_bounds(&options->create_level_min_hidden, 0, 9)) {
+            if (!options_set_int_bounds(&options->create_level_hidden.min, 0, 9)) {
                 errmsg("bad value for --level-min-hidden (expected %d - %d)", 0, 9);
                 return false;
             }
             break;
 
         case ')':
-            if (!options_set_long_bounds(&options->create_level_max_hidden, 0, 9)) {
+            if (!options_set_int_bounds(&options->create_level_hidden.max, 0, 9)) {
                 errmsg("bad value for --level-max-hidden (expected %d - %d)", 0, 9);
                 return false;
             }
             break;
 
         case '<':
-            if (!options_set_long_bounds(&options->create_level_min_path, 0, 6)) {
+            if (!options_set_int_bounds(&options->create_level_path.min, 0, 6)) {
                 errmsg("bad value for --level-min-path (expected %d - %d)", 0, 6);
                 return false;
             }
             break;
 
         case '>':
-            if (!options_set_long_bounds(&options->create_level_max_path, 1, 6)) {
+            if (!options_set_int_bounds(&options->create_level_path.max, 1, 6)) {
                 errmsg("bad value for --level-max-path (expected %d - %d)", 1, 6);
                 return false;
             }

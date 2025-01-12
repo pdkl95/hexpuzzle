@@ -34,95 +34,6 @@
 
 #include "pcg/pcg_basic.h"
 
-generate_features_t default_generate_feature_options[] = {
-    {
-        .name = "Common (symmetric: reflect)",
-        .fixed  = { .min = 3, .max = 5 },
-        .hidden = { .min = 3, .max = 6 },
-        .minimum_path_density = 2.5,
-        .symmetry_mode = SYMMETRY_MODE_REFLECT
-    },
-    {
-        .name = "Common (symmetric: rotate)",
-        .fixed  = { .min = 3, .max = 5 },
-        .hidden = { .min = 3, .max = 6 },
-        .minimum_path_density = 0.0,
-        .symmetry_mode = SYMMETRY_MODE_ROTATE
-    },
-    {
-        .name = "Common (random)",
-        .fixed  = { .min = 4, .max = 6 },
-        .hidden = { .min = 4, .max = 6 },
-        .minimum_path_density = 0.0,
-        .symmetry_mode = SYMMETRY_MODE_NONE
-    },
-    {
-        .name = "Uncommon (symmetric: reflect)",
-        .fixed  = { .min = 1, .max = 3 },
-        .hidden = { .min = 1, .max = 4 },
-        .minimum_path_density = 0.0,
-        .symmetry_mode = SYMMETRY_MODE_REFLECT
-    },
-    {
-        .name = "Uncommon (symmetric: rotate)",
-        .fixed  = { .min = 1, .max = 3 },
-        .hidden = { .min = 1, .max = 4 },
-        .minimum_path_density = 0.0,
-        .symmetry_mode = SYMMETRY_MODE_ROTATE
-    },
-    {
-        .name = "Uncommon (random)",
-        .fixed  = { .min = 2, .max = 3 },
-        .hidden = { .min = 2, .max = 4 },
-        .minimum_path_density = 0.0,
-        .symmetry_mode = SYMMETRY_MODE_NONE
-    },
-    {
-        .name = "Rare (symmetric: reflect)",
-        .fixed  = { .min = 0, .max = 2 },
-        .hidden = { .min = 0, .max = 2 },
-        .minimum_path_density = 0.0,
-        .symmetry_mode = SYMMETRY_MODE_REFLECT
-    },
-    {
-        .name = "Rare (symmetric: rotate)",
-        .fixed  = { .min = 0, .max = 2 },
-        .hidden = { .min = 0, .max = 2 },
-        .minimum_path_density = 0.0,
-        .symmetry_mode = SYMMETRY_MODE_ROTATE
-    },
-    {
-        .name = "Rare (random)",
-        .fixed  = { .min = 0, .max = 2 },
-        .hidden = { .min = 0, .max = 2 },
-        .minimum_path_density = 0.0,
-        .symmetry_mode = SYMMETRY_MODE_NONE
-    },
-    {
-        .name = "None",
-        .fixed  = { .min = 0, .max = 0 },
-        .hidden = { .min = 0, .max = 0 },
-        .minimum_path_density = 0.0,
-        .symmetry_mode = SYMMETRY_MODE_NONE
-    }
-};
-#define NUM_DEFAULT_GENERATE_FEATURE_OPTIONS NUM_ELEMENTS(generate_features_t,default_generate_feature_options)
-
-generate_features_t *generate_feature_options_loaded = NULL;
-generate_features_t *generate_feature_options = &(default_generate_feature_options[0]);
-int num_generate_feature_options = NUM_DEFAULT_GENERATE_FEATURE_OPTIONS;
-
-void print_generate_features(generate_features_t *features)
-{
-    printf("<generate_feature>\n");
-    printf("  name          = %s\n", features->name);
-    printf("  fixed         = %s\n", int_range_string(&features->fixed));
-    printf("  hidden        = %s\n", int_range_string(&features->hidden));
-    printf("  sym_mode      = %s\n", symmetry_mode_string(features->symmetry_mode));
-    printf("  min_path_dens = %f\n", features->minimum_path_density);
-    printf("</generate_feature>\n");
-}
-
 Rectangle gui_random_panel_rect;
 Rectangle gui_random_area_rect;
 Rectangle gui_random_play_button_rect;
@@ -132,12 +43,6 @@ Rectangle gui_random_radius_display_rect;
 Rectangle gui_random_radius_right_button_rect;
 Rectangle gui_random_save_button_rect;
 Rectangle gui_random_color_label_rect;
-Rectangle gui_random_gen_style_label_rect;
-Rectangle gui_random_gen_style_rect;
-Rectangle gui_random_difficulty_label_rect;
-Rectangle gui_random_difficulty_rect;
-Rectangle gui_random_fixed_hidden_assist_label_rect;
-Rectangle gui_random_fixed_hidden_assist_rect;
 Rectangle gui_random_seed_rect;
 Rectangle gui_random_seed_bg_rect;
 Rectangle gui_random_enter_seed_rect;
@@ -155,9 +60,6 @@ char gui_random_radius_label_text[] = "Tile Radius";
 char gui_random_radius_left_button_text[6];
 char gui_random_radius_right_button_text[6];
 char gui_random_color_label_text[] = "Colors";
-char gui_random_gen_style_label_text[] = "Gen. Method";
-char gui_random_difficulty_label_text[] = "Difficulty";
-char gui_random_fixed_hidden_assist_label_text[] = "Fixed/Removed";
 char gui_random_seed_text[] = "RNG Seed";
 char gui_random_rng_seed_text[] = "Randomize";
 char gui_random_enter_seed_text_str[] = "Enter";
@@ -166,36 +68,6 @@ char *gui_random_enter_seed_text = NULL;
 char gui_random_save_button_text_str[] = "Save";
 #define GUI_RANDOM_SAVE_BUTTON_TEXT_LENGTH (6 + sizeof(gui_random_save_button_text_str))
 char gui_random_save_button_text[GUI_RANDOM_SAVE_BUTTON_TEXT_LENGTH];
-
-const char *gui_random_gen_styles[] = {
-    "Density / Scatter",
-    "Hamiltonian Path - DFS",
-    "Connect To Point"
-};
-char *gui_random_gen_style_text = NULL;
-#define NUM_GEN_STYLES (sizeof(gui_random_gen_styles)/sizeof(char *))
-bool gui_random_gen_style_edit_mode = false;
-
-int gen_style = 2;
-
-const char *gui_random_difficulties[] = {
-    "Easy    (~2 paths/tile)",
-    "Medium  (~3 paths/tile)",
-    "Hard   (4~6 paths/tile)"
-};
-char *gui_random_difficulty_text = NULL;
-#define NUM_DIFFICULTIES (sizeof(gui_random_difficulties)/sizeof(char *))
-bool gui_random_difficulty_edit_mode = false;
-
-int difficulty = 1;
-
-const char **gui_random_fixed_hidden_assist = NULL;
-char *gui_random_fixed_hidden_assist_text = NULL;
-bool gui_random_fixed_hidden_assist_edit_mode = false;
-
-int fixed_hidden_assist = 0;
-
-bool any_drop_down_active = false;
 
 bool gui_random_color[PATH_TYPE_COUNT];
 int gui_random_color_count = PATH_TYPE_COUNT - 1;
@@ -352,136 +224,6 @@ static bool set_tile_and_neighbor_path(tile_pos_t *pos, hex_direction_t dir, pat
     } else {
         return false;
     }
-}
-
-static void generate_random_paths(level_t *level, int num_tiles)
-{
-    for (int i=0; i<num_tiles; i++) {
-        int path_delta = options->create_level_max_path - options->create_level_min_path;
-        int path_rand  = rng_get(path_delta);
-        int num_paths  = path_rand + options->create_level_min_path;
-
-        tile_t *tile = level->enabled_tiles[i];
-        tile_pos_t *pos = tile->solved_pos;
-
-        each_direction {
-            if (tile->path[dir]) {
-                num_paths--;
-            } else {
-                tile_pos_t *neighbor = pos->neighbors[dir];
-                if (neighbor && neighbor->tile && !neighbor->tile->enabled) {
-                    num_paths--;
-                }
-            }
-        }
-
-        //print_tile_pos(pos);
-        //pint(num_paths);
-
-        if (num_paths > 0) {
-            hex_direction_order_t order = get_random_direction_order(num_paths);
-            for (int i=0; i<num_paths; i++) {
-                hex_direction_t idx = order.dir[i];
-
-                if (tile->path[idx]) {
-                    continue;
-                }
-
-                if (set_tile_and_neighbor_path(pos, idx, rng_color())) {
-                    num_paths--;
-                    break;
-                }
-            }
-        }
-    }
-}
-
-static void set_all_hover(level_t *level, bool value)
-{
-    for (int i=0; i<LEVEL_MAXTILES; i++) {
-        tile_t *tile = &(level->tiles[i]);
-        tile->solved_pos->hover = value;
-        tile->unsolved_pos->hover = value;
-    }
-}
-
-//#define DEBUG_DFS
-#ifdef DEBUG_DFS
-int dfs_depth;
-#endif
-
-static void dfs_tile_pos(tile_pos_t *pos)
-{
-    bool todo[6] = {0};
-    int todo_count = 0;
-
-#ifdef DEBUG_DFS
-    printf("DFS: depth = %d ", dfs_depth);
-    print_tile_pos(pos);
-    dfs_depth++;
-#endif
-
-    pos->hover = true;
-
-    each_direction {
-        tile_pos_t *neighbor = pos->neighbors[dir];
-        if (neighbor && neighbor->tile && neighbor->tile->enabled && !neighbor->hover) {
-            todo[dir] = true;
-            todo_count++;
-        }
-    }
-
-    if (todo_count > 0) {
-        hex_direction_order_t order = get_random_direction_order(todo_count);
-        for (int i=0; i<todo_count; i++) {
-            hex_direction_t idx = order.dir[i];
-            if (todo[idx]) {
-                todo[idx] = false;
-
-                tile_pos_t *neighbor = pos->neighbors[idx];
-
-                if (neighbor && neighbor->tile && neighbor->tile->enabled && !neighbor->hover) {
-                    hex_direction_t opp_idx = hex_opposite_direction(idx);
-                    pos->tile->path[idx] = rng_color();
-                    neighbor->tile->path[opp_idx] = pos->tile->path[idx];
-
-                    dfs_tile_pos(neighbor);
-                }
-                break;
-            }
-
-            todo_count--;
-        }
-    }
-
-#ifdef DEBUG_DFS
-    dfs_depth--;
-#endif
-}
-
-static tile_pos_t *rng_get_start_pos(level_t *level, int num_tiles)
-{
-    while (true) {
-        int start_idx = rng_get(num_tiles);
-        tile_t *start = level->enabled_tiles[start_idx];
-        tile_pos_t *start_pos = start->solved_pos;
-
-        if (start->start_for_path_type == PATH_TYPE_NONE) {
-            return start_pos;
-        }
-    }
-}
-
-static void generate_dfs_path(level_t *level, int num_tiles)
-{
-    tile_pos_t *start_pos = rng_get_start_pos(level, num_tiles);
-
-    set_all_hover(level, false);
-#ifdef DEBUG_DFS
-    dfs_depth = 0;
-#endif
-    dfs_tile_pos(start_pos);
-    set_all_hover(level, false);
 }
 
 static tile_pos_t *find_random_empty_tile(level_t *level, tile_t *not_this_tile, bool blank_only)
@@ -693,7 +435,7 @@ static void add_random_path(level_t *level)
     }
 }
 
-static void generate_connect_to_point(level_t *level, generate_features_t *features)
+static void generate_connect_to_point(level_t *level)
 {
     assert_not_null(level);
     while (level_has_empty_tiles(level)) {
@@ -712,7 +454,7 @@ static void generate_connect_to_point(level_t *level, generate_features_t *featu
 
     for (int i=0; i<MAX_PATH_DENSITY_ITER; i++) {
         float path_density = level_average_paths_per_tile(level);
-        if (path_density >= features->minimum_path_density) {
+        if (path_density >= options->create_level_minimum_path_density) {
             break;
         }
 
@@ -757,18 +499,19 @@ static void mark_tile_hidden(tile_t *tile)
     }
 }
 
-static void mark_symmetric_fixed_and_hidden(level_t *level, int num_tiles, generate_features_t *features)
+static void mark_symmetric_fixed_and_hidden(level_t *level, int num_tiles)
 {
     level_use_solved_tile_pos(level);
-    int num_fixed = features->fixed.min
-        + rng_get(features->fixed.max -
-                  features->fixed.min);
-    int num_hidden = features->hidden.min
-        + rng_get(features->hidden.max -
-                  features->hidden.min);
+
+    int num_fixed = options->create_level_fixed.min
+        + rng_get(options->create_level_fixed.max -
+                  options->create_level_fixed.min);
+    int num_hidden = options->create_level_hidden.min
+        + rng_get(options->create_level_hidden.max -
+                  options->create_level_hidden.min);
 
     hex_axial_t center_pos = level_get_center_tile_pos(level)->position;
-    bool reflect = features->symmetry_mode == SYMMETRY_MODE_REFLECT;
+    bool reflect = options->create_level_symmetry_mode == SYMMETRY_MODE_REFLECT;
 
     for (int i=0; i<num_fixed; i++) {
         int idx = rng_get(num_tiles);
@@ -800,14 +543,14 @@ static void mark_symmetric_fixed_and_hidden(level_t *level, int num_tiles, gener
     }
 }
 
-static void mark_random_fixed_and_hidden(level_t *level, int num_tiles, generate_features_t *features)
+static void mark_random_fixed_and_hidden(level_t *level, int num_tiles)
 {
-    int num_fixed = features->fixed.min
-        + rng_get(features->fixed.max-
-                  features->fixed.min);
-    int num_hidden = features->hidden.min
-        + rng_get(features->hidden.max -
-                  features->hidden.min);
+    int num_fixed = options->create_level_fixed.min
+        + rng_get(options->create_level_fixed.max -
+                  options->create_level_fixed.min);
+    int num_hidden = options->create_level_hidden.min
+        + rng_get(options->create_level_hidden.max -
+                  options->create_level_hidden.min);
 
     for (int i=0; i<num_fixed; i++) {
         int idx = rng_get(num_tiles);
@@ -820,23 +563,23 @@ static void mark_random_fixed_and_hidden(level_t *level, int num_tiles, generate
     }
 }
 
-static void mark_features(level_t *level, int num_tiles, generate_features_t *features)
+static void mark_features(level_t *level, int num_tiles)
 {
-    switch (features->symmetry_mode) {
+    switch (options->create_level_symmetry_mode) {
     case SYMMETRY_MODE_NONE:
-        mark_random_fixed_and_hidden(level, num_tiles, features);
+        mark_random_fixed_and_hidden(level, num_tiles);
         break;
     case SYMMETRY_MODE_REFLECT:
         /* fall through */
     case SYMMETRY_MODE_ROTATE:
-        mark_symmetric_fixed_and_hidden(level, num_tiles, features);
+        mark_symmetric_fixed_and_hidden(level, num_tiles);
         break;
     default:
         __builtin_unreachable();
     }
 }
 
-struct level *_generate_random_level(generate_features_t *given_features)
+struct level *generate_random_level(void)
 {
     assert(rng_color_count() > 0);
 
@@ -865,81 +608,8 @@ struct level *_generate_random_level(generate_features_t *given_features)
     level_set_radius(level, options->create_level_radius);
     int n = level_get_enabled_tiles(level);
 
-    /*** Difficulty ***/
-    switch (difficulty) {
-    case 0: /* easy */
-        options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_EASY_MIN_PATH;
-        options->create_level_max_path = OPTIONS_DEFAULT_CREATE_LEVEL_EASY_MAX_PATH;
-        options->create_level_expoints = OPTIONS_DEFAULT_CREATE_LEVEL_EASY_EXPOINTS;
-        break;
-
-    case 1: /* medium */
-        options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_MEDIUM_MIN_PATH;
-        options->create_level_max_path = OPTIONS_DEFAULT_CREATE_LEVEL_MEDIUM_MAX_PATH;
-        options->create_level_expoints = OPTIONS_DEFAULT_CREATE_LEVEL_MEDIUM_EXPOINTS;
-        break;
-
-    case 2: /* hard */
-        options->create_level_min_path = OPTIONS_DEFAULT_CREATE_LEVEL_HARD_MIN_PATH;
-        options->create_level_max_path = OPTIONS_DEFAULT_CREATE_LEVEL_HARD_MAX_PATH;
-        options->create_level_expoints = OPTIONS_DEFAULT_CREATE_LEVEL_HARD_EXPOINTS;
-       break;
-
-    default:
-        __builtin_unreachable();
-        assert(false && "should never reach here");
-    }
-
-    pint(fixed_hidden_assist);
-    generate_features_t *features = &(generate_feature_options[fixed_hidden_assist]);
-    print_generate_features(features);
-    if (given_features) {
-        features = given_features;
-    }
-    print_generate_features(features);
-
-#define override(feat_field, opt_field)           \
-    if (options->opt_field >= 0) {                \
-        features->feat_field = options->opt_field; \
-    }
-
-    override( fixed.min, create_level_min_fixed);
-    override( fixed.max, create_level_max_fixed);
-    override(hidden.min, create_level_min_hidden);
-    override(hidden.max, create_level_max_hidden);
-
-#undef override
-
-    switch (level->radius) {
-    case 1:
-        if (features->fixed.min  > 2) { features->fixed.min  = 2; }
-        if (features->fixed.max  > 2) { features->fixed.max  = 2; }
-        if (features->hidden.min > 2) { features->hidden.min = 2; }
-        if (features->hidden.max > 2) { features->hidden.max = 2; }
-       break;
-    }
-
-    /*** Feneration Style ***/
-    switch (gen_style) {
-    case 0:
-        generate_random_paths(level, n);
-        break;
-
-    case 1:
-        generate_dfs_path(level, n);
-        generate_random_paths(level, n);
-        break;
-
-    case 2:
-        generate_connect_to_point(level, features);
-        break;
-
-    default:
-        __builtin_unreachable();
-        assert(false && "should never reach here");
-    }
-
-    mark_features(level, n, features);
+    generate_connect_to_point(level);
+    mark_features(level, n);
 
     level_update_path_counts(level);
 
@@ -951,11 +621,6 @@ struct level *_generate_random_level(generate_features_t *given_features)
     level_backup_unsolved_tiles(level);
 
     return level;
-}
-
-struct level *generate_random_level(void)
-{
-    return _generate_random_level(NULL);
 }
 
 struct level *generate_random_title_level(void)
@@ -973,23 +638,13 @@ struct level *generate_random_title_level(void)
     uint64_t save_random_seed = gui_random_seed;
     rng_seed();
 
-    int save_difficulty = difficulty;
-    difficulty = NUM_DIFFICULTIES - 1;
+//        .fixed  = { .min = 0, .max = 0 },
+//        .hidden = { .min = 0, .max = 0 },
+//        .minimum_path_density = 2.5,
+//        .symmetry_mode = SYMMETRY_MODE_NONE
 
-    int save_gen_style = gen_style;
-    gen_style = 2;
+    level_t *level = generate_random_level();
 
-    generate_features_t features = {
-        .name = "Title",
-        .fixed  = { .min = 0, .max = 0 },
-        .hidden = { .min = 0, .max = 0 },
-        .minimum_path_density = 1.5,
-        .symmetry_mode = SYMMETRY_MODE_NONE
-    };
-    level_t *level = _generate_random_level(&features);
-
-    gen_style = save_gen_style;
-    difficulty = save_difficulty;
     gui_random_seed = save_random_seed;
     memcpy(gui_random_color, save_color, sizeof(save_color));
     options->create_level_radius = save_radius;
@@ -1029,213 +684,6 @@ void promote_preview_to_level(void)
     gui_random_level_preview = NULL;
 }
 
-static void rebuild_dropdown_box_string(void)
-{
-    SAFEFREE(gui_random_fixed_hidden_assist);
-    gui_random_fixed_hidden_assist = calloc(num_generate_feature_options, sizeof(char *));
-
-    for (int i=0; i<num_generate_feature_options; i++) {
-        gui_random_fixed_hidden_assist[i] = generate_feature_options[i].name;
-    }
-
-    const char *join_str = TextJoin(gui_random_fixed_hidden_assist, num_generate_feature_options, ";");
-    gui_random_fixed_hidden_assist_text = strdup(join_str);
-}
-
-const char *symmetry_mode_string(symmetry_mode_t mode)
-{
-    switch (mode) {
-    case SYMMETRY_MODE_NONE:
-        return "none";
-    case SYMMETRY_MODE_REFLECT:
-        return "reflect";
-    case SYMMETRY_MODE_ROTATE:
-        return "rotate";
-    default:
-        __builtin_unreachable();
-    }
-}
-
-symmetry_mode_t parse_symmetry_mode_string(const char *string)
-{
-    if (string) {
-#define mode(name, id)                                  \
-    if (0 == strncasecmp(string, name, strlen(name))) { \
-        return id;                                      \
-    }
-        mode("none",    SYMMETRY_MODE_NONE);
-        mode("reflect", SYMMETRY_MODE_REFLECT);
-        mode("rotate",  SYMMETRY_MODE_ROTATE);
-#undef mode
-
-        errmsg("Invalid symmetry_mode: \"%s\"", string);
-    }
-
-    return SYMMETRY_MODE_NONE;
-}
-
-cJSON *generate_features_to_json(generate_features_t features)
-{
-    cJSON *json = cJSON_CreateObject();
-
-    if (cJSON_AddStringToObject(json, "name", features.name) == NULL) {
-        goto features_json_error;
-    }
-
-    if (cJSON_AddStringToObject(json, "symmetry_mode", symmetry_mode_string(features.symmetry_mode)) == NULL) {
-        goto features_json_error;
-    }
-
-    cJSON *fixed_json = int_range_to_json(&features.fixed);
-    if (fixed_json) {
-        if (!cJSON_AddItemToObject(json, "fixed", fixed_json)) {
-            goto features_json_error;
-        }
-    } else {
-        goto features_json_error;
-    }
-
-    cJSON *hidden_json = int_range_to_json(&features.hidden);
-    if (hidden_json) {
-        if (!cJSON_AddItemToObject(json, "hidden", hidden_json)) {
-            goto features_json_error;
-        }
-    } else {
-        goto features_json_error;
-    }
-
-    return json;
-
-  features_json_error:
-    cJSON_Delete(json);
-    return NULL;
-
-}
-
-bool generate_features_from_json(cJSON *json, generate_features_t *features)
-{
-    if (!cJSON_IsObject(json)) {
-        errmsg("JSON['generate_feature_options'][n] should be an Object");
-        return false;
-    }
-
-    cJSON *name_json = cJSON_GetObjectItem(json, "name");
-    if (name_json) {
-        if (!cJSON_IsString(name_json)) {
-            errmsg("Error parsing program state: JSON['generate_feature_options']['name'] is not a String");
-            return false;
-        }
-
-        char *name = cJSON_GetStringValue(name_json);
-        if (name) {
-            features->name = strdup(name);
-        } else {
-            errmsg("Error parsing program state: JSON['generate_feature_options']['name'] is NULL");
-            return false;
-        }
-    } else {
-        warnmsg("Program state JSON['generate_feature_options'] is missing \"name\"");
-    }
-
-    cJSON *mode_json = cJSON_GetObjectItem(json, "symmetry_mode");
-    if (mode_json) {
-        if (!cJSON_IsString(mode_json)) {
-            errmsg("Error parsing program state: JSON['generate_feature_options']['symmetry_mode'] is not a String");
-            return false;
-        }
-
-        char *mode = cJSON_GetStringValue(mode_json);
-        if (mode) {
-            features->symmetry_mode = parse_symmetry_mode_string(mode);
-        } else {
-            errmsg("Error parsing program state: JSON['generate_feature_options']['mode'] is NULL");
-            return false;
-        }
-    } else {
-        warnmsg("Program state JSON['generate_feature_options'] is missing \"symmetry_mode\"");
-    }
-
-    cJSON *fixed_json = cJSON_GetObjectItem(json, "fixed");
-    if (fixed_json) {
-        if (!int_range_from_json(fixed_json, &features->fixed)) {
-            errmsg("Error parsing program state: JSON['generate_feature_options']['fixed']");
-            return false;
-        }
-    } else {
-        warnmsg("Program state JSON['generate_feature_options'] is missing \"fixed\"");
-    }
-
-    cJSON *hidden_json = cJSON_GetObjectItem(json, "hidden");
-    if (hidden_json) {
-        if (!int_range_from_json(hidden_json, &features->hidden)) {
-            errmsg("Error parsing program state: JSON['generate_feature_options']['hidden']");            return false;
-        }
-    } else {
-        warnmsg("Program state JSON['generate_feature_options'] is missing \"hidden\"");
-    }
-
-    return true;
-}
-
-cJSON *generate_feature_options_to_json(void)
-{
-    cJSON *json = cJSON_CreateArray();
-
-    for (int i=0; i<num_generate_feature_options; i++) {
-        generate_features_t *opt = &(generate_feature_options[i]);
-        cJSON *json_opt = generate_features_to_json(*opt);
-        if (json_opt) {
-            cJSON_AddItemToArray(json, json_opt);
-        } else {
-            goto feature_opts_json_error;
-        }
-    }
-
-    return json;
-
-  feature_opts_json_error:
-    cJSON_Delete(json);
-    return NULL;
-}
-
-bool generate_feature_options_from_json(cJSON *json)
-{
-    if (!cJSON_IsArray(json)) {
-        errmsg("JSON['generate_feature_options'] should be an Array");
-        return false;
-    }
-
-    int size = cJSON_GetArraySize(json);
-
-    generate_features_t *loaded = calloc(size, sizeof(generate_features_t));
-
-    for (int i=0; i<size; i++) {
-        cJSON *item_json = cJSON_GetArrayItem(json, i);
-        generate_features_t *features = &(loaded[i]);
-        if (!generate_features_from_json(item_json, features)) {
-            errmsg("Could not parse JSON['generate_feature_options'][%d]", i);
-            return false;
-        }
-    }
-
-    if (generate_feature_options_loaded) {
-        for (int i=0; i<num_generate_feature_options; i++) {
-            generate_features_t *features = &(generate_feature_options_loaded[i]);
-            SAFEFREE(features->name);
-        }
-
-        FREE(generate_feature_options_loaded);
-    }
-
-    generate_feature_options_loaded = loaded;
-    generate_feature_options = generate_feature_options_loaded;
-    num_generate_feature_options = size;
-
-    rebuild_dropdown_box_string();
-
-    return true;
-}
-
 void init_gui_random_minimal(void)
 {
     gui_random_level = NULL;
@@ -1254,20 +702,8 @@ void init_gui_random(void)
     seed_bg_color = ColorBrightness(tile_bg_color, -0.25);
 
     SAFEFREE(gui_random_enter_seed_text);
-    SAFEFREE(gui_random_gen_style_text);
-    SAFEFREE(gui_random_difficulty_text);
-    SAFEFREE(gui_random_fixed_hidden_assist_text);
 
-    //gui_random_enter_seed_text = strdup(GuiIconText(ICON_PENCIL, gui_random_enter_seed_text_str));
     gui_random_enter_seed_text = strdup(GuiIconText(ICON_PENCIL, NULL));
-
-    const char *join_str = TextJoin(gui_random_gen_styles,   NUM_GEN_STYLES,   ";");
-    gui_random_gen_style_text  = strdup(join_str);
-
-    join_str = TextJoin(gui_random_difficulties, NUM_DIFFICULTIES, ";");
-    gui_random_difficulty_text = strdup(join_str);
-
-    rebuild_dropdown_box_string();
 
     memcpy(gui_random_save_button_text,
            GuiIconText(ICON_FILE_SAVE_CLASSIC, gui_random_save_button_text_str),
@@ -1282,11 +718,7 @@ void cleanup_gui_random(void)
     }
 
     SAFEFREE(gui_random_seed_str);
-
     SAFEFREE(gui_random_enter_seed_text);
-    SAFEFREE(gui_random_gen_style_text);
-    SAFEFREE(gui_random_difficulty_text);
-    SAFEFREE(gui_random_fixed_hidden_assist_text);
 }
 
 void resize_gui_random(void)
@@ -1362,51 +794,6 @@ void resize_gui_random(void)
     gui_random_area_rect.y      += gui_random_color_label_rect.height + RAYGUI_ICON_SIZE;
     gui_random_area_rect.height -= gui_random_color_label_rect.height + RAYGUI_ICON_SIZE;
 
-    Vector2 gui_random_gen_style_label_text_size = measure_gui_text(gui_random_gen_style_label_text);
-
-    gui_random_gen_style_label_rect.x      = gui_random_area_rect.x;
-    gui_random_gen_style_label_rect.y      = gui_random_area_rect.y;
-    gui_random_gen_style_label_rect.width  = gui_random_gen_style_label_text_size.x + (2 * BUTTON_MARGIN);
-    gui_random_gen_style_label_rect.height = TOOL_BUTTON_HEIGHT;
-
-    gui_random_gen_style_rect.x      = gui_random_gen_style_label_rect.x + gui_random_gen_style_label_rect.width + RAYGUI_ICON_SIZE;
-    gui_random_gen_style_rect.y      = gui_random_gen_style_label_rect.y;
-    gui_random_gen_style_rect.width  = gui_random_area_rect.width - (gui_random_gen_style_rect.x - gui_random_gen_style_label_rect.x);
-    gui_random_gen_style_rect.height = gui_random_gen_style_label_rect.height;
-
-    gui_random_area_rect.y      += gui_random_gen_style_rect.height + RAYGUI_ICON_SIZE;
-    gui_random_area_rect.height -= gui_random_gen_style_rect.height + RAYGUI_ICON_SIZE;
-
-    Vector2 gui_random_difficulty_label_text_size = measure_gui_text(gui_random_difficulty_label_text);
-
-    gui_random_difficulty_label_rect.x      = gui_random_area_rect.x;
-    gui_random_difficulty_label_rect.y      = gui_random_area_rect.y;
-    gui_random_difficulty_label_rect.width  = gui_random_difficulty_label_text_size.x + (2 * BUTTON_MARGIN);
-    gui_random_difficulty_label_rect.height = TOOL_BUTTON_HEIGHT;
-
-    gui_random_difficulty_rect.x      = gui_random_difficulty_label_rect.x + gui_random_difficulty_label_rect.width + RAYGUI_ICON_SIZE;
-    gui_random_difficulty_rect.y      = gui_random_difficulty_label_rect.y;
-    gui_random_difficulty_rect.width  = gui_random_area_rect.width - (gui_random_difficulty_rect.x - gui_random_difficulty_label_rect.x);
-    gui_random_difficulty_rect.height = gui_random_difficulty_label_rect.height;
-\
-    gui_random_area_rect.y      += gui_random_difficulty_rect.height + RAYGUI_ICON_SIZE;
-    gui_random_area_rect.height -= gui_random_difficulty_rect.height + RAYGUI_ICON_SIZE;
-
-    Vector2 gui_random_fixed_hidden_assist_label_text_size = measure_gui_text(gui_random_fixed_hidden_assist_label_text);
-
-    gui_random_fixed_hidden_assist_label_rect.x      = gui_random_area_rect.x;
-    gui_random_fixed_hidden_assist_label_rect.y      = gui_random_area_rect.y;
-    gui_random_fixed_hidden_assist_label_rect.width  = gui_random_fixed_hidden_assist_label_text_size.x + (2 * BUTTON_MARGIN);
-    gui_random_fixed_hidden_assist_label_rect.height = TOOL_BUTTON_HEIGHT;
-
-    gui_random_fixed_hidden_assist_rect.x      = gui_random_fixed_hidden_assist_label_rect.x + gui_random_fixed_hidden_assist_label_rect.width + RAYGUI_ICON_SIZE;
-    gui_random_fixed_hidden_assist_rect.y      = gui_random_fixed_hidden_assist_label_rect.y;
-    gui_random_fixed_hidden_assist_rect.width  = gui_random_area_rect.width - (gui_random_fixed_hidden_assist_rect.x - gui_random_fixed_hidden_assist_label_rect.x);
-    gui_random_fixed_hidden_assist_rect.height = gui_random_fixed_hidden_assist_label_rect.height;
-
-    gui_random_area_rect.y      += gui_random_fixed_hidden_assist_rect.height + RAYGUI_ICON_SIZE;
-    gui_random_area_rect.height -= gui_random_fixed_hidden_assist_rect.height + RAYGUI_ICON_SIZE;
-
     Vector2 gui_random_seed_text_size = measure_gui_text(gui_random_seed_text);
 
     gui_random_seed_rect.x      = gui_random_area_rect.x;
@@ -1479,10 +866,7 @@ static void draw_gui_random_colors(void)
     cross_color = ColorAlpha(cross_color, 0.7);
 
     for (path_type_t type = (PATH_TYPE_NONE + 1); type < PATH_TYPE_COUNT; type++) {
-        bool hover = false;
-        if (!any_drop_down_active) {
-            hover = CheckCollisionPointRec(mouse_positionf, rect);
-        }
+        bool hover = CheckCollisionPointRec(mouse_positionf, rect);
 
         if (gui_random_color[type]) {
             /* button for color ON */
@@ -1611,10 +995,7 @@ bool ask_for_random_seed(void)
 
 void draw_preview(void)
 {
-    bool hover = false;;
-    if (!any_drop_down_active) {
-        hover = CheckCollisionPointRec(mouse_positionf, gui_random_preview_rect);
-    }
+    bool hover = CheckCollisionPointRec(mouse_positionf, gui_random_preview_rect);
 
     DrawRectangleRec(gui_random_preview_rect, BLACK);
     level_preview(gui_random_level, gui_random_preview_rect);
@@ -1684,10 +1065,6 @@ void draw_gui_random(void)
         regen_level();
     }
 
-    if (any_drop_down_active) {
-        GuiLock();
-    }
-
     GuiPanel(gui_random_panel_rect, gui_random_panel_text);
 
     draw_tile_radius_gui();
@@ -1753,44 +1130,6 @@ void draw_gui_random(void)
     if (gui_random_level) {
         draw_preview();
     }
-
-    GuiUnlock();
-
-    if (gui_random_fixed_hidden_assist_edit_mode) {
-        GuiLock();
-    }
-
-    GuiLabel(gui_random_fixed_hidden_assist_label_rect, gui_random_fixed_hidden_assist_label_text);
-    if (GuiDropdownBox(gui_random_fixed_hidden_assist_rect, gui_random_fixed_hidden_assist_text, &fixed_hidden_assist, gui_random_fixed_hidden_assist_edit_mode)) {
-        gui_random_fixed_hidden_assist_edit_mode = !gui_random_fixed_hidden_assist_edit_mode;
-        regen_level();
-    }
-
-    GuiUnlock();
-
-    if (gui_random_gen_style_edit_mode) {
-        GuiLock();
-    }
-
-    GuiLabel(gui_random_difficulty_label_rect, gui_random_difficulty_label_text);
-    if (GuiDropdownBox(gui_random_difficulty_rect, gui_random_difficulty_text, &difficulty, gui_random_difficulty_edit_mode)) {
-        gui_random_difficulty_edit_mode = !gui_random_difficulty_edit_mode;
-        regen_level();
-    }
-
-    GuiUnlock();
-
-    if (gui_random_gen_style_edit_mode) {
-        GuiLock();
-    }
-
-    GuiLabel(gui_random_gen_style_label_rect, gui_random_gen_style_label_text);
-    if (GuiDropdownBox(gui_random_gen_style_rect, gui_random_gen_style_text, &gen_style, gui_random_gen_style_edit_mode)) {
-        gui_random_gen_style_edit_mode = !gui_random_gen_style_edit_mode;
-        regen_level();
-    }
-
-    any_drop_down_active = gui_random_difficulty_edit_mode || gui_random_gen_style_edit_mode || gui_random_fixed_hidden_assist_edit_mode;
 }
 
 void play_gui_random_level(void)
@@ -1819,3 +1158,221 @@ void save_gui_random_level(void)
     }
 }
 #endif
+
+const char *symmetry_mode_string(symmetry_mode_t mode)
+{
+    switch (mode) {
+    case SYMMETRY_MODE_NONE:
+        return "none";
+    case SYMMETRY_MODE_REFLECT:
+        return "reflect";
+    case SYMMETRY_MODE_ROTATE:
+        return "rotate";
+    default:
+        __builtin_unreachable();
+    }
+}
+
+symmetry_mode_t parse_symmetry_mode_string(const char *string)
+{
+    if (string) {
+#define mode(name, id)                                  \
+    if (0 == strncasecmp(string, name, strlen(name))) { \
+        return id;                                      \
+    }
+        mode("none",    SYMMETRY_MODE_NONE);
+        mode("reflect", SYMMETRY_MODE_REFLECT);
+        mode("rotate",  SYMMETRY_MODE_ROTATE);
+#undef mode
+
+        errmsg("Invalid symmetry_mode: \"%s\"", string);
+    }
+
+    return SYMMETRY_MODE_NONE;
+}
+
+bool create_level_from_json(cJSON *json)
+{
+    if (!cJSON_IsObject(json)) {
+        errmsg("JSON['create_level'] should be an Object");
+        return false;
+    }
+
+    cJSON *radius_json = cJSON_GetObjectItem(json, "radius");
+    if (radius_json) {
+        if (cJSON_IsNumber(radius_json)) {
+            options->create_level_radius = radius_json->valueint;
+        } else {
+            errmsg("JSON['create_level']['radius'] not a Number");
+            return false;
+        }
+        CLAMPVAR(options->create_level_radius,
+                 LEVEL_MIN_RADIUS,
+                 LEVEL_MAX_RADIUS);
+    } else {
+        warnmsg("JSON['create_level']['radius'] is missing");
+    }
+
+    cJSON *density_json = cJSON_GetObjectItem(json, "minimum_path_density");
+    if (density_json) {
+        if (cJSON_IsNumber(density_json)) {
+            options->create_level_minimum_path_density = density_json->valuedouble;
+        } else {
+            errmsg("JSON['create_level']['minimum_path_density'] not a Number");
+            return false;
+        }
+        CLAMPVAR(options->create_level_minimum_path_density,
+                 LEVEL_MIN_MINIMUM_PATH_DENSITY,
+                 LEVEL_MAX_MINIMUM_PATH_DENSITY);
+    } else {
+        warnmsg("JSON['create_level']['minimum_path_density'] is missing");
+    }
+
+    cJSON *symmetry_mode_json = cJSON_GetObjectItem(json, "symmetry_mode");
+    if (symmetry_mode_json) {
+        if (cJSON_IsString(symmetry_mode_json)) {
+            options->create_level_symmetry_mode = parse_symmetry_mode_string(cJSON_GetStringValue(symmetry_mode_json));
+        } else {
+            errmsg("JSON['create_level']['symmetry_mode'] not a Number");
+            return false;
+        }
+    } else {
+        warnmsg("JSON['create_level']['symmetry_mode'] is missing");
+    }
+
+    cJSON *fixed_json = cJSON_GetObjectItem(json, "fixed");
+    if (fixed_json) {
+        if (!int_range_from_json(fixed_json, &options->create_level_fixed)) {
+            errmsg("Error parsing program state: JSON['create_level']['fixed']");
+            return false;
+        }
+        int_range_clamp(&options->create_level_fixed,
+                        LEVEL_MIN_FIXED,
+                        LEVEL_MAX_FIXED);
+    } else {
+        warnmsg("Program state JSON['create_level'] is missing \"fixed\"");
+    }
+
+    cJSON *hidden_json = cJSON_GetObjectItem(json, "hidden");
+    if (hidden_json) {
+        if (!int_range_from_json(hidden_json, &options->create_level_hidden)) {
+            errmsg("Error parsing program state: JSON['create_level']['hidden']");
+            return false;
+        }
+        int_range_clamp(&options->create_level_hidden,
+                        LEVEL_MIN_HIDDEN,
+                        LEVEL_MAX_HIDDEN);
+    } else {
+        warnmsg("Program state JSON['create_level'] is missing \"hidden\"");
+    }
+
+    cJSON *path_json = cJSON_GetObjectItem(json, "path_iter");
+    if (path_json) {
+        if (!int_range_from_json(path_json, &options->create_level_path)) {
+            errmsg("Error parsing program state: JSON['create_level']['path_iter]");
+            return false;
+        }
+        int_range_clamp(&options->create_level_path,
+                        LEVEL_MIN_PATH_ITER,
+                        LEVEL_MAX_PATH_ITER);
+    } else {
+        warnmsg("Program state JSON['create_level'] is missing \"path_iter\"");
+    }
+
+    cJSON *color_json = cJSON_GetObjectItem(json, "color_enabled");
+    if (color_json) {
+        for (path_type_t type = (PATH_TYPE_NONE + 1); type < PATH_TYPE_COUNT; type++) {
+            const char *color_name = TextFormat("path_%d", type);
+
+            cJSON *color_type_json = cJSON_GetObjectItem(color_json, color_name);
+            if (color_type_json) {
+                if (cJSON_IsBool(color_type_json)) {
+                    if (cJSON_IsTrue(color_type_json)) {
+                        gui_random_color[type] = true;
+                    } else {
+                        gui_random_color[type] = false;
+                    }
+                } else {
+                    errmsg("Error parsing program state: JSON['create_level']['color_enabled']['%s']", color_name);
+                    return false;
+                }
+            } else {
+                warnmsg("Program state JSON['create_level']['color_enabled'] is missing \"%s\"", color_name);
+            }
+        }
+
+        update_rng_color_count();
+    } else {
+        warnmsg("Program state JSON['create_level'] is missing \"color_enabled\"");
+    }
+
+    return true;
+}
+
+cJSON *create_level_to_json(void)
+{
+    cJSON *json = cJSON_CreateObject();
+
+    if (cJSON_AddNumberToObject(json, "radius", options->create_level_radius) == NULL) {
+        goto create_level_to_json_error;
+    }
+
+    if (cJSON_AddNumberToObject(json, "minimum_path_density", options->create_level_minimum_path_density) == NULL) {
+        goto create_level_to_json_error;
+    }
+
+    if (cJSON_AddStringToObject(json, "symmetry_mode", symmetry_mode_string(options->create_level_symmetry_mode)) == NULL) {
+        goto create_level_to_json_error;
+    }
+
+    cJSON *fixed_json = int_range_to_json(&options->create_level_fixed);
+    if (fixed_json) {
+        if (!cJSON_AddItemToObject(json, "fixed", fixed_json)) {
+            goto create_level_to_json_error;
+        }
+    } else {
+        goto create_level_to_json_error;
+    }
+
+    cJSON *hidden_json = int_range_to_json(&options->create_level_hidden);
+    if (hidden_json) {
+        if (!cJSON_AddItemToObject(json, "hidden", hidden_json)) {
+            goto create_level_to_json_error;
+        }
+    } else {
+        goto create_level_to_json_error;
+    }
+
+    cJSON *path_json = int_range_to_json(&options->create_level_path);
+    if (path_json) {
+        if (!cJSON_AddItemToObject(json, "path_iter", path_json)) {
+            goto create_level_to_json_error;
+        }
+    } else {
+        goto create_level_to_json_error;
+    }
+
+    cJSON *color_json = cJSON_AddObjectToObject(json, "color_enabled");
+    if (color_json) {
+        for (path_type_t type = (PATH_TYPE_NONE + 1); type < PATH_TYPE_COUNT; type++) {
+            const char *color_name = TextFormat("path_%d", type);
+            if (gui_random_color[type]) {
+                if (cJSON_AddTrueToObject(color_json, color_name) == NULL) {
+                    goto create_level_to_json_error;
+                }
+            } else {
+                if (cJSON_AddFalseToObject(color_json, color_name) == NULL) {
+                    goto create_level_to_json_error;
+                }
+            }
+        }
+    } else {
+        goto create_level_to_json_error;
+    }
+
+    return json;
+
+  create_level_to_json_error:
+    cJSON_Delete(json);
+    return NULL;
+}

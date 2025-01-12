@@ -3,6 +3,7 @@ hexpuzzle.html
 hexpuzzle.js
 hexpuzzle.wasm
 a.wasm
+textures/experiment
 stuff/
 test*.hexlevel
 test*.hexlevelpack

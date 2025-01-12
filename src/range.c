@@ -86,3 +86,15 @@ bool int_range_from_json(cJSON *json, int_range_t *ir)
 
     return true;
 }
+
+void int_range_clamp(int_range_t *ir, int min, int max)
+{
+    if (ir->min > ir->max) {
+        int tmp = ir->min;
+        ir->min = ir->max;
+        ir->max = tmp;
+    }
+
+    CLAMPVAR(ir->min, min, max);
+    CLAMPVAR(ir->max, min, max);
+}
