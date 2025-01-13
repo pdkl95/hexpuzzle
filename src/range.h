@@ -35,5 +35,45 @@ cJSON *int_range_to_json(int_range_t *ir);
 bool int_range_from_json(cJSON *json, int_range_t *ir);
 void int_range_clamp(int_range_t *ir, int min, int max);
 
+struct gui_int_range;
+
+struct gui_int_range_spinner {
+    char *label;
+    Vector2 label_size;
+    int *value;
+    Rectangle rect;
+    Rectangle bg_rect;
+    bool edit;
+    struct gui_int_range *parent;
+};
+typedef struct gui_int_range_spinner gui_int_range_spinner_t;
+
+struct gui_int_range {
+    int_range_t *range;
+
+    int min;
+    int max;
+
+    Rectangle rect;
+
+    char *label_text;
+    Rectangle label_rect;
+
+    gui_int_range_spinner_t min_spinner;
+    gui_int_range_spinner_t max_spinner;
+
+    char add_button_text[6];
+    char sub_button_text[6];
+    char first_button_text[6];
+    char last_button_text[6];
+};
+typedef struct gui_int_range gui_int_range_t;
+
+gui_int_range_t *create_gui_int_range(int_range_t *range, const char *label, int min, int max);
+void resize_gui_int_range(gui_int_range_t *gui, Rectangle *area);
+void destroy_gui_int_range(gui_int_range_t *gui);
+void draw_gui_int_range(gui_int_range_t *gui);
+void gui_int_range_set_label_width(gui_int_range_t *gui, float width);
+
 #endif /*RANGE_H*/
 

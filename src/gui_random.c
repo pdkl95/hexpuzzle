@@ -60,6 +60,11 @@ char gui_random_radius_label_text[] = "Tile Radius";
 char gui_random_radius_left_button_text[6];
 char gui_random_radius_right_button_text[6];
 char gui_random_color_label_text[] = "Colors";
+char gui_random_fixed_label_text[] = "Fixed Tiles";
+char gui_random_hidden_label_text[] = "Hidden Tiles";
+char gui_random_path_iter_label_text[] = "Gen. Cycles";
+char gui_random_minimum_tile_density_label_text[] = "Fixed Tiles";
+char gui_random_symmetry_mode_label_text[] = "Fixed Tiles";
 char gui_random_seed_text[] = "RNG Seed";
 char gui_random_rng_seed_text[] = "Randomize";
 char gui_random_enter_seed_text_str[] = "Enter";
@@ -71,6 +76,10 @@ char gui_random_save_button_text[GUI_RANDOM_SAVE_BUTTON_TEXT_LENGTH];
 
 bool gui_random_color[PATH_TYPE_COUNT];
 int gui_random_color_count = PATH_TYPE_COUNT - 1;
+
+gui_int_range_t *gui_range_fixed     = NULL;
+gui_int_range_t *gui_range_hidden    = NULL;
+gui_int_range_t *gui_range_path_iter = NULL;
 
 bool played_level = false;
 level_t *gui_random_level = NULL;
@@ -191,6 +200,24 @@ static void toggle_color(path_type_t type)
         update_rng_color_count();
     }
 }
+
+#if 0
+static void enable_color(path_type_t type)
+{
+    gui_random_color[type] = true;
+    update_rng_color_count();
+}
+
+static void disable_color(path_type_t type)
+{
+    gui_random_color[type] = false;
+    if (update_rng_color_count() < 1) {
+        // cannot allow zero colors
+        gui_random_color[type] = true;;
+        update_rng_color_count();
+    }
+}
+#endif
 
 static path_type_t rng_color(void)
 {
@@ -608,6 +635,16 @@ struct level *generate_random_level(void)
     level_set_radius(level, options->create_level_radius);
     int n = level_get_enabled_tiles(level);
 
+#if 0
+    int num_colors = update_rng_color_count();
+    printf(">>> colors enabled: %d\n", num_colors);
+    for (path_type_t type=0; type<PATH_TYPE_COUNT; type++) {
+        printf("\t- path_%d = %s\n", type, gui_random_color[type] ? "true" : "false");
+    }
+#else
+    update_rng_color_count();
+#endif
+
     generate_connect_to_point(level);
     mark_features(level, n);
 
@@ -630,18 +667,13 @@ struct level *generate_random_title_level(void)
 
     bool save_color[PATH_TYPE_COUNT];
     memcpy(save_color, gui_random_color, sizeof(save_color));
-    for (int i=0; i<PATH_TYPE_COUNT; i++) {
+    for (path_type_t i=1; i<PATH_TYPE_COUNT; i++) {
         gui_random_color[i] = true;
     }
     update_rng_color_count();
 
     uint64_t save_random_seed = gui_random_seed;
     rng_seed();
-
-//        .fixed  = { .min = 0, .max = 0 },
-//        .hidden = { .min = 0, .max = 0 },
-//        .minimum_path_density = 2.5,
-//        .symmetry_mode = SYMMETRY_MODE_NONE
 
     level_t *level = generate_random_level();
 
@@ -708,6 +740,21 @@ void init_gui_random(void)
     memcpy(gui_random_save_button_text,
            GuiIconText(ICON_FILE_SAVE_CLASSIC, gui_random_save_button_text_str),
            GUI_RANDOM_SAVE_BUTTON_TEXT_LENGTH);
+
+    gui_range_fixed     = create_gui_int_range(&options->create_level_fixed,
+                                               gui_random_fixed_label_text,
+                                               LEVEL_MIN_FIXED,
+                                               LEVEL_MAX_FIXED);
+
+    gui_range_hidden    = create_gui_int_range(&options->create_level_hidden,
+                                               gui_random_hidden_label_text,
+                                               LEVEL_MIN_HIDDEN,
+                                               LEVEL_MAX_HIDDEN);
+
+    gui_range_path_iter = create_gui_int_range(&options->create_level_path,
+                                               gui_random_path_iter_label_text,
+                                               LEVEL_MIN_PATH_ITER,
+                                               LEVEL_MAX_PATH_ITER);
 }
 
 void cleanup_gui_random(void)
@@ -715,6 +762,21 @@ void cleanup_gui_random(void)
     if (gui_random_level) {
         destroy_level(gui_random_level);
         gui_random_level = NULL;
+    }
+
+    if (gui_range_path_iter) {
+        destroy_gui_int_range(gui_range_path_iter);
+        gui_range_path_iter = NULL;
+    }
+
+    if (gui_range_hidden) {
+        destroy_gui_int_range(gui_range_hidden);
+        gui_range_hidden = NULL;
+    }
+
+    if (gui_range_fixed) {
+        destroy_gui_int_range(gui_range_fixed);
+        gui_range_fixed = NULL;
     }
 
     SAFEFREE(gui_random_seed_str);
@@ -793,6 +855,18 @@ void resize_gui_random(void)
 
     gui_random_area_rect.y      += gui_random_color_label_rect.height + RAYGUI_ICON_SIZE;
     gui_random_area_rect.height -= gui_random_color_label_rect.height + RAYGUI_ICON_SIZE;
+
+    resize_gui_int_range(gui_range_fixed,     &gui_random_area_rect);
+    resize_gui_int_range(gui_range_hidden,    &gui_random_area_rect);
+    resize_gui_int_range(gui_range_path_iter, &gui_random_area_rect);
+
+    float range_opt_label_width = gui_range_fixed->label_rect.width;
+    range_opt_label_width = MAX(range_opt_label_width, gui_range_hidden->label_rect.width);
+    range_opt_label_width = MAX(range_opt_label_width, gui_range_path_iter->label_rect.width);
+
+    gui_int_range_set_label_width(gui_range_fixed,     range_opt_label_width);
+    gui_int_range_set_label_width(gui_range_hidden,    range_opt_label_width);
+    gui_int_range_set_label_width(gui_range_path_iter, range_opt_label_width);
 
     Vector2 gui_random_seed_text_size = measure_gui_text(gui_random_seed_text);
 
@@ -1094,6 +1168,10 @@ void draw_gui_random(void)
     for (path_type_t type = (PATH_TYPE_NONE + 1); type < PATH_TYPE_COUNT; type++) {
         colors_ok = colors_ok || gui_random_color[type];
     }
+
+    draw_gui_int_range(gui_range_fixed);
+    draw_gui_int_range(gui_range_hidden);
+    draw_gui_int_range(gui_range_path_iter);
 
     GuiLabel(gui_random_seed_rect, gui_random_seed_text);
 
