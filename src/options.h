@@ -48,7 +48,6 @@
 #define OPTIONS_DEFAULT_CREATE_LEVEL_RADIUS 2
 #define OPTIONS_DEFAULT_CREATE_LEVEL_FIXED  ((int_range_t){ .min = 2, .max = 4 })
 #define OPTIONS_DEFAULT_CREATE_LEVEL_HIDDEN ((int_range_t){ .min = 1, .max = 4 })
-#define OPTIONS_DEFAULT_CREATE_LEVEL_PATH   ((int_range_t){ .min = 2, .max = 4 })
 #define OPTIONS_DEFAULT_CREATE_LEVEL_EXPOINTS 3
 #define OPTIONS_DFFAULT_CREATE_LEVEL_SYMMETRY_MODE SYMMETRY_MODE_REFLECT
 #define OPTIONS_DFFAULT_CREATE_LEVEL_MINIMUM_PATH_DENSITY 2.5
@@ -115,7 +114,6 @@ struct options {
     long create_level_radius;
     int_range_t create_level_fixed;
     int_range_t create_level_hidden;
-    int_range_t create_level_path;
     long create_level_expoints;
     symmetry_mode_t create_level_symmetry_mode;
     float create_level_minimum_path_density;

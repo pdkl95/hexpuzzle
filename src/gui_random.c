@@ -62,7 +62,6 @@ char gui_random_radius_right_button_text[6];
 char gui_random_color_label_text[] = "Colors";
 char gui_random_fixed_label_text[] = "Fixed Tiles";
 char gui_random_hidden_label_text[] = "Hidden Tiles";
-char gui_random_path_iter_label_text[] = "Gen. Cycles";
 char gui_random_minimum_tile_density_label_text[] = "Fixed Tiles";
 char gui_random_symmetry_mode_label_text[] = "Fixed Tiles";
 char gui_random_seed_text[] = "RNG Seed";
@@ -77,9 +76,8 @@ char gui_random_save_button_text[GUI_RANDOM_SAVE_BUTTON_TEXT_LENGTH];
 bool gui_random_color[PATH_TYPE_COUNT];
 int gui_random_color_count = PATH_TYPE_COUNT - 1;
 
-gui_int_range_t *gui_range_fixed     = NULL;
-gui_int_range_t *gui_range_hidden    = NULL;
-gui_int_range_t *gui_range_path_iter = NULL;
+gui_int_range_t *gui_range_fixed  = NULL;
+gui_int_range_t *gui_range_hidden = NULL;
 
 bool played_level = false;
 level_t *gui_random_level = NULL;
@@ -750,11 +748,6 @@ void init_gui_random(void)
                                                gui_random_hidden_label_text,
                                                LEVEL_MIN_HIDDEN,
                                                LEVEL_MAX_HIDDEN);
-
-    gui_range_path_iter = create_gui_int_range(&options->create_level_path,
-                                               gui_random_path_iter_label_text,
-                                               LEVEL_MIN_PATH_ITER,
-                                               LEVEL_MAX_PATH_ITER);
 }
 
 void cleanup_gui_random(void)
@@ -762,11 +755,6 @@ void cleanup_gui_random(void)
     if (gui_random_level) {
         destroy_level(gui_random_level);
         gui_random_level = NULL;
-    }
-
-    if (gui_range_path_iter) {
-        destroy_gui_int_range(gui_range_path_iter);
-        gui_range_path_iter = NULL;
     }
 
     if (gui_range_hidden) {
@@ -837,7 +825,7 @@ void resize_gui_random(void)
     radius_display_text_shadow_location.y += 1.0f;
 
     Vector2 gui_random_save_button_text_size = measure_gui_text(gui_random_save_button_text);
-    fflush(stdout);
+
     gui_random_save_button_rect.x      = gui_random_area_rect.x + gui_random_area_rect.width - gui_random_save_button_text_size.x - PANEL_INNER_MARGIN;
     gui_random_save_button_rect.y      = gui_random_radius_right_button_rect.y;
     gui_random_save_button_rect.width  = gui_random_save_button_text_size.x;
@@ -856,17 +844,14 @@ void resize_gui_random(void)
     gui_random_area_rect.y      += gui_random_color_label_rect.height + RAYGUI_ICON_SIZE;
     gui_random_area_rect.height -= gui_random_color_label_rect.height + RAYGUI_ICON_SIZE;
 
-    resize_gui_int_range(gui_range_fixed,     &gui_random_area_rect);
-    resize_gui_int_range(gui_range_hidden,    &gui_random_area_rect);
-    resize_gui_int_range(gui_range_path_iter, &gui_random_area_rect);
+    resize_gui_int_range(gui_range_fixed,  &gui_random_area_rect);
+    resize_gui_int_range(gui_range_hidden, &gui_random_area_rect);
 
-    float range_opt_label_width = gui_range_fixed->label_rect.width;
-    range_opt_label_width = MAX(range_opt_label_width, gui_range_hidden->label_rect.width);
-    range_opt_label_width = MAX(range_opt_label_width, gui_range_path_iter->label_rect.width);
+    float range_opt_label_width = MAX(gui_range_fixed->label_rect.width,
+                                      gui_range_hidden->label_rect.width);
 
-    gui_int_range_set_label_width(gui_range_fixed,     range_opt_label_width);
-    gui_int_range_set_label_width(gui_range_hidden,    range_opt_label_width);
-    gui_int_range_set_label_width(gui_range_path_iter, range_opt_label_width);
+    gui_int_range_set_label_width(gui_range_fixed,  range_opt_label_width);
+    gui_int_range_set_label_width(gui_range_hidden, range_opt_label_width);
 
     Vector2 gui_random_seed_text_size = measure_gui_text(gui_random_seed_text);
 
@@ -1171,7 +1156,6 @@ void draw_gui_random(void)
 
     draw_gui_int_range(gui_range_fixed);
     draw_gui_int_range(gui_range_hidden);
-    draw_gui_int_range(gui_range_path_iter);
 
     GuiLabel(gui_random_seed_rect, gui_random_seed_text);
 
@@ -1344,19 +1328,6 @@ bool create_level_from_json(cJSON *json)
         warnmsg("Program state JSON['create_level'] is missing \"hidden\"");
     }
 
-    cJSON *path_json = cJSON_GetObjectItem(json, "path_iter");
-    if (path_json) {
-        if (!int_range_from_json(path_json, &options->create_level_path)) {
-            errmsg("Error parsing program state: JSON['create_level']['path_iter]");
-            return false;
-        }
-        int_range_clamp(&options->create_level_path,
-                        LEVEL_MIN_PATH_ITER,
-                        LEVEL_MAX_PATH_ITER);
-    } else {
-        warnmsg("Program state JSON['create_level'] is missing \"path_iter\"");
-    }
-
     cJSON *color_json = cJSON_GetObjectItem(json, "color_enabled");
     if (color_json) {
         for (path_type_t type = (PATH_TYPE_NONE + 1); type < PATH_TYPE_COUNT; type++) {
@@ -1415,15 +1386,6 @@ cJSON *create_level_to_json(void)
     cJSON *hidden_json = int_range_to_json(&options->create_level_hidden);
     if (hidden_json) {
         if (!cJSON_AddItemToObject(json, "hidden", hidden_json)) {
-            goto create_level_to_json_error;
-        }
-    } else {
-        goto create_level_to_json_error;
-    }
-
-    cJSON *path_json = int_range_to_json(&options->create_level_path);
-    if (path_json) {
-        if (!cJSON_AddItemToObject(json, "path_iter", path_json)) {
             goto create_level_to_json_error;
         }
     } else {

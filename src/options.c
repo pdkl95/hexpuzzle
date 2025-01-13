@@ -53,8 +53,6 @@ static struct option long_options[] = {
     {     "level-max-fixed", required_argument, 0, ']' },
     {    "level-min-hidden", required_argument, 0, '(' },
     {    "level-max-hidden", required_argument, 0, ')' },
-    {      "level-min-path", required_argument, 0, '<' },
-    {      "level-max-path", required_argument, 0, '>' },
     {                "seed", required_argument, 0, 's' },
     {                "play", required_argument, 0, 'p' },
     {              "random", optional_argument, 0, 'r' },
@@ -147,10 +145,6 @@ static char help_text[] =
     "      --level-max-fixed=NUMBER  Maximum number of fixed tiles.  (default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MAX_FIXED) ")\n"
     "      --level-min-hidden=NUMBER Minimum number of hidden tiles. (default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MIN_HIDDEN) ")\n"
     "      --level-max-hidden=NUMBER Maximum number of hidden tiles. (default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MAX_HIDDEN) ")\n"
-    "      --level-min-path=NUMBER   Minimum number of paths on each created tile.\n"
-    "                                  Min: 0, Max: 6, Default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MIN_PATH) "\n"
-    "      --level-max-path=NUMBER   Maximum number of paths on each created tile.\n"
-    "                                  Min: 1, Max: 6, Default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MAX_PATH) "\n"
     ;
 
 
@@ -365,7 +359,6 @@ options_set_defaults(
     options->create_level_radius        = OPTIONS_DEFAULT_CREATE_LEVEL_RADIUS;
     options->create_level_fixed         = OPTIONS_DEFAULT_CREATE_LEVEL_FIXED;
     options->create_level_hidden        = OPTIONS_DEFAULT_CREATE_LEVEL_HIDDEN;
-    options->create_level_path          = OPTIONS_DEFAULT_CREATE_LEVEL_PATH;
     options->create_level_expoints      = OPTIONS_DEFAULT_CREATE_LEVEL_EXPOINTS;
     options->create_level_symmetry_mode = OPTIONS_DFFAULT_CREATE_LEVEL_SYMMETRY_MODE;
     options->create_level_minimum_path_density = OPTIONS_DFFAULT_CREATE_LEVEL_MINIMUM_PATH_DENSITY;
@@ -501,20 +494,6 @@ options_parse_args(
         case ')':
             if (!options_set_int_bounds(&options->create_level_hidden.max, 0, 9)) {
                 errmsg("bad value for --level-max-hidden (expected %d - %d)", 0, 9);
-                return false;
-            }
-            break;
-
-        case '<':
-            if (!options_set_int_bounds(&options->create_level_path.min, 0, 6)) {
-                errmsg("bad value for --level-min-path (expected %d - %d)", 0, 6);
-                return false;
-            }
-            break;
-
-        case '>':
-            if (!options_set_int_bounds(&options->create_level_path.max, 1, 6)) {
-                errmsg("bad value for --level-max-path (expected %d - %d)", 1, 6);
                 return false;
             }
             break;
