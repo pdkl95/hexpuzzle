@@ -72,7 +72,7 @@ typedef struct gui_int_range gui_int_range_t;
 gui_int_range_t *create_gui_int_range(int_range_t *range, const char *label, int min, int max);
 void resize_gui_int_range(gui_int_range_t *gui, Rectangle *area);
 void destroy_gui_int_range(gui_int_range_t *gui);
-void draw_gui_int_range(gui_int_range_t *gui);
+bool draw_gui_int_range(gui_int_range_t *gui);
 void gui_int_range_set_label_width(gui_int_range_t *gui, float width);
 
 #endif /*RANGE_H*/

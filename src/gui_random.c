@@ -43,6 +43,10 @@ Rectangle gui_random_radius_display_rect;
 Rectangle gui_random_radius_right_button_rect;
 Rectangle gui_random_save_button_rect;
 Rectangle gui_random_color_label_rect;
+Rectangle gui_random_symmetry_label_rect;
+Rectangle gui_random_symmetry_button_none_rect;
+Rectangle gui_random_symmetry_button_reflect_rect;
+Rectangle gui_random_symmetry_button_rotate_rect;
 Rectangle gui_random_seed_rect;
 Rectangle gui_random_seed_bg_rect;
 Rectangle gui_random_enter_seed_rect;
@@ -63,7 +67,10 @@ char gui_random_color_label_text[] = "Colors";
 char gui_random_fixed_label_text[] = "Fixed Tiles";
 char gui_random_hidden_label_text[] = "Hidden Tiles";
 char gui_random_minimum_tile_density_label_text[] = "Fixed Tiles";
-char gui_random_symmetry_mode_label_text[] = "Fixed Tiles";
+char gui_random_symmetry_label_text[] = "Symmetry";
+char gui_random_symmetry_button_none_text[] = "#79#None";
+char gui_random_symmetry_button_reflect_text[] = "#40#Reflect";
+char gui_random_symmetry_button_rotate_text[] = "#77#Rotate";
 char gui_random_seed_text[] = "RNG Seed";
 char gui_random_rng_seed_text[] = "Randomize";
 char gui_random_enter_seed_text_str[] = "Enter";
@@ -844,6 +851,34 @@ void resize_gui_random(void)
     gui_random_area_rect.y      += gui_random_color_label_rect.height + RAYGUI_ICON_SIZE;
     gui_random_area_rect.height -= gui_random_color_label_rect.height + RAYGUI_ICON_SIZE;
 
+    Vector2 gui_random_symmetry_label_text_size = measure_gui_text(gui_random_symmetry_label_text);
+    Vector2 gui_random_symmetry_button_none_text_size = measure_gui_text(gui_random_symmetry_button_none_text);
+    Vector2 gui_random_symmetry_button_reflect_text_size = measure_gui_text(gui_random_symmetry_button_reflect_text);
+    Vector2 gui_random_symmetry_button_rotate_text_size = measure_gui_text(gui_random_symmetry_button_rotate_text);
+
+    gui_random_symmetry_label_rect.x      = gui_random_area_rect.x;
+    gui_random_symmetry_label_rect.y      = gui_random_area_rect.y;
+    gui_random_symmetry_label_rect.width  = gui_random_symmetry_label_text_size.x + (4 * BUTTON_MARGIN);
+    gui_random_symmetry_label_rect.height = TOOL_BUTTON_HEIGHT;
+
+    gui_random_symmetry_button_none_rect.x      = gui_random_symmetry_label_rect.x + gui_random_symmetry_label_rect.width + RAYGUI_ICON_SIZE;
+    gui_random_symmetry_button_none_rect.y      = gui_random_symmetry_label_rect.y;
+    gui_random_symmetry_button_none_rect.width  = gui_random_symmetry_button_none_text_size.x;
+    gui_random_symmetry_button_none_rect.height = gui_random_symmetry_label_rect.height;
+
+    gui_random_symmetry_button_reflect_rect.x      = gui_random_symmetry_button_none_rect.x + gui_random_symmetry_button_none_rect.width + RAYGUI_ICON_SIZE;
+    gui_random_symmetry_button_reflect_rect.y      = gui_random_symmetry_label_rect.y;
+    gui_random_symmetry_button_reflect_rect.width  = gui_random_symmetry_button_reflect_text_size.x;
+    gui_random_symmetry_button_reflect_rect.height = gui_random_symmetry_label_rect.height;
+
+    gui_random_symmetry_button_rotate_rect.x      = gui_random_symmetry_button_reflect_rect.x + gui_random_symmetry_button_reflect_rect.width + RAYGUI_ICON_SIZE;
+    gui_random_symmetry_button_rotate_rect.y      = gui_random_symmetry_label_rect.y;
+    gui_random_symmetry_button_rotate_rect.width  = gui_random_symmetry_button_rotate_text_size.x;
+    gui_random_symmetry_button_rotate_rect.height = gui_random_symmetry_label_rect.height;
+
+    gui_random_area_rect.y      += gui_random_symmetry_label_rect.height + RAYGUI_ICON_SIZE;
+    gui_random_area_rect.height -= gui_random_symmetry_label_rect.height + RAYGUI_ICON_SIZE;
+
     resize_gui_int_range(gui_range_fixed,  &gui_random_area_rect);
     resize_gui_int_range(gui_range_hidden, &gui_random_area_rect);
 
@@ -904,6 +939,46 @@ void resize_gui_random(void)
     seed_text_location.x += 3;
     seed_text_location.y += 5;
     gui_random_seed_rect.y += BUTTON_MARGIN;
+}
+
+static void draw_gui_randon_symmetry_modes(void)
+{
+    GuiLabel(gui_random_symmetry_label_rect, gui_random_symmetry_label_text);
+
+    if (options->create_level_symmetry_mode == SYMMETRY_MODE_NONE) {
+        GuiSetState(STATE_PRESSED);
+    } else {
+        GuiSetState(STATE_NORMAL);
+    }
+
+    if (GuiButton(gui_random_symmetry_button_none_rect, gui_random_symmetry_button_none_text)) {
+        options->create_level_symmetry_mode = SYMMETRY_MODE_NONE;
+        regen_level();
+    }
+
+    if (options->create_level_symmetry_mode == SYMMETRY_MODE_REFLECT) {
+        GuiSetState(STATE_PRESSED);
+    } else {
+        GuiSetState(STATE_NORMAL);
+    }
+
+    if (GuiButton(gui_random_symmetry_button_reflect_rect, gui_random_symmetry_button_reflect_text)) {
+        options->create_level_symmetry_mode = SYMMETRY_MODE_REFLECT;
+        regen_level();
+    }
+
+    if (options->create_level_symmetry_mode == SYMMETRY_MODE_ROTATE) {
+        GuiSetState(STATE_PRESSED);
+    } else {
+        GuiSetState(STATE_NORMAL);
+    }
+
+    if (GuiButton(gui_random_symmetry_button_rotate_rect, gui_random_symmetry_button_rotate_text)) {
+        options->create_level_symmetry_mode = SYMMETRY_MODE_ROTATE;
+        regen_level();
+    }
+
+    GuiSetState(STATE_NORMAL);
 }
 
 static void draw_gui_random_colors(void)
@@ -1154,8 +1229,14 @@ void draw_gui_random(void)
         colors_ok = colors_ok || gui_random_color[type];
     }
 
-    draw_gui_int_range(gui_range_fixed);
-    draw_gui_int_range(gui_range_hidden);
+    draw_gui_randon_symmetry_modes();
+
+    if (draw_gui_int_range(gui_range_fixed)) {
+        regen_level();
+    }
+    if (draw_gui_int_range(gui_range_hidden)) {
+        regen_level();
+    }
 
     GuiLabel(gui_random_seed_rect, gui_random_seed_text);
 

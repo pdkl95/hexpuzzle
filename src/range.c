@@ -183,21 +183,29 @@ void destroy_gui_int_range(gui_int_range_t *gui)
     }
 }
 
-static void draw_gui_imt_range_spinner(gui_int_range_spinner_t *gui_spin)
+static bool draw_gui_imt_range_spinner(gui_int_range_spinner_t *gui_spin)
 {
     DrawRectangleRounded(gui_spin->bg_rect, 0.4, 4, text_shadow_color);
+
+    int old = *gui_spin->value;
 
     if (GuiSpinner(gui_spin->rect, gui_spin->label, gui_spin->value, gui_spin->parent->min, gui_spin->parent->max, gui_spin->edit)) {
         gui_spin->edit = !gui_spin->edit;
     }
+
+    return old != *gui_spin->value;
 }
 
-void draw_gui_int_range(gui_int_range_t *gui)
+bool draw_gui_int_range(gui_int_range_t *gui)
 {
+    bool rv = false;
+
     GuiLabel(gui->label_rect, gui->label_text);
 
-    draw_gui_imt_range_spinner(&gui->min_spinner);
-    draw_gui_imt_range_spinner(&gui->max_spinner);
+    rv = draw_gui_imt_range_spinner(&gui->min_spinner) || rv;
+    rv = draw_gui_imt_range_spinner(&gui->max_spinner) || rv;
+
+    return rv;
 }
 
 void gui_int_range_set_label_width(gui_int_range_t *gui, float width)
