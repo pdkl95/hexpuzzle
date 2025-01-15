@@ -73,6 +73,7 @@ Color feedback_bg_tint_color = { FEEDBACK_BG_TINT, FEEDBACK_BG_TINT, FEEDBACK_BG
 
 Color modal_dialog_shading_color = { 0x33, 0x33, 0x33, 0x77 };
 
+Color no_preview_color = { 0x74, 0x00, 0x00, 0xFF };
 Color seed_bg_color;
 
 

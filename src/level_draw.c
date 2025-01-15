@@ -238,6 +238,25 @@ void level_draw(level_t *level, bool finished)
 
 void _level_preview(level_t *level, Rectangle rect, bool show_solved)
 {
+    if (!options->show_level_previews) {
+        rect.x      += 15.0f;
+        rect.y      += 15.0f;
+        rect.width  -= 30.0f;
+        rect.height -= 30.0f;
+        DrawRectangleLinesEx(rect, 1.0, no_preview_color);
+        DrawLine(rect.x,
+                 rect.y,
+                 rect.x + rect.width,
+                 rect.y + rect.height,
+                 no_preview_color);
+        DrawLine(rect.x + rect.width,
+                 rect.y,
+                 rect.x,
+                 rect.y + rect.height,
+                 no_preview_color);
+        return;
+    }
+
     rlPushMatrix();
 
     float scale_factor = 1.2;
