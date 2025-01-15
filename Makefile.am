@@ -141,12 +141,14 @@ hexpuzzle_SOURCES =                                          \
 	src/level_draw.h           src/level_draw.c          \
 	src/level_undo.h           src/level_undo.c          \
 	src/logging.h              src/logging.c             \
+	src/numeric.h              src/numeric.c             \
 	src/nvdata.h               src/nvdata.c              \
 	src/nvdata_finished.h      src/nvdata_finished.c     \
 	src/options.h              src/options.c             \
 	src/path.h                 src/path.c                \
 	src/range.h                src/range.c               \
 	src/raygui_impl.c 			             \
+	src/raylib_gui_numeric.h   src/raylib_gui_numeric.c  \
 	src/raylib_helper.h        src/raylib_helper.c       \
 	src/startup_action.h       src/startup_action.c      \
 	src/shader.h               src/shader.c              \

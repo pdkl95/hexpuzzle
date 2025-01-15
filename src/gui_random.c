@@ -31,6 +31,7 @@
 #include "tile_draw.h"
 #include "level.h"
 #include "gui_dialog.h"
+#include "raylib_gui_numeric.h"
 
 #include "pcg/pcg_basic.h"
 
@@ -66,7 +67,7 @@ char gui_random_radius_right_button_text[6];
 char gui_random_color_label_text[] = "Colors";
 char gui_random_fixed_label_text[] = "Fixed Tiles";
 char gui_random_hidden_label_text[] = "Hidden Tiles";
-char gui_random_minimum_tile_density_label_text[] = "Fixed Tiles";
+char gui_random_minimum_tile_density_label_text[] = "Path Density";
 char gui_random_symmetry_label_text[] = "Symmetry";
 char gui_random_symmetry_button_none_text[] = "#79#None";
 char gui_random_symmetry_button_reflect_text[] = "#40#Reflect";
@@ -85,14 +86,13 @@ int gui_random_color_count = PATH_TYPE_COUNT - 1;
 
 gui_int_range_t *gui_range_fixed  = NULL;
 gui_int_range_t *gui_range_hidden = NULL;
+raylib_gui_numeric_t *gui_random_density = NULL;
 
 bool played_level = false;
 level_t *gui_random_level = NULL;
 level_t *gui_random_level_preview = NULL;
 uint64_t gui_random_seed;
 char *gui_random_seed_str = NULL;
-
-Color seed_bg_color;
 
 pcg32_random_t rng;
 
@@ -736,8 +736,6 @@ void init_gui_random(void)
 {
     init_gui_random_minimal();
 
-    seed_bg_color = ColorBrightness(tile_bg_color, -0.25);
-
     SAFEFREE(gui_random_enter_seed_text);
 
     gui_random_enter_seed_text = strdup(GuiIconText(ICON_PENCIL, NULL));
@@ -755,10 +753,21 @@ void init_gui_random(void)
                                                gui_random_hidden_label_text,
                                                LEVEL_MIN_HIDDEN,
                                                LEVEL_MAX_HIDDEN);
+
+    gui_random_density = create_gui_numeric_float(gui_random_minimum_tile_density_label_text,
+                                                  &options->create_level_minimum_path_density,
+                                                  LEVEL_MIN_MINIMUM_PATH_DENSITY,
+                                                  LEVEL_MAX_MINIMUM_PATH_DENSITY,
+                                                  0.25f);
 }
 
 void cleanup_gui_random(void)
 {
+    if (gui_random_density) {
+        destroy_gui_numeric(gui_random_density);
+        gui_random_density = NULL;
+    }
+
     if (gui_random_level) {
         destroy_level(gui_random_level);
         gui_random_level = NULL;
@@ -850,6 +859,8 @@ void resize_gui_random(void)
 
     gui_random_area_rect.y      += gui_random_color_label_rect.height + RAYGUI_ICON_SIZE;
     gui_random_area_rect.height -= gui_random_color_label_rect.height + RAYGUI_ICON_SIZE;
+
+    gui_numeric_resize(gui_random_density, &gui_random_area_rect);
 
     Vector2 gui_random_symmetry_label_text_size = measure_gui_text(gui_random_symmetry_label_text);
     Vector2 gui_random_symmetry_button_none_text_size = measure_gui_text(gui_random_symmetry_button_none_text);
@@ -1227,6 +1238,10 @@ void draw_gui_random(void)
     bool colors_ok = false;
     for (path_type_t type = (PATH_TYPE_NONE + 1); type < PATH_TYPE_COUNT; type++) {
         colors_ok = colors_ok || gui_random_color[type];
+    }
+
+    if (draw_gui_numeric(gui_random_density)) {
+        regen_level();
     }
 
     draw_gui_randon_symmetry_modes();

@@ -173,17 +173,19 @@ am__hexpuzzle_SOURCES_DIST = src/background.h src/background.c \
 	src/gui_random.c src/gui_title.h src/gui_title.c src/hex.h \
 	src/hex.c src/level.h src/level.c src/level_draw.h \
 	src/level_draw.c src/level_undo.h src/level_undo.c \
-	src/logging.h src/logging.c src/nvdata.h src/nvdata.c \
-	src/nvdata_finished.h src/nvdata_finished.c src/options.h \
-	src/options.c src/path.h src/path.c src/range.h src/range.c \
-	src/raygui_impl.c src/raylib_helper.h src/raylib_helper.c \
-	src/startup_action.h src/startup_action.c src/shader.h \
-	src/shader.c src/solver.h src/solver.c src/textures.h \
-	src/textures.c src/tile.h src/tile.c src/tile_draw.h \
-	src/tile_draw.c src/tile_pos.h src/tile_pos.c src/util.h \
-	src/util.c src/win_anim.h src/win_anim.c \
-	src/win_anim_mode_config.h src/win_anim_mode_config.c \
-	src/common.h src/main.c src/physics.h src/physics.c
+	src/logging.h src/logging.c src/numeric.h src/numeric.c \
+	src/nvdata.h src/nvdata.c src/nvdata_finished.h \
+	src/nvdata_finished.c src/options.h src/options.c src/path.h \
+	src/path.c src/range.h src/range.c src/raygui_impl.c \
+	src/raylib_gui_numeric.h src/raylib_gui_numeric.c \
+	src/raylib_helper.h src/raylib_helper.c src/startup_action.h \
+	src/startup_action.c src/shader.h src/shader.c src/solver.h \
+	src/solver.c src/textures.h src/textures.c src/tile.h \
+	src/tile.c src/tile_draw.h src/tile_draw.c src/tile_pos.h \
+	src/tile_pos.c src/util.h src/util.c src/win_anim.h \
+	src/win_anim.c src/win_anim_mode_config.h \
+	src/win_anim_mode_config.c src/common.h src/main.c \
+	src/physics.h src/physics.c
 @USE_PHYSICS_TRUE@am__objects_2 = src/hexpuzzle-physics.$(OBJEXT)
 am_hexpuzzle_OBJECTS = src/hexpuzzle-background.$(OBJEXT) \
 	src/hexpuzzle-classics.$(OBJEXT) \
@@ -199,11 +201,13 @@ am_hexpuzzle_OBJECTS = src/hexpuzzle-background.$(OBJEXT) \
 	src/hexpuzzle-level.$(OBJEXT) \
 	src/hexpuzzle-level_draw.$(OBJEXT) \
 	src/hexpuzzle-level_undo.$(OBJEXT) \
-	src/hexpuzzle-logging.$(OBJEXT) src/hexpuzzle-nvdata.$(OBJEXT) \
+	src/hexpuzzle-logging.$(OBJEXT) \
+	src/hexpuzzle-numeric.$(OBJEXT) src/hexpuzzle-nvdata.$(OBJEXT) \
 	src/hexpuzzle-nvdata_finished.$(OBJEXT) \
 	src/hexpuzzle-options.$(OBJEXT) src/hexpuzzle-path.$(OBJEXT) \
 	src/hexpuzzle-range.$(OBJEXT) \
 	src/hexpuzzle-raygui_impl.$(OBJEXT) \
+	src/hexpuzzle-raylib_gui_numeric.$(OBJEXT) \
 	src/hexpuzzle-raylib_helper.$(OBJEXT) \
 	src/hexpuzzle-startup_action.$(OBJEXT) \
 	src/hexpuzzle-shader.$(OBJEXT) src/hexpuzzle-solver.$(OBJEXT) \
@@ -525,17 +529,18 @@ hexpuzzle_SOURCES = src/background.h src/background.c src/classics.h \
 	src/gui_title.h src/gui_title.c src/hex.h src/hex.c \
 	src/level.h src/level.c src/level_draw.h src/level_draw.c \
 	src/level_undo.h src/level_undo.c src/logging.h src/logging.c \
-	src/nvdata.h src/nvdata.c src/nvdata_finished.h \
-	src/nvdata_finished.c src/options.h src/options.c src/path.h \
-	src/path.c src/range.h src/range.c src/raygui_impl.c \
-	src/raylib_helper.h src/raylib_helper.c src/startup_action.h \
-	src/startup_action.c src/shader.h src/shader.c src/solver.h \
-	src/solver.c src/textures.h src/textures.c src/tile.h \
-	src/tile.c src/tile_draw.h src/tile_draw.c src/tile_pos.h \
-	src/tile_pos.c src/util.h src/util.c src/win_anim.h \
-	src/win_anim.c src/win_anim_mode_config.h \
-	src/win_anim_mode_config.c src/common.h src/main.c \
-	$(am__append_5)
+	src/numeric.h src/numeric.c src/nvdata.h src/nvdata.c \
+	src/nvdata_finished.h src/nvdata_finished.c src/options.h \
+	src/options.c src/path.h src/path.c src/range.h src/range.c \
+	src/raygui_impl.c src/raylib_gui_numeric.h \
+	src/raylib_gui_numeric.c src/raylib_helper.h \
+	src/raylib_helper.c src/startup_action.h src/startup_action.c \
+	src/shader.h src/shader.c src/solver.h src/solver.c \
+	src/textures.h src/textures.c src/tile.h src/tile.c \
+	src/tile_draw.h src/tile_draw.c src/tile_pos.h src/tile_pos.c \
+	src/util.h src/util.c src/win_anim.h src/win_anim.c \
+	src/win_anim_mode_config.h src/win_anim_mode_config.c \
+	src/common.h src/main.c $(am__append_5)
 dist_EXTRA_hexpuzzle_SOURCES = \
 	src/data_classics_levels.h  \
 	src/data_fonts.h            \
@@ -869,6 +874,8 @@ src/hexpuzzle-level_undo.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-logging.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/hexpuzzle-numeric.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-nvdata.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-nvdata_finished.$(OBJEXT): src/$(am__dirstamp) \
@@ -880,6 +887,8 @@ src/hexpuzzle-path.$(OBJEXT): src/$(am__dirstamp) \
 src/hexpuzzle-range.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-raygui_impl.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
+src/hexpuzzle-raylib_gui_numeric.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-raylib_helper.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
@@ -950,6 +959,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-level_undo.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-logging.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-numeric.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-nvdata.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-nvdata_finished.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-options.Po@am__quote@
@@ -957,6 +967,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-physics.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-range.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raygui_impl.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raylib_gui_numeric.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raylib_helper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-shader.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-solver.Po@am__quote@
@@ -1335,6 +1346,20 @@ src/hexpuzzle-logging.obj: src/logging.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-logging.obj `if test -f 'src/logging.c'; then $(CYGPATH_W) 'src/logging.c'; else $(CYGPATH_W) '$(srcdir)/src/logging.c'; fi`
 
+src/hexpuzzle-numeric.o: src/numeric.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-numeric.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-numeric.Tpo -c -o src/hexpuzzle-numeric.o `test -f 'src/numeric.c' || echo '$(srcdir)/'`src/numeric.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-numeric.Tpo src/$(DEPDIR)/hexpuzzle-numeric.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/numeric.c' object='src/hexpuzzle-numeric.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-numeric.o `test -f 'src/numeric.c' || echo '$(srcdir)/'`src/numeric.c
+
+src/hexpuzzle-numeric.obj: src/numeric.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-numeric.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-numeric.Tpo -c -o src/hexpuzzle-numeric.obj `if test -f 'src/numeric.c'; then $(CYGPATH_W) 'src/numeric.c'; else $(CYGPATH_W) '$(srcdir)/src/numeric.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-numeric.Tpo src/$(DEPDIR)/hexpuzzle-numeric.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/numeric.c' object='src/hexpuzzle-numeric.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-numeric.obj `if test -f 'src/numeric.c'; then $(CYGPATH_W) 'src/numeric.c'; else $(CYGPATH_W) '$(srcdir)/src/numeric.c'; fi`
+
 src/hexpuzzle-nvdata.o: src/nvdata.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-nvdata.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-nvdata.Tpo -c -o src/hexpuzzle-nvdata.o `test -f 'src/nvdata.c' || echo '$(srcdir)/'`src/nvdata.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-nvdata.Tpo src/$(DEPDIR)/hexpuzzle-nvdata.Po
@@ -1418,6 +1443,20 @@ src/hexpuzzle-raygui_impl.obj: src/raygui_impl.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/raygui_impl.c' object='src/hexpuzzle-raygui_impl.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-raygui_impl.obj `if test -f 'src/raygui_impl.c'; then $(CYGPATH_W) 'src/raygui_impl.c'; else $(CYGPATH_W) '$(srcdir)/src/raygui_impl.c'; fi`
+
+src/hexpuzzle-raylib_gui_numeric.o: src/raylib_gui_numeric.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-raylib_gui_numeric.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-raylib_gui_numeric.Tpo -c -o src/hexpuzzle-raylib_gui_numeric.o `test -f 'src/raylib_gui_numeric.c' || echo '$(srcdir)/'`src/raylib_gui_numeric.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-raylib_gui_numeric.Tpo src/$(DEPDIR)/hexpuzzle-raylib_gui_numeric.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/raylib_gui_numeric.c' object='src/hexpuzzle-raylib_gui_numeric.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-raylib_gui_numeric.o `test -f 'src/raylib_gui_numeric.c' || echo '$(srcdir)/'`src/raylib_gui_numeric.c
+
+src/hexpuzzle-raylib_gui_numeric.obj: src/raylib_gui_numeric.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-raylib_gui_numeric.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-raylib_gui_numeric.Tpo -c -o src/hexpuzzle-raylib_gui_numeric.obj `if test -f 'src/raylib_gui_numeric.c'; then $(CYGPATH_W) 'src/raylib_gui_numeric.c'; else $(CYGPATH_W) '$(srcdir)/src/raylib_gui_numeric.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-raylib_gui_numeric.Tpo src/$(DEPDIR)/hexpuzzle-raylib_gui_numeric.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/raylib_gui_numeric.c' object='src/hexpuzzle-raylib_gui_numeric.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-raylib_gui_numeric.obj `if test -f 'src/raylib_gui_numeric.c'; then $(CYGPATH_W) 'src/raylib_gui_numeric.c'; else $(CYGPATH_W) '$(srcdir)/src/raylib_gui_numeric.c'; fi`
 
 src/hexpuzzle-raylib_helper.o: src/raylib_helper.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-raylib_helper.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-raylib_helper.Tpo -c -o src/hexpuzzle-raylib_helper.o `test -f 'src/raylib_helper.c' || echo '$(srcdir)/'`src/raylib_helper.c

@@ -73,6 +73,9 @@ Color feedback_bg_tint_color = { FEEDBACK_BG_TINT, FEEDBACK_BG_TINT, FEEDBACK_BG
 
 Color modal_dialog_shading_color = { 0x33, 0x33, 0x33, 0x77 };
 
+Color seed_bg_color;
+
+
 void prepare_global_colors()
 {
     //cursor_outer_color = DODGER_BLUE;
@@ -87,6 +90,8 @@ void prepare_global_colors()
     panel_header_text_hover_color = WHITE;
 
     text_shadow_color = ColorAlpha(BLACK, 0.85);
+
+    seed_bg_color = ColorBrightness(tile_bg_color, -0.25);
 }
 
 static Vector4 RGB2HSV(Vector4 rgb)
