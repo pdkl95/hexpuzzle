@@ -319,6 +319,9 @@ static bool program_state_from_json(cJSON *json)
         if (options->load_state_show_level_previews) {
             mk_bool_json(show_level_previews, show_level_previews);
         }
+        if (options->load_state_show_tooltips) {
+            mk_bool_json(show_tooltips, show_tooltips);
+        }
 #undef mk_bool_json
     }
 
@@ -491,6 +494,7 @@ static cJSON *program_state_to_json(void)
     mk_bool_json(animate_win, animate_win);
     mk_bool_json(use_physics, use_physics);
     mk_bool_json(show_level_previews, show_level_previews);
+    mk_bool_json(show_tooltips, show_tooltips);
 #undef mk_bool_json
 
     cJSON *win_anim_json = win_anim_config_to_json();

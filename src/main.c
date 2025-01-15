@@ -147,6 +147,9 @@ bool edit_tool_cycle = true;
 bool edit_tool_erase = false;
 path_type_t edit_tool_state = PATH_TYPE_NONE;
 
+Rectangle tooltip_bounds = {0};
+const char *tooltip_text = NULL;
+
 char const * file_filter_patterns[2] = {
     "*." COLLECTION_FILENAME_EXT,
     "*." LEVEL_FILENAME_EXT
@@ -2230,6 +2233,52 @@ static void draw_feedback_bg(void)
     DrawTexturePro(scene_read_target->texture, src, dst, window_center, rot, feedback_bg_tint_color);
 }
 
+static void draw_gui_tooltip(void)
+{
+    if (!tooltip_text) {
+        return;
+    }
+
+    if (!options->show_tooltips) {
+        return;
+    }
+
+    Vector2 text_size = MeasureTextEx(GuiGetFont(),
+                                      tooltip_text,
+                                      (float)GuiGetStyle(DEFAULT, TEXT_SIZE),
+                                      (float)GuiGetStyle(DEFAULT, TEXT_SPACING));
+
+    if ((tooltip_bounds.x + text_size.x + 16) > window_size.x) {
+        tooltip_bounds.x -= (text_size.x + 16 - tooltip_bounds.width);
+    }
+
+    Rectangle panel_bounds = {
+        .x      = tooltip_bounds.x,
+        .y      = tooltip_bounds.y + tooltip_bounds.height + 4,
+        .width  = text_size.x + 16,
+        .height = GuiGetStyle(DEFAULT, TEXT_SIZE) + 8.f
+    };
+    GuiPanel(panel_bounds, NULL);
+
+    int save_padding   = GuiGetStyle(LABEL, TEXT_PADDING);
+    int save_alignment = GuiGetStyle(LABEL, TEXT_ALIGNMENT);
+    GuiSetStyle(LABEL, TEXT_PADDING, 0);
+    GuiSetStyle(LABEL, TEXT_ALIGNMENT, TEXT_ALIGN_CENTER);
+
+    Rectangle label_bounds = {
+        .x      = tooltip_bounds.x,
+        .y      = tooltip_bounds.y + tooltip_bounds.height + 4,
+        .width  = text_size.x + 16,
+        .height = GuiGetStyle(DEFAULT, TEXT_SIZE) + 8.f
+    };
+    GuiLabel(label_bounds, tooltip_text);
+
+    GuiSetStyle(LABEL, TEXT_ALIGNMENT, save_alignment);
+    GuiSetStyle(LABEL, TEXT_PADDING,   save_padding);
+
+    tooltip_text = NULL;
+}
+
 static void draw_gui(void)
 {
     switch (game_mode) {
@@ -2262,6 +2311,7 @@ static void draw_gui(void)
 
     draw_gui_widgets();
     draw_gui_dialog();
+    draw_gui_tooltip();
 }
 
 static bool
@@ -2494,6 +2544,8 @@ void gfx_init(void)
     GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
     GuiSetStyle(DROPDOWNBOX, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
     GuiSetStyle(DROPDOWNBOX, TEXT_PADDING, 10);
+
+    GuiEnableTooltip();
 
     if (options->wait_events) {
         if (options->verbose) {

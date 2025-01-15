@@ -197,9 +197,19 @@ static inline void set_mouse_cursor(int cursor)
     current_mouse_cursor = cursor;
 }
 
-
 extern float current_time;
 extern double double_current_time;
+
+extern Rectangle tooltip_bounds;
+extern const char *tooltip_text;
+
+static inline void tooltip(Rectangle bounds, const char *text)
+{
+    if (CheckCollisionPointRec(mouse_positionf, bounds)) {
+        tooltip_bounds = bounds;
+        tooltip_text   = text;
+    }
+}
 
 #include "fonts.h"
 #include "game_mode.h"

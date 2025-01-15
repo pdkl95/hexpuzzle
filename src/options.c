@@ -38,7 +38,7 @@
 options_t *options = NULL;
 
 /* command line options */
-static char short_options[] = "Cc:e:F:H:p:s:t:wvVW:PUL::r::hj";
+static char short_options[] = "Cc:e:F:H:p:s:wvVW:PUL::r::hj";
 
 static struct option long_options[] = {
     { "create-random-level",       no_argument, 0, 'L' },
@@ -71,6 +71,8 @@ static struct option long_options[] = {
 #endif
     {       "show-previews",       no_argument, 0, '-' },
     {    "no-show-previews",       no_argument, 0, '_' },
+    {       "show-tooltips",       no_argument, 0, 't' },
+    {    "no-show-tooltips",       no_argument, 0, 'T' },
     {      "extra-rainbows",       no_argument, 0, ':' },
     {   "no-extra-rainbows",       no_argument, 0, ';' },
     {         "wait-events",       no_argument, 0, 'w' },
@@ -109,6 +111,8 @@ static char help_text[] =
     "   --no-use-physics           Disable the physucs engine\n"
     "      --show-previews         Enable showing small level previews (default: on)\n"
     "   --no-show-previews         Disable showing small level previews\n"
+    "      --show-tooltips         Enable popup tooltips on mouse-hover default: on)\n"
+    "   --no-show-tooltips         Disable popup tooltips\n"
     "\n"
     "  -W, --width=NUMBER          Window width (default: " STR(OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH) ")\n"
     "  -H, --height=NUMBER         Window height (default: " STR(OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT) ")\n"
@@ -337,6 +341,7 @@ options_set_defaults(
     options->animate_win           = OPTIONS_DEFAULT_ANIMATE_WIN;
     options->use_physics           = OPTIONS_DEFAULT_USE_PHYSICS;
     options->show_level_previews   = OPTIONS_DEFAULT_SHOW_LEVEL_PREVIEWS;
+    options->show_tooltips         = OPTIONS_DEFAULT_SHOW_TOOLTIPS;
     options->extra_rainbows        = OPTIONS_DEFAULT_EXTRA_RAINBOWS;
     options->max_fps               = OPTIONS_DEFAULT_MAX_FPS;
     options->initial_window_width  = OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH;
@@ -348,6 +353,7 @@ options_set_defaults(
     options->load_state_animate_bg  = true;
     options->load_state_animate_win = true;
     options->load_state_show_level_previews = true;
+    options->load_state_show_tooltips = true;
     options->load_color_opt = true;
 
     options->safe_mode = false;
@@ -564,6 +570,16 @@ options_parse_args(
         case '_':
             options->show_level_previews = false;
             options->load_state_show_level_previews = false;
+            break;
+
+        case 't':
+            options->show_tooltips = true;
+            options->load_state_show_tooltips = false;
+            break;
+
+        case 'T':
+            options->show_tooltips = false;
+            options->load_state_show_tooltips = false;
             break;
 
         case ':':

@@ -34,6 +34,7 @@
 #define OPTIONS_DEFAULT_ANIMATE_WIN true
 #define OPTIONS_DEFAULT_USE_PHYSICS true
 #define OPTIONS_DEFAULT_SHOW_LEVEL_PREVIEWS true
+#define OPTIONS_DEFAULT_SHOW_TOOLTIPS true
 #define OPTIONS_DEFAULT_EXTRA_RAINBOWS false
 #define OPTIONS_DEFAULT_FPS 30
 #define OPTIONS_DEFAULT_MAX_FPS 30
@@ -92,11 +93,13 @@ struct options {
     bool animate_win;
     bool use_physics;
     bool show_level_previews;
+    bool show_tooltips;
     bool extra_rainbows;
     bool load_state_animate_bg;
     bool load_state_animate_win;
     bool load_state_use_physics;
     bool load_state_show_level_previews;
+    bool load_state_show_tooltips;
 
     long max_fps;
     long initial_window_width;
