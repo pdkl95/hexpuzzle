@@ -227,7 +227,7 @@ static bool program_state_from_json(cJSON *json)
         cJSON *colors_json = cJSON_GetObjectItem(json, "colors");
         if (colors_json) {
             for (int i=1; i<PATH_TYPE_COUNT; i++) {
-                const char *field = TextFormat("path_%d", i);
+                const char *field = TextFormat("path_color_%d", i);
                 cJSON *path_json = cJSON_GetObjectItem(colors_json, field);
                 if (path_json) {
                     if (!cJSON_IsString(path_json)) {
@@ -283,28 +283,25 @@ static bool program_state_from_json(cJSON *json)
         } else {
             warnmsg("Program state JSON['ui'] is missing \"max_win_radius\"");
         }
-    }
 
-    cJSON *graphics_json = cJSON_GetObjectItem(json, "graphics");
-    if (graphics_json) {
         cJSON *bool_json = NULL;
 
-#define mk_bool_json(field, name)                                           \
-    bool_json = cJSON_GetObjectItem(graphics_json, STR(name)); \
-    if (bool_json) {                                                        \
-        if (cJSON_IsBool(bool_json)) {                                      \
-            if (cJSON_IsTrue(bool_json)) {                                  \
-                options->field = true;                                      \
-            } else {                                                        \
-                options->field = false;                                     \
-            }                                                               \
-        } else {                                                            \
-            errmsg("Program state JSON['graphics']['%s'] is not a BOOL",    \
-                   STR(name));                                              \
-        }                                                                   \
-    } else {                                                                \
-        warnmsg("Program state JSON['graphics'] is missing \"%s\"",         \
-                STR(name));                                                 \
+#define mk_bool_json(field, name)                                        \
+    bool_json = cJSON_GetObjectItem(ui_json, STR(name));                 \
+    if (bool_json) {                                                     \
+        if (cJSON_IsBool(bool_json)) {                                   \
+            if (cJSON_IsTrue(bool_json)) {                               \
+                options->field = true;                                   \
+            } else {                                                     \
+                options->field = false;                                  \
+            }                                                            \
+        } else {                                                         \
+            errmsg("Program state JSON['graphics']['%s'] is not a BOOL", \
+                   STR(name));                                           \
+        }                                                                \
+    } else {                                                             \
+        warnmsg("Program state JSON['graphics'] is missing \"%s\"",      \
+                STR(name));                                              \
     }
 
         if (options->load_state_animate_bg) {
@@ -443,7 +440,7 @@ static cJSON *program_state_to_json(void)
     }
 
     for (int i=1; i<PATH_TYPE_COUNT; i++) {
-        const char *field = TextFormat("path_%d", i);
+        const char *field = TextFormat("path_color_%d", i);
         if (cJSON_AddStringToObject(colors_json, field, options->path_color[i].rgb_string) == NULL) {
             errmsg("Error adding \"height\" to JSON.window");
             goto to_json_error;
@@ -471,19 +468,13 @@ static cJSON *program_state_to_json(void)
         goto to_json_error;
     }
 
-    cJSON *graphics_json = cJSON_AddObjectToObject(json, "graphics");
-    if (!graphics_json) {
-        errmsg("Error adding \"graphics\" object to JSON");
-        goto to_json_error;
-    }
-
     cJSON *bool_json = NULL;
 
 #define mk_bool_json(field, name)                                       \
     if (options->field) {                                               \
-        bool_json = cJSON_AddTrueToObject(graphics_json, STR(name));    \
+        bool_json = cJSON_AddTrueToObject(ui_json, STR(name));    \
     } else {                                                            \
-        bool_json = cJSON_AddFalseToObject(graphics_json, STR(name));   \
+        bool_json = cJSON_AddFalseToObject(ui_json, STR(name));   \
     }                                                                   \
     if (!bool_json) {                                                   \
         errmsg("Error adding bool \"%s\" to JSON.graphics", STR(name)); \

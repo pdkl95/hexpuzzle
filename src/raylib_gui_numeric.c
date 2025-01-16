@@ -76,7 +76,7 @@ void gui_numeric_resize(raylib_gui_numeric_t *gn, Rectangle *area)
 
     gn->display_rect.x      = gn->left_button_rect.x + gn->left_button_rect.width + BUTTON_MARGIN;
     gn->display_rect.y      = gn->left_button_rect.y;
-    gn->display_rect.width  = 2 * TOOL_BUTTON_WIDTH;
+    gn->display_rect.width  = 2.5 * TOOL_BUTTON_WIDTH;
     gn->display_rect.height = TOOL_BUTTON_HEIGHT;
 
     gn->right_button_rect.x      = gn->display_rect.x + gn->display_rect.width + BUTTON_MARGIN;

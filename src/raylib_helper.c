@@ -237,6 +237,19 @@ Vector2 RectangleCenter(Rectangle rect)
     return v;
 }
 
+Rectangle ExpandRectangle(Rectangle rect, float margin)
+{
+    rect.x -= margin;
+    rect.y -= margin;
+
+    margin *= 2.0f;
+
+    rect.width  += margin;
+    rect.height += margin;
+
+    return rect;
+}
+
 void doublebuffer_load(doublebuffer_t *db, int width, int height)
 {
     doublebuffer_unload(db);

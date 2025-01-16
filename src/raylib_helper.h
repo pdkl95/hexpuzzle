@@ -141,6 +141,8 @@ Vector2 Vector2RotateAroundPoint(Vector2 v, float angle, Vector2 p);
 Rectangle BoundingBoxRotatedRectangle(Rectangle rect, float angle);
 Vector2 RectangleCenter(Rectangle rect);
 
+Rectangle ExpandRectangle(Rectangle rect, float margin);
+
 /*** Double Buffered Textures ***/
 
 struct doublebuffer {

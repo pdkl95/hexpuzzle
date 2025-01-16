@@ -48,6 +48,9 @@ Rectangle gui_random_symmetry_label_rect;
 Rectangle gui_random_symmetry_button_none_rect;
 Rectangle gui_random_symmetry_button_reflect_rect;
 Rectangle gui_random_symmetry_button_rotate_rect;
+Rectangle gui_random_symmetry_button_none_bg_rect;
+Rectangle gui_random_symmetry_button_reflect_bg_rect;
+Rectangle gui_random_symmetry_button_rotate_bg_rect;
 Rectangle gui_random_seed_rect;
 Rectangle gui_random_seed_bg_rect;
 Rectangle gui_random_enter_seed_rect;
@@ -887,6 +890,22 @@ void resize_gui_random(void)
     gui_random_symmetry_button_rotate_rect.width  = gui_random_symmetry_button_rotate_text_size.x;
     gui_random_symmetry_button_rotate_rect.height = gui_random_symmetry_label_rect.height;
 
+    float symmetry_highlight_thickness = 3.0f;
+    gui_random_symmetry_button_none_bg_rect    = ExpandRectangle(gui_random_symmetry_button_none_rect,
+                                                                 symmetry_highlight_thickness);
+    gui_random_symmetry_button_reflect_bg_rect = ExpandRectangle(gui_random_symmetry_button_reflect_rect,
+                                                                 symmetry_highlight_thickness);
+    gui_random_symmetry_button_rotate_bg_rect  = ExpandRectangle(gui_random_symmetry_button_rotate_rect,
+                                                                 symmetry_highlight_thickness);
+
+    gui_random_symmetry_button_none_bg_rect.x        -= 1.0;
+    gui_random_symmetry_button_reflect_bg_rect.x     -= 1.0;
+    gui_random_symmetry_button_rotate_bg_rect.x      -= 1.0;
+
+    gui_random_symmetry_button_none_bg_rect.width    += 1.0;
+    gui_random_symmetry_button_reflect_bg_rect.width += 1.0;
+    gui_random_symmetry_button_rotate_bg_rect.width  += 1.0;
+
     gui_random_area_rect.y      += gui_random_symmetry_label_rect.height + RAYGUI_ICON_SIZE;
     gui_random_area_rect.height -= gui_random_symmetry_label_rect.height + RAYGUI_ICON_SIZE;
 
@@ -956,8 +975,12 @@ static void draw_gui_randon_symmetry_modes(void)
 {
     GuiLabel(gui_random_symmetry_label_rect, gui_random_symmetry_label_text);
 
+    float roundness = 0.2;
+    int segments = 4;
+
     if (options->create_level_symmetry_mode == SYMMETRY_MODE_NONE) {
         GuiSetState(STATE_PRESSED);
+        DrawRectangleRounded(gui_random_symmetry_button_none_bg_rect, roundness, segments,  highlight_border_color);
     } else {
         GuiSetState(STATE_NORMAL);
     }
@@ -969,6 +992,7 @@ static void draw_gui_randon_symmetry_modes(void)
 
     if (options->create_level_symmetry_mode == SYMMETRY_MODE_REFLECT) {
         GuiSetState(STATE_PRESSED);
+        DrawRectangleRounded(gui_random_symmetry_button_reflect_bg_rect, roundness, segments,  highlight_border_color);
     } else {
         GuiSetState(STATE_NORMAL);
     }
@@ -980,6 +1004,7 @@ static void draw_gui_randon_symmetry_modes(void)
 
     if (options->create_level_symmetry_mode == SYMMETRY_MODE_ROTATE) {
         GuiSetState(STATE_PRESSED);
+        DrawRectangleRounded(gui_random_symmetry_button_rotate_bg_rect, roundness, segments,  highlight_border_color);
     } else {
         GuiSetState(STATE_NORMAL);
     }
@@ -1424,10 +1449,10 @@ bool create_level_from_json(cJSON *json)
         warnmsg("Program state JSON['create_level'] is missing \"hidden\"");
     }
 
-    cJSON *color_json = cJSON_GetObjectItem(json, "color_enabled");
+    cJSON *color_json = cJSON_GetObjectItem(json, "enabled_colors");
     if (color_json) {
         for (path_type_t type = (PATH_TYPE_NONE + 1); type < PATH_TYPE_COUNT; type++) {
-            const char *color_name = TextFormat("path_%d", type);
+            const char *color_name = TextFormat("path_color_%d", type);
 
             cJSON *color_type_json = cJSON_GetObjectItem(color_json, color_name);
             if (color_type_json) {
@@ -1488,10 +1513,10 @@ cJSON *create_level_to_json(void)
         goto create_level_to_json_error;
     }
 
-    cJSON *color_json = cJSON_AddObjectToObject(json, "color_enabled");
+    cJSON *color_json = cJSON_AddObjectToObject(json, "enabled_colors");
     if (color_json) {
         for (path_type_t type = (PATH_TYPE_NONE + 1); type < PATH_TYPE_COUNT; type++) {
-            const char *color_name = TextFormat("path_%d", type);
+            const char *color_name = TextFormat("path_color_%d", type);
             if (gui_random_color[type]) {
                 if (cJSON_AddTrueToObject(color_json, color_name) == NULL) {
                     goto create_level_to_json_error;

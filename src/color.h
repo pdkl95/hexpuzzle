@@ -92,6 +92,8 @@ extern Color modal_dialog_shading_color;
 extern Color seed_bg_color;
 extern Color no_preview_color;
 
+extern Color highlight_border_color;
+
 void prepare_global_colors();
 bool color_eq(Color a, Color b);
 
