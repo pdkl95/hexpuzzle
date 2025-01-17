@@ -576,6 +576,7 @@ void tile_draw_corner_connections(tile_pos_t *pos, win_anim_mode_t win_mode)
 
             float edge_thickness = 25.0;
 #endif
+            float rand_thickness = 2.0;
 
             switch (win_mode) {
             case WIN_ANIM_MODE_POPS:
@@ -626,7 +627,7 @@ void tile_draw_corner_connections(tile_pos_t *pos, win_anim_mode_t win_mode)
                     edge_thickness,
                     color);
 #else
-                float rand_thickness = 2.0 + (drand48() * 4.0);
+                rand_thickness = 2.0 + (drand48() * 4.0);
                 DrawSplineSegmentBezierCubic(
                     pos_m_p,
                     pos_m_c,

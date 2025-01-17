@@ -92,11 +92,7 @@ options_status_t options_status_off = {
     .color = RED
 };
 
-#if defined(PLATFORM_DESKTOP)
-# define NUM_TABS 3
-#else
-# define NUM_TABS 2
-#endif
+#define NUM_TABS 3
 
 const char *options_tabbar_text[NUM_TABS];
 
@@ -131,16 +127,11 @@ void show_status_beside(bool status_value, Rectangle neighbor)
 void init_gui_options(void)
 {
     options_tabbar_text[0] = "Graphics";
-#if defined(PLATFORM_DESKTOP)
     options_tabbar_text[1] = "Colors";
     options_tabbar_text[2] = "Data";
-#else
-    options_tabbar_text[1] = "Data";
-#endif
 
     options_active_tab = 0;
 
-#if defined(PLATFORM_DESKTOP)
     for (int i=1; i<PATH_TYPE_COUNT; i++) {
         snprintf(color_options[i].label_text,
                  GUI_COLOR_OPTION_LABEL_MAXLEN,
@@ -152,7 +143,6 @@ void init_gui_options(void)
         snprintf(color_options[i].reset_button_text, 7,
                  "%s", GuiIconText(ICON_UNDO_FILL, NULL));
     }
-#endif
 
     resize_gui_options();
 }
@@ -267,7 +257,6 @@ void resize_gui_options(void)
     options_status_on.icon_text_size.y = options_status_off.icon_text_size.y =
         MAX(options_status_on.icon_text_size.y, options_status_off.icon_text_size.y);
 
-#if defined(PLATFORM_DESKTOP)
     float max_label_text_size = 0.0f;
 
     for (int i=1; i<PATH_TYPE_COUNT; i++) {
@@ -312,7 +301,6 @@ void resize_gui_options(void)
 
         color_opt_y_offset += TOOL_BUTTON_HEIGHT + RAYGUI_ICON_SIZE;
     }
-#endif
 }
 
 void draw_gui_graphics_options(void)
@@ -346,7 +334,6 @@ void draw_gui_graphics_options(void)
     GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, prev_align);
 }
 
-#if defined(PLATFORM_DESKTOP)
 static void pick_color_finished(gui_dialog_t *dialog)
 {
     color_option_set(dialog->color_opt, dialog->color);
@@ -390,7 +377,6 @@ void draw_gui_color_options(void)
                               &(options->path_color[i]));
     }
 }
-#endif
 
 void draw_gui_data_options(void)
 {
@@ -411,12 +397,10 @@ void draw_gui_options(void)
         break;
 
     case 1:
-#if defined(PLATFORM_DESKTOP)
         draw_gui_color_options();
         break;
 
     case 2:
-#endif
         draw_gui_data_options();
         break;
     }

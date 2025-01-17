@@ -11,7 +11,7 @@
  *                                                                          *
  * hexpuzzle is distributed in the hope that it will be useful,             *
  * but WITHOUT ANY WARRANTY; without even the implied warranty of           *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General *
+ * MERCHANTABILITY or' FITNESS FOR A PARTICULAR PURPOSE. See the GNU General *
  * Public License for more details.                                         *
  *                                                                          *
  * You should have received a copy of the GNU General Public License along  *
@@ -56,8 +56,10 @@ tile_pos_t *init_tile_pos(tile_pos_t *pos, tile_t *tile, hex_axial_t addr)
     pos->hover = false;
     pos->hover_center = false;
 
+#ifdef USE_PHYSICS
     pos->physics_position = VEC2_ZERO;
     pos->physics_rotation = 0.0f;
+#endif
 
     return pos;
 }
@@ -387,9 +389,11 @@ void tile_pos_set_size(tile_pos_t *pos, float tile_pos_size)
 
 void tile_pos_reset_win_anim(tile_pos_t *pos)
 {
+#ifdef USE_PHYSICS
     pos->physics_position       = VEC2_ZERO;
     pos->physics_velocity       = VEC2_ZERO;
     pos->physics_rotation       = 0.0f;
+#endif
     pos->extra_rotate           = 0.0f;
     pos->extra_rotate_magnitude = 0.0f;
     pos->extra_translate        = VEC2_ZERO;

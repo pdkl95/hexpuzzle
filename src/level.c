@@ -1849,8 +1849,11 @@ static void level_fade_transition(level_t *level, level_fade_finished_cb_t callb
     if (level->win_anim && level->win_anim->running) {
         switch (level->win_anim->mode) {
         case WIN_ANIM_MODE_POPS:
+
+#ifdef USE_PHYSICS
             /* fall through */
         case WIN_ANIM_MODE_PHYSICS_SWIRL:
+#endif
             /* force clockwise rotation when currently in a mode that already features clockwuse motion */
             level->fade.rotate_speed = fabs(level->fade.rotate_speed);
             break;

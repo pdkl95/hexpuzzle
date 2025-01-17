@@ -2036,7 +2036,9 @@ static void draw_gui_widgets(void)
         game_mode_button(options_button_text,  GAME_MODE_OPTIONS, 1, 0);
 
         if (rsb_single_line_button(return_button_text)) {
+#if defined(PLATFORM_DESKTOP)
             show_ask_save_dialog(true);
+#endif
         }
 
         // skip one position
@@ -2050,6 +2052,7 @@ static void draw_gui_widgets(void)
             redo_edit();
         }
 
+#if defined(PLATFORM_DESKTOP)
         if (current_level && current_level->changed) {
             if (rsb_single_line_button(save_button_text)) {
                 show_ask_save_dialog(false);
@@ -2059,6 +2062,7 @@ static void draw_gui_widgets(void)
             rsb_single_line_button(save_button_text);
             GuiEnable();
         }
+#endif
         break;
 
     case GAME_MODE_PLAY_LEVEL:
