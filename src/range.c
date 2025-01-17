@@ -223,5 +223,10 @@ void gui_int_range_set_label_width(gui_int_range_t *gui, float width)
     gui->min_spinner.bg_rect.x -= PANEL_INNER_MARGIN;
     gui->max_spinner.bg_rect.x -= PANEL_INNER_MARGIN - 1;
     gui->min_spinner.bg_rect.width += PANEL_INNER_MARGIN - 3;
-    gui->max_spinner.bg_rect.width += PANEL_INNER_MARGIN - 4;
+    gui->max_spinner.bg_rect.width += PANEL_INNER_MARGIN - 3;
+
+    gui->min_spinner.bg_rect.y      -= 1;
+    gui->max_spinner.bg_rect.y      -= 1;
+    gui->min_spinner.bg_rect.height += 2;
+    gui->max_spinner.bg_rect.height += 2;
 }

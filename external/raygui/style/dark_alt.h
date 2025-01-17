@@ -18,12 +18,12 @@ static const GuiStyleProp darkStyleProps[DARK_STYLE_PROPS_COUNT] = {
     { 0, 0, 0x878787ff },    // DEFAULT_BORDER_COLOR_NORMAL 
     { 0, 1, 0x2c2c2cff },    // DEFAULT_BASE_COLOR_NORMAL 
     { 0, 2, 0xf0f0f0ff },    // DEFAULT_TEXT_COLOR_NORMAL 
-    { 0, 3, 0xe1e1e1ff },    // DEFAULT_BORDER_COLOR_FOCUSED 
+    { 0, 3, 0xe6e5c3ff },    // DEFAULT_BORDER_COLOR_FOCUSED
     { 0, 4, 0x5a5a5aff },    // DEFAULT_BASE_COLOR_FOCUSED
     { 0, 5, 0xffffffff },    // DEFAULT_TEXT_COLOR_FOCUSED
-    { 0, 6, 0x000000ff },    // DEFAULT_BORDER_COLOR_PRESSED 
-    { 0, 7, 0xc3c3c3ff },    // DEFAULT_BASE_COLOR_PRESSED 
-    { 0, 8, 0x202020ff },    // DEFAULT_TEXT_COLOR_PRESSED
+    { 0, 6, 0xaad39aff },    // DEFAULT_BORDER_COLOR_PRESSED
+    { 0, 7, 0xb3b3b3ff },    // DEFAULT_BASE_COLOR_PRESSED
+    { 0, 8, 0x101010ff },    // DEFAULT_TEXT_COLOR_PRESSED
     { 0, 9, 0x4a4a4aff },    // DEFAULT_BORDER_COLOR_DISABLED
     { 0, 10, 0x777777ff },    // DEFAULT_BASE_COLOR_DISABLED
     { 0, 11, 0x202020ff },    // DEFAULT_TEXT_COLOR_DISABLED
