@@ -1381,53 +1381,66 @@ bool create_level_from_json(cJSON *json)
         return false;
     }
 
-    cJSON *radius_json = cJSON_GetObjectItem(json, "radius");
-    if (radius_json) {
-        if (cJSON_IsNumber(radius_json)) {
-            options->create_level_radius = radius_json->valueint;
+    if (options->load_state_create_level_radius) {
+        cJSON *radius_json = cJSON_GetObjectItem(json, "radius");
+        if (radius_json) {
+            if (cJSON_IsNumber(radius_json)) {
+                options->create_level_radius = radius_json->valueint;
+            } else {
+                errmsg("JSON['create_level']['radius'] not a Number");
+                return false;
+            }
+            CLAMPVAR(options->create_level_radius,
+                     LEVEL_MIN_RADIUS,
+                     LEVEL_MAX_RADIUS);
         } else {
-            errmsg("JSON['create_level']['radius'] not a Number");
-            return false;
+            warnmsg("JSON['create_level']['radius'] is missing");
         }
-        CLAMPVAR(options->create_level_radius,
-                 LEVEL_MIN_RADIUS,
-                 LEVEL_MAX_RADIUS);
-    } else {
-        warnmsg("JSON['create_level']['radius'] is missing");
     }
 
-    cJSON *density_json = cJSON_GetObjectItem(json, "minimum_path_density");
-    if (density_json) {
-        if (cJSON_IsNumber(density_json)) {
-            options->create_level_minimum_path_density = density_json->valuedouble;
+    if (options->load_state_create_level_minimum_path_density) {
+        cJSON *density_json = cJSON_GetObjectItem(json, "minimum_path_density");
+        if (density_json) {
+            if (cJSON_IsNumber(density_json)) {
+                options->create_level_minimum_path_density = density_json->valuedouble;
+            } else {
+                errmsg("JSON['create_level']['minimum_path_density'] not a Number");
+                return false;
+            }
+            CLAMPVAR(options->create_level_minimum_path_density,
+                     LEVEL_MIN_MINIMUM_PATH_DENSITY,
+                     LEVEL_MAX_MINIMUM_PATH_DENSITY);
         } else {
-            errmsg("JSON['create_level']['minimum_path_density'] not a Number");
-            return false;
+            warnmsg("JSON['create_level']['minimum_path_density'] is missing");
         }
-        CLAMPVAR(options->create_level_minimum_path_density,
-                 LEVEL_MIN_MINIMUM_PATH_DENSITY,
-                 LEVEL_MAX_MINIMUM_PATH_DENSITY);
-    } else {
-        warnmsg("JSON['create_level']['minimum_path_density'] is missing");
     }
 
-    cJSON *symmetry_mode_json = cJSON_GetObjectItem(json, "symmetry_mode");
-    if (symmetry_mode_json) {
-        if (cJSON_IsString(symmetry_mode_json)) {
-            options->create_level_symmetry_mode = parse_symmetry_mode_string(cJSON_GetStringValue(symmetry_mode_json));
+    if (options->load_state_create_level_symmetry_mode) {
+        cJSON *symmetry_mode_json = cJSON_GetObjectItem(json, "symmetry_mode");
+        if (symmetry_mode_json) {
+            if (cJSON_IsString(symmetry_mode_json)) {
+                options->create_level_symmetry_mode = parse_symmetry_mode_string(cJSON_GetStringValue(symmetry_mode_json));
+            } else {
+                errmsg("JSON['create_level']['symmetry_mode'] not a Number");
+                return false;
+            }
         } else {
-            errmsg("JSON['create_level']['symmetry_mode'] not a Number");
-            return false;
+            warnmsg("JSON['create_level']['symmetry_mode'] is missing");
         }
-    } else {
-        warnmsg("JSON['create_level']['symmetry_mode'] is missing");
     }
 
     cJSON *fixed_json = cJSON_GetObjectItem(json, "fixed");
     if (fixed_json) {
-        if (!int_range_from_json(fixed_json, &options->create_level_fixed)) {
+        int_range_t fixed_range = options->create_level_fixed;
+        if (!int_range_from_json(fixed_json, &fixed_range)) {
             errmsg("Error parsing program state: JSON['create_level']['fixed']");
             return false;
+        }
+        if (options->load_state_create_level_fixed_min) {
+            options->create_level_fixed.min = fixed_range.min;
+        }
+        if (options->load_state_create_level_fixed_max) {
+            options->create_level_fixed.max = fixed_range.max;
         }
         int_range_clamp(&options->create_level_fixed,
                         LEVEL_MIN_FIXED,
@@ -1438,9 +1451,16 @@ bool create_level_from_json(cJSON *json)
 
     cJSON *hidden_json = cJSON_GetObjectItem(json, "hidden");
     if (hidden_json) {
+        int_range_t hidden_range = options->create_level_hidden;
         if (!int_range_from_json(hidden_json, &options->create_level_hidden)) {
             errmsg("Error parsing program state: JSON['create_level']['hidden']");
             return false;
+        }
+        if (options->load_state_create_level_hidden_min) {
+            options->create_level_hidden.min = hidden_range.min;
+        }
+        if (options->load_state_create_level_hidden_max) {
+            options->create_level_hidden.max = hidden_range.max;
         }
         int_range_clamp(&options->create_level_hidden,
                         LEVEL_MIN_HIDDEN,

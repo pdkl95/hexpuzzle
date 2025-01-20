@@ -125,6 +125,15 @@ struct options {
     symmetry_mode_t create_level_symmetry_mode;
     float create_level_minimum_path_density;
 
+    bool load_state_create_level_mode;
+    bool load_state_create_level_radius;
+    bool load_state_create_level_fixed_min;
+    bool load_state_create_level_fixed_max;
+    bool load_state_create_level_hidden_min;
+    bool load_state_create_level_hidden_max;
+    bool load_state_create_level_symmetry_mode;
+    bool load_state_create_level_minimum_path_density;
+
     char *file_path;
 
     /* cheat (debug) options */

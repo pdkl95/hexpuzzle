@@ -38,7 +38,7 @@
 options_t *options = NULL;
 
 /* command line options */
-static char short_options[] = "Cc:e:F:H:p:s:wvVW:PUL::r::hj";
+static char short_options[] = "Cc:e:F:H:p:s:wvVW:PR:UL::r::hj";
 
 static struct option long_options[] = {
     { "create-random-level",       no_argument, 0, 'L' },
@@ -48,7 +48,7 @@ static struct option long_options[] = {
     {                 "fps", required_argument, 0, 'F' },
     {              "height", required_argument, 0, 'H' },
     {               "width", required_argument, 0, 'W' },
-    {        "level-radius", required_argument, 0, '|' },
+    {        "level-radius", required_argument, 0, 'R' },
     {     "level-min-fixed", required_argument, 0, '[' },
     {     "level-max-fixed", required_argument, 0, ']' },
     {    "level-min-hidden", required_argument, 0, '(' },
@@ -143,7 +143,7 @@ static char help_text[] =
     "  -s, --seed <SEED_INT_OR_STR>    Set the RNG seed used for level creation.\n"
     "                                  Integers are used directly as the seed;\n"
     "                                  non-integer strings are hashed.\n"
-    "      --level-radius=NUMBER     Tile radius of created levels.\n"
+    "  -R, --level-radius=NUMBER     Tile radius of created levels.\n"
     "                                  Min: " STR(LEVEL_MIN_RADIUS) ", Max: " STR(LEVEL_MAX_RADIUS) ", Default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_RADIUS) "\n"
     "      --level-min-fixed=NUMBER  Minimum number of fixed tiles.  (default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MIN_FIXED) ")\n"
     "      --level-max-fixed=NUMBER  Maximum number of fixed tiles.  (default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MAX_FIXED) ")\n"
@@ -369,6 +369,15 @@ options_set_defaults(
     options->create_level_symmetry_mode = OPTIONS_DFFAULT_CREATE_LEVEL_SYMMETRY_MODE;
     options->create_level_minimum_path_density = OPTIONS_DFFAULT_CREATE_LEVEL_MINIMUM_PATH_DENSITY;
 
+    options->load_state_create_level_mode          = true;
+    options->load_state_create_level_radius        = true;
+    options->load_state_create_level_fixed_min     = true;
+    options->load_state_create_level_fixed_max     = true;
+    options->load_state_create_level_hidden_min    = true;
+    options->load_state_create_level_hidden_max    = true;
+    options->load_state_create_level_symmetry_mode = true;
+    options->load_state_create_level_minimum_path_density = true;
+
     color_option_set(&(options->path_color[0]), OPTIONS_DEFAULT_PATH_COLOR_0);
     color_option_set(&(options->path_color[1]), OPTIONS_DEFAULT_PATH_COLOR_1);
     color_option_set(&(options->path_color[2]), OPTIONS_DEFAULT_PATH_COLOR_2);
@@ -468,39 +477,77 @@ options_parse_args(
             options->startup_action = STARTUP_ACTION_CREATE_LEVEL;
             break;
 
-        case '|':
+        case 'R':
             if (!options_set_long_bounds(&options->create_level_radius, LEVEL_MIN_RADIUS, LEVEL_MAX_RADIUS)) {
                 errmsg("bad value for --level-radius (expected %d - %d)",
-                       LEVEL_MIN_RADIUS, LEVEL_MAX_RADIUS);
+                       LEVEL_MIN_RADIUS,
+                       LEVEL_MAX_RADIUS);
                 return false;
             }
+            options->load_state_create_level_radius = false;
             break;
 
         case '[':
-            if (!options_set_int_bounds(&options->create_level_fixed.min, 0, 9)) {
-                errmsg("bad value for --level-min-fixed (expected %d - %d)", 0, 9);
+            if (!options_set_int_bounds(&options->create_level_fixed.min,
+                                        LEVEL_MIN_FIXED,
+                                        LEVEL_MAX_FIXED)) {
+                errmsg("bad value for --level-min-fixed (expected %d - %d)",
+                       LEVEL_MIN_FIXED,
+                       LEVEL_MAX_FIXED);
                 return false;
+            }
+            options->load_state_create_level_fixed_min = false;
+            if (options->create_level_fixed.max < options->create_level_fixed.min) {
+                options->create_level_fixed.max = options->create_level_fixed.min;
+                options->load_state_create_level_fixed_max = false;
             }
             break;
 
         case ']':
-            if (!options_set_int_bounds(&options->create_level_fixed.max, 0, 9)) {
-                errmsg("bad value for --level-max-fixed (expected %d - %d)", 0, 9);
+            if (!options_set_int_bounds(&options->create_level_fixed.max,
+                                        LEVEL_MIN_FIXED,
+                                        LEVEL_MAX_FIXED)) {
+                errmsg("bad value for --level-max-fixed (expected %d - %d)",
+                       LEVEL_MIN_FIXED,
+                       LEVEL_MAX_FIXED);
                 return false;
+            }
+            options->load_state_create_level_fixed_max = false;
+            if (options->create_level_fixed.min > options->create_level_fixed.max) {
+                options->create_level_fixed.min = options->create_level_fixed.max;
+                options->load_state_create_level_fixed_min = false;
             }
             break;
 
         case '(':
-            if (!options_set_int_bounds(&options->create_level_hidden.min, 0, 9)) {
-                errmsg("bad value for --level-min-hidden (expected %d - %d)", 0, 9);
+            if (!options_set_int_bounds(&options->create_level_hidden.min,
+                                        LEVEL_MIN_HIDDEN,
+                                        LEVEL_MAX_HIDDEN)) {
+                errmsg("bad value for --level-min-hidden (expected %d - %d)",
+                       LEVEL_MIN_HIDDEN,
+                       LEVEL_MAX_HIDDEN);
                 return false;
+            }
+            options->load_state_create_level_hidden_min = false;
+            if (options->create_level_hidden.max < options->create_level_hidden.min) {
+                options->create_level_hidden.max = options->create_level_hidden.min;
+                options->load_state_create_level_hidden_max = false;
             }
             break;
 
         case ')':
-            if (!options_set_int_bounds(&options->create_level_hidden.max, 0, 9)) {
-                errmsg("bad value for --level-max-hidden (expected %d - %d)", 0, 9);
+            if (!options_set_int_bounds(&options->create_level_hidden.max,
+                                        LEVEL_MIN_HIDDEN,
+                                        LEVEL_MAX_HIDDEN)) {
+                errmsg("bad value for --level-max-hidden (expected %d - %d)",
+                       LEVEL_MIN_HIDDEN,
+                       LEVEL_MAX_HIDDEN);
                 return false;
+            }
+            options->load_state_create_level_hidden_max = false;
+            if (options->create_level_hidden.min > options->create_level_hidden.max) {
+                options->create_level_hidden.min = options->create_level_hidden.max;
+                options->load_state_create_level_hidden_min = false;
             }
             break;
 
