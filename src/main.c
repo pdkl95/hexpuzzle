@@ -238,26 +238,6 @@ void disable_automatic_events(void)
     }
 }
 
-void enable_mouse_input(void)
-{
-    mouse_input_accepted = true;
-}
-
-void disable_mouse_input(void)
-{
-    mouse_input_accepted = false;
-}
-
-void enable_postprocessing(void)
-{
-    do_postprocessing = true;
-}
-
-void disable_postprocessing(void)
-{
-    do_postprocessing = false;
-}
-
 #if defined(PLATFORM_DESKTOP)
 static void name_edit_dialog_finished(gui_dialog_t *dialog)
 {
@@ -859,7 +839,9 @@ handle_events(
         }
     }
 
-    set_mouse_position(GetMouseX(), GetMouseY());
+    if (mouse_input_is_enabled()) {
+        set_mouse_position(GetMouseX(), GetMouseY());
+    }
 
     if (IsKeyPressed(KEY_Q)) {
         running = false;
@@ -2162,60 +2144,38 @@ static void draw_gui_widgets(void)
 
 static void draw_cursor(void)
 {
+    IVector2 icon_pos;
+
     if (IsCursorOnScreen() && mouse_input_is_enabled()) {
-        int iconid = ICON_CURSOR_POINTER;
-        IVector2 icon_pos = mouse_position;
-        int icon_scale = options->cursor_scale;
+        icon_pos = mouse_position;
+    } else {
+        icon_pos.x = GetMouseX();
+        icon_pos.y = GetMouseY();
+    }
 
-        switch (current_mouse_cursor) {
-        case MOUSE_CURSOR_POINTING_HAND:
-            iconid = ICON_CURSOR_HAND;
-            icon_pos.x -= 2 * options->cursor_scale;;
-            icon_pos.y -= 1 * options->cursor_scale;;
-            break;
+    int iconid = ICON_CURSOR_POINTER;
+    int icon_scale = options->cursor_scale;
 
-        default:
-            // do nothing */
-            break;
-        }
+    switch (current_mouse_cursor) {
+    case MOUSE_CURSOR_POINTING_HAND:
+        iconid = ICON_CURSOR_HAND;
+        icon_pos.x -= 2 * options->cursor_scale;;
+        icon_pos.y -= 1 * options->cursor_scale;;
+        break;
 
-#if 0
-        Vector2 center = mouse_positionf;
+    default:
+        // do nothing */
+        break;
+    }
 
-        cursor_spin += cursor_spin_step;
-        while (cursor_spin >= 360.0) {
-            cursor_spin -= 360.0;
-        }
-        float spinosc = 0.5 * (sinf(3.0f * cursor_spin * M_PI / 180.0f) + 1.0);
+    bool save_locked = GuiIsLocked();
+    GuiUnlock();
 
-#define CURSOR_NUM_SECTORS 3
-#define CURSOR_SECTOR_SIZE (360.0f / CURSOR_NUM_SECTORS)
-#define CURSOR_RADIUS 12.0f
-#define CURSOR_INNER_RADIUS 4.0f
+    GuiDrawIcon(iconid, icon_pos.x + 1, icon_pos.y + 1, icon_scale, cursor_shadow_color);
+    GuiDrawIcon(iconid, icon_pos.x, icon_pos.y, icon_scale, cursor_color);
 
-        DrawRing(center,
-                 CURSOR_RADIUS,
-                 CURSOR_RADIUS + 1.5f,
-                 0.0f, 360.0f,
-                 0, cursor_outer_color);
-
-        for (int i=0; i<CURSOR_NUM_SECTORS; i++) {
-            float start_angle = ((float)i) * CURSOR_SECTOR_SIZE;
-            start_angle += cursor_spin;
-            float wedgesize = 2.5f + spinosc; // * 0.5;
-            float end_angle = start_angle + (CURSOR_SECTOR_SIZE/wedgesize);
-            DrawRing(center, CURSOR_INNER_RADIUS, CURSOR_RADIUS, start_angle, end_angle, 8, cursor_inner_color);
-        }
-#endif
-        bool save_locked = GuiIsLocked();
-        GuiUnlock();
-
-        GuiDrawIcon(iconid, icon_pos.x + 1, icon_pos.y + 1, icon_scale, ColorAlpha(BLACK, 0.5));
-        GuiDrawIcon(iconid, icon_pos.x, icon_pos.y, icon_scale, RAYWHITE);
-
-        if (save_locked) {
+    if (save_locked) {
             GuiLock();
-        }
     }
 }
 

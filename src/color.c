@@ -30,8 +30,8 @@ Color DEEP_SKY_BLUE      = { 176, 224, 230, 255 };
 Color DODGER_BLUE        = { 0x1E, 0x90, 0xFF, 255 };
 Color DEEP_PINK          = { 0xFF, 0x14, 0x93, 255 };
 Color CGOLD              = { 0xFF, 0xD7, 0x00, 255 };
-Color cursor_outer_color;
-Color cursor_inner_color;
+Color cursor_color;
+Color cursor_shadow_color;
 
 Color magenta    = { 214,   2, 112, 255 }; // d60270
 Color purple     = { 155,  79, 150, 255 }; // 9b4f96
@@ -80,12 +80,8 @@ Color seed_bg_color;
 
 void prepare_global_colors()
 {
-    //cursor_outer_color = DODGER_BLUE;
-    cursor_outer_color = CGOLD;
-    cursor_outer_color = ColorAlpha(cursor_outer_color, 0.86);
-
-    cursor_inner_color = DEEP_PINK;
-    cursor_inner_color = ColorAlpha(cursor_inner_color, 0.65);
+    cursor_color = RAYWHITE;
+    cursor_shadow_color = ColorAlpha(BLACK, 0.5);
 
     panel_bg_hover_color          = ColorBrightness(panel_bg_color,   -0.3);
     panel_edge_hover_color        = ColorBrightness(panel_edge_color,  0.3);

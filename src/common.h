@@ -107,6 +107,7 @@ extern const char *progversion;
 
 //#define RANDOM_GEN_DEBUG
 //#define DEBUG_ID_AND_DIR
+//#define DEBUG_MOUSE_INPUT_STATE
 
 #include "const.h"
 #include "raylib_helper.h"
@@ -133,18 +134,48 @@ int global_rng_sign(int pos_chances, int neg_chances);
 
 void disable_automatic_events(void);
 void enable_automatic_events(void);
-void enable_mouse_input(void);
-void disable_mouse_input(void);
-void enable_postprocessing(void);
-void disable_postprocessing(void);
 
 extern bool mouse_input_accepted;
+
+static inline void enable_mouse_input(void)
+{
+#ifdef DEBUG_MOUSE_INPUT_STATE
+    printf("mouse input: ENABLED\n");
+#endif
+    mouse_input_accepted = true;
+}
+
+static inline void disable_mouse_input(void)
+{
+#ifdef DEBUG_MOUSE_INPUT_STATE
+    printf("mouse input: DISABLED\n");
+#endif
+    mouse_input_accepted = false;
+}
+
 static inline bool mouse_input_is_enabled(void)
 {
+#ifdef DEBUG_MOUSE_INPUT_STATE
+    printf("mouse input TEST -> %s\n",
+           mouse_input_accepted ? "ENABLED" : "DISABLED");
+#endif
     return mouse_input_accepted;
 }
 
 void set_mouse_position(int new_x, int new_y);
+
+extern bool do_postprocessing;
+
+static inline void enable_postprocessing(void)
+{
+    do_postprocessing = true;
+}
+
+static inline void disable_postprocessing(void)
+{
+    do_postprocessing = false;
+}
+
 
 enum ui_result {
     UI_RESULT_PENDING = -1,

@@ -50,8 +50,8 @@ extern Color DODGER_BLUE;
 extern Color DEEP_PINK;
 extern Color CGOLD;
 
-extern Color cursor_outer_color;
-extern Color cursor_inner_color;
+extern Color cursor_color;
+extern Color cursor_shadow_color;
 
 extern Color magenta;
 extern Color purple;
