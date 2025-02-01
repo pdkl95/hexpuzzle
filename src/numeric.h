@@ -129,6 +129,8 @@ numeric_t numeric_pow(numeric_t a, numeric_t b);
 
 bool numeric_gt(numeric_t a, numeric_t b);
 bool numeric_lt(numeric_t a, numeric_t b);
+bool numeric_gte(numeric_t a, numeric_t b);
+bool numeric_lte(numeric_t a, numeric_t b);
 
 const char *numeric_text(numeric_t n);
 

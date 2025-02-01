@@ -298,6 +298,24 @@ bool numeric_lt(numeric_t a, numeric_t b)
     }
 }
 
+bool numeric_gte(numeric_t a, numeric_t b)
+{
+    if (both_like_int(a, b)) {
+        return (numeric_to_int(a) >= numeric_to_int(b));
+    } else {
+        return (numeric_to_float(a) >= numeric_to_float(b));
+    }
+}
+
+bool numeric_lte(numeric_t a, numeric_t b)
+{
+    if (both_like_int(a, b)) {
+        return (numeric_to_int(a) <= numeric_to_int(b));
+    } else {
+        return (numeric_to_float(a) <= numeric_to_float(b));
+    }
+}
+
 const char *numeric_text(numeric_t n)
 {
     assert_valid_numeric(n);

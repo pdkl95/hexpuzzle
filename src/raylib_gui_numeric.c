@@ -122,16 +122,31 @@ numeric_t gui_numeric_dec(raylib_gui_numeric_t *gn)
     return gui_numeric_set_bounded(gn, numeric_sub(gn->value, gn->step));
 }
 
+
+bool gui_numeric_is_min(raylib_gui_numeric_t *gn)
+{
+    return numeric_lte(gn->value, gn->min);
+}
+
+bool gui_numeric_is_max(raylib_gui_numeric_t *gn)
+{
+    return numeric_gte(gn->value, gn->max);
+}
+
 bool draw_gui_numeric(raylib_gui_numeric_t *gn)
 {
     bool rv = false;
 
     GuiLabel(gn->label_rect, gn->label_text);
 
+    if (gui_numeric_is_min(gn)) {
+        GuiDisable();
+    }
     if (GuiButton(gn->left_button_rect, gn->left_button_text)) {
         gui_numeric_dec(gn);
         rv = true;
     }
+    GuiEnable();
 
     DrawRectangleRec(gn->display_rect, seed_bg_color);
 
@@ -145,10 +160,14 @@ bool draw_gui_numeric(raylib_gui_numeric_t *gn)
                     gn->display_text_location,
                     RAYWHITE);
 
+    if (gui_numeric_is_max(gn)) {
+        GuiDisable();
+    }
     if (GuiButton(gn->right_button_rect, gn->right_button_text)) {
         gui_numeric_inc(gn);
         rv = true;
     }
+    GuiEnable();
 
     return rv;
 }
