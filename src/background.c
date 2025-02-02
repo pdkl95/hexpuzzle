@@ -134,10 +134,14 @@ void background_draw(background_t *bg)
 {
     bool animate_bg = !options->wait_events && options->animate_bg;
 
-    float fade = 0.0f;
+    static float fade = 0.0f;
+    float fade_target = 0.0f;
     if (current_level && current_level->finished) {
-        fade = 0.5 * (current_level->win_anim->fade[2] + current_level->win_anim->fade[3]);
+        fade_target = 0.5 * (current_level->win_anim->fade[2] + current_level->win_anim->fade[3]);
     }
+    fade = smooth_change(fade,
+                         fade_target,
+                         0.02f);
 
 #define cart_bg_normal_speed   1.0
 #define cart_bg_finished_speed 3.5
@@ -163,6 +167,7 @@ void background_draw(background_t *bg)
     int xmax = window_size.x + margin;
     int ymax = window_size.y + margin;
 
+    static float bloom_fade = 0.0f;
     static float speed = cart_bg_normal_speed;
     static float angle = 0.0;
     static float prev_angle = 0.0f;
@@ -204,21 +209,30 @@ void background_draw(background_t *bg)
         dir = Vector2Rotate((Vector2) { .x = 0.0f, .y = 1.0f }, angle);
         dir = Vector2Scale(dir, speed);
 
-        float bloom_fade = 0.5 * bloom_amount;
-        bloom_fade += 0.5;
+        float bloom_fade_target = 0.5 * bloom_amount;
+        bloom_fade_target += 0.5;
+        bloom_fade = smooth_change(bloom_fade,
+                                   bloom_fade_target,
+                                   0.005f);
+
         float circ_time_scale = 3.0;
-        float circ_mag = TAU/36.0f;
+        float circ_mag_target = TAU/36.0f;
 
         float rot_x, rot_y; 
         if (current_level) {
-           finished_fract = smooth_change(finished_fract,
+            finished_fract = smooth_change(finished_fract,
                                            current_level->finished_fract,
                                            0.005f);
-            circ_mag *= finished_fract;
+            circ_mag_target *= finished_fract;
         } else {
-            circ_mag *= bloom_fade;
-            circ_mag *= fade;
+            circ_mag_target *= bloom_fade;
+            circ_mag_target *= fade;
         }
+
+        static float circ_mag = 0.0f;
+        circ_mag = smooth_change(circ_mag,
+                                 circ_mag_target,
+                                 0.005f);
 
         if (current_level) {
             rot_x = circ_mag * cosf(current_time / circ_time_scale);
@@ -236,7 +250,7 @@ void background_draw(background_t *bg)
         float scale_rot = 3.0f;
         rot_z *= scale_rot * fade;
 
-        float turn_limit = 0.25 * (TAU/options->max_fps);
+        float turn_limit = 0.025 * (TAU/options->max_fps);
         limit_rot_x = slew_limit(limit_rot_x, rot_x, turn_limit);
         limit_rot_y = slew_limit(limit_rot_y, rot_y, turn_limit);
         limit_rot_z = slew_limit(limit_rot_z, rot_z, turn_limit);
