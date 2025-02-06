@@ -30,6 +30,20 @@
 #include "physics.h"
 #endif
 
+enum win_anim_state {
+    WIN_ANIM_STATE_NULL     = 0,
+    WIN_ANIM_STATE_STANDBY  = 1,
+    /*
+     * NOTE: all 'running' states MUST
+     *       be >= all non-'running' states
+     */
+#define WIN_ANIM_MIN_RUNNING_STATE WIN_ANIM_STATE_STARTUP
+    WIN_ANIM_STATE_STARTUP  = 2,
+    WIN_ANIM_STATE_RUNNING  = 3,
+    WIN_ANIM_STATE_SHUTDOWN = 4
+};
+typedef enum win_anim_state win_anim_state_t;
+
 enum win_anim_mode {
     WIN_ANIM_MODE_SIMPLE        = 0,
     WIN_ANIM_MODE_POPS          = 1,
@@ -61,7 +75,9 @@ struct win_anim {
     int total_mode_chances;
     bool use_background_3d;
     struct level *level;
-    bool running;
+    win_anim_state_t state;
+    float state_change_time;
+    float activation;
     float fade[4];
     float start_time;
     float run_time;
@@ -81,10 +97,12 @@ void win_anim_select_random_mode(win_anim_t *win_anim);
 void win_anim_update(win_anim_t *win_anim);
 void win_anim_draw(win_anim_t *win_anim);
 
-bool win_anim_running(win_anim_t *win_anim);
-
 void win_anim_start(win_anim_t *win_anim);
 void win_anim_stop(win_anim_t *win_anim);
 
-#endif /*WIN_ANIM_H*/
+static inline bool win_anim_running(win_anim_t *win_anim)
+{
+    return (win_anim != NULL) && (win_anim->state >= WIN_ANIM_MIN_RUNNING_STATE);
+}
 
+#endif /*WIN_ANIM_H*/

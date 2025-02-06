@@ -34,6 +34,14 @@ extern bool do_postprocessing;
 extern float bloom_amount;
 extern float warp_amount;
 
+static void win_anim_set_state(win_anim_t *win_anim, win_anim_state_t new_state)
+{
+    assert_not_null(win_anim);
+
+    win_anim->state = new_state;
+    win_anim->state_change_time = GetTime();
+}
+
 const char *win_anim_mode_str(win_anim_mode_t mode)
 {
     switch (mode) {
@@ -62,6 +70,29 @@ const char *win_anim_mode_str(win_anim_mode_t mode)
     }
 }
 
+const char *win_anim_state_str(win_anim_state_t state)
+{
+    switch (state) {
+    case WIN_ANIM_STATE_NULL:
+        return "NULL";
+
+    case WIN_ANIM_STATE_STANDBY:
+        return "STANDBY";
+
+    case WIN_ANIM_STATE_STARTUP:
+        return "STARTUP";
+
+    case WIN_ANIM_STATE_RUNNING:
+        return "RUNNING";
+
+    case WIN_ANIM_STATE_SHUTDOWN:
+        return "SHUTDOWN";
+
+    default:
+        return "(INVALID WIN_ANIM_STATE)";
+    }
+}
+
 void print_win_anim_modes(win_anim_t *win_anim)
 {
     for (win_anim_mode_t mode = 0; mode < WIN_ANIM_MODE_COUNT; mode++) {
@@ -80,7 +111,7 @@ void print_win_anim(win_anim_t *win_anim)
     printf(">>> win_anim[%p] %s %s\n",
            win_anim,
            win_anim_mode_str(win_anim->mode),
-           win_anim->running ? "running" : "off");
+           win_anim_state_str(win_anim->state));
 
     print_win_anim_modes(win_anim);
 
@@ -370,7 +401,8 @@ void init_win_anim(win_anim_t *win_anim, level_t *level)
 #endif
 #endif
 
-    win_anim->running = false;
+    win_anim_set_state(win_anim, WIN_ANIM_STATE_STANDBY);
+    win_anim->activation = 0.0f;
 
     win_anim->fade[0] = 0.0;
     win_anim->fade[1] = 0.0;
@@ -451,10 +483,53 @@ void destroy_win_anim(win_anim_t *win_anim)
     }
 }
 
+static bool win_anim_state_progress(win_anim_t *win_anim, float *progress, float inverse_state_duration)
+{
+    float cur_time = GetTime();
+    float elapsed_time = cur_time - win_anim->state_change_time;
+    float state_progress = elapsed_time * inverse_state_duration;
+    *progress = Clamp(state_progress, 0.0f, 1.0f);
+
+    return state_progress >= 1.0f;
+}
+
+#define WIN_ANIM_STARTUP_TIME_INVERSE  (1.0f / WIN_ANIM_STARTUP_TIME)
+#define WIN_ANIM_SHUTDOWN_TIME_INVERSE (1.0f / WIN_ANIM_SHUTDOWN_TIME)
+
 void win_anim_update(win_anim_t *win_anim)
 {
-    if (!win_anim || !win_anim->running) {
+    if (!win_anim) {
         return;
+    }
+
+    switch (win_anim->state) {
+    case WIN_ANIM_STATE_NULL:
+        assert(false && "win_anim_update called before win_anim_init");
+        return;
+
+    case WIN_ANIM_STATE_STANDBY:
+        win_anim->activation = 0.0f;
+        return;
+
+    case WIN_ANIM_STATE_STARTUP:
+        if (win_anim_state_progress(win_anim, &win_anim->activation, WIN_ANIM_STARTUP_TIME_INVERSE)) {
+            win_anim_set_state(win_anim, WIN_ANIM_STATE_RUNNING);
+            win_anim->activation = 1.0f;
+        }
+        break;
+
+    case WIN_ANIM_STATE_RUNNING:
+        win_anim->activation = 1.0f;
+        break;
+
+    case WIN_ANIM_STATE_SHUTDOWN:
+        if (win_anim_state_progress(win_anim, &win_anim->activation, WIN_ANIM_SHUTDOWN_TIME_INVERSE)) {
+            win_anim_set_state(win_anim, WIN_ANIM_STATE_STANDBY);
+            win_anim->activation = 0.0f;
+        } else {
+            win_anim->activation = 1.0f - win_anim->activation;
+        }
+        break;
     }
 
     win_anim->run_time = current_time - win_anim->start_time;
@@ -516,7 +591,7 @@ void win_anim_update(win_anim_t *win_anim)
     case WIN_ANIM_MODE_PHYSICS_FALL:
         /* fall through */
     case WIN_ANIM_MODE_PHYSICS_SWIRL:
-        physics_update(&win_anim->physics);
+        physics_update(&win_anim->physics, win_anim->activation);
         win_anim_update_physics(win_anim);
         break;
 #endif
@@ -528,21 +603,13 @@ void win_anim_draw(UNUSED win_anim_t *win_anim)
     assert_not_null(win_anim);
 }
 
-bool win_anim_running(win_anim_t *win_anim)
-{
-    if (win_anim) {
-        return win_anim->running;
-    } else {
-        return false;
-    }
-}
-
-
 void win_anim_start(win_anim_t *win_anim)
 {
     assert_not_null(win_anim);
 
-    if (!win_anim->running) {
+    if ((win_anim->state == WIN_ANIM_STATE_STANDBY) ||
+        (win_anim->state == WIN_ANIM_STATE_SHUTDOWN)) {
+
 #ifdef DEBUG_TRACE_WIN_ANIM
 #ifndef DEBUG_BUILD
         if (options->verbose) {
@@ -552,8 +619,8 @@ void win_anim_start(win_anim_t *win_anim)
         }
 #endif
 #endif
-        win_anim->running = true;
-        win_anim->start_time = GetTime();
+        win_anim_set_state(win_anim, WIN_ANIM_STATE_STARTUP);
+        win_anim->start_time = win_anim->state_change_time;
         win_anim->use_background_3d = false;
 
         win_anim->level->fade.do_rotate = win_anim->mode_config->do_fade_rotate;
@@ -584,7 +651,9 @@ void win_anim_stop(win_anim_t *win_anim)
 {
     assert_not_null(win_anim);
 
-    if (win_anim->running) {
+    if ((win_anim->state == WIN_ANIM_STATE_STARTUP) ||
+        (win_anim->state == WIN_ANIM_STATE_RUNNING)) {
+
 #ifdef DEBUG_TRACE_WIN_ANIM
 #ifndef DEBUG_BUILD
         if (options->verbose) {
@@ -607,7 +676,7 @@ void win_anim_stop(win_anim_t *win_anim)
             break;
         }
 
-        win_anim->running = false;
+        win_anim_set_state(win_anim, WIN_ANIM_STATE_SHUTDOWN);
 
         level_reset_win_anim(win_anim->level);
     }

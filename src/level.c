@@ -1846,7 +1846,7 @@ static void level_fade_transition(level_t *level, level_fade_finished_cb_t callb
         level->fade.rotate_speed *= -1.0;
     }
 
-    if (level->win_anim && level->win_anim->running) {
+    if (level->win_anim && win_anim_running(level->win_anim)) {
         switch (level->win_anim->mode) {
         case WIN_ANIM_MODE_POPS:
 

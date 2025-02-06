@@ -457,7 +457,7 @@ void physics_stop(physics_t *physics)
     physics_reset(physics);
 }
 
-void physics_update(physics_t *physics)
+void physics_update(physics_t *physics, float activation)
 {
     assert_not_null(physics);
 
@@ -486,5 +486,5 @@ void physics_update(physics_t *physics)
 
     fade_in_factor = physics->level->win_anim->fade[3];
     physics->time += physics->time_step;
-    cpSpaceStep(physics->space, physics->time_step);
+    cpSpaceStep(physics->space, physics->time_step * activation);
 }

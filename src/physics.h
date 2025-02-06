@@ -92,7 +92,7 @@ void physics_build_tiles(physics_t *physics);
 void physics_start(physics_t *physics);
 void physics_stop(physics_t *physics);
 void physics_reset(physics_t *physics);
-void physics_update(physics_t *physics);
+void physics_update(physics_t *physics, float activation);
 
 #endif /*PHYSICS_H*/
 
