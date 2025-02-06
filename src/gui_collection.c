@@ -35,6 +35,7 @@ Rectangle collection_list_rect;
 Rectangle collection_new_button_rect;
 Rectangle collection_play_button_rect;
 Rectangle collection_edit_button_rect;
+Rectangle collection_back_button_rect;
 Rectangle collection_name_label_rect;
 Rectangle collection_name_value_rect;
 
@@ -47,7 +48,7 @@ char collection_new_button_text[] = "New\nLevel";
 char collection_play_button_text[] = "Play";
 char collection_edit_button_text[] = "Edit";
 char collection_name_label_text[] = "Name";
-
+char collection_browser_button_text[] = "Collections";
 level_t *collection_preview_level;
 
 void init_gui_collection(void)
@@ -111,6 +112,16 @@ void resize_gui_collection(void)
         collection_preview_rect.y
         - collection_new_button_rect.height
         - (3 * PANEL_INNER_MARGIN);
+
+    collection_back_button_rect.width  = preview_play_width;
+    collection_back_button_rect.height = collection_play_button_text_size.y + WINDOW_MARGIN;
+    collection_back_button_rect.x = collection_preview_rect.x;
+    collection_back_button_rect.y =
+        collection_panel_rect.y
+        + collection_panel_rect.height
+        - collection_back_button_rect.height
+        - PANEL_INNER_MARGIN;
+
 
     Vector2 collection_name_label_text_size = measure_gui_text(collection_name_label_text);
 
@@ -420,6 +431,10 @@ void draw_gui_collection(void)
     if (game_mode == GAME_MODE_EDIT_COLLECTION) {
         draw_move_buttons(collection_list_rect);
         draw_edit_mode_buttons();
+    }
+
+    if (GuiButton(collection_back_button_rect, collection_browser_button_text)) {
+        set_game_mode(GAME_MODE_BROWSER);
     }
 
     int selected = draw_big_button(collection_play_button_rect, collection_play_button_text, true);
