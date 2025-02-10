@@ -259,7 +259,7 @@ void _level_preview(level_t *level, Rectangle rect, bool show_solved)
 
     rlPushMatrix();
 
-    float scale_factor = 1.2;
+    float scale_factor = 1.15;
     float half_scale_factor = 0.5 * scale_factor;
     Vector2 new_size = {
         .x = half_scale_factor * rect.width,

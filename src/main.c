@@ -133,6 +133,7 @@ bool level_finished = false;
 background_t *background;
 
 level_t *current_level = NULL;
+level_t *current_level_preview = NULL;
 collection_t *current_collection = NULL;
 
 bool modal_ui_active = false;
@@ -1740,6 +1741,12 @@ bool draw_level_preview(level_t *level, Rectangle bounds)
     DrawRectangleRec(bounds, BLACK);
 
     if (level) {
+        if (current_level_preview != level) {
+            current_level_preview = level;
+
+            level_resize(level);
+        }
+
         level_preview(level, bounds);
     } else {
         Vector2 bounds_loc  = {.x = bounds.x,     .y = bounds.y      };

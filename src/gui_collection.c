@@ -74,8 +74,13 @@ void resize_gui_collection(void)
     preview_play_width = MAX(preview_play_width, collection_new_button_text_size.x);
     preview_play_width = MAX(preview_play_width, collection_edit_button_text_size.x);
 
-    collection_preview_rect.width  = preview_play_width;
     collection_preview_rect.height = COLLECTION_LEVEL_PREVIEW_SIZE;
+    collection_preview_rect.width  = MIN(collection_preview_rect.height,
+                                         preview_play_width);
+
+    collection_preview_rect.height -= 2.0f * PANEL_INNER_MARGIN;
+    collection_preview_rect.width  -= 2.0f * PANEL_INNER_MARGIN;
+
     collection_preview_rect.x =
         main_gui_area_rect.x
         + main_gui_area_rect.width
@@ -89,7 +94,7 @@ void resize_gui_collection(void)
 
     collection_preview_rect.y = (collection_preview_rect.y + main_gui_area_rect.y) / 2.0f;
 
-    collection_play_button_rect.width  = preview_play_width;
+    collection_play_button_rect.width  = collection_preview_rect.width;
     collection_play_button_rect.height = collection_play_button_text_size.y + WINDOW_MARGIN;
     collection_play_button_rect.x = collection_preview_rect.x;
     collection_play_button_rect.y =
@@ -97,7 +102,7 @@ void resize_gui_collection(void)
         + collection_preview_rect.height
         + PANEL_INNER_MARGIN;
 
-    collection_edit_button_rect.width  = preview_play_width;
+    collection_edit_button_rect.width  = collection_preview_rect.width;
     collection_edit_button_rect.height = collection_edit_button_text_size.y + WINDOW_MARGIN;
     collection_edit_button_rect.x = collection_play_button_rect.x;
     collection_edit_button_rect.y =
@@ -105,7 +110,7 @@ void resize_gui_collection(void)
         + collection_play_button_rect.height
         + PANEL_INNER_MARGIN;
 
-    collection_new_button_rect.width  = preview_play_width;
+    collection_new_button_rect.width  = collection_preview_rect.width;
     collection_new_button_rect.height = (1 * collection_new_button_text_size.y) + WINDOW_MARGIN;
     collection_new_button_rect.x = collection_preview_rect.x;
     collection_new_button_rect.y =
@@ -113,7 +118,7 @@ void resize_gui_collection(void)
         - collection_new_button_rect.height
         - (3 * PANEL_INNER_MARGIN);
 
-    collection_back_button_rect.width  = preview_play_width;
+    collection_back_button_rect.width  = collection_preview_rect.width;
     collection_back_button_rect.height = collection_play_button_text_size.y + WINDOW_MARGIN;
     collection_back_button_rect.x = collection_preview_rect.x;
     collection_back_button_rect.y =
