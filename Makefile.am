@@ -1,10 +1,12 @@
 AUTOMAKE_OPTIONS = subdir-objects
 
-ACLOCAL_AMFLAGS = -I m4
+ACLOCAL_AMFLAGS = -I m4 -I m4/gnulib
 
 SUBDIRS =
 
 AM_CPPFLAGS = -Wall -Wextra
+
+LDADD =
 
 XXD ?= xxd
 
@@ -31,6 +33,7 @@ EXTRA_DIST = \
 	lib/gnugetopt.h \
 	lib/getopt.c \
 	lib/getopt1.c \
+	m4/gnulib/gnulib-cache.m4 \
 	external/sglib/LICENSE \
 	$(CLASSICS_LEVELS) \
 	$(FONTS) \
@@ -367,3 +370,16 @@ EXTRA_DIST += \
 
 external/raylib/external_raylib_libraylib_a-rglfw.$(OBJEXT): CFLAGS += -Wno-missing-field-initializers
 external/raylib/external_raylib_libraylib_a-rtextures.$(OBJEXT): CFLAGS += -Wno-array-bounds
+
+
+#########################################################
+# gnulib
+
+AM_CPPFLAGS += -I$(top_builddir)/lib -I$(top_srcdir)/lib
+
+hexpuzzle_LDADD += lib/gnulib/libgnu.a
+
+MOSTLYCLEANFILES =
+MOSTLYCLEANDIRS =
+
+include lib/gnulib/Makefile.gnulib

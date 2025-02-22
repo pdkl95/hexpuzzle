@@ -30,7 +30,7 @@ dnl ===  general Autotools Setup  ===
 dnl =================================
 
 AC_CONFIG_AUX_DIR([build-aux])
-AC_CONFIG_MACRO_DIR([m4])
+AC_CONFIG_MACRO_DIRS([m4 m4/gnulib])
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_HEADERS([config.h])
 
@@ -143,9 +143,11 @@ dnl ===  Compiler/Language Dependencies  ===
 dnl ========================================
 
 AC_PROG_CC
-AM_PROG_CC_C_O
-
 AC_USE_SYSTEM_EXTENSIONS
+
+gl_EARLY
+
+AM_PROG_CC_C_O
 
 AX_CHECK_STDC
 
@@ -224,6 +226,12 @@ AX_FUNC_GETOPT_LONG
 
 dnl Checks for other declarations
 dnl AC_CHECK_DECLS([])
+
+
+dnl optional GNUlib replacements for certain
+dnl required but missing standard library features
+gl_INIT
+
 
 dnl Export any extra build options
 APP_CFLAGS="-I\$(top_srcdir)/external"
