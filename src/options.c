@@ -95,7 +95,7 @@ static char help_text[] =
     "  -c, --config-dir=DIRECTORY  Directory to save/load persistant data.\n"
     "                              (default: ${XDG_CONFIG_HOME}/" PACKAGE_NAME "/\n"
     "                                which is usually ~/.config/" PACKAGE_NAME "/)\n"
-    "  -C, --no-config             Skip loading of all config files (\"Save Mode\")\n"
+    "  -C, --no-config             Skip loading of all config files (\"Safe Mode\")\n"
     "\n"
     "  -v, --verbose               More logging output (including raylib)\n"
     "\n"
