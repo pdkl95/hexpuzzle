@@ -1,3 +1,10 @@
+lib/gnulib/stddef.h
+lib/gnulib/stdio.h
+lib/gnulib/stdlib.h
+lib/gnulib/string.h
+lib/gnulib/strings.h
+lib/gnulib/sys/types.h
+lib/gnulib/unistd.h
 hexpuzzle
 hexpuzzle.html
 hexpuzzle.js
