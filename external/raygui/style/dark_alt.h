@@ -11,6 +11,8 @@
 //                                                                              //
 //////////////////////////////////////////////////////////////////////////////////
 
+//#define USE_BUNDLED_STYLE_FONT 1
+
 #define DARK_STYLE_PROPS_COUNT  23
 
 // Custom style name: Dark
@@ -21,12 +23,12 @@ static const GuiStyleProp darkStyleProps[DARK_STYLE_PROPS_COUNT] = {
     { 0, 3, 0xe6e5c3ff },    // DEFAULT_BORDER_COLOR_FOCUSED
     { 0, 4, 0x5a5a5aff },    // DEFAULT_BASE_COLOR_FOCUSED
     { 0, 5, 0xffffffff },    // DEFAULT_TEXT_COLOR_FOCUSED
-    { 0, 6, 0xaad39aff },    // DEFAULT_BORDER_COLOR_PRESSED
-    { 0, 7, 0xb3b3b3ff },    // DEFAULT_BASE_COLOR_PRESSED
-    { 0, 8, 0x101010ff },    // DEFAULT_TEXT_COLOR_PRESSED
-    { 0, 9, 0x4a4a4aff },    // DEFAULT_BORDER_COLOR_DISABLED
-    { 0, 10, 0x777777ff },    // DEFAULT_BASE_COLOR_DISABLED
-    { 0, 11, 0x202020ff },    // DEFAULT_TEXT_COLOR_DISABLED
+    { 0, 6, 0xe6e6e0ff },    // DEFAULT_BORDER_COLOR_PRESSED
+    { 0, 7, 0x3a3a3aff },    // DEFAULT_BASE_COLOR_PRESSED
+    { 0, 8, 0xffffffff },    // DEFAULT_TEXT_COLOR_PRESSED
+    { 0, 9, 0x414141ff },    // DEFAULT_BORDER_COLOR_DISABLED
+    { 0, 10, 0x414141ff },    // DEFAUALT_BASE_COLOR_DISABLED
+    { 0, 11, 0x9a9a9aff },    // DEFAULT_TEXT_COLOR_DISABLED
     { 0, 16, 0x00000010 },    // DEFAULT_TEXT_SIZE 
     { 0, 17, 0x00000000 },    // DEFAULT_TEXT_SPACING 
     { 0, 18, 0x9d9d9dff },    // DEFAULT_LINE_COLOR 
@@ -39,6 +41,8 @@ static const GuiStyleProp darkStyleProps[DARK_STYLE_PROPS_COUNT] = {
     { 9, 5, 0xf5f5f5ff },    // TEXTBOX_TEXT_COLOR_FOCUSED 
     { 10, 5, 0xf6f6f6ff },    // VALUEBOX_TEXT_COLOR_FOCUSED 
 };
+
+#ifdef USE_BUNDLED_STYLE_FONT
 
 // WARNING: This style uses a custom font: "Exo2-Regular.ttf" (size: 16, spacing: 0)
 
@@ -558,6 +562,9 @@ static const GlyphInfo darkFontGlyphs[95] = {
 
 Font font = { 0 };
 
+#endif /* USE_BUNDLED_STYLE_FONT */
+
+
 // Style loading function: dark
 static void GuiLoadStyleDark(void)
 {
@@ -568,6 +575,7 @@ static void GuiLoadStyleDark(void)
         GuiSetStyle(darkStyleProps[i].controlId, darkStyleProps[i].propertyId, darkStyleProps[i].propertyValue);
     }
 
+#ifdef USE_BUNDLED_STYLE_FONT
     // Custom font loading
     // NOTE: Compressed font image data (DEFLATE), it requires DecompressData() function
     int darkFontDataSize = 0;
@@ -599,6 +607,8 @@ static void GuiLoadStyleDark(void)
     Rectangle fontWhiteRec = { 510, 254, 1, 1 };
     SetShapesTexture(font.texture, fontWhiteRec);
 
+#endif /* USE_BUNDLED_STYLE_FONT */
+
     //-----------------------------------------------------------------
 
     // TODO: Custom user style setup: Set specific properties here (if required)
@@ -608,6 +618,8 @@ static void GuiLoadStyleDark(void)
 #if !defined(PLATFORM_WEB)
 static void GuiUnloadStyleDark(void)
 {
+#ifdef USE_BUNDLED_STYLE_FONT
     UnloadFont(font);
+#endif
 }
 #endif
