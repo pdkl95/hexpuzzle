@@ -41,45 +41,47 @@ options_t *options = NULL;
 static char short_options[] = "Cc:e:F:H:p:s:wvVW:PR:UL::r::hj";
 
 static struct option long_options[] = {
-    { "create-random-level",       no_argument, 0, 'L' },
-    {  "create-blank-level",       no_argument, 0, 'K' },
-    {           "no-config", required_argument, 0, 'C' },
-    {          "config-dir", required_argument, 0, 'c' },
-    {                 "fps", required_argument, 0, 'F' },
-    {              "height", required_argument, 0, 'H' },
-    {               "width", required_argument, 0, 'W' },
-    {        "level-radius", required_argument, 0, 'R' },
-    {     "level-min-fixed", required_argument, 0, '[' },
-    {     "level-max-fixed", required_argument, 0, ']' },
-    {    "level-min-hidden", required_argument, 0, '(' },
-    {    "level-max-hidden", required_argument, 0, ')' },
-    {                "seed", required_argument, 0, 's' },
-    {                "play", required_argument, 0, 'p' },
-    {              "random", optional_argument, 0, 'r' },
-    {                "edit", required_argument, 0, 'e' },
-    {       "cheat-autowin",       no_argument, 0, 'A' },
-    {               "force",       no_argument, 0, '!' },
-    {                "pack",       no_argument, 0, 'P' },
-    {              "unpack",       no_argument, 0, 'U' },
-    {          "animate-bg",       no_argument, 0, 'b' },
-    {       "no-animate-bg",       no_argument, 0, 'B' },
-    {         "animate-win",       no_argument, 0, 'i' },
-    {      "no-animate-win",       no_argument, 0, 'I' },
+    {  "create-random-level",       no_argument, 0, 'L' },
+    {   "create-blank-level",       no_argument, 0, 'K' },
+    {            "no-config", required_argument, 0, 'C' },
+    {           "config-dir", required_argument, 0, 'c' },
+    {                  "fps", required_argument, 0, 'F' },
+    {               "height", required_argument, 0, 'H' },
+    {                "width", required_argument, 0, 'W' },
+    {         "level-radius", required_argument, 0, 'R' },
+    {      "level-min-fixed", required_argument, 0, '[' },
+    {      "level-max-fixed", required_argument, 0, ']' },
+    {     "level-min-hidden", required_argument, 0, '(' },
+    {     "level-max-hidden", required_argument, 0, ')' },
+    {                 "seed", required_argument, 0, 's' },
+    {                 "play", required_argument, 0, 'p' },
+    {               "random", optional_argument, 0, 'r' },
+    {                 "edit", required_argument, 0, 'e' },
+    {        "cheat-autowin",       no_argument, 0, 'A' },
+    {                "force",       no_argument, 0, '!' },
+    {                 "pack",       no_argument, 0, 'P' },
+    {               "unpack",       no_argument, 0, 'U' },
+    {           "animate-bg",       no_argument, 0, 'b' },
+    {        "no-animate-bg",       no_argument, 0, 'B' },
+    {          "animate-win",       no_argument, 0, 'i' },
+    {       "no-animate-win",       no_argument, 0, 'I' },
 #ifdef USE_PHYSICS
-    {         "use-physics",       no_argument, 0, 'y' },
-    {      "no-use-physics",       no_argument, 0, 'Y' },
+    {          "use-physics",       no_argument, 0, 'y' },
+    {       "no-use-physics",       no_argument, 0, 'Y' },
 #endif
-    {       "show-previews",       no_argument, 0, '-' },
-    {    "no-show-previews",       no_argument, 0, '_' },
-    {       "show-tooltips",       no_argument, 0, 't' },
-    {    "no-show-tooltips",       no_argument, 0, 'T' },
-    {      "extra-rainbows",       no_argument, 0, ':' },
-    {   "no-extra-rainbows",       no_argument, 0, ';' },
-    {         "wait-events",       no_argument, 0, 'w' },
-    {             "verbose",       no_argument, 0, 'v' },
-    {             "version",       no_argument, 0, 'V' },
-    {                "help",       no_argument, 0, 'h' },
-    {                     0,                 0, 0,  0  }
+    {   "use-shader-effects",       no_argument, 0, 'x' },
+    {"no-use-shader-effects",       no_argument, 0, 'X' },
+    {        "show-previews",       no_argument, 0, '-' },
+    {     "no-show-previews",       no_argument, 0, '_' },
+    {        "show-tooltips",       no_argument, 0, 't' },
+    {     "no-show-tooltips",       no_argument, 0, 'T' },
+    {       "extra-rainbows",       no_argument, 0, ':' },
+    {    "no-extra-rainbows",       no_argument, 0, ';' },
+    {          "wait-events",       no_argument, 0, 'w' },
+    {              "verbose",       no_argument, 0, 'v' },
+    {              "version",       no_argument, 0, 'V' },
+    {                 "help",       no_argument, 0, 'h' },
+    {                      0,                 0, 0,  0  }
 };
 
 static char usage_args[] = "[<file>." LEVEL_FILENAME_EXT  " | <file>." COLLECTION_FILENAME_EXT "]";
@@ -109,6 +111,8 @@ static char help_text[] =
     "   --no-animate-win           Disable animation on level win\n"
     "      --use-physics           Enable the physics engine (default: on)\n"
     "   --no-use-physics           Disable the physucs engine\n"
+    "      --use-shader-effects    Enable shader postprocesing effects (default: on)\n"
+    "   --no-use-shader-effects    Disable shader postprocesing effects\n"
     "      --show-previews         Enable showing small level previews (default: on)\n"
     "   --no-show-previews         Disable showing small level previews\n"
     "      --show-tooltips         Enable popup tooltips on mouse-hover default: on)\n"
@@ -340,6 +344,7 @@ options_set_defaults(
     options->animate_bg            = OPTIONS_DEFAULT_ANIMATE_BG;
     options->animate_win           = OPTIONS_DEFAULT_ANIMATE_WIN;
     options->use_physics           = OPTIONS_DEFAULT_USE_PHYSICS;
+    options->use_postprocessing    = OPTIONS_DEFAULT_USE_POSTPROCESSING;
     options->show_level_previews   = OPTIONS_DEFAULT_SHOW_LEVEL_PREVIEWS;
     options->show_tooltips         = OPTIONS_DEFAULT_SHOW_TOOLTIPS;
     options->extra_rainbows        = OPTIONS_DEFAULT_EXTRA_RAINBOWS;
@@ -352,6 +357,8 @@ options_set_defaults(
 
     options->load_state_animate_bg  = true;
     options->load_state_animate_win = true;
+    options->load_state_use_physics = true;
+    options->load_state_use_postprocessing = true;
     options->load_state_show_level_previews = true;
     options->load_state_show_tooltips = true;
     options->load_color_opt = true;
@@ -609,6 +616,16 @@ options_parse_args(
             options->load_state_use_physics = false;
             break;
 #endif
+        case 'x':
+            options->use_postprocessing = true;
+            options->load_state_use_postprocessing = false;
+            break;
+
+        case 'X':
+            options->use_postprocessing = false;
+            options->load_state_use_postprocessing = false;
+            break;
+
         case '-':
             options->show_level_previews = true;
             options->load_state_show_level_previews = false;

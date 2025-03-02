@@ -2312,7 +2312,7 @@ render_frame(
 
     SetShaderValue(postprocessing_shader, postprocessing_shader_loc.time, &current_time, SHADER_UNIFORM_FLOAT);
 
-    bool do_postprocessing_this_frame = do_postprocessing;
+    bool do_postprocessing_this_frame = do_postprocessing && options->use_postprocessing;
 
     if (do_postprocessing_this_frame) {
         BeginTextureMode(*scene_write_target);

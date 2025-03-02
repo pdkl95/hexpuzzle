@@ -36,6 +36,7 @@ Rectangle options_anim_win_rect;
 Rectangle options_show_level_previews_rect;
 Rectangle options_show_tooltips_rect;
 Rectangle options_reset_finished_rect;
+Rectangle options_use_postprocessing_rect;
 
 char options_panel_text[] = "Options";
 char options_icon_scale_text[] = "Cursor Size";
@@ -46,6 +47,7 @@ char options_show_tooltips_text[] = "Show Tooltips";
 char options_reset_finished_text[] = "Reset Level Finished Data";
 char options_color_edit_tooltip[] = "Select Color";
 char options_color_reset_tooltip[] = "Reset color back to default";
+char options_use_postprocessing_text[] = "Use Shader Effects";
 
 #ifdef USE_PHYSICS
 Rectangle options_use_physics_rect;
@@ -159,7 +161,7 @@ void resize_gui_options(void)
     options_panel_rect.height = (window_size.y * options_panel_rect.x) / window_size.x;
 
     MINVAR(options_panel_rect.width,  350);
-    MINVAR(options_panel_rect.height, 350);
+    MINVAR(options_panel_rect.height, 400);
 
     options_panel_rect.x = (window_size.x / 2) - (options_panel_rect.width  / 2);
     options_panel_rect.y = (window_size.y / 2) - (options_panel_rect.height / 2);
@@ -192,6 +194,7 @@ void resize_gui_options(void)
 #ifdef USE_PHYSICS
     mktext(use_physics);
 #endif
+    mktext(use_postprocessing);
     mktext(show_level_previews);
     mktext(show_tooltips);
 #undef mktext
@@ -215,12 +218,17 @@ void resize_gui_options(void)
     options_use_physics_rect.height = TOOL_BUTTON_HEIGHT;
 #endif
 
-    options_show_level_previews_rect.x = options_area_rect.x;
+    options_use_postprocessing_rect.x = options_area_rect.x;
 #ifdef USE_PHYSICS
-    options_show_level_previews_rect.y = options_use_physics_rect.y + options_use_physics_rect.height + RAYGUI_ICON_SIZE;
+    options_use_postprocessing_rect.y = options_use_physics_rect.y + options_use_physics_rect.height + RAYGUI_ICON_SIZE;
 #else
-    options_show_level_previews_rect.y = options_anim_win_rect.y + options_anim_win_rect.height + RAYGUI_ICON_SIZE;
+    options_use_postprocessing_rect.y = options_anim_win_rect.y + options_anim_win_rect.height + RAYGUI_ICON_SIZE;
 #endif
+    options_use_postprocessing_rect.width = anim_text_size;
+    options_use_postprocessing_rect.height = TOOL_BUTTON_HEIGHT;
+
+    options_show_level_previews_rect.x = options_area_rect.x;
+    options_show_level_previews_rect.y = options_use_postprocessing_rect.y + options_use_postprocessing_rect.height + RAYGUI_ICON_SIZE;
     options_show_level_previews_rect.width = anim_text_size;
     options_show_level_previews_rect.height = TOOL_BUTTON_HEIGHT;
 
@@ -313,6 +321,7 @@ void draw_gui_graphics_options(void)
 #ifdef USE_PHYSICS
     GuiToggle(options_use_physics_rect,         options_use_physics_text,         &options->use_physics);
 #endif
+    GuiToggle(options_use_postprocessing_rect,  options_use_postprocessing_text,  &options->use_postprocessing);
     GuiToggle(options_show_level_previews_rect, options_show_level_previews_text, &options->show_level_previews);
     GuiToggle(options_show_tooltips_rect,       options_show_tooltips_text,       &options->show_tooltips);
 
@@ -321,6 +330,7 @@ void draw_gui_graphics_options(void)
 #ifdef USE_PHYSICS
     show_status_beside(options->use_physics,         options_use_physics_rect);
 #endif
+    show_status_beside(options->use_postprocessing,  options_use_postprocessing_rect);
     show_status_beside(options->show_level_previews, options_show_level_previews_rect);
     show_status_beside(options->show_tooltips,       options_show_tooltips_rect);
 
