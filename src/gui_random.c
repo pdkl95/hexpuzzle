@@ -890,7 +890,7 @@ void resize_gui_random(void)
     gui_random_symmetry_button_rotate_rect.width  = gui_random_symmetry_button_rotate_text_size.x;
     gui_random_symmetry_button_rotate_rect.height = gui_random_symmetry_label_rect.height;
 
-    float symmetry_highlight_thickness = 3.0f;
+    float symmetry_highlight_thickness = BUTTON_SELECTED_HIGHLIGHT_THICKNESS;
     gui_random_symmetry_button_none_bg_rect    = ExpandRectangle(gui_random_symmetry_button_none_rect,
                                                                  symmetry_highlight_thickness);
     gui_random_symmetry_button_reflect_bg_rect = ExpandRectangle(gui_random_symmetry_button_reflect_rect,
@@ -975,8 +975,8 @@ static void draw_gui_randon_symmetry_modes(void)
 {
     GuiLabel(gui_random_symmetry_label_rect, gui_random_symmetry_label_text);
 
-    float roundness = 0.2;
-    int segments = 4;
+    float roundness = BUTTON_SELECTED_HIGHLIGHT_ROUNDNESS;
+    int segments    = BUTTON_SELECTED_HIGHLIGHT_SEGMENTS;
 
     if (options->create_level_symmetry_mode == SYMMETRY_MODE_NONE) {
         GuiSetState(STATE_PRESSED);

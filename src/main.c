@@ -1927,6 +1927,18 @@ static inline bool rsb_single_line_button(const char *text)
     return pressed;
 }
 
+static inline bool rsb_single_line_button_or_disabled(const char *text, bool is_enabled)
+{
+    if (is_enabled) {
+        return rsb_single_line_button(text);
+    } else {
+        GuiDisable();
+        bool rv = rsb_single_line_button(text);
+        GuiEnable();
+        return rv;
+    }
+}
+
 static inline bool rsb_double_line_button(const char **lines, int line_count, int icon)
 {
     bool pressed = GuiButtonMultiLine(right_side_button.rect, lines, line_count, icon);
@@ -1938,8 +1950,23 @@ static bool game_mode_button(void *ptr, game_mode_t mode, int line_count, int ic
 {
     bool rv = false;
 
-    if (game_mode == mode) {
-        GuiDisable();
+    bool selected = game_mode == mode;
+
+    if (selected) {
+        Rectangle src_rect = right_side_button.rect;
+
+        int border_width = GuiGetStyle(BUTTON, BORDER_WIDTH);
+        float line_height = src_rect.height - (2 * border_width) - 2;
+        src_rect.height = (line_height * line_count) + ((line_count) * border_width);
+
+        Rectangle bg_rect = ExpandRectangle(src_rect,
+                                            BUTTON_SELECTED_HIGHLIGHT_THICKNESS);
+        DrawRectangleRounded(bg_rect,
+                             BUTTON_SELECTED_HIGHLIGHT_ROUNDNESS,
+                             BUTTON_SELECTED_HIGHLIGHT_SEGMENTS,
+                             highlight_border_color);
+        //GuiDisable();
+        GuiSetState(STATE_PRESSED);
     }
 
     bool pressed = false;
@@ -1952,12 +1979,17 @@ static bool game_mode_button(void *ptr, game_mode_t mode, int line_count, int ic
     }
 
     if (pressed) {
-        set_game_mode(mode);
+        if (selected) {
+            set_game_mode(GAME_MODE_TITLE);
+        } else {
+            set_game_mode(mode);
+        }
         rv = true;
     }
 
-    if (game_mode == mode) {
-        GuiEnable();
+    if (selected) {
+        //GuiEnable();
+        GuiSetState(STATE_NORMAL);
     }
 
     return rv;
@@ -1968,6 +2000,24 @@ static void standard_buttons(void)
     game_mode_button(options_button_text,  GAME_MODE_OPTIONS, 1, 0);
     game_mode_button(browser_button_lines, GAME_MODE_BROWSER, 2, ICON_FOLDER_FILE_OPEN);
     game_mode_button( random_button_lines, GAME_MODE_RANDOM,  2, ICON_SHUFFLE_FILL);
+}
+
+static inline void rsb_undo_button(void)
+{
+    if (current_level) {
+        if (rsb_single_line_button_or_disabled(undo_button_text, level_can_undo(current_level))) {
+            undo_play();
+        }
+    }
+}
+
+static inline void rsb_redo_button(void)
+{
+    if (current_level) {
+        if (rsb_single_line_button_or_disabled(redo_button_text, level_can_redo(current_level))) {
+            redo_play();
+        }
+    }
 }
 
 static void draw_gui_widgets(void)
@@ -2033,13 +2083,8 @@ static void draw_gui_widgets(void)
         // skip one position
         shift_down_right_side_button(right_side_button.single_line_y_offset);
 
-        if (rsb_single_line_button(undo_button_text)) {
-            undo_edit();
-        }
-
-        if (rsb_single_line_button(redo_button_text)) {
-            redo_edit();
-        }
+        rsb_undo_button();
+        rsb_redo_button();
 
 #if defined(PLATFORM_DESKTOP)
         if (current_level && current_level->changed) {
@@ -2080,13 +2125,9 @@ static void draw_gui_widgets(void)
         // skip one position
         shift_down_right_side_button(right_side_button.single_line_y_offset);
 
-        if (rsb_single_line_button(undo_button_text)) {
-            undo_play();
-        }
+        rsb_undo_button();
+        rsb_redo_button();
 
-        if (rsb_single_line_button(redo_button_text)) {
-            redo_play();
-        }
         break;
 
     case GAME_MODE_WIN_LEVEL:

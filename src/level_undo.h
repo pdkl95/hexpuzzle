@@ -241,5 +241,8 @@ void level_redo_play(level_t *level);
 void level_undo_edit(level_t *level);
 void level_redo_edit(level_t *level);
 
+bool level_can_undo(level_t *level);
+bool level_can_redo(level_t *level);
+
 #endif /*LEVEL_UNDO_H*/
 

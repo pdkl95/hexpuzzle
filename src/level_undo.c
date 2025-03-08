@@ -930,3 +930,26 @@ void level_redo_edit(level_t *level)
     } while(event.chain_next);
 }
 
+bool level_can_undo(level_t *level)
+{
+    struct undo_list *event_list = level->undo->edit_event_list;
+    if (edit_mode) {
+        event_list = level->undo->play_event_list;
+    }
+
+    undo_event_t *prev_event = _get_undo_event(event_list, false);
+
+    return !!prev_event;
+}
+
+bool level_can_redo(level_t *level)
+{
+    struct undo_list *event_list = level->undo->edit_event_list;
+    if (edit_mode) {
+        event_list = level->undo->play_event_list;
+    }
+
+    undo_event_t *next_event = _get_redo_event(event_list, false);
+
+    return !!next_event;
+}
