@@ -930,26 +930,42 @@ void level_redo_edit(level_t *level)
     } while(event.chain_next);
 }
 
+static undo_list_t *get_current_event_list(level_t *level)
+{
+    switch (game_mode) {
+    case GAME_MODE_PLAY_LEVEL:
+        return level->undo->play_event_list;
+
+    case GAME_MODE_EDIT_LEVEL:
+        return level->undo->edit_event_list;
+
+    default:
+        __builtin_unreachable();
+        assert(false && "Undo only works in PLAY or EDIT mode");
+        return NULL;
+    }
+}
+
 bool level_can_undo(level_t *level)
 {
-    struct undo_list *event_list = level->undo->edit_event_list;
-    if (edit_mode) {
-        event_list = level->undo->play_event_list;
-    }
-
+    undo_list_t  *event_list = get_current_event_list(level);
     undo_event_t *prev_event = _get_undo_event(event_list, false);
 
-    return !!prev_event;
+    if (prev_event) {
+        return true;
+    } else {
+        return false;
+    }
 }
 
 bool level_can_redo(level_t *level)
 {
-    struct undo_list *event_list = level->undo->edit_event_list;
-    if (edit_mode) {
-        event_list = level->undo->play_event_list;
-    }
-
+    undo_list_t  *event_list = get_current_event_list(level);
     undo_event_t *next_event = _get_redo_event(event_list, false);
 
-    return !!next_event;
+    if (next_event) {
+        return true;
+    } else {
+        return false;
+    }
 }
