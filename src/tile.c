@@ -167,13 +167,20 @@ int compare_tiles(const void *p1, const void *p2)
 
     int rv;
 
-#define CMP(field) \
+#define BCMP(field) \
+    if (t1->field && !t2->field) { return 1; } \
+    if (!t1->field && t2->field) { return -1; }
+
+    if (t1->enabled && !t2->enabled) { return 1; } \
+    if (!t1->enabled && t2->enabled) { return -1; }
+    //BCMP(enabled);
+    BCMP(hidden);
+    BCMP(fixed);
+#undef BCMP
+
+#define CMP(field)                            \
     rv = ((int)t1->field) - ((int)t2->field); \
     if (rv) { return rv; }
-
-    CMP(enabled);
-    CMP(hidden);
-    CMP(fixed);
 
     CMP(path[0]);
     CMP(path[1]);
@@ -184,17 +191,6 @@ int compare_tiles(const void *p1, const void *p2)
 #undef CMP
 
     return 0;
-
-#if 0
-    rv = ((int)t1->enabled) - ((int)t2->enabled);
-    if (rv) { return rv; }
-
-    rv = ((int)t1->hidden) - ((int)t2->hidden);
-    if (rv) { return rv; }
-
-    rv = ((int)t1->fixed) - ((int)t2->fixed);
-    if (rv) { return rv; }
-#endif
 }
 
 void tile_copy_attributes(tile_t *dst, tile_t *src)

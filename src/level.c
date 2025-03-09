@@ -517,6 +517,10 @@ level_t *create_level(struct collection *collection)
 void destroy_level(level_t *level)
 {
     if (level) {
+        if (current_level == level) {
+            current_level = NULL;
+        }
+
         if (level->undo) {
             destroy_level_undo(level->undo);
             level->undo = NULL;

@@ -482,6 +482,9 @@ void resize_gui_browser(void)
     if (local_files_home_button_text) {
         FREE(local_files_home_button_text);
     }
+    if (local_files_local_saved_levels_button_text) {
+        FREE(local_files_local_saved_levels_button_text);
+    }
     local_files_up_button_text   = strdup(GuiIconText(ICON_ARROW_LEFT, local_files_up_button_text_str));
     local_files_home_button_text = strdup(GuiIconText(ICON_HOUSE,      local_files_home_button_text_str));
     local_files_local_saved_levels_button_text = strdup(GuiIconText(ICON_FOLDER_FILE_OPEN, local_files_local_saved_levels_button_text_str));

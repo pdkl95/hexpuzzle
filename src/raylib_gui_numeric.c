@@ -56,6 +56,7 @@ void destroy_gui_numeric(raylib_gui_numeric_t *gn)
         SAFEFREE(gn->label_text);
         SAFEFREE(gn->left_button_text);
         SAFEFREE(gn->right_button_text);
+        SAFEFREE(gn);
     }
 }
 

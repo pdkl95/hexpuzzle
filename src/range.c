@@ -180,6 +180,7 @@ void destroy_gui_int_range(gui_int_range_t *gui)
 {
     if (gui) {
         SAFEFREE(gui->label_text);
+        SAFEFREE(gui);
     }
 }
 
