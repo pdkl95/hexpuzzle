@@ -473,9 +473,28 @@ win_anim_t *create_win_anim(struct level *level)
     return win_anim;
 }
 
+void cleanup_win_anim(win_anim_t *win_anim)
+{
+    if (win_anim) {
+        switch (win_anim->mode) {
+#ifdef USE_PHYSICS
+        case WIN_ANIM_MODE_PHYSICS_FALL:
+            /* fall through */
+        case WIN_ANIM_MODE_PHYSICS_SWIRL:
+            cleanup_physics(&win_anim->physics);
+            break;
+#endif
+        default:
+            break;
+        }
+    }
+}
+
 void destroy_win_anim(win_anim_t *win_anim)
 {
     if (win_anim) {
+        cleanup_win_anim(win_anim);
+
 #ifdef DEBUG_TRACE_WIN_ANIM
         infomsg("DESTR win_anim[%02d] %s", win_anim->id, win_anim_mode_str(win_anim->mode));
 #endif

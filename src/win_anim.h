@@ -91,6 +91,7 @@ const char *win_anim_mode_str(win_anim_mode_t mode);
 void print_win_anim(win_anim_t *win_anim);
 
 win_anim_t *create_win_anim(struct level *level);
+void cleanup_win_anim(win_anim_t *win_anim);
 void destroy_win_anim(win_anim_t *win_anim);
 
 void win_anim_select_random_mode(win_anim_t *win_anim);

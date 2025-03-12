@@ -25,7 +25,7 @@
 #include "win_anim.h"
 #include "physics.h"
 
-//#define DEBUG_TRACE_WIN_ANIM
+//#define DEBUG_TRACE_PHYICS_ALLOC
 
 float gravity_strength = 420.0f;; //250.0;
 
@@ -36,7 +36,7 @@ void init_physics(physics_t *physics, struct level *level)
 
     physics->level = level;
 
-#ifdef DEBUG_TRACE_WIN_ANIM
+#ifdef DEBUG_TRACE_PHYICS_ALLOC
     printf("init_physics() level->name=\"%s\"\n", level->name);
 #endif
 
@@ -82,12 +82,21 @@ physics_t *create_physics(struct level *level)
 
     physics_t *physics = calloc(1, sizeof(physics_t));
     init_physics(physics, level);
+
+#ifdef DEBUG_TRACE_PHYICS_ALLOC
+    printf("create_physics() level->name=\"%s\"\n", physics->level->name);
+#endif
+
     return physics;
 }
 
 void cleanup_phyics_tile(physics_tile_t *pt)
 {
     assert_not_null(pt);
+
+    if (!pt->tile) {
+        return;
+    }
 
     for (hex_direction_t dir=0; dir<3; dir++) {
         if (pt->path_spring[dir]) {
@@ -108,23 +117,56 @@ void cleanup_phyics_tile(physics_tile_t *pt)
         cpBodyFree(pt->body);
         pt->body = NULL;
     }
+
+    tile_t *tile = pt->tile;
+    pt->tile = NULL;
+    tile->physics_tile = NULL;
 }
 
-void destroy_physics(physics_t *physics)
+void cleanup_physics(physics_t *physics)
 {
     if (physics) {
+#ifdef DEBUG_TRACE_PHYICS_ALLOC
+        printf("cleanup_physics() level->name=\"%s\"\n", physics->level->name);
+#endif
+
         for (int i=0; i<LEVEL_MAXTILES; i++) {
             physics_tile_t *pt = &(physics->tiles[i]);
             cleanup_phyics_tile(pt);
         }
 
         for (int i=0; i<4; i++) {
-            cpShapeFree(physics->wall[i]);
+            if (physics->wall[i]) {
+                cpShapeFree(physics->wall[i]);
+                physics->wall[i] = NULL;
+            }
         }
 
-        cpSpaceFree(physics->space);
+        if (physics->space) {
+            cpSpaceFree(physics->space);
+            physics->space = NULL;
+        }
 
+#ifdef DEBUG_TRACE_PHYICS_ALLOC
+    } else {
+        printf("SKIP cleanup_physics() level->name=\"%s\"\n", physics->level->name);
+#endif
+    }
+}
+
+void destroy_physics(physics_t *physics)
+{
+    if (physics) {
+#ifdef DEBUG_TRACE_PHYICS_ALLOC
+        printf("destroy_physics() level->name=\"%s\"\n", physics->level->name);
+#endif
+        cleanup_physics(physics);
         FREE(physics);
+
+#ifdef DEBUG_TRACE_PHYICS_ALLOC
+    } else {
+        printf("SKIP destroy_physics() level->name=\"%s\"\n", physics->level->name);
+#endif
     }
 }
 
@@ -325,6 +367,9 @@ void physics_build_tiles(physics_t *physics)
         pt->tile = tile;
         tile->physics_tile = pt;
 
+        memset(pt->path_spring,       0, sizeof(pt->path_spring));
+        memset(pt->path_rotary_limit, 0, sizeof(pt->path_rotary_limit));
+
         Vector2 center_position = Vector2Subtract(pos->win.center, window_center);
         cpVect position = cpv(center_position.x,
                               center_position.y);
@@ -339,11 +384,13 @@ void physics_build_tiles(physics_t *physics)
         pt->mass = 11.0f; //pos->size;
         pt->moment = cpMomentForPoly(pt->mass, 6, verts, cpvzero, 0.0f);
 
-        pt->body = cpSpaceAddBody(physics->space, cpBodyNew(pt->mass, pt->moment));
-        pt->shape = cpSpaceAddShape(physics->space, cpPolyShapeNew(pt->body, 6, verts, cpTransformIdentity, 0.0));
+        pt->body = cpBodyNew(pt->mass, pt->moment);
+        cpSpaceAddBody(physics->space, pt->body);
+
+        pt->shape = cpPolyShapeNew(pt->body, 6, verts, cpTransformIdentity, 0.0);
+        cpSpaceAddShape(physics->space, pt->shape);
 
         cpBodySetUserData(pt->body, pt);
-
         cpBodySetPosition(pt->body, position);
 
         switch (mode) {
@@ -462,6 +509,10 @@ void physics_update(physics_t *physics, float activation)
     assert_not_null(physics);
 
     if (physics->state != PHYSICS_RUNNING) {
+        return;
+    }
+
+    if (!physics->space) {
         return;
     }
 

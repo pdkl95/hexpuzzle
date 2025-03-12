@@ -52,9 +52,9 @@ struct physics_tile {
     cpShape *shape;
     cpBody *body;
 
-    bool path_has_spring[3];
-    cpConstraint *path_spring[3];
-    cpConstraint *path_rotary_limit[3];
+    bool path_has_spring[6];
+    cpConstraint *path_spring[6];
+    cpConstraint *path_rotary_limit[6];
 
     cpFloat radius;
     cpFloat mass;
@@ -82,6 +82,7 @@ typedef struct physics physics_t;
 
 void init_physics(physics_t *physics, struct level *level);
 physics_t *create_physics(struct level *level);
+void cleanup_physics(physics_t *physics);
 void destroy_physics(physics_t *physics);
 
 void physics_init_fall(physics_t *physics);

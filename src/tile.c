@@ -171,8 +171,12 @@ int compare_tiles(const void *p1, const void *p2)
     if (t1->field && !t2->field) { return 1; } \
     if (!t1->field && t2->field) { return -1; }
 
-    if (t1->enabled && !t2->enabled) { return 1; } \
-    if (!t1->enabled && t2->enabled) { return -1; }
+    if (t1->enabled && !t2->enabled) {
+        return 1;
+    }
+    if (!t1->enabled && t2->enabled) {
+        return -1;
+    }
     //BCMP(enabled);
     BCMP(hidden);
     BCMP(fixed);
