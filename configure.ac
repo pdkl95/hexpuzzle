@@ -232,6 +232,22 @@ dnl optional GNUlib replacements for certain
 dnl required but missing standard library features
 gl_INIT
 
+dnl Allow makefile variation based on C compiler
+AS_CASE([$CC],
+  [*gcc*],[
+    AM_CONDITIONAL([CC_IS_GCC], [true])
+    AM_CONDITIONAL([CC_IS_CLANG], [false])
+  ],
+  [*clang*],[
+    AM_CONDITIONAL([CC_IS_GCC], [false])
+    AM_CONDITIONAL([CC_IS_CLANG], [true])
+  ],
+  [
+    AM_CONDITIONAL([CC_IS_GCC], [false])
+    AM_CONDITIONAL([CC_IS_CLANG], [false])
+  ]
+)
+
 
 dnl Export any extra build options
 APP_CFLAGS="-I\$(top_srcdir)/external"

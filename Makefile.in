@@ -150,40 +150,41 @@ bin_PROGRAMS = hexpuzzle$(EXEEXT)
 @USE_PHYSICS_TRUE@am__append_5 = \
 @USE_PHYSICS_TRUE@	src/physics.h           src/physics.c
 
-@BUILD_DEBUG_TRUE@am__append_6 = -D_DEBUG
-@BUILD_WEB_FALSE@am__append_7 = \
+@CC_IS_GCC_TRUE@am__append_6 = -Wno-unused-but-set-variable
+@BUILD_DEBUG_TRUE@am__append_7 = -D_DEBUG
+@BUILD_WEB_FALSE@am__append_8 = \
 @BUILD_WEB_FALSE@	external/raylib/rglfw.c
 
-@gl_GNULIB_ENABLED_4661e0b4e500a1a00180219f0280fb04_TRUE@am__append_8 = $(ALLOCA_H)
-@gl_GNULIB_ENABLED_4661e0b4e500a1a00180219f0280fb04_TRUE@am__append_9 = lib/gnulib/alloca.h lib/gnulib/alloca.h-t
-@gl_GNULIB_ENABLED_d07eca4c7a24aaac657c64e6568d4c2f_TRUE@am__append_10 = $(ASSERT_H)
-@gl_GNULIB_ENABLED_d07eca4c7a24aaac657c64e6568d4c2f_TRUE@am__append_11 = lib/gnulib/assert.h lib/gnulib/assert.h-t
-@gl_GNULIB_ENABLED_errno_TRUE@am__append_12 = $(ERRNO_H)
-@gl_GNULIB_ENABLED_errno_TRUE@am__append_13 = lib/gnulib/errno.h lib/gnulib/errno.h-t
-@gl_GNULIB_ENABLED_float_TRUE@am__append_14 = $(FLOAT_H)
-@gl_GNULIB_ENABLED_float_TRUE@am__append_15 = lib/gnulib/float.h lib/gnulib/float.h-t
-@GL_COND_OBJ_FLOAT_TRUE@@gl_GNULIB_ENABLED_float_TRUE@am__append_16 = lib/gnulib/float.c
-@GL_COND_OBJ_ITOLD_TRUE@@gl_GNULIB_ENABLED_float_TRUE@am__append_17 = lib/gnulib/itold.c
-@GL_COND_OBJ_FREE_TRUE@@gl_GNULIB_ENABLED_ef07dc4b3077c11ea9cef586db4e5955_TRUE@am__append_18 = lib/gnulib/free.c
-@GL_COND_OBJ_GETDELIM_TRUE@@gl_GNULIB_ENABLED_getdelim_TRUE@am__append_19 = lib/gnulib/getdelim.c
-@GL_COND_OBJ_GETLINE_TRUE@am__append_20 = lib/gnulib/getline.c
-@gl_GNULIB_ENABLED_67241cf2e9b9409f43aeebaa5c55e7f2_TRUE@am__append_21 = lib/gnulib/inttypes.h
-@gl_GNULIB_ENABLED_67241cf2e9b9409f43aeebaa5c55e7f2_TRUE@am__append_22 = lib/gnulib/inttypes.h lib/gnulib/inttypes.h-t
-@gl_GNULIB_ENABLED_46f732ef6fef4ccd68de017c9ed88bed_TRUE@am__append_23 = $(LIMITS_H)
-@gl_GNULIB_ENABLED_46f732ef6fef4ccd68de017c9ed88bed_TRUE@am__append_24 = lib/gnulib/limits.h lib/gnulib/limits.h-t
-@gl_GNULIB_ENABLED_mbszero_TRUE@am__append_25 = lib/gnulib/mbszero.c
-@GL_COND_OBJ_MEMCHR_TRUE@@gl_GNULIB_ENABLED_memchr_TRUE@am__append_26 = lib/gnulib/memchr.c
-@gl_GNULIB_ENABLED_size_max_TRUE@am__append_27 = lib/gnulib/size_max.h
-@gl_GNULIB_ENABLED_stdint_TRUE@am__append_28 = $(STDINT_H)
-@gl_GNULIB_ENABLED_stdint_TRUE@am__append_29 = lib/gnulib/stdint.h lib/gnulib/stdint.h-t
-@GL_COND_OBJ_STDIO_READ_TRUE@am__append_30 = lib/gnulib/stdio-read.c
-@GL_COND_OBJ_STDIO_WRITE_TRUE@am__append_31 = lib/gnulib/stdio-write.c
-@GL_COND_OBJ_STRCASECMP_TRUE@am__append_32 = lib/gnulib/strcasecmp.c
-@GL_COND_OBJ_STRNCASECMP_TRUE@am__append_33 = lib/gnulib/strncasecmp.c
-@GL_COND_OBJ_STRSEP_TRUE@am__append_34 = lib/gnulib/strsep.c
-@gl_GNULIB_ENABLED_wchar_TRUE@am__append_35 = lib/gnulib/wchar.h
-@gl_GNULIB_ENABLED_wchar_TRUE@am__append_36 = lib/gnulib/wchar.h lib/gnulib/wchar.h-t1 lib/gnulib/wchar.h-t2 lib/gnulib/wchar.h-t3
-@gl_GNULIB_ENABLED_xsize_TRUE@am__append_37 = lib/gnulib/xsize.h lib/gnulib/xsize.c
+@gl_GNULIB_ENABLED_4661e0b4e500a1a00180219f0280fb04_TRUE@am__append_9 = $(ALLOCA_H)
+@gl_GNULIB_ENABLED_4661e0b4e500a1a00180219f0280fb04_TRUE@am__append_10 = lib/gnulib/alloca.h lib/gnulib/alloca.h-t
+@gl_GNULIB_ENABLED_d07eca4c7a24aaac657c64e6568d4c2f_TRUE@am__append_11 = $(ASSERT_H)
+@gl_GNULIB_ENABLED_d07eca4c7a24aaac657c64e6568d4c2f_TRUE@am__append_12 = lib/gnulib/assert.h lib/gnulib/assert.h-t
+@gl_GNULIB_ENABLED_errno_TRUE@am__append_13 = $(ERRNO_H)
+@gl_GNULIB_ENABLED_errno_TRUE@am__append_14 = lib/gnulib/errno.h lib/gnulib/errno.h-t
+@gl_GNULIB_ENABLED_float_TRUE@am__append_15 = $(FLOAT_H)
+@gl_GNULIB_ENABLED_float_TRUE@am__append_16 = lib/gnulib/float.h lib/gnulib/float.h-t
+@GL_COND_OBJ_FLOAT_TRUE@@gl_GNULIB_ENABLED_float_TRUE@am__append_17 = lib/gnulib/float.c
+@GL_COND_OBJ_ITOLD_TRUE@@gl_GNULIB_ENABLED_float_TRUE@am__append_18 = lib/gnulib/itold.c
+@GL_COND_OBJ_FREE_TRUE@@gl_GNULIB_ENABLED_ef07dc4b3077c11ea9cef586db4e5955_TRUE@am__append_19 = lib/gnulib/free.c
+@GL_COND_OBJ_GETDELIM_TRUE@@gl_GNULIB_ENABLED_getdelim_TRUE@am__append_20 = lib/gnulib/getdelim.c
+@GL_COND_OBJ_GETLINE_TRUE@am__append_21 = lib/gnulib/getline.c
+@gl_GNULIB_ENABLED_67241cf2e9b9409f43aeebaa5c55e7f2_TRUE@am__append_22 = lib/gnulib/inttypes.h
+@gl_GNULIB_ENABLED_67241cf2e9b9409f43aeebaa5c55e7f2_TRUE@am__append_23 = lib/gnulib/inttypes.h lib/gnulib/inttypes.h-t
+@gl_GNULIB_ENABLED_46f732ef6fef4ccd68de017c9ed88bed_TRUE@am__append_24 = $(LIMITS_H)
+@gl_GNULIB_ENABLED_46f732ef6fef4ccd68de017c9ed88bed_TRUE@am__append_25 = lib/gnulib/limits.h lib/gnulib/limits.h-t
+@gl_GNULIB_ENABLED_mbszero_TRUE@am__append_26 = lib/gnulib/mbszero.c
+@GL_COND_OBJ_MEMCHR_TRUE@@gl_GNULIB_ENABLED_memchr_TRUE@am__append_27 = lib/gnulib/memchr.c
+@gl_GNULIB_ENABLED_size_max_TRUE@am__append_28 = lib/gnulib/size_max.h
+@gl_GNULIB_ENABLED_stdint_TRUE@am__append_29 = $(STDINT_H)
+@gl_GNULIB_ENABLED_stdint_TRUE@am__append_30 = lib/gnulib/stdint.h lib/gnulib/stdint.h-t
+@GL_COND_OBJ_STDIO_READ_TRUE@am__append_31 = lib/gnulib/stdio-read.c
+@GL_COND_OBJ_STDIO_WRITE_TRUE@am__append_32 = lib/gnulib/stdio-write.c
+@GL_COND_OBJ_STRCASECMP_TRUE@am__append_33 = lib/gnulib/strcasecmp.c
+@GL_COND_OBJ_STRNCASECMP_TRUE@am__append_34 = lib/gnulib/strncasecmp.c
+@GL_COND_OBJ_STRSEP_TRUE@am__append_35 = lib/gnulib/strsep.c
+@gl_GNULIB_ENABLED_wchar_TRUE@am__append_36 = lib/gnulib/wchar.h
+@gl_GNULIB_ENABLED_wchar_TRUE@am__append_37 = lib/gnulib/wchar.h lib/gnulib/wchar.h-t1 lib/gnulib/wchar.h-t2 lib/gnulib/wchar.h-t3
+@gl_GNULIB_ENABLED_xsize_TRUE@am__append_38 = lib/gnulib/xsize.h lib/gnulib/xsize.c
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/gnulib/00gnulib.m4 \
@@ -1514,12 +1515,13 @@ dist_EXTRA_hexpuzzle_SOURCES = \
 	src/data_shaders.h	    \
 	src/data_textures.h
 
-BUILT_SOURCES = $(dist_EXTRA_hexpuzzle_SOURCES) $(am__append_8) \
-	$(am__append_10) $(am__append_12) $(am__append_14) \
-	$(am__append_21) $(am__append_23) $(STDDEF_H) $(am__append_28) \
+NO_UNUSED_BUT_SET_OPT = $(am__append_6)
+BUILT_SOURCES = $(dist_EXTRA_hexpuzzle_SOURCES) $(am__append_9) \
+	$(am__append_11) $(am__append_13) $(am__append_15) \
+	$(am__append_22) $(am__append_24) $(STDDEF_H) $(am__append_29) \
 	lib/gnulib/stdio.h lib/gnulib/stdlib.h lib/gnulib/string.h \
 	lib/gnulib/strings.h lib/gnulib/sys/types.h \
-	lib/gnulib/unistd.h $(am__append_35)
+	lib/gnulib/unistd.h $(am__append_36)
 MAINTAINERCLEANFILES = \
 	$(dist_EXTRA_hexpuzzle_SOURCES)
 
@@ -1550,7 +1552,7 @@ external_raylib_libraylib_a_CFLAGS = $(ALL_PKG_CFLAGS) $(APP_CFLAGS) \
 	-I$(top_srcdir)/external/raylib/external/glfw/include \
 	-I$(top_srcdir)/external/raylib/external/glfw/deps/mingw -fPIC \
 	-Wno-unused-function -Wno-unused-parameter -Wno-sign-compare \
-	$(am__append_6)
+	$(am__append_7)
 GLFW_SRC = \
 	external/raylib/external/glfw/src/cocoa_joystick.h \
 	external/raylib/external/glfw/src/cocoa_platform.h \
@@ -1646,11 +1648,11 @@ external_raylib_libraylib_a_SOURCES = external/raylib/raylib_config.h \
 	external/raylib/rmodels.c external/raylib/rshapes.c \
 	external/raylib/rtext.c external/raylib/rtextures.c \
 	external/raylib/utils.c external/raylib/utils.h \
-	$(am__append_7)
+	$(am__append_8)
 MOSTLYCLEANFILES = lib/gnulib/core lib/gnulib/*.stackdump \
-	$(am__append_9) $(am__append_11) $(am__append_13) \
-	$(am__append_15) $(am__append_22) $(am__append_24) \
-	lib/gnulib/stddef.h lib/gnulib/stddef.h-t $(am__append_29) \
+	$(am__append_10) $(am__append_12) $(am__append_14) \
+	$(am__append_16) $(am__append_23) $(am__append_25) \
+	lib/gnulib/stddef.h lib/gnulib/stddef.h-t $(am__append_30) \
 	lib/gnulib/stdio.h lib/gnulib/stdio.h-t1 lib/gnulib/stdio.h-t2 \
 	lib/gnulib/stdio.h-t3 lib/gnulib/stdlib.h \
 	lib/gnulib/stdlib.h-t1 lib/gnulib/stdlib.h-t2 \
@@ -1660,14 +1662,14 @@ MOSTLYCLEANFILES = lib/gnulib/core lib/gnulib/*.stackdump \
 	lib/gnulib/sys/types.h lib/gnulib/sys/types.h-t \
 	lib/gnulib/unistd.h lib/gnulib/unistd.h-t1 \
 	lib/gnulib/unistd.h-t2 lib/gnulib/unistd.h-t3 \
-	lib/gnulib/unistd.h-t4 $(am__append_36)
+	lib/gnulib/unistd.h-t4 $(am__append_37)
 MOSTLYCLEANDIRS = lib/gnulib/sys
-lib_gnulib_libgnu_a_SOURCES = $(am__append_16) $(am__append_17) \
-	$(am__append_18) $(am__append_19) $(am__append_20) \
-	$(am__append_25) $(am__append_26) $(am__append_27) \
-	$(am__append_30) $(am__append_31) lib/gnulib/stdlib.c \
-	$(am__append_32) $(am__append_33) $(am__append_34) \
-	lib/gnulib/unistd.c $(am__append_37)
+lib_gnulib_libgnu_a_SOURCES = $(am__append_17) $(am__append_18) \
+	$(am__append_19) $(am__append_20) $(am__append_21) \
+	$(am__append_26) $(am__append_27) $(am__append_28) \
+	$(am__append_31) $(am__append_32) lib/gnulib/stdlib.c \
+	$(am__append_33) $(am__append_34) $(am__append_35) \
+	lib/gnulib/unistd.c $(am__append_38)
 lib_gnulib_libgnu_a_CFLAGS = $(AM_CFLAGS) $(GL_CFLAG_GNULIB_WARNINGS)
 lib_gnulib_libgnu_a_LIBADD = $(gl_LIBOBJS)
 lib_gnulib_libgnu_a_DEPENDENCIES = $(gl_LIBOBJS)
@@ -3551,7 +3553,7 @@ src/data_textures.h: $(TEXTURES)
 
 src/hexpuzzle-physac_impl.$(OBJEXT): CFLAGS += -Wno-sign-compare
 src/hexpuzzle-raygui_impl.$(OBJEXT): CFLAGS += -Wno-unused-parameter -Wno-unused-result
-src/hexpuzzle-nvdata_finished.$(OBJEXT): CFLAGS += -Wno-unused-but-set-variable -Wno-unused-variable -Wno-incompatible-pointer-types
+src/hexpuzzle-nvdata_finished.$(OBJEXT): CFLAGS += $(NO_UNUSED_BUT_SET_OPT) -Wno-unused-variable -Wno-incompatible-pointer-types
 
 external/raylib/external_raylib_libraylib_a-rglfw.$(OBJEXT): CFLAGS += -Wno-missing-field-initializers
 external/raylib/external_raylib_libraylib_a-rtextures.$(OBJEXT): CFLAGS += -Wno-array-bounds

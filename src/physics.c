@@ -320,10 +320,10 @@ void physics_build_tiles(physics_t *physics)
     level_t *level = physics->level;
     win_anim_mode_t mode = level->win_anim->mode;
 
+    cpVect gravity = cpv(0.0, gravity_strength);
+
     switch (mode) {
     case WIN_ANIM_MODE_PHYSICS_FALL:
-        cpVect gravity = cpv(0.0, gravity_strength);
-
         if (global_rng_bool(1, 17)) {
             if (global_rng_bool(11, 11)) {
                 gravity = cpvperp(gravity);

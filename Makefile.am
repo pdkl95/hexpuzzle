@@ -200,9 +200,14 @@ src/data_textures.h: $(TEXTURES)
 	    $(XXD) -i "$${file}" >> $@ ; \
 	done
 
+NO_UNUSED_BUT_SET_OPT =
+if CC_IS_GCC
+NO_UNUSED_BUT_SET_OPT += -Wno-unused-but-set-variable
+endif
+
 src/hexpuzzle-physac_impl.$(OBJEXT): CFLAGS += -Wno-sign-compare
 src/hexpuzzle-raygui_impl.$(OBJEXT): CFLAGS += -Wno-unused-parameter -Wno-unused-result
-src/hexpuzzle-nvdata_finished.$(OBJEXT): CFLAGS += -Wno-unused-but-set-variable -Wno-unused-variable -Wno-incompatible-pointer-types
+src/hexpuzzle-nvdata_finished.$(OBJEXT): CFLAGS += $(NO_UNUSED_BUT_SET_OPT) -Wno-unused-variable -Wno-incompatible-pointer-types
 
 BUILT_SOURCES = \
 	$(dist_EXTRA_hexpuzzle_SOURCES)

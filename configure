@@ -644,6 +644,10 @@ GL_CFLAGS
 PKG_CONFIG_LIBDIR
 PKG_CONFIG_PATH
 PKG_CONFIG
+CC_IS_CLANG_FALSE
+CC_IS_CLANG_TRUE
+CC_IS_GCC_FALSE
+CC_IS_GCC_TRUE
 LIBGNU_LTLIBDEPS
 LIBGNU_LIBDEPS
 GL_CFLAG_GNULIB_WARNINGS
@@ -17491,6 +17495,67 @@ fi
 
 
 
+case $CC in #(
+  *gcc*) :
+
+     if true; then
+  CC_IS_GCC_TRUE=
+  CC_IS_GCC_FALSE='#'
+else
+  CC_IS_GCC_TRUE='#'
+  CC_IS_GCC_FALSE=
+fi
+
+     if false; then
+  CC_IS_CLANG_TRUE=
+  CC_IS_CLANG_FALSE='#'
+else
+  CC_IS_CLANG_TRUE='#'
+  CC_IS_CLANG_FALSE=
+fi
+
+   ;; #(
+  *clang*) :
+
+     if false; then
+  CC_IS_GCC_TRUE=
+  CC_IS_GCC_FALSE='#'
+else
+  CC_IS_GCC_TRUE='#'
+  CC_IS_GCC_FALSE=
+fi
+
+     if true; then
+  CC_IS_CLANG_TRUE=
+  CC_IS_CLANG_FALSE='#'
+else
+  CC_IS_CLANG_TRUE='#'
+  CC_IS_CLANG_FALSE=
+fi
+
+   ;; #(
+  *) :
+
+     if false; then
+  CC_IS_GCC_TRUE=
+  CC_IS_GCC_FALSE='#'
+else
+  CC_IS_GCC_TRUE='#'
+  CC_IS_GCC_FALSE=
+fi
+
+     if false; then
+  CC_IS_CLANG_TRUE=
+  CC_IS_CLANG_FALSE='#'
+else
+  CC_IS_CLANG_TRUE='#'
+  CC_IS_CLANG_FALSE=
+fi
+
+
+ ;;
+esac
+
 
 APP_CFLAGS="-I\$(top_srcdir)/external"
 APP_LIBS=""
@@ -18163,6 +18228,30 @@ fi
     gltests_LIBOBJDEPS=$gltests_libobjdeps
 
 
+if test -z "${CC_IS_GCC_TRUE}" && test -z "${CC_IS_GCC_FALSE}"; then
+  as_fn_error $? "conditional \"CC_IS_GCC\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${CC_IS_CLANG_TRUE}" && test -z "${CC_IS_CLANG_FALSE}"; then
+  as_fn_error $? "conditional \"CC_IS_CLANG\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${CC_IS_GCC_TRUE}" && test -z "${CC_IS_GCC_FALSE}"; then
+  as_fn_error $? "conditional \"CC_IS_GCC\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${CC_IS_CLANG_TRUE}" && test -z "${CC_IS_CLANG_FALSE}"; then
+  as_fn_error $? "conditional \"CC_IS_CLANG\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${CC_IS_GCC_TRUE}" && test -z "${CC_IS_GCC_FALSE}"; then
+  as_fn_error $? "conditional \"CC_IS_GCC\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${CC_IS_CLANG_TRUE}" && test -z "${CC_IS_CLANG_FALSE}"; then
+  as_fn_error $? "conditional \"CC_IS_CLANG\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 
 : "${CONFIG_STATUS=./config.status}"
 ac_write_fail=0
