@@ -1964,7 +1964,7 @@ void level_shuffle_tiles(level_t *level)
     tile_pos_t *backup_enabled_positions[LEVEL_MAXTILES];
     memcpy(backup_enabled_positions, level->enabled_positions, sizeof(backup_enabled_positions));
 
-    int num_positions = level_get_enabled_positions(level);
+    int num_positions = level_get_movable_positions(level);
 
     for (int i=num_positions-1; i>0; i--) {
         int j = i;
