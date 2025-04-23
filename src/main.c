@@ -2146,13 +2146,9 @@ static void draw_gui_widgets(void)
         // skip two positions
         shift_down_right_side_button(right_side_button.double_line_y_offset);
 
-        if (rsb_single_line_button(undo_button_text)) {
-            undo_play();
-        }
+        rsb_undo_button();
+        rsb_redo_button();
 
-        if (rsb_single_line_button(redo_button_text)) {
-            redo_play();
-        }
         break;
 
     case GAME_MODE_EDIT_COLLECTION:
