@@ -1774,6 +1774,10 @@ void level_win(level_t *level)
     }
 
     nvdata_mark_finished(level);
+
+    if (level->collection) {
+        collection_update_level_names(level->collection);
+    }
 }
 
 void level_unwin(level_t *level)
