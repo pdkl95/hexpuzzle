@@ -1445,7 +1445,7 @@ void gui_setup(void)
     memcpy(    save_button_text, GuiIconText(ICON_FILE_SAVE_CLASSIC,     save_button_text_str),     SAVE_BUTTON_TEXT_LENGTH);
     memcpy(savequit_button_text, GuiIconText(ICON_FILE_SAVE_CLASSIC, savequit_button_text_str), SAVEQUIT_BUTTON_TEXT_LENGTH);
     memcpy(   reset_button_text, GuiIconText(ICON_EXPLOSION,            reset_button_text_str),    RESET_BUTTON_TEXT_LENGTH);
-    memcpy(  return_button_text, GuiIconText(ICON_CROSS,               return_button_text_str),   RETURN_BUTTON_TEXT_LENGTH);
+    memcpy(  return_button_text, GuiIconText(ICON_ARROW_LEFT,          return_button_text_str),   RETURN_BUTTON_TEXT_LENGTH);
     memcpy(    undo_button_text, GuiIconText(ICON_UNDO_FILL,             undo_button_text_str),     UNDO_BUTTON_TEXT_LENGTH);
     memcpy(    redo_button_text, GuiIconText(ICON_REDO_FILL,             redo_button_text_str),     REDO_BUTTON_TEXT_LENGTH);
     memcpy( options_button_text, GuiIconText(ICON_GEAR,               options_button_text_str),  OPTIONS_BUTTON_TEXT_LENGTH);

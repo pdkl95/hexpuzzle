@@ -48,7 +48,13 @@ char collection_new_button_text[] = "New\nLevel";
 char collection_play_button_text[] = "Play";
 char collection_edit_button_text[] = "Edit";
 char collection_name_label_text[] = "Name";
-char collection_browser_button_text[] = "Collections";
+
+#define COLLECTION_BROWSER_BUTTON_LINE_COUNT 2
+char *collection_browser_button_lines[COLLECTION_BROWSER_BUTTON_LINE_COUNT] = {
+    "Back To",
+    "Collections"
+};
+
 level_t *collection_preview_level;
 
 void init_gui_collection(void)
@@ -119,14 +125,13 @@ void resize_gui_collection(void)
         - (3 * PANEL_INNER_MARGIN);
 
     collection_back_button_rect.width  = collection_preview_rect.width;
-    collection_back_button_rect.height = collection_play_button_text_size.y + WINDOW_MARGIN;
+    collection_back_button_rect.height = ICON_BUTTON_SIZE;
     collection_back_button_rect.x = collection_preview_rect.x;
     collection_back_button_rect.y =
         collection_panel_rect.y
         + collection_panel_rect.height
-        - collection_back_button_rect.height
-        - PANEL_INNER_MARGIN;
-
+        - (2 * collection_back_button_rect.height)
+        - (2 *PANEL_INNER_MARGIN);
 
     Vector2 collection_name_label_text_size = measure_gui_text(collection_name_label_text);
 
@@ -419,6 +424,21 @@ void gui_collection_update_level_preview(void)
     collection_preview_level = collection_find_active_levwl(current_collection);
 }
 
+static void draw_back_to_collections_button(void)
+{
+    //set_big_button_font();
+
+    const char **lines = (const char **)collection_browser_button_lines;
+    if (GuiButtonMultiLine(collection_back_button_rect,
+                           lines,
+                           COLLECTION_BROWSER_BUTTON_LINE_COUNT,
+                           ICON_ARROW_LEFT)) {
+        set_game_mode(GAME_MODE_BROWSER);
+    }
+
+    //set_default_font();
+}
+
 void draw_gui_collection(void)
 {
     assert_not_null(current_collection);
@@ -438,9 +458,7 @@ void draw_gui_collection(void)
         draw_edit_mode_buttons();
     }
 
-    if (GuiButton(collection_back_button_rect, collection_browser_button_text)) {
-        set_game_mode(GAME_MODE_BROWSER);
-    }
+    draw_back_to_collections_button();
 
     int selected = draw_big_button(collection_play_button_rect, collection_play_button_text, true);
     bool preview_clicked = draw_level_preview(collection_preview_level, collection_preview_rect);

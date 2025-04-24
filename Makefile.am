@@ -373,7 +373,7 @@ EXTRA_DIST += \
 	external/raylib/platforms/rcore_web.c \
 	external/raylib/external/glfw/LICENSE.md
 
-external/raylib/external_raylib_libraylib_a-rglfw.$(OBJEXT): CFLAGS += -Wno-missing-field-initializers
+external/raylib/external_raylib_libraylib_a-rglfw.$(OBJEXT): CFLAGS += $(GLFW_OSX) -Wno-missing-field-initializers
 external/raylib/external_raylib_libraylib_a-rtextures.$(OBJEXT): CFLAGS += -Wno-array-bounds
 
 

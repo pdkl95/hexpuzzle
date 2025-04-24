@@ -89,7 +89,7 @@ dnl >>> Use a locally installed version of chipmunk instead of
 dnl     the provided version in external/chipmunk
 
 AC_ARG_ENABLE([chipmunk],
-    AS_HELP_STRING([--disable-chipmunk], [Disable the Chipmunk physics engine)]))
+    AS_HELP_STRING([--disable-chipmunk], [Disable the Chipmunk physics engine]))
 
 AS_IF([test "x$enable_web" = "xyes"], [
     enable_chipmunk="no"
@@ -128,7 +128,7 @@ dnl >>> Use a locally installed version of raylib instead of
 dnl     the provided version in external/raylib
 
 AC_ARG_ENABLE([system-raylib],
-    AS_HELP_STRING([--enable-system-raylib], [Use a locally installed version of raylib instead of the version iincluded with project_name)]))
+    AS_HELP_STRING([--enable-system-raylib], [Use a locally installed version of raylib instead of the version iincluded with project_name]))
 
 AS_IF([test "x$enable_system_raylib" = "xyes"], [
 ],[
@@ -155,6 +155,30 @@ AM_PROG_AR
 AC_PROG_RANLIB
 
 AC_PATH_PROG(XXD, xxd)
+
+
+dnl ========================================
+dnl ===  OS Detection  ===
+dnl ========================================
+
+AC_CANONICAL_HOST
+
+build_osx=no
+
+AC_MSG_CHECKING([if host OS requires special handling])
+case "${host_os}" in
+    darwin*)
+        AC_MSG_RESULT([yes (OSX options enabled))])
+        build_osx=yes
+        ;;
+    *)
+        AC_MSG_RESULT([no])
+        ;;
+esac
+
+AM_CONDITIONAL([BUILD_OSX], [test "x$build_osx" = "xyes"])
+
+
 
 dnl ===============================================================
 dnl ===  Export the project configuration into config.h macros  ===
@@ -260,11 +284,16 @@ dnl =================================
 ALL_PKG_CFLAGS=""
 ALL_PKG_LIBS=""
 
-AS_IF([test "x$enable_web" != "xyes"], [
-    PKG_CHECK_MODULES([GL],     [gl     >= 10.0.4])
+GLFW_OSX=""
 
-    ALL_PKG_CFLAGS="$ALL_PKG_CFLAGS $GL_CFLAGS"
-    ALL_PKG_LIBS="$ALL_PKG_LIBS $GL_LIBS"
+AS_IF([test "x$enable_web" != "xyes"], [
+    AS_IF([test "x$build_osx" = "xyes"], [
+        dnl APP_CFLAGS="$APP_CFLAGS "
+        APP_LIBS="$APP_LIBS -framework OpenGL -framework Cocoa -framework IOKit -framework CoreAudio -framework CoreVideo"
+        GLFW_OSX="-x objective-c"
+    ],[
+        PKG_CHECK_MODULES([GL],     [gl     >= 10.0.4])
+    ])
 ])
 
 AS_IF([test "x$enable_system_raylib" = "xyes"], [
@@ -287,6 +316,7 @@ AS_IF([test "x$enable_web" = "xyes"], [
     AC_SUBST(EXEEXT)
 ])
 
+AC_SUBST(GLFW_OSX)
 AC_SUBST(APP_CFLAGS)
 AC_SUBST(APP_LIBS)
 AC_SUBST(ALL_PKG_CFLAGS)
