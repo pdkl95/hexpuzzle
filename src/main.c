@@ -54,6 +54,7 @@
 #include "gui_options.h"
 #include "gui_random.h"
 #include "gui_dialog.h"
+#include "gui_popup_message.h"
 #include "background.h"
 
 #include "nvdata.h"
@@ -702,6 +703,7 @@ do_resize(
     background_resize(background);
 
     gui_setup();
+    resize_gui_popup_message();
     resize_gui_dialog();
     resize_gui_title();
     resize_gui_browser();
@@ -2320,6 +2322,7 @@ static void draw_gui(void)
     draw_gui_widgets();
     draw_gui_dialog();
     draw_gui_tooltip();
+    draw_gui_popup_message();
 }
 
 static bool
@@ -2456,7 +2459,7 @@ static void early_frame_setup(void)
         SetShaderValue(win_border_shader, win_border_shader_loc.time, &current_time, SHADER_UNIFORM_FLOAT);
     }
 
-    if (gui_dialog_active()) {
+    if (gui_dialog_active() || gui_popup_message_active()) {
         modal_ui_active = true;
         GuiLock();
     } else {
@@ -2615,6 +2618,7 @@ static void game_init(void)
     init_gui_random();
     init_gui_title();
     init_gui_dialog();
+    init_gui_popup_message();
 
     background = create_background();
 
@@ -2659,6 +2663,7 @@ static void game_cleanup(void)
 {
     save_nvdata();
 
+    cleanup_gui_popup_message();
     cleanup_gui_dialog();
     cleanup_gui_random();
     cleanup_gui_collection();

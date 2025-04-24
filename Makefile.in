@@ -330,23 +330,23 @@ am__hexpuzzle_SOURCES_DIST = src/background.h src/background.c \
 	src/fonts.h src/fonts.c src/game_mode.h src/game_mode.c \
 	src/gui_browser.h src/gui_browser.c src/gui_collection.h \
 	src/gui_collection.c src/gui_dialog.h src/gui_dialog.c \
-	src/gui_options.h src/gui_options.c src/gui_random.h \
-	src/gui_random.c src/gui_title.h src/gui_title.c src/hex.h \
-	src/hex.c src/level.h src/level.c src/level_draw.h \
-	src/level_draw.c src/level_undo.h src/level_undo.c \
-	src/logging.h src/logging.c src/numeric.h src/numeric.c \
-	src/nvdata.h src/nvdata.c src/nvdata_finished.h \
-	src/nvdata_finished.c src/options.h src/options.c src/path.h \
-	src/path.c src/range.h src/range.c src/raygui_impl.c \
-	src/raylib_gui_numeric.h src/raylib_gui_numeric.c \
-	src/raylib_helper.h src/raylib_helper.c src/startup_action.h \
-	src/startup_action.c src/shader.h src/shader.c src/solver.h \
-	src/solver.c src/textures.h src/textures.c src/tile.h \
-	src/tile.c src/tile_draw.h src/tile_draw.c src/tile_pos.h \
-	src/tile_pos.c src/util.h src/util.c src/win_anim.h \
-	src/win_anim.c src/win_anim_mode_config.h \
-	src/win_anim_mode_config.c src/common.h src/main.c \
-	src/physics.h src/physics.c
+	src/gui_options.h src/gui_options.c src/gui_popup_message.h \
+	src/gui_popup_message.c src/gui_random.h src/gui_random.c \
+	src/gui_title.h src/gui_title.c src/hex.h src/hex.c \
+	src/level.h src/level.c src/level_draw.h src/level_draw.c \
+	src/level_undo.h src/level_undo.c src/logging.h src/logging.c \
+	src/numeric.h src/numeric.c src/nvdata.h src/nvdata.c \
+	src/nvdata_finished.h src/nvdata_finished.c src/options.h \
+	src/options.c src/path.h src/path.c src/range.h src/range.c \
+	src/raygui_impl.c src/raylib_gui_numeric.h \
+	src/raylib_gui_numeric.c src/raylib_helper.h \
+	src/raylib_helper.c src/startup_action.h src/startup_action.c \
+	src/shader.h src/shader.c src/solver.h src/solver.c \
+	src/textures.h src/textures.c src/tile.h src/tile.c \
+	src/tile_draw.h src/tile_draw.c src/tile_pos.h src/tile_pos.c \
+	src/util.h src/util.c src/win_anim.h src/win_anim.c \
+	src/win_anim_mode_config.h src/win_anim_mode_config.c \
+	src/common.h src/main.c src/physics.h src/physics.c
 @USE_PHYSICS_TRUE@am__objects_16 = src/hexpuzzle-physics.$(OBJEXT)
 am_hexpuzzle_OBJECTS = src/hexpuzzle-background.$(OBJEXT) \
 	src/hexpuzzle-classics.$(OBJEXT) \
@@ -357,6 +357,7 @@ am_hexpuzzle_OBJECTS = src/hexpuzzle-background.$(OBJEXT) \
 	src/hexpuzzle-gui_collection.$(OBJEXT) \
 	src/hexpuzzle-gui_dialog.$(OBJEXT) \
 	src/hexpuzzle-gui_options.$(OBJEXT) \
+	src/hexpuzzle-gui_popup_message.$(OBJEXT) \
 	src/hexpuzzle-gui_random.$(OBJEXT) \
 	src/hexpuzzle-gui_title.$(OBJEXT) src/hexpuzzle-hex.$(OBJEXT) \
 	src/hexpuzzle-level.$(OBJEXT) \
@@ -1494,7 +1495,8 @@ hexpuzzle_SOURCES = src/background.h src/background.c src/classics.h \
 	src/game_mode.h src/game_mode.c src/gui_browser.h \
 	src/gui_browser.c src/gui_collection.h src/gui_collection.c \
 	src/gui_dialog.h src/gui_dialog.c src/gui_options.h \
-	src/gui_options.c src/gui_random.h src/gui_random.c \
+	src/gui_options.c src/gui_popup_message.h \
+	src/gui_popup_message.c src/gui_random.h src/gui_random.c \
 	src/gui_title.h src/gui_title.c src/hex.h src/hex.c \
 	src/level.h src/level.c src/level_draw.h src/level_draw.c \
 	src/level_undo.h src/level_undo.c src/logging.h src/logging.c \
@@ -1977,6 +1979,8 @@ src/hexpuzzle-gui_dialog.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-gui_options.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/hexpuzzle-gui_popup_message.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-gui_random.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-gui_title.$(OBJEXT): src/$(am__dirstamp) \
@@ -2090,6 +2094,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-gui_collection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-gui_dialog.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-gui_options.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-gui_popup_message.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-gui_random.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-gui_title.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-hex.Po@am__quote@
@@ -2680,6 +2685,20 @@ src/hexpuzzle-gui_options.obj: src/gui_options.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/gui_options.c' object='src/hexpuzzle-gui_options.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-gui_options.obj `if test -f 'src/gui_options.c'; then $(CYGPATH_W) 'src/gui_options.c'; else $(CYGPATH_W) '$(srcdir)/src/gui_options.c'; fi`
+
+src/hexpuzzle-gui_popup_message.o: src/gui_popup_message.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-gui_popup_message.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-gui_popup_message.Tpo -c -o src/hexpuzzle-gui_popup_message.o `test -f 'src/gui_popup_message.c' || echo '$(srcdir)/'`src/gui_popup_message.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-gui_popup_message.Tpo src/$(DEPDIR)/hexpuzzle-gui_popup_message.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/gui_popup_message.c' object='src/hexpuzzle-gui_popup_message.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-gui_popup_message.o `test -f 'src/gui_popup_message.c' || echo '$(srcdir)/'`src/gui_popup_message.c
+
+src/hexpuzzle-gui_popup_message.obj: src/gui_popup_message.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-gui_popup_message.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-gui_popup_message.Tpo -c -o src/hexpuzzle-gui_popup_message.obj `if test -f 'src/gui_popup_message.c'; then $(CYGPATH_W) 'src/gui_popup_message.c'; else $(CYGPATH_W) '$(srcdir)/src/gui_popup_message.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-gui_popup_message.Tpo src/$(DEPDIR)/hexpuzzle-gui_popup_message.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/gui_popup_message.c' object='src/hexpuzzle-gui_popup_message.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-gui_popup_message.obj `if test -f 'src/gui_popup_message.c'; then $(CYGPATH_W) 'src/gui_popup_message.c'; else $(CYGPATH_W) '$(srcdir)/src/gui_popup_message.c'; fi`
 
 src/hexpuzzle-gui_random.o: src/gui_random.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-gui_random.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-gui_random.Tpo -c -o src/hexpuzzle-gui_random.o `test -f 'src/gui_random.c' || echo '$(srcdir)/'`src/gui_random.c
@@ -3555,6 +3574,7 @@ src/data_textures.h: $(TEXTURES)
 src/hexpuzzle-physac_impl.$(OBJEXT): CFLAGS += -Wno-sign-compare
 src/hexpuzzle-raygui_impl.$(OBJEXT): CFLAGS += -Wno-unused-parameter -Wno-unused-result
 src/hexpuzzle-nvdata_finished.$(OBJEXT): CFLAGS += $(NO_UNUSED_BUT_SET_OPT) -Wno-unused-variable -Wno-incompatible-pointer-types
+src/hexpuzzle-gui_popup_message.$(OBJEXT): CFLAGS += $(NO_UNUSED_BUT_SET_OPT) -Wno-unused-variable -Wno-incompatible-pointer-types -Wno-misleading-indentation
 
 external/raylib/external_raylib_libraylib_a-rglfw.$(OBJEXT): CFLAGS += $(GLFW_OSX) -Wno-missing-field-initializers
 external/raylib/external_raylib_libraylib_a-rtextures.$(OBJEXT): CFLAGS += -Wno-array-bounds

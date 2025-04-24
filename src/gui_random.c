@@ -31,6 +31,7 @@
 #include "tile_draw.h"
 #include "level.h"
 #include "gui_dialog.h"
+#include "gui_popup_message.h"
 #include "raylib_gui_numeric.h"
 
 #include "pcg/pcg_basic.h"
@@ -1338,6 +1339,12 @@ void save_gui_random_level(void)
         level_save_to_local_levels(gui_random_level,
                                    GUI_RAMDOM_SAVE_PREFIX,
                                    gui_random_level->name);
+
+        assert_not_null(gui_random_level->filename);
+
+        popup_message("SAVE random level",
+                      "Level saved as:\"%s\"",
+                      gui_random_level->filename);
     }
 }
 #endif

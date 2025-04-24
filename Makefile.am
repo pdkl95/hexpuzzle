@@ -137,6 +137,7 @@ hexpuzzle_SOURCES =                                          \
 	src/gui_collection.h       src/gui_collection.c      \
 	src/gui_dialog.h           src/gui_dialog.c          \
 	src/gui_options.h          src/gui_options.c         \
+	src/gui_popup_message.h    src/gui_popup_message.c   \
 	src/gui_random.h           src/gui_random.c          \
 	src/gui_title.h            src/gui_title.c           \
 	src/hex.h                  src/hex.c                 \
@@ -208,6 +209,7 @@ endif
 src/hexpuzzle-physac_impl.$(OBJEXT): CFLAGS += -Wno-sign-compare
 src/hexpuzzle-raygui_impl.$(OBJEXT): CFLAGS += -Wno-unused-parameter -Wno-unused-result
 src/hexpuzzle-nvdata_finished.$(OBJEXT): CFLAGS += $(NO_UNUSED_BUT_SET_OPT) -Wno-unused-variable -Wno-incompatible-pointer-types
+src/hexpuzzle-gui_popup_message.$(OBJEXT): CFLAGS += $(NO_UNUSED_BUT_SET_OPT) -Wno-unused-variable -Wno-incompatible-pointer-types -Wno-misleading-indentation
 
 BUILT_SOURCES = \
 	$(dist_EXTRA_hexpuzzle_SOURCES)
