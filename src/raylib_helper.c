@@ -250,6 +250,17 @@ Rectangle ExpandRectangle(Rectangle rect, float margin)
     return rect;
 }
 
+Rectangle move_rect_to_screen_center(Rectangle rect)
+{
+    rect.x = window_center.x;
+    rect.y = window_center.y;
+
+    rect.x -= 0.5f * rect.width;
+    rect.y -= 0.5f * rect.height;
+
+    return rect;
+}
+
 void doublebuffer_load(doublebuffer_t *db, int width, int height)
 {
     doublebuffer_unload(db);

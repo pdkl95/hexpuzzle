@@ -99,7 +99,7 @@ static inline void draw_current_popup_message(void)
 {
     assert_not_null(current_message);
 
-    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(DARKGRAY, 0.2f));
+    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(DARKGRAY, 0.4f));
 
     Rectangle bounds = popup_message_rect;
 
@@ -108,11 +108,12 @@ static inline void draw_current_popup_message(void)
         RAYGUI_MESSAGEBOX_BUTTON_PADDING*2;
 
     bounds.height =
-        current_message->message_size.y +    
+        current_message->message_size.y +
         RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT +
         3*RAYGUI_MESSAGEBOX_BUTTON_PADDING +
         RAYGUI_MESSAGEBOX_BUTTON_HEIGHT;
-    
+
+    bounds = move_rect_to_screen_center(bounds);
 
     GuiUnlock();
 
