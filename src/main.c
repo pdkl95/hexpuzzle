@@ -95,6 +95,7 @@ bool skip_next_resize_event = false;
 double resize_delay = 0.5;
 double resize_time = 0.0;
 IVector2 window_size;
+Vector2 window_sizef;
 Vector2 window_center;
 float window_corner_dist;
 IVector2 mouse_position;
@@ -683,8 +684,11 @@ do_resize(
     window_size.x = GetScreenWidth();
     window_size.y = GetScreenHeight();
 
-    window_center.x = 0.5f * (float)window_size.x;
-    window_center.y = 0.5f * (float)window_size.y;
+    window_sizef.x = (float)window_size.x;
+    window_sizef.y = (float)window_size.y;
+
+    window_center.x = 0.5f * window_sizef.x;
+    window_center.y = 0.5f * window_sizef.y;
 
     window_corner_dist = Vector2Length(window_center);
 
@@ -856,6 +860,10 @@ handle_events(
 
     if (IsKeyPressed(KEY_P)) {
         do_postprocessing = !do_postprocessing;
+    }
+
+    if (IsKeyPressed(KEY_F9)) {
+        popup_message("TEST (frame = %d)", frame_count);
     }
 
     if (IsKeyPressed(KEY_F5)) {
@@ -2459,7 +2467,7 @@ static void early_frame_setup(void)
         SetShaderValue(win_border_shader, win_border_shader_loc.time, &current_time, SHADER_UNIFORM_FLOAT);
     }
 
-    if (gui_dialog_active() || gui_popup_message_active()) {
+    if (gui_dialog_active()) {
         modal_ui_active = true;
         GuiLock();
     } else {

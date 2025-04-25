@@ -20,6 +20,10 @@
  ****************************************************************************/
 
 #include "common.h"
+
+#include <limits.h>
+
+#include "color.h"
 #include "gui_popup_message.h"
 
 #include "sglib/sglib.h"
@@ -35,9 +39,41 @@ popup_msg *current_message = NULL;
 popup_msg *message_queue = NULL;
 int message_queue_last_id = 0;
 
-popup_msg *create_popup_msg(char *title, char *message)
+static void popup_msg_set_state(popup_msg *msg, popup_msg_state_t state)
 {
-    assert_not_null(title);
+    assert_not_null(msg);
+
+    msg->state = state;
+
+    switch (state) {
+    case POPUP_MSG_STATE_START:
+        msg->state_duration = 0.0f;
+        msg->fade = 0.0f;
+        break;
+
+    case POPUP_MSG_STATE_FADEIN:
+        msg->state_duration = 0.4f;
+        msg->fade = 0.0f;
+        break;
+
+    case POPUP_MSG_STATE_VISIBLE:
+        msg->state_duration = 3.333f;
+        msg->fade = 1.0f;
+        break;
+
+    case POPUP_MSG_STATE_FADEOUT:
+        msg->state_duration = 0.4f;
+        msg->fade = 1.0f;
+        break;
+    }
+
+    msg->enter_state_time = current_time;
+    msg->exit_state_time = msg->enter_state_time + msg->state_duration;
+    msg->state_progress = 0.0f;
+}
+
+popup_msg *create_popup_msg(char *message)
+{
     assert_not_null(message);
 
     popup_msg *msg = calloc(1, sizeof(popup_msg));
@@ -46,12 +82,20 @@ popup_msg *create_popup_msg(char *title, char *message)
     message_queue_last_id += 1;
     msg->id = message_queue_last_id;
 
-    msg->title   = title;
     msg->message = message;
     msg->prev    = NULL;
     msg->next    = NULL;
 
-    msg->message_size = measure_gui_text(msg->message);
+    popup_msg_set_state(msg, POPUP_MSG_STATE_START);
+
+    popup_msg_state_t state;
+    float state_duration;
+    float enter_state_time;
+    float exit_state_time;
+    float state_progress;
+
+
+    msg->message_size = measure_panel_text(msg->message);
 
     popup_msg *last = sglib_popup_msg_get_last(message_queue);
     sglib_popup_msg_add_after(&last, msg);
@@ -66,10 +110,65 @@ static void destroy_popup_msg(struct popup_msg *msg)
     if (msg) {
         sglib_popup_msg_delete(&message_queue, msg);
 
-        SAFEFREE(msg->title);
         SAFEFREE(msg->message);
 
         FREE(msg);
+    }
+}
+
+static void popup_msg_next_state(popup_msg *msg)
+{
+    assert_not_null(msg);
+
+    switch (msg->state) {
+    case POPUP_MSG_STATE_START:
+        popup_msg_set_state(msg, POPUP_MSG_STATE_FADEIN);
+        break;
+
+    case POPUP_MSG_STATE_FADEIN:
+        popup_msg_set_state(msg, POPUP_MSG_STATE_VISIBLE);
+        break;
+
+    case POPUP_MSG_STATE_VISIBLE:
+        popup_msg_set_state(msg, POPUP_MSG_STATE_FADEOUT);
+        break;
+
+    case POPUP_MSG_STATE_FADEOUT:
+        current_message = NULL;
+        destroy_popup_msg(msg);
+        break;
+    }
+}
+
+static void popup_msg_update_state(popup_msg *msg)
+{
+    assert_not_null(msg);
+
+    if (current_time < msg->exit_state_time) {
+        float delta_time = current_time - msg->enter_state_time;
+        msg->state_progress = delta_time / msg->state_duration;
+
+        switch (msg->state) {
+        case POPUP_MSG_STATE_START:
+            msg->fade = 0.0f;
+            break;
+
+        case POPUP_MSG_STATE_FADEIN:
+//            msg->fade = ease_exponential_out(msg->state_progress);
+            msg->fade = ease_quint_out(msg->state_progress);
+            break;
+
+        case POPUP_MSG_STATE_VISIBLE:
+            msg->fade = 1.0f;
+            break;
+
+        case POPUP_MSG_STATE_FADEOUT:
+//            msg->fade = ease_exponential_out(1.0 - msg->state_progress);
+            msg->fade = ease_quint_out(1.0 - msg->state_progress);
+            break;
+        }
+    } else {
+        popup_msg_next_state(msg);
     }
 }
 
@@ -99,34 +198,38 @@ static inline void draw_current_popup_message(void)
 {
     assert_not_null(current_message);
 
-    DrawRectangle(0, 0, GetScreenWidth(), GetScreenHeight(), Fade(DARKGRAY, 0.4f));
+    popup_msg_update_state(current_message);
+
+    if  (!current_message) {
+        return;
+    }
 
     Rectangle bounds = popup_message_rect;
+    float border_thickness = 2.0;
+    float margin = WINDOW_MARGIN + border_thickness;
 
     bounds.width =
-        current_message->message_size.x +
-        RAYGUI_MESSAGEBOX_BUTTON_PADDING*2;
+        current_message->message_size.x
+        + (2 * PANEL_INNER_MARGIN);
 
     bounds.height =
-        current_message->message_size.y +
-        RAYGUI_WINDOWBOX_STATUSBAR_HEIGHT +
-        3*RAYGUI_MESSAGEBOX_BUTTON_PADDING +
-        RAYGUI_MESSAGEBOX_BUTTON_HEIGHT;
+        current_message->message_size.y
+        + (2 * PANEL_INNER_MARGIN);
 
-    bounds = move_rect_to_screen_center(bounds);
+    bounds.x = window_sizef.x - margin - bounds.width;
+    bounds.y = window_sizef.y - margin - bounds.height;
 
-    GuiUnlock();
+    float xslide_length = window_sizef.x - bounds.width;
+    bounds.x += (1.0 - current_message->fade) * xslide_length;
 
-    int result = GuiMessageBox(
-        bounds,
-        current_message->title,
-        current_message->message,
-        "Ok");
+    Vector2 text_pos = getVector2FromRectangle(bounds);
+    text_pos.x += PANEL_INNER_MARGIN;
+    text_pos.y += PANEL_INNER_MARGIN;
 
-    if (result != -1) {
-        destroy_popup_msg(current_message);
-        current_message = NULL;
-    }
+    DrawRectangleRounded(bounds, PANEL_ROUNDNES, 0, Fade(BLACK, current_message->fade));
+    DrawRectangleRoundedLines(bounds, PANEL_ROUNDNES, 0, border_thickness, Fade(panel_edge_color, current_message->fade));
+
+    draw_panel_text(current_message->message, text_pos, Fade(WHITE, current_message->fade));
 }
 
 static inline void show_next_popup_message(void)
@@ -148,28 +251,25 @@ void draw_gui_popup_message(void)
     }
 }
 
-int popup_message(const char *title, const char *fmt, ...)
+int popup_message(const char *fmt, ...)
 {
     va_list ap;
     int rv = 0;
 
     va_start(ap, fmt);
-    rv = vpopup_message(title, fmt, ap);
+    rv = vpopup_message(fmt, ap);
     va_end(ap);
 
     return rv;
 }
 
-int vpopup_message(const char *title, const char *fmt, va_list ap)
+int vpopup_message(const char *fmt, va_list ap)
 {
     char *message = NULL;
     
     int rv = safe_vasprintf(&message, fmt, ap);
 
-    create_popup_msg(strdup(GuiIconText(ICON_INFO, title)),
-                     message);
+    create_popup_msg(message);
 
     return rv;
 }
-
-
