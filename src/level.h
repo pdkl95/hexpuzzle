@@ -120,6 +120,9 @@ struct level {
     char *dirpath;
     bool changed;
 
+    IconStr finished_status_icon;
+    Color   finished_status_color;
+
     bool finished;
     float finished_fract;
     int path_count;

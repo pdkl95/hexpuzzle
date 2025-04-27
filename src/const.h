@@ -70,13 +70,16 @@
 #define NAME_MAXLEN 22
 #define UI_NAME_MAXLEN  (6 + NAME_MAXLEN)
 
+// ['#', '1', '2', '3', '#', '\0']
+#define ICON_STR_MAXLEN 6
+
 #define ID_MAXLEN 255
 
 #define FINISHED_HUE_STEP 4.0
 #define FINISHED_ANIM_PREDELAY_LENGTH 0.5
 #define FINISHED_ANIM_LENGTH 5.0
 
-#define WIN_ANIM_STARTUP_TIME  1.1
+#define WIN_ANIM_STARTUP_TIME  1.9
 #define WIN_ANIM_SHUTDOWN_TIME 0.7
 
 // 1MB

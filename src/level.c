@@ -798,9 +798,16 @@ void level_update_ui_name(level_t *level, int idx)
     assert_not_null(level);
 
     bool is_finished = nvdata_is_finished(level);
-    int icon = is_finished
-        ? ICON_OK_TICK
-        : ICON_CROSS_SMALL;
+    int icon = ICON_CROSS_SMALL;
+    level->finished_status_color = RED;
+    if (is_finished) {
+        icon = ICON_OK_TICK;
+        level->finished_status_color = GREEN;
+    }
+
+    memcpy(level->finished_status_icon,
+           GuiIconText(icon, NULL),
+           ICON_STR_MAXLEN);
 
     snprintf(level->ui_name, UI_NAME_MAXLEN, "%s% 2d. %s", GuiIconText(icon, NULL), idx, level->name);
 

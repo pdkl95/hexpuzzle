@@ -329,6 +329,58 @@ static void draw_move_buttons(Rectangle bounds)
     }
 }
 
+static inline void draw_level_list_colored_status(void)
+{
+    const char **text = current_collection->level_names;
+    Rectangle bounds = collection_list_rect;
+    int count = current_collection->level_count;
+    int startIndex = current_collection->gui_list_scroll_index;
+
+    bool useScrollBar = false;
+    if ((GuiGetStyle(LISTVIEW, LIST_ITEMS_HEIGHT) +
+         GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING)) * count > bounds.height) {
+        useScrollBar = true;
+    }
+
+    Rectangle itemBounds = { 0 };
+    itemBounds.x = bounds.x + GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING);
+    itemBounds.y = bounds.y + GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING) + GuiGetStyle(DEFAULT, BORDER_WIDTH);
+    itemBounds.width = bounds.width - 2*GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING) - GuiGetStyle(DEFAULT, BORDER_WIDTH);
+    itemBounds.height = (float)GuiGetStyle(LISTVIEW, LIST_ITEMS_HEIGHT);
+    if (useScrollBar) itemBounds.width -= GuiGetStyle(LISTVIEW, SCROLLBAR_WIDTH);
+
+     // Get items on the list
+    int visibleItems = (int)bounds.height/(GuiGetStyle(LISTVIEW, LIST_ITEMS_HEIGHT) +
+                                           GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING));
+    if (visibleItems > count) {
+        visibleItems = count;
+    }
+
+    if ((startIndex < 0) || (startIndex > (count - visibleItems))) {
+        startIndex = 0;
+    }
+    level_t *level = current_collection->levels;
+    int nskip = startIndex;
+    while (nskip > 0) {
+        assert_not_null(level->next);
+        level = level->next;
+        nskip--;
+    }
+
+    int align = GuiGetStyle(LISTVIEW, TEXT_ALIGNMENT);
+    for (int i = 0; ((i < visibleItems) && (text != NULL)); i++) {
+        assert_not_null(level);
+
+        GuiDrawText(level->finished_status_icon,
+                    GetTextBounds(DEFAULT, itemBounds),
+                    align,
+                    level->finished_status_color);
+
+        itemBounds.y += GuiGetStyle(LISTVIEW, LIST_ITEMS_HEIGHT) + GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING);
+        level = level->next;
+    }
+}
+
 static void draw_level_list(void)
 {
     assert_not_null(current_collection);
@@ -344,6 +396,9 @@ static void draw_level_list(void)
                   &current_collection->gui_list_scroll_index,
                   &current_collection->gui_list_active,
                   &current_collection->gui_list_focus);
+
+    draw_level_list_colored_status();
+
 #if 0
     printf("LIST[n=%d] scroll_index=%d, active=%d, focus=%d\n",
            current_collection->level_count,

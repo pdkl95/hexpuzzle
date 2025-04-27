@@ -176,6 +176,7 @@ static inline void disable_postprocessing(void)
     do_postprocessing = false;
 }
 
+typedef char IconStr[ICON_STR_MAXLEN];
 
 enum ui_result {
     UI_RESULT_PENDING = -1,
