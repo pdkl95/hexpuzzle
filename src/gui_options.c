@@ -37,6 +37,7 @@ Rectangle options_show_level_previews_rect;
 Rectangle options_show_tooltips_rect;
 Rectangle options_reset_finished_rect;
 Rectangle options_use_postprocessing_rect;
+Rectangle options_description_rect;
 
 char options_panel_text[] = "Options";
 char options_icon_scale_text[] = "Cursor Size";
@@ -49,10 +50,61 @@ char options_color_edit_tooltip[] = "Select Color";
 char options_color_reset_tooltip[] = "Reset color back to default";
 char options_use_postprocessing_text[] = "Use Shader Effects";
 
+char options_anim_bg_desc_text[]  = "Disable if the animated background is too distracting.";
+char options_anim_win_desc_text[] = "Special effects animation that plays when a level is completed.";
+char options_use_postprocessing_desc_text[] = "Postpo4ssing shader effects (blur, warping)";
+char options_show_level_previews_desc_text[] = "Show small level previews.";
+char options_show_tooltips_desc_text[] = "Show popup tooltips when hovering over some controls.";
+
 #ifdef USE_PHYSICS
 Rectangle options_use_physics_rect;
 char options_use_physics_text[] = "Use Physics Engine";
+char options_use_physics_desc_text[] = "Some win animations use a physics engine, which can use a lot of CPU time.";
 #endif
+
+struct gui_bool_option {
+    bool *opt;
+    Rectangle *rect;
+    char *label;
+    char *desc;
+};
+typedef struct gui_bool_option gui_bool_option_t;
+
+gui_bool_option_t graphics_options[] = {
+    {
+        .rect  = &options_anim_bg_rect,
+        .label = options_anim_bg_text,
+        .desc  = options_anim_bg_desc_text,
+    },
+    {
+        .rect  = &options_anim_win_rect,
+        .label = options_anim_win_text,
+        .desc  = options_anim_win_desc_text
+    },
+#ifdef USE_PHYSICS
+    {
+        .rect  = &options_use_physics_rect,
+        .label = options_use_physics_text,
+        .desc  = options_use_physics_desc_text
+    },
+#endif
+    {
+        .rect  = &options_use_postprocessing_rect,
+        .label = options_use_postprocessing_text,
+        .desc  = options_use_postprocessing_desc_text
+    },
+    {
+        .rect  = &options_show_level_previews_rect,
+        .label = options_show_level_previews_text,
+        .desc  = options_show_level_previews_desc_text
+    },
+    {
+        .rect  = &options_show_tooltips_rect,
+        .label = options_show_tooltips_text,
+        .desc  = options_show_tooltips_desc_text
+    }
+};
+#define NUM_BOOL_OPTIONS ((long)NUM_ELEMENTS(gui_bool_option_t, graphics_options))
 
 //                         8 =    5 2   1
 //                           "Color N"'\0'
@@ -61,7 +113,7 @@ struct gui_color_option {
     Rectangle label_rect;
     char label_text[GUI_COLOR_OPTION_LABEL_MAXLEN];
     float label_size;
-\
+
     Rectangle color_sample_rect;
 
     Rectangle pick_color_button_rect;
@@ -145,6 +197,13 @@ void init_gui_options(void)
         snprintf(color_options[i].reset_button_text, 7,
                  "%s", GuiIconText(ICON_UNDO_FILL, NULL));
     }
+
+    graphics_options[0].opt = &options->animate_bg;
+    graphics_options[1].opt = &options->animate_win;
+    graphics_options[2].opt = &options->use_physics;
+    graphics_options[3].opt = &options->use_postprocessing;
+    graphics_options[4].opt = &options->show_level_previews;
+    graphics_options[5].opt = &options->show_tooltips;
 
     resize_gui_options();
 }
@@ -265,6 +324,16 @@ void resize_gui_options(void)
     options_status_on.icon_text_size.y = options_status_off.icon_text_size.y =
         MAX(options_status_on.icon_text_size.y, options_status_off.icon_text_size.y);
 
+    float bool_opt_width =
+        options_anim_bg_rect.width +
+        options_status_on.icon_text_size.x +
+        (2 * PANEL_INNER_MARGIN);
+
+    options_description_rect.x = options_anim_bg_rect.x + bool_opt_width;
+    options_description_rect.y = options_area_rect.y;
+    options_description_rect.width = options_area_rect.width - bool_opt_width;
+    options_description_rect.height = options_area_rect.height;
+
     float max_label_text_size = 0.0f;
 
     for (int i=1; i<PATH_TYPE_COUNT; i++) {
@@ -313,26 +382,33 @@ void resize_gui_options(void)
 
 void draw_gui_graphics_options(void)
 {
+    char *desc = NULL;
+
     int prev_align = GuiGetStyle(TOGGLE, TEXT_ALIGNMENT);
     GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
 
-    GuiToggle(options_anim_bg_rect,             options_anim_bg_text,             &options->animate_bg);
-    GuiToggle(options_anim_win_rect,            options_anim_win_text,            &options->animate_win);
-#ifdef USE_PHYSICS
-    GuiToggle(options_use_physics_rect,         options_use_physics_text,         &options->use_physics);
-#endif
-    GuiToggle(options_use_postprocessing_rect,  options_use_postprocessing_text,  &options->use_postprocessing);
-    GuiToggle(options_show_level_previews_rect, options_show_level_previews_text, &options->show_level_previews);
-    GuiToggle(options_show_tooltips_rect,       options_show_tooltips_text,       &options->show_tooltips);
+    for (int i=0; i<NUM_BOOL_OPTIONS; i++) {
+        gui_bool_option_t *opt = &(graphics_options[i]);
 
-    show_status_beside(options->animate_bg,          options_anim_bg_rect);
-    show_status_beside(options->animate_win,         options_anim_win_rect);
-#ifdef USE_PHYSICS
-    show_status_beside(options->use_physics,         options_use_physics_rect);
-#endif
-    show_status_beside(options->use_postprocessing,  options_use_postprocessing_rect);
-    show_status_beside(options->show_level_previews, options_show_level_previews_rect);
-    show_status_beside(options->show_tooltips,       options_show_tooltips_rect);
+        GuiToggle(*opt->rect, opt->label, opt->opt);
+        show_status_beside(*opt->opt, *opt->rect);
+
+        if (CheckCollisionPointRec(mouse_positionf, *opt->rect)) {
+            desc = opt->desc;
+        }
+    }
+
+    if (desc) {
+        int old_valign = GuiGetStyle(DEFAULT, TEXT_ALIGNMENT_VERTICAL);
+        int old_wrap   = GuiGetStyle(DEFAULT, TEXT_WRAP_MODE);
+        GuiSetStyle(DEFAULT, TEXT_ALIGNMENT_VERTICAL, TEXT_ALIGN_TOP);
+        GuiSetStyle(DEFAULT, TEXT_WRAP_MODE, TEXT_WRAP_WORD);
+
+        GuiTextBox(options_description_rect, desc, 0, false);
+
+        GuiSetStyle(DEFAULT, TEXT_ALIGNMENT_VERTICAL, old_valign);
+        GuiSetStyle(DEFAULT, TEXT_WRAP_MODE, old_wrap);
+    }
 
     int old_cursor_scale = options->cursor_scale;
     int cursor_scale     = options->cursor_scale;
