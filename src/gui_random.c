@@ -1242,12 +1242,12 @@ void draw_gui_random(void)
 
 #if defined(PLATFORM_DESKTOP)
     bool save_ok = false;
-    if (current_level && (current_level->seed > 0)) {
+    if (gui_random_level && (gui_random_level->seed > 0)) {
         save_ok = true;
     }
 
     if (!save_ok) {
-        //     GuiDisable();
+        GuiDisable();
     }
 
     if (GuiButton(gui_random_save_button_rect, gui_random_save_button_text)) {
