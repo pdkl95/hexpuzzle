@@ -355,7 +355,7 @@ void gui_dialog_pick_color(struct color_option *c_opt, gui_dialog_finished_cb_t 
     gui_dialog_show(&dialog);
 }
 
-void gui_dialog_ask_for_string(const char *question, const char *default_string, gui_dialog_finished_cb_t callback)
+void gui_dialog_ask_for_string(const char *title, const char *question, const char *default_string, gui_dialog_finished_cb_t callback)
 {
     if (current_dialog) {
         return;
@@ -368,6 +368,9 @@ void gui_dialog_ask_for_string(const char *question, const char *default_string,
                  GUI_DIALOG_STRING_MAX_LENGTH,
                  "%s",
                  default_string);
+    }
+    if (title) {
+        dialog.title = title;
     }
     dialog.question = question;
     dialog.callback = callback;

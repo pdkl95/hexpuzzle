@@ -1160,7 +1160,7 @@ void ask_for_random_seed_callback(gui_dialog_t *dialog)
 
 bool ask_for_random_seed(void)
 {
-    gui_dialog_ask_for_string("", NULL, ask_for_random_seed_callback);
+    gui_dialog_ask_for_string("Enter RNG seed (number or string)", NULL, NULL, ask_for_random_seed_callback);
     return true;
 }
 
@@ -1342,9 +1342,7 @@ void save_gui_random_level(void)
 
         assert_not_null(gui_random_level->filename);
 
-        popup_message("SAVE random level",
-                      "Level saved as:\"%s\"",
-                      gui_random_level->filename);
+        popup_message("Level saved as:\"%s\"", gui_random_level->filename);
     }
 }
 #endif
