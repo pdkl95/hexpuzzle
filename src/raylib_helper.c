@@ -521,3 +521,26 @@ int GuiButtonMultiLine(Rectangle bounds, const char **text, int count, int icon)
 
     return result;
 }
+
+/* same as OpenURL() but with & */
+void OpenURLBackground(const char *url)
+{
+    // Security check to (partially) avoid malicious code
+    if (strchr(url, '\'') != NULL) TRACELOG(LOG_WARNING, "SYSTEM: Provided URL could be potentially malicious, avoid [\'] character");
+    else
+    {
+        char *cmd = (char *)RL_CALLOC(strlen(url) + 32, sizeof(char));
+#if defined(_WIN32)
+        sprintf(cmd, "explorer \"%s\"", url);
+#endif
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__)
+        sprintf(cmd, "xdg-open '%s' &", url); // Alternatives: firefox, x-www-browser
+#endif
+#if defined(__APPLE__)
+        sprintf(cmd, "open '%s'", url);
+#endif
+        int result = system(cmd);
+        if (result == -1) TRACELOG(LOG_WARNING, "OpenURL() child process could not be created");
+        RL_FREE(cmd);
+    }
+}

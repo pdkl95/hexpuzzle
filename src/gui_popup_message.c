@@ -207,6 +207,18 @@ static inline void draw_current_popup_message(void)
     Rectangle bounds = popup_message_rect;
     float border_thickness = 2.0;
     float margin = WINDOW_MARGIN + border_thickness;
+    float mode_yoffset = 0.0f;
+
+    switch (game_mode) {
+    case GAME_MODE_TITLE:
+        // should be -right_side_button.double_line_y_offset
+        mode_yoffset = -((2 * ICON_BUTTON_SIZE) + WINDOW_MARGIN);
+        break;
+
+    default:
+        // do nothing
+        break;
+    }
 
     bounds.width =
         current_message->message_size.x
@@ -217,7 +229,7 @@ static inline void draw_current_popup_message(void)
         + (2 * PANEL_INNER_MARGIN);
 
     bounds.x = window_sizef.x - margin - bounds.width;
-    bounds.y = window_sizef.y - margin - bounds.height;
+    bounds.y = window_sizef.y - margin - bounds.height + mode_yoffset;
 
     float xslide_length = window_sizef.x - bounds.width;
     bounds.x += (1.0 - current_message->fade) * xslide_length;

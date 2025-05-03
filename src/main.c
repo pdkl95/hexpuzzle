@@ -1129,6 +1129,13 @@ char *random_button_lines[2] = {
     levels_button_text_str
 };
 
+char game_source_button_game_str[] = "Game";
+char game_source_button_source_str[] = "Source";
+const char *game_source_button_lines[2] = {
+    game_source_button_game_str,
+    game_source_button_source_str
+};
+
 char edit_radius_label_text[] = "Radius";
 char edit_mode_label_text[] = "Mode";
 char edit_tool_label_text[] = "Edit Tool";
@@ -1925,6 +1932,11 @@ static inline void reset_right_side_button(void)
     right_side_button.rect.y = right_side_button.top_y;
 }
 
+static inline void set_bottom_double_right_side_button(void)
+{
+    right_side_button.rect.y = window_size.y - right_side_button.double_line_y_offset;
+}
+
 static inline void shift_down_right_side_button(float yoffset)
 {
     right_side_button.rect.y += yoffset;
@@ -2047,7 +2059,16 @@ static void draw_gui_widgets(void)
 
     switch (game_mode) {
     case GAME_MODE_TITLE:
-        /* fall through */
+        standard_buttons();
+
+        set_bottom_double_right_side_button();
+
+        if (rsb_double_line_button(game_source_button_lines, 2, ICON_FILETYPE_TEXT)) {
+            popup_message("Opening %s", PACKAGE_URL);
+            OpenURLBackground(PACKAGE_URL);
+        }
+        break;
+
     case GAME_MODE_RANDOM:
         standard_buttons();
         break;

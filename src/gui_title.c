@@ -31,6 +31,7 @@ Rectangle panel_rect;
 Rectangle bg_level_rect;
 Rectangle title1_text_rect;
 Rectangle title2_text_rect;
+Rectangle author_text_bg_rect;
 
 Vector2 title1_text_position;
 Vector2 title2_text_position;
@@ -38,15 +39,19 @@ Vector2 title1_text_pos_shadow_position;
 Vector2 title2_text_pos_shadow_position;
 Vector2 title1_text_neg_shadow_position;
 Vector2 title2_text_neg_shadow_position;
+Vector2 author_text_position;
 
 char title1_text[] = "Hex";
 char title2_text[] = "Puzzle";
+
+char author_text[] = "by PDKL95";
 
 float hexpanel_size;
 float hexpanel_rotation = TO_DEGREES(TAU / 12.0f);
 
 Color title_text_color;
 font_handle_t title_font = {0};
+font_handle_t author_font = {0};
 
 float title1_voffset = -35.0f;
 float title2_voffset = -28.0f;
@@ -70,6 +75,8 @@ void init_gui_title(void)
 
     title_font.use_color = false;
     title_font.color = 0;
+
+    author_font = name_font;
 
     Vector3 hexpanel_bg_hsv = ColorToHSV(panel_bg_color);
     hexpanel_bg_hsv.y *= 0.6;
@@ -134,6 +141,18 @@ void resize_gui_title(void)
     title2_text_rect.height -= 12.0f;
     title1_text_rect.y += 8.0f;
     title2_text_rect.y += 5.0f;
+
+    Vector2 author_text_size = MeasureTextWithFont(author_font, author_text);
+
+    author_text_bg_rect.width  = author_text_size.x;
+    author_text_bg_rect.height = author_text_size.y;
+    author_text_bg_rect.x = WINDOW_MARGIN;
+    author_text_bg_rect.y =
+        window_sizef.y
+        - author_text_bg_rect.height
+        - WINDOW_MARGIN;
+
+    author_text_position = getVector2FromRectangle(author_text_bg_rect);
 }
 
 static inline void draw_title(void)
@@ -163,6 +182,12 @@ static inline void draw_title(void)
     draw_text_with_font(title_font, title2_text, title2_text_position, title_text_color);
 }
 
+static inline void draw_author(void)
+{
+    DrawRectangleRounded(author_text_bg_rect, 0.25f, 8, title_bg_shadow_color);
+    draw_text_with_font(author_font, author_text, author_text_position, title_text_color);
+}
+
 void draw_gui_title(void)
 {
     if (!bg_level) {
@@ -176,6 +201,8 @@ void draw_gui_title(void)
     DrawPolyLinesEx(window_center, 6, hexpanel_size + 2.0f, hexpanel_rotation, 5.0f, text_shadow_color);
     DrawPolyLinesEx(window_center, 6, hexpanel_size - 2.0f, hexpanel_rotation, 1.5f, magenta);
     DrawPolyLinesEx(window_center, 6, hexpanel_size + 2.0f, hexpanel_rotation, 3.0f, royal_blue);
+
+    draw_author();
 
     draw_title();
 }

@@ -167,5 +167,10 @@ RenderTexture2D LoadRenderTextureWithFormat(int width, int height, int pixel_for
 void GuiSimpleTabBar(Rectangle bounds, const char **text, int count, int *active);
 int GuiButtonMultiLine(Rectangle bounds, const char **text, int count, int icon);
 
+/*** custom variations of raylib functions ***/
+
+void OpenURLBackground(const char *url);
+
+
 #endif /*RAYLIB_HELPER_H*/
 
