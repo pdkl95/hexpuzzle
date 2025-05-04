@@ -201,6 +201,10 @@ bool run_startup_action(void)
     }
 
     switch (options->startup_action) {
+    case STARTUP_ACTION_DEMO_SOLVE:
+        /* fall through */
+    case STARTUP_ACTION_DEMO_WIN_ANIM:
+        /* fall through */
     case STARTUP_ACTION_PLAY:
         /* fall through */
     case STARTUP_ACTION_RANDOM:

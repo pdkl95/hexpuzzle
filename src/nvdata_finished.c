@@ -241,6 +241,11 @@ void load_nvdata_finished_levels(void)
 
 void save_nvdata_finished_levels(void)
 {
+    if (demo_mode) {
+        infomsg("Skipping saving finished level data (demo mode is enabled)");
+        return;
+    }
+
     FILE *f = fopen(nvdata_state_finished_levels_file_path, "w");
     if (NULL == f) {
         errmsg("Couldn't open finished level file \"%s\": %s",

@@ -374,6 +374,10 @@ static void prepare_tile_swap(solver_t *solver, float anim_time)
            solver->end_px.y);
 #endif
 
+    if (demo_mode) {
+        anim_time *= SOLVER_DEMO_TIME_SCALE;
+    }
+
     start_move_anim(solver, anim_time);
 }
 

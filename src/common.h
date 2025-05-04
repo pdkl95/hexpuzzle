@@ -244,6 +244,8 @@ static inline void tooltip(Rectangle bounds, const char *text)
     }
 }
 
+extern bool demo_mode;
+
 #include "fonts.h"
 #include "game_mode.h"
 

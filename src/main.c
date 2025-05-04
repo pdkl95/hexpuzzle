@@ -86,6 +86,7 @@ int debug_dir = 0;
 #endif
 
 bool running = true;
+bool demo_mode = false;
 int automatic_event_polling_semaphore = 0;
 bool mouse_input_accepted = true;
 bool event_waiting_active = false;
@@ -826,6 +827,25 @@ static void handle_mouse_events(void)
 #endif
 }
 
+static void do_level_checks(void)
+{
+    if (current_level) {
+        if (level_check(current_level)) {
+            if (!level_finished) {
+                level_finished = true;
+                level_win(current_level);
+            }
+        } else {
+            if (level_finished) {
+                level_finished = false;
+                level_unwin(current_level);
+            }
+        }
+    } else {
+        level_finished = false;
+    }
+}
+
 static bool
 handle_events(
     void
@@ -862,38 +882,36 @@ handle_events(
         do_postprocessing = !do_postprocessing;
     }
 
-    if (IsKeyPressed(KEY_F9)) {
-        popup_message("TEST (frame = %d)", frame_count);
-    }
-
-    if (IsKeyPressed(KEY_F5)) {
-        if (current_level) {
-            create_or_use_solver(current_level);
-            solver_toggle_solve(current_level->solver);
+    if (!demo_mode) {
+        if (IsKeyPressed(KEY_F5)) {
+            if (current_level) {
+                create_or_use_solver(current_level);
+                solver_toggle_solve(current_level->solver);
+            }
         }
-    }
 
-    if (IsKeyPressed(KEY_F6)) {
-        if (current_level) {
-            create_or_use_solver(current_level);
-            solver_stop(current_level->solver);
+        if (IsKeyPressed(KEY_F6)) {
+            if (current_level) {
+                create_or_use_solver(current_level);
+                solver_stop(current_level->solver);
+            }
         }
-    }
 
 #ifdef DEBUG_ID_AND_DIR
-    if (IsKeyPressed(KEY_F3)) {
-        debug_dir = (debug_dir + 1) % 6;
-    }
+        if (IsKeyPressed(KEY_F3)) {
+            debug_dir = (debug_dir + 1) % 6;
+        }
 
-    if (IsKeyPressed(KEY_F4)) {
-        debug_id = (debug_id + 1) % LEVEL_MAXTILES;
-    }
+        if (IsKeyPressed(KEY_F4)) {
+            debug_id = (debug_id + 1) % LEVEL_MAXTILES;
+        }
 #endif
 
-    if (IsKeyPressed(KEY_F7)) {
-        if (current_level) {
-            create_or_use_solver(current_level);
-            solver_toggle_undo(current_level->solver);
+        if (IsKeyPressed(KEY_F7)) {
+            if (current_level) {
+                create_or_use_solver(current_level);
+                solver_toggle_undo(current_level->solver);
+            }
         }
     }
 
@@ -907,6 +925,28 @@ handle_events(
         ToggleBorderlessWindowed();
     }
 #endif
+
+    if (demo_mode) {
+        if (IsKeyPressed(KEY_ESCAPE)) {
+            running = false;
+        }
+
+        if (IsKeyPressed(KEY_SPACE)) {
+            regen_level_preview();
+            play_gui_random_level_preview();
+
+            if (options->cheat_autowin) {
+                level_win(current_level);
+            } else {
+                create_or_use_solver(current_level);
+                solver_toggle_solve(current_level->solver);
+            }
+        }
+
+        do_level_checks();
+
+        return true;
+    }
 
     if (modal_ui_active) {
         if (IsKeyPressed(KEY_ESCAPE)) {
@@ -981,21 +1021,7 @@ handle_events(
         handle_mouse_events();
     }
 
-    if (current_level) {
-        if (level_check(current_level)) {
-            if (!level_finished) {
-                level_finished = true;
-                level_win(current_level);
-            }
-        } else {
-            if (level_finished) {
-                level_finished = false;
-                level_unwin(current_level);
-            }
-        }
-    } else {
-        level_finished = false;
-    }
+    do_level_checks();
 
     return true;
 }
@@ -2452,7 +2478,9 @@ render_frame(
         renderd_texture_last_frame = false;
     }
 
-    draw_gui();
+    if (!demo_mode) {
+        draw_gui();
+    }
 
     if (show_fps) {
         DrawTextShadow(TextFormat("FPS: %d", GetFPS()), 15, 10, DEFAULT_GUI_FONT_SIZE, WHITE);
@@ -2674,6 +2702,20 @@ static void start_given_file(void)
 
     case STARTUP_ACTION_EDIT:
         edit_game_file(options->file_path);
+        break;
+
+    case STARTUP_ACTION_DEMO_WIN_ANIM:
+        options->cheat_autowin = true;
+        warnmsg("DEMO WIN ANIM ENABLED: auto-win levels");
+        /* fall through */
+    case STARTUP_ACTION_DEMO_SOLVE:
+        demo_mode = true;
+        warnmsg("DEMO MODE ENABLED");
+
+        play_random_game();
+
+        create_or_use_solver(current_level);
+        solver_toggle_solve(current_level->solver);
         break;
 
     default:

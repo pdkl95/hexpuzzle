@@ -443,7 +443,9 @@ void tile_draw_corner_connections(tile_pos_t *pos, win_anim_mode_t win_mode)
 
     float fade = 1.0;
     if (current_level) {
-        fade = current_level->win_anim->fade[2];//* current_level->fade.value_eased;
+        if (current_level->win_anim) {
+            fade = current_level->win_anim->fade[2];//* current_level->fade.value_eased;
+        }
     }
 
 #ifdef USE_PHYSICS

@@ -161,6 +161,7 @@
 
 #define SOLVER_SOLVE_SWAP_TIME 0.2
 #define SOLVER_UNDO_SWAP_TIME  0.15
+#define SOLVER_DEMO_TIME_SCALE 2.5
 
 #endif /*CONST_H*/
 

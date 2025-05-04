@@ -77,6 +77,8 @@ static struct option long_options[] = {
     {     "no-show-tooltips",       no_argument, 0, 'T' },
     {       "extra-rainbows",       no_argument, 0, ':' },
     {    "no-extra-rainbows",       no_argument, 0, ';' },
+    {                 "demo",       no_argument, 0, 'd' },
+    {             "demo-win",       no_argument, 0, 'D' },
     {          "wait-events",       no_argument, 0, 'w' },
     {              "verbose",       no_argument, 0, 'v' },
     {              "version",       no_argument, 0, 'V' },
@@ -141,6 +143,10 @@ static char help_text[] =
     "                                     into a ." COLLECTION_FILENAME_EXT "\n"
     "  -U, --unpack <file." COLLECTION_FILENAME_EXT "> Unpack a " COLLECTION_FILENAME_EXT " file\n"
     "                                     into a directory of ." LEVEL_FILENAME_EXT "\n"
+    "      --demo                       Show an auto-solving demo (\"attract\") mode.\n"
+    "                                     No user input accepted except SPACE to advance\n"
+    "                                     the demo and ESC/q to quit.\n"
+    "      --demo-win                   Same as --demo, but only show the win animations.\n"
     "\n"
     "ACTION OPTIONS\n"
     "      --force                   Allow files to be overwritten (dangerous!)\n"
@@ -652,6 +658,14 @@ options_parse_args(
 
         case ';':
             options->extra_rainbows = false;
+            break;
+
+        case 'd':
+            options->startup_action = STARTUP_ACTION_DEMO_SOLVE;
+            break;
+
+        case 'D':
+            options->startup_action = STARTUP_ACTION_DEMO_WIN_ANIM;
             break;
 
         case 'w':
