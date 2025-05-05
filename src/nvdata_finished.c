@@ -116,7 +116,7 @@ void nvdata_mark_id_finished(char *id)
     snprintf(&e->id, ID_MAXLEN, "%s", id);
 
     if (options->verbose) {
-        printf("MARK finished: \"%s\"\n", e->id);
+        infomsg("MARK finished: \"%s\"", e->id);
     }
 
     sglib_finished_level_add_if_not_member(&(finished_levels.tree), e, &member);
@@ -146,7 +146,7 @@ void nvdata_unmark_finished(struct level *level)
     snprintf(&e.id, ID_MAXLEN, "%s", level->id);
 
     if (options->verbose) {
-        printf("UNMARK finished: \"%s\"\n", e.id);
+        infomsg("UNMARK finished: \"%s\"", e.id);
     }
 
     sglib_finished_level_delete_if_member(&(finished_levels.tree), &e, &result);

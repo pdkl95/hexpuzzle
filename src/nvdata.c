@@ -527,6 +527,11 @@ static cJSON *program_state_to_json(void)
 
 static void save_nvdata_program_state(void)
 {
+    if (demo_mode) {
+        infomsg("Skipping saving program state (demo mode is enabled)");
+        return;
+    }
+
     char *tmpname;
     safe_asprintf(&tmpname, "%s.tmp", nvdata_state_file_path);
 
