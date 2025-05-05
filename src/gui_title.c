@@ -32,6 +32,7 @@ Rectangle bg_level_rect;
 Rectangle title1_text_rect;
 Rectangle title2_text_rect;
 Rectangle author_text_bg_rect;
+Rectangle version_text_bg_rect;
 
 Vector2 title1_text_position;
 Vector2 title2_text_position;
@@ -40,18 +41,22 @@ Vector2 title2_text_pos_shadow_position;
 Vector2 title1_text_neg_shadow_position;
 Vector2 title2_text_neg_shadow_position;
 Vector2 author_text_position;
+Vector2 version_text_position;
 
 char title1_text[] = "Hex";
 char title2_text[] = "Puzzle";
 
 char author_text[] = "by PDKL95";
+char version_text[] = PACKAGE_VERSION;
 
 float hexpanel_size;
 float hexpanel_rotation = TO_DEGREES(TAU / 12.0f);
 
 Color title_text_color;
+Color version_text_color;
 font_handle_t title_font = {0};
 font_handle_t author_font = {0};
+font_handle_t version_font = {0};
 
 float title1_voffset = -35.0f;
 float title2_voffset = -28.0f;
@@ -62,12 +67,14 @@ level_t *bg_level = NULL;
 Color hexpanel_bg_color;
 Color shade_overlay_color;
 Color title_bg_shadow_color;
+Color title_dark_bg_shadow_color;
 Color title_nshadow_color;
 Color title_pshadow_color;
 
 void init_gui_title(void)
 {
     title_text_color = purple;
+    version_text_color = ColorBrightness(purple, 0.15);
 
     title_font.font = name_font.font;
     title_font.size = 3.0f * name_font.size;
@@ -77,6 +84,8 @@ void init_gui_title(void)
     title_font.color = 0;
 
     author_font = name_font;
+    version_font = gui_font;
+    //version_font.size *= 2;//1.5f;
 
     Vector3 hexpanel_bg_hsv = ColorToHSV(panel_bg_color);
     hexpanel_bg_hsv.y *= 0.6;
@@ -90,6 +99,9 @@ void init_gui_title(void)
     title_bg_shadow_color.g = 0;
     title_bg_shadow_color.b = 0;
     title_bg_shadow_color.a = 120;
+
+    title_dark_bg_shadow_color = title_bg_shadow_color;
+    title_dark_bg_shadow_color.a = 160;
 
     title_nshadow_color = ColorAlpha(royal_blue, 0.8);
     title_pshadow_color = ColorAlpha(   magenta, 0.7);
@@ -153,6 +165,18 @@ void resize_gui_title(void)
         - WINDOW_MARGIN;
 
     author_text_position = getVector2FromRectangle(author_text_bg_rect);
+
+    Vector2 version_text_size = MeasureTextWithFont(version_font, version_text);
+
+    version_text_bg_rect.width  = version_text_size.x;
+    version_text_bg_rect.height = version_text_size.y;
+    version_text_bg_rect.x = WINDOW_MARGIN;
+    version_text_bg_rect.y = WINDOW_MARGIN;
+
+    version_text_position = getVector2FromRectangle(version_text_bg_rect);
+
+    author_text_bg_rect  = ExpandRectangleWH(author_text_bg_rect,  BUTTON_MARGIN + 2, BUTTON_MARGIN);
+    version_text_bg_rect = ExpandRectangleWH(version_text_bg_rect, BUTTON_MARGIN + 2, BUTTON_MARGIN);
 }
 
 static inline void draw_title(void)
@@ -184,8 +208,14 @@ static inline void draw_title(void)
 
 static inline void draw_author(void)
 {
-    DrawRectangleRounded(author_text_bg_rect, 0.25f, 8, title_bg_shadow_color);
+    DrawRectangleRounded(author_text_bg_rect, 0.25f, 8, title_dark_bg_shadow_color);
     draw_text_with_font(author_font, author_text, author_text_position, title_text_color);
+}
+
+static inline void draw_version(void)
+{
+    DrawRectangleRounded(version_text_bg_rect, 0.25f, 8, title_dark_bg_shadow_color);
+    draw_text_with_font(version_font, version_text, version_text_position, version_text_color);
 }
 
 void draw_gui_title(void)
@@ -203,6 +233,6 @@ void draw_gui_title(void)
     DrawPolyLinesEx(window_center, 6, hexpanel_size + 2.0f, hexpanel_rotation, 3.0f, royal_blue);
 
     draw_author();
-
+    draw_version();
     draw_title();
 }

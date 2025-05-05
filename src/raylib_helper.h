@@ -142,6 +142,7 @@ Rectangle BoundingBoxRotatedRectangle(Rectangle rect, float angle);
 Vector2 RectangleCenter(Rectangle rect);
 
 Rectangle ExpandRectangle(Rectangle rect, float margin);
+Rectangle ExpandRectangleWH(Rectangle rect, float width_margin, float height_margin);
 Rectangle move_rect_to_screen_center(Rectangle rect);
 
 /*** Double Buffered Textures ***/

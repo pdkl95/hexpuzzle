@@ -250,6 +250,20 @@ Rectangle ExpandRectangle(Rectangle rect, float margin)
     return rect;
 }
 
+Rectangle ExpandRectangleWH(Rectangle rect, float width_margin, float height_margin)
+{
+    rect.x -= width_margin;
+    rect.y -= height_margin;
+
+    width_margin *= 2.0f;
+    height_margin *= 2.0f;
+
+    rect.width  += width_margin;
+    rect.height += height_margin;
+
+    return rect;
+}
+
 Rectangle move_rect_to_screen_center(Rectangle rect)
 {
     rect.x = window_center.x;
