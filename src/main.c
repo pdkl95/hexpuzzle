@@ -2247,11 +2247,19 @@ static void draw_cursor(void)
 {
     IVector2 icon_pos;
 
-    if (IsCursorOnScreen() && mouse_input_is_enabled()) {
-        icon_pos = mouse_position;
+    if (demo_mode) {
+        if (play_level_mode) {
+            icon_pos = mouse_position;
+        } else {
+            return;
+        }
     } else {
-        icon_pos.x = GetMouseX();
-        icon_pos.y = GetMouseY();
+        if (IsCursorOnScreen() && mouse_input_is_enabled()) {
+            icon_pos = mouse_position;
+        } else {
+            icon_pos.x = GetMouseX();
+            icon_pos.y = GetMouseY();
+        }
     }
 
     int iconid = ICON_CURSOR_POINTER;

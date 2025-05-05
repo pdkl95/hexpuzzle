@@ -40,6 +40,8 @@ const char *solver_state_name(solver_state_t state)
         return "SOLVE";
     case SOLVER_STATE_SOLVE_MOVING:
         return "SOLVE_MOVING";
+    case SOLVER_STATE_SOLVE_MOVING_TO_NEXT_TILE:
+        return "SOLVE_MOVING_TO_NEXT_TILE";
     case SOLVER_STATE_UNDO:
         return "UNDO";
     case SOLVER_STATE_UNDO_MOVING:
@@ -102,6 +104,9 @@ void solver_set_state(solver_t *solver, solver_state_t new_state)
     case SOLVER_STATE_SOLVE_MOVING:
         break;
 
+    case SOLVER_STATE_SOLVE_MOVING_TO_NEXT_TILE:
+        break;
+
     case SOLVER_STATE_UNDO:
         break;
 
@@ -130,6 +135,9 @@ void solver_set_state(solver_t *solver, solver_state_t new_state)
     case SOLVER_STATE_SOLVE_MOVING:
         break;
 
+    case SOLVER_STATE_SOLVE_MOVING_TO_NEXT_TILE:
+        break;
+
     case SOLVER_STATE_UNDO:
         break;
 
@@ -150,6 +158,8 @@ void solver_toggle_solve(solver_t *solver)
         solver_set_state(solver, SOLVER_STATE_SOLVE);
         break;
 
+    case SOLVER_STATE_SOLVE_MOVING_TO_NEXT_TILE:
+        /* fall through */
     case SOLVER_STATE_SOLVE:
         /* fall through */
     case SOLVER_STATE_SOLVE_MOVING:
@@ -174,6 +184,8 @@ void solver_toggle_undo(solver_t *solver)
         solver_set_state(solver, SOLVER_STATE_UNDO);
         break;
 
+    case SOLVER_STATE_SOLVE_MOVING_TO_NEXT_TILE:
+        /* fall through */
     case SOLVER_STATE_SOLVE:
         /* fall through */
     case SOLVER_STATE_SOLVE_MOVING:
@@ -245,11 +257,13 @@ void solver_undo(solver_t *solver)
 
 static bool update_move_anim(solver_t *solver);
 
-static void start_move_anim(solver_t *solver, float anim_time)
+static void start_move_anim(solver_t *solver, float anim_time, bool is_drag)
 {
     if (solver->anim_running) {
         stop_move_anim(solver);
     }
+
+    solver->move_is_drag = is_drag;
 
     int total_frames = options->max_fps * anim_time;
     solver->anim_step = 1.0 / (float)total_frames;
@@ -265,11 +279,12 @@ static void start_move_anim(solver_t *solver, float anim_time)
     IVector2 ipos = vector2_to_ivector2(solver->start_px);
     set_mouse_position(ipos.x, ipos.y);
 
-    level_drag_start(solver->level);
+    if (solver->move_is_drag) {
+        level_drag_start(solver->level);
+    }
 
     if (solver->fast) {
         solver->anim_progress = 1.0;
-        //update_move_anim(solver);
     }
 }
 
@@ -286,7 +301,9 @@ static void stop_move_anim(solver_t *solver)
     printf("solver: stop anim\n");
 #endif
 
-    level_drag_stop(solver->level);
+    if (solver->move_is_drag) {
+        level_drag_stop(solver->level);
+    }
 }
 
 static bool update_move_anim(solver_t *solver)
@@ -374,11 +391,43 @@ static void prepare_tile_swap(solver_t *solver, float anim_time)
            solver->end_px.y);
 #endif
 
-    if (demo_mode) {
-        anim_time *= SOLVER_DEMO_TIME_SCALE;
-    }
+    start_move_anim(solver, anim_time, true);
+}
 
-    start_move_anim(solver, anim_time);
+static void solver_setup_tile_swap(solver_t *solver)
+{
+    prepare_tile_swap(solver, SOLVER_SOLVE_SWAP_TIME);
+    solver_set_state(solver, SOLVER_STATE_SOLVE_MOVING);
+}
+
+static void solver_setup_tile_swap_after_move_pointer(solver_t *solver)
+{
+    prepare_tile_swap(solver, SOLVER_DEMO_SOLVE_SWAP_TIME);
+    solver_set_state(solver, SOLVER_STATE_SOLVE_MOVING);
+}
+
+static void prepare_move_pointer(solver_t *solver, float anim_time)
+{
+    assert_not_null(solver->swap_a);
+    assert_not_null(solver->swap_b);
+    assert(anim_time > 0.0);
+
+    solver->start_px = mouse_positionf;
+    solver->end_px = Vector2Add(solver->swap_a->win.center, solver->level->px_offset);
+
+    if (Vector2Equals(solver->start_px, solver->end_px)) {
+        /* skip the move pointer anim time if we are
+           alresdy in the correct position */
+        solver_setup_tile_swap_after_move_pointer(solver);
+    } else {
+        start_move_anim(solver, anim_time, false);
+    }
+}
+
+static void solver_setup_move_pointer(solver_t *solver)
+{
+    prepare_move_pointer(solver, SOLVER_DEMO_SOLVE_MOVE_POINTER_TIME);
+    solver_set_state(solver, SOLVER_STATE_SOLVE_MOVING_TO_NEXT_TILE);
 }
 
 void solver_update_solve(solver_t *solver)
@@ -410,11 +459,14 @@ void solver_update_solve(solver_t *solver)
     solver->saved_positions[solver->solved_index].solved_position   = solved_p;
     solver->saved_positions[solver->solved_index].unsolved_position = unsolved_p;
 
-    solver->swap_a = level_get_unsolved_tile_pos(solver->level, solved_p);
-    solver->swap_b = level_get_unsolved_tile_pos(solver->level, unsolved_p);
+    solver->swap_b = level_get_unsolved_tile_pos(solver->level, solved_p);
+    solver->swap_a = level_get_unsolved_tile_pos(solver->level, unsolved_p);
 
-    prepare_tile_swap(solver, SOLVER_SOLVE_SWAP_TIME);
-    solver_set_state(solver, SOLVER_STATE_SOLVE_MOVING);
+    if (demo_mode) {
+        solver_setup_move_pointer(solver);
+    } else {
+        solver_setup_tile_swap(solver);
+    }
 
     next_tile_index(solver);
     next_solved_index(solver);
@@ -453,6 +505,12 @@ void solver_update(solver_t *solver)
         solver_update_undo(solver);
         break;
 
+    case SOLVER_STATE_SOLVE_MOVING_TO_NEXT_TILE:
+        if (update_move_anim(solver)) {
+            solver_setup_tile_swap_after_move_pointer(solver);
+        }
+        break;
+
     case SOLVER_STATE_SOLVE_MOVING:
         if (update_move_anim(solver)) {
             solver_set_state(solver, SOLVER_STATE_SOLVE);
@@ -462,7 +520,7 @@ void solver_update(solver_t *solver)
     case SOLVER_STATE_UNDO_MOVING:
         if (update_move_anim(solver)) {
             solver_set_state(solver, SOLVER_STATE_UNDO);
-    }
+        }
         break;
 
     default:

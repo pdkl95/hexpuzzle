@@ -26,6 +26,7 @@ enum solver_state {
     SOLVER_STATE_IDLE = 0,
     SOLVER_STATE_SOLVE,
     SOLVER_STATE_SOLVE_MOVING,
+    SOLVER_STATE_SOLVE_MOVING_TO_NEXT_TILE,
     SOLVER_STATE_UNDO,
     SOLVER_STATE_UNDO_MOVING
 };
@@ -58,6 +59,8 @@ struct solver {
     struct tile_pos *swap_b;
     Vector2 start_px;
     Vector2 end_px;
+
+    bool move_is_drag;
 };
 typedef struct solver solver_t;
 

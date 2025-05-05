@@ -159,9 +159,10 @@
     #endif
 #endif
 
-#define SOLVER_SOLVE_SWAP_TIME 0.2
-#define SOLVER_UNDO_SWAP_TIME  0.15
-#define SOLVER_DEMO_TIME_SCALE 2.5
+#define SOLVER_SOLVE_SWAP_TIME               0.2
+#define SOLVER_DEMO_SOLVE_SWAP_TIME          1.2
+#define SOLVER_DEMO_SOLVE_MOVE_POINTER_TIME  0.7
+#define SOLVER_UNDO_SWAP_TIME                0.15
 
 #endif /*CONST_H*/
 
