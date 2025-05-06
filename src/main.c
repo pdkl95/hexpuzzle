@@ -86,6 +86,7 @@ int debug_dir = 0;
 #endif
 
 bool running = true;
+int raylib_log_level = LOG_WARNING;
 bool demo_mode = false;
 int automatic_event_polling_semaphore = 0;
 bool mouse_input_accepted = true;
@@ -93,7 +94,7 @@ bool event_waiting_active = false;
 bool window_size_changed = false;
 bool first_resize = true;
 bool skip_next_resize_event = false;
-double resize_delay = 0.5;
+double resize_delay = 0.3;
 double resize_time = 0.0;
 IVector2 window_size;
 Vector2 window_sizef;
@@ -678,10 +679,8 @@ set_uniform_resolution(
     SetShaderValue(postprocessing_shader, postprocessing_shader_loc.resolution, resolution, SHADER_UNIFORM_VEC2);
 }
 
-static void
-do_resize(
-    void
-) {
+void do_resize(void)
+{
     window_size.x = GetScreenWidth();
     window_size.y = GetScreenHeight();
 
@@ -919,11 +918,6 @@ handle_events(
     if (IsKeyPressed(KEY_R) && is_any_shift_down()) {
         reset_window_to_center();
     }
-
-    if (IsKeyPressed(KEY_F11)) {
-        //ToggleFullscreen();
-        ToggleBorderlessWindowed();
-    }
 #endif
 
     if (demo_mode) {
@@ -984,18 +978,6 @@ handle_events(
 #endif
         }
     }
-
-#if defined(PLATFORM_DESKTOP)
-    if (IsKeyPressed(KEY_F1)) {
-        if (current_level) {
-            cJSON *json = level_to_json(current_level);
-            char *json_str = cJSON_PrintUnformatted(json);
-            printf("JSON>>>\n%s\n<<<JSON\n", json_str);
-            free(json_str);
-            cJSON_Delete(json);
-        }
-    }
-#endif
 
     if (IsKeyPressed(KEY_ENTER)) {
         switch (game_mode) {
@@ -2576,13 +2558,50 @@ main_event_loop(
 }
 #endif
 
+static const char *raylih_log_type_string(int logLevel)
+{
+    switch (logLevel) {
+    case LOG_TRACE:   return "TRACE";
+    case LOG_DEBUG:   return "DEBUG";
+    case LOG_INFO:    return "INFO";
+    case LOG_WARNING: return "WARNING";
+    case LOG_ERROR:   return "ERROR";
+    case LOG_FATAL:   return "FATAL";
+    default:
+        __builtin_unreachable();
+        return "(NULL)";
+    }
+}
+
+void raylib_trace_log_cb(int logLevel, const char *text, va_list args)
+{
+    if (logLevel < raylib_log_level) {
+        return;
+    }
+
+    const char *type = raylih_log_type_string(logLevel);
+
+    printf("raylib: %s: ", type);
+    vprintf(text, args);
+    putchar('\n');
+    fflush(stdout);
+
+    if (logLevel == LOG_FATAL) {
+        exit(EXIT_FAILURE);
+    }
+}
+
 void gfx_init(void)
 {
     if (options->verbose) {
         SetTraceLogLevel(LOG_INFO);
+        raylib_log_level = LOG_INFO;
     } else {
         SetTraceLogLevel(LOG_WARNING);
+        raylib_log_level = LOG_WARNING;
     }
+
+    SetTraceLogCallback(raylib_trace_log_cb);
 
     unsigned int flags = 0;
     flags |= FLAG_VSYNC_HINT;

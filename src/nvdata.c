@@ -179,8 +179,8 @@ static bool program_state_from_json(cJSON *json)
                 int scr_width  = width_json->valueint;
                 int scr_height = height_json->valueint;
 
-                CLAMPVAR(scr_width,  500, window_size.x);
-                CLAMPVAR(scr_height, 500, window_size.y);
+                CLAMPVAR(scr_width,  OPTIONS_WINDOW_MIN_WIDTH,  OPTIONS_WINDOW_MAX_WIDTH);
+                CLAMPVAR(scr_height, OPTIONS_WINDOW_MIN_HEIGHT, OPTIONS_WINDOW_MAX_HEIGHT);
 
                 SetWindowSize(scr_width, scr_height);
             } else {
@@ -213,8 +213,8 @@ static bool program_state_from_json(cJSON *json)
                     .y = position_y_json->valueint
                 };
 
-                CLAMPVAR(wpos.x, 0, (window_size.x - 32));
-                CLAMPVAR(wpos.y, 0, (window_size.y - 32));
+                CLAMPVAR(wpos.x, 0, GetMonitorWidth( GetCurrentMonitor()) - window_size.x);
+                CLAMPVAR(wpos.y, 0, GetMonitorHeight(GetCurrentMonitor()) - window_size.y);
 
                 SetWindowPosition(wpos.x, wpos.y);
             } else {
