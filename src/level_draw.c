@@ -255,9 +255,15 @@ static void draw_level_preview_replacement(Rectangle rect)
              no_preview_color);
 }
 
+Vector2 initial_window_size = {
+    .x = (float)OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH,
+    .y = (float)OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT
+};
+
 void _level_preview(level_t *level, Rectangle rect, bool show_solved)
 {
     float scale_factor = 1.15;
+    //float scale_factor = 1.0;
     float half_scale_factor = 0.5 * scale_factor;
     Vector2 new_size = {
         .x = half_scale_factor * rect.width,
@@ -279,12 +285,16 @@ void _level_preview(level_t *level, Rectangle rect, bool show_solved)
         .y = rect.height / window_size.y
     };
 
+    Vector2 winsize_ratio = Vector2Divide(window_sizef,
+                                          initial_window_size);
+
     scale = Vector2Scale(scale, scale_factor);
 
     rlPushMatrix();
 
     rlTranslatef(translate.x, translate.y, 0.0f);
     rlScalef(scale.x, scale.y, 1.0f);
+    rlScalef(winsize_ratio.x, winsize_ratio.y, 1.0f);
 
     used_tiles_t save_currently_used_tiles = level->currently_used_tiles;
     float save_fade_value                  = level->fade.value;

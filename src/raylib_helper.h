@@ -39,6 +39,12 @@ void printcolor(Color c);
                vtmp.x, vtmp.y); \
     } while(0)
 
+#define pivec2(var) do { \
+        IVector2 ivtmp = (var); \
+        printf(QUOTE(var) "\t= ( x=%d, y=%d )\n", \
+               ivtmp.x, ivtmp.y); \
+    } while(0)
+
 #define prect(var) do { \
         Rectangle rtmp = (var); \
         printf(QUOTE(var) "\t= ( x=% 8.2f, y=% 8.2f,\n", rtmp.x, rtmp.y); \
