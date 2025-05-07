@@ -24,7 +24,7 @@
 
 void level_draw(level_t *level, bool finishe);
 void level_preview(level_t *level, Rectangle rect);
-void level_preview_solved(level_t *level, Rectangle rect);
+void level_draw_for_title(level_t *level, Rectangle rect);
 
 #endif /*LEVEL_DRAW_H*/
 

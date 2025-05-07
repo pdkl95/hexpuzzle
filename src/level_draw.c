@@ -236,29 +236,27 @@ void level_draw(level_t *level, bool finished)
 #endif
 }
 
+static void draw_level_preview_replacement(Rectangle rect)
+{
+    rect.x      += 15.0f;
+    rect.y      += 15.0f;
+    rect.width  -= 30.0f;
+    rect.height -= 30.0f;
+    DrawRectangleLinesEx(rect, 1.0, no_preview_color);
+    DrawLine(rect.x,
+             rect.y,
+             rect.x + rect.width,
+             rect.y + rect.height,
+             no_preview_color);
+    DrawLine(rect.x + rect.width,
+             rect.y,
+             rect.x,
+             rect.y + rect.height,
+             no_preview_color);
+}
+
 void _level_preview(level_t *level, Rectangle rect, bool show_solved)
 {
-    if (!options->show_level_previews) {
-        rect.x      += 15.0f;
-        rect.y      += 15.0f;
-        rect.width  -= 30.0f;
-        rect.height -= 30.0f;
-        DrawRectangleLinesEx(rect, 1.0, no_preview_color);
-        DrawLine(rect.x,
-                 rect.y,
-                 rect.x + rect.width,
-                 rect.y + rect.height,
-                 no_preview_color);
-        DrawLine(rect.x + rect.width,
-                 rect.y,
-                 rect.x,
-                 rect.y + rect.height,
-                 no_preview_color);
-        return;
-    }
-
-    rlPushMatrix();
-
     float scale_factor = 1.15;
     float half_scale_factor = 0.5 * scale_factor;
     Vector2 new_size = {
@@ -271,13 +269,22 @@ void _level_preview(level_t *level, Rectangle rect, bool show_solved)
     };
     Vector2 delta = Vector2Subtract(new_size, old_size);
 
-    rlTranslatef(rect.x - delta.x,
-                 rect.y - delta.y,
-                 0.0f);
+    Vector2 translate = {
+        .x = rect.x - delta.x,
+        .y = rect.y - delta.y
+    };
 
-    rlScalef(scale_factor * (rect.width  / window_size.x),
-             scale_factor * (rect.height / window_size.y),
-             1.0f);
+    Vector2 scale = {
+        .x = rect.width  / window_size.x,
+        .y = rect.height / window_size.y
+    };
+
+    scale = Vector2Scale(scale, scale_factor);
+
+    rlPushMatrix();
+
+    rlTranslatef(translate.x, translate.y, 0.0f);
+    rlScalef(scale.x, scale.y, 1.0f);
 
     used_tiles_t save_currently_used_tiles = level->currently_used_tiles;
     float save_fade_value                  = level->fade.value;
@@ -313,10 +320,15 @@ void _level_preview(level_t *level, Rectangle rect, bool show_solved)
 
 void level_preview(level_t *level, Rectangle rect)
 {
+    if (!options->show_level_previews) {
+        draw_level_preview_replacement(rect);
+        return;
+    }
+
     _level_preview(level, rect, false);
 }
 
-void level_preview_solved(level_t *level, Rectangle rect)
+void level_draw_for_title(level_t *level, Rectangle rect)
 {
     _level_preview(level, rect, true);
 }

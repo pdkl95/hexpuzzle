@@ -225,7 +225,7 @@ void draw_gui_title(void)
     }
 
     DrawPoly(       window_center, 6, hexpanel_size + 2.0f, hexpanel_rotation, hexpanel_bg_color);
-    level_preview_solved(bg_level, bg_level_rect);
+    level_draw_for_title(bg_level, bg_level_rect);
     DrawPoly(       window_center, 6, hexpanel_size + 2.0f, hexpanel_rotation, shade_overlay_color);
 
     DrawPolyLinesEx(window_center, 6, hexpanel_size + 2.0f, hexpanel_rotation, 5.0f, text_shadow_color);
