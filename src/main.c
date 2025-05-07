@@ -2615,6 +2615,8 @@ void gfx_init(void)
                      OPTIONS_WINDOW_MIN_HEIGHT);
     SetWindowMaxSize(OPTIONS_WINDOW_MAX_WIDTH,
                      OPTIONS_WINDOW_MAX_HEIGHT);
+    SetWindowAspectRatio(OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH,
+                         OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT);
 #endif
 
     SetExitKey(KEY_NULL); // handle ESC ourself

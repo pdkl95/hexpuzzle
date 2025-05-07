@@ -678,6 +678,12 @@ void SetWindowSize(int width, int height)
     glfwSetWindowSize(platform.handle, width, height);
 }
 
+// Set window dimensions
+void SetWindowAspectRatio(int width, int height)
+{
+    glfwSetWindowAspectRatio(platform.handle, width, height);
+}
+
 // Set window opacity, value opacity is between 0.0 and 1.0
 void SetWindowOpacity(float opacity)
 {
