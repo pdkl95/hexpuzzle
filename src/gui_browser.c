@@ -49,6 +49,8 @@ struct gui_list_entry {
     char *icon_name;
 
     gui_list_entry_type_t type;
+
+    level_t *level;
 };
 typedef struct gui_list_entry gui_list_entry_t;
 
@@ -142,7 +144,7 @@ const char *browser_tabbar_text[NUM_TABS];
 
 int active_tab = 0;
 
-level_t *browse_preview_level;
+level_t *browse_preview_level = NULL;
 
 const char *entry_type_str(gui_list_entry_type_t type)
 {
@@ -164,6 +166,10 @@ const char *entry_type_str(gui_list_entry_type_t type)
 static void free_local_files_data(void)
 {
     for (int i=0; i<local_files.count; i++) {
+        if (local_files.entries[i].level) {
+            destroy_level(local_files.entries[i].level);
+            local_files.entries[i].level = NULL;
+        }
         SAFEFREE(local_files.entries[i].icon_name);
     }
 
@@ -369,6 +375,24 @@ void open_entry(gui_list_entry_t *entry)
         errmsg("Cannot open \"%s\": NULL entr6y type.", entry->path);
     }
 }
+
+void preview_entry(gui_list_entry_t *entry)
+{
+    if (entry->type != ENTRY_TYPE_LEVEL_FILE) {
+        browse_preview_level = NULL;
+        return;
+    }
+
+    if (!entry->level) {
+        entry->level = load_level_file(entry->path);
+
+        if (!entry->level) {
+            return;
+        }
+    }
+
+    browse_preview_level = entry->level;
+}
 #endif
 
 void init_gui_browser(void)
@@ -520,7 +544,7 @@ void resize_gui_browser(void)
     local_files_list_with_preview_rect.height -= browser_preview_rect.height + (2 * PANEL_INNER_MARGIN);
 }
 
-void draw_gui_browser_list(gui_list_vars_t *list)
+int draw_gui_browser_list(gui_list_vars_t *list)
 {
     GuiSetStyle(LISTVIEW, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
 
@@ -540,6 +564,8 @@ void draw_gui_browser_list(gui_list_vars_t *list)
                   &list->focus);
 
     GuiSetStyle(DEFAULT, BACKGROUND_COLOR, save_bg_color);
+
+    return list->active;
 }
 
 int draw_gui_browser_big_button(gui_list_vars_t *list, const char *button_text)
@@ -616,6 +642,10 @@ void draw_gui_browser_local_level_file(void)
     char *button_text =  browser_play_button_text;
     gui_list_entry_t *entry = &(local_files.entries[local_files.active]);
 
+    if (local_files.active >= 0) {
+        preview_entry(entry);
+    }
+
     switch (entry->type) {
     case ENTRY_TYPE_DIR:
         button_text = browser_open_button_text;
@@ -661,7 +691,9 @@ void draw_gui_browser(void)
     }
 
     if (browse_preview_level) {
-        draw_level_preview(browse_preview_level, browser_preview_rect);
+        if (draw_level_preview(browse_preview_level, browser_preview_rect)) {
+            level_play(browse_preview_level);
+        }
     }
 }
 

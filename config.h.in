@@ -692,6 +692,9 @@
 /* Defined to 1 when --enable-web is active */
 #undef WEB_BUILD
 
+/* Defined to 1 if window resizing is enabled */
+#undef WINDOW_RESIZE_ENABLED
+
 /* Define to l, ll, u, ul, ull, etc., as suitable for constants of type
    'wint_t'. */
 #undef WINT_T_SUFFIX

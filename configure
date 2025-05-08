@@ -1523,6 +1523,8 @@ CPPFLAGS
 LDFLAGS
 CFLAGS
 CC
+WINDOW_RESIZE_ENABLED_FALSE
+WINDOW_RESIZE_ENABLED_TRUE
 USE_SYSTEM_RAYLIB_FALSE
 USE_SYSTEM_RAYLIB_TRUE
 USE_PHYSICS_FALSE
@@ -1610,6 +1612,7 @@ enable_debug
 enable_web
 enable_chipmunk
 enable_system_raylib
+enable_window_resize
 enable_dependency_tracking
 enable_assert
 enable_cross_guesses
@@ -2259,6 +2262,7 @@ Optional Features:
   --disable-chipmunk      Disable the Chipmunk physics engine
   --enable-system-raylib  Use a locally installed version of raylib instead of
                           the version iincluded with hexpuzzle
+  --enable-window-resize  Enables resizing of the main window (BUGGY)
   --enable-dependency-tracking
                           do not reject slow dependency extractors
   --disable-dependency-tracking
@@ -4256,6 +4260,39 @@ else
   USE_SYSTEM_RAYLIB_FALSE=
 fi
 
+
+
+
+# Check whether --enable-window-resize was given.
+if test "${enable_window_resize+set}" = set; then :
+  enableval=$enable_window_resize;
+fi
+
+
+if test "x$enable_window_resize" = "xyes"; then :
+
+    enable_window_resize="yes"
+
+else
+
+    enable_window_resize="no"
+
+fi
+
+ if test "x$enable_window_resizs" = "xyes"; then
+  WINDOW_RESIZE_ENABLED_TRUE=
+  WINDOW_RESIZE_ENABLED_FALSE='#'
+else
+  WINDOW_RESIZE_ENABLED_TRUE='#'
+  WINDOW_RESIZE_ENABLED_FALSE=
+fi
+
+
+
+if test "x$enable_window_resize" = "xyes"; then :
+  $as_echo "#define WINDOW_RESIZE_ENABLED 1" >>confdefs.h
+
+fi
 
 
 
@@ -17960,6 +17997,8 @@ $as_echo "$as_me:      CHIPMUNK = ${enable_chipmunk}" >&6;}
 $as_echo "$as_me:       PHYSICS = ${enable_physics}" >&6;}
 { $as_echo "$as_me:${as_lineno-$LINENO}: SYSTEM_RAYLIB = ${enable_system_raylib}" >&5
 $as_echo "$as_me: SYSTEM_RAYLIB = ${enable_system_raylib}" >&6;}
+{ $as_echo "$as_me:${as_lineno-$LINENO}: WINDOW_RESIZE = ${enable_window_resize}" >&5
+$as_echo "$as_me: WINDOW_RESIZE = ${enable_window_resize}" >&6;}
 { $as_echo "$as_me:${as_lineno-$LINENO}: " >&5
 $as_echo "$as_me: " >&6;}
 { $as_echo "$as_me:${as_lineno-$LINENO}:       AR = ${AR}" >&5
@@ -18129,6 +18168,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${USE_SYSTEM_RAYLIB_TRUE}" && test -z "${USE_SYSTEM_RAYLIB_FALSE}"; then
   as_fn_error $? "conditional \"USE_SYSTEM_RAYLIB\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${WINDOW_RESIZE_ENABLED_TRUE}" && test -z "${WINDOW_RESIZE_ENABLED_FALSE}"; then
+  as_fn_error $? "conditional \"WINDOW_RESIZE_ENABLED\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${AMDEP_TRUE}" && test -z "${AMDEP_FALSE}"; then

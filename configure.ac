@@ -138,6 +138,24 @@ AS_IF([test "x$enable_system_raylib" = "xyes"], [
 AM_CONDITIONAL([USE_SYSTEM_RAYLIB], [test "x$enable_system_raylib" = "xyes"])
 
 
+dnl >>> Allow the main window to be resiszable,
+dnl     with the kayout6 dynamiclly adjusting
+
+AC_ARG_ENABLE([window-resize],
+    AS_HELP_STRING([--enable-window-resize], [Enables resizing of the main window (BUGGY)]))
+
+AS_IF([test "x$enable_window_resize" = "xyes"], [
+    enable_window_resize="yes"
+],[
+    enable_window_resize="no"
+])
+
+AM_CONDITIONAL([WINDOW_RESIZE_ENABLED], [test "x$enable_window_resizs" = "xyes"])
+
+AH_TEMPLATE([WINDOW_RESIZE_ENABLED], [Defined to 1 if window resizing is enabled])
+AS_IF([test "x$enable_window_resize" = "xyes"],[AC_DEFINE([WINDOW_RESIZE_ENABLED],[1])])
+
+
 dnl ========================================
 dnl ===  Compiler/Language Dependencies  ===
 dnl ========================================
@@ -330,6 +348,7 @@ AC_MSG_NOTICE([          WEB = ${enable_web}])
 AC_MSG_NOTICE([     CHIPMUNK = ${enable_chipmunk}])
 AC_MSG_NOTICE([      PHYSICS = ${enable_physics}])
 AC_MSG_NOTICE([SYSTEM_RAYLIB = ${enable_system_raylib}])
+AC_MSG_NOTICE([WINDOW_RESIZE = ${enable_window_resize}])
 AC_MSG_NOTICE([])
 AC_MSG_NOTICE([      AR = ${AR}])
 AC_MSG_NOTICE([     CPP = ${CPP}])

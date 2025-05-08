@@ -2605,18 +2605,23 @@ void gfx_init(void)
 
     unsigned int flags = 0;
     flags |= FLAG_VSYNC_HINT;
+#ifdef WINDOW_RESIZE_ENABLED
     flags |= FLAG_WINDOW_RESIZABLE;
+#endif
     flags |= FLAG_MSAA_4X_HINT;
     SetConfigFlags(flags);
 
     InitWindow(window_size.x, window_size.y, "Hex Puzzle");
+
 #if defined(PLATFORM_DESKTOP)
+#ifdef WINDOW_RESIZE_ENABLED
     SetWindowMinSize(OPTIONS_WINDOW_MIN_WIDTH,
                      OPTIONS_WINDOW_MIN_HEIGHT);
     SetWindowMaxSize(OPTIONS_WINDOW_MAX_WIDTH,
                      OPTIONS_WINDOW_MAX_HEIGHT);
     SetWindowAspectRatio(OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH,
                          OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT);
+#endif
 #endif
 
     SetExitKey(KEY_NULL); // handle ESC ourself
