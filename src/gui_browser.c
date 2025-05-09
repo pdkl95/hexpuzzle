@@ -393,6 +393,11 @@ void preview_entry(gui_list_entry_t *entry)
 
     browse_preview_level = entry->level;
 }
+
+void disable_preview(void)
+{
+    browse_preview_level = NULL;;
+}
 #endif
 
 void init_gui_browser(void)
@@ -439,12 +444,12 @@ void resize_gui_browser(void)
         main_gui_area_rect.x
         + main_gui_area_rect.width
         - browser_preview_rect.width
-        - PANEL_INNER_MARGIN;
+        - (2*PANEL_INNER_MARGIN);
     browser_preview_rect.y =
         main_gui_area_rect.y
         + main_gui_area_rect.height
         - browser_preview_rect.height
-        - PANEL_INNER_MARGIN;
+        - (2*PANEL_INNER_MARGIN);
 
     float panel_bottom = browser_panel_rect.y + browser_panel_rect.height;
 
@@ -541,7 +546,7 @@ void resize_gui_browser(void)
     local_files_list_rect.height = area_bottom - local_files_list_rect.y;
 
     local_files_list_with_preview_rect = local_files_list_rect;
-    local_files_list_with_preview_rect.height -= browser_preview_rect.height + (2 * PANEL_INNER_MARGIN);
+    local_files_list_with_preview_rect.height -= browser_preview_rect.height - browser_play_button_rect.height;
 }
 
 int draw_gui_browser_list(gui_list_vars_t *list)
@@ -588,18 +593,9 @@ int draw_gui_browser_big_button(gui_list_vars_t *list, const char *button_text)
     if (GuiButton(*btn_rect, button_text)) {
         if (list->active >= 0 && list->active < list->count) {
             rv = list->active;
-            goto big_button_cleanup;
         }
     }
 
-    if (mouse_left_doubleclick) {
-        if (list->active >= 0 && list->active < list->count) {
-            rv = list->active;
-            goto big_button_cleanup;
-        }
-    }
-
-  big_button_cleanup:
     if (disable_button) {
         GuiEnable();
     }
@@ -644,6 +640,8 @@ void draw_gui_browser_local_level_file(void)
 
     if (local_files.active >= 0) {
         preview_entry(entry);
+    } else {
+        disable_preview();
     }
 
     switch (entry->type) {
@@ -663,6 +661,13 @@ void draw_gui_browser_local_level_file(void)
     }
 
     int selected = draw_gui_browser_big_button(&local_files, button_text);
+
+    if (browse_preview_level) {
+        if (draw_level_preview(browse_preview_level, browser_preview_rect)) {
+            open_entry(entry);
+            return;
+        }
+    }
 
     if (selected > -1) {
         if (entry) {
@@ -688,12 +693,6 @@ void draw_gui_browser(void)
         draw_gui_browser_local_level_file();
         break;
 #endif
-    }
-
-    if (browse_preview_level) {
-        if (draw_level_preview(browse_preview_level, browser_preview_rect)) {
-            level_play(browse_preview_level);
-        }
     }
 }
 
