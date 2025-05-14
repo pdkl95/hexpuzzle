@@ -1793,6 +1793,8 @@ bool draw_level_preview(level_t *level, Rectangle bounds)
         DrawLineEx(c_tr, c_br, thickness, color);
         DrawLineEx(c_br, c_bl, thickness, color);
         DrawLineEx(c_bl, c_tl, thickness, color);
+
+        return false;
     }
 
     if (hover) {

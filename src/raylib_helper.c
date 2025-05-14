@@ -397,7 +397,7 @@ static Color GuiFade(Color color, float alpha)
     return result;
 }
 
-static void GuiDrawRectangle(Rectangle rec, int borderWidth, Color borderColor, Color color)
+void GuiDrawRectangle(Rectangle rec, int borderWidth, Color borderColor, Color color)
 {
     if (color.a > 0)
     {

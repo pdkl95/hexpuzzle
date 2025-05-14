@@ -171,6 +171,7 @@ Texture2D LoadTextureWithFormat(int width, int height, int format);
 RenderTexture2D LoadRenderTextureWithFormat(int width, int height, int pixel_format);
 
 /*** Custom RayGui widgets ***/
+void GuiDrawRectangle(Rectangle rec, int borderWidth, Color borderColor, Color color);
 void GuiSimpleTabBar(Rectangle bounds, const char **text, int count, int *active);
 int GuiButtonMultiLine(Rectangle bounds, const char **text, int count, int icon);
 

@@ -23,6 +23,7 @@
 #include "options.h"
 #include "level.h"
 #include "collection.h"
+#include "raygui_paged_list.h"
 #include "gui_browser.h"
 
 extern char *home_dir;
@@ -64,6 +65,8 @@ struct gui_list_vars {
     Rectangle *list_rect_preview;
     Rectangle *btn_rect;
     Rectangle *btn_rect_preview;
+
+    raygui_paged_list_t list;
 
     int scroll_index;
     int active;
@@ -130,9 +133,9 @@ gui_list_vars_t local_files = {
     .names             = NULL,
     .entries           = NULL,
     .count             = 0,
-    .list_rect         = &local_files_list_rect,
+    .list_rect         = &local_files_list_with_preview_rect,
     .list_rect_preview = &local_files_list_with_preview_rect,
-    .btn_rect          = &browser_play_button_rect,
+    .btn_rect          = &browser_play_button_with_preview_rect,
     .btn_rect_preview  = &browser_play_button_with_preview_rect,
     .scroll_index      = -1,
     .active            = -1,
@@ -216,6 +219,10 @@ static void prepare_gui_list_names(gui_list_vars_t *list)
         gui_list_entry_t *entry = &(list->entries[i]);
         list->names[i] = entry->icon_name;
     }
+
+    raygui_paged_list_set_text(&(list->list),
+                               (const char **)list->names,
+                               list->count);
 }
 
 #if defined(PLATFORM_DESKTOP)
@@ -407,12 +414,22 @@ void init_gui_browser(void)
     browser_tabbar_text[1] = "Local Files";
     browser_tabbar_text[2] = "Add File";
 
+    init_raygui_paged_list(&(local_files.list),
+                           &(local_files.scroll_index),
+                           &(local_files.active),
+                           &(local_files.focus));
+
     change_gui_browser_path_to_local_saved_levels();
 
 #else
     browser_tabbar_text[1] = NULL;
     browser_tabbar_text[2] = NULL;
 #endif
+
+    init_raygui_paged_list(&(classics.list),
+                           &(classics.scroll_index),
+                           &(classics.active),
+                           &(classics.focus));
 
     prepare_gui_list_names(&classics);
 
@@ -422,10 +439,14 @@ void init_gui_browser(void)
 void cleanup_gui_browser(void)
 {
 #if defined(PLATFORM_DESKTOP)
+    cleanup_raygui_paged_list(&(local_files.list));
+
     if (local_files.names) {
         free_local_files_data();
     }
 #endif
+
+    cleanup_raygui_paged_list(&(classics.list));
 
     SAFEFREE(local_files_up_button_text);
     SAFEFREE(local_files_home_button_text);
@@ -547,6 +568,20 @@ void resize_gui_browser(void)
 
     local_files_list_with_preview_rect = local_files_list_rect;
     local_files_list_with_preview_rect.height -= browser_preview_rect.height - browser_play_button_rect.height;
+
+    if (main_gui_area_rect.width < 1.0) {
+        return;
+    }
+
+    raygui_paged_list_resize(&(classics.list), *classics.list_rect);
+
+#if defined(PLATFORM_DESKTOP)
+    //if (browse_preview_level) {
+        raygui_paged_list_resize(&(local_files.list), *local_files.list_rect_preview);
+    //} else {
+        //raygui_paged_list_resize(&(local_files.list), *local_files.list_rect);
+    //}
+#endif
 }
 
 int draw_gui_browser_list(gui_list_vars_t *list)
@@ -556,17 +591,7 @@ int draw_gui_browser_list(gui_list_vars_t *list)
     int save_bg_color = GuiGetStyle(DEFAULT, BACKGROUND_COLOR);
     GuiSetStyle(DEFAULT, BACKGROUND_COLOR, GuiGetStyle(STATUSBAR, BASE_COLOR_NORMAL));
 
-    Rectangle *list_rect =
-        browse_preview_level
-        ? list->list_rect_preview
-        : list->list_rect;
-
-    GuiListViewEx(*list_rect,
-                  (const char **)list->names,
-                  list->count,
-                  &list->scroll_index,
-                  &list->active,
-                  &list->focus);
+    raygui_paged_list_draw(&(list->list));
 
     GuiSetStyle(DEFAULT, BACKGROUND_COLOR, save_bg_color);
 
@@ -662,12 +687,12 @@ void draw_gui_browser_local_level_file(void)
 
     int selected = draw_gui_browser_big_button(&local_files, button_text);
 
-    if (browse_preview_level) {
+    //if (browse_preview_level) {
         if (draw_level_preview(browse_preview_level, browser_preview_rect)) {
             open_entry(entry);
             return;
         }
-    }
+    //}
 
     if (selected > -1) {
         if (entry) {

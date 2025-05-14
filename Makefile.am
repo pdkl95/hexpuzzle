@@ -152,6 +152,7 @@ hexpuzzle_SOURCES =                                          \
 	src/path.h                 src/path.c                \
 	src/range.h                src/range.c               \
 	src/raygui_impl.c 			             \
+	src/raygui_paged_list.h    src/raygui_paged_list.c   \
 	src/raylib_gui_numeric.h   src/raylib_gui_numeric.c  \
 	src/raylib_helper.h        src/raylib_helper.c       \
 	src/startup_action.h       src/startup_action.c      \

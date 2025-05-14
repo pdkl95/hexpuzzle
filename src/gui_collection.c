@@ -25,6 +25,7 @@
 
 #include "level.h"
 #include "collection.h"
+#include "raygui_paged_list.h"
 #include "gui_collection.h"
 
 bool draw_level_preview(level_t *level, Rectangle bounds);
@@ -390,12 +391,13 @@ static void draw_level_list(void)
     int save_bg_color = GuiGetStyle(DEFAULT, BACKGROUND_COLOR);
     GuiSetStyle(DEFAULT, BACKGROUND_COLOR, GuiGetStyle(STATUSBAR, BASE_COLOR_NORMAL));
 
-    GuiListViewEx(collection_list_rect,
-                  current_collection->level_names,
-                  current_collection->level_count,
-                  &current_collection->gui_list_scroll_index,
-                  &current_collection->gui_list_active,
-                  &current_collection->gui_list_focus);
+    raygui_paged_list_draw_as_listview(
+        collection_list_rect,
+        current_collection->level_names,
+        current_collection->level_count,
+        &current_collection->gui_list_scroll_index,
+        &current_collection->gui_list_active,
+        &current_collection->gui_list_focus);
 
     draw_level_list_colored_status();
 
