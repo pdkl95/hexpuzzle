@@ -66,7 +66,8 @@ struct gui_list_vars {
     Rectangle *btn_rect;
     Rectangle *btn_rect_preview;
 
-    raygui_paged_list_t list;
+    raygui_paged_list_t *gui_list;
+    raygui_paged_list_t *gui_list_preview;
 
     int scroll_index;
     int active;
@@ -103,6 +104,10 @@ char *local_files_up_button_text = NULL;
 char *local_files_home_button_text = NULL;
 char *local_files_local_saved_levels_button_text = NULL;
 
+raygui_paged_list_t classics_gui_list;
+raygui_paged_list_t local_files_gui_list;
+raygui_paged_list_t local_files_gui_list_preview;
+
 gui_list_entry_t classics_entries[] = {
     { .name = "01 - 10 (red)",    .path = NULL, .icon = ICON_SUITCASE, .icon_name = NULL },
     { .name = "11 - 20 (blue)",   .path = NULL, .icon = ICON_SUITCASE, .icon_name = NULL },
@@ -119,6 +124,8 @@ gui_list_vars_t classics = {
     .list_rect_preview = &browser_list_with_preview_rect,
     .btn_rect          = &browser_play_button_rect,
     .btn_rect_preview  = &browser_play_button_with_preview_rect,
+    .gui_list          = &classics_gui_list,
+    .gui_list_preview  = NULL,
     .scroll_index      = -1,
     .active            = -1,
     .focus             = -1
@@ -133,10 +140,12 @@ gui_list_vars_t local_files = {
     .names             = NULL,
     .entries           = NULL,
     .count             = 0,
-    .list_rect         = &local_files_list_with_preview_rect,
+    .list_rect         = &local_files_list_rect,
     .list_rect_preview = &local_files_list_with_preview_rect,
-    .btn_rect          = &browser_play_button_with_preview_rect,
+    .btn_rect          = &browser_play_button_rect,
     .btn_rect_preview  = &browser_play_button_with_preview_rect,
+    .gui_list          = &local_files_gui_list,
+    .gui_list_preview  = &local_files_gui_list_preview,
     .scroll_index      = -1,
     .active            = -1,
     .focus             = -1
@@ -220,9 +229,17 @@ static void prepare_gui_list_names(gui_list_vars_t *list)
         list->names[i] = entry->icon_name;
     }
 
-    raygui_paged_list_set_text(&(list->list),
-                               (const char **)list->names,
-                               list->count);
+    if (list->gui_list) {
+        raygui_paged_list_set_text(list->gui_list,
+                                   (const char **)list->names,
+                                   list->count);
+    }
+
+    if (list->gui_list_preview) {
+        raygui_paged_list_set_text(list->gui_list_preview,
+                                   (const char **)list->names,
+                                   list->count);
+    }
 }
 
 #if defined(PLATFORM_DESKTOP)
@@ -383,6 +400,7 @@ void open_entry(gui_list_entry_t *entry)
     }
 }
 
+
 void preview_entry(gui_list_entry_t *entry)
 {
     if (entry->type != ENTRY_TYPE_LEVEL_FILE) {
@@ -414,7 +432,12 @@ void init_gui_browser(void)
     browser_tabbar_text[1] = "Local Files";
     browser_tabbar_text[2] = "Add File";
 
-    init_raygui_paged_list(&(local_files.list),
+    init_raygui_paged_list(local_files.gui_list,
+                           &(local_files.scroll_index),
+                           &(local_files.active),
+                           &(local_files.focus));
+
+    init_raygui_paged_list(local_files.gui_list_preview,
                            &(local_files.scroll_index),
                            &(local_files.active),
                            &(local_files.focus));
@@ -426,7 +449,7 @@ void init_gui_browser(void)
     browser_tabbar_text[2] = NULL;
 #endif
 
-    init_raygui_paged_list(&(classics.list),
+    init_raygui_paged_list(classics.gui_list,
                            &(classics.scroll_index),
                            &(classics.active),
                            &(classics.focus));
@@ -439,14 +462,15 @@ void init_gui_browser(void)
 void cleanup_gui_browser(void)
 {
 #if defined(PLATFORM_DESKTOP)
-    cleanup_raygui_paged_list(&(local_files.list));
+    cleanup_raygui_paged_list(local_files.gui_list_preview);
+    cleanup_raygui_paged_list(local_files.gui_list);
 
     if (local_files.names) {
         free_local_files_data();
     }
 #endif
 
-    cleanup_raygui_paged_list(&(classics.list));
+    cleanup_raygui_paged_list(classics.gui_list);
 
     SAFEFREE(local_files_up_button_text);
     SAFEFREE(local_files_home_button_text);
@@ -573,16 +597,24 @@ void resize_gui_browser(void)
         return;
     }
 
-    raygui_paged_list_resize(&(classics.list), *classics.list_rect);
+    raygui_paged_list_resize(classics.gui_list, *classics.list_rect);
 
 #if defined(PLATFORM_DESKTOP)
-    //if (browse_preview_level) {
-        raygui_paged_list_resize(&(local_files.list), *local_files.list_rect_preview);
-    //} else {
-        //raygui_paged_list_resize(&(local_files.list), *local_files.list_rect);
-    //}
+    raygui_paged_list_resize(local_files.gui_list_preview, *local_files.list_rect_preview);
+    raygui_paged_list_resize(local_files.gui_list,         *local_files.list_rect);
 #endif
 }
+
+static inline raygui_paged_list_t *get_current_gui_list(gui_list_vars_t *list)
+{
+    raygui_paged_list_t *gui_list = list->gui_list;
+    if (browse_preview_level && list->gui_list_preview) {
+        gui_list = list->gui_list_preview;
+    }
+    assert_not_null(gui_list);
+    return gui_list;
+}
+
 
 int draw_gui_browser_list(gui_list_vars_t *list)
 {
@@ -591,7 +623,8 @@ int draw_gui_browser_list(gui_list_vars_t *list)
     int save_bg_color = GuiGetStyle(DEFAULT, BACKGROUND_COLOR);
     GuiSetStyle(DEFAULT, BACKGROUND_COLOR, GuiGetStyle(STATUSBAR, BASE_COLOR_NORMAL));
 
-    raygui_paged_list_draw(&(list->list));
+    raygui_paged_list_t *gui_list = get_current_gui_list(list);
+    raygui_paged_list_draw(gui_list);
 
     GuiSetStyle(DEFAULT, BACKGROUND_COLOR, save_bg_color);
 
@@ -663,10 +696,18 @@ void draw_gui_browser_local_level_file(void)
     char *button_text =  browser_play_button_text;
     gui_list_entry_t *entry = &(local_files.entries[local_files.active]);
 
+    level_t *old_browse_preview_level = browse_preview_level;
+
     if (local_files.active >= 0) {
         preview_entry(entry);
     } else {
         disable_preview();
+    }
+
+    if ((old_browse_preview_level != browse_preview_level) &&
+        local_files.active > -1) {
+        raygui_paged_list_t *gui_list = get_current_gui_list(&local_files);
+        raygui_paged_list_select_active_page(gui_list);
     }
 
     switch (entry->type) {
@@ -687,12 +728,12 @@ void draw_gui_browser_local_level_file(void)
 
     int selected = draw_gui_browser_big_button(&local_files, button_text);
 
-    //if (browse_preview_level) {
+    if (browse_preview_level) {
         if (draw_level_preview(browse_preview_level, browser_preview_rect)) {
             open_entry(entry);
             return;
         }
-    //}
+    }
 
     if (selected > -1) {
         if (entry) {

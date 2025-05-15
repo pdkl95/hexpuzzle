@@ -22,7 +22,8 @@
 #include "common.h"
 #include "raygui_paged_list.h"
 
-
+char prev_button_tooltip[] = "Prev Page";
+char next_button_tooltip[] = "Next Page";
 
 raygui_paged_list_t *alloc_raygui_paged_list(void)
 {
@@ -160,6 +161,7 @@ static inline void raygui_paged_list_draw_sidebar(raygui_paged_list_t *list)
     bool show_next = !raygui_paged_list_on_last_page(list);
 
     if (show_prev) {
+        tooltip(list->gui_prev_button_bounds, prev_button_tooltip);
         if (GuiButton(list->gui_prev_button_bounds, list->prev_button_text)) {
             raygui_paged_list_goto_prev_page(list);
         }
@@ -170,6 +172,7 @@ static inline void raygui_paged_list_draw_sidebar(raygui_paged_list_t *list)
     }
 
     if (show_next) {
+        tooltip(list->gui_next_button_bounds, next_button_tooltip);
         if (GuiButton(list->gui_next_button_bounds, list->next_button_text)) {
             raygui_paged_list_goto_next_page(list);
         }
@@ -302,4 +305,20 @@ int raygui_paged_list_draw_as_listview(Rectangle bounds, const char **text, int 
     raygui_paged_list_draw(&list);
 
     return 0;
+}
+
+static int raygui_paged_list_get_pagenum(raygui_paged_list_t *list, int rowid)
+{
+    return (int)floorf(((float)rowid) / ((float)list->items_per_page));
+}
+
+void raygui_paged_list_select_active_page(raygui_paged_list_t *list)
+{
+    assert_not_null(list);
+
+    int pagenum = raygui_paged_list_get_pagenum(list, *list->active);
+
+    if ((pagenum >= list->first_page) && (pagenum <= list->last_page)) {
+        list->page = pagenum;
+    }
 }

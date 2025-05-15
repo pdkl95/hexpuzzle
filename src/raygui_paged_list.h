@@ -86,5 +86,8 @@ void raygui_paged_list_draw(raygui_paged_list_t *list);
 
 int raygui_paged_list_draw_as_listview(Rectangle bounds, const char **text, int count, int *scrollIndex, int *active, int *focus);
 
+void raygui_paged_list_select_active_page(raygui_paged_list_t *list);
+
+
 #endif /*RAYGUI_PAGED_LIST_H*/
 
