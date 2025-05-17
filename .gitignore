@@ -5,6 +5,7 @@ lib/gnulib/string.h
 lib/gnulib/strings.h
 lib/gnulib/sys/types.h
 lib/gnulib/unistd.h
+fonts/*.c
 hexpuzzle
 hexpuzzle.html
 hexpuzzle.js

@@ -1,3 +1,5 @@
+SUFFIXES = .ttf .otf
+
 AUTOMAKE_OPTIONS = subdir-objects
 
 ACLOCAL_AMFLAGS = -I m4 -I m4/gnulib
@@ -20,6 +22,11 @@ FONTS = \
 	fonts/BeetypeFilled-ljJq.otf \
 	fonts/CabinCondensed-Bold.ttf \
 	fonts/Ubuntu-Medium.ttf
+
+C_SRC_FONTS = \
+	fonts/BeetypeFilled-ljJq.c \
+	fonts/CabinCondensed-Bold.c \
+	fonts/Ubuntu-Medium.c
 
 SHADERS = \
 	shaders/postprocessing.frag.glsl \
@@ -178,17 +185,28 @@ dist_EXTRA_hexpuzzle_SOURCES =      \
 	src/data_shaders.h	    \
 	src/data_textures.h
 
+EXTRA_PROGRAMS = util/compile_to_c_src
+util_compile_to_c_src_SOURCES = util/compile_to_c_src.c
+util_compile_to_c_src_CFLAGS = $(COMMON_PROG_CFLAGS)
+util_compile_to_c_src_LDADD = $(COMMON_PROG_LDADD) \
+	external/raylib/libraylib.a \
+	-lGL -lc -lm -lpthread -ldl -lrt
+
+.ttf.c: | util/compile_to_c_src
+	$(builddir)/util/compile_to_c_src $^ $@
+
+.otf.c: | util/compile_to_c_src
+	$(builddir)/util/compile_to_c_src $^ $@
+
 src/data_classics_levels.h: $(CLASSICS_LEVELS)
 	$(AM_V_at)rm -f $@
 	$(AM_V_GEN)cd $(top_srcdir) && for file in $^ ; do \
 	    $(XXD) -i "$${file}" >> $@ ; \
 	done
 
-src/data_fonts.h: $(FONTS)
+src/data_fonts.h: $(C_SRC_FONTS)
 	$(AM_V_at)rm -f $@
-	$(AM_V_GEN)cd $(top_srcdir) && for file in $^ ; do \
-	    $(XXD) -i "$${file}" >> $@ ; \
-	done
+	$(AM_V_GEN)cat $(C_SRC_FONTS) >> $@
 
 src/data_shaders.h: $(SHADERS)
 	$(AM_V_at)rm -f $@
@@ -213,9 +231,13 @@ src/hexpuzzle-nvdata_finished.$(OBJEXT): CFLAGS += $(NO_UNUSED_BUT_SET_OPT) -Wno
 src/hexpuzzle-gui_popup_message.$(OBJEXT): CFLAGS += $(NO_UNUSED_BUT_SET_OPT) -Wno-unused-variable -Wno-incompatible-pointer-types -Wno-misleading-indentation
 
 BUILT_SOURCES = \
+	util/compile_to_c_src \
+	$(C_SRC_FONTS) \
 	$(dist_EXTRA_hexpuzzle_SOURCES)
 
 MAINTAINERCLEANFILES = \
+	util/compile_to_c_src \
+	$(C_SRC_FONTS) \
 	$(dist_EXTRA_hexpuzzle_SOURCES)
 
 
