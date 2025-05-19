@@ -34,8 +34,12 @@ font_handle_t *current_font;
 bool restore_color_next_change = false;
 int restore_color;
 
-static inline font_handle_t load_font(int size, int filter, unsigned char *font_data, unsigned int font_data_length)
+static inline font_handle_t load_font(int size, int filter, unsigned char *comp_data, unsigned int comp_data_length)
 {
+    int font_data_length = 0;
+    unsigned char *font_data = DecompressData(comp_data, comp_data_length, &font_data_length);
+    assert_not_null(font_data);
+
     font_handle_t fh = {
         .size    = size,
         .spacing = 2.0f,
@@ -53,6 +57,8 @@ static inline font_handle_t load_font(int size, int filter, unsigned char *font_
 
     SetTextureFilter(fh.font.texture, filter);
 
+    MemFree(font_data);
+
     return fh;
 }
 
@@ -65,24 +71,24 @@ static inline void set_font_color(font_handle_t *fh, int color)
 void load_fonts(void)
 {
     gui_font        = load_font(16, TEXTURE_FILTER_TRILINEAR,
-                                fonts_Ubuntu_Medium_ttf,
-                                fonts_Ubuntu_Medium_ttf_len);
+                                UBUNTU_MEDIUM_DATA,
+                                UBUNTU_MEDIUM_DATA_SIZE);
 
     gui_narrow_font = load_font(15, TEXTURE_FILTER_TRILINEAR,
-                                fonts_CabinCondensed_Bold_ttf,
-                                fonts_CabinCondensed_Bold_ttf_len);
+                                CABIN_CONDENSED_BOLD_DATA,
+                                CABIN_CONDENSED_BOLD_DATA_SIZE);
 
     panel_font      = load_font(20, TEXTURE_FILTER_BILINEAR,
-                                fonts_Ubuntu_Medium_ttf,
-                                fonts_Ubuntu_Medium_ttf_len);
+                                UBUNTU_MEDIUM_DATA,
+                                UBUNTU_MEDIUM_DATA_SIZE);
 
     name_font       = load_font(36, TEXTURE_FILTER_BILINEAR,
-                                fonts_Ubuntu_Medium_ttf,
-                                fonts_Ubuntu_Medium_ttf_len);
+                                UBUNTU_MEDIUM_DATA,
+                                UBUNTU_MEDIUM_DATA_SIZE);
 
     big_button_font = load_font(36, TEXTURE_FILTER_BILINEAR,
-                                fonts_BeetypeFilled_ljJq_otf,
-                                fonts_BeetypeFilled_ljJq_otf_len);
+                                BEETYPE_FILLED_DATA,
+                                BEETYPE_FILLED_DATA_SIZE);
 
     set_font_color(&big_button_font, 0xc1c1c1ff);
 }

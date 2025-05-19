@@ -19,14 +19,15 @@ CLASSICS_LEVELS = \
 	levels/classics/4-yellow.hexlevelpack
 
 FONTS = \
-	fonts/BeetypeFilled-ljJq.otf \
-	fonts/CabinCondensed-Bold.ttf \
-	fonts/Ubuntu-Medium.ttf
+	fonts/beetype_filled.otf \
+	fonts/cabin_condensed_bold.ttf \
+	fonts/ubuntu_medium.ttf
 
 C_SRC_FONTS = \
-	fonts/BeetypeFilled-ljJq.c \
-	fonts/CabinCondensed-Bold.c \
-	fonts/Ubuntu-Medium.c
+	fonts/beetype_filled.c \
+	fonts/cabin_condensed_bold.c \
+	fonts/ubuntu_medium.c
+
 
 SHADERS = \
 	shaders/postprocessing.frag.glsl \
@@ -180,6 +181,7 @@ hexpuzzle_SOURCES += \
 endif
 
 dist_EXTRA_hexpuzzle_SOURCES =      \
+	$(C_SRC_FONTS)              \
 	src/data_classics_levels.h  \
 	src/data_fonts.h            \
 	src/data_shaders.h	    \
@@ -192,11 +194,11 @@ util_compile_to_c_src_LDADD = $(COMMON_PROG_LDADD) \
 	external/raylib/libraylib.a \
 	-lGL -lc -lm -lpthread -ldl -lrt
 
-.ttf.c: | util/compile_to_c_src
-	$(builddir)/util/compile_to_c_src $^ $@
+.ttf.c: util/compile_to_c_src
+	$(builddir)/util/compile_to_c_src -c $< $@
 
-.otf.c: | util/compile_to_c_src
-	$(builddir)/util/compile_to_c_src $^ $@
+.otf.c: util/compile_to_c_src
+	$(builddir)/util/compile_to_c_src -c $< $@
 
 src/data_classics_levels.h: $(CLASSICS_LEVELS)
 	$(AM_V_at)rm -f $@
@@ -234,6 +236,9 @@ BUILT_SOURCES = \
 	util/compile_to_c_src \
 	$(C_SRC_FONTS) \
 	$(dist_EXTRA_hexpuzzle_SOURCES)
+
+DISTCLEANFILES = \
+	util/compile_to_c_src
 
 MAINTAINERCLEANFILES = \
 	util/compile_to_c_src \

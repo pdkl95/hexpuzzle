@@ -1437,14 +1437,14 @@ CLASSICS_LEVELS = \
 	levels/classics/4-yellow.hexlevelpack
 
 FONTS = \
-	fonts/BeetypeFilled-ljJq.otf \
-	fonts/CabinCondensed-Bold.ttf \
-	fonts/Ubuntu-Medium.ttf
+	fonts/beetype_filled.otf \
+	fonts/cabin_condensed_bold.ttf \
+	fonts/ubuntu_medium.ttf
 
 C_SRC_FONTS = \
-	fonts/BeetypeFilled-ljJq.c \
-	fonts/CabinCondensed-Bold.c \
-	fonts/Ubuntu-Medium.c
+	fonts/beetype_filled.c \
+	fonts/cabin_condensed_bold.c \
+	fonts/ubuntu_medium.c
 
 SHADERS = \
 	shaders/postprocessing.frag.glsl \
@@ -1532,6 +1532,7 @@ hexpuzzle_SOURCES = src/background.h src/background.c src/classics.h \
 	src/win_anim_mode_config.h src/win_anim_mode_config.c \
 	src/common.h src/main.c $(am__append_5)
 dist_EXTRA_hexpuzzle_SOURCES = \
+	$(C_SRC_FONTS)              \
 	src/data_classics_levels.h  \
 	src/data_fonts.h            \
 	src/data_shaders.h	    \
@@ -1551,6 +1552,9 @@ BUILT_SOURCES = util/compile_to_c_src $(C_SRC_FONTS) \
 	lib/gnulib/stdio.h lib/gnulib/stdlib.h lib/gnulib/string.h \
 	lib/gnulib/strings.h lib/gnulib/sys/types.h \
 	lib/gnulib/unistd.h $(am__append_36)
+DISTCLEANFILES = \
+	util/compile_to_c_src
+
 MAINTAINERCLEANFILES = \
 	util/compile_to_c_src \
 	$(C_SRC_FONTS) \
@@ -2067,6 +2071,18 @@ src/hexpuzzle-main.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-physics.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+fonts/$(am__dirstamp):
+	@$(MKDIR_P) fonts
+	@: > fonts/$(am__dirstamp)
+fonts/$(DEPDIR)/$(am__dirstamp):
+	@$(MKDIR_P) fonts/$(DEPDIR)
+	@: > fonts/$(DEPDIR)/$(am__dirstamp)
+fonts/hexpuzzle-beetype_filled.$(OBJEXT): fonts/$(am__dirstamp) \
+	fonts/$(DEPDIR)/$(am__dirstamp)
+fonts/hexpuzzle-cabin_condensed_bold.$(OBJEXT): fonts/$(am__dirstamp) \
+	fonts/$(DEPDIR)/$(am__dirstamp)
+fonts/hexpuzzle-ubuntu_medium.$(OBJEXT): fonts/$(am__dirstamp) \
+	fonts/$(DEPDIR)/$(am__dirstamp)
 
 hexpuzzle$(EXEEXT): $(hexpuzzle_OBJECTS) $(hexpuzzle_DEPENDENCIES) $(EXTRA_hexpuzzle_DEPENDENCIES) 
 	@rm -f hexpuzzle$(EXEEXT)
@@ -2089,6 +2105,7 @@ mostlyclean-compile:
 	-rm -f external/cJSON/*.$(OBJEXT)
 	-rm -f external/pcg/*.$(OBJEXT)
 	-rm -f external/raylib/*.$(OBJEXT)
+	-rm -f fonts/*.$(OBJEXT)
 	-rm -f lib/gnulib/*.$(OBJEXT)
 	-rm -f src/*.$(OBJEXT)
 	-rm -f util/*.$(OBJEXT)
@@ -2106,6 +2123,9 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rtext.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@external/raylib/$(DEPDIR)/external_raylib_libraylib_a-rtextures.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@external/raylib/$(DEPDIR)/external_raylib_libraylib_a-utils.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@fonts/$(DEPDIR)/hexpuzzle-beetype_filled.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@fonts/$(DEPDIR)/hexpuzzle-cabin_condensed_bold.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@fonts/$(DEPDIR)/hexpuzzle-ubuntu_medium.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-asnprintf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-asprintf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-float.Po@am__quote@
@@ -3151,6 +3171,48 @@ src/hexpuzzle-physics.obj: src/physics.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-physics.obj `if test -f 'src/physics.c'; then $(CYGPATH_W) 'src/physics.c'; else $(CYGPATH_W) '$(srcdir)/src/physics.c'; fi`
 
+fonts/hexpuzzle-beetype_filled.o: fonts/beetype_filled.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT fonts/hexpuzzle-beetype_filled.o -MD -MP -MF fonts/$(DEPDIR)/hexpuzzle-beetype_filled.Tpo -c -o fonts/hexpuzzle-beetype_filled.o `test -f 'fonts/beetype_filled.c' || echo '$(srcdir)/'`fonts/beetype_filled.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) fonts/$(DEPDIR)/hexpuzzle-beetype_filled.Tpo fonts/$(DEPDIR)/hexpuzzle-beetype_filled.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fonts/beetype_filled.c' object='fonts/hexpuzzle-beetype_filled.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o fonts/hexpuzzle-beetype_filled.o `test -f 'fonts/beetype_filled.c' || echo '$(srcdir)/'`fonts/beetype_filled.c
+
+fonts/hexpuzzle-beetype_filled.obj: fonts/beetype_filled.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT fonts/hexpuzzle-beetype_filled.obj -MD -MP -MF fonts/$(DEPDIR)/hexpuzzle-beetype_filled.Tpo -c -o fonts/hexpuzzle-beetype_filled.obj `if test -f 'fonts/beetype_filled.c'; then $(CYGPATH_W) 'fonts/beetype_filled.c'; else $(CYGPATH_W) '$(srcdir)/fonts/beetype_filled.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) fonts/$(DEPDIR)/hexpuzzle-beetype_filled.Tpo fonts/$(DEPDIR)/hexpuzzle-beetype_filled.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fonts/beetype_filled.c' object='fonts/hexpuzzle-beetype_filled.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o fonts/hexpuzzle-beetype_filled.obj `if test -f 'fonts/beetype_filled.c'; then $(CYGPATH_W) 'fonts/beetype_filled.c'; else $(CYGPATH_W) '$(srcdir)/fonts/beetype_filled.c'; fi`
+
+fonts/hexpuzzle-cabin_condensed_bold.o: fonts/cabin_condensed_bold.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT fonts/hexpuzzle-cabin_condensed_bold.o -MD -MP -MF fonts/$(DEPDIR)/hexpuzzle-cabin_condensed_bold.Tpo -c -o fonts/hexpuzzle-cabin_condensed_bold.o `test -f 'fonts/cabin_condensed_bold.c' || echo '$(srcdir)/'`fonts/cabin_condensed_bold.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) fonts/$(DEPDIR)/hexpuzzle-cabin_condensed_bold.Tpo fonts/$(DEPDIR)/hexpuzzle-cabin_condensed_bold.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fonts/cabin_condensed_bold.c' object='fonts/hexpuzzle-cabin_condensed_bold.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o fonts/hexpuzzle-cabin_condensed_bold.o `test -f 'fonts/cabin_condensed_bold.c' || echo '$(srcdir)/'`fonts/cabin_condensed_bold.c
+
+fonts/hexpuzzle-cabin_condensed_bold.obj: fonts/cabin_condensed_bold.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT fonts/hexpuzzle-cabin_condensed_bold.obj -MD -MP -MF fonts/$(DEPDIR)/hexpuzzle-cabin_condensed_bold.Tpo -c -o fonts/hexpuzzle-cabin_condensed_bold.obj `if test -f 'fonts/cabin_condensed_bold.c'; then $(CYGPATH_W) 'fonts/cabin_condensed_bold.c'; else $(CYGPATH_W) '$(srcdir)/fonts/cabin_condensed_bold.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) fonts/$(DEPDIR)/hexpuzzle-cabin_condensed_bold.Tpo fonts/$(DEPDIR)/hexpuzzle-cabin_condensed_bold.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fonts/cabin_condensed_bold.c' object='fonts/hexpuzzle-cabin_condensed_bold.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o fonts/hexpuzzle-cabin_condensed_bold.obj `if test -f 'fonts/cabin_condensed_bold.c'; then $(CYGPATH_W) 'fonts/cabin_condensed_bold.c'; else $(CYGPATH_W) '$(srcdir)/fonts/cabin_condensed_bold.c'; fi`
+
+fonts/hexpuzzle-ubuntu_medium.o: fonts/ubuntu_medium.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT fonts/hexpuzzle-ubuntu_medium.o -MD -MP -MF fonts/$(DEPDIR)/hexpuzzle-ubuntu_medium.Tpo -c -o fonts/hexpuzzle-ubuntu_medium.o `test -f 'fonts/ubuntu_medium.c' || echo '$(srcdir)/'`fonts/ubuntu_medium.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) fonts/$(DEPDIR)/hexpuzzle-ubuntu_medium.Tpo fonts/$(DEPDIR)/hexpuzzle-ubuntu_medium.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fonts/ubuntu_medium.c' object='fonts/hexpuzzle-ubuntu_medium.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o fonts/hexpuzzle-ubuntu_medium.o `test -f 'fonts/ubuntu_medium.c' || echo '$(srcdir)/'`fonts/ubuntu_medium.c
+
+fonts/hexpuzzle-ubuntu_medium.obj: fonts/ubuntu_medium.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT fonts/hexpuzzle-ubuntu_medium.obj -MD -MP -MF fonts/$(DEPDIR)/hexpuzzle-ubuntu_medium.Tpo -c -o fonts/hexpuzzle-ubuntu_medium.obj `if test -f 'fonts/ubuntu_medium.c'; then $(CYGPATH_W) 'fonts/ubuntu_medium.c'; else $(CYGPATH_W) '$(srcdir)/fonts/ubuntu_medium.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) fonts/$(DEPDIR)/hexpuzzle-ubuntu_medium.Tpo fonts/$(DEPDIR)/hexpuzzle-ubuntu_medium.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='fonts/ubuntu_medium.c' object='fonts/hexpuzzle-ubuntu_medium.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o fonts/hexpuzzle-ubuntu_medium.obj `if test -f 'fonts/ubuntu_medium.c'; then $(CYGPATH_W) 'fonts/ubuntu_medium.c'; else $(CYGPATH_W) '$(srcdir)/fonts/ubuntu_medium.c'; fi`
+
 util/util_compile_to_c_src-compile_to_c_src.o: util/compile_to_c_src.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(util_compile_to_c_src_CFLAGS) $(CFLAGS) -MT util/util_compile_to_c_src-compile_to_c_src.o -MD -MP -MF util/$(DEPDIR)/util_compile_to_c_src-compile_to_c_src.Tpo -c -o util/util_compile_to_c_src-compile_to_c_src.o `test -f 'util/compile_to_c_src.c' || echo '$(srcdir)/'`util/compile_to_c_src.c
 @am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) util/$(DEPDIR)/util_compile_to_c_src-compile_to_c_src.Tpo util/$(DEPDIR)/util_compile_to_c_src-compile_to_c_src.Po
@@ -3502,12 +3564,15 @@ distclean-generic:
 	-rm -f external/pcg/$(am__dirstamp)
 	-rm -f external/raylib/$(DEPDIR)/$(am__dirstamp)
 	-rm -f external/raylib/$(am__dirstamp)
+	-rm -f fonts/$(DEPDIR)/$(am__dirstamp)
+	-rm -f fonts/$(am__dirstamp)
 	-rm -f lib/gnulib/$(DEPDIR)/$(am__dirstamp)
 	-rm -f lib/gnulib/$(am__dirstamp)
 	-rm -f src/$(DEPDIR)/$(am__dirstamp)
 	-rm -f src/$(am__dirstamp)
 	-rm -f util/$(DEPDIR)/$(am__dirstamp)
 	-rm -f util/$(am__dirstamp)
+	-test -z "$(DISTCLEANFILES)" || rm -f $(DISTCLEANFILES)
 
 maintainer-clean-generic:
 	@echo "This command is intended for maintainers to use"
@@ -3522,7 +3587,7 @@ clean-am: clean-binPROGRAMS clean-generic clean-local \
 
 distclean: distclean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
-	-rm -rf external/cJSON/$(DEPDIR) external/pcg/$(DEPDIR) external/raylib/$(DEPDIR) lib/gnulib/$(DEPDIR) src/$(DEPDIR) util/$(DEPDIR)
+	-rm -rf external/cJSON/$(DEPDIR) external/pcg/$(DEPDIR) external/raylib/$(DEPDIR) fonts/$(DEPDIR) lib/gnulib/$(DEPDIR) src/$(DEPDIR) util/$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
 	distclean-hdr distclean-local distclean-tags
@@ -3570,7 +3635,7 @@ installcheck-am:
 maintainer-clean: maintainer-clean-recursive
 	-rm -f $(am__CONFIG_DISTCLEAN_FILES)
 	-rm -rf $(top_srcdir)/autom4te.cache
-	-rm -rf external/cJSON/$(DEPDIR) external/pcg/$(DEPDIR) external/raylib/$(DEPDIR) lib/gnulib/$(DEPDIR) src/$(DEPDIR) util/$(DEPDIR)
+	-rm -rf external/cJSON/$(DEPDIR) external/pcg/$(DEPDIR) external/raylib/$(DEPDIR) fonts/$(DEPDIR) lib/gnulib/$(DEPDIR) src/$(DEPDIR) util/$(DEPDIR)
 	-rm -f Makefile
 maintainer-clean-am: distclean-am maintainer-clean-generic \
 	maintainer-clean-local
@@ -3622,11 +3687,11 @@ XXD ?= xxd
 @BUILD_WEB_TRUE@clean-local:
 @BUILD_WEB_TRUE@	rm -f hexpuzzle.js hexpuzzle.wasm
 
-.ttf.c: | util/compile_to_c_src
-	$(builddir)/util/compile_to_c_src $^ $@
+.ttf.c: util/compile_to_c_src
+	$(builddir)/util/compile_to_c_src -c $< $@
 
-.otf.c: | util/compile_to_c_src
-	$(builddir)/util/compile_to_c_src $^ $@
+.otf.c: util/compile_to_c_src
+	$(builddir)/util/compile_to_c_src -c $< $@
 
 src/data_classics_levels.h: $(CLASSICS_LEVELS)
 	$(AM_V_at)rm -f $@
