@@ -926,7 +926,7 @@ handle_events(
         }
 
         if (IsKeyPressed(KEY_SPACE)) {
-            regen_level_preview();
+            //regen_level_preview();
             play_gui_random_level_preview();
 
             if (options->cheat_autowin) {

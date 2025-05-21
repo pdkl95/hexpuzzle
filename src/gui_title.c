@@ -47,7 +47,7 @@ char title1_text[] = "Hex";
 char title2_text[] = "Puzzle";
 
 char author_text[] = "by PDKL95";
-char version_text[] = PACKAGE_VERSION;
+char version_text[] = "Version " PACKAGE_VERSION;
 
 float hexpanel_size;
 float hexpanel_rotation = TO_DEGREES(TAU / 12.0f);

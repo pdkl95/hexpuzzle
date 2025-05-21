@@ -55,9 +55,8 @@ raygui_paged_list_t *create_raygui_paged_list(int *page_index, int *active, int 
     return init_raygui_paged_list(list, page_index, active, focus);
 }
 
-void cleanup_raygui_paged_list(raygui_paged_list_t *list)
+void cleanup_raygui_paged_list(UNUSED raygui_paged_list_t *list)
 {
-    assert_not_null(list);
 }
 
 void destroy_raygui_paged_list(raygui_paged_list_t *list)

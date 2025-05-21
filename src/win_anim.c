@@ -629,15 +629,10 @@ void win_anim_start(win_anim_t *win_anim)
     if ((win_anim->state == WIN_ANIM_STATE_STANDBY) ||
         (win_anim->state == WIN_ANIM_STATE_SHUTDOWN)) {
 
-#ifdef DEBUG_TRACE_WIN_ANIM
-#ifndef DEBUG_BUILD
         if (options->verbose) {
-#endif
             infomsg("START win_anim[%02d] %s", win_anim->id, win_anim_mode_str(win_anim->mode));
-#ifndef DEBUG_BUILD
         }
-#endif
-#endif
+
         win_anim_set_state(win_anim, WIN_ANIM_STATE_STARTUP);
         win_anim->start_time = win_anim->state_change_time;
         win_anim->use_background_3d = false;

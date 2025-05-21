@@ -95,7 +95,7 @@ void action_create_level(void)
         case CREATE_LEVEL_MODE_RANDOM:
             window_size.x = OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH;
             window_size.y = OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT;
-            level = generate_random_level();
+            level = generate_random_level("--create-r5anom-level");
             break;
 
         default:

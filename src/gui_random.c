@@ -615,7 +615,11 @@ static void mark_features(level_t *level, int num_tiles)
     }
 }
 
-struct level *generate_random_level(void)
+struct level *generate_random_level(
+#ifndef RANDOM_GEN_DEBUG
+    UNUSED
+#endif
+    const char *purpose)
 {
     assert(rng_color_count() > 0);
 
@@ -638,7 +642,11 @@ struct level *generate_random_level(void)
     level->seed = gui_random_seed;
     snprintf(level->name, NAME_MAXLEN, "%s", TextFormat("%d", gui_random_seed));
     if (options->verbose) {
+#ifdef RANDOM_GEN_DEBUG
+        infomsg("Generating random level \"%s\" for %s", level->name, purpose);
+#else
         infomsg("Generating random level \"%s\"", level->name);
+#endif
     }
 
     level_set_radius(level, options->create_level_radius);
@@ -684,7 +692,7 @@ struct level *generate_random_title_level(void)
     uint64_t save_random_seed = gui_random_seed;
     rng_seed();
 
-    level_t *level = generate_random_level();
+    level_t *level = generate_random_level("title");
 
     gui_random_seed = save_random_seed;
     memcpy(gui_random_color, save_color, sizeof(save_color));
@@ -699,7 +707,7 @@ static void regen_level(void)
         destroy_level(gui_random_level);
     }
 
-    gui_random_level = generate_random_level();
+    gui_random_level = generate_random_level("regen");
     played_level = false;
 }
 
@@ -712,7 +720,7 @@ void regen_level_preview(void)
     }
 
     gui_random_seed = gui_random_level->seed + 1;
-    gui_random_level_preview = generate_random_level();
+    gui_random_level_preview = generate_random_level("preview");
 }
 
 void promote_preview_to_level(void)

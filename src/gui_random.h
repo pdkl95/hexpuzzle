@@ -33,7 +33,7 @@ void cleanup_gui_random(void);
 void resize_gui_random(void);
 void draw_gui_random(void);
 
-struct level *generate_random_level(void);
+struct level *generate_random_level(const char *purpose);
 struct level *generate_random_title_level(void);
 
 void regen_level_preview(void);
