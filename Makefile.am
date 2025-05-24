@@ -23,12 +23,6 @@ FONTS = \
 	fonts/cabin_condensed_bold.ttf \
 	fonts/ubuntu_medium.ttf
 
-C_SRC_FONTS = \
-	fonts/beetype_filled.c \
-	fonts/cabin_condensed_bold.c \
-	fonts/ubuntu_medium.c
-
-
 SHADERS = \
 	shaders/postprocessing.frag.glsl \
 	shaders/win_border.frag.glsl
@@ -45,6 +39,7 @@ EXTRA_DIST = \
 	external/sglib/LICENSE \
 	$(CLASSICS_LEVELS) \
 	$(FONTS) \
+	$(C_SRC_FONTS) \
 	$(SHADERS) \
 	$(TEXTURES)
 
@@ -181,7 +176,6 @@ hexpuzzle_SOURCES += \
 endif
 
 dist_EXTRA_hexpuzzle_SOURCES =      \
-	$(C_SRC_FONTS)              \
 	src/data_classics_levels.h  \
 	src/data_fonts.h            \
 	src/data_shaders.h	    \
@@ -194,21 +188,19 @@ util_compile_to_c_src_LDADD = $(COMMON_PROG_LDADD) \
 	external/raylib/libraylib.a \
 	-lGL -lc -lm -lpthread -ldl -lrt
 
-.ttf.c: util/compile_to_c_src
-	$(builddir)/util/compile_to_c_src -c $< $@
-
-.otf.c: util/compile_to_c_src
-	$(builddir)/util/compile_to_c_src -c $< $@
-
 src/data_classics_levels.h: $(CLASSICS_LEVELS)
 	$(AM_V_at)rm -f $@
 	$(AM_V_GEN)cd $(top_srcdir) && for file in $^ ; do \
 	    $(XXD) -i "$${file}" >> $@ ; \
 	done
 
-src/data_fonts.h: $(C_SRC_FONTS)
+src/data_fonts.h: $(FONTS)
 	$(AM_V_at)rm -f $@
-	$(AM_V_GEN)cat $(C_SRC_FONTS) >> $@
+	$(AM_V_GEN)cd $(top_srcdir) && for file in $^ ; do \
+	    $(builddir)/util/compile_to_c_src -c "$${file}" "$${file}".c ; \
+	    cat "$${file}".c >> $@ ; \
+	    rm -f "$${file}".c ; \
+	done
 
 src/data_shaders.h: $(SHADERS)
 	$(AM_V_at)rm -f $@
@@ -234,7 +226,6 @@ src/hexpuzzle-gui_popup_message.$(OBJEXT): CFLAGS += $(NO_UNUSED_BUT_SET_OPT) -W
 
 BUILT_SOURCES = \
 	util/compile_to_c_src \
-	$(C_SRC_FONTS) \
 	$(dist_EXTRA_hexpuzzle_SOURCES)
 
 DISTCLEANFILES = \
@@ -242,7 +233,6 @@ DISTCLEANFILES = \
 
 MAINTAINERCLEANFILES = \
 	util/compile_to_c_src \
-	$(C_SRC_FONTS) \
 	$(dist_EXTRA_hexpuzzle_SOURCES)
 
 
