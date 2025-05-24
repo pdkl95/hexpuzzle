@@ -43,6 +43,7 @@
 #  --no-vc-files \
 #  --avoid=gnulib-i18n \
 #  getline \
+#  rename \
 #  strcase \
 #  strsep \
 #  vasprintf
@@ -51,6 +52,7 @@
 gl_LOCAL_DIR([])
 gl_MODULES([
   getline
+  rename
   strcase
   strsep
   vasprintf

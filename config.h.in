@@ -35,9 +35,28 @@
 /* Defined to 1 when --enable-debug is active */
 #undef DEBUG_BUILD
 
+/* Define to 1 if // is a file system root distinct from /. */
+#undef DOUBLE_SLASH_IS_DISTINCT_ROOT
+
+/* Define to 1 if realpath() can malloc memory, always gives an absolute path,
+   and handles a trailing slash correctly. */
+#undef FUNC_REALPATH_NEARLY_WORKS
+
+/* Define to 1 if realpath() can malloc memory, always gives an absolute path,
+   and handles leading slashes and a trailing slash correctly. */
+#undef FUNC_REALPATH_WORKS
+
+/* Define to a C preprocessor expression that evaluates to 1 or 0, depending
+   whether the gnulib module canonicalize-lgpl shall be considered present. */
+#undef GNULIB_CANONICALIZE_LGPL
+
 /* Define to a C preprocessor expression that evaluates to 1 or 0, depending
    whether the gnulib module fscanf shall be considered present. */
 #undef GNULIB_FSCANF
+
+/* Define to a C preprocessor expression that evaluates to 1 or 0, depending
+   whether the gnulib module lstat shall be considered present. */
+#undef GNULIB_LSTAT
 
 /* Define to 1 if printf and friends should be labeled with attribute
    "__gnu_printf__" instead of "__printf__" */
@@ -46,6 +65,17 @@
 /* Define to a C preprocessor expression that evaluates to 1 or 0, depending
    whether the gnulib module scanf shall be considered present. */
 #undef GNULIB_SCANF
+
+/* Define to a C preprocessor expression that evaluates to 1 or 0, depending
+   whether the gnulib module stat shall be considered present. */
+#undef GNULIB_STAT
+
+/* Define to 1 when the gnulib module canonicalize_file_name should be tested.
+   */
+#undef GNULIB_TEST_CANONICALIZE_FILE_NAME
+
+/* Define to 1 when the gnulib module chdir should be tested. */
+#undef GNULIB_TEST_CHDIR
 
 /* Define to 1 when the gnulib module fgetc should be tested. */
 #undef GNULIB_TEST_FGETC
@@ -86,11 +116,20 @@
 /* Define to 1 when the gnulib module getline should be tested. */
 #undef GNULIB_TEST_GETLINE
 
+/* Define to 1 when the gnulib module lstat should be tested. */
+#undef GNULIB_TEST_LSTAT
+
+/* Define to 1 when the gnulib module malloc-posix should be tested. */
+#undef GNULIB_TEST_MALLOC_POSIX
+
 /* Define to 1 when the gnulib module mbszero should be tested. */
 #undef GNULIB_TEST_MBSZERO
 
 /* Define to 1 when the gnulib module memchr should be tested. */
 #undef GNULIB_TEST_MEMCHR
+
+/* Define to 1 when the gnulib module mempcpy should be tested. */
+#undef GNULIB_TEST_MEMPCPY
 
 /* Define to 1 when the gnulib module printf should be tested. */
 #undef GNULIB_TEST_PRINTF
@@ -104,8 +143,29 @@
 /* Define to 1 when the gnulib module puts should be tested. */
 #undef GNULIB_TEST_PUTS
 
+/* Define to 1 when the gnulib module rawmemchr should be tested. */
+#undef GNULIB_TEST_RAWMEMCHR
+
+/* Define to 1 when the gnulib module readlink should be tested. */
+#undef GNULIB_TEST_READLINK
+
+/* Define to 1 when the gnulib module realloc-posix should be tested. */
+#undef GNULIB_TEST_REALLOC_POSIX
+
+/* Define to 1 when the gnulib module realpath should be tested. */
+#undef GNULIB_TEST_REALPATH
+
+/* Define to 1 when the gnulib module rename should be tested. */
+#undef GNULIB_TEST_RENAME
+
+/* Define to 1 when the gnulib module rmdir should be tested. */
+#undef GNULIB_TEST_RMDIR
+
 /* Define to 1 when the gnulib module scanf should be tested. */
 #undef GNULIB_TEST_SCANF
+
+/* Define to 1 when the gnulib module stat should be tested. */
+#undef GNULIB_TEST_STAT
 
 /* Define to 1 when the gnulib module strsep should be tested. */
 #undef GNULIB_TEST_STRSEP
@@ -130,11 +190,17 @@
 /* Define to 1 if you have the <bp-sym.h> header file. */
 #undef HAVE_BP_SYM_H
 
+/* Define to 1 if you have the `canonicalize_file_name' function. */
+#undef HAVE_CANONICALIZE_FILE_NAME
+
 /* Define to 1 if you have the <crtdefs.h> header file. */
 #undef HAVE_CRTDEFS_H
 
 /* Define to 1 if you have the <ctype.h> header file. */
 #undef HAVE_CTYPE_H
+
+/* Define to 1 if bool, true and false work as per C2023. */
+#undef HAVE_C_BOOL
 
 /* Define to 1 if the static_assert keyword works. */
 #undef HAVE_C_STATIC_ASSERT
@@ -195,6 +261,9 @@
    */
 #undef HAVE_DIRENT_H
 
+/* Define to 1 if you have the `faccessat' function. */
+#undef HAVE_FACCESSAT
+
 /* Define to 1 if you have the <features.h> header file. */
 #undef HAVE_FEATURES_H
 
@@ -206,6 +275,9 @@
 
 /* Define to 1 if you have the `funlockfile' function. */
 #undef HAVE_FUNLOCKFILE
+
+/* Define to 1 if you have the `getcwd' function. */
+#undef HAVE_GETCWD
 
 /* Define to 1 if you have the `getdelim' function. */
 #undef HAVE_GETDELIM
@@ -241,12 +313,28 @@
 /* Define to 1 if you have the <limits.h> header file. */
 #undef HAVE_LIMITS_H
 
+/* Define to 1 if you have the `link' function. */
+#undef HAVE_LINK
+
 /* Define to 1 if the system has the type 'long long int'. */
 #undef HAVE_LONG_LONG_INT
+
+/* Define to 1 if you have the `lstat' function. */
+#undef HAVE_LSTAT
 
 /* Define to 1 if your system has a GNU libc compatible `malloc' function, and
    to 0 otherwise. */
 #undef HAVE_MALLOC
+
+/* Define to 1 if malloc (0) returns nonnull. */
+#undef HAVE_MALLOC_0_NONNULL
+
+/* Define if malloc, realloc, and calloc set errno on allocation failure. */
+#undef HAVE_MALLOC_POSIX
+
+/* Define to 1 if malloc-like functions do not allocate objects larger than
+   PTRDIFF_MAX bytes. */
+#undef HAVE_MALLOC_PTRDIFF
 
 /* Define to 1 if mmap()'s MAP_ANONYMOUS flag is available after including
    config.h and <sys/mman.h>. */
@@ -267,8 +355,17 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
+/* Define to 1 if you have the `mempcpy' function. */
+#undef HAVE_MEMPCPY
+
 /* Define to 1 if you have the <minix/config.h> header file. */
 #undef HAVE_MINIX_CONFIG_H
+
+/* Define to 1 if <limits.h> defines the MIN and MAX macros. */
+#undef HAVE_MINMAX_IN_LIMITS_H
+
+/* Define to 1 if <sys/param.h> defines the MIN and MAX macros. */
+#undef HAVE_MINMAX_IN_SYS_PARAM_H
 
 /* Define to 1 if you have a working `mmap' system call. */
 #undef HAVE_MMAP
@@ -278,6 +375,21 @@
 
 /* Define to 1 if you have the <ndir.h> header file, and it defines `DIR'. */
 #undef HAVE_NDIR_H
+
+/* Define to 1 if you have the `rawmemchr' function. */
+#undef HAVE_RAWMEMCHR
+
+/* Define to 1 if you have the `readlink' function. */
+#undef HAVE_READLINK
+
+/* Define to 1 if realloc (..., 0) returns nonnull. */
+#undef HAVE_REALLOC_0_NONNULL
+
+/* Define to 1 if you have the `realpath' function. */
+#undef HAVE_REALPATH
+
+/* Define to 1 if you have the <sdkddkver.h> header file. */
+#undef HAVE_SDKDDKVER_H
 
 /* Define to 1 if 'sig_atomic_t' is a signed integer type. */
 #undef HAVE_SIGNED_SIG_ATOMIC_T
@@ -299,6 +411,12 @@
 /* Define if the string produced by the snprintf function is always NUL
    terminated. */
 #undef HAVE_SNPRINTF_TRUNCATION_C99
+
+/* Define to 1 if you have the <stdbool.h> header file. */
+#undef HAVE_STDBOOL_H
+
+/* Define to 1 if you have the <stdckdint.h> header file. */
+#undef HAVE_STDCKDINT_H
 
 /* Define to 1 if you have the <stdint.h> header file. */
 #undef HAVE_STDINT_H
@@ -328,6 +446,30 @@
 /* Define to 1 if you have the `strsep' function. */
 #undef HAVE_STRSEP
 
+/* Define to 1 if `st_atimensec' is a member of `struct stat'. */
+#undef HAVE_STRUCT_STAT_ST_ATIMENSEC
+
+/* Define to 1 if `st_atimespec.tv_nsec' is a member of `struct stat'. */
+#undef HAVE_STRUCT_STAT_ST_ATIMESPEC_TV_NSEC
+
+/* Define to 1 if `st_atim.st__tim.tv_nsec' is a member of `struct stat'. */
+#undef HAVE_STRUCT_STAT_ST_ATIM_ST__TIM_TV_NSEC
+
+/* Define to 1 if `st_atim.tv_nsec' is a member of `struct stat'. */
+#undef HAVE_STRUCT_STAT_ST_ATIM_TV_NSEC
+
+/* Define to 1 if `st_birthtimensec' is a member of `struct stat'. */
+#undef HAVE_STRUCT_STAT_ST_BIRTHTIMENSEC
+
+/* Define to 1 if `st_birthtimespec.tv_nsec' is a member of `struct stat'. */
+#undef HAVE_STRUCT_STAT_ST_BIRTHTIMESPEC_TV_NSEC
+
+/* Define to 1 if `st_birthtim.tv_nsec' is a member of `struct stat'. */
+#undef HAVE_STRUCT_STAT_ST_BIRTHTIM_TV_NSEC
+
+/* Define to 1 if you have the `symlink' function. */
+#undef HAVE_SYMLINK
+
 /* Define to 1 if you have the <sys/bitypes.h> header file. */
 #undef HAVE_SYS_BITYPES_H
 
@@ -350,6 +492,9 @@
 
 /* Define to 1 if you have the <sys/stat.h> header file. */
 #undef HAVE_SYS_STAT_H
+
+/* Define to 1 if you have the <sys/time.h> header file. */
+#undef HAVE_SYS_TIME_H
 
 /* Define to 1 if you have the <sys/types.h> header file. */
 #undef HAVE_SYS_TYPES_H
@@ -378,11 +523,27 @@
 /* Define if you have the 'wint_t' type. */
 #undef HAVE_WINT_T
 
+/* Define to 1 if O_NOATIME works. */
+#undef HAVE_WORKING_O_NOATIME
+
+/* Define to 1 if O_NOFOLLOW works. */
+#undef HAVE_WORKING_O_NOFOLLOW
+
 /* Define to 1 if the system has the type `_Bool'. */
 #undef HAVE__BOOL
 
 /* define if your compiler has __attribute__ */
 #undef HAVE___ATTRIBUTE__
+
+/* Define to 1 if the compiler supports __builtin_expect,
+   and to 2 if <builtins.h> does.  */
+#undef HAVE___BUILTIN_EXPECT
+#ifndef HAVE___BUILTIN_EXPECT
+# define __builtin_expect(e, c) (e)
+#elif HAVE___BUILTIN_EXPECT == 2
+# include <builtins.h>
+#endif
+    
 
 /* Define to 1 if ctype.h defines __header_inline. */
 #undef HAVE___HEADER_INLINE
@@ -494,6 +655,13 @@
 # define _GL_INLINE_HEADER_END
 #endif
 
+/* Define to 1 if the compiler supports the keyword '__inline'. */
+#undef HAVE___INLINE
+
+/* Define to 1 if 'lstat' dereferences a symlink specified with a trailing
+   slash. */
+#undef LSTAT_FOLLOWS_SLASHED_SYMLINK
+
 /* Define to a substitute value for mmap()'s MAP_ANONYMOUS flag. */
 #undef MAP_ANONYMOUS
 
@@ -508,6 +676,9 @@
 
 /* Define to 1 if assertions should be disabled. */
 #undef NDEBUG
+
+/* Define to 1 if realloc should abort upon undefined behaviour. */
+#undef NEED_SANITIZED_REALLOC
 
 /* Name of package */
 #undef PACKAGE
@@ -549,6 +720,33 @@
    'ptrdiff_t'. */
 #undef PTRDIFF_T_SUFFIX
 
+/* Define to 1 if readlink fails to recognize a trailing slash. */
+#undef READLINK_TRAILING_SLASH_BUG
+
+/* Define to 1 if readlink sets errno instead of truncating a too-long link.
+   */
+#undef READLINK_TRUNCATE_BUG
+
+/* Define if rename does not work when the destination file exists, as on
+   Cygwin 1.5 or Windows. */
+#undef RENAME_DEST_EXISTS_BUG
+
+/* Define if rename fails to leave hard links alone, as on NetBSD 1.6 or
+   Cygwin 1.5. */
+#undef RENAME_HARD_LINK_BUG
+
+/* Define if rename does not correctly handle slashes on the destination
+   argument, such as on Solaris 11 or NetBSD 1.6. */
+#undef RENAME_TRAILING_SLASH_DEST_BUG
+
+/* Define if rename does not correctly handle slashes on the source argument,
+   such as on Solaris 9 or cygwin 1.5. */
+#undef RENAME_TRAILING_SLASH_SOURCE_BUG
+
+/* Define to 1 if stat needs help when passed a file name with a trailing
+   slash */
+#undef REPLACE_FUNC_STAT_FILE
+
 /* Define if vasnprintf exists but is overridden by gnulib. */
 #undef REPLACE_VASNPRINTF
 
@@ -574,8 +772,15 @@
         STACK_DIRECTION = 0 => direction of growth unknown */
 #undef STACK_DIRECTION
 
+/* Define to 1 if the `S_IS*' macros in <sys/stat.h> do not work properly. */
+#undef STAT_MACROS_BROKEN
+
 /* Define to 1 if you have the ANSI C header files. */
 #undef STDC_HEADERS
+
+/* Define to 1 if the type of the st_atim member of a struct stat is struct
+   timespec. */
+#undef TYPEOF_STRUCT_STAT_ST_ATIM_IS_STRUCT_TIMESPEC
 
 /* Defined to 1 if chipmunk is enabled */
 #undef USE_CHIPMUNK
@@ -711,6 +916,9 @@
 # endif
 #endif
 
+/* Number of bits in a file offset, on hosts where this is settable. */
+#undef _FILE_OFFSET_BITS
+
 /* True if the compiler says it groks GNU C version MAJOR.MINOR.
     Except that
       - clang groks GNU C 4.2, even on Windows, where it does not define
@@ -734,6 +942,9 @@
 
 /* Define to enable the declarations of ISO C 11 types and functions. */
 #undef _ISOC11_SOURCE
+
+/* Define to 1 on platforms where this makes off_t a 64-bit type. */
+#undef _LARGE_FILES
 
 /* Define so that AIX headers are more compatible with GNU/Linux. */
 #undef _LINUX_SOURCE_COMPAT
@@ -774,6 +985,9 @@
 #endif
 
 
+/* Number of bits in time_t, on hosts where this is settable. */
+#undef _TIME_BITS
+
 /* Define for Solaris 2.5.1 so the uint32_t typedef from <sys/synch.h>,
    <pthread.h>, or <semaphore.h> is not used. If the typedef were allowed, the
    #define below would cause a syntax error. */
@@ -781,6 +995,9 @@
 
 /* For standard stat data types on VMS. */
 #undef _USE_STD_STAT
+
+/* Define to 1 on platforms where this makes time_t a 64-bit type. */
+#undef __MINGW_USE_VC2005_COMPAT
 
 /* Define to 1 if the system <stdint.h> predates C++11. */
 #undef __STDC_CONSTANT_MACROS
@@ -1651,6 +1868,9 @@
 /* Define to `int' if <sys/types.h> does not define. */
 #undef mode_t
 
+/* Define to the type of st_nlink in struct stat, or a supertype. */
+#undef nlink_t
+
 /* Define as a signed integer type capable of holding a process identifier. */
 #undef pid_t
 
@@ -1682,6 +1902,29 @@
 /* Define to the type of an unsigned integer type of width exactly 32 bits if
    such a type exists and the standard includes do not define it. */
 #undef uint32_t
+
+#if !(defined __cplusplus \
+      ? 1 \
+      : (defined __clang__ \
+         ? __STDC_VERSION__ >= 202000L && __clang_major__ >= 15 \
+         : (defined __GNUC__ \
+            ? __STDC_VERSION__ >= 202000L && __GNUC__ >= 13 \
+            : defined HAVE_C_BOOL)))
+# if !defined __cplusplus && !defined __bool_true_false_are_defined
+#  if HAVE_STDBOOL_H
+#   include <stdbool.h>
+#  else
+#   if defined __SUNPRO_C
+#    error "<stdbool.h> is not usable with this configuration. To make it usable, add -D_STDC_C99= to $CC."
+#   else
+#    error "<stdbool.h> does not exist on this platform. Use gnulib module 'stdbool-c99' instead of gnulib module 'stdbool'."
+#   endif
+#  endif
+# endif
+# if !true
+#  define true (!false)
+# endif
+#endif
 
 #if (!(defined __clang__ \
        ? (defined __cplusplus \

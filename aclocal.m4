@@ -1822,23 +1822,6 @@ AC_LANG_POP([C])])
 # For backward compatibility.
 AC_DEFUN_ONCE([AM_PROG_CC_C_O], [AC_REQUIRE([AC_PROG_CC])])
 
-# Copyright (C) 2001-2014 Free Software Foundation, Inc.
-#
-# This file is free software; the Free Software Foundation
-# gives unlimited permission to copy and/or distribute it,
-# with or without modifications, as long as this notice is preserved.
-
-# AM_RUN_LOG(COMMAND)
-# -------------------
-# Run COMMAND, save the exit status in ac_status, and log it.
-# (This has been adapted from Autoconf's _AC_RUN_LOG macro.)
-AC_DEFUN([AM_RUN_LOG],
-[{ echo "$as_me:$LINENO: $1" >&AS_MESSAGE_LOG_FD
-   ($1) >&AS_MESSAGE_LOG_FD 2>&AS_MESSAGE_LOG_FD
-   ac_status=$?
-   echo "$as_me:$LINENO: \$? = $ac_status" >&AS_MESSAGE_LOG_FD
-   (exit $ac_status); }])
-
 # Check to make sure that the build environment is sane.    -*- Autoconf -*-
 
 # Copyright (C) 1996-2014 Free Software Foundation, Inc.
@@ -2161,15 +2144,22 @@ AC_SUBST([am__untar])
 ]) # _AM_PROG_TAR
 
 m4_include([m4/gnulib/00gnulib.m4])
+m4_include([m4/gnulib/__inline.m4])
 m4_include([m4/gnulib/absolute-header.m4])
 m4_include([m4/gnulib/alloca.m4])
 m4_include([m4/gnulib/assert_h.m4])
+m4_include([m4/gnulib/builtin-expect.m4])
+m4_include([m4/gnulib/c-bool.m4])
+m4_include([m4/gnulib/canonicalize.m4])
 m4_include([m4/gnulib/codeset.m4])
+m4_include([m4/gnulib/double-slash-root.m4])
 m4_include([m4/gnulib/errno_h.m4])
 m4_include([m4/gnulib/exponentd.m4])
 m4_include([m4/gnulib/extensions-aix.m4])
 m4_include([m4/gnulib/extensions.m4])
 m4_include([m4/gnulib/extern-inline.m4])
+m4_include([m4/gnulib/fcntl-o.m4])
+m4_include([m4/gnulib/fcntl_h.m4])
 m4_include([m4/gnulib/float_h.m4])
 m4_include([m4/gnulib/free.m4])
 m4_include([m4/gnulib/getdelim.m4])
@@ -2180,22 +2170,38 @@ m4_include([m4/gnulib/include_next.m4])
 m4_include([m4/gnulib/intmax_t.m4])
 m4_include([m4/gnulib/inttypes.m4])
 m4_include([m4/gnulib/inttypes_h.m4])
+m4_include([m4/gnulib/largefile.m4])
 m4_include([m4/gnulib/limits-h.m4])
 m4_include([m4/gnulib/locale-en.m4])
 m4_include([m4/gnulib/locale-ja.m4])
 m4_include([m4/gnulib/locale-zh.m4])
+m4_include([m4/gnulib/lstat.m4])
+m4_include([m4/gnulib/malloc.m4])
+m4_include([m4/gnulib/malloca.m4])
 m4_include([m4/gnulib/mbrtowc.m4])
 m4_include([m4/gnulib/mbstate_t.m4])
 m4_include([m4/gnulib/memchr.m4])
+m4_include([m4/gnulib/mempcpy.m4])
+m4_include([m4/gnulib/minmax.m4])
 m4_include([m4/gnulib/mmap-anon.m4])
 m4_include([m4/gnulib/multiarch.m4])
 m4_include([m4/gnulib/musl.m4])
+m4_include([m4/gnulib/nocrash.m4])
 m4_include([m4/gnulib/off64_t.m4])
 m4_include([m4/gnulib/off_t.m4])
+m4_include([m4/gnulib/pathmax.m4])
 m4_include([m4/gnulib/pid_t.m4])
 m4_include([m4/gnulib/printf.m4])
+m4_include([m4/gnulib/rawmemchr.m4])
+m4_include([m4/gnulib/readlink.m4])
+m4_include([m4/gnulib/realloc.m4])
+m4_include([m4/gnulib/rename.m4])
+m4_include([m4/gnulib/rmdir.m4])
 m4_include([m4/gnulib/size_max.m4])
 m4_include([m4/gnulib/ssize_t.m4])
+m4_include([m4/gnulib/stat-time.m4])
+m4_include([m4/gnulib/stat.m4])
+m4_include([m4/gnulib/std-gnu11.m4])
 m4_include([m4/gnulib/stddef_h.m4])
 m4_include([m4/gnulib/stdint.m4])
 m4_include([m4/gnulib/stdint_h.m4])
@@ -2205,7 +2211,9 @@ m4_include([m4/gnulib/strcase.m4])
 m4_include([m4/gnulib/string_h.m4])
 m4_include([m4/gnulib/strings_h.m4])
 m4_include([m4/gnulib/strsep.m4])
+m4_include([m4/gnulib/sys_stat_h.m4])
 m4_include([m4/gnulib/sys_types_h.m4])
+m4_include([m4/gnulib/time_h.m4])
 m4_include([m4/gnulib/unistd_h.m4])
 m4_include([m4/gnulib/vasnprintf.m4])
 m4_include([m4/gnulib/vasprintf.m4])
