@@ -24,6 +24,7 @@
 #include "options.h"
 #include "color.h"
 #include "level.h"
+#include "nvdata_finished.h"
 #include "gui_options.h"
 #include "gui_dialog.h"
 
@@ -466,8 +467,20 @@ void draw_gui_color_options(void)
 
 void draw_gui_data_options(void)
 {
+    bool do_disable = !have_nvdata_finished_levels_data();
+
+    if (do_disable) {
+        GuiDisable();
+    }
+
     if (GuiButton(options_reset_finished_rect, options_reset_finished_text)) {
-        printf("reset\n");
+        if (reset_nvdata_finished_levels()) {
+            popup_message("Erased finished level data.");
+        }
+    }
+
+    if (do_disable) {
+        GuiEnable();
     }
 }
 

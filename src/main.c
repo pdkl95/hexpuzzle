@@ -2086,10 +2086,12 @@ static void draw_gui_widgets(void)
     case GAME_MODE_BROWSER:
         standard_buttons();
 
+#if 0
 #if defined(PLATFORM_DESKTOP)
         if (GuiButton(open_file_button_rect, open_file_button_text)) {
             open_file_box();
         }
+#endif
 #endif
         break;
 

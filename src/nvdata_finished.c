@@ -26,6 +26,7 @@
 #include "nvdata_finished.h"
 
 char *nvdata_state_finished_levels_file_path = NULL;
+char *nvdata_state_finished_levels_backup_file_path = NULL;
 
 #define TREE_INDENT_MAXLEN 60
 char indentbuf[TREE_INDENT_MAXLEN];
@@ -98,12 +99,19 @@ void destroy_finished_level(struct finished_level *node)
     }
 }
 
-void cleanup_nvdata_finished(void)
+static void destroy_finished_levels_tree(void)
 {
     if (finished_levels.tree) {
         destroy_finished_level(finished_levels.tree);
+        finished_levels.tree = NULL;
     }
+}
 
+void cleanup_nvdata_finished(void)
+{
+    destroy_finished_levels_tree();
+
+    SAFEFREE(nvdata_state_finished_levels_backup_file_path);
     SAFEFREE(nvdata_state_finished_levels_file_path);
 }
 
@@ -263,3 +271,38 @@ void save_nvdata_finished_levels(void)
     }
 }
 
+bool reset_nvdata_finished_levels(void)
+{
+    destroy_finished_levels_tree();
+
+    assert_not_null(nvdata_state_finished_levels_file_path);
+    assert_not_null(nvdata_state_finished_levels_backup_file_path);
+
+    if (!FileExists(nvdata_state_finished_levels_file_path)) {
+        if (options->verbose) {
+            infomsg("Reset of Finished level data unnecessary; data file \"%s\" does not exist.\n", nvdata_state_finished_levels_file_path);
+        }
+        return false;
+    }
+
+    infomsg("Reseting finished level data...\n");
+    infomsg("Saving a backup of the old finished level data in \"%s\"",
+            nvdata_state_finished_levels_backup_file_path);
+    infomsg("Removing finished level data storge file \"%s\"",
+            nvdata_state_finished_levels_file_path);
+
+    if (-1 == rename(nvdata_state_finished_levels_file_path,
+                     nvdata_state_finished_levels_backup_file_path)) {
+        int err = errno;
+        errmsg("Error renaming \"%s\"", nvdata_state_finished_levels_file_path);
+        errmsg("            to \"%s\"", nvdata_state_finished_levels_backup_file_path);
+        errmsg("  %s", strerror(err));
+    }
+
+    return true;
+}
+
+bool have_nvdata_finished_levels_data(void)
+{
+    return finished_levels.tree != NULL;
+}

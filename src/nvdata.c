@@ -599,6 +599,12 @@ void init_nvdata(void)
                  nvdata_dir, NVDATA_FINISHED_LEVEL_FILE_NAME);
     }
 
+    if (nvdata_state_finished_levels_backup_file_path == NULL) {
+        assert_not_null(nvdata_state_finished_levels_file_path);
+        safe_asprintf(&nvdata_state_finished_levels_backup_file_path, "%s.backup",
+                 nvdata_state_finished_levels_file_path);
+    }
+
     if (nvdata_default_browse_path == NULL) {
         safe_asprintf(&nvdata_default_browse_path, "%s/%s",
                  nvdata_dir, NVDATA_DEFAULT_BROWSE_PATH_NAME);
