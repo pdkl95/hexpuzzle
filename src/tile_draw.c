@@ -444,7 +444,7 @@ void tile_draw_corner_connections(tile_pos_t *pos, win_anim_mode_t win_mode)
     float fade = 1.0;
     if (current_level) {
         if (current_level->win_anim) {
-            fade = current_level->win_anim->fade[2];//* current_level->fade.value_eased;
+            fade = current_level->win_anim->fade[2] * current_level->fade.value_eased_in;
         }
     }
 
@@ -549,9 +549,13 @@ void tile_draw_corner_connections(tile_pos_t *pos, win_anim_mode_t win_mode)
             color.g = options->path_color[tile->path[dir]].hue;
             float thickness = pos->line_width;
 
+            thickness = Lerp(0.333 * thickness,
+                             thickness,
+                             smoothstep(0.5, 1.0, 1.0f / outside_dist));
+
             color.a = 0.0;
             if (is_pop) {
-                color.a = 1.0;
+                color.a = fade;
                 thickness = pos->line_width * 0.75;
             }
 

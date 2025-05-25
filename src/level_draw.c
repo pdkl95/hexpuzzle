@@ -43,7 +43,7 @@ static void level_set_fade_transition(level_t *level, tile_pos_t *pos)
     }
 
     Vector2 modded = Vector2Scale(pos->radial_vector, 5.0);
-    Vector2 faded  = Vector2Lerp(modded, pos->radial_vector, level->fade.value_eased);
+    Vector2 faded  = Vector2Lerp(modded, pos->radial_vector, level->fade.value_eased_out);
 
     Vector2 translate = Vector2Subtract(faded, pos->radial_vector);
 
@@ -75,6 +75,9 @@ static void level_draw_corner_connections(level_t *level, win_anim_mode_t win_mo
 
     SetShaderValue(win_border_shader, win_border_shader_loc.effect_amount1, &(postprocessing_effect_amount1[0]), SHADER_UNIFORM_VEC4);
     SetShaderValue(win_border_shader, win_border_shader_loc.effect_amount2, &(postprocessing_effect_amount2[0]), SHADER_UNIFORM_VEC4);
+
+    //bool do_fade = level->fade.value != 1.0f;
+    //float finished_fade_in = level->win_anim ? level->win_anim->fade[2] : 1.0;
 
     BeginShaderMode(win_border_shader);
     {
@@ -116,7 +119,7 @@ void level_draw(level_t *level, bool finished)
     rlPushMatrix();
 
     if (do_fade) {
-        float blend_amount = level->fade.value;// * (1.0f - finished_fade_in);
+        float blend_amount = level->fade.value_eased_out;
         glBlendColor(0.0f, 0.0f, 0.0f, blend_amount);
         rlSetBlendMode(RL_BLEND_CUSTOM);
     }
@@ -128,7 +131,7 @@ void level_draw(level_t *level, bool finished)
 
     rlTranslatef(level->px_offset.x, level->px_offset.y, 0.0);
 
-    if (finished) {
+    if (finished && level->fade.value >= 1.0f) {
         level_draw_corner_connections(level, level->win_anim ? level->win_anim->mode : WIN_ANIM_MODE_SIMPLE);
     }
     for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
@@ -298,7 +301,8 @@ void _level_preview(level_t *level, Rectangle rect, bool show_solved)
 
     used_tiles_t save_currently_used_tiles = level->currently_used_tiles;
     float save_fade_value                  = level->fade.value;
-    float save_fade_value_eased            = level->fade.value_eased;
+    float save_fade_value_eased_out        = level->fade.value_eased_out;
+    float save_fade_value_eased_in         = level->fade.value_eased_in;
     float save_fade_rotate_speed           = level->fade.rotate_speed;
     float save_fade_rotate_level           = level->fade.rotate_level;
     float save_extra_rotate_level          = level->extra_rotate_level;
@@ -307,7 +311,8 @@ void _level_preview(level_t *level, Rectangle rect, bool show_solved)
 
     level->currently_used_tiles = show_solved ? USED_TILES_SOLVED : USED_TILES_UNSOLVED;
     level->fade.value                  = 1.0f;
-    level->fade.value_eased            = 1.0f;
+    level->fade.value_eased_out        = 1.0f;
+    level->fade.value_eased_in         = 1.0f;
     level->fade.rotate_speed           = 0.0f;
     level->fade.rotate_level           = 0.0f;
     level->extra_rotate_level          = 0.0f;
@@ -321,7 +326,8 @@ void _level_preview(level_t *level, Rectangle rect, bool show_solved)
     level->extra_rotate_level_velocity = save_extra_rotate_level_velocity;
     level->currently_used_tiles        = save_currently_used_tiles;
     level->fade.value                  = save_fade_value;
-    level->fade.value_eased            = save_fade_value_eased;
+    level->fade.value_eased_out        = save_fade_value_eased_out;
+    level->fade.value_eased_in         = save_fade_value_eased_in;
     level->fade.rotate_speed           = save_fade_rotate_speed;
     level->fade.rotate_level           = save_fade_rotate_level;
 

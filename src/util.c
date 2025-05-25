@@ -207,13 +207,14 @@ float slew_limit_down(float current, float target, float step)
     }
 }
 
-float ease_circular_in(float t) {
+float ease_circular_in(float t)
+{
     return 1.0f - sqrtf(1.0f - (t * t));
 }
 
-float ease_circular_out(float t) {
+float ease_circular_out(float t)
+{
     return sqrtf(1.0f - powf(t - 1.0f, 2.0f));
-
 }
 
 float ease_sine_in(float t)
@@ -279,6 +280,37 @@ float ease_back_in(float t) {
 
 float ease_back_out(float t) {
     return EASE_BACK_C3 * t * t * t - EASE_BACK_C1 * t * t;
+}
+
+float ease_bounce_in(float t)
+{
+    return 1.0f - ease_bounce_out(1.0 - t);
+}
+
+float ease_bounce_out(float t)
+{
+    /* const float n1 = 7.5625f; */
+    /* const float d1 = 2.75f; */
+
+    /* if (t < 1.0f / d1) { */
+    /*     return n1 * t * t; */
+    /* } else if (t < 2.0f / d1) { */
+    /*     return n1 * (t -= 1.5f   / d1) * t + 0.75f; */
+    /* } else if (t < 2.5f / d1) { */
+    /*     return n1 * (t -= 2.25f  / d1) * t + 0.9375f; */
+    /* } else { */
+    /*     return n1 * (t -= 2.625f / d1) * t + 0.984375f; */
+    /* } */
+
+    if (t < 4.0f/11.0f) {
+        return (121.0f * t * t) / 16.0f;
+    } else if (t < 8.0f / 11.0f) {
+        return ((363.0f / 40.0f) * t * t) - ((99.0f / 10.0f) * t) + (17.0f / 5.0f);
+    } else if (t < (9.0f / 10.0f)) {
+        return ((4356.0f / 361.0f) * t * t) - ((35442.0f / 1805.0f) * t) + (16061.0f / 1805.0f);
+    } else {
+        return ((54.0f / 5.0f) * t * t) - ((513.0f / 25.0f) * t) + (268.0f / 25.0f);
+    }
 }
 
 float ease_quartic_inout(float t)

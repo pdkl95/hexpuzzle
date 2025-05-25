@@ -52,7 +52,8 @@ struct level_fade {
     bool  active;
     bool  do_rotate;
     float value;
-    float value_eased;
+    float value_eased_out;
+    float value_eased_in;
     float rotate_level;
     float delta;
     float target;

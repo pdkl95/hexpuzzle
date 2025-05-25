@@ -81,6 +81,8 @@ float slew_limit_down(float current, float target, float step);
 #define ease_quartic_in(t)  ((t) * (t) * (t) * (t))
 #define ease_quintic_in(t)  ((t) * (t) * (t) * (t) * (t))
 
+float ease_sine_in(float t);
+float ease_sine_out(float t);
 float ease_circular_in(float t);
 float ease_circular_out(float t);
 float ease_quad_in(float t);
@@ -93,6 +95,8 @@ float ease_exponential_in(float t);
 float ease_exponential_out(float t);
 float ease_back_in(float t);
 float ease_back_out(float t);
+float ease_bounce_in(float t);
+float ease_bounce_out(float t);
 
 float ease_quartic_inout(float t);
 

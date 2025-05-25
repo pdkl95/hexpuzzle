@@ -311,12 +311,13 @@ static level_t *init_level(level_t *level)
 
     level->finished_hue = 0.0f;
 
-    level->fade.active = false;
+    level->fade.active    = false;
     level->fade.do_rotate = true;
-    level->fade.value        = 0.0f;
-    level->fade.value_eased  = 0.0f;
-    level->fade.delta        = 0.0f;
-    level->fade.target       = 0.0f;
+    level->fade.value            = 0.0f;
+    level->fade.value_eased_out  = 0.0f;
+    level->fade.value_eased_in   = 0.0f;
+    level->fade.delta            = 0.0f;
+    level->fade.target           = 0.0f;
 
     level->fade.rotate_level  = 0.0f;
     level->extra_rotate_level = 0.0f;
@@ -1814,8 +1815,9 @@ bool level_update_fade(level_t *level)
 
     if (level->fade.active && (level->fade.value != level->fade.target)) {
         if (fabs(level->fade.value - level->fade.target) <= LEVEL_FADE_DELTA) {
-            level->fade.value       = level->fade.target;
-            level->fade.value_eased = level->fade.target;
+            level->fade.value           = level->fade.target;
+            level->fade.value_eased_out = level->fade.target;
+            level->fade.value_eased_in  = level->fade.target;
 #ifdef DEBUG_LEVEL_FADE
             printf("level_update_fade(): stopped at fade_target = %f\n", level->fade.target);
 #endif
@@ -1831,7 +1833,8 @@ bool level_update_fade(level_t *level)
 #endif
 
             level->fade.value += level->fade.delta;
-            level->fade.value_eased = ease_exponential_out(level->fade.value);
+            level->fade.value_eased_out = ease_exponential_out(level->fade.value);
+            level->fade.value_eased_in  = ease_sine_in( level->fade.value);
 
 #ifdef DEBUG_LEVEL_FADE
             printf("level_update_fade(): fade_value %f -> %f\n", old_fade_value, level->fade.value);
