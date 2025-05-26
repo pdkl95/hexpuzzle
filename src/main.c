@@ -1137,11 +1137,11 @@ char *random_button_lines[2] = {
     levels_button_text_str
 };
 
-char game_source_button_game_str[] = "Game";
 char game_source_button_source_str[] = "Source";
-const char *game_source_button_lines[2] = {
-    game_source_button_game_str,
-    game_source_button_source_str
+char game_source_button_code_str[] = "Code";
+const char *game_source_button_lines[3] = {
+    game_source_button_source_str,
+    game_source_button_code_str
 };
 
 char edit_radius_label_text[] = "Radius";
