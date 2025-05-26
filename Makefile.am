@@ -20,6 +20,7 @@ CLASSICS_LEVELS = \
 
 FONTS = \
 	fonts/cabin_condensed/cabin_condensed_bold.ttf \
+	fonts/jockeyone/jockeyone_regular.ttf \
 	fonts/ubuntu/ubuntu_medium.ttf
 
 SHADERS = \
@@ -37,6 +38,7 @@ EXTRA_DIST = \
 	m4/gnulib/gnulib-cache.m4 \
 	external/sglib/LICENSE \
 	fonts/cabin_condensed/OFL.txt \
+	fonts/jockeyone/OFL.txt \
 	fonts/ubuntu/LICENCE.txt \
 	$(CLASSICS_LEVELS) \
 	$(FONTS) \

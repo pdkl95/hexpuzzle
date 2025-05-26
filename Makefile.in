@@ -1635,6 +1635,7 @@ CLASSICS_LEVELS = \
 
 FONTS = \
 	fonts/cabin_condensed/cabin_condensed_bold.ttf \
+	fonts/jockeyone/jockeyone_regular.ttf \
 	fonts/ubuntu/ubuntu_medium.ttf
 
 SHADERS = \
@@ -1646,9 +1647,9 @@ TEXTURES = \
 
 EXTRA_DIST = README.md lib/gnugetopt.h lib/getopt.c lib/getopt1.c \
 	m4/gnulib/gnulib-cache.m4 external/sglib/LICENSE \
-	fonts/cabin_condensed/OFL.txt fonts/ubuntu/LICENCE.txt \
-	$(CLASSICS_LEVELS) $(FONTS) $(SHADERS) $(TEXTURES) $(GLFW_SRC) \
-	$(RAYLIB_EXTERNAL_SRC) \
+	fonts/cabin_condensed/OFL.txt fonts/jockeyone/OFL.txt \
+	fonts/ubuntu/LICENCE.txt $(CLASSICS_LEVELS) $(FONTS) \
+	$(SHADERS) $(TEXTURES) $(GLFW_SRC) $(RAYLIB_EXTERNAL_SRC) \
 	external/raylib/platforms/rcore_desktop.c \
 	external/raylib/platforms/rcore_web.c \
 	external/raylib/external/glfw/LICENSE.md \
