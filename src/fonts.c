@@ -87,8 +87,8 @@ void load_fonts(void)
                                 UBUNTU_MEDIUM_DATA_SIZE);
 
     big_button_font = load_font(36, TEXTURE_FILTER_BILINEAR,
-                                BEETYPE_FILLED_DATA,
-                                BEETYPE_FILLED_DATA_SIZE);
+                                UBUNTU_MEDIUM_DATA,
+                                UBUNTU_MEDIUM_DATA_SIZE);
 
     set_font_color(&big_button_font, 0xc1c1c1ff);
 }

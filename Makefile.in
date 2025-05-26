@@ -1634,9 +1634,8 @@ CLASSICS_LEVELS = \
 	levels/classics/4-yellow.hexlevelpack
 
 FONTS = \
-	fonts/beetype_filled.otf \
-	fonts/cabin_condensed_bold.ttf \
-	fonts/ubuntu_medium.ttf
+	fonts/cabin_condensed/cabin_condensed_bold.ttf \
+	fonts/ubuntu/ubuntu_medium.ttf
 
 SHADERS = \
 	shaders/postprocessing.frag.glsl \
@@ -1647,8 +1646,9 @@ TEXTURES = \
 
 EXTRA_DIST = README.md lib/gnugetopt.h lib/getopt.c lib/getopt1.c \
 	m4/gnulib/gnulib-cache.m4 external/sglib/LICENSE \
-	$(CLASSICS_LEVELS) $(FONTS) $(C_SRC_FONTS) $(SHADERS) \
-	$(TEXTURES) $(GLFW_SRC) $(RAYLIB_EXTERNAL_SRC) \
+	fonts/cabin_condensed/OFL.txt fonts/ubuntu/LICENCE.txt \
+	$(CLASSICS_LEVELS) $(FONTS) $(SHADERS) $(TEXTURES) $(GLFW_SRC) \
+	$(RAYLIB_EXTERNAL_SRC) \
 	external/raylib/platforms/rcore_desktop.c \
 	external/raylib/platforms/rcore_web.c \
 	external/raylib/external/glfw/LICENSE.md \
