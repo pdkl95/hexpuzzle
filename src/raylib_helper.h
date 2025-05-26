@@ -101,6 +101,15 @@ Color ColorLerp(Color start, Color end, float amount);
 
 bool ColorEq(Color a, Color b);
 
+#define HSV(h,s,v) (Vector3){ .x = (h), .y = (s), .z = (v) }
+
+Color ColorRelHSV(Color color, Vector3 relhsv);
+
+static inline Color ColorRelSaturation(Color color, float relsat)
+{
+    return ColorRelHSV(color, HSV(0.0f, relsat, 0.0f));
+}
+
 /*** Misc Math ***/
 
 float nsinf(float x);

@@ -74,7 +74,9 @@ Color title_pshadow_color;
 void init_gui_title(void)
 {
     title_text_color = purple;
-    version_text_color = ColorBrightness(purple, 0.15);
+    version_text_color = ColorBrightness(purple, 0.2);
+    version_text_color = ColorRelHSV(version_text_color,
+                                     HSV(0.0f, -0.12f, 0.25f));
 
     title_font.font = name_font.font;
     title_font.size = 3.0f * name_font.size;

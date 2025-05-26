@@ -104,6 +104,26 @@ void printcolor(Color c)
     printf(" }");
 }
 
+Color ColorRelHSV(Color color, Vector3 relhsv)
+{
+    Vector3 hsv = ColorToHSV(color);
+
+    hsv = Vector3Add(hsv, relhsv);
+
+    if (hsv.x < 0.0f) {
+        hsv.x += 360.0f;
+    }
+
+    if (hsv.x >= 360.0f) {
+        hsv.x -= 360.0f;
+    }
+
+    hsv.y = Clamp(hsv.y, 0.0f, 1.0f);
+    hsv.z = Clamp(hsv.z, 0.0f, 1.0f);
+
+    return ColorFromHSV(hsv.x, hsv.y, hsv.z);
+}
+
 float nsinf(float x)
 {
     float value = sinf(x);
