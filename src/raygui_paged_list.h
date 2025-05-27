@@ -88,6 +88,7 @@ int raygui_paged_list_draw_as_listview(Rectangle bounds, const char **text, int 
 
 void raygui_paged_list_select_active_page(raygui_paged_list_t *list);
 
+extern float raygui_paged_list_sidebar_width;
 
 #endif /*RAYGUI_PAGED_LIST_H*/
 

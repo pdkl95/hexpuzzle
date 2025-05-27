@@ -94,6 +94,10 @@ Rectangle local_files_dir_rect;
 Rectangle local_files_up_button_rect;
 Rectangle local_files_home_button_rect;
 Rectangle local_files_local_saved_levels_button_rect;
+Rectangle local_files_new_button_rect;
+Rectangle local_files_rename_button_rect;
+Rectangle local_files_new_button_with_preview_rect;
+Rectangle local_files_rename_button_with_preview_rect;
 
 char browser_panel_text[] = "Browse Levels";
 char browser_play_button_text[] = "Play";
@@ -104,10 +108,14 @@ char local_files_dir_label_text[] = "Directory";
 char local_files_up_button_text_str[] = "Up";
 char local_files_local_saved_levels_button_text_str[] = "Local Saved Levels";
 char local_files_home_button_text_str[] = "Home";
+char local_files_new_button_text_str[] = "New";
+char local_files_rename_button_text_str[] = "Rename";
 
 char *local_files_up_button_text = NULL;
 char *local_files_home_button_text = NULL;
 char *local_files_local_saved_levels_button_text = NULL;
+char *local_files_new_button_text = NULL;
+char *local_files_rename_button_text = NULL;
 
 raygui_paged_list_t classics_gui_list;
 raygui_paged_list_t local_files_gui_list;
@@ -431,6 +439,17 @@ void disable_preview(void)
 {
     browse_preview_level = NULL;;
 }
+
+void gui_browser_new(void)
+{
+    infomsg("new");
+}
+
+void gui_browser_rename(void)
+{
+    infomsg("rename");
+}
+
 #endif
 
 void init_gui_browser(void)
@@ -563,7 +582,7 @@ void resize_gui_browser(void)
 
     local_files_dir_label_rect.x      = browser_area_rect.x;
     local_files_dir_label_rect.y      = browser_area_rect.y;
-    local_files_dir_label_rect.width  = local_files_dir_label_text_size.x;
+    local_files_dir_label_rect.width  = local_files_dir_label_text_size.x + PANEL_INNER_MARGIN;
     local_files_dir_label_rect.height = TOOL_BUTTON_HEIGHT;
 
     local_files_dir_rect.x      = local_files_dir_label_rect.x + local_files_dir_label_rect.width + RAYGUI_ICON_SIZE;
@@ -583,9 +602,17 @@ void resize_gui_browser(void)
     if (local_files_local_saved_levels_button_text) {
         FREE(local_files_local_saved_levels_button_text);
     }
+    if (local_files_new_button_text) {
+        FREE(local_files_new_button_text);
+    }
+    if (local_files_rename_button_text) {
+        FREE(local_files_rename_button_text);
+    }
     local_files_up_button_text   = strdup(GuiIconText(ICON_ARROW_LEFT, local_files_up_button_text_str));
     local_files_home_button_text = strdup(GuiIconText(ICON_HOUSE,      local_files_home_button_text_str));
     local_files_local_saved_levels_button_text = strdup(GuiIconText(ICON_FOLDER_FILE_OPEN, local_files_local_saved_levels_button_text_str));
+    local_files_new_button_text    = strdup(GuiIconText(ICON_FILE_ADD, local_files_new_button_text_str));
+    local_files_rename_button_text = strdup(GuiIconText(ICON_PENCIL,   local_files_rename_button_text_str));
 
     Vector2 local_files_up_button_text_size   = measure_gui_text(local_files_up_button_text);
     Vector2 local_files_home_button_text_size = measure_gui_text(local_files_home_button_text);
@@ -609,6 +636,33 @@ void resize_gui_browser(void)
     browser_area_rect.y      += local_files_up_button_rect.height + RAYGUI_ICON_SIZE;
     browser_area_rect.height -= local_files_up_button_rect.height + RAYGUI_ICON_SIZE;
 
+    Vector2 local_files_new_button_text_size = measure_gui_text(local_files_new_button_text);
+    Vector2 local_files_rename_button_text_size = measure_gui_text(local_files_rename_button_text);
+
+    local_files_new_button_rect.width  = local_files_new_button_text_size.x;
+    local_files_new_button_rect.height = TOOL_BUTTON_HEIGHT;
+    local_files_rename_button_rect.width  = local_files_rename_button_text_size.x;
+    local_files_rename_button_rect.height = TOOL_BUTTON_HEIGHT;
+
+    local_files_new_button_rect.x    = browser_area_rect.x + browser_area_rect.width - local_files_new_button_rect.width;
+    local_files_rename_button_rect.x = browser_area_rect.x;
+
+    local_files_new_button_rect.y    = area_bottom - local_files_new_button_rect.height;
+    local_files_rename_button_rect.y = local_files_new_button_rect.y;
+
+    local_files_new_button_with_preview_rect = local_files_new_button_rect;
+    local_files_rename_button_with_preview_rect = local_files_rename_button_rect;
+
+    local_files_new_button_with_preview_rect.x -= browser_preview_rect.width + (2 * PANEL_INNER_MARGIN);
+
+    prect(local_files_new_button_rect);
+    prect(local_files_rename_button_rect);
+    prect(local_files_new_button_with_preview_rect);
+    prect(local_files_rename_button_with_preview_rect);
+
+    area_bottom -= local_files_new_button_rect.height;
+    area_bottom -= PANEL_INNER_MARGIN;
+
     local_files_list_rect.x      = browser_area_rect.x;
     local_files_list_rect.y      = browser_area_rect.y;
     local_files_list_rect.width  = browser_area_rect.width;
@@ -627,6 +681,8 @@ void resize_gui_browser(void)
     raygui_paged_list_resize(local_files.gui_list_preview, *local_files.list_rect_preview);
     raygui_paged_list_resize(local_files.gui_list,         *local_files.list_rect);
 #endif
+
+    local_files_new_button_rect.x -= raygui_paged_list_sidebar_width;
 }
 
 static inline raygui_paged_list_t *get_current_gui_list(gui_list_vars_t *list)
@@ -705,6 +761,37 @@ void draw_gui_browser_classics(void)
 }
 
 #if defined(PLATFORM_DESKTOP)
+static inline void draw_gui_browser_local_level_file_new_button(void)
+{
+    Rectangle new_btn_rect = browse_preview_level
+        ? local_files_new_button_with_preview_rect
+        : local_files_new_button_rect;
+
+    if (GuiButton(new_btn_rect, local_files_new_button_text)) {
+        gui_browser_new();
+    }
+}
+
+static inline void draw_gui_browser_local_level_file_rename_button(void)
+{
+    Rectangle rename_btn_rect = browse_preview_level
+        ? local_files_rename_button_with_preview_rect
+        : local_files_rename_button_rect;
+
+    bool disable_rename_btn = local_files.active == -1;
+    if (disable_rename_btn) {
+        GuiDisable();
+    }
+
+    if (GuiButton(rename_btn_rect, local_files_rename_button_text)) {
+        gui_browser_rename();
+    }
+
+    if (disable_rename_btn) {
+        GuiDisable();
+    }
+}
+
 void draw_gui_browser_local_level_file(void)
 {
     GuiLabel(local_files_dir_label_rect, local_files_dir_label_text);
@@ -740,6 +827,9 @@ void draw_gui_browser_local_level_file(void)
         raygui_paged_list_t *gui_list = get_current_gui_list(&local_files);
         raygui_paged_list_select_active_page(gui_list);
     }
+
+    draw_gui_browser_local_level_file_new_button();
+    draw_gui_browser_local_level_file_rename_button();
 
     switch (entry->type) {
     case ENTRY_TYPE_DIR:

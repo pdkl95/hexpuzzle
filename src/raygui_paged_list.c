@@ -25,6 +25,8 @@
 char prev_button_tooltip[] = "Prev Page";
 char next_button_tooltip[] = "Next Page";
 
+float raygui_paged_list_sidebar_width = 0.0f;
+
 raygui_paged_list_t *alloc_raygui_paged_list(void)
 {
     return calloc(1, sizeof(raygui_paged_list_t));
@@ -101,6 +103,8 @@ static void raygui_paged_list_prepare_text(raygui_paged_list_t *list)
     list->gui_sidebar_bounds.width = ICON_BUTTON_SIZE;
 
     float sidebar_size = list->gui_sidebar_bounds.width + PANEL_INNER_MARGIN;
+    raygui_paged_list_sidebar_width = sidebar_size;
+
     list->gui_list_bounds.width -= sidebar_size;
     list->gui_sidebar_bounds.x  += list->gui_list_bounds.width + PANEL_INNER_MARGIN;
 
