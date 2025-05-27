@@ -45,7 +45,6 @@ EXTRA_DIST = \
 	$(SHADERS) \
 	$(TEXTURES)
 
-#CHIPMUNK_DIR = /home/endymion/build/ChipmunkLatest/Chipmunk-7.0.3
 CHIPMUNK_DIR = external/chipmunk
 
 if USE_CHIPMUNK

@@ -1681,8 +1681,6 @@ EXTRA_DIST = README.md lib/gnugetopt.h lib/getopt.c lib/getopt1.c \
 	lib/gnulib/vasnprintf.h lib/gnulib/asprintf.c \
 	lib/gnulib/vasprintf.c lib/gnulib/wchar.in.h \
 	lib/gnulib/xalloc-oversized.h
-
-#CHIPMUNK_DIR = /home/endymion/build/ChipmunkLatest/Chipmunk-7.0.3
 CHIPMUNK_DIR = external/chipmunk
 @BUILD_WEB_FALSE@RAYLIB_PLATFORM = PLATFORM_DESKTOP
 @BUILD_WEB_TRUE@RAYLIB_PLATFORM = PLATFORM_WEB
