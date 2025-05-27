@@ -163,7 +163,7 @@ gui_list_vars_t local_files = {
 #define NUM_TABS 3
 const char *browser_tabbar_text[NUM_TABS];
 
-int active_tab = 0;
+int browser_active_tab = 0;
 
 level_t *browse_preview_level = NULL;
 
@@ -787,9 +787,9 @@ void draw_gui_browser(void)
 {
     GuiPanel(browser_panel_rect, browser_panel_text);
 
-    GuiSimpleTabBar(browser_tabbar_rect, browser_tabbar_text, 2, &active_tab);
+    GuiSimpleTabBar(browser_tabbar_rect, browser_tabbar_text, 2, &browser_active_tab);
 
-    switch (active_tab) {
+    switch (browser_active_tab) {
     case 0:
         draw_gui_browser_classics();
         break;

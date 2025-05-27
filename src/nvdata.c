@@ -34,6 +34,7 @@
 
 #include "nvdata.h"
 #include "nvdata_finished.h"
+#include "gui_browser.h"
 #include "gui_random.h"
 
 uint16_t state_version = 1;
@@ -284,6 +285,17 @@ static bool program_state_from_json(cJSON *json)
             warnmsg("Program state JSON['ui'] is missing \"max_win_radius\"");
         }
 
+        cJSON *browser_active_tab_json = cJSON_GetObjectItem(ui_json, "browser_active_tab");
+        if (browser_active_tab_json) {
+            if (cJSON_IsNumber(browser_active_tab_json)) {
+                int value = browser_active_tab_json->valueint;
+                CLAMPVAR(value, BROWSER_ACTIVE_TAB_MIN, BROWSER_ACTIVE_TAB_MAX);
+                browser_active_tab = value;
+            } else {
+                errmsg("Program state JSON['ui']['browser_activer_tab'] is not a NUMBER");
+            }
+        }
+
         cJSON *bool_json = NULL;
 
 #define mk_bool_json(field, name)                                        \
@@ -468,6 +480,11 @@ static cJSON *program_state_to_json(void)
 
     if (cJSON_AddNumberToObject(ui_json, "max_win_radius", options->max_win_radius) == NULL) {
         errmsg("Error adding \"max_win_radius\" to JSON.ui");
+        goto to_json_error;
+    }
+
+    if (cJSON_AddNumberToObject(ui_json, "browser_active_tab", browser_active_tab) == NULL) {
+        errmsg("Error adding \"browser_active_tab\" to JSON.ui");
         goto to_json_error;
     }
 

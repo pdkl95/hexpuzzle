@@ -27,5 +27,9 @@ void cleanup_gui_browser(void);
 void resize_gui_browser(void);
 void draw_gui_browser(void);
 
+extern int browser_active_tab;
+#define BROWSER_ACTIVE_TAB_MIN 0
+#define BROWSER_ACTIVE_TAB_MAX 2
+
 #endif /*GUI_BROWSER_H*/
 
