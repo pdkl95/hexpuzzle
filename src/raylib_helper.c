@@ -571,7 +571,7 @@ void OpenURLBackground(const char *url)
         sprintf(cmd, "xdg-open '%s' &", url); // Alternatives: firefox, x-www-browser
 #endif
 #if defined(__APPLE__)
-        sprintf(cmd, "open '%s'", url);
+        sprintf(cmd, "open '%s' &", url);
 #endif
         int result = system(cmd);
         if (result == -1) TRACELOG(LOG_WARNING, "OpenURL() child process could not be created");
