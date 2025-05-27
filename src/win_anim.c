@@ -566,16 +566,6 @@ void win_anim_update(win_anim_t *win_anim)
         win_anim->level->background_transform_amount = 0.0f;
     }
 
-    switch (win_anim->mode) {
-#ifdef USE_PHYSICS
-    case WIN_ANIM_MODE_PHYSICS_FALL:
-        win_anim->fade[2] = 1.0;
-        break;
-#endif
-    default:
-        break;
-    }
-
 #if 0
     printf("progress = %3.2f. hue = %3.2f, fadein = %3.2f, other = %3.2f\n",
            win_anim->fade[0],
