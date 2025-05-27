@@ -38,7 +38,7 @@
 options_t *options = NULL;
 
 /* command line options */
-static char short_options[] = "Cc:e:F:H:p:s:wvVW:PR:UL::r::hj";
+static char short_options[] = "Cc:e:EF:H:p:s:wvVW:PR:UL::r::hj";
 
 static struct option long_options[] = {
     {  "create-random-level",       no_argument, 0, 'L' },
@@ -77,6 +77,7 @@ static struct option long_options[] = {
     {     "no-show-tooltips",       no_argument, 0, 'T' },
     {       "extra-rainbows",       no_argument, 0, ':' },
     {    "no-extra-rainbows",       no_argument, 0, ';' },
+    {      "allow-edit-mode",       no_argument, 0, 'E' },
     {                 "demo",       no_argument, 0, 'd' },
     {             "demo-win",       no_argument, 0, 'D' },
     {          "wait-events",       no_argument, 0, 'w' },
@@ -100,6 +101,8 @@ static char help_text[] =
     "                              (default: ${XDG_CONFIG_HOME}/" PACKAGE_NAME "/\n"
     "                                which is usually ~/.config/" PACKAGE_NAME "/)\n"
     "  -C, --no-config             Skip loading of all config files (\"Safe Mode\")\n"
+    "\n"
+    "      --allow-edit-mode       Enable the edit button when browsing local files\n"
     "\n"
     "  -v, --verbose               More logging output (including raylib)\n"
     "\n"
@@ -347,6 +350,9 @@ options_set_defaults(
 
     options->verbose               = OPTIONS_DEFAULT_VERBOSE;
     options->wait_events           = OPTIONS_DEFAULT_WAIT_EVENTS;
+
+    options->allow_edit_mode       = OPTIONZ_DEFAULT_ALLOW_EDIT_MODE;
+
     options->animate_bg            = OPTIONS_DEFAULT_ANIMATE_BG;
     options->animate_win           = OPTIONS_DEFAULT_ANIMATE_WIN;
     options->use_physics           = OPTIONS_DEFAULT_USE_PHYSICS;
@@ -469,6 +475,10 @@ options_parse_args(
         case 'e':
             options_set_string(&options->file_path);
             options->startup_action = STARTUP_ACTION_EDIT;
+            break;
+
+        case 'E':
+            options->allow_edit_mode = true;
             break;
 
         case '!':

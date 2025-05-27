@@ -28,7 +28,7 @@
 
 extern char *home_dir;
 
-void open_game_file(const char *path);
+void open_game_file(const char *path, bool edit);
 void open_classics_game_pack(int n);
 bool draw_level_preview(level_t *level, Rectangle bounds);
 
@@ -65,6 +65,8 @@ struct gui_list_vars {
     Rectangle *list_rect_preview;
     Rectangle *btn_rect;
     Rectangle *btn_rect_preview;
+    Rectangle *edit_btn_rect;
+    Rectangle *edit_btn_rect_preview;
 
     raygui_paged_list_t *gui_list;
     raygui_paged_list_t *gui_list_preview;
@@ -81,8 +83,10 @@ Rectangle browser_tabbar_rect;
 Rectangle browser_area_rect;
 Rectangle browser_list_rect;
 Rectangle browser_play_button_rect;
+Rectangle browser_edit_button_rect;
 Rectangle browser_list_with_preview_rect;
 Rectangle browser_play_button_with_preview_rect;
+Rectangle browser_edit_button_with_preview_rect;
 Rectangle local_files_list_rect;
 Rectangle local_files_list_with_preview_rect;
 Rectangle local_files_dir_label_rect;
@@ -93,6 +97,7 @@ Rectangle local_files_local_saved_levels_button_rect;
 
 char browser_panel_text[] = "Browse Levels";
 char browser_play_button_text[] = "Play";
+char browser_edit_button_text[] = "Edit";
 char browser_open_button_text[] = "Open";
 
 char local_files_dir_label_text[] = "Directory";
@@ -117,18 +122,20 @@ gui_list_entry_t classics_entries[] = {
 #define NUM_CLASSICS_NAMES (sizeof(classics_entries)/sizeof(gui_list_entry_t))
 
 gui_list_vars_t classics = {
-    .names             = NULL,
-    .entries           = classics_entries,
-    .count             = NUM_CLASSICS_NAMES,
-    .list_rect         = &browser_list_rect,
-    .list_rect_preview = &browser_list_with_preview_rect,
-    .btn_rect          = &browser_play_button_rect,
-    .btn_rect_preview  = &browser_play_button_with_preview_rect,
-    .gui_list          = &classics_gui_list,
-    .gui_list_preview  = NULL,
-    .scroll_index      = -1,
-    .active            = -1,
-    .focus             = -1
+    .names                 = NULL,
+    .entries               = classics_entries,
+    .count                 = NUM_CLASSICS_NAMES,
+    .list_rect             = &browser_list_rect,
+    .list_rect_preview     = &browser_list_with_preview_rect,
+    .btn_rect              = &browser_play_button_rect,
+    .btn_rect_preview      = &browser_play_button_with_preview_rect,
+    .edit_btn_rect         = &browser_edit_button_rect,
+    .edit_btn_rect_preview = &browser_edit_button_with_preview_rect,
+    .gui_list              = &classics_gui_list,
+    .gui_list_preview      = NULL,
+    .scroll_index          = -1,
+    .active                = -1,
+    .focus                 = -1
 };
 
 extern char *nvdata_default_browse_path;
@@ -137,18 +144,20 @@ char *browse_path = NULL;
 FilePathList browse_file_list;
 
 gui_list_vars_t local_files = {
-    .names             = NULL,
-    .entries           = NULL,
-    .count             = 0,
-    .list_rect         = &local_files_list_rect,
-    .list_rect_preview = &local_files_list_with_preview_rect,
-    .btn_rect          = &browser_play_button_rect,
-    .btn_rect_preview  = &browser_play_button_with_preview_rect,
-    .gui_list          = &local_files_gui_list,
-    .gui_list_preview  = &local_files_gui_list_preview,
-    .scroll_index      = -1,
-    .active            = -1,
-    .focus             = -1
+    .names                 = NULL,
+    .entries               = NULL,
+    .count                 = 0,
+    .list_rect             = &local_files_list_rect,
+    .list_rect_preview     = &local_files_list_with_preview_rect,
+    .btn_rect              = &browser_play_button_rect,
+    .btn_rect_preview      = &browser_play_button_with_preview_rect,
+    .edit_btn_rect         = &browser_edit_button_rect,
+    .edit_btn_rect_preview = &browser_edit_button_with_preview_rect,
+    .gui_list              = &local_files_gui_list,
+    .gui_list_preview      = &local_files_gui_list_preview,
+    .scroll_index          = -1,
+    .active                = -1,
+    .focus                 = -1
 };
 
 #define NUM_TABS 3
@@ -376,7 +385,7 @@ void change_gui_browser_path_to_local_saved_levels(void)
     change_gui_browser_path(nvdata_default_browse_path);
 }
 
-void open_entry(gui_list_entry_t *entry)
+void open_entry(gui_list_entry_t *entry, bool edit)
 {
     switch (entry->type) {
     case ENTRY_TYPE_DIR:
@@ -391,7 +400,7 @@ void open_entry(gui_list_entry_t *entry)
         /* fall through */
     case ENTRY_TYPE_COLLECTION_FILE:
         if (FileExists(entry->path)) {
-            open_game_file(entry->path);
+            open_game_file(entry->path, edit);
         }
         break;
 
@@ -399,7 +408,6 @@ void open_entry(gui_list_entry_t *entry)
         errmsg("Cannot open \"%s\": NULL entr6y type.", entry->path);
     }
 }
-
 
 void preview_entry(gui_list_entry_t *entry)
 {
@@ -512,9 +520,11 @@ void resize_gui_browser(void)
 
     Vector2 browser_play_button_text_size = measure_big_button_text(browser_play_button_text);
     Vector2 browser_open_button_text_size = measure_big_button_text(browser_open_button_text);
+    Vector2 browser_edit_button_text_size = measure_big_button_text(browser_edit_button_text);
 
     Vector2 button_max_size = Vector2Max(browser_play_button_text_size,
                                          browser_open_button_text_size);
+    button_max_size = Vector2Max(button_max_size, browser_edit_button_text_size);
 
     browser_play_button_rect.height = button_max_size.y + (5 * BUTTON_MARGIN);
     browser_play_button_rect.x = browser_area_rect.x;
@@ -523,6 +533,20 @@ void resize_gui_browser(void)
 
     browser_play_button_with_preview_rect = browser_play_button_rect;
     browser_play_button_with_preview_rect.width -= browser_preview_rect.width + (2 * PANEL_INNER_MARGIN);
+
+    if (options->allow_edit_mode) {
+        browser_edit_button_rect              = browser_play_button_rect;
+        browser_edit_button_with_preview_rect = browser_play_button_with_preview_rect;
+
+        browser_edit_button_rect.width = browser_edit_button_text_size.x + (2 * PANEL_INNER_MARGIN);
+        browser_edit_button_with_preview_rect.width = browser_edit_button_rect.width;
+
+        browser_play_button_rect.width -= browser_edit_button_rect.width + PANEL_INNER_MARGIN;
+        browser_play_button_with_preview_rect.width -= browser_edit_button_with_preview_rect.width + PANEL_INNER_MARGIN;
+
+        browser_edit_button_rect.x              += browser_play_button_rect.width + PANEL_INNER_MARGIN;
+        browser_edit_button_with_preview_rect.x += browser_play_button_with_preview_rect.width + PANEL_INNER_MARGIN;
+    }
 
     area_bottom -= browser_play_button_rect.height;
     area_bottom -= 2 * PANEL_INNER_MARGIN;
@@ -631,7 +655,7 @@ int draw_gui_browser_list(gui_list_vars_t *list)
     return list->active;
 }
 
-int draw_gui_browser_big_button(gui_list_vars_t *list, const char *button_text)
+int draw_gui_browser_big_button(gui_list_vars_t *list, const char *button_text, bool edit)
 {
     int rv = -1;
 
@@ -647,6 +671,13 @@ int draw_gui_browser_big_button(gui_list_vars_t *list, const char *button_text)
         browse_preview_level
         ? list->btn_rect_preview
         : list->btn_rect;
+
+    if (edit) {
+        btn_rect = browse_preview_level
+            ? list->edit_btn_rect_preview
+            : list->edit_btn_rect;
+
+    }
 
     if (GuiButton(*btn_rect, button_text)) {
         if (list->active >= 0 && list->active < list->count) {
@@ -666,7 +697,7 @@ void draw_gui_browser_classics(void)
 {
     draw_gui_browser_list(&classics);
 
-    int selected = draw_gui_browser_big_button(&classics, browser_open_button_text);
+    int selected = draw_gui_browser_big_button(&classics, browser_open_button_text, false);
 
     if (selected > -1) {
         open_classics_game_pack(selected + 1);
@@ -726,18 +757,27 @@ void draw_gui_browser_local_level_file(void)
         break;
     }
 
-    int selected = draw_gui_browser_big_button(&local_files, button_text);
+    int selected = draw_gui_browser_big_button(&local_files, button_text, false);
+
+    int edit_selected = -1;
+    if  (options->allow_edit_mode) {
+        edit_selected = draw_gui_browser_big_button(&local_files, browser_edit_button_text, true);
+    }
 
     if (browse_preview_level) {
         if (draw_level_preview(browse_preview_level, browser_preview_rect)) {
-            open_entry(entry);
+            open_entry(entry, false);
             return;
         }
     }
 
-    if (selected > -1) {
+    if (edit_selected > -1) {
         if (entry) {
-            open_entry(entry);
+            open_entry(entry, true);
+        }
+    } else if (selected > -1) {
+        if (entry) {
+            open_entry(entry, false);
         }
     }
 }

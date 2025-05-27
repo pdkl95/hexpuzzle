@@ -30,6 +30,7 @@
 
 #define OPTIONS_DEFAULT_VERBOSE false
 #define OPTIONS_DEFAULT_WAIT_EVENTS false
+#define OPTIONZ_DEFAULT_ALLOW_EDIT_MODE false
 #define OPTIONS_DEFAULT_ANIMATE_BG  true
 #define OPTIONS_DEFAULT_ANIMATE_WIN true
 #define OPTIONS_DEFAULT_USE_PHYSICS true
@@ -89,6 +90,8 @@ struct options {
     color_option_t path_color[PATH_TYPE_COUNT];
 
     bool load_color_opt;
+
+    bool allow_edit_mode;
 
     bool animate_bg;
     bool animate_win;
