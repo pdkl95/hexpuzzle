@@ -285,3 +285,59 @@ int vpopup_message(const char *fmt, va_list ap)
 
     return rv;
 }
+
+int popup_error_message(const char *fmt, ...)
+{
+    va_list ap;
+    int rv = 0;
+
+    va_start(ap, fmt);
+    rv = vpopup_error_message(fmt, ap);
+    va_end(ap);
+
+    return rv;
+}
+
+int vpopup_error_message(const char *fmt, va_list ap)
+{
+    char *message = NULL;
+    char *error_message = NULL;
+
+    int rv = safe_vasprintf(&message, fmt, ap);
+
+    errmsg("%s", message);
+    safe_asprintf(&error_message, "ERROR: %s", message);
+    FREE(message);
+
+    create_popup_msg(error_message);
+
+    return rv;
+}
+
+int popup_bug_message(const char *fmt, ...)
+{
+    va_list ap;
+    int rv = 0;
+
+    va_start(ap, fmt);
+    rv = vpopup_bug_message(fmt, ap);
+    va_end(ap);
+
+    return rv;
+}
+
+int vpopup_bug_message(const char *fmt, va_list ap)
+{
+    char *message = NULL;
+    char *bug_message = NULL;
+
+    int rv = safe_vasprintf(&message, fmt, ap);
+
+    errmsg("POSSIBLE BUG: %s", message);
+    safe_asprintf(&bug_message, "POSSIBLE BUG: %s", message);
+    FREE(message);
+
+    create_popup_msg(bug_message);
+
+    return rv;
+}

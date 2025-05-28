@@ -421,7 +421,7 @@ void draw_gui_graphics_options(void)
     GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, prev_align);
 }
 
-static void pick_color_finished(gui_dialog_t *dialog)
+static void pick_color_finished(gui_dialog_t *dialog, UNUSED void *data)
 {
     color_option_set(dialog->color_opt, dialog->color);
 }
@@ -439,7 +439,7 @@ void draw_gui_color_option(gui_color_option_t *gui_opt, color_option_t *c_opt)
     tooltip(gui_opt->pick_color_button_rect, options_color_edit_tooltip);
 
     if (GuiButton(gui_opt->pick_color_button_rect, gui_opt->pick_color_button_text)) {
-        gui_dialog_pick_color(c_opt, pick_color_finished);
+        gui_dialog_pick_color(c_opt, pick_color_finished, NULL);
     }
 
     bool do_disable = color_eq(c_opt->color, c_opt->default_color);

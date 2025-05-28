@@ -79,12 +79,39 @@ const char *directory_without_end_separator(const char *path)
 
 const char *concat_dir_and_filename(const char *dir, const char *filename)
 {
+    assert_not_null(dir);
+    assert_not_null(filename);
+
     static char buf[PATH_MAX];
     int dirlast = strlen(dir) - 1;
     if (is_dir_separator(dir[dirlast])) {
         snprintf(buf, PATH_MAX, "%s%s", dir, filename);
     } else {
         snprintf(buf, PATH_MAX, "%s/%s", dir, filename);
+    }
+    return buf;
+}
+
+const char *concat_dir_and_filename_and_ext(const char *dir, const char *filename, const char *ext)
+{
+    assert_not_null(dir);
+    assert_not_null(filename);
+    assert_not_null(ext);
+
+    static char buf[PATH_MAX];
+    int dirlast = strlen(dir) - 1;
+    if (ext[0] == '.') {
+        if (is_dir_separator(dir[dirlast])) {
+            snprintf(buf, PATH_MAX, "%s%s%s", dir, filename, ext);
+        } else {
+            snprintf(buf, PATH_MAX, "%s/%s%s", dir, filename, ext);
+        }
+    } else {
+        if (is_dir_separator(dir[dirlast])) {
+            snprintf(buf, PATH_MAX, "%s%s.%s", dir, filename, ext);
+        } else {
+            snprintf(buf, PATH_MAX, "%s/%s.%s", dir, filename, ext);
+        }
     }
     return buf;
 }

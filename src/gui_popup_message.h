@@ -56,6 +56,12 @@ void draw_gui_popup_message(void);
 int popup_message(const char *fmt, ...);
 int vpopup_message(const char *fmt, va_list ap);
 
+int popup_error_message(const char *fmt, ...);
+int vpopup_error_message(const char *fmt, va_list ap);
+
+int popup_bug_message(const char *fmt, ...);
+int vpopup_bug_message(const char *fmt, va_list ap);
+
 extern popup_msg *current_message;
 
 static inline bool gui_popup_message_active(void)

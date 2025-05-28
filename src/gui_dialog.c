@@ -243,7 +243,7 @@ void resize_gui_dialog(void)
 void gui_dialog_finish(void)
 {
     if (current_dialog->callback) {
-        current_dialog->callback(current_dialog);
+        current_dialog->callback(current_dialog, current_dialog->callback_data);
     }
 
     current_dialog = NULL;
@@ -251,12 +251,14 @@ void gui_dialog_finish(void)
 
 void gui_dialog_ok(void)
 {
+    printf("ok\n");
     current_dialog->status = true;
     gui_dialog_finish();
 }
 
 void gui_dialog_cancel(void)
 {
+    printf("cancel\n");
     current_dialog->status = false;
     gui_dialog_finish();
 }
@@ -278,10 +280,12 @@ void draw_gui_dialog(void)
         return;
 
     case UI_RESULT_CANCEL:
+    printf("ui result cancel\n");
         gui_dialog_cancel();
         return;
 
     case UI_RESULT_OK:
+    printf("ui result okn");
         gui_dialog_ok();
         return;
     }
@@ -293,12 +297,10 @@ void draw_gui_dialog(void)
 
     switch (current_dialog->type) {
     case GUI_DIALOG_STRING:
-        if (GuiTextBox(dialog_controls_rect,
-                       &(current_dialog->string[0]),
-                       GUI_DIALOG_STRING_MAX_LENGTH,
-                       true)) {
-            gui_dialog_ok();
-        }
+        GuiTextBox(dialog_controls_rect,
+                   current_dialog->string,
+                   GUI_DIALOG_STRING_MAX_LENGTH,
+                   true);
         break;
 
     case GUI_DIALOG_OPEN_FILE:
@@ -341,7 +343,7 @@ void gui_dialog_clesr(gui_dialog_t *dialog, gui_dialog_type_t type)
     dialog->title = default_dialog_title(dialog);
 }
 
-void gui_dialog_pick_color(struct color_option *c_opt, gui_dialog_finished_cb_t callback)
+void gui_dialog_pick_color(struct color_option *c_opt, gui_dialog_finished_cb_t callback, void *data)
 {
     if (current_dialog) {
         return;
@@ -352,27 +354,25 @@ void gui_dialog_pick_color(struct color_option *c_opt, gui_dialog_finished_cb_t 
     dialog.color = c_opt->color;
     dialog.color_opt = c_opt;
     dialog.callback = callback;
+    dialog.callback_data = data;
     gui_dialog_show(&dialog);
 }
 
-void gui_dialog_ask_for_string(const char *title, const char *question, const char *default_string, gui_dialog_finished_cb_t callback)
+void gui_dialog_ask_for_string(const char *title, const char *question, const char *default_string, gui_dialog_finished_cb_t callback, void *data)
 {
     if (current_dialog) {
         return;
     }
 
     gui_dialog_clesr(&dialog, GUI_DIALOG_STRING);
-    memset(dialog.string, 0, GUI_DIALOG_STRING_MAX_LENGTH);
     if (default_string) {
-        snprintf(dialog.string,
-                 GUI_DIALOG_STRING_MAX_LENGTH,
-                 "%s",
-                 default_string);
+        dialog.default_input = (char *)default_string;
     }
     if (title) {
         dialog.title = title;
     }
     dialog.question = question;
     dialog.callback = callback;
+    dialog.callback_data = data;
     gui_dialog_show(&dialog);
 }

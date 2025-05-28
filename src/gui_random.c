@@ -1157,8 +1157,7 @@ bool parse_random_seed_str(char *seedstr)
     return true;
 }
 
-void ask_for_random_seed_callback(gui_dialog_t *dialog)
-{
+void ask_for_random_seed_callback(gui_dialog_t *dialog, UNUSED void *data){
     if (dialog->status) {
         if (strlen(dialog->string) > 0) {
             parse_random_seed_str(dialog->string);
@@ -1168,7 +1167,7 @@ void ask_for_random_seed_callback(gui_dialog_t *dialog)
 
 bool ask_for_random_seed(void)
 {
-    gui_dialog_ask_for_string("Enter RNG seed (number or string)", NULL, NULL, ask_for_random_seed_callback);
+    gui_dialog_ask_for_string("Enter RNG seed (number or string)", NULL, NULL, ask_for_random_seed_callback, NULL);
     return true;
 }
 

@@ -244,7 +244,7 @@ void disable_automatic_events(void)
 }
 
 #if defined(PLATFORM_DESKTOP)
-static void name_edit_dialog_finished(gui_dialog_t *dialog)
+static void name_edit_dialog_finished(gui_dialog_t *dialog, UNUSED void *data)
 {
     if (dialog->status) {
         /* accept edit / ok */
@@ -262,7 +262,7 @@ static void name_edit_dialog_finished(gui_dialog_t *dialog)
     }
 }
 
-static void ask_save_dialog_finished(gui_dialog_t *dialog)
+static void ask_save_dialog_finished(gui_dialog_t *dialog, UNUSED void *data)
 {
     if (dialog->status) {
         /* yes */
@@ -311,7 +311,7 @@ static void ask_save_dialog_finished(gui_dialog_t *dialog)
     }
 }
 
-static void open_file_dialog_finished(gui_dialog_t *dialog)
+static void open_file_dialog_finished(gui_dialog_t *dialog, UNUSED void *data)
 {
     if (dialog->status) {
         if (options->verbose) {

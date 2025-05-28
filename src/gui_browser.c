@@ -25,6 +25,7 @@
 #include "collection.h"
 #include "raygui_paged_list.h"
 #include "gui_browser.h"
+#include "gui_dialog.h"
 
 extern char *home_dir;
 
@@ -42,6 +43,8 @@ enum gui_list_entry_type {
 typedef enum gui_list_entry_type gui_list_entry_type_t;
 
 struct gui_list_entry {
+    int index;
+
     const char *name;
     const char *path;
 
@@ -174,6 +177,7 @@ const char *browser_tabbar_text[NUM_TABS];
 int browser_active_tab = 0;
 
 level_t *browse_preview_level = NULL;
+bool defer_setup_browse_dir = false;
 
 const char *entry_type_str(gui_list_entry_type_t type)
 {
@@ -237,6 +241,7 @@ static void prepare_gui_list_names(gui_list_vars_t *list)
         gui_list_entry_t *entry = &(list->entries[i]);
         const char *icon_name = GuiIconText(entry->icon, entry->name);
         entry->icon_name = strdup(icon_name);
+        entry->index = i;
     }
 
     qsort(list->entries, list->count, sizeof(gui_list_entry_t), compare_entries);
@@ -365,7 +370,10 @@ void change_gui_browser_path(const char *dir)
     SAFEFREE(browse_path);
 
     browse_path = strdup(dir);
-    setup_browse_dir();
+
+    if (!defer_setup_browse_dir) {
+        setup_browse_dir();
+    }
 }
 
 void change_gui_browser_path_up(void)
@@ -440,20 +448,124 @@ void disable_preview(void)
     browse_preview_level = NULL;;
 }
 
-void gui_browser_new(void)
+gui_list_entry_t *find_entry_by_filename(gui_list_vars_t *list, const char *filename)
+{
+    for (int i=0; i<list->count; i++) {
+        gui_list_entry_t *entry = &(list->entries[i]);
+        if (0 == strcmp(entry->name, filename)) {
+            return entry;
+        }
+    }
+
+    return NULL;
+}
+
+void select_entry_by_filename(gui_list_vars_t *list, const char *filename)
+{
+    gui_list_entry_t *entry = find_entry_by_filename(list, filename);
+    if (entry) {
+        list->active = entry->index;
+    } else {
+        list->active = -1;
+    }
+}
+
+void gui_browser_new(UNUSED gui_list_entry_t *entry)
 {
     infomsg("new");
 }
 
-void gui_browser_rename(void)
+void gui_browser_rename_string_finished_cb(struct gui_dialog *dialog, void *data)
 {
-    infomsg("rename");
+    if (!dialog->status) {
+        return;
+    }
+
+    gui_list_entry_t *entry = (gui_list_entry_t *)data;
+
+    char *oldname = strdup(concat_dir_and_filename(
+                               browse_path,
+                               GetFileName(entry->path)));
+
+    if (!FileExists(oldname)) {
+        popup_bug_message("File \"%s\" does not exist", oldname);
+        goto rename_string_finished_cleanup_old_only;
+    }
+
+    if (strlen(dialog->string) < 1) {
+        warnmsg("Cannot rename to a zero-length filename");
+        goto rename_string_finished_cleanup_old_only;
+    }
+
+    char *newname = strdup(concat_dir_and_filename_and_ext(
+                               browse_path,
+                               dialog->string,
+                               GetFileExtension(oldname)));
+
+    if (0 == strcmp(oldname, newname)) {
+        if (options->verbose) {
+            warnmsg("Skipping rename - old and new names are the same");
+        }
+        goto rename_string_finished_cleanup;
+    }
+
+    if (FileExists(newname)) {
+        popup_error_message("Cannot rename %s to %s: would clobber existing file",
+                            entry->name, dialog->string);
+        goto rename_string_finished_cleanup;
+    }
+
+    pstr(oldname);
+    pstr(newname);
+
+    if (-1 == rename(oldname, newname)) {
+        popup_error_message("Rename error: %d", strerror(errno));
+        setup_browse_dir();
+        goto rename_string_finished_cleanup;
+    }
+
+    popup_message("Renamed \"%s\" to \"%s\"",
+                  entry->name, dialog->string);
+
+    setup_browse_dir();
+    select_entry_by_filename(&local_files, GetFileName(newname));
+
+  rename_string_finished_cleanup:
+    FREE(newname);
+  rename_string_finished_cleanup_old_only:
+    FREE(oldname);
+}
+
+void gui_browser_rename(gui_list_entry_t *entry)
+{
+    switch (entry->type) {
+        //case ENTRY_TYPE_COLLECTION_DIR:
+        /* fall through */
+    case ENTRY_TYPE_LEVEL_FILE:
+        /* fall through */
+    case ENTRY_TYPE_COLLECTION_FILE:
+        if (FileExists(entry->path)) {
+            const char *filename = GetFileNameWithoutExt(entry->path);
+            gui_dialog_ask_for_string("Rename",
+                                      NULL,
+                                      filename,
+                                      gui_browser_rename_string_finished_cb,
+                                      entry);
+        }
+        break;
+
+    default:
+        /* do nothing */
+        break;
+    }
 }
 
 #endif
 
 void init_gui_browser(void)
 {
+    defer_setup_browse_dir = true;
+
     browser_tabbar_text[0] = "Classics";
 #if defined(PLATFORM_DESKTOP)
     browser_tabbar_text[1] = "Local Files";
@@ -654,11 +766,8 @@ void resize_gui_browser(void)
     local_files_rename_button_with_preview_rect = local_files_rename_button_rect;
 
     local_files_new_button_with_preview_rect.x -= browser_preview_rect.width + (2 * PANEL_INNER_MARGIN);
-
-    prect(local_files_new_button_rect);
-    prect(local_files_rename_button_rect);
-    prect(local_files_new_button_with_preview_rect);
-    prect(local_files_rename_button_with_preview_rect);
+    local_files_new_button_with_preview_rect.y = browser_preview_rect.y;
+    local_files_rename_button_with_preview_rect.y = browser_preview_rect.y;
 
     area_bottom -= local_files_new_button_rect.height;
     area_bottom -= PANEL_INNER_MARGIN;
@@ -669,7 +778,12 @@ void resize_gui_browser(void)
     local_files_list_rect.height = area_bottom - local_files_list_rect.y;
 
     local_files_list_with_preview_rect = local_files_list_rect;
-    local_files_list_with_preview_rect.height -= browser_preview_rect.height - browser_play_button_rect.height;
+    float list_preview_delta =
+        local_files_list_rect.y
+        + local_files_list_rect.height
+        - browser_preview_rect.y
+        + PANEL_INNER_MARGIN;
+    local_files_list_with_preview_rect.height -= list_preview_delta;
 
     if (main_gui_area_rect.width < 1.0) {
         return;
@@ -761,18 +875,18 @@ void draw_gui_browser_classics(void)
 }
 
 #if defined(PLATFORM_DESKTOP)
-static inline void draw_gui_browser_local_level_file_new_button(void)
+static inline void draw_gui_browser_local_level_file_new_button(gui_list_entry_t *entry)
 {
     Rectangle new_btn_rect = browse_preview_level
         ? local_files_new_button_with_preview_rect
         : local_files_new_button_rect;
 
     if (GuiButton(new_btn_rect, local_files_new_button_text)) {
-        gui_browser_new();
+        gui_browser_new(entry);
     }
 }
 
-static inline void draw_gui_browser_local_level_file_rename_button(void)
+static inline void draw_gui_browser_local_level_file_rename_button(gui_list_entry_t *entry)
 {
     Rectangle rename_btn_rect = browse_preview_level
         ? local_files_rename_button_with_preview_rect
@@ -784,7 +898,7 @@ static inline void draw_gui_browser_local_level_file_rename_button(void)
     }
 
     if (GuiButton(rename_btn_rect, local_files_rename_button_text)) {
-        gui_browser_rename();
+        gui_browser_rename(entry);
     }
 
     if (disable_rename_btn) {
@@ -794,6 +908,11 @@ static inline void draw_gui_browser_local_level_file_rename_button(void)
 
 void draw_gui_browser_local_level_file(void)
 {
+    if (defer_setup_browse_dir) {
+        defer_setup_browse_dir = false;
+        setup_browse_dir();
+    }
+
     GuiLabel(local_files_dir_label_rect, local_files_dir_label_text);
     GuiStatusBar(local_files_dir_rect, browse_path);
 
@@ -828,8 +947,8 @@ void draw_gui_browser_local_level_file(void)
         raygui_paged_list_select_active_page(gui_list);
     }
 
-    draw_gui_browser_local_level_file_new_button();
-    draw_gui_browser_local_level_file_rename_button();
+    draw_gui_browser_local_level_file_new_button(entry);
+    draw_gui_browser_local_level_file_rename_button(entry);
 
     switch (entry->type) {
     case ENTRY_TYPE_DIR:
@@ -891,4 +1010,3 @@ void draw_gui_browser(void)
 #endif
     }
 }
-
