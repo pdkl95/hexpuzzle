@@ -493,6 +493,22 @@ void play_random_game(void)
     play_gui_random_level();
 }
 
+level_t *create_blank_level(void)
+{
+    level_t *level = create_level(NULL);
+    level_reset(level);
+    level_set_radius(level, options->create_level_radius);
+    return level;
+}
+
+void edit_new_blank_level(void)
+{
+    level_t *blank = create_blank_level();
+    level_edit(blank);
+}
+
+
+
 const char *default_open_file_path(void)
 {
     static char path[MAX_FILEPATH_LENGTH];

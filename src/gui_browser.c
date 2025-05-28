@@ -32,6 +32,7 @@ extern char *home_dir;
 void open_game_file(const char *path, bool edit);
 void open_classics_game_pack(int n);
 bool draw_level_preview(level_t *level, Rectangle bounds);
+void edit_new_blank_level(void);
 
 enum gui_list_entry_type {
     ENTRY_TYPE_NULL = 0,
@@ -472,7 +473,7 @@ void select_entry_by_filename(gui_list_vars_t *list, const char *filename)
 
 void gui_browser_new(UNUSED gui_list_entry_t *entry)
 {
-    infomsg("new");
+    edit_new_blank_level();
 }
 
 void gui_browser_rename_string_finished_cb(struct gui_dialog *dialog, void *data)
