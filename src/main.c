@@ -677,6 +677,7 @@ set_uniform_resolution(
     float resolution[2] = { (float)window_size.x, (float)window_size.y };
     SetShaderValue(win_border_shader, win_border_shader_loc.resolution, resolution, SHADER_UNIFORM_VEC2);
     SetShaderValue(postprocessing_shader, postprocessing_shader_loc.resolution, resolution, SHADER_UNIFORM_VEC2);
+    SetShaderValue(background_shader, background_shader_loc.resolution, resolution, SHADER_UNIFORM_VEC2);
 }
 
 void do_resize(void)
@@ -2400,6 +2401,7 @@ render_frame(
     SetShaderValue(postprocessing_shader, postprocessing_shader_loc.effect_amount2, &(postprocessing_effect_amount2[0]), SHADER_UNIFORM_VEC4);
 
     SetShaderValue(postprocessing_shader, postprocessing_shader_loc.time, &current_time, SHADER_UNIFORM_FLOAT);
+    SetShaderValue(background_shader, background_shader_loc.time, &current_time, SHADER_UNIFORM_FLOAT);
 
     bool do_postprocessing_this_frame = do_postprocessing && options->use_postprocessing;
 
@@ -2416,7 +2418,11 @@ render_frame(
             draw_feedback_bg();
         }
 
-        background_draw(background);
+        BeginShaderMode(background_shader);
+        {
+            background_draw(background);
+        }
+        EndShaderMode();
 
         switch (game_mode) {
         case GAME_MODE_WIN_LEVEL:

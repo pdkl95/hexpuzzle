@@ -1639,6 +1639,8 @@ FONTS = \
 	fonts/ubuntu/ubuntu_medium.ttf
 
 SHADERS = \
+	shaders/background.vert.glsl \
+	shaders/background.frag.glsl \
 	shaders/postprocessing.frag.glsl \
 	shaders/win_border.frag.glsl
 

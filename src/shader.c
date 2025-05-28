@@ -33,6 +33,11 @@ Shader postprocessing_shader;
 postprocessing_shader_loc_t postprocessing_shader_loc;
 char *postprocessing_shader_src;
 
+Shader background_shader;
+background_shader_loc_t background_shader_loc;
+char *background_shader_vert_src;
+char *background_shader_frag_src;
+
 void load_shaders(void)
 {
     win_border_shader_src = strdup_xxd_include(
@@ -66,13 +71,32 @@ void load_shaders(void)
     postprocessing_shader_loc.time           = GetShaderLocation(postprocessing_shader, "time");
     postprocessing_shader_loc.effect_amount1 = GetShaderLocation(postprocessing_shader, "effect_amount1");
     postprocessing_shader_loc.effect_amount2 = GetShaderLocation(postprocessing_shader, "effect_amount2");
+
+    background_shader_vert_src = strdup_xxd_include(
+        shaders_background_vert_glsl,
+        shaders_background_vert_glsl_len);
+
+    background_shader_frag_src = strdup_xxd_include(
+        shaders_background_frag_glsl,
+        shaders_background_frag_glsl_len);
+
+    background_shader = LoadShaderFromMemory(background_shader_vert_src, background_shader_frag_src);
+    background_shader_loc.resolution     = GetShaderLocation(background_shader, "resolution");
+    background_shader_loc.time           = GetShaderLocation(background_shader, "time");
+    background_shader_loc.warp           = GetShaderLocation(background_shader, "warp");
+    background_shader_loc.effect_amount1 = GetShaderLocation(background_shader, "effect_amount1");
+    background_shader_loc.effect_amount2 = GetShaderLocation(background_shader, "effect_amount2");
 }
 
 void unload_shaders(void)
 {
     UnloadShader(win_border_shader);
-    free(win_border_shader_src);
+    FREE(win_border_shader_src);
 
     UnloadShader(postprocessing_shader);
-    free(postprocessing_shader_src);
+    FREE(postprocessing_shader_src);
+
+    UnloadShader(background_shader);
+    FREE(background_shader_vert_src);
+    FREE(background_shader_frag_src);
 }

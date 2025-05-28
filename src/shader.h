@@ -41,6 +41,15 @@ typedef struct postprocessing_shader_loc {
 } postprocessing_shader_loc_t;
 extern postprocessing_shader_loc_t postprocessing_shader_loc;
 
+extern Shader background_shader;
+typedef struct background_shader_loc {
+    int resolution;
+    int time;
+    int warp;
+    int effect_amount1;
+    int effect_amount2;
+} background_shader_loc_t;
+extern background_shader_loc_t background_shader_loc;
 
 void load_shaders(void);
 void unload_shaders(void);

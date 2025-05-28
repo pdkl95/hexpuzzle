@@ -26,6 +26,7 @@
 #include "level.h"
 #include "win_anim.h"
 #include "background.h"
+#include "shader.h"
 
 //#define DEBUG_DRAW_LABELS
 
@@ -136,12 +137,42 @@ void background_draw(background_t *bg)
 
     static float fade = 0.0f;
     float fade_target = 0.0f;
-    if (current_level && current_level->finished) {
+
+    static float bgwarp = 0.0f;
+    float bgwarp_target = 0.0f;
+
+    bool current_finished_level = current_level && current_level->finished;
+
+    if (current_finished_level) {
         fade_target = 0.5 * (current_level->win_anim->fade[2] + current_level->win_anim->fade[3]);
     }
     fade = smooth_change(fade,
                          fade_target,
                          0.02f);
+
+    if (current_finished_level) {
+        bgwarp = fade;
+
+        switch (current_level->win_anim->mode) {
+        case WIN_ANIM_MODE_WAVES:
+            bgwarp_target = 0.0f;
+            break;
+
+#ifdef USE_PHYSICS
+        case WIN_ANIM_MODE_PHYSICS_FALL:
+            bgwarp_target = 0.0f;
+            break;
+#endif
+        default:
+            break;
+        }
+    }
+
+    bgwarp = smooth_change(bgwarp,
+                           bgwarp_target,
+                           0.02f);
+
+    SetShaderValue(background_shader, background_shader_loc.warp, &bgwarp, SHADER_UNIFORM_FLOAT);
 
 #define cart_bg_normal_speed   1.0
 #define cart_bg_finished_speed 3.5
