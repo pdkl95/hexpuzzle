@@ -4212,7 +4212,7 @@ src/data_classics_levels.h: $(CLASSICS_LEVELS)
 	    $(XXD) -i "$${file}" >> $@ ; \
 	done
 
-src/data_fonts.h: $(FONTS)
+src/data_fonts.h: $(FONTS) | util/compile_to_c_src
 	$(AM_V_at)rm -f $@
 	$(AM_V_GEN)cd $(top_srcdir) && for file in $^ ; do \
 	    $(builddir)/util/compile_to_c_src -c "$${file}" "$${file}".c ; \

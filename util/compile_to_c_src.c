@@ -126,13 +126,15 @@ int main(int argc, char **argv)
     char *infile  = argv[optind];
     char *outfile = argv[optind + 1];
 
-    printf("Compiling \"%s\" into \"%s\"\n",
-           infile, outfile);
-
     int rv = EXIT_FAILURE;
 
     if (verbose) {
+        printf("Compiling \"%s\" into \"%s\"\n",
+               infile, outfile);
+
         SetTraceLogLevel(LOG_INFO);
+    } else {
+        SetTraceLogLevel(LOG_WARNING);
     }
 
     if (!FileExists(infile)) {
