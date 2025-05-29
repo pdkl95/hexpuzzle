@@ -899,17 +899,26 @@ handle_events(
     }
 
     if (!demo_mode) {
-        if (IsKeyPressed(KEY_F5)) {
-            if (current_level) {
-                create_or_use_solver(current_level);
-                solver_toggle_solve(current_level->solver);
+        if (options->cheat_solver) {
+            if (IsKeyPressed(KEY_F5)) {
+                if (current_level) {
+                    create_or_use_solver(current_level);
+                    solver_toggle_solve(current_level->solver);
+                }
             }
-        }
 
-        if (IsKeyPressed(KEY_F6)) {
-            if (current_level) {
-                create_or_use_solver(current_level);
-                solver_stop(current_level->solver);
+            if (IsKeyPressed(KEY_F6)) {
+                if (current_level) {
+                    create_or_use_solver(current_level);
+                    solver_stop(current_level->solver);
+                }
+            }
+
+            if (IsKeyPressed(KEY_F7)) {
+                if (current_level) {
+                    create_or_use_solver(current_level);
+                    solver_toggle_undo(current_level->solver);
+                }
             }
         }
 
@@ -922,13 +931,6 @@ handle_events(
             debug_id = (debug_id + 1) % LEVEL_MAXTILES;
         }
 #endif
-
-        if (IsKeyPressed(KEY_F7)) {
-            if (current_level) {
-                create_or_use_solver(current_level);
-                solver_toggle_undo(current_level->solver);
-            }
-        }
     }
 
 #if defined(PLATFORM_DESKTOP)

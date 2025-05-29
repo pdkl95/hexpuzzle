@@ -144,6 +144,7 @@ struct options {
 
     /* cheat (debug) options */
     bool cheat_autowin;
+    bool cheat_solver;
 
     /* remaining args */
     char **extra_argv;

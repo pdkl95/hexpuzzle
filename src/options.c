@@ -38,7 +38,7 @@
 options_t *options = NULL;
 
 /* command line options */
-static char short_options[] = "Cc:e:EF:H:p:s:wvVW:PR:UL::r::hj";
+static char short_options[] = "Cc:e:EF:H:p:s:SwvVW:PR:UL::r::hj";
 
 static struct option long_options[] = {
     {  "create-random-level",       no_argument, 0, 'L' },
@@ -58,6 +58,7 @@ static struct option long_options[] = {
     {               "random", optional_argument, 0, 'r' },
     {                 "edit", required_argument, 0, 'e' },
     {        "cheat-autowin",       no_argument, 0, 'A' },
+    {         "cheat-solver",       no_argument, 0, 'S' },
     {                "force",       no_argument, 0, '!' },
     {                 "pack",       no_argument, 0, 'P' },
     {               "unpack",       no_argument, 0, 'U' },
@@ -84,6 +85,7 @@ static struct option long_options[] = {
     {              "verbose",       no_argument, 0, 'v' },
     {              "version",       no_argument, 0, 'V' },
     {                 "help",       no_argument, 0, 'h' },
+    {           "help-cheat",       no_argument, 0, '*' },
     {                      0,                 0, 0,  0  }
 };
 
@@ -164,6 +166,15 @@ static char help_text[] =
     "      --level-max-hidden=NUMBER Maximum number of hidden tiles. (default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MAX_HIDDEN) ")\n"
     ;
 
+static char help_cheat_text[] =
+    "CHEAT OPTIONS\n"
+    "      --cheat-autowin         Skip solving the puzzle; jump straight to the\n"
+    "                                solved state and win animation.\n"
+    "  -S, --cheat-solver          Enable the auto-solver hotkeys:\n"
+    "                                <F5> Toggle running the solver\n"
+    "                                <F6> Stop the solver\n"
+    "                                <F7> Reverse (UNDO) the direction of the solver\n"
+    ;
 
 void
 show_usage(
@@ -179,7 +190,16 @@ show_help(
     char *usage_args
 ) {
     show_usage(usage_args);
-    printf("%s", help_text);
+    printf("%s\n", help_text);
+}
+
+void
+show_help_cheat(
+    char *help_text,
+    char *usage_args
+) {
+    show_help(help_text, usage_args);
+    printf("%s\n", help_cheat_text);
 }
 
 void
@@ -420,6 +440,7 @@ options_set_defaults(
     options->rng_seed_str = NULL;
 
     options->cheat_autowin = false;
+    options->cheat_solver  = false;
 
     if (options->nvdata_dir) {
         options->nvdata_dir = NULL;
@@ -488,6 +509,11 @@ options_parse_args(
         case 'A':
             options->cheat_autowin = true;
             warnmsg("CHEAT ENABLED: auto-win levels");
+            break;
+
+        case 'S':
+            options->cheat_solver = true;
+            warnmsg("CHEAT ENABLED: auto-solver tool is available");
             break;
 
         case 'L':
@@ -693,6 +719,11 @@ options_parse_args(
 
         case 'h':
             show_help(help_text, usage_args);
+            exit(0);
+            break;
+
+        case '*':
+            show_help_cheat(help_text, usage_args);
             exit(0);
             break;
 
