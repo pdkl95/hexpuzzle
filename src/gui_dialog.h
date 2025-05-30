@@ -61,6 +61,7 @@ void init_gui_dialog(void);
 void cleanup_gui_dialog(void);
 void resize_gui_dialog(void);
 void draw_gui_dialog(void);
+void draw_gui_modal_popup_background(void);
 
 void gui_dialog_show(gui_dialog_t *dialog);
 

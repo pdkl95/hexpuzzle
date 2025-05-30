@@ -55,6 +55,7 @@
 #include "gui_random.h"
 #include "gui_dialog.h"
 #include "gui_popup_message.h"
+#include "gui_help.h"
 #include "background.h"
 
 #include "nvdata.h"
@@ -726,6 +727,7 @@ void do_resize(void)
     gui_setup();
     resize_gui_popup_message();
     resize_gui_dialog();
+    resize_gui_help();
     resize_gui_title();
     resize_gui_browser();
     resize_gui_collection();
@@ -894,8 +896,12 @@ handle_events(
         show_fps = !show_fps;
     }
 
+    if (IsKeyPressed(KEY_B)) {
+        options->animate_bg = !options->animate_bg;
+    }
+
     if (IsKeyPressed(KEY_P)) {
-        do_postprocessing = !do_postprocessing;
+        options->use_postprocessing = !options->use_postprocessing;
     }
 
     if (!demo_mode) {
@@ -931,6 +937,10 @@ handle_events(
             debug_id = (debug_id + 1) % LEVEL_MAXTILES;
         }
 #endif
+
+        if (IsKeyPressed(KEY_F1) || IsKeyPressed(KEY_H)) {
+            show_help_box = !show_help_box;
+        }
     }
 
 #if defined(PLATFORM_DESKTOP)
@@ -962,12 +972,19 @@ handle_events(
     }
 
     if (modal_ui_active) {
-        if (IsKeyPressed(KEY_ESCAPE)) {
-            modal_ui_result = UI_RESULT_CANCEL;
-        } else if (IsKeyPressed(KEY_ENTER)) {
-            modal_ui_result = UI_RESULT_OK;
+        if (show_help_box) {
+            if (IsKeyPressed(KEY_ESCAPE) ||
+                IsKeyPressed(KEY_ENTER)) {
+                show_help_box = false;
+            }
         } else {
-            modal_ui_result = UI_RESULT_PENDING;;
+            if (IsKeyPressed(KEY_ESCAPE)) {
+                modal_ui_result = UI_RESULT_CANCEL;
+            } else if (IsKeyPressed(KEY_ENTER)) {
+                modal_ui_result = UI_RESULT_OK;
+            } else {
+                modal_ui_result = UI_RESULT_PENDING;;
+            }
         }
 
         return true;
@@ -1010,11 +1027,11 @@ handle_events(
         }
     }
 
-    if (IsKeyPressed(KEY_U)) {
+    if (IsKeyPressed(KEY_U) || is_key_pressed_with_control_or_super(KEY_Z)) {
         undo();
     }
 
-    if (IsKeyPressed(KEY_R)) {
+    if (IsKeyPressed(KEY_R) || is_key_pressed_with_control_or_super(KEY_Y)) {
         redo();
     }
 
@@ -2388,6 +2405,7 @@ static void draw_gui(void)
     }
 
     draw_gui_widgets();
+    draw_gui_help();
     draw_gui_dialog();
     draw_gui_tooltip();
     draw_gui_popup_message();
@@ -2534,7 +2552,7 @@ static void early_frame_setup(void)
         SetShaderValue(win_border_shader, win_border_shader_loc.time, &current_time, SHADER_UNIFORM_FLOAT);
     }
 
-    if (gui_dialog_active()) {
+    if (gui_dialog_active() || show_help_box) {
         modal_ui_active = true;
         GuiLock();
     } else {
@@ -2733,6 +2751,7 @@ static void game_init(void)
     init_gui_options();
     init_nvdata();
     init_gui_browser();
+    init_gui_help();
     init_gui_collection();
     init_gui_random();
     init_gui_title();
@@ -2801,6 +2820,7 @@ static void game_cleanup(void)
     cleanup_gui_random();
     cleanup_gui_collection();
     cleanup_gui_browser();
+    cleanup_gui_help();
     cleanup_gui_title();
     cleanup_nvdata();
     cleanup_gui_options();

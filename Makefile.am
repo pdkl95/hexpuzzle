@@ -142,6 +142,7 @@ hexpuzzle_SOURCES =                                          \
 	src/gui_browser.h          src/gui_browser.c         \
 	src/gui_collection.h       src/gui_collection.c      \
 	src/gui_dialog.h           src/gui_dialog.c          \
+	src/gui_help.h             src/gui_help.c            \
 	src/gui_options.h          src/gui_options.c         \
 	src/gui_popup_message.h    src/gui_popup_message.c   \
 	src/gui_random.h           src/gui_random.c          \

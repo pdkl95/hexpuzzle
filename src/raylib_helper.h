@@ -79,6 +79,47 @@ static inline bool is_any_shift_down(void)
     return IsKeyDown(KEY_LEFT_SHIFT) || IsKeyDown(KEY_RIGHT_SHIFT);
 }
 
+static inline bool is_any_control_down(void)
+{
+    return IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL);
+}
+
+static inline bool is_any_alt_down(void)
+{
+    return IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_RIGHT_ALT);
+}
+
+static inline bool is_any_super_down(void)
+{
+    return IsKeyDown(KEY_LEFT_SUPER) || IsKeyDown(KEY_RIGHT_SUPER);
+}
+
+static inline bool is_key_pressed_with_shift(int key)
+{
+    return IsKeyPressed(key) && is_any_shift_down();
+}
+
+static inline bool is_key_pressed_with_control(int key)
+{
+    return IsKeyPressed(key) && is_any_control_down();
+}
+
+static inline bool is_key_pressed_with_alt(int key)
+{
+    return IsKeyPressed(key) && is_any_alt_down();
+}
+
+static inline bool is_key_pressed_with_super(int key)
+{
+    return IsKeyPressed(key) && is_any_super_down();
+}
+
+static inline bool is_key_pressed_with_control_or_super(int key)
+{
+    return IsKeyPressed(key) &&
+        (is_any_control_down() || is_any_super_down());
+}
+
 /*** Constants ***/
 
 #define VEC2_ZERO    ((Vector2){ 0.0f, 0.0f })

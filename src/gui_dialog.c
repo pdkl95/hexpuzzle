@@ -27,6 +27,7 @@ gui_dialog_t *current_dialog;
 
 Vector2 winsize = {0};
 
+Rectangle dialog_full_window_rect;
 Rectangle dialog_panel_rect;
 Rectangle dialog_question_label_rect;
 Rectangle dialog_ok_button_rect;
@@ -235,6 +236,11 @@ void prepare_gui_dialog(void)
 
 void resize_gui_dialog(void)
 {
+    dialog_full_window_rect.x      = 0.0f;
+    dialog_full_window_rect.y      = 0.0f;
+    dialog_full_window_rect.width  = window_sizef.x;
+    dialog_full_window_rect.height = window_sizef.y;
+
     if (current_dialog) {
         prepare_gui_dialog();
     }
@@ -261,6 +267,11 @@ void gui_dialog_cancel(void)
     printf("cancel\n");
     current_dialog->status = false;
     gui_dialog_finish();
+}
+
+void draw_gui_modal_popup_background(void)
+{
+    DrawRectangleRec(dialog_full_window_rect, modal_dialog_shading_color);
 }
 
 void draw_gui_dialog(void)
@@ -290,7 +301,7 @@ void draw_gui_dialog(void)
         return;
     }
 
-    DrawRectangleV(VEC2_ZERO, winsize, modal_dialog_shading_color);
+    draw_gui_modal_popup_background();
 
     GuiPanel(dialog_panel_rect, current_dialog->title);
     GuiLabel(dialog_question_label_rect, current_dialog->question);

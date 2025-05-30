@@ -254,6 +254,13 @@ void save_nvdata_finished_levels(void)
         return;
     }
 
+    if (!have_nvdata_finished_levels_data()) {
+        if (options->verbose) {
+            infomsg("Skipping saving finished level data (nothing to save)");
+        }
+        return;
+    }
+
     FILE *f = fopen(nvdata_state_finished_levels_file_path, "w");
     if (NULL == f) {
         errmsg("Couldn't open finished level file \"%s\": %s",
