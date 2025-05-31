@@ -174,6 +174,7 @@ AC_PROG_RANLIB
 
 AC_PATH_PROG(XXD, xxd)
 
+AC_PATH_PROG(STRIP, strip, :)
 
 dnl ========================================
 dnl ===  OS Detection  ===
@@ -352,6 +353,8 @@ AC_MSG_NOTICE([SYSTEM_RAYLIB = ${enable_system_raylib}])
 AC_MSG_NOTICE([WINDOW_RESIZE = ${enable_window_resize}])
 AC_MSG_NOTICE([])
 AC_MSG_NOTICE([      AR = ${AR}])
+AC_MSG_NOTICE([   STRIP = ${STRIP}])
+AC_MSG_NOTICE([     XXD = ${XXD}])
 AC_MSG_NOTICE([     CPP = ${CPP}])
 AC_MSG_NOTICE([      CC = ${CC}])
 AC_MSG_NOTICE([  CFLAGS = ${APP_CFLAGS} ${ALL_PKG_CFLAGS}])
