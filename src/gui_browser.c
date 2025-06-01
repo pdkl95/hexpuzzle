@@ -814,7 +814,6 @@ void resize_gui_browser(void)
     local_files_new_button_rect.x -= raygui_paged_list_sidebar_width;
     local_files_home_button_rect.x -= raygui_paged_list_sidebar_width;
     local_files_local_saved_levels_button_rect.x -= raygui_paged_list_sidebar_width;
-    pfloat(raygui_paged_list_sidebar_width);
 }
 
 static inline raygui_paged_list_t *get_current_gui_list(gui_list_vars_t *list)

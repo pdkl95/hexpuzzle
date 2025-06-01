@@ -176,6 +176,10 @@ static inline void disable_postprocessing(void)
     do_postprocessing = false;
 }
 
+typedef char unique_id_t[UNIQUE_ID_LENGTH];
+#define set_unique_id(dst, src) memcpy((dst), (src), UNIQUE_ID_LENGTH)
+#define gen_unique_id(dst) set_unique_id(dst, generate_unique_id())
+
 typedef char IconStr[ICON_STR_MAXLEN];
 
 enum ui_result {

@@ -23,6 +23,7 @@
 #include "raylib_helper.h"
 
 #include <libgen.h>
+#include <time.h>
 
 #include "cJSON/cJSON.h"
 #include "raygui/raygui.h"
@@ -271,6 +272,8 @@ static level_t *init_level(level_t *level)
     assert_not_null(level);
 
     memset(level, 0, sizeof(level_t));
+
+    gen_unique_id(level->unique_id);
 
     level->center = LEVEL_CENTER_POSITION;
 
@@ -1047,6 +1050,13 @@ bool level_from_json(level_t *level, cJSON *json)
         return false;
     }
 
+    cJSON *unique_id_json = cJSON_GetObjectItem(json, "unique_id");
+    if (!cJSON_IsString(unique_id_json)) {
+        errmsg("Error parsing level JSON: 'unique_id' is not a String");
+        return false;
+    }
+    snprintf(level->unique_id, UNIQUE_ID_LENGTH, "%s", unique_id_json->valuestring);
+
     cJSON *name_json = cJSON_GetObjectItem(json, "name");
     if (!cJSON_IsString(name_json)) {
         errmsg("Error parsing level JSON: 'name' is not a String");
@@ -1089,6 +1099,10 @@ cJSON *level_to_json(level_t *level)
     cJSON *json = cJSON_CreateObject();
 
     if (cJSON_AddNumberToObject(json, "version", LEVEL_JSON_VERSION) == NULL) {
+        goto json_err;
+    }
+
+    if (cJSON_AddStringToObject(json, "unique_id", level->unique_id) == NULL) {
         goto json_err;
     }
 
@@ -1813,6 +1827,8 @@ void level_win(level_t *level)
     }
 
     level->finished = true;
+    level->win_time = time(NULL);
+
     if (game_mode == GAME_MODE_PLAY_LEVEL) {
         set_game_mode(GAME_MODE_WIN_LEVEL);
     }

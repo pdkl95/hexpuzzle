@@ -158,7 +158,7 @@ static uint32_t rand32(void)
     return ((rand() & 0x3) << 30) | ((rand() & 0x7fff) << 15) | (rand() & 0x7fff);
 }
 
-const char *gen_unique_id(void)
+const char *generate_unique_id(void)
 {
     static char buf[37];
     snprintf(buf, 37, "%08x-%04x-%04x-%04x-%04x%08x",

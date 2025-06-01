@@ -27,7 +27,8 @@
 struct level;
 
 typedef struct finished_level {
-    char id[ID_MAXLEN];
+    char id[UNIQUE_ID_LENGTH];
+    time_t win_time;
 
     char rb_color;
     struct finished_level *left;
@@ -45,7 +46,7 @@ typedef struct finished_levels finished_levels_t;
 
 void init_nvdata_finished(void);
 void cleanup_nvdata_finished(void);
-void nvdata_mark_id_finished(char *id);
+void nvdata_mark_id_finished(char *id, time_t win_time);
 void nvdata_mark_finished(struct level *level);
 void nvdata_unmark_finished(struct level *level);
 bool nvdata_is_finished(struct level *level);

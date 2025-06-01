@@ -73,6 +73,8 @@
 // ['#', '1', '2', '3', '#', '\0']
 #define ICON_STR_MAXLEN 6
 
+#define UNIQUE_ID_LENGTH 37
+#define COLLECTION_ID_LENGTH UNIQUE_ID_LENGTH
 #define ID_MAXLEN 255
 
 #define FINISHED_HUE_STEP 4.0

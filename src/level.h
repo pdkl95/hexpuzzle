@@ -65,6 +65,7 @@ struct level_fade {
 typedef struct level_fade level_fade_t;
 
 struct level {
+    unique_id_t unique_id;
     char *id;
     bool have_id;
 
@@ -120,6 +121,8 @@ struct level {
     char *filename;
     char *dirpath;
     bool changed;
+
+    time_t win_time;
 
     IconStr finished_status_icon;
     Color   finished_status_color;

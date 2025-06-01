@@ -20,6 +20,9 @@
  ****************************************************************************/
 
 #include "common.h"
+
+#include <time.h>
+
 #include "options.h"
 #include "level.h"
 #include "collection.h"
@@ -31,39 +34,31 @@ char *nvdata_state_finished_levels_backup_file_path = NULL;
 #define TREE_INDENT_MAXLEN 60
 char indentbuf[TREE_INDENT_MAXLEN];
 
-void _print_finished_level(struct finished_level *node, int indent, char type)
+SGLIB_DEFINE_RBTREE_FUNCTIONS(finished_level, left, right, rb_color, compare_finished_level);
+
+finished_levels_t finished_levels;
+
+void print_finished_levels(void)
 {
-    if (indent >= TREE_INDENT_MAXLEN) {
-        return;
+    struct finished_level *e = NULL;
+    struct sglib_finished_level_iterator it;
+    int count = 0;
+
+    printf("<finished_levels>\n");
+
+    for(e = sglib_finished_level_it_init_inorder(&it, finished_levels.tree);
+        e != NULL;
+        e = sglib_finished_level_it_next(&it)
+    ) {
+        struct tm win_tm;
+        gmtime_r(&e->win_time, &win_tm);
+
+        char win_time_str[256];
+        strftime(win_time_str, sizeof(win_time_str), "%F %T", &win_tm);
+        printf("\t\"%s\",\t\"%s\"\n", e->id, win_time_str);
     }
 
-    int nextindent = indent + 1;
-    indentbuf[indent] = '\0';
-
-    printf("%s<%c> %s\n", indentbuf, type, node->id);
-
-    int i=indent;
-    indentbuf[i] = ' ';
-    i++;
-
-    if (node->left && node->right) {
-        indentbuf[i] = '|';
-        _print_finished_level(node->left, i+1, 'L');
-        indentbuf[i] = ' ';
-        _print_finished_level(node->right, i+1, 'R');
-    } else if (node->left) {
-        indentbuf[i] = ' ';
-        _print_finished_level(node->left, i+1, 'L');
-    } else if (node->right) {
-        indentbuf[i] = ' ';
-        _print_finished_level(node->right, i+1, 'R');
-    } else {
-    }
-}
-
-void print_finished_level(struct finished_level *node)
-{
-    _print_finished_level(node, 0, 'T');
+    printf("</finished_levels>\n");
 }
 
 int compare_finished_level(struct finished_level *a, struct finished_level *b)
@@ -74,10 +69,6 @@ int compare_finished_level(struct finished_level *a, struct finished_level *b)
     int rv = strcmp(a->id, b->id);
     return rv;
 }
-
-SGLIB_DEFINE_RBTREE_FUNCTIONS(finished_level, left, right, rb_color, compare_finished_level);
-
-finished_levels_t finished_levels;
 
 void init_nvdata_finished(void)
 {
@@ -115,13 +106,14 @@ void cleanup_nvdata_finished(void)
     SAFEFREE(nvdata_state_finished_levels_file_path);
 }
 
-void nvdata_mark_id_finished(char *id)
+void nvdata_mark_id_finished(char *id, time_t win_time)
 {
     assert_not_null(id);
 
     struct finished_level *e, *member;
     e = calloc(1, sizeof(struct finished_level));
     snprintf(&e->id, ID_MAXLEN, "%s", id);
+    e->win_time = win_time;
 
     if (options->verbose) {
         infomsg("MARK finished: \"%s\"", e->id);
@@ -134,11 +126,11 @@ void nvdata_mark_finished(struct level *level)
 {
     assert_not_null(level);
 
-    if (!level->have_id) {
+    if (!level->finished) {
         return;
     }
 
-    nvdata_mark_id_finished(level->id);
+    nvdata_mark_id_finished(level->unique_id, level->win_time);
 }
 
 void nvdata_unmark_finished(struct level *level)
@@ -184,8 +176,14 @@ void nvdata_finished_write(FILE *f)
         e != NULL;
         e = sglib_finished_level_it_next(&it)
     ) {
-        fprintf(f, "%s\n", e->id);
+        struct tm win_tm;
+        gmtime_r(&e->win_time, &win_tm);
+
+        char win_time_str[256];
+        strftime(win_time_str, sizeof(win_time_str), "%F %T", &win_tm);
+        fprintf(f, "%s\t%s\n", e->id, win_time_str);
         count++;
+        //printf("WRITE \"%s\t%s\"\n", e->id, win_time_str);
     }
 
     if (options->verbose) {
@@ -215,21 +213,54 @@ void load_nvdata_finished_levels(void)
     int count = 0;
 
     while ((getline(&line, &len, f)) != -1) {
+        assert_not_null(line);
         line[strcspn(line, "\n")] = '\0';
+
+        char *win_time_str = line;
+        char *id_str = strsep(&win_time_str, "\t");
+
+#if 0
+        pstr(win_time_str);
+        pstr(id_str);
+#endif
+
+        char *errsrc = NULL;
+        if (!win_time_str) {
+            errsrc = "win_time";
+        }
+
+        if (!id_str) {
+            errsrc = "unique_id";
+        }
+
+        if (errsrc) {
+            warnmsg("While reading \"%s\", line %d: error parsing %s",
+                    nvdata_state_finished_levels_file_path,
+                    count + 1,
+                    errsrc);
+            goto load_finished_levels_cleanup;
+        }
+
+        struct tm win_tm;
+        strptime(win_time_str, "%F %T", &win_tm);
+        time_t win_time = mktime(&win_tm);
+
         if (strlen(line) >= 3) {
             if (current_collection) {
-                level_t *level = collection_find_level_by_id(current_collection, line);
+                level_t *level = collection_find_level_by_unique_id(current_collection, id_str);
                 if (level) {
                     level->finished = true;
+                    level->win_time = win_time;
                 }
             }
 
-            nvdata_mark_id_finished(line);
+            nvdata_mark_id_finished(line, win_time);
 
             count++;
         }
     }
 
+  load_finished_levels_cleanup:
     if (line) {
         free(line);
     }
@@ -244,7 +275,7 @@ void load_nvdata_finished_levels(void)
         collection_update_level_names(current_collection);
     }
 
-    //print_finished_level(finished_levels.tree);
+    //print_finished_levels();
 }
 
 void save_nvdata_finished_levels(void)
@@ -276,6 +307,7 @@ void save_nvdata_finished_levels(void)
         infomsg("Finished level data saved in \"%s\"",
                 nvdata_state_finished_levels_file_path);
     }
+    //print_finished_levels();
 }
 
 bool reset_nvdata_finished_levels(void)

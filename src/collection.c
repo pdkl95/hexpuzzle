@@ -68,7 +68,8 @@ static collection_t *alloc_collection(void)
     collection->level_name_count = INITIAL_LEVEL_NAME_COUNT;
     collection_alloc_level_names(collection);
 
-    collection_set_id(collection, gen_unique_id());
+    gen_unique_id(collection->unique_id);
+    collection_set_id(collection, collection->unique_id);
 
     collection->dirpath = NULL;
     collection->filename = NULL;
@@ -239,6 +240,13 @@ bool collection_from_json(collection_t *collection, cJSON *json)
                version_json->valueint, COLLECTION_JSON_VERSION);
         return false;
     }
+
+    cJSON *unique_id_json = cJSON_GetObjectItem(json, "uni1ue_id");
+    if (!cJSON_IsString(unique_id_json)) {
+        errmsg("Error parsing pack JSON: 'uni1ue_id' is not a String");
+        return false;
+    }
+    snprintf(collection->unique_id, UNIQUE_ID_LENGTH, "%s", unique_id_json->valuestring);
 
     cJSON *id_json = cJSON_GetObjectItem(json, "id");
     if (!cJSON_IsString(id_json)) {
@@ -623,6 +631,24 @@ level_t *collection_find_level_by_id(collection_t *collection, const char *id)
     return NULL;
 }
 
+level_t *collection_find_level_by_unique_id(collection_t *collection, const char *unique_id)
+{
+    assert_not_null(collection);
+
+    level_t *level = collection->levels;
+    while (level) {
+        if (level->id) {
+            if (0 == strcmp(unique_id, level->unique_id)) {
+                return level;
+            }
+        }
+
+        level = level->next;
+    }
+
+    return NULL;
+}
+
 level_t *collection_find_level_by_filename(collection_t *collection, const char *filepath)
 {
     assert_not_null(collection);
@@ -700,6 +726,10 @@ cJSON *collection_to_json(collection_t *collection)
     cJSON *json = cJSON_CreateObject();
 
     if (cJSON_AddNumberToObject(json, "version", COLLECTION_JSON_VERSION) == NULL) {
+        goto json_err;
+    }
+
+    if (cJSON_AddStringToObject(json, "unique_id", collection->unique_id) == NULL) {
         goto json_err;
     }
 

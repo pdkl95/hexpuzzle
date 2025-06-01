@@ -29,8 +29,8 @@
 
 #include "level.h"
 
-#define COLLECTION_ID_LENGTH 37
 struct collection {
+    unique_id_t unique_id;
     char id[COLLECTION_ID_LENGTH];
     bool have_id;
 
@@ -84,6 +84,7 @@ bool collection_add_level_file(collection_t *collection, const char *filename);
 
 level_t *collection_get_level_after(collection_t *collection, level_t *level);
 level_t *collection_find_level_by_id(collection_t *collection, const char *id);
+level_t *collection_find_level_by_unique_id(collection_t *collection, const char *unique_id);
 level_t *collection_find_level_by_filename(collection_t *collection, const char *filename);
 void collection_update_level_names(collection_t *collection);
 

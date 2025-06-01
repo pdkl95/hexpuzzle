@@ -60,7 +60,7 @@ char *strcat_alloc(const char *first, const char *second);
 
 char *strdup_xxd_include(unsigned char *buf, unsigned int len);
 
-const char *gen_unique_id(void);
+const char *generate_unique_id(void);
 
 static inline const char *booltext(bool value)
 {
