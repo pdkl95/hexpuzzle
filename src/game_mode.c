@@ -22,6 +22,7 @@
 #include "common.h"
 #include "level.h"
 #include "game_mode.h"
+#include "gui_browser.h"
 #include "gui_collection.h"
 
 //#define DEBUG_GAME_MODE
@@ -89,6 +90,11 @@ static void on_exit_win_level_mode(void)
     if (current_level) {
         level_reset_win_anim(current_level);
     }
+}
+
+static void on_enter_browser_mode(void)
+{
+    gui_browsee_reload();
 }
 
 static void _set_game_mode(game_mode_t new_mode)
@@ -165,6 +171,10 @@ static void _set_game_mode(game_mode_t new_mode)
 
     case GAME_MODE_WIN_LEVEL:
         on_enter_win_level_mode();
+        break;
+
+    case GAME_MODE_BROWSER:
+        on_enter_browser_mode();
         break;
 
     default:

@@ -137,6 +137,9 @@ bool level_finished = false;
 
 background_t *background;
 
+game_mode_t nested_game_mode = GAME_MODE_NULL;
+level_t *nested_return_level = NULL;
+
 level_t *current_level = NULL;
 level_t *current_level_preview = NULL;
 collection_t *current_collection = NULL;
@@ -146,7 +149,6 @@ ui_result_t modal_ui_result;
 gui_dialog_t dialog;
 bool show_name_edit_box = false;
 bool show_ask_save_box = false;
-bool return_after_save_box = true;
 bool show_open_file_box = false;
 
 bool edit_tool_cycle = true;
@@ -249,67 +251,121 @@ static void name_edit_dialog_finished(gui_dialog_t *dialog, UNUSED void *data)
 {
     if (dialog->status) {
         /* accept edit / ok */
-        memcpy(current_level->name, dialog->string, strlen(dialog->string) + 1);
-        modal_ui_result = UI_RESULT_NULL;
-        if (current_collection) {
-            collection_update_level_names(current_collection);
+        if (current_level) {
+            level_set_name(current_level, dialog->string);
         }
+        modal_ui_result = UI_RESULT_NULL;
     } else {
         /* rollback edit / cancel */
         if (current_level) {
-            memcpy(current_level->name, current_level->name_backup, NAME_MAXLEN);
+            level_set_name(current_level, current_level->name_backup);
         }
         modal_ui_result = UI_RESULT_NULL;
     }
 }
 
-static void ask_save_dialog_finished(gui_dialog_t *dialog, UNUSED void *data)
+static void ask_save_dialog_finished_edit_collection(gui_dialog_t *dialog, UNUSED void *data)
 {
-    if (dialog->status) {
-        /* yes */
-        switch (game_mode) {
-        case GAME_MODE_EDIT_COLLECTION:
-            if (current_collection) {
-                collection_save(current_collection);
-            }
-            break;
+    after_dialog_action_t action = dialog->status
+        ? dialog->action_after_ok
+        : dialog->action_after_cancel;
 
-        case GAME_MODE_EDIT_LEVEL:
-            if (current_level) {
-                level_save(current_level);
-            }
-            if (return_after_save_box) {
-                return_from_level();
-            }
-            break;
+    switch (action) {
+    case AFTER_DIALOG_NULL:
+        break;
 
-        default:
-            __builtin_unreachable();
+    case AFTER_DIALOG_QUIT:
+        running = false;
+        break;
+
+    case AFTER_DIALOG_RETURN:
+        return_from_level();
+        break;
+
+    case AFTER_DIALOG_SAVE:
+        if (current_collection) {
+            collection_save(current_collection);
         }
+        break;
 
-        modal_ui_result = UI_RESULT_NULL;
-
-    } else {
-        /* no */
-        switch (game_mode) {
-        case GAME_MODE_EDIT_COLLECTION:
-            break;
-
-        case GAME_MODE_EDIT_LEVEL:
-            if (current_collection) {
-                current_collection->changed = true;
-            }
-            if (return_after_save_box) {
-                return_from_level();
-            }
-            break;
-
-        default:
-            __builtin_unreachable();
+    case AFTER_DIALOG_SAVE_AND_QUIT:
+        if (current_collection) {
+            collection_save(current_collection);
         }
+        running = false;
+        break;
 
-        modal_ui_result = UI_RESULT_NULL;
+    case AFTER_DIALOG_SAVE_AND_RETURN:
+        if (current_collection) {
+            collection_save(current_collection);
+        }
+        return_from_level();
+        break;
+
+    default:
+        __builtin_unreachable();
     }
+}
+
+static void ask_save_dialog_finished_edit_level(gui_dialog_t *dialog, UNUSED void *data)
+{
+    after_dialog_action_t action = dialog->status
+        ? dialog->action_after_ok
+        : dialog->action_after_cancel;
+
+    switch (action) {
+    case AFTER_DIALOG_NULL:
+        break;
+
+    case AFTER_DIALOG_QUIT:
+        running = false;
+        break;
+
+    case AFTER_DIALOG_RETURN:
+        return_from_level();
+        break;
+
+    case AFTER_DIALOG_SAVE:
+        if (current_level) {
+            level_save(current_level);
+        }
+        break;
+
+    case AFTER_DIALOG_SAVE_AND_QUIT:
+        if (current_level) {
+            level_save(current_level);
+        }
+        running = false;
+        break;
+
+    case AFTER_DIALOG_SAVE_AND_RETURN:
+        if (current_level) {
+            level_save(current_level);
+        }
+        return_from_level();
+        break;
+
+    default:
+        __builtin_unreachable();
+    }
+}
+
+static void ask_save_dialog_finished(gui_dialog_t *dialog, void *data)
+{
+    switch (game_mode) {
+    case GAME_MODE_EDIT_COLLECTION:
+        ask_save_dialog_finished_edit_collection(dialog, data);
+        break;
+
+    case GAME_MODE_EDIT_LEVEL:
+        ask_save_dialog_finished_edit_level(dialog, data);
+        break;
+
+    default:
+        __builtin_unreachable();
+    }
+
+    modal_ui_result = UI_RESULT_NULL;
 }
 
 static void open_file_dialog_finished(gui_dialog_t *dialog, UNUSED void *data)
@@ -322,16 +378,16 @@ static void open_file_dialog_finished(gui_dialog_t *dialog, UNUSED void *data)
     }
 }
 
-void show_ask_save_dialog(bool return_after)
+void show_ask_save_dialog(after_dialog_action_t action_after_ok, after_dialog_action_t action_after_cancel)
 {
     if (current_dialog) {
         return;
     }
 
-    return_after_save_box = return_after;
-
     gui_dialog_clesr(&dialog,  GUI_DIALOG_YN);
     dialog.callback = ask_save_dialog_finished;
+    dialog.action_after_ok     = action_after_ok;
+    dialog.action_after_cancel = action_after_cancel;
 
     switch (game_mode) {
     case GAME_MODE_EDIT_COLLECTION:
@@ -382,6 +438,49 @@ static void set_edit_tool(path_type_t type)
     edit_tool_state = type;
     if (options->verbose) {
         infomsg("Using Edit Tool: %s", path_type_name(edit_tool_state));
+    }
+}
+
+static void return_from_nested_level_callback(UNUSED level_t *level, UNUSED void *data)
+{
+    level_t *level_copy = current_level;
+
+    if (current_level) {
+        disable_postprocessing();
+        level_unload();
+    }
+
+    destroy_level(level_copy);
+
+    switch (nested_game_mode) {
+    case GAME_MODE_EDIT_LEVEL:
+        level_edit(nested_return_level);
+        break;
+
+    default:
+        __builtin_unreachable();
+    }
+
+    nested_return_level = NULL;
+    nested_game_mode = GAME_MODE_NULL;
+}
+
+bool return_from_nested_level(void)
+{
+    assert_not_null(nested_return_level);
+
+    if (current_level) {
+        if (current_level->fade.active) {
+            if (options->verbose) {
+                infomsg("forcinng quick exit");
+            }
+            running = false;
+            return true;
+        }
+        level_fade_out(current_level, return_from_nested_level_callback, NULL);
+        return true;
+    } else {
+        return false;
     }
 }
 
@@ -488,28 +587,6 @@ static void edit_game_file(const char *path)
     open_game_file(path, true);
 }
 
-void play_random_game(void)
-{
-    set_game_mode(GAME_MODE_RANDOM);
-    play_gui_random_level();
-}
-
-level_t *create_blank_level(void)
-{
-    level_t *level = create_level(NULL);
-    level_reset(level);
-    level_set_radius(level, options->create_level_radius);
-    return level;
-}
-
-void edit_new_blank_level(void)
-{
-    level_t *blank = create_blank_level();
-    level_edit(blank);
-}
-
-
-
 const char *default_open_file_path(void)
 {
     static char path[MAX_FILEPATH_LENGTH];
@@ -543,6 +620,44 @@ void savequit_current_level(void)
     }
 }
 #endif
+
+void play_random_game(void)
+{
+    set_game_mode(GAME_MODE_RANDOM);
+    play_gui_random_level();
+}
+
+level_t *create_blank_level(void)
+{
+    level_t *level = create_level(NULL);
+    level_reset(level);
+    level_set_radius(level, options->create_level_radius);
+    return level;
+}
+
+void edit_new_blank_level(void)
+{
+    level_t *blank = create_blank_level();
+    level_edit(blank);
+}
+
+void play_nested_level_callback(UNUSED struct level *level, UNUSED void *data)
+{
+    level_t *nested_level = create_level_copy(nested_return_level);
+    level_play(nested_level);
+}
+
+void play_nested_level(void)
+{
+    assert_not_null(current_level);
+    assert_null(nested_return_level);
+    assert(game_mode == GAME_MODE_EDIT_LEVEL);
+
+    nested_game_mode = game_mode;
+    nested_return_level = current_level;
+
+    level_fade_out(current_level, play_nested_level_callback, NULL);
+}
 
 static void reset_current_level(void)
 {
@@ -1123,6 +1238,10 @@ char save_button_text_str[] = "Save";
 #define SAVE_BUTTON_TEXT_LENGTH (6 + sizeof(save_button_text_str))
 char save_button_text[SAVE_BUTTON_TEXT_LENGTH];
 
+char test_button_text_str[] = "Test";
+#define TEST_BUTTON_TEXT_LENGTH (6 + sizeof(test_button_text_str))
+char test_button_text[TEST_BUTTON_TEXT_LENGTH];
+
 char edit_button_text_str[] = "Edit";
 #define EDIT_BUTTON_TEXT_LENGTH (6 + sizeof(edit_button_text_str))
 char edit_button_text[EDIT_BUTTON_TEXT_LENGTH];
@@ -1142,6 +1261,10 @@ char reset_button_text[RESET_BUTTON_TEXT_LENGTH];
 char return_button_text_str[] = "Back";
 #define RETURN_BUTTON_TEXT_LENGTH (6 + sizeof(return_button_text_str))
 char return_button_text[RETURN_BUTTON_TEXT_LENGTH];
+
+char retnest_button_text_str[] = "Back";
+#define RETNEST_BUTTON_TEXT_LENGTH (6 + sizeof(retnest_button_text_str))
+char retnest_button_text[RETNEST_BUTTON_TEXT_LENGTH];
 
 char undo_button_text_str[] = "Undo";
 #define UNDO_BUTTON_TEXT_LENGTH (6 + sizeof(undo_button_text_str))
@@ -1501,12 +1624,14 @@ void gui_setup(void)
     gui_setup_goto_next_seed_panel();
 
     memcpy(   close_button_text, GuiIconText(ICON_EXIT,                 close_button_text_str),    CLOSE_BUTTON_TEXT_LENGTH);
+    memcpy(    test_button_text, GuiIconText(ICON_PLAYER_PLAY,           test_button_text_str),     TEST_BUTTON_TEXT_LENGTH);
     memcpy(    edit_button_text, GuiIconText(ICON_TOOLS,                 edit_button_text_str),     EDIT_BUTTON_TEXT_LENGTH);
     memcpy(  unedit_button_text, GuiIconText(ICON_TOOLS,               unedit_button_text_str),   UNEDIT_BUTTON_TEXT_LENGTH);
     memcpy(    save_button_text, GuiIconText(ICON_FILE_SAVE_CLASSIC,     save_button_text_str),     SAVE_BUTTON_TEXT_LENGTH);
     memcpy(savequit_button_text, GuiIconText(ICON_FILE_SAVE_CLASSIC, savequit_button_text_str), SAVEQUIT_BUTTON_TEXT_LENGTH);
     memcpy(   reset_button_text, GuiIconText(ICON_EXPLOSION,            reset_button_text_str),    RESET_BUTTON_TEXT_LENGTH);
     memcpy(  return_button_text, GuiIconText(ICON_ARROW_LEFT,          return_button_text_str),   RETURN_BUTTON_TEXT_LENGTH);
+    memcpy( retnest_button_text, GuiIconText(ICON_ARROW_LEFT,         retnest_button_text_str),  RETNEST_BUTTON_TEXT_LENGTH);
     memcpy(    undo_button_text, GuiIconText(ICON_UNDO_FILL,             undo_button_text_str),     UNDO_BUTTON_TEXT_LENGTH);
     memcpy(    redo_button_text, GuiIconText(ICON_REDO_FILL,             redo_button_text_str),     REDO_BUTTON_TEXT_LENGTH);
     memcpy( options_button_text, GuiIconText(ICON_GEAR,               options_button_text_str),  OPTIONS_BUTTON_TEXT_LENGTH);
@@ -1658,6 +1783,10 @@ static void drsw_edit_tile_radius_gui(void)
 
 static void drsw_edit_tile_mode_gui(void)
 {
+    if (!current_level) {
+        return;
+    }
+
     DrawRectangleRounded(edit_mode_panel_rect, PANEL_ROUNDNES, 0, panel_bg_color);
     DrawRectangleRoundedLines(edit_mode_panel_rect, PANEL_ROUNDNES, 0, 1.0, panel_edge_color);
 
@@ -1978,6 +2107,11 @@ static inline void reset_right_side_button(void)
     right_side_button.rect.y = right_side_button.top_y;
 }
 
+static inline void set_bottom_single_right_side_button(void)
+{
+    right_side_button.rect.y = window_size.y - right_side_button.double_line_y_offset;
+}
+
 static inline void set_bottom_double_right_side_button(void)
 {
     right_side_button.rect.y = window_size.y - right_side_button.double_line_y_offset;
@@ -2096,9 +2230,9 @@ static void draw_gui_widgets(void)
     GuiSetStyle(BUTTON, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
 
 #if defined(PLATFORM_DESKTOP)
-    bool pressed = rsb_single_line_button(close_button_text);
+    bool quit_pressed = rsb_single_line_button(close_button_text);
 
-    if (pressed) {
+    if (quit_pressed) {
         running = false;
     }
 #endif
@@ -2138,6 +2272,16 @@ static void draw_gui_widgets(void)
         break;
 
     case GAME_MODE_EDIT_LEVEL:
+#if defined(PLATFORM_DESKTOP)
+        if (quit_pressed) {
+            if (current_level && current_level->changed) {
+                show_ask_save_dialog(AFTER_DIALOG_SAVE_AND_QUIT,
+                                     AFTER_DIALOG_QUIT);
+                running = true;
+            }
+        }
+#endif
+
         draw_name_header();
 
         drsw_edit_tile_mode_gui();
@@ -2155,7 +2299,12 @@ static void draw_gui_widgets(void)
 
         if (rsb_single_line_button(return_button_text)) {
 #if defined(PLATFORM_DESKTOP)
-            show_ask_save_dialog(true);
+            if (current_level && current_level->changed) {
+                show_ask_save_dialog(AFTER_DIALOG_SAVE_AND_RETURN,
+                                     AFTER_DIALOG_RETURN);
+            } else {
+                return_from_level();
+            }
 #endif
         }
 
@@ -2168,7 +2317,8 @@ static void draw_gui_widgets(void)
 #if defined(PLATFORM_DESKTOP)
         if (current_level && current_level->changed) {
             if (rsb_single_line_button(save_button_text)) {
-                show_ask_save_dialog(false);
+                show_ask_save_dialog(AFTER_DIALOG_SAVE,
+                                     AFTER_DIALOG_NULL);
             }
         } else {
             GuiDisable();
@@ -2176,6 +2326,13 @@ static void draw_gui_widgets(void)
             GuiEnable();
         }
 #endif
+
+        set_bottom_single_right_side_button();
+
+        if (rsb_single_line_button(test_button_text)) {
+            play_nested_level();
+        }
+
         break;
 
     case GAME_MODE_PLAY_LEVEL:
@@ -2197,8 +2354,14 @@ static void draw_gui_widgets(void)
             reset_current_level();
         }
 
-        if (rsb_single_line_button(return_button_text)) {
-            return_from_level();
+        if (nested_return_level) {
+            if (rsb_single_line_button(retnest_button_text)) {
+                return_from_nested_level();
+            }
+        } else {
+            if (rsb_single_line_button(return_button_text)) {
+                return_from_level();
+            }
         }
 
         // skip one position
@@ -2231,6 +2394,14 @@ static void draw_gui_widgets(void)
         break;
 
     case GAME_MODE_EDIT_COLLECTION:
+        if (quit_pressed) {
+            if (current_collection && current_collection->changed) {
+                show_ask_save_dialog(AFTER_DIALOG_SAVE_AND_QUIT,
+                                     AFTER_DIALOG_QUIT);
+                running = true;
+            }
+        }
+
         standard_buttons();
 
         set_gui_narrow_font();
@@ -2242,7 +2413,8 @@ static void draw_gui_widgets(void)
 #if defined(PLATFORM_DESKTOP)
         if (current_collection && current_collection->changed) {
             if (rsb_single_line_button(save_button_text)) {
-                show_ask_save_dialog(false);
+                show_ask_save_dialog(AFTER_DIALOG_SAVE,
+                                     AFTER_DIALOG_NULL);
             }
         }
 #endif
@@ -2760,9 +2932,9 @@ static void game_init(void)
 
     background = create_background();
 
-    //set_game_mode(GAME_MODE_BROWSER);
+    set_game_mode(GAME_MODE_BROWSER);
     //set_game_mode(GAME_MODE_RANDOM);
-    set_game_mode(GAME_MODE_TITLE);
+    //set_game_mode(GAME_MODE_TITLE);
 
     win_anim_mode_config_reset_to_defaut(&(win_anim_mode_config[0]));
 

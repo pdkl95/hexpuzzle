@@ -36,6 +36,16 @@ enum gui_dialog_type {
 };
 typedef enum gui_dialog_type gui_dialog_type_t;
 
+enum after_dialog_action {
+    AFTER_DIALOG_NULL = 0,
+    AFTER_DIALOG_QUIT,
+    AFTER_DIALOG_RETURN,
+    AFTER_DIALOG_SAVE,
+    AFTER_DIALOG_SAVE_AND_QUIT,
+    AFTER_DIALOG_SAVE_AND_RETURN
+};
+typedef enum after_dialog_action after_dialog_action_t;
+
 typedef void (*gui_dialog_finished_cb_t)(struct gui_dialog *dialog, void *data);
 
 struct gui_dialog {
@@ -49,6 +59,9 @@ struct gui_dialog {
 
     bool textbox_edit_mode;
     struct color_option *color_opt;
+
+    after_dialog_action_t action_after_ok;
+    after_dialog_action_t action_after_cancel;
 
     /* results */
     bool status;

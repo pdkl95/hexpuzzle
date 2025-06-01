@@ -286,6 +286,31 @@ int vpopup_message(const char *fmt, va_list ap)
     return rv;
 }
 
+int popup_info_message(const char *fmt, ...)
+{
+    va_list ap;
+    int rv = 0;
+
+    va_start(ap, fmt);
+    rv = vpopup_info_message(fmt, ap);
+    va_end(ap);
+
+    return rv;
+}
+
+int vpopup_info_message(const char *fmt, va_list ap)
+{
+    char *message = NULL;
+    char *error_message = NULL;
+
+    int rv = safe_vasprintf(&message, fmt, ap);
+
+    infomsg("%s", message);
+    create_popup_msg(message);
+
+    return rv;
+}
+
 int popup_error_message(const char *fmt, ...)
 {
     va_list ap;

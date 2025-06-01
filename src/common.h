@@ -247,6 +247,7 @@ static inline void tooltip(Rectangle bounds, const char *text)
 extern bool demo_mode;
 
 int popup_message(const char *fmt, ...);
+int popup_info_message(const char *fmt, ...);
 int popup_error_message(const char *fmt, ...);
 int popup_bug_message(const char *fmt, ...);
 

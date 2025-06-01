@@ -63,6 +63,15 @@ void printcolor(Color c);
         printf("\n"); \
     } while(0)
 
+#define plevel(var) do { \
+        printf(QUOTE(var) "\t= "); \
+        print_level(var); \
+        printf("\n"); \
+    } while(0)
+
+
+
+
 /*** misc stuff */
 
 static inline Vector2 getVector2FromRectangle(Rectangle rect)

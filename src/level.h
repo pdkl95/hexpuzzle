@@ -147,6 +147,8 @@ struct level {
     struct collection *collection;
 
     struct level *prev, *next;
+
+    struct level *orig_copy;;
 };
 typedef struct level level_t;
 
@@ -157,11 +159,13 @@ typedef struct level level_t;
 
 #define dragable_mode (play_mode || edit_mode_unsolved)
 
+void print_level(level_t *level);
 int hex_axial_to_idx(hex_axial_t axial);
 tile_pos_t *level_get_solved_tile_pos(level_t *level,  hex_axial_t axial);
 tile_pos_t *level_get_unsolved_tile_pos(level_t *level,  hex_axial_t axial);
 
 level_t *create_level(struct collection *collection);
+level_t *create_level_copy(level_t *other);
 void destroy_level(level_t *level);
 void level_reset(level_t *level);
 void level_backup_unsolved_tiles(level_t *level);
@@ -211,6 +215,7 @@ void level_load(level_t *level);
 void level_play(level_t *level);
 void level_edit(level_t *level);
 
+void level_set_name(level_t *level, const char *name);
 void level_set_file_path(level_t *level, const char *path);
 void level_save_to_filename(level_t *level, const char *filepath);
 void level_save_to_file(level_t *level, const char *dirpath);

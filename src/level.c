@@ -43,6 +43,19 @@
 //#define DEBUG_DRAG_AND_DROP 1
 //#define DEBUG_LEVEL_FADE
 
+void print_level(level_t *level)
+{
+    if (!level) {
+        printf("(NULL)\n");
+        return;
+    }
+
+    printf("LEVEL<%p> {\n", level);
+    printf("\tid   = \"%s\"\n", level->id);
+    printf("\tname = \"%s\"\n", level->name);
+    printf("}\n");
+}
+
 void print_tiles(level_t *level)
 {
     level_sort_tiles(level);
@@ -515,6 +528,21 @@ level_t *create_level(struct collection *collection)
     return level;
 }
 
+level_t *create_level_copy(level_t *other)
+{
+    cJSON *json = level_to_json(other);
+
+    level_t *level = alloc_level();
+    if (!level_from_json(level, json)) {
+        assert(false && "Why JSON parsing failing for JSON that came direcyly from the JSON serialisz4er");
+    }
+
+    cJSON_Delete(json);
+
+    return level;
+}
+
+
 void destroy_level(level_t *level)
 {
     if (level) {
@@ -710,6 +738,14 @@ bool level_parse_string(level_t *level, const char *str)
     return rv;
 }
 
+void level_set_name(level_t *level, const char *name)
+{
+    memcpy(level->name, name, strlen(name) + 1);
+    if (level->collection) {
+        collection_update_level_names(level->collection);
+    }
+}
+
 void level_set_file_path(level_t *level, const char *path)
 {
     char *dirc  = strdup(path);
@@ -897,9 +933,14 @@ void level_save_to_filename(level_t *level, const char *filepath)
         if (-1 == rename(tmpname, filepath)) {
             errmsg("Error trying to rename \"%s\" to \"%s\" - ",
                    tmpname, filepath);
+            popup_error_message("Error renaming file to \"%s\"", GetFileName(filepath));
+        } else {
+            popup_info_message("Level saved to \"%s\"", GetFileName(filepath));
         }
 
         free(tmpname);
+    } else {
+        popup_info_message("Level saved to \"%s\"", GetFileName(filepath));
     }
 }
 
@@ -942,6 +983,8 @@ void level_save_to_file(level_t *level, const char *dirpath)
 
 void level_save_to_local_levels(level_t *level, const char *prefix, const char *name)
 {
+    assert_not_null(level);
+
     if (!level->filename) {
         safe_asprintf(&level->filename, "%s-%s.%s", prefix, name, LEVEL_FILENAME_EXT);
     }
@@ -969,6 +1012,9 @@ void level_save(level_t *level)
         level_save_to_file_if_changed(level, NULL);
     } else if (level->filename && level->collection && level->collection->dirpath) {
         level_save_to_file_if_changed(level, level->collection->dirpath);
+    } else if (!level->filename && (level->name[0] != '\0')) {
+        safe_asprintf(&level->filename, "%s.%s", level->name, LEVEL_FILENAME_EXT);
+        level_save_to_local_levels(level, NULL, NULL);
     } else {
         errmsg("Not enough file metadata to save level!");
         pstr(level->filename);
