@@ -46,6 +46,8 @@
 #  rename \
 #  strcase \
 #  strsep \
+#  timespec \
+#  timespec_get \
 #  vasprintf
 
 # Specification in the form of a few gnulib-tool.m4 macro invocations:
@@ -55,6 +57,8 @@ gl_MODULES([
   rename
   strcase
   strsep
+  timespec
+  timespec_get
   vasprintf
 ])
 gl_AVOID([gnulib-i18n])

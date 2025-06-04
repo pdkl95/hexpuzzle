@@ -20,12 +20,15 @@
  ****************************************************************************/
 
 #include "common.h"
+#include "solve_timer.h"
 #include "level.h"
 #include "game_mode.h"
 #include "gui_browser.h"
 #include "gui_collection.h"
 
 //#define DEBUG_GAME_MODE
+
+extern solve_timer_t solve_timer;
 
 game_mode_t game_mode = GAME_MODE_NULL;
 game_mode_t last_game_mode = GAME_MODE_NULL;
@@ -92,9 +95,28 @@ static void on_exit_win_level_mode(void)
     }
 }
 
+static void on_enter_play_level_mode(void)
+{
+}
+
+static void on_exit_play_level_mode(void)
+{
+    solve_timer_stop(&solve_timer);
+}
+
 static void on_enter_browser_mode(void)
 {
     gui_browsee_reload();
+}
+
+static void on_play_level_to_options_transition(void)
+{
+    solve_timer_stop(&solve_timer);
+}
+
+static void on_options_to_play_level_transition(void)
+{
+    solve_timer_start(&solve_timer);
 }
 
 static void _set_game_mode(game_mode_t new_mode)
@@ -151,6 +173,10 @@ static void _set_game_mode(game_mode_t new_mode)
 
     /* exit events */
     switch (old_mode) {
+    case GAME_MODE_PLAY_LEVEL:
+        on_exit_play_level_mode();
+        break;
+
     case GAME_MODE_WIN_LEVEL:
         on_exit_win_level_mode();
         break;
@@ -158,6 +184,17 @@ static void _set_game_mode(game_mode_t new_mode)
     default:
         break;
     }
+
+#define transition(state_from, state_to, func_from, func_to)  \
+    if ((old_mode == GAME_MODE_ ## state_from) &&             \
+        (new_mode == GAME_MODE_ ## state_to)) {               \
+        on_ ## func_from ## _to_ ## func_to ## _transition(); \
+    }
+
+    transition(PLAY_LEVEL, OPTIONS, play_level, options);
+    transition(OPTIONS, PLAY_LEVEL, options, play_level);
+
+#undef transition
 
     /* enter events */
     switch (new_mode) {
@@ -167,6 +204,10 @@ static void _set_game_mode(game_mode_t new_mode)
 
     case GAME_MODE_EDIT_COLLECTION:
         on_enter_edit_collection_mode();
+        break;
+
+    case GAME_MODE_PLAY_LEVEL:
+        on_enter_play_level_mode();
         break;
 
     case GAME_MODE_WIN_LEVEL:

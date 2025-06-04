@@ -1,0 +1,159 @@
+/****************************************************************************
+ *                                                                          *
+ * solve_timer.c                                                            *
+ *                                                                          *
+ * This file is part of hexpuzzle.                                          *
+ *                                                                          *
+ * hexpuzzle is free software: you can redistribute it and/or               *
+ * modify it under the terms of the GNU General Public License as published *
+ * by the Free Software Foundation, either version 3 of the License,        *
+ * or (at your option) any later version.                                   *
+ *                                                                          *
+ * hexpuzzle is distributed in the hope that it will be useful,             *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of           *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General *
+ * Public License for more details.                                         *
+ *                                                                          *
+ * You should have received a copy of the GNU General Public License along  *
+ * with hexpuzzle. If not, see <https://www.gnu.org/licenses/>.             *
+ *                                                                          *
+ ****************************************************************************/
+
+#include "common.h"
+
+#include "solve_timer.h"
+
+#define SECONDS_PER_MINUTE 60
+#define SECONDS_PER_HOUR  (60 * SECONDS_PER_MINUTE)
+#define SECONDS_PER_DAY   (24 * SECONDS_PER_HOUR)
+
+#define NSEC_PER_SEC 1000000000
+
+static inline void get_currernt_time(struct timespec *ts)
+{
+    timespec_get(ts, TIME_UTC);
+}
+
+struct timespec timespec_add(struct timespec a, struct timespec b)
+{
+    struct timespec res = {0};
+
+    res.tv_sec  = a.tv_sec  + b.tv_sec;
+    res.tv_nsec = a.tv_nsec + b.tv_nsec;
+
+    while (res.tv_nsec >= NSEC_PER_SEC) {
+        res.tv_sec  += 1;
+        res.tv_nsec -= NSEC_PER_SEC;
+    }
+    
+    return res;
+}
+
+struct timespec timespec_sub(struct timespec a, struct timespec b)
+{
+    struct timespec res = {0};
+
+    if (a.tv_nsec < b.tv_nsec) {
+        res.tv_sec  = a.tv_sec  - b.tv_sec  - 1;
+        res.tv_nsec = a.tv_nsec - b.tv_nsec + 1000000000;
+    } else {
+        res.tv_sec  = a.tv_sec  - b.tv_sec;
+        res.tv_nsec = a.tv_nsec - b.tv_nsec;
+    }
+
+    return res;
+}
+
+solve_timer_t *alloc_solve_timer(void)
+{
+    return calloc(1, sizeof(solve_timer_t));
+}
+
+void free_solve_timer(solve_timer_t *solve_timer)
+{
+    if (solve_timer) {
+        free(solve_timer);
+    }
+}
+
+void init_solve_timer(solve_timer_t *solve_timer)
+{
+    solve_timer_reset(solve_timer);
+}
+
+solve_timer_t *create_solve_timer(void)
+{
+    solve_timer_t *solve_timer = alloc_solve_timer();
+    init_solve_timer(solve_timer);
+    return solve_timer;
+}
+
+void destroy_solve_timer(solve_timer_t *solve_timer)
+{
+    free_solve_timer(solve_timer);
+}
+
+
+void solve_timer_update(solve_timer_t *solve_timer)
+{
+    if (!solve_timer->valid) {
+        return;
+    }
+
+    if (solve_timer->state == SOLVE_TIMER_STATE_RUNNING) {
+        struct timespec now = {0};
+        get_currernt_time(&now);
+
+        struct timespec delta = timespec_sub(now, solve_timer->start_time);
+        solve_timer->elapsed_time = timespec_add(delta, solve_timer->elapsed_time);
+
+        solve_timer->start_time = now;
+    }
+
+    struct timespec et = solve_timer->elapsed_time;
+
+    solve_timer->day = et.tv_sec  / SECONDS_PER_DAY;
+    et.tv_sec -= solve_timer->day * SECONDS_PER_DAY;
+
+    solve_timer->hr  = et.tv_sec  / SECONDS_PER_HOUR;
+    et.tv_sec -= solve_timer->hr  * SECONDS_PER_HOUR;
+
+    solve_timer->min = et.tv_sec  / SECONDS_PER_MINUTE;
+    et.tv_sec -= solve_timer->min * SECONDS_PER_MINUTE;
+
+    solve_timer->sec = et.tv_sec;
+
+    assert(solve_timer->elapsed_time.tv_sec == ((solve_timer->day * SECONDS_PER_DAY) +
+                                                (solve_timer->hr  * SECONDS_PER_HOUR) +
+                                                (solve_timer->min * SECONDS_PER_MINUTE) +
+                                                (solve_timer->sec)));
+
+    solve_timer->ms = et.tv_nsec / 1000000;
+}
+
+void solve_timer_reset(solve_timer_t *solve_timer)
+{
+    solve_timer->state = SOLVE_TIMER_STATE_RESET;
+    solve_timer->valid = true;
+    solve_timer->elapsed_time.tv_sec  = 0;
+    solve_timer->elapsed_time.tv_nsec = 0;
+    solve_timer_update(solve_timer);
+}
+
+void solve_timer_start(solve_timer_t *solve_timer)
+{
+    if (solve_timer->state == SOLVE_TIMER_STATE_RESET) {
+        solve_timer->elapsed_time.tv_sec  = 0;
+        solve_timer->elapsed_time.tv_nsec = 0;
+    }
+    solve_timer->state = SOLVE_TIMER_STATE_RUNNING;
+    get_currernt_time(&solve_timer->start_time);
+    solve_timer_update(solve_timer);
+}
+
+void solve_timer_stop(solve_timer_t *solve_timer)
+{
+    solve_timer_update(solve_timer);
+    solve_timer->state = SOLVE_TIMER_STATE_PAUSED;
+}
+

@@ -116,6 +116,7 @@ int frame_delay;
 bool show_fps = false;
 float current_time = 0.0f;
 double double_current_time = 0.0;
+solve_timer_t solve_timer;
 
 RenderTexture2D scene_targets[2];
 RenderTexture2D *scene_read_target;
@@ -612,7 +613,6 @@ static void reset_window_to_center(void)
 
 void savequit_current_level(void)
 {
-    printf("savequit_current_level()\n");
     running = false;
 
     if (current_level) {
@@ -2437,6 +2437,91 @@ static void draw_gui_widgets(void)
 }
 #undef gm_button
 
+static void draw_solve_timer(void)
+{
+    const char *str = NULL;
+    Color text_color = WHITE;
+    Color border_color = { 0x77, 0xDF, 0x73, 0xcc };
+    Color bg_color = shade_overlay_color;
+
+    bool draw_border = false;
+    float roundness = 0.3;
+
+    if (solve_timer.state == SOLVE_TIMER_STATE_PAUSED) {
+        text_color = LIGHTGRAY;
+    }
+
+    if (solve_timer.valid) {
+        solve_timer_update(&solve_timer);
+
+        if (solve_timer.day > 0) {
+            str = TextFormat("%d %s, %02d:%02d:%02d.%03d",
+                             solve_timer.day,
+                             ((solve_timer.day == 1) ? "day" : "days"),
+                             solve_timer.hr,
+                             solve_timer.min,
+                             solve_timer.sec,
+                             solve_timer.ms);
+        } else if (solve_timer.hr > 0) {
+            str = TextFormat("%02d:%02d:%02d.%03d",
+                             solve_timer.hr,
+                             solve_timer.min,
+                             solve_timer.sec,
+                             solve_timer.ms);
+        } else {
+            str = TextFormat("%02d:%02d.%03d",
+                             solve_timer.min,
+                             solve_timer.sec,
+                             solve_timer.ms);
+        }
+
+        switch (game_mode) {
+        case GAME_MODE_WIN_LEVEL:
+            draw_border = true;
+            bg_color = ColorAlpha(BLACK, 0.9);
+            break;
+
+        default:
+            break;
+        }
+
+
+    } else {
+        /* invalid */
+
+        switch (game_mode) {
+        case GAME_MODE_WIN_LEVEL:
+            return;
+
+        default:
+            str = "--:--";
+            text_color = DARKGRAY;
+            break;
+        }
+    }
+
+
+    Vector2 text_size = measure_panel_text(str);
+    Rectangle bg_rec = {
+        .x = (window_sizef.x / 2.0f) - 45.0f,
+        .y = WINDOW_MARGIN,
+        .width  = text_size.x,
+        .height = text_size.y,
+    };
+
+    Vector2 text_pos = getVector2FromRectangle(bg_rec);
+    bg_rec = ExpandRectangle(bg_rec, 5.0f);
+
+    DrawRectangleRounded(bg_rec, roundness, 0, bg_color);
+
+    if (draw_border) {
+        DrawRectangleRoundedLines(bg_rec, roundness, 0, 2.0, border_color);
+    }
+
+    draw_panel_text(str, text_pos, text_color);
+}
+
+
 static void draw_cursor(void)
 {
     IVector2 icon_pos;
@@ -2639,6 +2724,9 @@ render_frame(
             if (current_level) {
                 level_draw(current_level, level_finished);
             }
+            if (options->use_solve_timer) {
+                draw_solve_timer();
+            }
             break;
 
         case GAME_MODE_EDIT_LEVEL:
@@ -2688,6 +2776,19 @@ render_frame(
 
     if (!demo_mode) {
         draw_gui();
+
+        switch (game_mode) {
+        case GAME_MODE_WIN_LEVEL:
+            /* fall thrugh */
+        case GAME_MODE_PLAY_LEVEL:
+            if (options->use_solve_timer) {
+                draw_solve_timer();
+            }
+            break;
+
+        default:
+            break;
+        }
     }
 
     if (show_fps) {
@@ -2929,6 +3030,8 @@ static void game_init(void)
     init_gui_title();
     init_gui_dialog();
     init_gui_popup_message();
+
+    init_solve_timer(&solve_timer);
 
     background = create_background();
 

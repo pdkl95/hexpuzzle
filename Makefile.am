@@ -164,6 +164,7 @@ hexpuzzle_SOURCES =                                          \
 	src/raylib_helper.h        src/raylib_helper.c       \
 	src/startup_action.h       src/startup_action.c      \
 	src/shader.h               src/shader.c              \
+	src/solve_timer.h          src/solve_timer.c         \
 	src/solver.h               src/solver.c              \
 	src/textures.h             src/textures.c            \
 	src/tile.h                 src/tile.c                \
@@ -407,6 +408,7 @@ external/raylib/external_raylib_libraylib_a-rtextures.$(OBJEXT): CFLAGS += -Wno-
 AM_CPPFLAGS += -I$(top_builddir)/lib -I$(top_srcdir)/lib
 
 hexpuzzle_LDADD += lib/gnulib/libgnu.a
+hexpuzzle_LDADD += $(CLOCK_TIME_LIB)
 
 MOSTLYCLEANFILES =
 MOSTLYCLEANDIRS =

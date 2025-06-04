@@ -145,6 +145,7 @@ static bool program_state_from_json(cJSON *json)
                 if (level) {
                     infomsg("Level loaded. Removing transient save file \"%s\"", filename);
                     level_play(level);
+                    solve_timer.valid = false;
                     unlink(filename);
                 } else {
                     errmsg("Load failed!");

@@ -55,6 +55,8 @@
 #  rename \
 #  strcase \
 #  strsep \
+#  timespec \
+#  timespec_get \
 #  vasprintf
 
 
@@ -175,46 +177,50 @@ EXTRA_PROGRAMS = util/compile_to_c_src$(EXEEXT)
 @GL_COND_OBJ_FREE_TRUE@@gl_GNULIB_ENABLED_ef07dc4b3077c11ea9cef586db4e5955_TRUE@am__append_24 = lib/gnulib/free.c
 @GL_COND_OBJ_GETDELIM_TRUE@@gl_GNULIB_ENABLED_getdelim_TRUE@am__append_25 = lib/gnulib/getdelim.c
 @GL_COND_OBJ_GETLINE_TRUE@am__append_26 = lib/gnulib/getline.c
-@gl_GNULIB_ENABLED_8444034ea779b88768865bb60b4fb8c9_TRUE@am__append_27 = lib/gnulib/malloc/scratch_buffer.gl.h
-@gl_GNULIB_ENABLED_8444034ea779b88768865bb60b4fb8c9_TRUE@am__append_28 = lib/gnulib/malloc/scratch_buffer.gl.h lib/gnulib/malloc/scratch_buffer.gl.h-t
-@gl_GNULIB_ENABLED_8444034ea779b88768865bb60b4fb8c9_TRUE@am__append_29 = lib/gnulib/malloc/scratch_buffer_grow.c                 lib/gnulib/malloc/scratch_buffer_grow_preserve.c                 lib/gnulib/malloc/scratch_buffer_set_array_size.c
-@gl_GNULIB_ENABLED_idx_TRUE@am__append_30 = lib/gnulib/idx.h
-@gl_GNULIB_ENABLED_67241cf2e9b9409f43aeebaa5c55e7f2_TRUE@am__append_31 = lib/gnulib/inttypes.h
-@gl_GNULIB_ENABLED_67241cf2e9b9409f43aeebaa5c55e7f2_TRUE@am__append_32 = lib/gnulib/inttypes.h lib/gnulib/inttypes.h-t
-@gl_GNULIB_ENABLED_46f732ef6fef4ccd68de017c9ed88bed_TRUE@am__append_33 = $(LIMITS_H)
-@gl_GNULIB_ENABLED_46f732ef6fef4ccd68de017c9ed88bed_TRUE@am__append_34 = lib/gnulib/limits.h lib/gnulib/limits.h-t
-@GL_COND_OBJ_LSTAT_TRUE@@gl_GNULIB_ENABLED_lstat_TRUE@am__append_35 = lib/gnulib/lstat.c
-@gl_GNULIB_ENABLED_malloca_TRUE@am__append_36 = lib/gnulib/malloca.c
-@gl_GNULIB_ENABLED_mbszero_TRUE@am__append_37 = lib/gnulib/mbszero.c
-@GL_COND_OBJ_MEMCHR_TRUE@@gl_GNULIB_ENABLED_memchr_TRUE@am__append_38 = lib/gnulib/memchr.c
-@GL_COND_OBJ_MEMPCPY_TRUE@@gl_GNULIB_ENABLED_mempcpy_TRUE@am__append_39 = lib/gnulib/mempcpy.c
-@gl_GNULIB_ENABLED_minmax_TRUE@am__append_40 = lib/gnulib/minmax.h
-@GL_COND_OBJ_RAWMEMCHR_TRUE@@gl_GNULIB_ENABLED_rawmemchr_TRUE@am__append_41 = lib/gnulib/rawmemchr.c
-@GL_COND_OBJ_READLINK_TRUE@@gl_GNULIB_ENABLED_readlink_TRUE@am__append_42 = lib/gnulib/readlink.c
-@GL_COND_OBJ_REALLOC_POSIX_TRUE@@gl_GNULIB_ENABLED_61bcaca76b3e6f9ae55d57a1c3193bc4_TRUE@am__append_43 = lib/gnulib/realloc.c
-@GL_COND_OBJ_RENAME_TRUE@am__append_44 = lib/gnulib/rename.c
-@GL_COND_OBJ_RMDIR_TRUE@@gl_GNULIB_ENABLED_rmdir_TRUE@am__append_45 = lib/gnulib/rmdir.c
-@gl_GNULIB_ENABLED_9bc5f216d57e231e4834049d67d0db62_TRUE@am__append_46 = lib/gnulib/same-inode.h lib/gnulib/same-inode.c
-@gl_GNULIB_ENABLED_size_max_TRUE@am__append_47 = lib/gnulib/size_max.h
-@GL_COND_OBJ_STAT_TRUE@@gl_GNULIB_ENABLED_stat_TRUE@am__append_48 = lib/gnulib/stat.c
-@gl_GNULIB_ENABLED_0137e3d3638b33e5819d132d0b23165c_TRUE@am__append_49 = lib/gnulib/stat-time.c
-@gl_GNULIB_ENABLED_stdckdint_TRUE@am__append_50 = $(STDCKDINT_H)
-@gl_GNULIB_ENABLED_stdckdint_TRUE@am__append_51 = lib/gnulib/stdckdint.h lib/gnulib/stdckdint.h-t
-@gl_GNULIB_ENABLED_stdint_TRUE@am__append_52 = $(STDINT_H)
-@gl_GNULIB_ENABLED_stdint_TRUE@am__append_53 = lib/gnulib/stdint.h lib/gnulib/stdint.h-t
-@GL_COND_OBJ_STDIO_READ_TRUE@am__append_54 = lib/gnulib/stdio-read.c
-@GL_COND_OBJ_STDIO_WRITE_TRUE@am__append_55 = lib/gnulib/stdio-write.c
-@GL_COND_OBJ_STRCASECMP_TRUE@am__append_56 = lib/gnulib/strcasecmp.c
-@GL_COND_OBJ_STRNCASECMP_TRUE@am__append_57 = lib/gnulib/strncasecmp.c
-@GL_COND_OBJ_STRSEP_TRUE@am__append_58 = lib/gnulib/strsep.c
-@gl_GNULIB_ENABLED_sys_stat_TRUE@am__append_59 = lib/gnulib/sys/stat.h
-@gl_GNULIB_ENABLED_sys_stat_TRUE@am__append_60 = lib/gnulib/sys/stat.h lib/gnulib/sys/stat.h-t
-@gl_GNULIB_ENABLED_sys_stat_TRUE@am__append_61 = lib/gnulib/sys
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@am__append_62 = lib/gnulib/time.h
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@am__append_63 = lib/gnulib/time.h lib/gnulib/time.h-t
-@gl_GNULIB_ENABLED_wchar_TRUE@am__append_64 = lib/gnulib/wchar.h
-@gl_GNULIB_ENABLED_wchar_TRUE@am__append_65 = lib/gnulib/wchar.h lib/gnulib/wchar.h-t1 lib/gnulib/wchar.h-t2 lib/gnulib/wchar.h-t3
-@gl_GNULIB_ENABLED_xsize_TRUE@am__append_66 = lib/gnulib/xsize.h lib/gnulib/xsize.c
+@gl_GNULIB_ENABLED_gettime_TRUE@am__append_27 = lib/gnulib/gettime.c
+@GL_COND_OBJ_GETTIMEOFDAY_TRUE@@gl_GNULIB_ENABLED_gettimeofday_TRUE@am__append_28 = lib/gnulib/gettimeofday.c
+@gl_GNULIB_ENABLED_8444034ea779b88768865bb60b4fb8c9_TRUE@am__append_29 = lib/gnulib/malloc/scratch_buffer.gl.h
+@gl_GNULIB_ENABLED_8444034ea779b88768865bb60b4fb8c9_TRUE@am__append_30 = lib/gnulib/malloc/scratch_buffer.gl.h lib/gnulib/malloc/scratch_buffer.gl.h-t
+@gl_GNULIB_ENABLED_8444034ea779b88768865bb60b4fb8c9_TRUE@am__append_31 = lib/gnulib/malloc/scratch_buffer_grow.c                 lib/gnulib/malloc/scratch_buffer_grow_preserve.c                 lib/gnulib/malloc/scratch_buffer_set_array_size.c
+@gl_GNULIB_ENABLED_idx_TRUE@am__append_32 = lib/gnulib/idx.h
+@gl_GNULIB_ENABLED_67241cf2e9b9409f43aeebaa5c55e7f2_TRUE@am__append_33 = lib/gnulib/inttypes.h
+@gl_GNULIB_ENABLED_67241cf2e9b9409f43aeebaa5c55e7f2_TRUE@am__append_34 = lib/gnulib/inttypes.h lib/gnulib/inttypes.h-t
+@gl_GNULIB_ENABLED_46f732ef6fef4ccd68de017c9ed88bed_TRUE@am__append_35 = $(LIMITS_H)
+@gl_GNULIB_ENABLED_46f732ef6fef4ccd68de017c9ed88bed_TRUE@am__append_36 = lib/gnulib/limits.h lib/gnulib/limits.h-t
+@GL_COND_OBJ_LSTAT_TRUE@@gl_GNULIB_ENABLED_lstat_TRUE@am__append_37 = lib/gnulib/lstat.c
+@gl_GNULIB_ENABLED_malloca_TRUE@am__append_38 = lib/gnulib/malloca.c
+@gl_GNULIB_ENABLED_mbszero_TRUE@am__append_39 = lib/gnulib/mbszero.c
+@GL_COND_OBJ_MEMCHR_TRUE@@gl_GNULIB_ENABLED_memchr_TRUE@am__append_40 = lib/gnulib/memchr.c
+@GL_COND_OBJ_MEMPCPY_TRUE@@gl_GNULIB_ENABLED_mempcpy_TRUE@am__append_41 = lib/gnulib/mempcpy.c
+@gl_GNULIB_ENABLED_minmax_TRUE@am__append_42 = lib/gnulib/minmax.h
+@GL_COND_OBJ_RAWMEMCHR_TRUE@@gl_GNULIB_ENABLED_rawmemchr_TRUE@am__append_43 = lib/gnulib/rawmemchr.c
+@GL_COND_OBJ_READLINK_TRUE@@gl_GNULIB_ENABLED_readlink_TRUE@am__append_44 = lib/gnulib/readlink.c
+@GL_COND_OBJ_REALLOC_POSIX_TRUE@@gl_GNULIB_ENABLED_61bcaca76b3e6f9ae55d57a1c3193bc4_TRUE@am__append_45 = lib/gnulib/realloc.c
+@GL_COND_OBJ_RENAME_TRUE@am__append_46 = lib/gnulib/rename.c
+@GL_COND_OBJ_RMDIR_TRUE@@gl_GNULIB_ENABLED_rmdir_TRUE@am__append_47 = lib/gnulib/rmdir.c
+@gl_GNULIB_ENABLED_9bc5f216d57e231e4834049d67d0db62_TRUE@am__append_48 = lib/gnulib/same-inode.h lib/gnulib/same-inode.c
+@gl_GNULIB_ENABLED_size_max_TRUE@am__append_49 = lib/gnulib/size_max.h
+@GL_COND_OBJ_STAT_TRUE@@gl_GNULIB_ENABLED_stat_TRUE@am__append_50 = lib/gnulib/stat.c
+@gl_GNULIB_ENABLED_0137e3d3638b33e5819d132d0b23165c_TRUE@am__append_51 = lib/gnulib/stat-time.c
+@gl_GNULIB_ENABLED_stdckdint_TRUE@am__append_52 = $(STDCKDINT_H)
+@gl_GNULIB_ENABLED_stdckdint_TRUE@am__append_53 = lib/gnulib/stdckdint.h lib/gnulib/stdckdint.h-t
+@gl_GNULIB_ENABLED_stdint_TRUE@am__append_54 = $(STDINT_H)
+@gl_GNULIB_ENABLED_stdint_TRUE@am__append_55 = lib/gnulib/stdint.h lib/gnulib/stdint.h-t
+@GL_COND_OBJ_STDIO_READ_TRUE@am__append_56 = lib/gnulib/stdio-read.c
+@GL_COND_OBJ_STDIO_WRITE_TRUE@am__append_57 = lib/gnulib/stdio-write.c
+@GL_COND_OBJ_STRCASECMP_TRUE@am__append_58 = lib/gnulib/strcasecmp.c
+@GL_COND_OBJ_STRNCASECMP_TRUE@am__append_59 = lib/gnulib/strncasecmp.c
+@GL_COND_OBJ_STRSEP_TRUE@am__append_60 = lib/gnulib/strsep.c
+@gl_GNULIB_ENABLED_sys_stat_TRUE@am__append_61 = lib/gnulib/sys/stat.h
+@gl_GNULIB_ENABLED_sys_stat_TRUE@am__append_62 = lib/gnulib/sys/stat.h lib/gnulib/sys/stat.h-t
+@gl_GNULIB_ENABLED_sys_stat_TRUE@am__append_63 = lib/gnulib/sys
+@gl_GNULIB_ENABLED_sys_time_TRUE@am__append_64 = lib/gnulib/sys/time.h
+@gl_GNULIB_ENABLED_sys_time_TRUE@am__append_65 = lib/gnulib/sys/time.h lib/gnulib/sys/time.h-t
+@gl_GNULIB_ENABLED_sys_time_TRUE@am__append_66 = lib/gnulib/sys
+@GL_COND_OBJ_TIMESPEC_GET_TRUE@am__append_67 = lib/gnulib/timespec_get.c
+@gl_GNULIB_ENABLED_wchar_TRUE@am__append_68 = lib/gnulib/wchar.h
+@gl_GNULIB_ENABLED_wchar_TRUE@am__append_69 = lib/gnulib/wchar.h lib/gnulib/wchar.h-t1 lib/gnulib/wchar.h-t2 lib/gnulib/wchar.h-t3
+@gl_GNULIB_ENABLED_xsize_TRUE@am__append_70 = lib/gnulib/xsize.h lib/gnulib/xsize.c
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/gnulib/00gnulib.m4 \
@@ -225,6 +231,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/gnulib/00gnulib.m4 \
 	$(top_srcdir)/m4/gnulib/builtin-expect.m4 \
 	$(top_srcdir)/m4/gnulib/c-bool.m4 \
 	$(top_srcdir)/m4/gnulib/canonicalize.m4 \
+	$(top_srcdir)/m4/gnulib/clock_time.m4 \
 	$(top_srcdir)/m4/gnulib/codeset.m4 \
 	$(top_srcdir)/m4/gnulib/double-slash-root.m4 \
 	$(top_srcdir)/m4/gnulib/errno_h.m4 \
@@ -238,6 +245,8 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/gnulib/00gnulib.m4 \
 	$(top_srcdir)/m4/gnulib/free.m4 \
 	$(top_srcdir)/m4/gnulib/getdelim.m4 \
 	$(top_srcdir)/m4/gnulib/getline.m4 \
+	$(top_srcdir)/m4/gnulib/gettime.m4 \
+	$(top_srcdir)/m4/gnulib/gettimeofday.m4 \
 	$(top_srcdir)/m4/gnulib/gnulib-common.m4 \
 	$(top_srcdir)/m4/gnulib/gnulib-comp.m4 \
 	$(top_srcdir)/m4/gnulib/include_next.m4 \
@@ -285,9 +294,13 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/gnulib/00gnulib.m4 \
 	$(top_srcdir)/m4/gnulib/string_h.m4 \
 	$(top_srcdir)/m4/gnulib/strings_h.m4 \
 	$(top_srcdir)/m4/gnulib/strsep.m4 \
+	$(top_srcdir)/m4/gnulib/sys_socket_h.m4 \
 	$(top_srcdir)/m4/gnulib/sys_stat_h.m4 \
+	$(top_srcdir)/m4/gnulib/sys_time_h.m4 \
 	$(top_srcdir)/m4/gnulib/sys_types_h.m4 \
 	$(top_srcdir)/m4/gnulib/time_h.m4 \
+	$(top_srcdir)/m4/gnulib/timespec.m4 \
+	$(top_srcdir)/m4/gnulib/timespec_get.m4 \
 	$(top_srcdir)/m4/gnulib/unistd_h.m4 \
 	$(top_srcdir)/m4/gnulib/vasnprintf.m4 \
 	$(top_srcdir)/m4/gnulib/vasprintf.m4 \
@@ -350,6 +363,7 @@ am__lib_gnulib_libgnu_a_SOURCES_DIST = lib/gnulib/basename-lgpl.c \
 	lib/gnulib/canonicalize-lgpl.c lib/gnulib/dirname-lgpl.c \
 	lib/gnulib/stripslash.c lib/gnulib/float.c lib/gnulib/itold.c \
 	lib/gnulib/free.c lib/gnulib/getdelim.c lib/gnulib/getline.c \
+	lib/gnulib/gettime.c lib/gnulib/gettimeofday.c \
 	lib/gnulib/malloc/scratch_buffer_grow.c \
 	lib/gnulib/malloc/scratch_buffer_grow_preserve.c \
 	lib/gnulib/malloc/scratch_buffer_set_array_size.c \
@@ -363,6 +377,7 @@ am__lib_gnulib_libgnu_a_SOURCES_DIST = lib/gnulib/basename-lgpl.c \
 	lib/gnulib/stdio-read.c lib/gnulib/stdio-write.c \
 	lib/gnulib/stdlib.c lib/gnulib/strcasecmp.c \
 	lib/gnulib/strncasecmp.c lib/gnulib/strsep.c \
+	lib/gnulib/timespec.c lib/gnulib/timespec_get.c \
 	lib/gnulib/unistd.c lib/gnulib/xsize.h lib/gnulib/xsize.c
 @gl_GNULIB_ENABLED_ae0d979e17e723693567f9efd1d2294f_TRUE@am__objects_2 = lib/gnulib/lib_gnulib_libgnu_a-basename-lgpl.$(OBJEXT)
 @GL_COND_OBJ_CANONICALIZE_LGPL_TRUE@@gl_GNULIB_ENABLED_72dfd9a8bb8db9211d38af59105b03c0_TRUE@am__objects_3 = lib/gnulib/lib_gnulib_libgnu_a-canonicalize-lgpl.$(OBJEXT)
@@ -373,43 +388,48 @@ am__lib_gnulib_libgnu_a_SOURCES_DIST = lib/gnulib/basename-lgpl.c \
 @GL_COND_OBJ_FREE_TRUE@@gl_GNULIB_ENABLED_ef07dc4b3077c11ea9cef586db4e5955_TRUE@am__objects_7 = lib/gnulib/lib_gnulib_libgnu_a-free.$(OBJEXT)
 @GL_COND_OBJ_GETDELIM_TRUE@@gl_GNULIB_ENABLED_getdelim_TRUE@am__objects_8 = lib/gnulib/lib_gnulib_libgnu_a-getdelim.$(OBJEXT)
 @GL_COND_OBJ_GETLINE_TRUE@am__objects_9 = lib/gnulib/lib_gnulib_libgnu_a-getline.$(OBJEXT)
-@gl_GNULIB_ENABLED_8444034ea779b88768865bb60b4fb8c9_TRUE@am__objects_10 = lib/gnulib/malloc/lib_gnulib_libgnu_a-scratch_buffer_grow.$(OBJEXT) \
+@gl_GNULIB_ENABLED_gettime_TRUE@am__objects_10 = lib/gnulib/lib_gnulib_libgnu_a-gettime.$(OBJEXT)
+@GL_COND_OBJ_GETTIMEOFDAY_TRUE@@gl_GNULIB_ENABLED_gettimeofday_TRUE@am__objects_11 = lib/gnulib/lib_gnulib_libgnu_a-gettimeofday.$(OBJEXT)
+@gl_GNULIB_ENABLED_8444034ea779b88768865bb60b4fb8c9_TRUE@am__objects_12 = lib/gnulib/malloc/lib_gnulib_libgnu_a-scratch_buffer_grow.$(OBJEXT) \
 @gl_GNULIB_ENABLED_8444034ea779b88768865bb60b4fb8c9_TRUE@	lib/gnulib/malloc/lib_gnulib_libgnu_a-scratch_buffer_grow_preserve.$(OBJEXT) \
 @gl_GNULIB_ENABLED_8444034ea779b88768865bb60b4fb8c9_TRUE@	lib/gnulib/malloc/lib_gnulib_libgnu_a-scratch_buffer_set_array_size.$(OBJEXT)
-am__objects_11 =
-@GL_COND_OBJ_LSTAT_TRUE@@gl_GNULIB_ENABLED_lstat_TRUE@am__objects_12 = lib/gnulib/lib_gnulib_libgnu_a-lstat.$(OBJEXT)
-@gl_GNULIB_ENABLED_malloca_TRUE@am__objects_13 = lib/gnulib/lib_gnulib_libgnu_a-malloca.$(OBJEXT)
-@gl_GNULIB_ENABLED_mbszero_TRUE@am__objects_14 = lib/gnulib/lib_gnulib_libgnu_a-mbszero.$(OBJEXT)
-@GL_COND_OBJ_MEMCHR_TRUE@@gl_GNULIB_ENABLED_memchr_TRUE@am__objects_15 = lib/gnulib/lib_gnulib_libgnu_a-memchr.$(OBJEXT)
-@GL_COND_OBJ_MEMPCPY_TRUE@@gl_GNULIB_ENABLED_mempcpy_TRUE@am__objects_16 = lib/gnulib/lib_gnulib_libgnu_a-mempcpy.$(OBJEXT)
-@GL_COND_OBJ_RAWMEMCHR_TRUE@@gl_GNULIB_ENABLED_rawmemchr_TRUE@am__objects_17 = lib/gnulib/lib_gnulib_libgnu_a-rawmemchr.$(OBJEXT)
-@GL_COND_OBJ_READLINK_TRUE@@gl_GNULIB_ENABLED_readlink_TRUE@am__objects_18 = lib/gnulib/lib_gnulib_libgnu_a-readlink.$(OBJEXT)
-@GL_COND_OBJ_REALLOC_POSIX_TRUE@@gl_GNULIB_ENABLED_61bcaca76b3e6f9ae55d57a1c3193bc4_TRUE@am__objects_19 = lib/gnulib/lib_gnulib_libgnu_a-realloc.$(OBJEXT)
-@GL_COND_OBJ_RENAME_TRUE@am__objects_20 = lib/gnulib/lib_gnulib_libgnu_a-rename.$(OBJEXT)
-@GL_COND_OBJ_RMDIR_TRUE@@gl_GNULIB_ENABLED_rmdir_TRUE@am__objects_21 = lib/gnulib/lib_gnulib_libgnu_a-rmdir.$(OBJEXT)
-@gl_GNULIB_ENABLED_9bc5f216d57e231e4834049d67d0db62_TRUE@am__objects_22 = lib/gnulib/lib_gnulib_libgnu_a-same-inode.$(OBJEXT)
-@GL_COND_OBJ_STAT_TRUE@@gl_GNULIB_ENABLED_stat_TRUE@am__objects_23 = lib/gnulib/lib_gnulib_libgnu_a-stat.$(OBJEXT)
-@gl_GNULIB_ENABLED_0137e3d3638b33e5819d132d0b23165c_TRUE@am__objects_24 = lib/gnulib/lib_gnulib_libgnu_a-stat-time.$(OBJEXT)
-@GL_COND_OBJ_STDIO_READ_TRUE@am__objects_25 = lib/gnulib/lib_gnulib_libgnu_a-stdio-read.$(OBJEXT)
-@GL_COND_OBJ_STDIO_WRITE_TRUE@am__objects_26 = lib/gnulib/lib_gnulib_libgnu_a-stdio-write.$(OBJEXT)
-@GL_COND_OBJ_STRCASECMP_TRUE@am__objects_27 = lib/gnulib/lib_gnulib_libgnu_a-strcasecmp.$(OBJEXT)
-@GL_COND_OBJ_STRNCASECMP_TRUE@am__objects_28 = lib/gnulib/lib_gnulib_libgnu_a-strncasecmp.$(OBJEXT)
-@GL_COND_OBJ_STRSEP_TRUE@am__objects_29 = lib/gnulib/lib_gnulib_libgnu_a-strsep.$(OBJEXT)
-@gl_GNULIB_ENABLED_xsize_TRUE@am__objects_30 = lib/gnulib/lib_gnulib_libgnu_a-xsize.$(OBJEXT)
+am__objects_13 =
+@GL_COND_OBJ_LSTAT_TRUE@@gl_GNULIB_ENABLED_lstat_TRUE@am__objects_14 = lib/gnulib/lib_gnulib_libgnu_a-lstat.$(OBJEXT)
+@gl_GNULIB_ENABLED_malloca_TRUE@am__objects_15 = lib/gnulib/lib_gnulib_libgnu_a-malloca.$(OBJEXT)
+@gl_GNULIB_ENABLED_mbszero_TRUE@am__objects_16 = lib/gnulib/lib_gnulib_libgnu_a-mbszero.$(OBJEXT)
+@GL_COND_OBJ_MEMCHR_TRUE@@gl_GNULIB_ENABLED_memchr_TRUE@am__objects_17 = lib/gnulib/lib_gnulib_libgnu_a-memchr.$(OBJEXT)
+@GL_COND_OBJ_MEMPCPY_TRUE@@gl_GNULIB_ENABLED_mempcpy_TRUE@am__objects_18 = lib/gnulib/lib_gnulib_libgnu_a-mempcpy.$(OBJEXT)
+@GL_COND_OBJ_RAWMEMCHR_TRUE@@gl_GNULIB_ENABLED_rawmemchr_TRUE@am__objects_19 = lib/gnulib/lib_gnulib_libgnu_a-rawmemchr.$(OBJEXT)
+@GL_COND_OBJ_READLINK_TRUE@@gl_GNULIB_ENABLED_readlink_TRUE@am__objects_20 = lib/gnulib/lib_gnulib_libgnu_a-readlink.$(OBJEXT)
+@GL_COND_OBJ_REALLOC_POSIX_TRUE@@gl_GNULIB_ENABLED_61bcaca76b3e6f9ae55d57a1c3193bc4_TRUE@am__objects_21 = lib/gnulib/lib_gnulib_libgnu_a-realloc.$(OBJEXT)
+@GL_COND_OBJ_RENAME_TRUE@am__objects_22 = lib/gnulib/lib_gnulib_libgnu_a-rename.$(OBJEXT)
+@GL_COND_OBJ_RMDIR_TRUE@@gl_GNULIB_ENABLED_rmdir_TRUE@am__objects_23 = lib/gnulib/lib_gnulib_libgnu_a-rmdir.$(OBJEXT)
+@gl_GNULIB_ENABLED_9bc5f216d57e231e4834049d67d0db62_TRUE@am__objects_24 = lib/gnulib/lib_gnulib_libgnu_a-same-inode.$(OBJEXT)
+@GL_COND_OBJ_STAT_TRUE@@gl_GNULIB_ENABLED_stat_TRUE@am__objects_25 = lib/gnulib/lib_gnulib_libgnu_a-stat.$(OBJEXT)
+@gl_GNULIB_ENABLED_0137e3d3638b33e5819d132d0b23165c_TRUE@am__objects_26 = lib/gnulib/lib_gnulib_libgnu_a-stat-time.$(OBJEXT)
+@GL_COND_OBJ_STDIO_READ_TRUE@am__objects_27 = lib/gnulib/lib_gnulib_libgnu_a-stdio-read.$(OBJEXT)
+@GL_COND_OBJ_STDIO_WRITE_TRUE@am__objects_28 = lib/gnulib/lib_gnulib_libgnu_a-stdio-write.$(OBJEXT)
+@GL_COND_OBJ_STRCASECMP_TRUE@am__objects_29 = lib/gnulib/lib_gnulib_libgnu_a-strcasecmp.$(OBJEXT)
+@GL_COND_OBJ_STRNCASECMP_TRUE@am__objects_30 = lib/gnulib/lib_gnulib_libgnu_a-strncasecmp.$(OBJEXT)
+@GL_COND_OBJ_STRSEP_TRUE@am__objects_31 = lib/gnulib/lib_gnulib_libgnu_a-strsep.$(OBJEXT)
+@GL_COND_OBJ_TIMESPEC_GET_TRUE@am__objects_32 = lib/gnulib/lib_gnulib_libgnu_a-timespec_get.$(OBJEXT)
+@gl_GNULIB_ENABLED_xsize_TRUE@am__objects_33 = lib/gnulib/lib_gnulib_libgnu_a-xsize.$(OBJEXT)
 am_lib_gnulib_libgnu_a_OBJECTS = $(am__objects_2) $(am__objects_3) \
 	$(am__objects_4) $(am__objects_5) $(am__objects_6) \
 	$(am__objects_7) $(am__objects_8) $(am__objects_9) \
 	$(am__objects_10) $(am__objects_11) $(am__objects_12) \
 	$(am__objects_13) $(am__objects_14) $(am__objects_15) \
-	$(am__objects_16) $(am__objects_11) $(am__objects_17) \
-	$(am__objects_18) $(am__objects_19) $(am__objects_20) \
-	$(am__objects_21) $(am__objects_22) $(am__objects_11) \
-	$(am__objects_23) $(am__objects_24) $(am__objects_25) \
-	$(am__objects_26) \
+	$(am__objects_16) $(am__objects_17) $(am__objects_18) \
+	$(am__objects_13) $(am__objects_19) $(am__objects_20) \
+	$(am__objects_21) $(am__objects_22) $(am__objects_23) \
+	$(am__objects_24) $(am__objects_13) $(am__objects_25) \
+	$(am__objects_26) $(am__objects_27) $(am__objects_28) \
 	lib/gnulib/lib_gnulib_libgnu_a-stdlib.$(OBJEXT) \
-	$(am__objects_27) $(am__objects_28) $(am__objects_29) \
+	$(am__objects_29) $(am__objects_30) $(am__objects_31) \
+	lib/gnulib/lib_gnulib_libgnu_a-timespec.$(OBJEXT) \
+	$(am__objects_32) \
 	lib/gnulib/lib_gnulib_libgnu_a-unistd.$(OBJEXT) \
-	$(am__objects_30)
+	$(am__objects_33)
 lib_gnulib_libgnu_a_OBJECTS = $(am_lib_gnulib_libgnu_a_OBJECTS)
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
@@ -432,13 +452,14 @@ am__hexpuzzle_SOURCES_DIST = src/background.h src/background.c \
 	src/raygui_paged_list.c src/raylib_gui_numeric.h \
 	src/raylib_gui_numeric.c src/raylib_helper.h \
 	src/raylib_helper.c src/startup_action.h src/startup_action.c \
-	src/shader.h src/shader.c src/solver.h src/solver.c \
-	src/textures.h src/textures.c src/tile.h src/tile.c \
-	src/tile_draw.h src/tile_draw.c src/tile_pos.h src/tile_pos.c \
-	src/util.h src/util.c src/win_anim.h src/win_anim.c \
-	src/win_anim_mode_config.h src/win_anim_mode_config.c \
-	src/common.h src/main.c src/physics.h src/physics.c
-@USE_PHYSICS_TRUE@am__objects_31 = src/hexpuzzle-physics.$(OBJEXT)
+	src/shader.h src/shader.c src/solve_timer.h src/solve_timer.c \
+	src/solver.h src/solver.c src/textures.h src/textures.c \
+	src/tile.h src/tile.c src/tile_draw.h src/tile_draw.c \
+	src/tile_pos.h src/tile_pos.c src/util.h src/util.c \
+	src/win_anim.h src/win_anim.c src/win_anim_mode_config.h \
+	src/win_anim_mode_config.c src/common.h src/main.c \
+	src/physics.h src/physics.c
+@USE_PHYSICS_TRUE@am__objects_34 = src/hexpuzzle-physics.$(OBJEXT)
 am_hexpuzzle_OBJECTS = src/hexpuzzle-background.$(OBJEXT) \
 	src/hexpuzzle-classics.$(OBJEXT) \
 	src/hexpuzzle-collection.$(OBJEXT) \
@@ -465,20 +486,22 @@ am_hexpuzzle_OBJECTS = src/hexpuzzle-background.$(OBJEXT) \
 	src/hexpuzzle-raylib_gui_numeric.$(OBJEXT) \
 	src/hexpuzzle-raylib_helper.$(OBJEXT) \
 	src/hexpuzzle-startup_action.$(OBJEXT) \
-	src/hexpuzzle-shader.$(OBJEXT) src/hexpuzzle-solver.$(OBJEXT) \
+	src/hexpuzzle-shader.$(OBJEXT) \
+	src/hexpuzzle-solve_timer.$(OBJEXT) \
+	src/hexpuzzle-solver.$(OBJEXT) \
 	src/hexpuzzle-textures.$(OBJEXT) src/hexpuzzle-tile.$(OBJEXT) \
 	src/hexpuzzle-tile_draw.$(OBJEXT) \
 	src/hexpuzzle-tile_pos.$(OBJEXT) src/hexpuzzle-util.$(OBJEXT) \
 	src/hexpuzzle-win_anim.$(OBJEXT) \
 	src/hexpuzzle-win_anim_mode_config.$(OBJEXT) \
-	src/hexpuzzle-main.$(OBJEXT) $(am__objects_31)
+	src/hexpuzzle-main.$(OBJEXT) $(am__objects_34)
 hexpuzzle_OBJECTS = $(am_hexpuzzle_OBJECTS)
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @USE_SYSTEM_RAYLIB_FALSE@am__DEPENDENCIES_3 =  \
 @USE_SYSTEM_RAYLIB_FALSE@	external/libcombined_deps.a \
 @USE_SYSTEM_RAYLIB_FALSE@	external/raylib/libraylib.a
 hexpuzzle_DEPENDENCIES = $(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
-	$(am__append_4) lib/gnulib/libgnu.a
+	$(am__append_4) lib/gnulib/libgnu.a $(am__DEPENDENCIES_1)
 hexpuzzle_LINK = $(CCLD) $(hexpuzzle_CFLAGS) $(CFLAGS) \
 	$(hexpuzzle_LDFLAGS) $(LDFLAGS) -o $@
 am_util_compile_to_c_src_OBJECTS =  \
@@ -654,6 +677,7 @@ CAN_PRINT_STACK_TRACE = @CAN_PRINT_STACK_TRACE@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
+CLOCK_TIME_LIB = @CLOCK_TIME_LIB@
 CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CYGPATH_W = @CYGPATH_W@
@@ -761,6 +785,7 @@ GL_GNULIB_GETPASS = @GL_GNULIB_GETPASS@
 GL_GNULIB_GETPASS_GNU = @GL_GNULIB_GETPASS_GNU@
 GL_GNULIB_GETPROGNAME = @GL_GNULIB_GETPROGNAME@
 GL_GNULIB_GETSUBOPT = @GL_GNULIB_GETSUBOPT@
+GL_GNULIB_GETTIMEOFDAY = @GL_GNULIB_GETTIMEOFDAY@
 GL_GNULIB_GETUMASK = @GL_GNULIB_GETUMASK@
 GL_GNULIB_GETUSERSHELL = @GL_GNULIB_GETUSERSHELL@
 GL_GNULIB_GRANTPT = @GL_GNULIB_GRANTPT@
@@ -1111,6 +1136,7 @@ HAVE_GETPAGESIZE = @HAVE_GETPAGESIZE@
 HAVE_GETPASS = @HAVE_GETPASS@
 HAVE_GETPROGNAME = @HAVE_GETPROGNAME@
 HAVE_GETSUBOPT = @HAVE_GETSUBOPT@
+HAVE_GETTIMEOFDAY = @HAVE_GETTIMEOFDAY@
 HAVE_GETUMASK = @HAVE_GETUMASK@
 HAVE_GRANTPT = @HAVE_GRANTPT@
 HAVE_GROUP_MEMBER = @HAVE_GROUP_MEMBER@
@@ -1198,6 +1224,7 @@ HAVE_STRTOLL = @HAVE_STRTOLL@
 HAVE_STRTOUL = @HAVE_STRTOUL@
 HAVE_STRTOULL = @HAVE_STRTOULL@
 HAVE_STRUCT_RANDOM_DATA = @HAVE_STRUCT_RANDOM_DATA@
+HAVE_STRUCT_TIMEVAL = @HAVE_STRUCT_TIMEVAL@
 HAVE_STRVERSCMP = @HAVE_STRVERSCMP@
 HAVE_SYMLINK = @HAVE_SYMLINK@
 HAVE_SYMLINKAT = @HAVE_SYMLINKAT@
@@ -1205,6 +1232,7 @@ HAVE_SYS_BITYPES_H = @HAVE_SYS_BITYPES_H@
 HAVE_SYS_INTTYPES_H = @HAVE_SYS_INTTYPES_H@
 HAVE_SYS_LOADAVG_H = @HAVE_SYS_LOADAVG_H@
 HAVE_SYS_PARAM_H = @HAVE_SYS_PARAM_H@
+HAVE_SYS_TIME_H = @HAVE_SYS_TIME_H@
 HAVE_SYS_TYPES_H = @HAVE_SYS_TYPES_H@
 HAVE_TIMEGM = @HAVE_TIMEGM@
 HAVE_TIMESPEC_GET = @HAVE_TIMESPEC_GET@
@@ -1246,6 +1274,7 @@ HAVE_WCSSTR = @HAVE_WCSSTR@
 HAVE_WCSTOK = @HAVE_WCSTOK@
 HAVE_WCSWIDTH = @HAVE_WCSWIDTH@
 HAVE_WCSXFRM = @HAVE_WCSXFRM@
+HAVE_WINSOCK2_H = @HAVE_WINSOCK2_H@
 HAVE_WINT_T = @HAVE_WINT_T@
 HAVE_WMEMCHR = @HAVE_WMEMCHR@
 HAVE_WMEMCMP = @HAVE_WMEMCMP@
@@ -1268,6 +1297,7 @@ LIBGNU_LIBDEPS = @LIBGNU_LIBDEPS@
 LIBGNU_LTLIBDEPS = @LIBGNU_LTLIBDEPS@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
+LIB_CLOCK_GETTIME = @LIB_CLOCK_GETTIME@
 LIMITS_H = @LIMITS_H@
 LOCALE_EN_UTF8 = @LOCALE_EN_UTF8@
 LOCALE_JA = @LOCALE_JA@
@@ -1290,6 +1320,7 @@ NEXT_AS_FIRST_DIRECTIVE_STDLIB_H = @NEXT_AS_FIRST_DIRECTIVE_STDLIB_H@
 NEXT_AS_FIRST_DIRECTIVE_STRINGS_H = @NEXT_AS_FIRST_DIRECTIVE_STRINGS_H@
 NEXT_AS_FIRST_DIRECTIVE_STRING_H = @NEXT_AS_FIRST_DIRECTIVE_STRING_H@
 NEXT_AS_FIRST_DIRECTIVE_SYS_STAT_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_STAT_H@
+NEXT_AS_FIRST_DIRECTIVE_SYS_TIME_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_TIME_H@
 NEXT_AS_FIRST_DIRECTIVE_SYS_TYPES_H = @NEXT_AS_FIRST_DIRECTIVE_SYS_TYPES_H@
 NEXT_AS_FIRST_DIRECTIVE_TIME_H = @NEXT_AS_FIRST_DIRECTIVE_TIME_H@
 NEXT_AS_FIRST_DIRECTIVE_UNISTD_H = @NEXT_AS_FIRST_DIRECTIVE_UNISTD_H@
@@ -1306,6 +1337,7 @@ NEXT_STDLIB_H = @NEXT_STDLIB_H@
 NEXT_STRINGS_H = @NEXT_STRINGS_H@
 NEXT_STRING_H = @NEXT_STRING_H@
 NEXT_SYS_STAT_H = @NEXT_SYS_STAT_H@
+NEXT_SYS_TIME_H = @NEXT_SYS_TIME_H@
 NEXT_SYS_TYPES_H = @NEXT_SYS_TYPES_H@
 NEXT_TIME_H = @NEXT_TIME_H@
 NEXT_UNISTD_H = @NEXT_UNISTD_H@
@@ -1393,6 +1425,7 @@ REPLACE_GETPASS = @REPLACE_GETPASS@
 REPLACE_GETPASS_FOR_GETPASS_GNU = @REPLACE_GETPASS_FOR_GETPASS_GNU@
 REPLACE_GETPROGNAME = @REPLACE_GETPROGNAME@
 REPLACE_GETSUBOPT = @REPLACE_GETSUBOPT@
+REPLACE_GETTIMEOFDAY = @REPLACE_GETTIMEOFDAY@
 REPLACE_GETUSERSHELL = @REPLACE_GETUSERSHELL@
 REPLACE_GMTIME = @REPLACE_GMTIME@
 REPLACE_IMAXABS = @REPLACE_IMAXABS@
@@ -1496,6 +1529,7 @@ REPLACE_STRTOLL = @REPLACE_STRTOLL@
 REPLACE_STRTOUL = @REPLACE_STRTOUL@
 REPLACE_STRTOULL = @REPLACE_STRTOULL@
 REPLACE_STRTOUMAX = @REPLACE_STRTOUMAX@
+REPLACE_STRUCT_TIMEVAL = @REPLACE_STRUCT_TIMEVAL@
 REPLACE_STRVERSCMP = @REPLACE_STRVERSCMP@
 REPLACE_SYMLINK = @REPLACE_SYMLINK@
 REPLACE_SYMLINKAT = @REPLACE_SYMLINKAT@
@@ -1677,7 +1711,8 @@ EXTRA_DIST = README.md lib/gnugetopt.h lib/getopt.c lib/getopt1.c \
 	lib/gnulib/stdint.in.h lib/gnulib/stdio.in.h \
 	lib/gnulib/stdlib.in.h lib/gnulib/string.in.h \
 	lib/gnulib/strings.in.h lib/gnulib/sys_stat.in.h \
-	lib/gnulib/sys_types.in.h lib/gnulib/time.in.h \
+	lib/gnulib/sys_time.in.h lib/gnulib/sys_types.in.h \
+	lib/gnulib/time.in.h lib/gnulib/timespec.h \
 	lib/gnulib/unistd.in.h lib/gnulib/asnprintf.c \
 	lib/gnulib/float+.h lib/gnulib/printf-args.c \
 	lib/gnulib/printf-args.h lib/gnulib/printf-parse.c \
@@ -1708,7 +1743,7 @@ COMMON_PROG_LDADD = \
 
 hexpuzzle_CFLAGS = $(COMMON_PROG_CFLAGS) $(am__append_3)
 hexpuzzle_LDADD = $(COMMON_PROG_LDADD) $(am__append_1) $(am__append_4) \
-	lib/gnulib/libgnu.a
+	lib/gnulib/libgnu.a $(CLOCK_TIME_LIB)
 @BUILD_WEB_TRUE@hexpuzzle_LDFLAGS = -flto -s MAX_WEBGL_VERSION=1 -s \
 @BUILD_WEB_TRUE@	USE_GLFW=3 -s WASM=1 -s \
 @BUILD_WEB_TRUE@	GL_ENABLE_GET_PROC_ADDRESS=1 -s \
@@ -1732,13 +1767,13 @@ hexpuzzle_SOURCES = src/background.h src/background.c src/classics.h \
 	src/raygui_paged_list.h src/raygui_paged_list.c \
 	src/raylib_gui_numeric.h src/raylib_gui_numeric.c \
 	src/raylib_helper.h src/raylib_helper.c src/startup_action.h \
-	src/startup_action.c src/shader.h src/shader.c src/solver.h \
-	src/solver.c src/textures.h src/textures.c src/tile.h \
-	src/tile.c src/tile_draw.h src/tile_draw.c src/tile_pos.h \
-	src/tile_pos.c src/util.h src/util.c src/win_anim.h \
-	src/win_anim.c src/win_anim_mode_config.h \
-	src/win_anim_mode_config.c src/common.h src/main.c \
-	$(am__append_5)
+	src/startup_action.c src/shader.h src/shader.c \
+	src/solve_timer.h src/solve_timer.c src/solver.h src/solver.c \
+	src/textures.h src/textures.c src/tile.h src/tile.c \
+	src/tile_draw.h src/tile_draw.c src/tile_pos.h src/tile_pos.c \
+	src/util.h src/util.c src/win_anim.h src/win_anim.c \
+	src/win_anim_mode_config.h src/win_anim_mode_config.c \
+	src/common.h src/main.c $(am__append_5)
 dist_EXTRA_hexpuzzle_SOURCES = \
 	src/data_classics_levels.h  \
 	src/data_fonts.h            \
@@ -1754,12 +1789,12 @@ util_compile_to_c_src_LDADD = $(COMMON_PROG_LDADD) \
 NO_UNUSED_BUT_SET_OPT = $(am__append_6)
 BUILT_SOURCES = util/compile_to_c_src $(dist_EXTRA_hexpuzzle_SOURCES) \
 	$(am__append_9) $(am__append_11) $(am__append_16) \
-	$(am__append_18) $(am__append_20) $(am__append_27) \
-	$(am__append_31) $(am__append_33) $(am__append_50) $(STDDEF_H) \
-	$(am__append_52) lib/gnulib/stdio.h lib/gnulib/stdlib.h \
-	lib/gnulib/string.h lib/gnulib/strings.h $(am__append_59) \
-	lib/gnulib/sys/types.h $(am__append_62) lib/gnulib/unistd.h \
-	$(am__append_64)
+	$(am__append_18) $(am__append_20) $(am__append_29) \
+	$(am__append_33) $(am__append_35) $(am__append_52) $(STDDEF_H) \
+	$(am__append_54) lib/gnulib/stdio.h lib/gnulib/stdlib.h \
+	lib/gnulib/string.h lib/gnulib/strings.h $(am__append_61) \
+	$(am__append_64) lib/gnulib/sys/types.h lib/gnulib/time.h \
+	lib/gnulib/unistd.h $(am__append_68)
 DISTCLEANFILES = \
 	util/compile_to_c_src
 
@@ -1893,32 +1928,34 @@ external_raylib_libraylib_a_SOURCES = external/raylib/raylib_config.h \
 	$(am__append_8)
 MOSTLYCLEANFILES = lib/gnulib/core lib/gnulib/*.stackdump \
 	$(am__append_10) $(am__append_12) $(am__append_17) \
-	$(am__append_19) $(am__append_21) $(am__append_28) \
-	$(am__append_32) $(am__append_34) $(am__append_51) \
-	lib/gnulib/stddef.h lib/gnulib/stddef.h-t $(am__append_53) \
+	$(am__append_19) $(am__append_21) $(am__append_30) \
+	$(am__append_34) $(am__append_36) $(am__append_53) \
+	lib/gnulib/stddef.h lib/gnulib/stddef.h-t $(am__append_55) \
 	lib/gnulib/stdio.h lib/gnulib/stdio.h-t1 lib/gnulib/stdio.h-t2 \
 	lib/gnulib/stdio.h-t3 lib/gnulib/stdlib.h \
 	lib/gnulib/stdlib.h-t1 lib/gnulib/stdlib.h-t2 \
 	lib/gnulib/stdlib.h-t3 lib/gnulib/string.h \
 	lib/gnulib/string.h-t1 lib/gnulib/string.h-t2 \
-	lib/gnulib/strings.h lib/gnulib/strings.h-t $(am__append_60) \
-	lib/gnulib/sys/types.h lib/gnulib/sys/types.h-t \
-	$(am__append_63) lib/gnulib/unistd.h lib/gnulib/unistd.h-t1 \
+	lib/gnulib/strings.h lib/gnulib/strings.h-t $(am__append_62) \
+	$(am__append_65) lib/gnulib/sys/types.h \
+	lib/gnulib/sys/types.h-t lib/gnulib/time.h lib/gnulib/time.h-t \
+	lib/gnulib/unistd.h lib/gnulib/unistd.h-t1 \
 	lib/gnulib/unistd.h-t2 lib/gnulib/unistd.h-t3 \
-	lib/gnulib/unistd.h-t4 $(am__append_65)
-MOSTLYCLEANDIRS = $(am__append_61) lib/gnulib/sys
+	lib/gnulib/unistd.h-t4 $(am__append_69)
+MOSTLYCLEANDIRS = $(am__append_63) $(am__append_66) lib/gnulib/sys
 lib_gnulib_libgnu_a_SOURCES = $(am__append_13) $(am__append_14) \
 	$(am__append_15) $(am__append_22) $(am__append_23) \
 	$(am__append_24) $(am__append_25) $(am__append_26) \
-	$(am__append_29) $(am__append_30) $(am__append_35) \
-	$(am__append_36) $(am__append_37) $(am__append_38) \
+	$(am__append_27) $(am__append_28) $(am__append_31) \
+	$(am__append_32) $(am__append_37) $(am__append_38) \
 	$(am__append_39) $(am__append_40) $(am__append_41) \
 	$(am__append_42) $(am__append_43) $(am__append_44) \
 	$(am__append_45) $(am__append_46) $(am__append_47) \
-	$(am__append_48) $(am__append_49) $(am__append_54) \
-	$(am__append_55) lib/gnulib/stdlib.c $(am__append_56) \
-	$(am__append_57) $(am__append_58) lib/gnulib/unistd.c \
-	$(am__append_66)
+	$(am__append_48) $(am__append_49) $(am__append_50) \
+	$(am__append_51) $(am__append_56) $(am__append_57) \
+	lib/gnulib/stdlib.c $(am__append_58) $(am__append_59) \
+	$(am__append_60) lib/gnulib/timespec.c $(am__append_67) \
+	lib/gnulib/unistd.c $(am__append_70)
 lib_gnulib_libgnu_a_CFLAGS = $(AM_CFLAGS) $(GL_CFLAG_GNULIB_WARNINGS)
 lib_gnulib_libgnu_a_LIBADD = $(gl_LIBOBJS)
 lib_gnulib_libgnu_a_DEPENDENCIES = $(gl_LIBOBJS)
@@ -2117,6 +2154,12 @@ lib/gnulib/lib_gnulib_libgnu_a-getdelim.$(OBJEXT):  \
 lib/gnulib/lib_gnulib_libgnu_a-getline.$(OBJEXT):  \
 	lib/gnulib/$(am__dirstamp) \
 	lib/gnulib/$(DEPDIR)/$(am__dirstamp)
+lib/gnulib/lib_gnulib_libgnu_a-gettime.$(OBJEXT):  \
+	lib/gnulib/$(am__dirstamp) \
+	lib/gnulib/$(DEPDIR)/$(am__dirstamp)
+lib/gnulib/lib_gnulib_libgnu_a-gettimeofday.$(OBJEXT):  \
+	lib/gnulib/$(am__dirstamp) \
+	lib/gnulib/$(DEPDIR)/$(am__dirstamp)
 lib/gnulib/malloc/$(am__dirstamp):
 	@$(MKDIR_P) lib/gnulib/malloc
 	@: > lib/gnulib/malloc/$(am__dirstamp)
@@ -2187,6 +2230,12 @@ lib/gnulib/lib_gnulib_libgnu_a-strncasecmp.$(OBJEXT):  \
 	lib/gnulib/$(am__dirstamp) \
 	lib/gnulib/$(DEPDIR)/$(am__dirstamp)
 lib/gnulib/lib_gnulib_libgnu_a-strsep.$(OBJEXT):  \
+	lib/gnulib/$(am__dirstamp) \
+	lib/gnulib/$(DEPDIR)/$(am__dirstamp)
+lib/gnulib/lib_gnulib_libgnu_a-timespec.$(OBJEXT):  \
+	lib/gnulib/$(am__dirstamp) \
+	lib/gnulib/$(DEPDIR)/$(am__dirstamp)
+lib/gnulib/lib_gnulib_libgnu_a-timespec_get.$(OBJEXT):  \
 	lib/gnulib/$(am__dirstamp) \
 	lib/gnulib/$(DEPDIR)/$(am__dirstamp)
 lib/gnulib/lib_gnulib_libgnu_a-unistd.$(OBJEXT):  \
@@ -2334,6 +2383,8 @@ src/hexpuzzle-startup_action.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-shader.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/hexpuzzle-solve_timer.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-solver.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-textures.$(OBJEXT): src/$(am__dirstamp) \
@@ -2403,6 +2454,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-free.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-getdelim.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-getline.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-gettime.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-gettimeofday.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-itold.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-lstat.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-malloc.Po@am__quote@
@@ -2428,6 +2481,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-stripslash.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-strncasecmp.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-strsep.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-timespec.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-timespec_get.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-unistd.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-vasnprintf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-vasprintf.Po@am__quote@
@@ -2467,6 +2522,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raylib_gui_numeric.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raylib_helper.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-shader.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-solve_timer.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-solver.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-startup_action.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-textures.Po@am__quote@
@@ -2731,6 +2787,34 @@ lib/gnulib/lib_gnulib_libgnu_a-getline.obj: lib/gnulib/getline.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='lib/gnulib/getline.c' object='lib/gnulib/lib_gnulib_libgnu_a-getline.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_gnulib_libgnu_a_CFLAGS) $(CFLAGS) -c -o lib/gnulib/lib_gnulib_libgnu_a-getline.obj `if test -f 'lib/gnulib/getline.c'; then $(CYGPATH_W) 'lib/gnulib/getline.c'; else $(CYGPATH_W) '$(srcdir)/lib/gnulib/getline.c'; fi`
+
+lib/gnulib/lib_gnulib_libgnu_a-gettime.o: lib/gnulib/gettime.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_gnulib_libgnu_a_CFLAGS) $(CFLAGS) -MT lib/gnulib/lib_gnulib_libgnu_a-gettime.o -MD -MP -MF lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-gettime.Tpo -c -o lib/gnulib/lib_gnulib_libgnu_a-gettime.o `test -f 'lib/gnulib/gettime.c' || echo '$(srcdir)/'`lib/gnulib/gettime.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-gettime.Tpo lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-gettime.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='lib/gnulib/gettime.c' object='lib/gnulib/lib_gnulib_libgnu_a-gettime.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_gnulib_libgnu_a_CFLAGS) $(CFLAGS) -c -o lib/gnulib/lib_gnulib_libgnu_a-gettime.o `test -f 'lib/gnulib/gettime.c' || echo '$(srcdir)/'`lib/gnulib/gettime.c
+
+lib/gnulib/lib_gnulib_libgnu_a-gettime.obj: lib/gnulib/gettime.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_gnulib_libgnu_a_CFLAGS) $(CFLAGS) -MT lib/gnulib/lib_gnulib_libgnu_a-gettime.obj -MD -MP -MF lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-gettime.Tpo -c -o lib/gnulib/lib_gnulib_libgnu_a-gettime.obj `if test -f 'lib/gnulib/gettime.c'; then $(CYGPATH_W) 'lib/gnulib/gettime.c'; else $(CYGPATH_W) '$(srcdir)/lib/gnulib/gettime.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-gettime.Tpo lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-gettime.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='lib/gnulib/gettime.c' object='lib/gnulib/lib_gnulib_libgnu_a-gettime.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_gnulib_libgnu_a_CFLAGS) $(CFLAGS) -c -o lib/gnulib/lib_gnulib_libgnu_a-gettime.obj `if test -f 'lib/gnulib/gettime.c'; then $(CYGPATH_W) 'lib/gnulib/gettime.c'; else $(CYGPATH_W) '$(srcdir)/lib/gnulib/gettime.c'; fi`
+
+lib/gnulib/lib_gnulib_libgnu_a-gettimeofday.o: lib/gnulib/gettimeofday.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_gnulib_libgnu_a_CFLAGS) $(CFLAGS) -MT lib/gnulib/lib_gnulib_libgnu_a-gettimeofday.o -MD -MP -MF lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-gettimeofday.Tpo -c -o lib/gnulib/lib_gnulib_libgnu_a-gettimeofday.o `test -f 'lib/gnulib/gettimeofday.c' || echo '$(srcdir)/'`lib/gnulib/gettimeofday.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-gettimeofday.Tpo lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-gettimeofday.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='lib/gnulib/gettimeofday.c' object='lib/gnulib/lib_gnulib_libgnu_a-gettimeofday.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_gnulib_libgnu_a_CFLAGS) $(CFLAGS) -c -o lib/gnulib/lib_gnulib_libgnu_a-gettimeofday.o `test -f 'lib/gnulib/gettimeofday.c' || echo '$(srcdir)/'`lib/gnulib/gettimeofday.c
+
+lib/gnulib/lib_gnulib_libgnu_a-gettimeofday.obj: lib/gnulib/gettimeofday.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_gnulib_libgnu_a_CFLAGS) $(CFLAGS) -MT lib/gnulib/lib_gnulib_libgnu_a-gettimeofday.obj -MD -MP -MF lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-gettimeofday.Tpo -c -o lib/gnulib/lib_gnulib_libgnu_a-gettimeofday.obj `if test -f 'lib/gnulib/gettimeofday.c'; then $(CYGPATH_W) 'lib/gnulib/gettimeofday.c'; else $(CYGPATH_W) '$(srcdir)/lib/gnulib/gettimeofday.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-gettimeofday.Tpo lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-gettimeofday.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='lib/gnulib/gettimeofday.c' object='lib/gnulib/lib_gnulib_libgnu_a-gettimeofday.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_gnulib_libgnu_a_CFLAGS) $(CFLAGS) -c -o lib/gnulib/lib_gnulib_libgnu_a-gettimeofday.obj `if test -f 'lib/gnulib/gettimeofday.c'; then $(CYGPATH_W) 'lib/gnulib/gettimeofday.c'; else $(CYGPATH_W) '$(srcdir)/lib/gnulib/gettimeofday.c'; fi`
 
 lib/gnulib/malloc/lib_gnulib_libgnu_a-scratch_buffer_grow.o: lib/gnulib/malloc/scratch_buffer_grow.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_gnulib_libgnu_a_CFLAGS) $(CFLAGS) -MT lib/gnulib/malloc/lib_gnulib_libgnu_a-scratch_buffer_grow.o -MD -MP -MF lib/gnulib/malloc/$(DEPDIR)/lib_gnulib_libgnu_a-scratch_buffer_grow.Tpo -c -o lib/gnulib/malloc/lib_gnulib_libgnu_a-scratch_buffer_grow.o `test -f 'lib/gnulib/malloc/scratch_buffer_grow.c' || echo '$(srcdir)/'`lib/gnulib/malloc/scratch_buffer_grow.c
@@ -3039,6 +3123,34 @@ lib/gnulib/lib_gnulib_libgnu_a-strsep.obj: lib/gnulib/strsep.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='lib/gnulib/strsep.c' object='lib/gnulib/lib_gnulib_libgnu_a-strsep.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_gnulib_libgnu_a_CFLAGS) $(CFLAGS) -c -o lib/gnulib/lib_gnulib_libgnu_a-strsep.obj `if test -f 'lib/gnulib/strsep.c'; then $(CYGPATH_W) 'lib/gnulib/strsep.c'; else $(CYGPATH_W) '$(srcdir)/lib/gnulib/strsep.c'; fi`
+
+lib/gnulib/lib_gnulib_libgnu_a-timespec.o: lib/gnulib/timespec.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_gnulib_libgnu_a_CFLAGS) $(CFLAGS) -MT lib/gnulib/lib_gnulib_libgnu_a-timespec.o -MD -MP -MF lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-timespec.Tpo -c -o lib/gnulib/lib_gnulib_libgnu_a-timespec.o `test -f 'lib/gnulib/timespec.c' || echo '$(srcdir)/'`lib/gnulib/timespec.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-timespec.Tpo lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-timespec.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='lib/gnulib/timespec.c' object='lib/gnulib/lib_gnulib_libgnu_a-timespec.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_gnulib_libgnu_a_CFLAGS) $(CFLAGS) -c -o lib/gnulib/lib_gnulib_libgnu_a-timespec.o `test -f 'lib/gnulib/timespec.c' || echo '$(srcdir)/'`lib/gnulib/timespec.c
+
+lib/gnulib/lib_gnulib_libgnu_a-timespec.obj: lib/gnulib/timespec.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_gnulib_libgnu_a_CFLAGS) $(CFLAGS) -MT lib/gnulib/lib_gnulib_libgnu_a-timespec.obj -MD -MP -MF lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-timespec.Tpo -c -o lib/gnulib/lib_gnulib_libgnu_a-timespec.obj `if test -f 'lib/gnulib/timespec.c'; then $(CYGPATH_W) 'lib/gnulib/timespec.c'; else $(CYGPATH_W) '$(srcdir)/lib/gnulib/timespec.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-timespec.Tpo lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-timespec.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='lib/gnulib/timespec.c' object='lib/gnulib/lib_gnulib_libgnu_a-timespec.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_gnulib_libgnu_a_CFLAGS) $(CFLAGS) -c -o lib/gnulib/lib_gnulib_libgnu_a-timespec.obj `if test -f 'lib/gnulib/timespec.c'; then $(CYGPATH_W) 'lib/gnulib/timespec.c'; else $(CYGPATH_W) '$(srcdir)/lib/gnulib/timespec.c'; fi`
+
+lib/gnulib/lib_gnulib_libgnu_a-timespec_get.o: lib/gnulib/timespec_get.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_gnulib_libgnu_a_CFLAGS) $(CFLAGS) -MT lib/gnulib/lib_gnulib_libgnu_a-timespec_get.o -MD -MP -MF lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-timespec_get.Tpo -c -o lib/gnulib/lib_gnulib_libgnu_a-timespec_get.o `test -f 'lib/gnulib/timespec_get.c' || echo '$(srcdir)/'`lib/gnulib/timespec_get.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-timespec_get.Tpo lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-timespec_get.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='lib/gnulib/timespec_get.c' object='lib/gnulib/lib_gnulib_libgnu_a-timespec_get.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_gnulib_libgnu_a_CFLAGS) $(CFLAGS) -c -o lib/gnulib/lib_gnulib_libgnu_a-timespec_get.o `test -f 'lib/gnulib/timespec_get.c' || echo '$(srcdir)/'`lib/gnulib/timespec_get.c
+
+lib/gnulib/lib_gnulib_libgnu_a-timespec_get.obj: lib/gnulib/timespec_get.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_gnulib_libgnu_a_CFLAGS) $(CFLAGS) -MT lib/gnulib/lib_gnulib_libgnu_a-timespec_get.obj -MD -MP -MF lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-timespec_get.Tpo -c -o lib/gnulib/lib_gnulib_libgnu_a-timespec_get.obj `if test -f 'lib/gnulib/timespec_get.c'; then $(CYGPATH_W) 'lib/gnulib/timespec_get.c'; else $(CYGPATH_W) '$(srcdir)/lib/gnulib/timespec_get.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-timespec_get.Tpo lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-timespec_get.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='lib/gnulib/timespec_get.c' object='lib/gnulib/lib_gnulib_libgnu_a-timespec_get.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_gnulib_libgnu_a_CFLAGS) $(CFLAGS) -c -o lib/gnulib/lib_gnulib_libgnu_a-timespec_get.obj `if test -f 'lib/gnulib/timespec_get.c'; then $(CYGPATH_W) 'lib/gnulib/timespec_get.c'; else $(CYGPATH_W) '$(srcdir)/lib/gnulib/timespec_get.c'; fi`
 
 lib/gnulib/lib_gnulib_libgnu_a-unistd.o: lib/gnulib/unistd.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(lib_gnulib_libgnu_a_CFLAGS) $(CFLAGS) -MT lib/gnulib/lib_gnulib_libgnu_a-unistd.o -MD -MP -MF lib/gnulib/$(DEPDIR)/lib_gnulib_libgnu_a-unistd.Tpo -c -o lib/gnulib/lib_gnulib_libgnu_a-unistd.o `test -f 'lib/gnulib/unistd.c' || echo '$(srcdir)/'`lib/gnulib/unistd.c
@@ -3613,6 +3725,20 @@ src/hexpuzzle-shader.obj: src/shader.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/shader.c' object='src/hexpuzzle-shader.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-shader.obj `if test -f 'src/shader.c'; then $(CYGPATH_W) 'src/shader.c'; else $(CYGPATH_W) '$(srcdir)/src/shader.c'; fi`
+
+src/hexpuzzle-solve_timer.o: src/solve_timer.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-solve_timer.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-solve_timer.Tpo -c -o src/hexpuzzle-solve_timer.o `test -f 'src/solve_timer.c' || echo '$(srcdir)/'`src/solve_timer.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-solve_timer.Tpo src/$(DEPDIR)/hexpuzzle-solve_timer.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/solve_timer.c' object='src/hexpuzzle-solve_timer.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-solve_timer.o `test -f 'src/solve_timer.c' || echo '$(srcdir)/'`src/solve_timer.c
+
+src/hexpuzzle-solve_timer.obj: src/solve_timer.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-solve_timer.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-solve_timer.Tpo -c -o src/hexpuzzle-solve_timer.obj `if test -f 'src/solve_timer.c'; then $(CYGPATH_W) 'src/solve_timer.c'; else $(CYGPATH_W) '$(srcdir)/src/solve_timer.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-solve_timer.Tpo src/$(DEPDIR)/hexpuzzle-solve_timer.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/solve_timer.c' object='src/hexpuzzle-solve_timer.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-solve_timer.obj `if test -f 'src/solve_timer.c'; then $(CYGPATH_W) 'src/solve_timer.c'; else $(CYGPATH_W) '$(srcdir)/src/solve_timer.c'; fi`
 
 src/hexpuzzle-solver.o: src/solver.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-solver.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-solver.Tpo -c -o src/hexpuzzle-solver.o `test -f 'src/solver.c' || echo '$(srcdir)/'`src/solver.c
@@ -4989,6 +5115,29 @@ lib/gnulib/strings.h: lib/gnulib/strings.in.h $(top_builddir)/config.status $(CX
 @gl_GNULIB_ENABLED_sys_stat_TRUE@	      $(top_srcdir)/lib/gnulib/sys_stat.in.h > $@-t
 @gl_GNULIB_ENABLED_sys_stat_TRUE@	$(AM_V_at)mv $@-t $@
 
+# We need the following in order to create <sys/time.h> when the system
+# doesn't have one that works with the given compiler.
+@gl_GNULIB_ENABLED_sys_time_TRUE@lib/gnulib/sys/time.h: lib/gnulib/sys_time.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
+@gl_GNULIB_ENABLED_sys_time_TRUE@	$(AM_V_GEN)$(MKDIR_P) 'lib/gnulib/sys'
+@gl_GNULIB_ENABLED_sys_time_TRUE@	$(AM_V_at)$(SED_HEADER_STDOUT) \
+@gl_GNULIB_ENABLED_sys_time_TRUE@	      -e 's|@''GUARD_PREFIX''@|GL|g' \
+@gl_GNULIB_ENABLED_sys_time_TRUE@	      -e 's/@''HAVE_SYS_TIME_H''@/$(HAVE_SYS_TIME_H)/g' \
+@gl_GNULIB_ENABLED_sys_time_TRUE@	      -e 's|@''INCLUDE_NEXT''@|$(INCLUDE_NEXT)|g' \
+@gl_GNULIB_ENABLED_sys_time_TRUE@	      -e 's|@''PRAGMA_SYSTEM_HEADER''@|@PRAGMA_SYSTEM_HEADER@|g' \
+@gl_GNULIB_ENABLED_sys_time_TRUE@	      -e 's|@''PRAGMA_COLUMNS''@|@PRAGMA_COLUMNS@|g' \
+@gl_GNULIB_ENABLED_sys_time_TRUE@	      -e 's|@''NEXT_SYS_TIME_H''@|$(NEXT_SYS_TIME_H)|g' \
+@gl_GNULIB_ENABLED_sys_time_TRUE@	      -e 's/@''GNULIB_GETTIMEOFDAY''@/$(GL_GNULIB_GETTIMEOFDAY)/g' \
+@gl_GNULIB_ENABLED_sys_time_TRUE@	      -e 's|@''HAVE_WINSOCK2_H''@|$(HAVE_WINSOCK2_H)|g' \
+@gl_GNULIB_ENABLED_sys_time_TRUE@	      -e 's/@''HAVE_GETTIMEOFDAY''@/$(HAVE_GETTIMEOFDAY)/g' \
+@gl_GNULIB_ENABLED_sys_time_TRUE@	      -e 's/@''HAVE_STRUCT_TIMEVAL''@/$(HAVE_STRUCT_TIMEVAL)/g' \
+@gl_GNULIB_ENABLED_sys_time_TRUE@	      -e 's/@''REPLACE_GETTIMEOFDAY''@/$(REPLACE_GETTIMEOFDAY)/g' \
+@gl_GNULIB_ENABLED_sys_time_TRUE@	      -e 's/@''REPLACE_STRUCT_TIMEVAL''@/$(REPLACE_STRUCT_TIMEVAL)/g' \
+@gl_GNULIB_ENABLED_sys_time_TRUE@	      -e '/definitions of _GL_FUNCDECL_RPL/r $(CXXDEFS_H)' \
+@gl_GNULIB_ENABLED_sys_time_TRUE@	      -e '/definition of _GL_ARG_NONNULL/r $(ARG_NONNULL_H)' \
+@gl_GNULIB_ENABLED_sys_time_TRUE@	      -e '/definition of _GL_WARN_ON_USE/r $(WARN_ON_USE_H)' \
+@gl_GNULIB_ENABLED_sys_time_TRUE@	      $(top_srcdir)/lib/gnulib/sys_time.in.h > $@-t
+@gl_GNULIB_ENABLED_sys_time_TRUE@	$(AM_V_at)mv $@-t $@
+
 # We need the following in order to create <sys/types.h> when the system
 # doesn't have one that works with the given compiler.
 lib/gnulib/sys/types.h: lib/gnulib/sys_types.in.h $(top_builddir)/config.status
@@ -5007,61 +5156,61 @@ lib/gnulib/sys/types.h: lib/gnulib/sys_types.in.h $(top_builddir)/config.status
 
 # We need the following in order to create <time.h> when the system
 # doesn't have one that works with the given compiler.
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@lib/gnulib/time.h: lib/gnulib/time.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	$(AM_V_GEN)$(MKDIR_P) 'lib/gnulib'
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	$(gl_V_at)$(SED_HEADER_STDOUT) \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''GUARD_PREFIX''@|GL|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''INCLUDE_NEXT''@|$(INCLUDE_NEXT)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''PRAGMA_SYSTEM_HEADER''@|@PRAGMA_SYSTEM_HEADER@|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''PRAGMA_COLUMNS''@|@PRAGMA_COLUMNS@|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''NEXT_TIME_H''@|$(NEXT_TIME_H)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's/@''GNULIB_CTIME''@/$(GL_GNULIB_CTIME)/g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's/@''GNULIB_LOCALTIME''@/$(GL_GNULIB_LOCALTIME)/g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's/@''GNULIB_MKTIME''@/$(GL_GNULIB_MKTIME)/g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's/@''GNULIB_NANOSLEEP''@/$(GL_GNULIB_NANOSLEEP)/g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's/@''GNULIB_STRFTIME''@/$(GL_GNULIB_STRFTIME)/g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's/@''GNULIB_STRPTIME''@/$(GL_GNULIB_STRPTIME)/g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's/@''GNULIB_TIME''@/$(GL_GNULIB_TIME)/g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's/@''GNULIB_TIMEGM''@/$(GL_GNULIB_TIMEGM)/g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's/@''GNULIB_TIMESPEC_GET''@/$(GL_GNULIB_TIMESPEC_GET)/g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's/@''GNULIB_TIMESPEC_GETRES''@/$(GL_GNULIB_TIMESPEC_GETRES)/g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's/@''GNULIB_TIME_R''@/$(GL_GNULIB_TIME_R)/g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's/@''GNULIB_TIME_RZ''@/$(GL_GNULIB_TIME_RZ)/g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's/@''GNULIB_TZNAME''@/$(GL_GNULIB_TZNAME)/g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's/@''GNULIB_TZSET''@/$(GL_GNULIB_TZSET)/g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's/@''GNULIB_MDA_TZSET''@/$(GL_GNULIB_MDA_TZSET)/g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''HAVE_DECL_LOCALTIME_R''@|$(HAVE_DECL_LOCALTIME_R)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''HAVE_NANOSLEEP''@|$(HAVE_NANOSLEEP)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''HAVE_STRPTIME''@|$(HAVE_STRPTIME)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''HAVE_TIMEGM''@|$(HAVE_TIMEGM)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''HAVE_TIMESPEC_GET''@|$(HAVE_TIMESPEC_GET)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''HAVE_TIMESPEC_GETRES''@|$(HAVE_TIMESPEC_GETRES)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''HAVE_TIMEZONE_T''@|$(HAVE_TIMEZONE_T)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''HAVE_TZALLOC''@|$(HAVE_TZALLOC)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''REPLACE_CTIME''@|$(REPLACE_CTIME)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''REPLACE_GMTIME''@|$(REPLACE_GMTIME)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''REPLACE_LOCALTIME''@|$(REPLACE_LOCALTIME)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''REPLACE_LOCALTIME_R''@|$(REPLACE_LOCALTIME_R)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''REPLACE_LOCALTIME_RZ''@|$(REPLACE_LOCALTIME_RZ)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''REPLACE_MKTIME''@|$(REPLACE_MKTIME)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''REPLACE_MKTIME_Z''@|$(REPLACE_MKTIME_Z)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''REPLACE_NANOSLEEP''@|$(REPLACE_NANOSLEEP)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''REPLACE_STRFTIME''@|$(REPLACE_STRFTIME)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''REPLACE_TIME''@|$(REPLACE_TIME)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''REPLACE_TIMEGM''@|$(REPLACE_TIMEGM)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''REPLACE_TIMESPEC_GET''@|$(REPLACE_TIMESPEC_GET)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''REPLACE_TIMESPEC_GETRES''@|$(REPLACE_TIMESPEC_GETRES)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''REPLACE_TZSET''@|$(REPLACE_TZSET)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''PTHREAD_H_DEFINES_STRUCT_TIMESPEC''@|$(PTHREAD_H_DEFINES_STRUCT_TIMESPEC)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''SYS_TIME_H_DEFINES_STRUCT_TIMESPEC''@|$(SYS_TIME_H_DEFINES_STRUCT_TIMESPEC)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''TIME_H_DEFINES_STRUCT_TIMESPEC''@|$(TIME_H_DEFINES_STRUCT_TIMESPEC)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''UNISTD_H_DEFINES_STRUCT_TIMESPEC''@|$(UNISTD_H_DEFINES_STRUCT_TIMESPEC)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e 's|@''TIME_H_DEFINES_TIME_UTC''@|$(TIME_H_DEFINES_TIME_UTC)|g' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e '/definitions of _GL_FUNCDECL_RPL/r $(CXXDEFS_H)' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e '/definition of _GL_ARG_NONNULL/r $(ARG_NONNULL_H)' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      -e '/definition of _GL_WARN_ON_USE/r $(WARN_ON_USE_H)' \
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	      $(top_srcdir)/lib/gnulib/time.in.h > $@-t
-@gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE@	$(AM_V_at)mv $@-t $@
+lib/gnulib/time.h: lib/gnulib/time.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
+	$(AM_V_GEN)$(MKDIR_P) 'lib/gnulib'
+	$(gl_V_at)$(SED_HEADER_STDOUT) \
+	      -e 's|@''GUARD_PREFIX''@|GL|g' \
+	      -e 's|@''INCLUDE_NEXT''@|$(INCLUDE_NEXT)|g' \
+	      -e 's|@''PRAGMA_SYSTEM_HEADER''@|@PRAGMA_SYSTEM_HEADER@|g' \
+	      -e 's|@''PRAGMA_COLUMNS''@|@PRAGMA_COLUMNS@|g' \
+	      -e 's|@''NEXT_TIME_H''@|$(NEXT_TIME_H)|g' \
+	      -e 's/@''GNULIB_CTIME''@/$(GL_GNULIB_CTIME)/g' \
+	      -e 's/@''GNULIB_LOCALTIME''@/$(GL_GNULIB_LOCALTIME)/g' \
+	      -e 's/@''GNULIB_MKTIME''@/$(GL_GNULIB_MKTIME)/g' \
+	      -e 's/@''GNULIB_NANOSLEEP''@/$(GL_GNULIB_NANOSLEEP)/g' \
+	      -e 's/@''GNULIB_STRFTIME''@/$(GL_GNULIB_STRFTIME)/g' \
+	      -e 's/@''GNULIB_STRPTIME''@/$(GL_GNULIB_STRPTIME)/g' \
+	      -e 's/@''GNULIB_TIME''@/$(GL_GNULIB_TIME)/g' \
+	      -e 's/@''GNULIB_TIMEGM''@/$(GL_GNULIB_TIMEGM)/g' \
+	      -e 's/@''GNULIB_TIMESPEC_GET''@/$(GL_GNULIB_TIMESPEC_GET)/g' \
+	      -e 's/@''GNULIB_TIMESPEC_GETRES''@/$(GL_GNULIB_TIMESPEC_GETRES)/g' \
+	      -e 's/@''GNULIB_TIME_R''@/$(GL_GNULIB_TIME_R)/g' \
+	      -e 's/@''GNULIB_TIME_RZ''@/$(GL_GNULIB_TIME_RZ)/g' \
+	      -e 's/@''GNULIB_TZNAME''@/$(GL_GNULIB_TZNAME)/g' \
+	      -e 's/@''GNULIB_TZSET''@/$(GL_GNULIB_TZSET)/g' \
+	      -e 's/@''GNULIB_MDA_TZSET''@/$(GL_GNULIB_MDA_TZSET)/g' \
+	      -e 's|@''HAVE_DECL_LOCALTIME_R''@|$(HAVE_DECL_LOCALTIME_R)|g' \
+	      -e 's|@''HAVE_NANOSLEEP''@|$(HAVE_NANOSLEEP)|g' \
+	      -e 's|@''HAVE_STRPTIME''@|$(HAVE_STRPTIME)|g' \
+	      -e 's|@''HAVE_TIMEGM''@|$(HAVE_TIMEGM)|g' \
+	      -e 's|@''HAVE_TIMESPEC_GET''@|$(HAVE_TIMESPEC_GET)|g' \
+	      -e 's|@''HAVE_TIMESPEC_GETRES''@|$(HAVE_TIMESPEC_GETRES)|g' \
+	      -e 's|@''HAVE_TIMEZONE_T''@|$(HAVE_TIMEZONE_T)|g' \
+	      -e 's|@''HAVE_TZALLOC''@|$(HAVE_TZALLOC)|g' \
+	      -e 's|@''REPLACE_CTIME''@|$(REPLACE_CTIME)|g' \
+	      -e 's|@''REPLACE_GMTIME''@|$(REPLACE_GMTIME)|g' \
+	      -e 's|@''REPLACE_LOCALTIME''@|$(REPLACE_LOCALTIME)|g' \
+	      -e 's|@''REPLACE_LOCALTIME_R''@|$(REPLACE_LOCALTIME_R)|g' \
+	      -e 's|@''REPLACE_LOCALTIME_RZ''@|$(REPLACE_LOCALTIME_RZ)|g' \
+	      -e 's|@''REPLACE_MKTIME''@|$(REPLACE_MKTIME)|g' \
+	      -e 's|@''REPLACE_MKTIME_Z''@|$(REPLACE_MKTIME_Z)|g' \
+	      -e 's|@''REPLACE_NANOSLEEP''@|$(REPLACE_NANOSLEEP)|g' \
+	      -e 's|@''REPLACE_STRFTIME''@|$(REPLACE_STRFTIME)|g' \
+	      -e 's|@''REPLACE_TIME''@|$(REPLACE_TIME)|g' \
+	      -e 's|@''REPLACE_TIMEGM''@|$(REPLACE_TIMEGM)|g' \
+	      -e 's|@''REPLACE_TIMESPEC_GET''@|$(REPLACE_TIMESPEC_GET)|g' \
+	      -e 's|@''REPLACE_TIMESPEC_GETRES''@|$(REPLACE_TIMESPEC_GETRES)|g' \
+	      -e 's|@''REPLACE_TZSET''@|$(REPLACE_TZSET)|g' \
+	      -e 's|@''PTHREAD_H_DEFINES_STRUCT_TIMESPEC''@|$(PTHREAD_H_DEFINES_STRUCT_TIMESPEC)|g' \
+	      -e 's|@''SYS_TIME_H_DEFINES_STRUCT_TIMESPEC''@|$(SYS_TIME_H_DEFINES_STRUCT_TIMESPEC)|g' \
+	      -e 's|@''TIME_H_DEFINES_STRUCT_TIMESPEC''@|$(TIME_H_DEFINES_STRUCT_TIMESPEC)|g' \
+	      -e 's|@''UNISTD_H_DEFINES_STRUCT_TIMESPEC''@|$(UNISTD_H_DEFINES_STRUCT_TIMESPEC)|g' \
+	      -e 's|@''TIME_H_DEFINES_TIME_UTC''@|$(TIME_H_DEFINES_TIME_UTC)|g' \
+	      -e '/definitions of _GL_FUNCDECL_RPL/r $(CXXDEFS_H)' \
+	      -e '/definition of _GL_ARG_NONNULL/r $(ARG_NONNULL_H)' \
+	      -e '/definition of _GL_WARN_ON_USE/r $(WARN_ON_USE_H)' \
+	      $(top_srcdir)/lib/gnulib/time.in.h > $@-t
+	$(AM_V_at)mv $@-t $@
 
 # We need the following in order to create an empty placeholder for
 # <unistd.h> when the system doesn't have one.

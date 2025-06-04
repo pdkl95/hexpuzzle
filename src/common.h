@@ -248,6 +248,10 @@ static inline void tooltip(Rectangle bounds, const char *text)
     }
 }
 
+#include "solve_timer.h"
+
+extern solve_timer_t solve_timer;
+
 extern bool demo_mode;
 
 int popup_message(const char *fmt, ...);

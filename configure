@@ -663,8 +663,8 @@ gl_GNULIB_ENABLED_wchar_FALSE
 gl_GNULIB_ENABLED_wchar_TRUE
 gl_GNULIB_ENABLED_vasnprintf_FALSE
 gl_GNULIB_ENABLED_vasnprintf_TRUE
-gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_FALSE
-gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE
+gl_GNULIB_ENABLED_sys_time_FALSE
+gl_GNULIB_ENABLED_sys_time_TRUE
 gl_GNULIB_ENABLED_sys_stat_FALSE
 gl_GNULIB_ENABLED_sys_stat_TRUE
 gl_GNULIB_ENABLED_stdint_FALSE
@@ -725,6 +725,10 @@ gl_GNULIB_ENABLED_idx_FALSE
 gl_GNULIB_ENABLED_idx_TRUE
 gl_GNULIB_ENABLED_8444034ea779b88768865bb60b4fb8c9_FALSE
 gl_GNULIB_ENABLED_8444034ea779b88768865bb60b4fb8c9_TRUE
+gl_GNULIB_ENABLED_gettimeofday_FALSE
+gl_GNULIB_ENABLED_gettimeofday_TRUE
+gl_GNULIB_ENABLED_gettime_FALSE
+gl_GNULIB_ENABLED_gettime_TRUE
 gl_GNULIB_ENABLED_getdelim_FALSE
 gl_GNULIB_ENABLED_getdelim_TRUE
 gl_GNULIB_ENABLED_ef07dc4b3077c11ea9cef586db4e5955_FALSE
@@ -745,6 +749,8 @@ gl_GNULIB_ENABLED_36afd6902ac3aacf32e3ff12a686c346_FALSE
 gl_GNULIB_ENABLED_36afd6902ac3aacf32e3ff12a686c346_TRUE
 gl_GNULIB_ENABLED_a691da99c1d83b83238e45f41a696f5c_FALSE
 gl_GNULIB_ENABLED_a691da99c1d83b83238e45f41a696f5c_TRUE
+gl_GNULIB_ENABLED_c58c2549aa84fceb9f0ca39c3eb5c7bd_FALSE
+gl_GNULIB_ENABLED_c58c2549aa84fceb9f0ca39c3eb5c7bd_TRUE
 gl_GNULIB_ENABLED_chdir_FALSE
 gl_GNULIB_ENABLED_chdir_TRUE
 gl_GNULIB_ENABLED_72dfd9a8bb8db9211d38af59105b03c0_FALSE
@@ -766,50 +772,6 @@ HAVE_WINT_T
 NEXT_AS_FIRST_DIRECTIVE_WCHAR_H
 NEXT_WCHAR_H
 HAVE_FEATURES_H
-GL_GNULIB_MDA_TZSET
-GL_GNULIB_TZSET
-GL_GNULIB_TZNAME
-GL_GNULIB_TIME_RZ
-GL_GNULIB_TIME_R
-GL_GNULIB_TIMESPEC_GETRES
-GL_GNULIB_TIMESPEC_GET
-GL_GNULIB_TIMEGM
-GL_GNULIB_TIME
-GL_GNULIB_STRPTIME
-GL_GNULIB_STRFTIME
-GL_GNULIB_NANOSLEEP
-GL_GNULIB_LOCALTIME
-GL_GNULIB_MKTIME
-GL_GNULIB_CTIME
-TIME_H_DEFINES_TIME_UTC
-UNISTD_H_DEFINES_STRUCT_TIMESPEC
-PTHREAD_H_DEFINES_STRUCT_TIMESPEC
-SYS_TIME_H_DEFINES_STRUCT_TIMESPEC
-TIME_H_DEFINES_STRUCT_TIMESPEC
-NEXT_AS_FIRST_DIRECTIVE_TIME_H
-NEXT_TIME_H
-REPLACE_TZSET
-REPLACE_TIMESPEC_GETRES
-REPLACE_TIMESPEC_GET
-REPLACE_TIMEGM
-REPLACE_TIME
-REPLACE_STRFTIME
-REPLACE_NANOSLEEP
-REPLACE_MKTIME_Z
-REPLACE_MKTIME
-REPLACE_LOCALTIME_RZ
-REPLACE_LOCALTIME_R
-REPLACE_LOCALTIME
-REPLACE_GMTIME
-REPLACE_CTIME
-HAVE_TZALLOC
-HAVE_TIMEZONE_T
-HAVE_TIMESPEC_GETRES
-HAVE_TIMESPEC_GET
-HAVE_TIMEGM
-HAVE_STRPTIME
-HAVE_NANOSLEEP
-HAVE_DECL_LOCALTIME_R
 GL_GENERATE_STDINT_H_FALSE
 GL_GENERATE_STDINT_H_TRUE
 STDINT_H
@@ -1041,6 +1003,17 @@ HAVE_WCHAR_H
 GNULIBHEADERS_OVERRIDE_WINT_T
 NEXT_AS_FIRST_DIRECTIVE_LIMITS_H
 NEXT_LIMITS_H
+GL_GNULIB_GETTIMEOFDAY
+GL_COND_OBJ_GETTIMEOFDAY_FALSE
+GL_COND_OBJ_GETTIMEOFDAY_TRUE
+HAVE_WINSOCK2_H
+NEXT_AS_FIRST_DIRECTIVE_SYS_TIME_H
+NEXT_SYS_TIME_H
+REPLACE_STRUCT_TIMEVAL
+REPLACE_GETTIMEOFDAY
+HAVE_SYS_TIME_H
+HAVE_STRUCT_TIMEVAL
+HAVE_GETTIMEOFDAY
 GL_COND_OBJ_GETDELIM_FALSE
 GL_COND_OBJ_GETDELIM_TRUE
 GL_COND_OBJ_FREE_FALSE
@@ -1081,6 +1054,8 @@ EMULTIHOP_VALUE
 EMULTIHOP_HIDDEN
 NEXT_AS_FIRST_DIRECTIVE_ERRNO_H
 NEXT_ERRNO_H
+LIB_CLOCK_GETTIME
+CLOCK_TIME_LIB
 GL_COND_OBJ_CANONICALIZE_LGPL_FALSE
 GL_COND_OBJ_CANONICALIZE_LGPL_TRUE
 GL_GENERATE_ASSERT_H_FALSE
@@ -1282,6 +1257,52 @@ HAVE_EUIDACCESS
 HAVE_DUP3
 HAVE_COPY_FILE_RANGE
 HAVE_CHOWN
+GL_COND_OBJ_TIMESPEC_GET_FALSE
+GL_COND_OBJ_TIMESPEC_GET_TRUE
+GL_GNULIB_MDA_TZSET
+GL_GNULIB_TZSET
+GL_GNULIB_TZNAME
+GL_GNULIB_TIME_RZ
+GL_GNULIB_TIME_R
+GL_GNULIB_TIMESPEC_GETRES
+GL_GNULIB_TIMESPEC_GET
+GL_GNULIB_TIMEGM
+GL_GNULIB_TIME
+GL_GNULIB_STRPTIME
+GL_GNULIB_STRFTIME
+GL_GNULIB_NANOSLEEP
+GL_GNULIB_LOCALTIME
+GL_GNULIB_MKTIME
+GL_GNULIB_CTIME
+TIME_H_DEFINES_TIME_UTC
+UNISTD_H_DEFINES_STRUCT_TIMESPEC
+PTHREAD_H_DEFINES_STRUCT_TIMESPEC
+SYS_TIME_H_DEFINES_STRUCT_TIMESPEC
+TIME_H_DEFINES_STRUCT_TIMESPEC
+NEXT_AS_FIRST_DIRECTIVE_TIME_H
+NEXT_TIME_H
+REPLACE_TZSET
+REPLACE_TIMESPEC_GETRES
+REPLACE_TIMESPEC_GET
+REPLACE_TIMEGM
+REPLACE_TIME
+REPLACE_STRFTIME
+REPLACE_NANOSLEEP
+REPLACE_MKTIME_Z
+REPLACE_MKTIME
+REPLACE_LOCALTIME_RZ
+REPLACE_LOCALTIME_R
+REPLACE_LOCALTIME
+REPLACE_GMTIME
+REPLACE_CTIME
+HAVE_TZALLOC
+HAVE_TIMEZONE_T
+HAVE_TIMESPEC_GETRES
+HAVE_TIMESPEC_GET
+HAVE_TIMEGM
+HAVE_STRPTIME
+HAVE_NANOSLEEP
+HAVE_DECL_LOCALTIME_R
 WINDOWS_STAT_INODES
 HAVE_OFF64_T
 WINDOWS_64_BIT_OFF_T
@@ -3618,9 +3639,12 @@ as_fn_append ac_header_list " sys/param.h"
 as_fn_append ac_func_list " lstat"
 as_fn_append ac_func_list " link"
 as_fn_append ac_header_list " strings.h"
+as_fn_append ac_header_list " sys/time.h"
 as_fn_append ac_func_list " canonicalize_file_name"
 as_fn_append ac_func_list " realpath"
 as_fn_append ac_func_list " symlink"
+as_fn_append ac_header_list " sys/socket.h"
+as_fn_append ac_func_list " gettimeofday"
 as_fn_append ac_header_list " limits.h"
 as_fn_append ac_header_list " inttypes.h"
 as_fn_append ac_header_list " sys/types.h"
@@ -3631,7 +3655,6 @@ as_fn_append ac_header_list " sys/mman.h"
 as_fn_append ac_func_list " mprotect"
 as_fn_append ac_func_list " readlink"
 as_fn_append ac_header_list " sys/stat.h"
-as_fn_append ac_header_list " sys/time.h"
 as_fn_append ac_header_list " stdbool.h"
 as_fn_append ac_header_list " stdckdint.h"
 as_fn_append ac_func_list " vasnprintf"
@@ -7374,6 +7397,7 @@ fi
   # Code from module c99:
   # Code from module canonicalize-lgpl:
   # Code from module chdir:
+  # Code from module clock-time:
   # Code from module dirname-lgpl:
   # Code from module double-slash-root:
   # Code from module eloop-threshold:
@@ -7391,6 +7415,8 @@ fi
   # Code from module gen-header:
   # Code from module getdelim:
   # Code from module getline:
+  # Code from module gettime:
+  # Code from module gettimeofday:
   # Code from module glibc-internal/scratch_buffer:
   # Code from module idx:
   # Code from module include_next:
@@ -7441,9 +7467,12 @@ fi
   # Code from module strings:
   # Code from module strsep:
   # Code from module sys_stat:
+  # Code from module sys_time:
   # Code from module sys_types:
 
   # Code from module time-h:
+  # Code from module timespec:
+  # Code from module timespec_get:
   # Code from module unistd:
   # Code from module vasnprintf:
   # Code from module vasprintf:
@@ -11449,6 +11478,397 @@ $as_echo "$gl_cv_next_sys_types_h" >&6; }
 
 
 
+    HAVE_DECL_LOCALTIME_R=1;
+  HAVE_NANOSLEEP=1;
+  HAVE_STRPTIME=1;
+  HAVE_TIMEGM=1;
+  HAVE_TIMESPEC_GET=1;
+  HAVE_TIMESPEC_GETRES=1;
+    HAVE_TIMEZONE_T=0;
+  HAVE_TZALLOC=0;
+  REPLACE_CTIME=0;
+  REPLACE_GMTIME=0;
+  REPLACE_LOCALTIME=0;
+  REPLACE_LOCALTIME_R=0;
+  REPLACE_LOCALTIME_RZ=0;
+  REPLACE_MKTIME=0;
+  REPLACE_MKTIME_Z=0;
+  REPLACE_NANOSLEEP=0;
+  REPLACE_STRFTIME=0;
+  REPLACE_TIME=0;
+  REPLACE_TIMEGM=0;
+  REPLACE_TIMESPEC_GET=0;
+  REPLACE_TIMESPEC_GETRES=0;
+  REPLACE_TZSET=0;
+
+
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for struct timespec in <time.h>" >&5
+$as_echo_n "checking for struct timespec in <time.h>... " >&6; }
+if ${gl_cv_sys_struct_timespec_in_time_h+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <time.h>
+
+int
+main ()
+{
+static struct timespec x; x.tv_sec = x.tv_nsec;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_sys_struct_timespec_in_time_h=yes
+else
+  gl_cv_sys_struct_timespec_in_time_h=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_sys_struct_timespec_in_time_h" >&5
+$as_echo "$gl_cv_sys_struct_timespec_in_time_h" >&6; }
+
+  TIME_H_DEFINES_STRUCT_TIMESPEC=0
+  SYS_TIME_H_DEFINES_STRUCT_TIMESPEC=0
+  PTHREAD_H_DEFINES_STRUCT_TIMESPEC=0
+  UNISTD_H_DEFINES_STRUCT_TIMESPEC=0
+  if test $gl_cv_sys_struct_timespec_in_time_h = yes; then
+    TIME_H_DEFINES_STRUCT_TIMESPEC=1
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for struct timespec in <sys/time.h>" >&5
+$as_echo_n "checking for struct timespec in <sys/time.h>... " >&6; }
+if ${gl_cv_sys_struct_timespec_in_sys_time_h+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/time.h>
+
+int
+main ()
+{
+static struct timespec x; x.tv_sec = x.tv_nsec;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_sys_struct_timespec_in_sys_time_h=yes
+else
+  gl_cv_sys_struct_timespec_in_sys_time_h=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_sys_struct_timespec_in_sys_time_h" >&5
+$as_echo "$gl_cv_sys_struct_timespec_in_sys_time_h" >&6; }
+    if test $gl_cv_sys_struct_timespec_in_sys_time_h = yes; then
+      SYS_TIME_H_DEFINES_STRUCT_TIMESPEC=1
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for struct timespec in <pthread.h>" >&5
+$as_echo_n "checking for struct timespec in <pthread.h>... " >&6; }
+if ${gl_cv_sys_struct_timespec_in_pthread_h+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <pthread.h>
+
+int
+main ()
+{
+static struct timespec x; x.tv_sec = x.tv_nsec;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_sys_struct_timespec_in_pthread_h=yes
+else
+  gl_cv_sys_struct_timespec_in_pthread_h=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_sys_struct_timespec_in_pthread_h" >&5
+$as_echo "$gl_cv_sys_struct_timespec_in_pthread_h" >&6; }
+      if test $gl_cv_sys_struct_timespec_in_pthread_h = yes; then
+        PTHREAD_H_DEFINES_STRUCT_TIMESPEC=1
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for struct timespec in <unistd.h>" >&5
+$as_echo_n "checking for struct timespec in <unistd.h>... " >&6; }
+if ${gl_cv_sys_struct_timespec_in_unistd_h+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <unistd.h>
+
+int
+main ()
+{
+static struct timespec x; x.tv_sec = x.tv_nsec;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_sys_struct_timespec_in_unistd_h=yes
+else
+  gl_cv_sys_struct_timespec_in_unistd_h=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_sys_struct_timespec_in_unistd_h" >&5
+$as_echo "$gl_cv_sys_struct_timespec_in_unistd_h" >&6; }
+        if test $gl_cv_sys_struct_timespec_in_unistd_h = yes; then
+          UNISTD_H_DEFINES_STRUCT_TIMESPEC=1
+        fi
+      fi
+    fi
+  fi
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     if test $gl_cv_have_include_next = yes; then
+       gl_cv_next_time_h='<'time.h'>'
+     else
+       { $as_echo "$as_me:${as_lineno-$LINENO}: checking absolute name of <time.h>" >&5
+$as_echo_n "checking absolute name of <time.h>... " >&6; }
+if ${gl_cv_next_time_h+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+
+
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <time.h>
+_ACEOF
+                case "$host_os" in
+    aix*) gl_absname_cpp="$ac_cpp -C" ;;
+    *)    gl_absname_cpp="$ac_cpp" ;;
+  esac
+
+  case "$host_os" in
+    mingw* | windows*)
+                                          gl_dirsep_regex='[/\\]'
+      ;;
+    *)
+      gl_dirsep_regex='\/'
+      ;;
+  esac
+      gl_make_literal_regex_sed='s,[]$^\\.*/[],\\&,g'
+  gl_header_literal_regex=`echo 'time.h' \
+                           | sed -e "$gl_make_literal_regex_sed"`
+  gl_absolute_header_sed="/${gl_dirsep_regex}${gl_header_literal_regex}/"'{
+      s/.*"\(.*'"${gl_dirsep_regex}${gl_header_literal_regex}"'\)".*/\1/
+      s|^/[^/]|//&|
+      p
+      q
+    }'
+
+        gl_cv_absolute_time_h=`(eval "$gl_absname_cpp conftest.$ac_ext") 2>&5 |
+  sed -n "$gl_absolute_header_sed"`
+
+          gl_header=$gl_cv_absolute_time_h
+          gl_cv_next_time_h='"'$gl_header'"'
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_next_time_h" >&5
+$as_echo "$gl_cv_next_time_h" >&6; }
+     fi
+     NEXT_TIME_H=$gl_cv_next_time_h
+
+     if test $gl_cv_have_include_next = yes || test $gl_cv_have_include_next = buggy; then
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include_next'
+       gl_next_as_first_directive='<'time.h'>'
+     else
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include'
+       gl_next_as_first_directive=$gl_cv_next_time_h
+     fi
+     NEXT_AS_FIRST_DIRECTIVE_TIME_H=$gl_next_as_first_directive
+
+
+
+
+
+
+
+
+
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for TIME_UTC in <time.h>" >&5
+$as_echo_n "checking for TIME_UTC in <time.h>... " >&6; }
+if ${gl_cv_time_h_has_TIME_UTC+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <time.h>
+
+int
+main ()
+{
+static int x = TIME_UTC; x++;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_time_h_has_TIME_UTC=yes
+else
+  gl_cv_time_h_has_TIME_UTC=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_time_h_has_TIME_UTC" >&5
+$as_echo "$gl_cv_time_h_has_TIME_UTC" >&6; }
+  if test $gl_cv_time_h_has_TIME_UTC = yes; then
+    TIME_H_DEFINES_TIME_UTC=1
+  else
+    TIME_H_DEFINES_TIME_UTC=0
+  fi
+
+
+
+
+  GL_GNULIB_CTIME=0
+
+
+
+  GL_GNULIB_MKTIME=0
+
+
+
+  GL_GNULIB_LOCALTIME=0
+
+
+
+  GL_GNULIB_NANOSLEEP=0
+
+
+
+  GL_GNULIB_STRFTIME=0
+
+
+
+  GL_GNULIB_STRPTIME=0
+
+
+
+  GL_GNULIB_TIME=0
+
+
+
+  GL_GNULIB_TIMEGM=0
+
+
+
+  GL_GNULIB_TIMESPEC_GET=0
+
+
+
+  GL_GNULIB_TIMESPEC_GETRES=0
+
+
+
+  GL_GNULIB_TIME_R=0
+
+
+
+  GL_GNULIB_TIME_RZ=0
+
+
+
+  GL_GNULIB_TZNAME=0
+
+
+
+  GL_GNULIB_TZSET=0
+
+
+
+  GL_GNULIB_MDA_TZSET=1
+
+
+
+
+
+
+
+
+          ac_fn_c_check_decl "$LINENO" "timespec_get" "ac_cv_have_decl_timespec_get" "#include <time.h>
+"
+if test "x$ac_cv_have_decl_timespec_get" = xyes; then :
+
+fi
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for timespec_get" >&5
+$as_echo_n "checking for timespec_get... " >&6; }
+if ${gl_cv_onwards_func_timespec_get+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test $ac_cv_have_decl_timespec_get = yes; then
+       cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <time.h>
+              struct timespec ts;
+
+int
+main ()
+{
+return timespec_get (&ts, 0);
+  ;
+  return 0;
+}
+
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  gl_cv_onwards_func_timespec_get=yes
+else
+  gl_cv_onwards_func_timespec_get=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+     else
+       gl_cv_onwards_func_timespec_get=no
+     fi
+     case "$host_os" in
+       linux*-android*)
+         if test $gl_cv_onwards_func_timespec_get = no; then
+           gl_cv_onwards_func_timespec_get='future OS version'
+         fi
+         ;;
+     esac
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_onwards_func_timespec_get" >&5
+$as_echo "$gl_cv_onwards_func_timespec_get" >&6; }
+  case "$gl_cv_onwards_func_timespec_get" in
+    future*) gl_cv_func_timespec_get=no ;;
+    *)       gl_cv_func_timespec_get=$gl_cv_onwards_func_timespec_get ;;
+  esac
+
+
     HAVE_CHOWN=1;
   HAVE_COPY_FILE_RANGE=1;
   HAVE_DUP3=1;
@@ -13494,6 +13914,219 @@ fi
 cat >>confdefs.h <<_ACEOF
 #define HAVE_DECL_GETDELIM $ac_have_decl
 _ACEOF
+
+
+    HAVE_GETTIMEOFDAY=1;
+  HAVE_STRUCT_TIMEVAL=1;
+  HAVE_SYS_TIME_H=1;
+  REPLACE_GETTIMEOFDAY=0;
+  REPLACE_STRUCT_TIMEVAL=0;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     if test $gl_cv_have_include_next = yes; then
+       gl_cv_next_sys_time_h='<'sys/time.h'>'
+     else
+       { $as_echo "$as_me:${as_lineno-$LINENO}: checking absolute name of <sys/time.h>" >&5
+$as_echo_n "checking absolute name of <sys/time.h>... " >&6; }
+if ${gl_cv_next_sys_time_h+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+
+             if test $ac_cv_header_sys_time_h = yes; then
+
+
+
+
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/time.h>
+_ACEOF
+                case "$host_os" in
+    aix*) gl_absname_cpp="$ac_cpp -C" ;;
+    *)    gl_absname_cpp="$ac_cpp" ;;
+  esac
+
+  case "$host_os" in
+    mingw* | windows*)
+                                          gl_dirsep_regex='[/\\]'
+      ;;
+    *)
+      gl_dirsep_regex='\/'
+      ;;
+  esac
+      gl_make_literal_regex_sed='s,[]$^\\.*/[],\\&,g'
+  gl_header_literal_regex=`echo 'sys/time.h' \
+                           | sed -e "$gl_make_literal_regex_sed"`
+  gl_absolute_header_sed="/${gl_dirsep_regex}${gl_header_literal_regex}/"'{
+      s/.*"\(.*'"${gl_dirsep_regex}${gl_header_literal_regex}"'\)".*/\1/
+      s|^/[^/]|//&|
+      p
+      q
+    }'
+
+        gl_cv_absolute_sys_time_h=`(eval "$gl_absname_cpp conftest.$ac_ext") 2>&5 |
+  sed -n "$gl_absolute_header_sed"`
+
+          gl_header=$gl_cv_absolute_sys_time_h
+          gl_cv_next_sys_time_h='"'$gl_header'"'
+          else
+               gl_cv_next_sys_time_h='<'sys/time.h'>'
+             fi
+
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_next_sys_time_h" >&5
+$as_echo "$gl_cv_next_sys_time_h" >&6; }
+     fi
+     NEXT_SYS_TIME_H=$gl_cv_next_sys_time_h
+
+     if test $gl_cv_have_include_next = yes || test $gl_cv_have_include_next = buggy; then
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include_next'
+       gl_next_as_first_directive='<'sys/time.h'>'
+     else
+       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include'
+       gl_next_as_first_directive=$gl_cv_next_sys_time_h
+     fi
+     NEXT_AS_FIRST_DIRECTIVE_SYS_TIME_H=$gl_next_as_first_directive
+
+
+
+
+
+  if test $ac_cv_header_sys_time_h != yes; then
+    HAVE_SYS_TIME_H=0
+  fi
+
+
+
+
+
+  if test $ac_cv_header_sys_socket_h != yes; then
+                    for ac_header in winsock2.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "winsock2.h" "ac_cv_header_winsock2_h" "$ac_includes_default"
+if test "x$ac_cv_header_winsock2_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_WINSOCK2_H 1
+_ACEOF
+
+fi
+
+done
+
+  fi
+  if test "$ac_cv_header_winsock2_h" = yes; then
+    HAVE_WINSOCK2_H=1
+    UNISTD_H_HAVE_WINSOCK2_H=1
+    SYS_IOCTL_H_HAVE_WINSOCK2_H=1
+  else
+    HAVE_WINSOCK2_H=0
+  fi
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for struct timeval" >&5
+$as_echo_n "checking for struct timeval... " >&6; }
+if ${gl_cv_sys_struct_timeval+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#if HAVE_SYS_TIME_H
+             #include <sys/time.h>
+            #endif
+            #include <time.h>
+            #if HAVE_WINSOCK2_H
+            # include <winsock2.h>
+            #endif
+
+int
+main ()
+{
+static struct timeval x; x.tv_sec = x.tv_usec;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_sys_struct_timeval=yes
+else
+  gl_cv_sys_struct_timeval=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_sys_struct_timeval" >&5
+$as_echo "$gl_cv_sys_struct_timeval" >&6; }
+  if test $gl_cv_sys_struct_timeval != yes; then
+    HAVE_STRUCT_TIMEVAL=0
+  else
+                            { $as_echo "$as_me:${as_lineno-$LINENO}: checking for wide-enough struct timeval.tv_sec member" >&5
+$as_echo_n "checking for wide-enough struct timeval.tv_sec member... " >&6; }
+if ${gl_cv_sys_struct_timeval_tv_sec+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#if HAVE_SYS_TIME_H
+               #include <sys/time.h>
+              #endif
+              #include <time.h>
+              #if HAVE_WINSOCK2_H
+              # include <winsock2.h>
+              #endif
+
+int
+main ()
+{
+static struct timeval x;
+              typedef int verify_tv_sec_type[
+                sizeof (time_t) <= sizeof x.tv_sec ? 1 : -1
+              ];
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_sys_struct_timeval_tv_sec=yes
+else
+  gl_cv_sys_struct_timeval_tv_sec=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_sys_struct_timeval_tv_sec" >&5
+$as_echo "$gl_cv_sys_struct_timeval_tv_sec" >&6; }
+    if test $gl_cv_sys_struct_timeval_tv_sec != yes; then
+      REPLACE_STRUCT_TIMEVAL=1
+    fi
+  fi
+
+
+
+
+
+
+
+
+
+  GL_GNULIB_GETTIMEOFDAY=0
+
+
 
 
 
@@ -16246,340 +16879,6 @@ done
 
 
 
-    HAVE_DECL_LOCALTIME_R=1;
-  HAVE_NANOSLEEP=1;
-  HAVE_STRPTIME=1;
-  HAVE_TIMEGM=1;
-  HAVE_TIMESPEC_GET=1;
-  HAVE_TIMESPEC_GETRES=1;
-    HAVE_TIMEZONE_T=0;
-  HAVE_TZALLOC=0;
-  REPLACE_CTIME=0;
-  REPLACE_GMTIME=0;
-  REPLACE_LOCALTIME=0;
-  REPLACE_LOCALTIME_R=0;
-  REPLACE_LOCALTIME_RZ=0;
-  REPLACE_MKTIME=0;
-  REPLACE_MKTIME_Z=0;
-  REPLACE_NANOSLEEP=0;
-  REPLACE_STRFTIME=0;
-  REPLACE_TIME=0;
-  REPLACE_TIMEGM=0;
-  REPLACE_TIMESPEC_GET=0;
-  REPLACE_TIMESPEC_GETRES=0;
-  REPLACE_TZSET=0;
-
-
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for struct timespec in <time.h>" >&5
-$as_echo_n "checking for struct timespec in <time.h>... " >&6; }
-if ${gl_cv_sys_struct_timespec_in_time_h+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <time.h>
-
-int
-main ()
-{
-static struct timespec x; x.tv_sec = x.tv_nsec;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  gl_cv_sys_struct_timespec_in_time_h=yes
-else
-  gl_cv_sys_struct_timespec_in_time_h=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_sys_struct_timespec_in_time_h" >&5
-$as_echo "$gl_cv_sys_struct_timespec_in_time_h" >&6; }
-
-  TIME_H_DEFINES_STRUCT_TIMESPEC=0
-  SYS_TIME_H_DEFINES_STRUCT_TIMESPEC=0
-  PTHREAD_H_DEFINES_STRUCT_TIMESPEC=0
-  UNISTD_H_DEFINES_STRUCT_TIMESPEC=0
-  if test $gl_cv_sys_struct_timespec_in_time_h = yes; then
-    TIME_H_DEFINES_STRUCT_TIMESPEC=1
-  else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for struct timespec in <sys/time.h>" >&5
-$as_echo_n "checking for struct timespec in <sys/time.h>... " >&6; }
-if ${gl_cv_sys_struct_timespec_in_sys_time_h+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <sys/time.h>
-
-int
-main ()
-{
-static struct timespec x; x.tv_sec = x.tv_nsec;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  gl_cv_sys_struct_timespec_in_sys_time_h=yes
-else
-  gl_cv_sys_struct_timespec_in_sys_time_h=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_sys_struct_timespec_in_sys_time_h" >&5
-$as_echo "$gl_cv_sys_struct_timespec_in_sys_time_h" >&6; }
-    if test $gl_cv_sys_struct_timespec_in_sys_time_h = yes; then
-      SYS_TIME_H_DEFINES_STRUCT_TIMESPEC=1
-    else
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for struct timespec in <pthread.h>" >&5
-$as_echo_n "checking for struct timespec in <pthread.h>... " >&6; }
-if ${gl_cv_sys_struct_timespec_in_pthread_h+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <pthread.h>
-
-int
-main ()
-{
-static struct timespec x; x.tv_sec = x.tv_nsec;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  gl_cv_sys_struct_timespec_in_pthread_h=yes
-else
-  gl_cv_sys_struct_timespec_in_pthread_h=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_sys_struct_timespec_in_pthread_h" >&5
-$as_echo "$gl_cv_sys_struct_timespec_in_pthread_h" >&6; }
-      if test $gl_cv_sys_struct_timespec_in_pthread_h = yes; then
-        PTHREAD_H_DEFINES_STRUCT_TIMESPEC=1
-      else
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for struct timespec in <unistd.h>" >&5
-$as_echo_n "checking for struct timespec in <unistd.h>... " >&6; }
-if ${gl_cv_sys_struct_timespec_in_unistd_h+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <unistd.h>
-
-int
-main ()
-{
-static struct timespec x; x.tv_sec = x.tv_nsec;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  gl_cv_sys_struct_timespec_in_unistd_h=yes
-else
-  gl_cv_sys_struct_timespec_in_unistd_h=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_sys_struct_timespec_in_unistd_h" >&5
-$as_echo "$gl_cv_sys_struct_timespec_in_unistd_h" >&6; }
-        if test $gl_cv_sys_struct_timespec_in_unistd_h = yes; then
-          UNISTD_H_DEFINES_STRUCT_TIMESPEC=1
-        fi
-      fi
-    fi
-  fi
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-     if test $gl_cv_have_include_next = yes; then
-       gl_cv_next_time_h='<'time.h'>'
-     else
-       { $as_echo "$as_me:${as_lineno-$LINENO}: checking absolute name of <time.h>" >&5
-$as_echo_n "checking absolute name of <time.h>... " >&6; }
-if ${gl_cv_next_time_h+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-
-
-
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <time.h>
-_ACEOF
-                case "$host_os" in
-    aix*) gl_absname_cpp="$ac_cpp -C" ;;
-    *)    gl_absname_cpp="$ac_cpp" ;;
-  esac
-
-  case "$host_os" in
-    mingw* | windows*)
-                                          gl_dirsep_regex='[/\\]'
-      ;;
-    *)
-      gl_dirsep_regex='\/'
-      ;;
-  esac
-      gl_make_literal_regex_sed='s,[]$^\\.*/[],\\&,g'
-  gl_header_literal_regex=`echo 'time.h' \
-                           | sed -e "$gl_make_literal_regex_sed"`
-  gl_absolute_header_sed="/${gl_dirsep_regex}${gl_header_literal_regex}/"'{
-      s/.*"\(.*'"${gl_dirsep_regex}${gl_header_literal_regex}"'\)".*/\1/
-      s|^/[^/]|//&|
-      p
-      q
-    }'
-
-        gl_cv_absolute_time_h=`(eval "$gl_absname_cpp conftest.$ac_ext") 2>&5 |
-  sed -n "$gl_absolute_header_sed"`
-
-          gl_header=$gl_cv_absolute_time_h
-          gl_cv_next_time_h='"'$gl_header'"'
-
-
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_next_time_h" >&5
-$as_echo "$gl_cv_next_time_h" >&6; }
-     fi
-     NEXT_TIME_H=$gl_cv_next_time_h
-
-     if test $gl_cv_have_include_next = yes || test $gl_cv_have_include_next = buggy; then
-       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include_next'
-       gl_next_as_first_directive='<'time.h'>'
-     else
-       # INCLUDE_NEXT_AS_FIRST_DIRECTIVE='include'
-       gl_next_as_first_directive=$gl_cv_next_time_h
-     fi
-     NEXT_AS_FIRST_DIRECTIVE_TIME_H=$gl_next_as_first_directive
-
-
-
-
-
-
-
-
-
-
-
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for TIME_UTC in <time.h>" >&5
-$as_echo_n "checking for TIME_UTC in <time.h>... " >&6; }
-if ${gl_cv_time_h_has_TIME_UTC+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <time.h>
-
-int
-main ()
-{
-static int x = TIME_UTC; x++;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  gl_cv_time_h_has_TIME_UTC=yes
-else
-  gl_cv_time_h_has_TIME_UTC=no
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_time_h_has_TIME_UTC" >&5
-$as_echo "$gl_cv_time_h_has_TIME_UTC" >&6; }
-  if test $gl_cv_time_h_has_TIME_UTC = yes; then
-    TIME_H_DEFINES_TIME_UTC=1
-  else
-    TIME_H_DEFINES_TIME_UTC=0
-  fi
-
-
-
-
-  GL_GNULIB_CTIME=0
-
-
-
-  GL_GNULIB_MKTIME=0
-
-
-
-  GL_GNULIB_LOCALTIME=0
-
-
-
-  GL_GNULIB_NANOSLEEP=0
-
-
-
-  GL_GNULIB_STRFTIME=0
-
-
-
-  GL_GNULIB_STRPTIME=0
-
-
-
-  GL_GNULIB_TIME=0
-
-
-
-  GL_GNULIB_TIMEGM=0
-
-
-
-  GL_GNULIB_TIMESPEC_GET=0
-
-
-
-  GL_GNULIB_TIMESPEC_GETRES=0
-
-
-
-  GL_GNULIB_TIME_R=0
-
-
-
-  GL_GNULIB_TIME_RZ=0
-
-
-
-  GL_GNULIB_TZNAME=0
-
-
-
-  GL_GNULIB_TZSET=0
-
-
-
-  GL_GNULIB_MDA_TZSET=1
-
-
-
-
-
-
 
 
 
@@ -18888,6 +19187,60 @@ $as_echo "#define GNULIB_TEST_STRSEP 1" >>confdefs.h
 
 
 
+  :
+
+
+
+
+
+
+  if test $gl_cv_func_timespec_get != yes; then
+    HAVE_TIMESPEC_GET=0
+    case "$gl_cv_onwards_func_timespec_get" in
+      future*) REPLACE_TIMESPEC_GET=1 ;;
+    esac
+  fi
+
+
+     if test $HAVE_TIMESPEC_GET = 0 || test $REPLACE_TIMESPEC_GET = 1; then
+  GL_COND_OBJ_TIMESPEC_GET_TRUE=
+  GL_COND_OBJ_TIMESPEC_GET_FALSE='#'
+else
+  GL_COND_OBJ_TIMESPEC_GET_TRUE='#'
+  GL_COND_OBJ_TIMESPEC_GET_FALSE=
+fi
+:
+    if test -z "${GL_COND_OBJ_TIMESPEC_GET_TRUE}" && test -z "${GL_COND_OBJ_TIMESPEC_GET_FALSE}"; then
+    GL_COND_OBJ_TIMESPEC_GET_TRUE='#'
+    GL_COND_OBJ_TIMESPEC_GET_FALSE='#'
+  fi
+
+
+
+
+
+
+
+
+
+
+          GL_GNULIB_TIMESPEC_GET=1
+
+
+
+
+
+$as_echo "#define GNULIB_TEST_TIMESPEC_GET 1" >>confdefs.h
+
+
+
+
+
+
+
+
+
+
 
   for ac_func in vasprintf
 do :
@@ -18973,6 +19326,7 @@ $as_echo "#define GNULIB_TEST_VASPRINTF 1" >>confdefs.h
   gl_gnulib_enabled_c99=false
   gl_gnulib_enabled_72dfd9a8bb8db9211d38af59105b03c0=false
   gl_gnulib_enabled_chdir=false
+  gl_gnulib_enabled_c58c2549aa84fceb9f0ca39c3eb5c7bd=false
   gl_gnulib_enabled_a691da99c1d83b83238e45f41a696f5c=false
   gl_gnulib_enabled_36afd6902ac3aacf32e3ff12a686c346=false
   gl_gnulib_enabled_925677f0343de64b89a9f0c790b4104c=false
@@ -18983,6 +19337,8 @@ $as_echo "#define GNULIB_TEST_VASPRINTF 1" >>confdefs.h
   gl_gnulib_enabled_float=false
   gl_gnulib_enabled_ef07dc4b3077c11ea9cef586db4e5955=false
   gl_gnulib_enabled_getdelim=false
+  gl_gnulib_enabled_gettime=false
+  gl_gnulib_enabled_gettimeofday=false
   gl_gnulib_enabled_8444034ea779b88768865bb60b4fb8c9=false
   gl_gnulib_enabled_idx=false
   gl_gnulib_enabled_intprops=false
@@ -19013,7 +19369,7 @@ $as_echo "#define GNULIB_TEST_VASPRINTF 1" >>confdefs.h
   gl_gnulib_enabled_stdckdint=false
   gl_gnulib_enabled_stdint=false
   gl_gnulib_enabled_sys_stat=false
-  gl_gnulib_enabled_cb7562e84d8cf7185af782fe497b53dd=false
+  gl_gnulib_enabled_sys_time=false
   gl_gnulib_enabled_vasnprintf=false
   gl_gnulib_enabled_wchar=false
   gl_gnulib_enabled_682e609604ccaac6be382e4ee3a4eaec=false
@@ -19527,6 +19883,116 @@ $as_echo "#define GNULIB_TEST_CHDIR 1" >>confdefs.h
 
 
       gl_gnulib_enabled_chdir=true
+    fi
+  }
+  func_gl_gnulib_m4code_c58c2549aa84fceb9f0ca39c3eb5c7bd ()
+  {
+    if $gl_gnulib_enabled_c58c2549aa84fceb9f0ca39c3eb5c7bd; then :; else
+
+
+
+
+
+  # On mingw, these functions are defined in the libwinpthread library,
+  # which is better avoided.  In fact, the clock_gettime function is buggy
+  # in 32-bit mingw, when -D__MINGW_USE_VC2005_COMPAT is used (which Gnulib's
+  # year2038 module does): It leaves the upper 32 bits of the tv_sec field
+  # of the result uninitialized.
+
+  # Solaris 2.5.1 needs -lposix4 to get the clock_gettime function.
+  # Solaris 7 prefers the library name -lrt to the obsolescent name -lposix4.
+
+  # Save and restore LIBS so e.g., -lrt, isn't added to it.  Otherwise, *all*
+  # programs in the package would end up linked with that potentially-shared
+  # library, inducing unnecessary run-time overhead.
+  CLOCK_TIME_LIB=
+
+  case "$host_os" in
+    mingw* | windows*)
+      ac_cv_func_clock_getres=no
+      ac_cv_func_clock_gettime=no
+      ac_cv_func_clock_settime=no
+      ;;
+    *)
+      gl_saved_libs=$LIBS
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing clock_gettime" >&5
+$as_echo_n "checking for library containing clock_gettime... " >&6; }
+if ${ac_cv_search_clock_gettime+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char clock_gettime ();
+int
+main ()
+{
+return clock_gettime ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' rt posix4; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_clock_gettime=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_clock_gettime+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_clock_gettime+:} false; then :
+
+else
+  ac_cv_search_clock_gettime=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_clock_gettime" >&5
+$as_echo "$ac_cv_search_clock_gettime" >&6; }
+ac_res=$ac_cv_search_clock_gettime
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+  test "$ac_cv_search_clock_gettime" = "none required" ||
+                        CLOCK_TIME_LIB=$ac_cv_search_clock_gettime
+fi
+
+        for ac_func in clock_getres clock_gettime clock_settime
+do :
+  as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
+ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
+if eval test \"x\$"$as_ac_var"\" = x"yes"; then :
+  cat >>confdefs.h <<_ACEOF
+#define `$as_echo "HAVE_$ac_func" | $as_tr_cpp` 1
+_ACEOF
+
+fi
+done
+
+      LIBS=$gl_saved_libs
+      ;;
+  esac
+
+  # For backward compatibility.
+  LIB_CLOCK_GETTIME="$CLOCK_TIME_LIB"
+
+
+      gl_gnulib_enabled_c58c2549aa84fceb9f0ca39c3eb5c7bd=true
     fi
   }
   func_gl_gnulib_m4code_a691da99c1d83b83238e45f41a696f5c ()
@@ -20302,6 +20768,155 @@ $as_echo "#define GNULIB_TEST_GETDELIM 1" >>confdefs.h
       if test $HAVE_GETDELIM = 0 || test $REPLACE_GETDELIM = 1; then
         func_gl_gnulib_m4code_stdint
       fi
+    fi
+  }
+  func_gl_gnulib_m4code_gettime ()
+  {
+    if $gl_gnulib_enabled_gettime; then :; else
+
+
+
+
+
+  if test $gl_cv_func_timespec_get = yes; then
+
+$as_echo "#define HAVE_TIMESPEC_GET 1" >>confdefs.h
+
+  fi
+
+      gl_gnulib_enabled_gettime=true
+      func_gl_gnulib_m4code_c58c2549aa84fceb9f0ca39c3eb5c7bd
+      func_gl_gnulib_m4code_gettimeofday
+      func_gl_gnulib_m4code_sys_time
+    fi
+  }
+  func_gl_gnulib_m4code_gettimeofday ()
+  {
+    if $gl_gnulib_enabled_gettimeofday; then :; else
+
+
+
+
+
+
+
+  gl_gettimeofday_timezone=void
+  if test $ac_cv_func_gettimeofday != yes; then
+    HAVE_GETTIMEOFDAY=0
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for gettimeofday with POSIX signature" >&5
+$as_echo_n "checking for gettimeofday with POSIX signature... " >&6; }
+if ${gl_cv_func_gettimeofday_posix_signature+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/time.h>
+              struct timeval c;
+              int gettimeofday (struct timeval *restrict, void *restrict);
+
+int
+main ()
+{
+/* glibc uses struct timezone * rather than the POSIX void *
+                 if _GNU_SOURCE is defined.  However, since the only portable
+                 use of gettimeofday uses NULL as the second parameter, and
+                 since the glibc definition is actually more typesafe, it is
+                 not worth wrapping this to get a compliant signature.  */
+              int (*f) (struct timeval *restrict, void *restrict)
+                = gettimeofday;
+              int x = f (&c, 0);
+              return !(x | c.tv_sec | c.tv_usec);
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_func_gettimeofday_posix_signature=yes
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <sys/time.h>
+int gettimeofday (struct timeval *restrict, struct timezone *restrict);
+
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+  gl_cv_func_gettimeofday_posix_signature=almost
+else
+  gl_cv_func_gettimeofday_posix_signature=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $gl_cv_func_gettimeofday_posix_signature" >&5
+$as_echo "$gl_cv_func_gettimeofday_posix_signature" >&6; }
+    if test $gl_cv_func_gettimeofday_posix_signature = almost; then
+      gl_gettimeofday_timezone='struct timezone'
+    elif test $gl_cv_func_gettimeofday_posix_signature != yes; then
+      REPLACE_GETTIMEOFDAY=1
+    fi
+        if test $REPLACE_STRUCT_TIMEVAL = 1; then
+      REPLACE_GETTIMEOFDAY=1
+    fi
+            case "$host_os" in
+      mingw* | windows*) REPLACE_GETTIMEOFDAY=1 ;;
+    esac
+  fi
+
+cat >>confdefs.h <<_ACEOF
+#define GETTIMEOFDAY_TIMEZONE $gl_gettimeofday_timezone
+_ACEOF
+
+
+
+     if test $HAVE_GETTIMEOFDAY = 0 || test $REPLACE_GETTIMEOFDAY = 1; then
+  GL_COND_OBJ_GETTIMEOFDAY_TRUE=
+  GL_COND_OBJ_GETTIMEOFDAY_FALSE='#'
+else
+  GL_COND_OBJ_GETTIMEOFDAY_TRUE='#'
+  GL_COND_OBJ_GETTIMEOFDAY_FALSE=
+fi
+:
+    if test -z "${GL_COND_OBJ_GETTIMEOFDAY_TRUE}" && test -z "${GL_COND_OBJ_GETTIMEOFDAY_FALSE}"; then
+    GL_COND_OBJ_GETTIMEOFDAY_TRUE='#'
+    GL_COND_OBJ_GETTIMEOFDAY_FALSE='#'
+  fi
+
+      if test -z "$GL_COND_OBJ_GETTIMEOFDAY_TRUE"; then :
+
+        :
+
+fi
+
+
+
+
+
+
+
+
+
+          GL_GNULIB_GETTIMEOFDAY=1
+
+
+
+
+
+$as_echo "#define GNULIB_TEST_GETTIMEOFDAY 1" >>confdefs.h
+
+
+
+      gl_gnulib_enabled_gettimeofday=true
+      func_gl_gnulib_m4code_sys_time
     fi
   }
   func_gl_gnulib_m4code_8444034ea779b88768865bb60b4fb8c9 ()
@@ -21780,7 +22395,6 @@ fi
       gl_gnulib_enabled_0137e3d3638b33e5819d132d0b23165c=true
       func_gl_gnulib_m4code_errno
       func_gl_gnulib_m4code_stdckdint
-      func_gl_gnulib_m4code_cb7562e84d8cf7185af782fe497b53dd
     fi
   }
   func_gl_gnulib_m4code_4ecd6d4226a85c8d3e919d781a515f81 ()
@@ -21961,12 +22575,11 @@ fi
 
 
       gl_gnulib_enabled_sys_stat=true
-      func_gl_gnulib_m4code_cb7562e84d8cf7185af782fe497b53dd
     fi
   }
-  func_gl_gnulib_m4code_cb7562e84d8cf7185af782fe497b53dd ()
+  func_gl_gnulib_m4code_sys_time ()
   {
-    if $gl_gnulib_enabled_cb7562e84d8cf7185af782fe497b53dd; then :; else
+    if $gl_gnulib_enabled_sys_time; then :; else
 
 
 
@@ -21974,7 +22587,7 @@ fi
 
 
 
-      gl_gnulib_enabled_cb7562e84d8cf7185af782fe497b53dd=true
+      gl_gnulib_enabled_sys_time=true
     fi
   }
   func_gl_gnulib_m4code_vasnprintf ()
@@ -22190,6 +22803,9 @@ done
   if test $REPLACE_RENAME = 1; then
     func_gl_gnulib_m4code_stdbool
   fi
+  if test $HAVE_TIMESPEC_GET = 0 || test $REPLACE_TIMESPEC_GET = 1; then
+    func_gl_gnulib_m4code_gettime
+  fi
   if test $HAVE_VASPRINTF = 0 || test $REPLACE_VASPRINTF = 1; then
     func_gl_gnulib_m4code_errno
   fi
@@ -22262,6 +22878,14 @@ fi
 else
   gl_GNULIB_ENABLED_chdir_TRUE='#'
   gl_GNULIB_ENABLED_chdir_FALSE=
+fi
+
+   if $gl_gnulib_enabled_c58c2549aa84fceb9f0ca39c3eb5c7bd; then
+  gl_GNULIB_ENABLED_c58c2549aa84fceb9f0ca39c3eb5c7bd_TRUE=
+  gl_GNULIB_ENABLED_c58c2549aa84fceb9f0ca39c3eb5c7bd_FALSE='#'
+else
+  gl_GNULIB_ENABLED_c58c2549aa84fceb9f0ca39c3eb5c7bd_TRUE='#'
+  gl_GNULIB_ENABLED_c58c2549aa84fceb9f0ca39c3eb5c7bd_FALSE=
 fi
 
    if $gl_gnulib_enabled_a691da99c1d83b83238e45f41a696f5c; then
@@ -22342,6 +22966,22 @@ fi
 else
   gl_GNULIB_ENABLED_getdelim_TRUE='#'
   gl_GNULIB_ENABLED_getdelim_FALSE=
+fi
+
+   if $gl_gnulib_enabled_gettime; then
+  gl_GNULIB_ENABLED_gettime_TRUE=
+  gl_GNULIB_ENABLED_gettime_FALSE='#'
+else
+  gl_GNULIB_ENABLED_gettime_TRUE='#'
+  gl_GNULIB_ENABLED_gettime_FALSE=
+fi
+
+   if $gl_gnulib_enabled_gettimeofday; then
+  gl_GNULIB_ENABLED_gettimeofday_TRUE=
+  gl_GNULIB_ENABLED_gettimeofday_FALSE='#'
+else
+  gl_GNULIB_ENABLED_gettimeofday_TRUE='#'
+  gl_GNULIB_ENABLED_gettimeofday_FALSE=
 fi
 
    if $gl_gnulib_enabled_8444034ea779b88768865bb60b4fb8c9; then
@@ -22584,12 +23224,12 @@ else
   gl_GNULIB_ENABLED_sys_stat_FALSE=
 fi
 
-   if $gl_gnulib_enabled_cb7562e84d8cf7185af782fe497b53dd; then
-  gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE=
-  gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_FALSE='#'
+   if $gl_gnulib_enabled_sys_time; then
+  gl_GNULIB_ENABLED_sys_time_TRUE=
+  gl_GNULIB_ENABLED_sys_time_FALSE='#'
 else
-  gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE='#'
-  gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_FALSE=
+  gl_GNULIB_ENABLED_sys_time_TRUE='#'
+  gl_GNULIB_ENABLED_sys_time_FALSE=
 fi
 
    if $gl_gnulib_enabled_vasnprintf; then
@@ -23341,6 +23981,10 @@ if test -z "${gl_GNULIB_ENABLED_chdir_TRUE}" && test -z "${gl_GNULIB_ENABLED_chd
   as_fn_error $? "conditional \"gl_GNULIB_ENABLED_chdir\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
+if test -z "${gl_GNULIB_ENABLED_c58c2549aa84fceb9f0ca39c3eb5c7bd_TRUE}" && test -z "${gl_GNULIB_ENABLED_c58c2549aa84fceb9f0ca39c3eb5c7bd_FALSE}"; then
+  as_fn_error $? "conditional \"gl_GNULIB_ENABLED_c58c2549aa84fceb9f0ca39c3eb5c7bd\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
 if test -z "${gl_GNULIB_ENABLED_a691da99c1d83b83238e45f41a696f5c_TRUE}" && test -z "${gl_GNULIB_ENABLED_a691da99c1d83b83238e45f41a696f5c_FALSE}"; then
   as_fn_error $? "conditional \"gl_GNULIB_ENABLED_a691da99c1d83b83238e45f41a696f5c\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
@@ -23379,6 +24023,14 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${gl_GNULIB_ENABLED_getdelim_TRUE}" && test -z "${gl_GNULIB_ENABLED_getdelim_FALSE}"; then
   as_fn_error $? "conditional \"gl_GNULIB_ENABLED_getdelim\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${gl_GNULIB_ENABLED_gettime_TRUE}" && test -z "${gl_GNULIB_ENABLED_gettime_FALSE}"; then
+  as_fn_error $? "conditional \"gl_GNULIB_ENABLED_gettime\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${gl_GNULIB_ENABLED_gettimeofday_TRUE}" && test -z "${gl_GNULIB_ENABLED_gettimeofday_FALSE}"; then
+  as_fn_error $? "conditional \"gl_GNULIB_ENABLED_gettimeofday\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${gl_GNULIB_ENABLED_8444034ea779b88768865bb60b4fb8c9_TRUE}" && test -z "${gl_GNULIB_ENABLED_8444034ea779b88768865bb60b4fb8c9_FALSE}"; then
@@ -23501,8 +24153,8 @@ if test -z "${gl_GNULIB_ENABLED_sys_stat_TRUE}" && test -z "${gl_GNULIB_ENABLED_
   as_fn_error $? "conditional \"gl_GNULIB_ENABLED_sys_stat\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
-if test -z "${gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_TRUE}" && test -z "${gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd_FALSE}"; then
-  as_fn_error $? "conditional \"gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd\" was never defined.
+if test -z "${gl_GNULIB_ENABLED_sys_time_TRUE}" && test -z "${gl_GNULIB_ENABLED_sys_time_FALSE}"; then
+  as_fn_error $? "conditional \"gl_GNULIB_ENABLED_sys_time\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${gl_GNULIB_ENABLED_vasnprintf_TRUE}" && test -z "${gl_GNULIB_ENABLED_vasnprintf_FALSE}"; then

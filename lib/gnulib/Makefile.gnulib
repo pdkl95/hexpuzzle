@@ -41,6 +41,8 @@
 #  rename \
 #  strcase \
 #  strsep \
+#  timespec \
+#  timespec_get \
 #  vasprintf
 
 
@@ -339,6 +341,24 @@ lib_gnulib_libgnu_a_SOURCES += lib/gnulib/getline.c
 endif
 
 ## end   gnulib module getline
+
+## begin gnulib module gettime
+
+if gl_GNULIB_ENABLED_gettime
+lib_gnulib_libgnu_a_SOURCES += lib/gnulib/gettime.c
+
+endif
+## end   gnulib module gettime
+
+## begin gnulib module gettimeofday
+
+if gl_GNULIB_ENABLED_gettimeofday
+if GL_COND_OBJ_GETTIMEOFDAY
+lib_gnulib_libgnu_a_SOURCES += lib/gnulib/gettimeofday.c
+endif
+
+endif
+## end   gnulib module gettimeofday
 
 ## begin gnulib module glibc-internal/scratch_buffer
 
@@ -1365,6 +1385,41 @@ EXTRA_DIST += lib/gnulib/sys_stat.in.h
 
 ## end   gnulib module sys_stat
 
+## begin gnulib module sys_time
+
+if gl_GNULIB_ENABLED_sys_time
+BUILT_SOURCES += lib/gnulib/sys/time.h
+
+# We need the following in order to create <sys/time.h> when the system
+# doesn't have one that works with the given compiler.
+lib/gnulib/sys/time.h: lib/gnulib/sys_time.in.h $(top_builddir)/config.status $(CXXDEFS_H) $(ARG_NONNULL_H) $(WARN_ON_USE_H)
+	$(AM_V_GEN)$(MKDIR_P) '%reldir%/sys'
+	$(AM_V_at)$(SED_HEADER_STDOUT) \
+	      -e 's|@''GUARD_PREFIX''@|GL|g' \
+	      -e 's/@''HAVE_SYS_TIME_H''@/$(HAVE_SYS_TIME_H)/g' \
+	      -e 's|@''INCLUDE_NEXT''@|$(INCLUDE_NEXT)|g' \
+	      -e 's|@''PRAGMA_SYSTEM_HEADER''@|@PRAGMA_SYSTEM_HEADER@|g' \
+	      -e 's|@''PRAGMA_COLUMNS''@|@PRAGMA_COLUMNS@|g' \
+	      -e 's|@''NEXT_SYS_TIME_H''@|$(NEXT_SYS_TIME_H)|g' \
+	      -e 's/@''GNULIB_GETTIMEOFDAY''@/$(GL_GNULIB_GETTIMEOFDAY)/g' \
+	      -e 's|@''HAVE_WINSOCK2_H''@|$(HAVE_WINSOCK2_H)|g' \
+	      -e 's/@''HAVE_GETTIMEOFDAY''@/$(HAVE_GETTIMEOFDAY)/g' \
+	      -e 's/@''HAVE_STRUCT_TIMEVAL''@/$(HAVE_STRUCT_TIMEVAL)/g' \
+	      -e 's/@''REPLACE_GETTIMEOFDAY''@/$(REPLACE_GETTIMEOFDAY)/g' \
+	      -e 's/@''REPLACE_STRUCT_TIMEVAL''@/$(REPLACE_STRUCT_TIMEVAL)/g' \
+	      -e '/definitions of _GL_FUNCDECL_RPL/r $(CXXDEFS_H)' \
+	      -e '/definition of _GL_ARG_NONNULL/r $(ARG_NONNULL_H)' \
+	      -e '/definition of _GL_WARN_ON_USE/r $(WARN_ON_USE_H)' \
+	      $(top_srcdir)/lib/gnulib/sys_time.in.h > $@-t
+	$(AM_V_at)mv $@-t $@
+MOSTLYCLEANFILES += lib/gnulib/sys/time.h lib/gnulib/sys/time.h-t
+MOSTLYCLEANDIRS += lib/gnulib/sys
+
+endif
+EXTRA_DIST += lib/gnulib/sys_time.in.h
+
+## end   gnulib module sys_time
+
 ## begin gnulib module sys_types
 
 BUILT_SOURCES += lib/gnulib/sys/types.h
@@ -1393,7 +1448,6 @@ EXTRA_DIST += lib/gnulib/sys_types.in.h
 
 ## begin gnulib module time-h
 
-if gl_GNULIB_ENABLED_cb7562e84d8cf7185af782fe497b53dd
 BUILT_SOURCES += lib/gnulib/time.h
 
 # We need the following in order to create <time.h> when the system
@@ -1455,10 +1509,25 @@ lib/gnulib/time.h: lib/gnulib/time.in.h $(top_builddir)/config.status $(CXXDEFS_
 	$(AM_V_at)mv $@-t $@
 MOSTLYCLEANFILES += lib/gnulib/time.h lib/gnulib/time.h-t
 
-endif
 EXTRA_DIST += lib/gnulib/time.in.h
 
 ## end   gnulib module time-h
+
+## begin gnulib module timespec
+
+lib_gnulib_libgnu_a_SOURCES += lib/gnulib/timespec.c
+
+EXTRA_DIST += lib/gnulib/timespec.h
+
+## end   gnulib module timespec
+
+## begin gnulib module timespec_get
+
+if GL_COND_OBJ_TIMESPEC_GET
+lib_gnulib_libgnu_a_SOURCES += lib/gnulib/timespec_get.c
+endif
+
+## end   gnulib module timespec_get
 
 ## begin gnulib module unistd
 

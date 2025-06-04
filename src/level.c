@@ -41,6 +41,7 @@
 #include "win_anim.h"
 #include "solver.h"
 
+
 //#define DEBUG_DRAG_AND_DROP 1
 //#define DEBUG_LEVEL_FADE
 
@@ -326,6 +327,8 @@ static level_t *init_level(level_t *level)
     level->enabled_tile_count = 0;
 
     level->finished_hue = 0.0f;
+
+    level->unplayed = true;
 
     level->fade.active    = false;
     level->fade.do_rotate = true;
@@ -884,6 +887,12 @@ void level_load(level_t *level)
     level_reset(current_level);
 }
 
+void level_play_fade_in_callback(UNUSED struct level *level, UNUSED void *data)
+{
+    solve_timer_start(&solve_timer);
+}
+
+
 void level_play(level_t *level)
 {
     assert_not_null(level);
@@ -896,8 +905,13 @@ void level_play(level_t *level)
         level_unwin(level);
     }
 
-    level_fade_in(level, NULL, NULL);
+    level_fade_in(level, level_play_fade_in_callback, NULL);
     set_game_mode(GAME_MODE_PLAY_LEVEL);
+
+    if (level->unplayed) {
+        level->unplayed = false;
+        solve_timer_reset(&solve_timer);
+    }
 
     if (options->cheat_autowin) {
         level_solve(level);
@@ -1866,6 +1880,8 @@ void level_unwin(level_t *level)
     if (game_mode == GAME_MODE_WIN_LEVEL) {
         set_game_mode(GAME_MODE_PLAY_LEVEL);
     }
+
+    solve_timer_start(&solve_timer);
 }
 
 bool level_is_fading(level_t *level)
@@ -1989,6 +2005,9 @@ void level_fade_out(level_t *level, level_fade_finished_cb_t callback, void *dat
 #ifdef DEBUG_LEVEL_FADE
     printf("level_fade_out()\n");
 #endif
+
+    solve_timer_stop(&solve_timer);
+
     level->fade.target = 0.0f;
     level_fade_transition(level, callback, data);
 }
