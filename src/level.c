@@ -570,6 +570,8 @@ void destroy_level(level_t *level)
 
         SAFEFREE(level->id);
         SAFEFREE(level->filename);
+        SAFEFREE(level->dirpath);
+        SAFEFREE(level->savepath);
         SAFEFREE(level);
     }
 }

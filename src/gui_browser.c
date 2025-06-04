@@ -971,27 +971,31 @@ void draw_gui_browser_local_level_file(void)
     draw_gui_browser_local_level_file_new_button(entry);
     draw_gui_browser_local_level_file_rename_button(entry);
 
-    switch (entry->type) {
-    case ENTRY_TYPE_DIR:
-        button_text = browser_open_button_text;
-        break;
-
-    case ENTRY_TYPE_LEVEL_FILE:
-        /* fall through */
-    case ENTRY_TYPE_COLLECTION_FILE:
-        /* fall through */
-    case ENTRY_TYPE_COLLECTION_DIR:
-        break;
-
-    default:
-        break;
-    }
-
-    int selected = draw_gui_browser_big_button(&local_files, button_text, false);
-
+    int selected = -1;
     int edit_selected = -1;
-    if  (options->allow_edit_mode) {
-        edit_selected = draw_gui_browser_big_button(&local_files, browser_edit_button_text, true);
+
+    if (local_files.active >= 0) {
+        switch (entry->type) {
+        case ENTRY_TYPE_DIR:
+            button_text = browser_open_button_text;
+            break;
+
+        case ENTRY_TYPE_LEVEL_FILE:
+            /* fall through */
+        case ENTRY_TYPE_COLLECTION_FILE:
+            /* fall through */
+        case ENTRY_TYPE_COLLECTION_DIR:
+            break;
+
+        default:
+            break;
+        }
+
+        selected = draw_gui_browser_big_button(&local_files, button_text, false);
+
+        if  (options->allow_edit_mode) {
+            edit_selected = draw_gui_browser_big_button(&local_files, browser_edit_button_text, true);
+        }
     }
 
     if (browse_preview_level) {

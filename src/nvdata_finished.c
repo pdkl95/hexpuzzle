@@ -176,7 +176,7 @@ void nvdata_finished_write(FILE *f)
         e != NULL;
         e = sglib_finished_level_it_next(&it)
     ) {
-        struct tm win_tm;
+        struct tm win_tm = {0};
         gmtime_r(&e->win_time, &win_tm);
 
         char win_time_str[256];
@@ -241,7 +241,7 @@ void load_nvdata_finished_levels(void)
             goto load_finished_levels_cleanup;
         }
 
-        struct tm win_tm;
+        struct tm win_tm = {0};
         strptime(win_time_str, "%F %T", &win_tm);
         time_t win_time = mktime(&win_tm);
 

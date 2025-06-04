@@ -90,7 +90,7 @@ physics_t *create_physics(struct level *level)
     return physics;
 }
 
-void cleanup_phyics_tile(physics_tile_t *pt)
+void cleanup_phyics_tile(physics_t *physics, physics_tile_t *pt)
 {
     assert_not_null(pt);
 
@@ -100,20 +100,24 @@ void cleanup_phyics_tile(physics_tile_t *pt)
 
     for (hex_direction_t dir=0; dir<3; dir++) {
         if (pt->path_spring[dir]) {
+            cpSpaceRemoveConstraint(physics->space, pt->path_spring[dir]);
             cpConstraintFree(pt->path_spring[dir]);
             pt->path_spring[dir] = NULL;
         }
         if (pt->path_rotary_limit[dir]) {
+            cpSpaceRemoveConstraint(physics->space, pt->path_rotary_limit[dir]);
             cpConstraintFree(pt->path_rotary_limit[dir]);
             pt->path_rotary_limit[dir] = NULL;
         }
     }
 
     if (pt->shape) {
+        cpSpaceRemoveShape(physics->space, pt->shape);
         cpShapeFree(pt->shape);
         pt->shape = NULL;
     }
     if (pt->body) {
+        cpSpaceRemoveBody(physics->space, pt->body);
         cpBodyFree(pt->body);
         pt->body = NULL;
     }
@@ -132,11 +136,12 @@ void cleanup_physics(physics_t *physics)
 
         for (int i=0; i<LEVEL_MAXTILES; i++) {
             physics_tile_t *pt = &(physics->tiles[i]);
-            cleanup_phyics_tile(pt);
+            cleanup_phyics_tile(physics, pt);
         }
 
         for (int i=0; i<4; i++) {
             if (physics->wall[i]) {
+                cpSpaceRemoveShape(physics->space, physics->wall[i]);
                 cpShapeFree(physics->wall[i]);
                 physics->wall[i] = NULL;
             }
