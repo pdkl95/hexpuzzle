@@ -72,6 +72,8 @@ static struct option long_options[] = {
 #endif
     {   "use-shader-effects",       no_argument, 0, 'x' },
     {"no-use-shader-effects",       no_argument, 0, 'X' },
+    {      "use-solve-timer",       no_argument, 0, 'm' },
+    {   "no-use-solve-timer",       no_argument, 0, 'M' },
     {        "show-previews",       no_argument, 0, '-' },
     {     "no-show-previews",       no_argument, 0, '_' },
     {        "show-tooltips",       no_argument, 0, 't' },
@@ -120,6 +122,8 @@ static char help_text[] =
     "   --no-use-physics           Disable the physucs engine\n"
     "      --use-shader-effects    Enable shader postprocesing effects (default: on)\n"
     "   --no-use-shader-effects    Disable shader postprocesing effects\n"
+    "      --use-solve-timer       Enable level solve time tracking (default: on)\n"
+    "   --no-use-solve-timer       Disable level solve time tracking\n"
     "      --show-previews         Enable showing small level previews (default: on)\n"
     "   --no-show-previews         Disable showing small level previews\n"
     "      --show-tooltips         Enable popup tooltips on mouse-hover default: on)\n"
@@ -377,6 +381,7 @@ options_set_defaults(
     options->animate_win           = OPTIONS_DEFAULT_ANIMATE_WIN;
     options->use_physics           = OPTIONS_DEFAULT_USE_PHYSICS;
     options->use_postprocessing    = OPTIONS_DEFAULT_USE_POSTPROCESSING;
+    options->use_solve_timer       = OPTIONS_DEFAULT_USE_SOLVE_TIMER;
     options->show_level_previews   = OPTIONS_DEFAULT_SHOW_LEVEL_PREVIEWS;
     options->show_tooltips         = OPTIONS_DEFAULT_SHOW_TOOLTIPS;
     options->extra_rainbows        = OPTIONS_DEFAULT_EXTRA_RAINBOWS;
@@ -391,6 +396,7 @@ options_set_defaults(
     options->load_state_animate_win = true;
     options->load_state_use_physics = true;
     options->load_state_use_postprocessing = true;
+    options->load_state_use_solve_timer = true;
     options->load_state_show_level_previews = true;
     options->load_state_show_tooltips = true;
     options->load_color_opt = true;
@@ -666,6 +672,16 @@ options_parse_args(
         case 'X':
             options->use_postprocessing = false;
             options->load_state_use_postprocessing = false;
+            break;
+
+        case 'm':
+            options->use_solve_timer = true;
+            options->load_state_use_solve_timer = false;
+            break;
+
+        case 'M':
+            options->use_solve_timer = false;
+            options->load_state_use_solve_timer = false;
             break;
 
         case '-':

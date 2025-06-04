@@ -38,6 +38,7 @@ Rectangle options_show_level_previews_rect;
 Rectangle options_show_tooltips_rect;
 Rectangle options_reset_finished_rect;
 Rectangle options_use_postprocessing_rect;
+Rectangle options_use_solve_timer_rect;
 Rectangle options_description_rect;
 
 char options_panel_text[] = "Options";
@@ -50,10 +51,12 @@ char options_reset_finished_text[] = "Reset Level Finished Data";
 char options_color_edit_tooltip[] = "Select Color";
 char options_color_reset_tooltip[] = "Reset color back to default";
 char options_use_postprocessing_text[] = "Use Shader Effects";
+char options_use_solve_timer_text[] = "Solve Time Clock";
 
 char options_anim_bg_desc_text[]  = "Disable if the animated background is too distracting.";
 char options_anim_win_desc_text[] = "Special effects animation that plays when a level is completed.";
 char options_use_postprocessing_desc_text[] = "Postpo4ssing shader effects (blur, warping)";
+char options_use_solve_timer_desc_text[] = "A clock that tracks how long it takes to solve each level.";
 char options_show_level_previews_desc_text[] = "Show small level previews.";
 char options_show_tooltips_desc_text[] = "Show popup tooltips when hovering over some controls.";
 
@@ -72,6 +75,11 @@ struct gui_bool_option {
 typedef struct gui_bool_option gui_bool_option_t;
 
 gui_bool_option_t graphics_options[] = {
+    {
+        .rect  = &options_use_solve_timer_rect,
+        .label = options_use_solve_timer_text,
+        .desc  = options_use_solve_timer_desc_text
+    },
     {
         .rect  = &options_anim_bg_rect,
         .label = options_anim_bg_text,
@@ -199,12 +207,13 @@ void init_gui_options(void)
                  "%s", GuiIconText(ICON_UNDO_FILL, NULL));
     }
 
-    graphics_options[0].opt = &options->animate_bg;
-    graphics_options[1].opt = &options->animate_win;
-    graphics_options[2].opt = &options->use_physics;
-    graphics_options[3].opt = &options->use_postprocessing;
-    graphics_options[4].opt = &options->show_level_previews;
-    graphics_options[5].opt = &options->show_tooltips;
+    graphics_options[0].opt = &options->use_solve_timer;
+    graphics_options[1].opt = &options->animate_bg;
+    graphics_options[2].opt = &options->animate_win;
+    graphics_options[3].opt = &options->use_physics;
+    graphics_options[4].opt = &options->use_postprocessing;
+    graphics_options[5].opt = &options->show_level_previews;
+    graphics_options[6].opt = &options->show_tooltips;
 
     resize_gui_options();
 }
@@ -221,7 +230,7 @@ void resize_gui_options(void)
     options_panel_rect.height = (window_size.y * options_panel_rect.x) / window_size.x;
 
     MINVAR(options_panel_rect.width,  350);
-    MINVAR(options_panel_rect.height, 400);
+    MINVAR(options_panel_rect.height, 440);
 
     options_panel_rect.x = (window_size.x / 2) - (options_panel_rect.width  / 2);
     options_panel_rect.y = (window_size.y / 2) - (options_panel_rect.height / 2);
@@ -249,6 +258,7 @@ void resize_gui_options(void)
     anim_text_size = MAX(anim_text_size, options_##name##_text_size.x);
 
     float anim_text_size = 0.0f;
+    mktext(use_solve_timer);
     mktext(anim_bg);
     mktext(anim_win);
 #ifdef USE_PHYSICS
@@ -261,8 +271,13 @@ void resize_gui_options(void)
 
     anim_text_size += 4 * BUTTON_MARGIN;
 
+    options_use_solve_timer_rect.x = options_area_rect.x;
+    options_use_solve_timer_rect.y = options_area_rect.y;
+    options_use_solve_timer_rect.width = anim_text_size;
+    options_use_solve_timer_rect.height = TOOL_BUTTON_HEIGHT;
+
     options_anim_bg_rect.x = options_area_rect.x;
-    options_anim_bg_rect.y = options_area_rect.y;
+    options_anim_bg_rect.y = options_use_solve_timer_rect.y + options_use_solve_timer_rect.height + RAYGUI_ICON_SIZE;
     options_anim_bg_rect.width = anim_text_size;
     options_anim_bg_rect.height = TOOL_BUTTON_HEIGHT;
 
