@@ -30,6 +30,7 @@ void printcolor(Color c);
 #define pbool(var) printf(QUOTE(var) "\t= %s\n", (var) ? "true" : "false");
 #define psize(var) printf(QUOTE(var) "\t= % 9zd\n", (var));
 #define pint(var) printf(QUOTE(var) "\t= % 9d\n", (var));
+#define plong(var) printf(QUOTE(var) "\t= % 9ld\n", (var));
 #define pfloat(var) printf(QUOTE(var) "\t= % 12.2f\n", (var));
 #define pstr(var) printf(QUOTE(var) "\t= \"%s\"\n", (var));
 

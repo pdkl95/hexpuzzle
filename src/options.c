@@ -31,14 +31,14 @@
 
 #include <limits.h>
 #include <time.h>
-
+#include <ctype.h>
 
 #include "options.h"
 
 options_t *options = NULL;
 
 /* command line options */
-static char short_options[] = "Cc:e:EF:H:p:s:SwvVW:PR:UL::r::hj";
+static char short_options[] = "Cc:d:e:EF:H:p:s:SwvVW:PR:UL::r::hj";
 
 static struct option long_options[] = {
     {  "create-random-level",       no_argument, 0, 'L' },
@@ -53,6 +53,7 @@ static struct option long_options[] = {
     {      "level-max-fixed", required_argument, 0, ']' },
     {     "level-min-hidden", required_argument, 0, '(' },
     {     "level-max-hidden", required_argument, 0, ')' },
+    {         "path-density", required_argument, 0, 'd' },
     {                 "seed", required_argument, 0, 's' },
     {                 "play", required_argument, 0, 'p' },
     {               "random", optional_argument, 0, 'r' },
@@ -81,8 +82,8 @@ static struct option long_options[] = {
     {       "extra-rainbows",       no_argument, 0, ':' },
     {    "no-extra-rainbows",       no_argument, 0, ';' },
     {      "allow-edit-mode",       no_argument, 0, 'E' },
-    {                 "demo",       no_argument, 0, 'd' },
-    {             "demo-win",       no_argument, 0, 'D' },
+    {                 "demo",       no_argument, 0, 'j' },
+    {             "demo-win",       no_argument, 0, 'J' },
     {          "wait-events",       no_argument, 0, 'w' },
     {              "verbose",       no_argument, 0, 'v' },
     {              "version",       no_argument, 0, 'V' },
@@ -168,6 +169,7 @@ static char help_text[] =
     "      --level-max-fixed=NUMBER  Maximum number of fixed tiles.  (default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MAX_FIXED) ")\n"
     "      --level-min-hidden=NUMBER Minimum number of hidden tiles. (default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MIN_HIDDEN) ")\n"
     "      --level-max-hidden=NUMBER Maximum number of hidden tiles. (default: " STR(OPTIONS_DEFAULT_CREATE_LEVEL_MAX_HIDDEN) ")\n"
+    "  -d, --path-densitys=NUMBER    Average density of paths/tile.  (default: " STR(OPTIONS_DFFAULT_CREATE_LEVEL_MINIMUM_PATH_DENSITY_FLOAT) ")\n"
     ;
 
 static char help_cheat_text[] =
@@ -274,6 +276,54 @@ options_set_string(
     }
 
     *opt = strdup(src);
+}
+
+static void
+options_set_float(
+    float *opt
+) {
+    assert_not_null(opt);
+    assert_not_null(optarg);
+
+    const char *str = optarg;
+    char *endptr;
+
+    errno = 0;
+    *opt = strtof(str, &endptr);
+
+    if (str == endptr) {
+        errmsg("cannot parse \"%s\" as a float", str);
+        DIE("bad numeric value option")
+    }
+    if (errno) {
+        errmsg("while parsing \"%s\" as a float: %s", str, strerror(errno));
+        DIE("cannot parse numewric option");
+    }
+
+    while (isspace((unsigned char)*endptr)) {
+        endptr++;
+    }
+
+    if (*endptr != '\0') {
+        errmsg("invalid numher formst: \"%s\"", str);
+        DIE("cannot parse numewric option");
+    }
+}
+
+static bool
+options_set_float_bounds(
+    float *opt,
+    float min,
+    float max
+) {
+    float value = 0;
+    options_set_float(&value);
+    if ((value < min) || (value > max)) {
+        return false;
+    } else {
+        *opt = value;
+        return true;
+    }
 }
 
 static void
@@ -472,6 +522,7 @@ options_parse_args(
     char *argv[]
 ) {
     int c;
+    float float_value;
 
     for (;;) {
         int option_index = 0;
@@ -530,6 +581,18 @@ options_parse_args(
         case 'K':
             options->create_level_mode = CREATE_LEVEL_MODE_BLANK;
             options->startup_action = STARTUP_ACTION_CREATE_LEVEL;
+            break;
+
+        case 'd':
+            float_value = 0.0f;
+            if (!options_set_float_bounds(&float_value, LEVEL_MIN_MINIMUM_PATH_DENSITY_FLOAT, LEVEL_MAX_MINIMUM_PATH_DENSITY_FLOAT)) {
+                errmsg("bad value for --path-density (expected %3.2f - %3.2f)",
+                       LEVEL_MIN_MINIMUM_PATH_DENSITY_FLOAT,
+                       LEVEL_MAX_MINIMUM_PATH_DENSITY_FLOAT);
+                return false;
+            }
+            options->create_level_minimum_path_density = (long)(float_value * 100.0f);
+            options->load_state_create_level_minimum_path_density = false;
             break;
 
         case 'R':
@@ -712,11 +775,11 @@ options_parse_args(
             options->extra_rainbows = false;
             break;
 
-        case 'd':
+        case 'j':
             options->startup_action = STARTUP_ACTION_DEMO_SOLVE;
             break;
 
-        case 'D':
+        case 'J':
             options->startup_action = STARTUP_ACTION_DEMO_WIN_ANIM;
             break;
 

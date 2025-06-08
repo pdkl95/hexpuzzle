@@ -109,6 +109,9 @@ extern const char *progversion;
 //#define DEBUG_ID_AND_DIR
 //#define DEBUG_MOUSE_INPUT_STATE
 
+#define float_div_100(x) (((float)(x)) / 100.0f)
+#define long_mul_100(x) ((long)(100.0f * (x)))
+
 #include "const.h"
 #include "raylib_helper.h"
 #include "util.h"

@@ -2097,7 +2097,7 @@ void level_reset_win_anim(level_t *level)
     //printf("level_reset_win_anim()\n");
 }
 
-float level_average_paths_per_tile(level_t *level)
+long level_average_paths_per_tile(level_t *level)
 {
     int path_count = 0;
     int enabled_tile_count = 0;
@@ -2120,5 +2120,5 @@ float level_average_paths_per_tile(level_t *level)
     assert(path_count > 0);
     assert(enabled_tile_count > 0);
 
-    return ((float)path_count) / ((float)enabled_tile_count);
+    return (100 * path_count) / enabled_tile_count;
 }

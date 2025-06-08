@@ -26,6 +26,7 @@
 #include "level_draw.h"
 #include "gui_random.h"
 #include "gui_title.h"
+#include "generate_level.h"
 
 Rectangle panel_rect;
 Rectangle bg_level_rect;

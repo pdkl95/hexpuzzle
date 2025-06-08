@@ -437,34 +437,35 @@ am__hexpuzzle_SOURCES_DIST = src/background.h src/background.c \
 	src/classics.h src/classics.c src/collection.h \
 	src/collection.c src/color.h src/color.c src/const.h \
 	src/fonts.h src/fonts.c src/game_mode.h src/game_mode.c \
-	src/gui_browser.h src/gui_browser.c src/gui_collection.h \
-	src/gui_collection.c src/gui_dialog.h src/gui_dialog.c \
-	src/gui_help.h src/gui_help.c src/gui_options.h \
-	src/gui_options.c src/gui_popup_message.h \
-	src/gui_popup_message.c src/gui_random.h src/gui_random.c \
-	src/gui_title.h src/gui_title.c src/hex.h src/hex.c \
-	src/level.h src/level.c src/level_draw.h src/level_draw.c \
-	src/level_undo.h src/level_undo.c src/logging.h src/logging.c \
-	src/numeric.h src/numeric.c src/nvdata.h src/nvdata.c \
-	src/nvdata_finished.h src/nvdata_finished.c src/options.h \
-	src/options.c src/path.h src/path.c src/range.h src/range.c \
-	src/raygui_impl.c src/raygui_paged_list.h \
-	src/raygui_paged_list.c src/raylib_gui_numeric.h \
-	src/raylib_gui_numeric.c src/raylib_helper.h \
-	src/raylib_helper.c src/startup_action.h src/startup_action.c \
-	src/shader.h src/shader.c src/solve_timer.h src/solve_timer.c \
-	src/solver.h src/solver.c src/textures.h src/textures.c \
-	src/tile.h src/tile.c src/tile_draw.h src/tile_draw.c \
-	src/tile_pos.h src/tile_pos.c src/util.h src/util.c \
-	src/win_anim.h src/win_anim.c src/win_anim_mode_config.h \
-	src/win_anim_mode_config.c src/common.h src/main.c \
-	src/physics.h src/physics.c
+	src/generate_level.h src/generate_level.c src/gui_browser.h \
+	src/gui_browser.c src/gui_collection.h src/gui_collection.c \
+	src/gui_dialog.h src/gui_dialog.c src/gui_help.h \
+	src/gui_help.c src/gui_options.h src/gui_options.c \
+	src/gui_popup_message.h src/gui_popup_message.c \
+	src/gui_random.h src/gui_random.c src/gui_title.h \
+	src/gui_title.c src/hex.h src/hex.c src/level.h src/level.c \
+	src/level_draw.h src/level_draw.c src/level_undo.h \
+	src/level_undo.c src/logging.h src/logging.c src/numeric.h \
+	src/numeric.c src/nvdata.h src/nvdata.c src/nvdata_finished.h \
+	src/nvdata_finished.c src/options.h src/options.c src/path.h \
+	src/path.c src/range.h src/range.c src/raygui_impl.c \
+	src/raygui_paged_list.h src/raygui_paged_list.c \
+	src/raylib_gui_numeric.h src/raylib_gui_numeric.c \
+	src/raylib_helper.h src/raylib_helper.c src/startup_action.h \
+	src/startup_action.c src/shader.h src/shader.c \
+	src/solve_timer.h src/solve_timer.c src/solver.h src/solver.c \
+	src/textures.h src/textures.c src/tile.h src/tile.c \
+	src/tile_draw.h src/tile_draw.c src/tile_pos.h src/tile_pos.c \
+	src/util.h src/util.c src/win_anim.h src/win_anim.c \
+	src/win_anim_mode_config.h src/win_anim_mode_config.c \
+	src/common.h src/main.c src/physics.h src/physics.c
 @USE_PHYSICS_TRUE@am__objects_34 = src/hexpuzzle-physics.$(OBJEXT)
 am_hexpuzzle_OBJECTS = src/hexpuzzle-background.$(OBJEXT) \
 	src/hexpuzzle-classics.$(OBJEXT) \
 	src/hexpuzzle-collection.$(OBJEXT) \
 	src/hexpuzzle-color.$(OBJEXT) src/hexpuzzle-fonts.$(OBJEXT) \
 	src/hexpuzzle-game_mode.$(OBJEXT) \
+	src/hexpuzzle-generate_level.$(OBJEXT) \
 	src/hexpuzzle-gui_browser.$(OBJEXT) \
 	src/hexpuzzle-gui_collection.$(OBJEXT) \
 	src/hexpuzzle-gui_dialog.$(OBJEXT) \
@@ -1752,28 +1753,29 @@ hexpuzzle_LDADD = $(COMMON_PROG_LDADD) $(am__append_1) $(am__append_4) \
 hexpuzzle_SOURCES = src/background.h src/background.c src/classics.h \
 	src/classics.c src/collection.h src/collection.c src/color.h \
 	src/color.c src/const.h src/fonts.h src/fonts.c \
-	src/game_mode.h src/game_mode.c src/gui_browser.h \
-	src/gui_browser.c src/gui_collection.h src/gui_collection.c \
-	src/gui_dialog.h src/gui_dialog.c src/gui_help.h \
-	src/gui_help.c src/gui_options.h src/gui_options.c \
-	src/gui_popup_message.h src/gui_popup_message.c \
-	src/gui_random.h src/gui_random.c src/gui_title.h \
-	src/gui_title.c src/hex.h src/hex.c src/level.h src/level.c \
-	src/level_draw.h src/level_draw.c src/level_undo.h \
-	src/level_undo.c src/logging.h src/logging.c src/numeric.h \
-	src/numeric.c src/nvdata.h src/nvdata.c src/nvdata_finished.h \
-	src/nvdata_finished.c src/options.h src/options.c src/path.h \
-	src/path.c src/range.h src/range.c src/raygui_impl.c \
-	src/raygui_paged_list.h src/raygui_paged_list.c \
-	src/raylib_gui_numeric.h src/raylib_gui_numeric.c \
-	src/raylib_helper.h src/raylib_helper.c src/startup_action.h \
-	src/startup_action.c src/shader.h src/shader.c \
-	src/solve_timer.h src/solve_timer.c src/solver.h src/solver.c \
-	src/textures.h src/textures.c src/tile.h src/tile.c \
-	src/tile_draw.h src/tile_draw.c src/tile_pos.h src/tile_pos.c \
-	src/util.h src/util.c src/win_anim.h src/win_anim.c \
-	src/win_anim_mode_config.h src/win_anim_mode_config.c \
-	src/common.h src/main.c $(am__append_5)
+	src/game_mode.h src/game_mode.c src/generate_level.h \
+	src/generate_level.c src/gui_browser.h src/gui_browser.c \
+	src/gui_collection.h src/gui_collection.c src/gui_dialog.h \
+	src/gui_dialog.c src/gui_help.h src/gui_help.c \
+	src/gui_options.h src/gui_options.c src/gui_popup_message.h \
+	src/gui_popup_message.c src/gui_random.h src/gui_random.c \
+	src/gui_title.h src/gui_title.c src/hex.h src/hex.c \
+	src/level.h src/level.c src/level_draw.h src/level_draw.c \
+	src/level_undo.h src/level_undo.c src/logging.h src/logging.c \
+	src/numeric.h src/numeric.c src/nvdata.h src/nvdata.c \
+	src/nvdata_finished.h src/nvdata_finished.c src/options.h \
+	src/options.c src/path.h src/path.c src/range.h src/range.c \
+	src/raygui_impl.c src/raygui_paged_list.h \
+	src/raygui_paged_list.c src/raylib_gui_numeric.h \
+	src/raylib_gui_numeric.c src/raylib_helper.h \
+	src/raylib_helper.c src/startup_action.h src/startup_action.c \
+	src/shader.h src/shader.c src/solve_timer.h src/solve_timer.c \
+	src/solver.h src/solver.c src/textures.h src/textures.c \
+	src/tile.h src/tile.c src/tile_draw.h src/tile_draw.c \
+	src/tile_pos.h src/tile_pos.c src/util.h src/util.c \
+	src/win_anim.h src/win_anim.c src/win_anim_mode_config.h \
+	src/win_anim_mode_config.c src/common.h src/main.c \
+	$(am__append_5)
 dist_EXTRA_hexpuzzle_SOURCES = \
 	src/data_classics_levels.h  \
 	src/data_fonts.h            \
@@ -2333,6 +2335,8 @@ src/hexpuzzle-fonts.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-game_mode.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/hexpuzzle-generate_level.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-gui_browser.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-gui_collection.$(OBJEXT): src/$(am__dirstamp) \
@@ -2496,6 +2500,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-color.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-fonts.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-game_mode.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-generate_level.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-gui_browser.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-gui_collection.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-gui_dialog.Po@am__quote@
@@ -3375,6 +3380,20 @@ src/hexpuzzle-game_mode.obj: src/game_mode.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/game_mode.c' object='src/hexpuzzle-game_mode.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-game_mode.obj `if test -f 'src/game_mode.c'; then $(CYGPATH_W) 'src/game_mode.c'; else $(CYGPATH_W) '$(srcdir)/src/game_mode.c'; fi`
+
+src/hexpuzzle-generate_level.o: src/generate_level.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-generate_level.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-generate_level.Tpo -c -o src/hexpuzzle-generate_level.o `test -f 'src/generate_level.c' || echo '$(srcdir)/'`src/generate_level.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-generate_level.Tpo src/$(DEPDIR)/hexpuzzle-generate_level.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/generate_level.c' object='src/hexpuzzle-generate_level.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-generate_level.o `test -f 'src/generate_level.c' || echo '$(srcdir)/'`src/generate_level.c
+
+src/hexpuzzle-generate_level.obj: src/generate_level.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-generate_level.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-generate_level.Tpo -c -o src/hexpuzzle-generate_level.obj `if test -f 'src/generate_level.c'; then $(CYGPATH_W) 'src/generate_level.c'; else $(CYGPATH_W) '$(srcdir)/src/generate_level.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-generate_level.Tpo src/$(DEPDIR)/hexpuzzle-generate_level.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/generate_level.c' object='src/hexpuzzle-generate_level.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-generate_level.obj `if test -f 'src/generate_level.c'; then $(CYGPATH_W) 'src/generate_level.c'; else $(CYGPATH_W) '$(srcdir)/src/generate_level.c'; fi`
 
 src/hexpuzzle-gui_browser.o: src/gui_browser.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-gui_browser.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-gui_browser.Tpo -c -o src/hexpuzzle-gui_browser.o `test -f 'src/gui_browser.c' || echo '$(srcdir)/'`src/gui_browser.c

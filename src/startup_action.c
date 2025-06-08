@@ -20,11 +20,12 @@
  ****************************************************************************/
 
 #include "common.h"
-#include "startup_action.h"
 #include "options.h"
 #include "level.h"
 #include "collection.h"
 #include "gui_random.h"
+#include "startup_action.h"
+#include "generate_level.h"
 
 bool startup_action_ok = false;
 
@@ -47,21 +48,9 @@ create_level_mode_t parse_create_level_mode(const char *str)
 }
 #endif
 
-level_t *generate_blank_level(void)
-{
-    level_t *level = create_level(NULL);
-    level_reset(level);
-
-    level_set_radius(level, options->create_level_radius);
-
-    return level;
-}
-
 void action_create_level(void)
 {
     infomsg("ACTION: create random level");
-
-    init_gui_random_minimal();
 
     for (int arg=0; arg < options->extra_argc; arg++) {
         char *name = options->extra_argv[arg];
@@ -93,9 +82,7 @@ void action_create_level(void)
             break;
 
         case CREATE_LEVEL_MODE_RANDOM:
-            window_size.x = OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH;
-            window_size.y = OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT;
-            level = generate_random_level("--create-r5anom-level");
+            level = generate_random_level_simple("--create-r5anom-level");
             break;
 
         default:

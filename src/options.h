@@ -58,7 +58,9 @@
 #define OPTIONS_DEFAULT_CREATE_LEVEL_HIDDEN ((int_range_t){ .min = OPTIONS_DEFAULT_CREATE_LEVEL_MIN_HIDDEN, .max = OPTIONS_DEFAULT_CREATE_LEVEL_MAX_HIDDEN })
 #define OPTIONS_DEFAULT_CREATE_LEVEL_EXPOINTS 3
 #define OPTIONS_DFFAULT_CREATE_LEVEL_SYMMETRY_MODE SYMMETRY_MODE_REFLECT
-#define OPTIONS_DFFAULT_CREATE_LEVEL_MINIMUM_PATH_DENSITY 2.5
+
+#define OPTIONS_DFFAULT_CREATE_LEVEL_MINIMUM_PATH_DENSITY 250
+#define OPTIONS_DFFAULT_CREATE_LEVEL_MINIMUM_PATH_DENSITY_FLOAT (float_div_100(OPTIONS_DFFAULT_CREATE_LEVEL_MINIMUM_PATH_DENSITY))
 
 #define OPTIONS_DEFAULT_PATH_COLOR_0 (Color){ 0, 0, 0, 0 }
 #define OPTIONS_DEFAULT_PATH_COLOR_1 RED
@@ -132,7 +134,7 @@ struct options {
     int_range_t create_level_hidden;
     long create_level_expoints;
     symmetry_mode_t create_level_symmetry_mode;
-    float create_level_minimum_path_density;
+    long create_level_minimum_path_density;
 
     bool load_state_create_level_mode;
     bool load_state_create_level_radius;

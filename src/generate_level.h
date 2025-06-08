@@ -1,6 +1,6 @@
 /****************************************************************************
  *                                                                          *
- * gui_random.h                                                             *
+ * generate_level.h                                                         *
  *                                                                          *
  * This file is part of hexpuzzle.                                          *
  *                                                                          *
@@ -19,28 +19,48 @@
  *                                                                          *
  ****************************************************************************/
 
-#ifndef GUI_RANDOM_H
-#define GUI_RANDOM_H
+#ifndef GENERATE_LEVEL_H
+#define GENERATE_LEVEL_H
 
-#include "cJSON/cJSON.h"
+enum generate_level_mode {
+    GENERATE_LEVEL_BLANK                    = 0,
+    GENERATE_LEVEL_RANDOM_CONNECT_TO_POINT  = 1
+};
+typedef enum generate_level_mode generate_level_mode_t;
 
-void init_gui_random_minimal(void);
-void init_gui_random(void);
-void cleanup_gui_random(void);
-void resize_gui_random(void);
-void draw_gui_random(void);
+struct generate_level_param {
+    generate_level_mode_t mode;
 
-void regen_level_preview(void);
+    uint64_t seed;
+    uint64_t series;
 
-void save_gui_random_level(void);
-void play_gui_random_level(void);
-void play_gui_random_level_preview(void);
+    int tile_radius;
 
-bool create_level_from_json(cJSON *json);
-cJSON *create_level_to_json(void);
+    int_range_t fixed;
+    int_range_t hidden;
 
-extern struct level *gui_random_level;
-extern struct level *gui_random_level_preview;
+    long path_density;
 
-#endif /*GUI_RANDOM_H*/
+    bool color[PATH_TYPE_COUNT];
+    int  color_count;
+
+    symmetry_mode_t symmetry_mode;
+};
+typedef struct generate_level_param generate_level_param_t;
+
+const char *symmetry_mode_string(symmetry_mode_t mode);
+symmetry_mode_t parse_symmetry_mode_string(const char *string);
+
+bool parse_random_seed_str(char *seedstr, uint64_t *dst);
+
+generate_level_param_t deserialize_generate_level_params(const char *str);
+const char *serialize_generate_level_params(generate_level_param_t param);
+
+struct level *generate_random_level(generate_level_param_t *param, const char *purpose);
+struct level *generate_random_level_simple(const char *purpose);
+
+struct level *generate_blank_level(void);
+struct level *generate_random_title_level(void);
+
+#endif /*GENERATE_LEVEL_H*/
 
