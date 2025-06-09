@@ -45,6 +45,8 @@ struct generate_level_param {
     int  color_count;
 
     symmetry_mode_t symmetry_mode;
+
+    bool fill_all_tiles;
 };
 typedef struct generate_level_param generate_level_param_t;
 

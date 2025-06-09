@@ -58,7 +58,7 @@ void print_level(level_t *level)
     printf("}\n");
 }
 
-void print_tiles(level_t *level)
+void print_level_tiles(level_t *level)
 {
     level_sort_tiles(level);
 
@@ -1307,14 +1307,20 @@ tile_pos_t *level_find_current_neighbor_tile_pos(level_t *level, tile_pos_t *pos
 
 bool level_has_empty_tiles(level_t *level)
 {
+    assert_not_null(level);
+
     for (int i=0; i<LEVEL_MAXTILES; i++) {
         tile_t *tile = &(level->tiles[i]);
 
-        if (!tile->enabled || tile->hidden) {
+        if (!tile->enabled) {
             continue;
         }
 
-        if (tile_is_blank(tile)) {
+        if (tile->hidden) {
+            continue;
+        }
+
+        if (tile_is_empty(tile)) {
             return true;
         }
     }

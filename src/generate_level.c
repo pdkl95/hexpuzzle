@@ -136,7 +136,6 @@ static int rng_get(int bound)
     }
 }
 
-#if 0
 static void shuffle_int(int *list, int len)
 {
     int i, j, tmp;
@@ -173,6 +172,7 @@ static hex_direction_order_t get_random_direction_order(int len)
     return order;
 }
 
+#if 0
 static bool rng_bool(int true_chances, int false_chances)
 {
     int total_chances = true_chances + false_chances;
@@ -199,6 +199,9 @@ static path_type_t rng_color(void)
     int skip = rng_get(gen_param.color_count);
 
     for (path_type_t type = (PATH_TYPE_NONE + 1); type < PATH_TYPE_COUNT; type++) {
+        assert(type >= PATH_TYPE_MIN);
+        assert(type <= PATH_TYPE_MAX);
+
         if (gen_param.color[type]) {
             if (skip) {
                 skip--;
@@ -226,6 +229,11 @@ static tile_t *rng_get_tile(level_t *level)
 static bool set_tile_and_neighbor_path(tile_pos_t *pos, hex_direction_t dir, path_type_t type)
 {
     assert_not_null(pos);
+
+    assert(type >= PATH_TYPE_MIN);
+    assert(type <= PATH_TYPE_MAX);
+    assert(dir >= HEX_DIRECTION_MIN);
+    assert(dir <= HEX_DIRECTION_MAX);
 
     tile_pos_t *neighbor = pos->neighbors[dir];
     if (neighbor && neighbor->tile && neighbor->tile->enabled) {
@@ -262,6 +270,24 @@ static bool remove_path(tile_pos_t *pos, hex_direction_t dir)
 {
     assert_not_null(pos);
     return set_tile_and_neighbor_path(pos, dir, PATH_TYPE_NONE);
+}
+
+
+path_type_t find_random_path_type_on_tile(tile_pos_t *pos)
+{
+    tile_t *tile = pos->tile;
+
+    hex_direction_order_t order = get_random_direction_order(6);
+
+    for(int i=0; i < 6; i++) {
+        hex_direction_t dir = order.dir[i];
+        path_type_t type = tile->path[dir];
+        if (type != PATH_TYPE_NONE) {
+            return type;
+        }
+    }
+
+    return PATH_TYPE_NONE;
 }
 
 static tile_pos_t *find_random_empty_tile(level_t *level, tile_t *not_this_tile, bool blank_only)
@@ -498,6 +524,51 @@ static void generate_connect_to_point(level_t *level)
     }
 }
 
+static void fill_remaining_single_tile(tile_pos_t *pos)
+{
+    assert_not_null(pos);
+
+    hex_direction_order_t order = get_random_direction_order(6);
+
+    for(int i=0; i < 6; i++) {
+        hex_direction_t dir = order.dir[i];
+        tile_pos_t *neighbor = pos->neighbors[dir];
+        if (!neighbor) {
+            continue;
+        }
+
+        path_type_t type = find_random_path_type_on_tile(neighbor);
+
+        if (type != PATH_TYPE_NONE) {
+            add_path(pos, dir, type);
+            return;
+        }
+    }
+
+    /* neighbors didn't have existing pths; so just
+       pick a neighbor and path_type at random */
+    for(int i=0; i < 6; i++) {
+        hex_direction_t dir = order.dir[i];
+        tile_pos_t *neighbor = pos->neighbors[dir];
+        if (neighbor) {
+            add_path(pos, dir, rng_color());
+            return;
+        }
+    }
+
+    __builtin_unreachable();
+}
+
+static void fill_remaining_tiles(level_t *level)
+{
+    assert_not_null(level);
+
+    while (level_has_empty_tiles(level)) {
+        tile_pos_t *pos = find_random_empty_tile(level, NULL, true);
+        fill_remaining_single_tile(pos);
+    }
+}
+
 static void shuffle_tiles(level_t *level)
 {
     level_use_unsolved_tile_pos(level);
@@ -621,6 +692,9 @@ struct level *generate_random_level(generate_level_param_t *param, const char *p
     hidden_count = rng_range(param->hidden);
 
     generate_connect_to_point(level);
+    if (gen_param.fill_all_tiles) {
+        fill_remaining_tiles(level);
+    }
     mark_features(level);
 
     level_update_path_counts(level);
@@ -651,11 +725,12 @@ struct level *generate_random_title_level(void)
         .seed = rand(),
         .tile_radius = LEVEL_MAX_RADIUS,
         .color = { 0, true, true, true, true },
-        .color_count = 5,
+        .color_count = 4,
         .fixed  = { 0, 0 },
         .hidden = { 0, 0 },
         .symmetry_mode = SYMMETRY_MODE_NONE,
-        .path_density = OPTIONS_DFFAULT_CREATE_LEVEL_MINIMUM_PATH_DENSITY
+        .path_density = TITLE_MINIMUM_PATH_DENSITY,
+        .fill_all_tiles = true
     };
 
     return generate_random_level(&param, "title");
@@ -677,7 +752,7 @@ struct level *generate_random_level_simple(const char *purpose)
         .seed = seed,
         .tile_radius = options->create_level_radius,
         .color = { 0, true, true, true, true },
-        .color_count = 5,
+        .color_count = 4,
         .fixed  = {
             options->create_level_fixed.min,
             options->create_level_fixed.max

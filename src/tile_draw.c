@@ -109,7 +109,7 @@ void tile_draw_path(tile_pos_t *pos, bool finished)
         /* neighbor hex address label */
         Vector2 offset = Vector2Scale(Vector2Subtract(pos->rel.center, mid), 0.32);;
         Vector2 mlabel = Vector2Add(mid, offset);
-        tile_pos_t *n = pos->neighbors[i];
+        tile_pos_t *n = pos->neighbors[dir];
         DrawTextShadow(TextFormat("%d,%d", n->position.q, n->position.r), mlabel.x - 11, mlabel.y - 4, 16, RAYWHITE);
 #endif
     }

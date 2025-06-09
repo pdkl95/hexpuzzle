@@ -24,6 +24,10 @@
 
 #include "numeric.h"
 
+struct raylib_gui_numeric;
+
+typedef const char *gui_numeric_get_text_cb(struct raylib_gui_numeric *gn);
+
 struct raylib_gui_numeric {
     numeric_t value;
 
@@ -42,8 +46,12 @@ struct raylib_gui_numeric {
     char *label_text;
     char *left_button_text;
     char *right_button_text;
+
+    gui_numeric_get_text_cb *get_text;
 };
 typedef struct raylib_gui_numeric raylib_gui_numeric_t;
+
+const char *gui_numeric_default_get_text(raylib_gui_numeric_t *gn);
 
 raylib_gui_numeric_t *create_gui_numeric(const char *label, numeric_t valuep, numeric_t min, numeric_t max, numeric_t step);
 raylib_gui_numeric_t *create_gui_numeric_int(const char *label, int *valuep, int min, int max, int step);

@@ -164,6 +164,8 @@ typedef struct level level_t;
 #define dragable_mode (play_mode || edit_mode_unsolved)
 
 void print_level(level_t *level);
+void print_level_tiles(level_t *level);
+
 int hex_axial_to_idx(hex_axial_t axial);
 tile_pos_t *level_get_solved_tile_pos(level_t *level,  hex_axial_t axial);
 tile_pos_t *level_get_unsolved_tile_pos(level_t *level,  hex_axial_t axial);

@@ -29,6 +29,75 @@
 
 #define NSEC_PER_SEC 1000000000
 
+#define ELAPSED_TIME_FMT "%dms%ds%dm%dh%dd"
+
+char *solve_elapsed_time_to_str(solve_elapsed_time_t *elapsed_time)
+{
+    static char buf[SOLVE_ELAPSED_TIME_STR_MAXLEN];
+
+    snprintf(buf,
+             SOLVE_ELAPSED_TIME_STR_MAXLEN,
+             ELAPSED_TIME_FMT,
+             elapsed_time->ms,
+             elapsed_time->sec,
+             elapsed_time->min,
+             elapsed_time->hr,
+             elapsed_time->day);
+
+    return buf;
+}
+
+solve_elapsed_time_t str_to_solve_elapsed_time(const char *str)
+{
+    solve_elapsed_time_t elapsed_time = {0};;
+
+    errno = 0;
+    int ret = sscanf(str,
+                     ELAPSED_TIME_FMT,
+                     &elapsed_time.ms,
+                     &elapsed_time.sec,
+                     &elapsed_time.min,
+                     &elapsed_time.hr,
+                     &elapsed_time.day);
+
+    if (errno) {
+        ret = -1;
+        errmsg("while trying to parse \"%s\" as an elapsed time: %s",
+               str, strerror(errno));
+    }
+
+    switch (ret) {
+    case 1:
+        elapsed_time.sec = 0;
+        /* fall through */
+    case 2:
+        elapsed_time.min = 0;
+        /* fall through */
+    case 3:
+        elapsed_time.hr  = 0;
+        /* fall through */
+    case 4:
+        elapsed_time.day = 0;
+        /* fall through */
+    case 5:
+        /* all fields ok */
+        elapsed_time.valid = true;
+        break;
+
+    default:
+        elapsed_time.valid = false;
+        elapsed_time.ms  = 0;
+        elapsed_time.sec = 0;
+        elapsed_time.min = 0;
+        elapsed_time.hr  = 0;
+        elapsed_time.day = 0;
+        break;
+    }
+
+    return elapsed_time;
+}
+#undef ELAPSED_TIME_FMT
+
 static inline void get_currernt_time(struct timespec *ts)
 {
     timespec_get(ts, TIME_UTC);
@@ -105,46 +174,46 @@ void solve_timer_update(solve_timer_t *solve_timer)
         get_currernt_time(&now);
 
         struct timespec delta = timespec_sub(now, solve_timer->start_time);
-        solve_timer->elapsed_time = timespec_add(delta, solve_timer->elapsed_time);
+        solve_timer->elapsed_time.ts = timespec_add(delta, solve_timer->elapsed_time.ts);
 
         solve_timer->start_time = now;
     }
 
-    struct timespec et = solve_timer->elapsed_time;
+    struct timespec et = solve_timer->elapsed_time.ts;
 
-    solve_timer->day = et.tv_sec  / SECONDS_PER_DAY;
-    et.tv_sec -= solve_timer->day * SECONDS_PER_DAY;
+    solve_timer->elapsed_time.day = et.tv_sec  / SECONDS_PER_DAY;
+    et.tv_sec -= solve_timer->elapsed_time.day * SECONDS_PER_DAY;
 
-    solve_timer->hr  = et.tv_sec  / SECONDS_PER_HOUR;
-    et.tv_sec -= solve_timer->hr  * SECONDS_PER_HOUR;
+    solve_timer->elapsed_time.hr  = et.tv_sec  / SECONDS_PER_HOUR;
+    et.tv_sec -= solve_timer->elapsed_time.hr  * SECONDS_PER_HOUR;
 
-    solve_timer->min = et.tv_sec  / SECONDS_PER_MINUTE;
-    et.tv_sec -= solve_timer->min * SECONDS_PER_MINUTE;
+    solve_timer->elapsed_time.min = et.tv_sec  / SECONDS_PER_MINUTE;
+    et.tv_sec -= solve_timer->elapsed_time.min * SECONDS_PER_MINUTE;
 
-    solve_timer->sec = et.tv_sec;
+    solve_timer->elapsed_time.sec = et.tv_sec;
 
-    assert(solve_timer->elapsed_time.tv_sec == ((solve_timer->day * SECONDS_PER_DAY) +
-                                                (solve_timer->hr  * SECONDS_PER_HOUR) +
-                                                (solve_timer->min * SECONDS_PER_MINUTE) +
-                                                (solve_timer->sec)));
+    assert(solve_timer->elapsed_time.ts.tv_sec == ((solve_timer->elapsed_time.day * SECONDS_PER_DAY) +
+                                                   (solve_timer->elapsed_time.hr  * SECONDS_PER_HOUR) +
+                                                   (solve_timer->elapsed_time.min * SECONDS_PER_MINUTE) +
+                                                   (solve_timer->elapsed_time.sec)));
 
-    solve_timer->ms = et.tv_nsec / 1000000;
+    solve_timer->elapsed_time.ms = et.tv_nsec / 1000000;
 }
 
 void solve_timer_reset(solve_timer_t *solve_timer)
 {
     solve_timer->state = SOLVE_TIMER_STATE_RESET;
     solve_timer->valid = true;
-    solve_timer->elapsed_time.tv_sec  = 0;
-    solve_timer->elapsed_time.tv_nsec = 0;
+    solve_timer->elapsed_time.ts.tv_sec  = 0;
+    solve_timer->elapsed_time.ts.tv_nsec = 0;
     solve_timer_update(solve_timer);
 }
 
 void solve_timer_start(solve_timer_t *solve_timer)
 {
     if (solve_timer->state == SOLVE_TIMER_STATE_RESET) {
-        solve_timer->elapsed_time.tv_sec  = 0;
-        solve_timer->elapsed_time.tv_nsec = 0;
+        solve_timer->elapsed_time.ts.tv_sec  = 0;
+        solve_timer->elapsed_time.ts.tv_nsec = 0;
     }
     solve_timer->state = SOLVE_TIMER_STATE_RUNNING;
     get_currernt_time(&solve_timer->start_time);

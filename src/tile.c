@@ -74,11 +74,12 @@ void print_tile(tile_t *tile)
 {
     if (tile) {
         printf("%p ", tile);
-        printf("tile<flags=%s path=%s s_pos=%s u_pos=%s>\n",
+        printf("tile<flags=%s path=%s s_pos=%s u_pos=%s%s>\n",
                tile_flag_string(tile),
                tile_path_string(tile),
                tile_our_pos_string(tile->solved_pos),
-               tile_our_pos_string(tile->unsolved_pos));
+               tile_our_pos_string(tile->unsolved_pos),
+               tile_is_blank(tile) ? " EMPTY" : "");
     } else {
         printf("tile<NULL>\n");
     }
@@ -367,6 +368,11 @@ bool tile_is_blank(tile_t *tile)
     }
 
     return true;
+}
+
+bool tile_is_empty(tile_t *tile)
+{
+    return tile_is_blank(tile) && tile->enabled;
 }
 
 void tile_set_positions(tile_t *tile, level_t *level, hex_axial_t solved_addr, hex_axial_t unsolved_addr)

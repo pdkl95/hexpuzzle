@@ -40,6 +40,9 @@ enum hex_direction {
 };
 typedef enum hex_direction hex_direction_t;
 
+#define HEX_DIRECTION_MIN HEX_DIR_UP_RIGHT
+#define HEX_DIRECTION_MAX HEX_DIR_DOWN_RIGHT
+
 #define for_each_direction(var) for (hex_direction_t var=0; var<6; var++)
 #define each_direction for_each_direction(dir)
 

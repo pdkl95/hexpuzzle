@@ -2454,25 +2454,25 @@ static void draw_solve_timer(void)
     if (solve_timer.valid) {
         solve_timer_update(&solve_timer);
 
-        if (solve_timer.day > 0) {
+        if (solve_timer.elapsed_time.day > 0) {
             str = TextFormat("%d %s, %02d:%02d:%02d.%03d",
-                             solve_timer.day,
-                             ((solve_timer.day == 1) ? "day" : "days"),
-                             solve_timer.hr,
-                             solve_timer.min,
-                             solve_timer.sec,
-                             solve_timer.ms);
-        } else if (solve_timer.hr > 0) {
+                             solve_timer.elapsed_time.day,
+                             ((solve_timer.elapsed_time.day == 1) ? "day" : "days"),
+                             solve_timer.elapsed_time.hr,
+                             solve_timer.elapsed_time.min,
+                             solve_timer.elapsed_time.sec,
+                             solve_timer.elapsed_time.ms);
+        } else if (solve_timer.elapsed_time.hr > 0) {
             str = TextFormat("%02d:%02d:%02d.%03d",
-                             solve_timer.hr,
-                             solve_timer.min,
-                             solve_timer.sec,
-                             solve_timer.ms);
+                             solve_timer.elapsed_time.hr,
+                             solve_timer.elapsed_time.min,
+                             solve_timer.elapsed_time.sec,
+                             solve_timer.elapsed_time.ms);
         } else {
             str = TextFormat("%02d:%02d.%03d",
-                             solve_timer.min,
-                             solve_timer.sec,
-                             solve_timer.ms);
+                             solve_timer.elapsed_time.min,
+                             solve_timer.elapsed_time.sec,
+                             solve_timer.elapsed_time.ms);
         }
 
         switch (game_mode) {

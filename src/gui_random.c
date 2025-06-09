@@ -250,6 +250,12 @@ void init_gui_random_minimal(void)
     new_random_seed();
 }
 
+const char *gui_random_density_get_text(raylib_gui_numeric_t *gn)
+{
+    float value = numeric_to_float(gn->value) / 100.0f;
+    return TextFormat("%3.2f", value);
+}
+
 void init_gui_random(void)
 {
     init_gui_random_minimal();
@@ -272,11 +278,12 @@ void init_gui_random(void)
                                                LEVEL_MIN_HIDDEN,
                                                LEVEL_MAX_HIDDEN);
 
-    gui_random_density = create_gui_numeric_float(gui_random_minimum_tile_density_label_text,
-                                                  &gui_random_density_float,
-                                                  LEVEL_MIN_MINIMUM_PATH_DENSITY,
-                                                  LEVEL_MAX_MINIMUM_PATH_DENSITY,
-                                                  0.25f);
+    gui_random_density = create_gui_numeric_int(gui_random_minimum_tile_density_label_text,
+                                                &options->create_level_minimum_path_density,
+                                                LEVEL_MIN_MINIMUM_PATH_DENSITY,
+                                                LEVEL_MAX_MINIMUM_PATH_DENSITY,
+                                                25);
+    gui_random_density->get_text = gui_random_density_get_text;
 }
 
 void cleanup_gui_random(void)
@@ -737,7 +744,6 @@ void draw_gui_random(void)
     }
 
     if (draw_gui_numeric(gui_random_density)) {
-        options->create_level_minimum_path_density = long_mul_100(gui_random_density_float);
         regen_level();
     }
 

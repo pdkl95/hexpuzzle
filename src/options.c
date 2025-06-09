@@ -585,13 +585,13 @@ options_parse_args(
 
         case 'd':
             float_value = 0.0f;
-            if (!options_set_float_bounds(&float_value, LEVEL_MIN_MINIMUM_PATH_DENSITY_FLOAT, LEVEL_MAX_MINIMUM_PATH_DENSITY_FLOAT)) {
+            if (!options_set_float_bounds(&float_value, float_div_100(LEVEL_MIN_MINIMUM_PATH_DENSITY), float_div_100(LEVEL_MAX_MINIMUM_PATH_DENSITY))) {
                 errmsg("bad value for --path-density (expected %3.2f - %3.2f)",
-                       LEVEL_MIN_MINIMUM_PATH_DENSITY_FLOAT,
-                       LEVEL_MAX_MINIMUM_PATH_DENSITY_FLOAT);
+                       float_div_100(LEVEL_MIN_MINIMUM_PATH_DENSITY),
+                       float_div_100(LEVEL_MAX_MINIMUM_PATH_DENSITY));
                 return false;
             }
-            options->create_level_minimum_path_density = (long)(float_value * 100.0f);
+            options->create_level_minimum_path_density = (int)(float_value * 100.0f);
             options->load_state_create_level_minimum_path_density = false;
             break;
 

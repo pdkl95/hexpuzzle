@@ -37,6 +37,8 @@ raylib_gui_numeric_t *create_gui_numeric(const char *label, numeric_t valuep, nu
     gn->left_button_text  = strdup(GuiIconText(ICON_ARROW_LEFT_FILL, NULL));
     gn->right_button_text = strdup(GuiIconText(ICON_ARROW_RIGHT_FILL, NULL));
 
+    gn->get_text = gui_numeric_default_get_text;
+
     return gn;
 }
 
@@ -134,6 +136,11 @@ bool gui_numeric_is_max(raylib_gui_numeric_t *gn)
     return numeric_gte(gn->value, gn->max);
 }
 
+const char *gui_numeric_default_get_text(struct raylib_gui_numeric *gn)
+{
+    return numeric_text(gn->value);
+}
+
 bool draw_gui_numeric(raylib_gui_numeric_t *gn)
 {
     bool rv = false;
@@ -151,7 +158,7 @@ bool draw_gui_numeric(raylib_gui_numeric_t *gn)
 
     DrawRectangleRec(gn->display_rect, seed_bg_color);
 
-    const char *value_text = numeric_text(gn->value);
+    const char *value_text = gn->get_text(gn);
 
     draw_panel_text(value_text,
                     gn->display_text_shadow_location,

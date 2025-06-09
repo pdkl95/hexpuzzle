@@ -24,6 +24,22 @@
 
 #include <time.h>
 
+#define SOLVE_ELAPSED_TIME_STR_MAXLEN 256
+
+struct solve_elapsed_time {
+    bool valid;
+
+    struct timespec ts;
+
+    /* elapsed time parts */
+    int day;
+    int hr;
+    int min;
+    int sec;
+    int ms;
+};
+typedef struct solve_elapsed_time solve_elapsed_time_t;
+
 enum solve_timer_state {
     SOLVE_TIMER_STATE_RESET = 0,
     SOLVE_TIMER_STATE_RUNNING,
@@ -51,16 +67,12 @@ struct solve_timer {
      * Total cumulative elqapwsd time the solve_timer
      * has been in the RUNNING state.
      */
-    struct timespec elapsed_time;
-
-    /* elapsed time parts */
-    int day;
-    int hr;
-    int min;
-    int sec;
-    int ms;
+    solve_elapsed_time_t elapsed_time;
 };
 typedef struct solve_timer solve_timer_t;
+
+char *solve_elapsed_time_to_str(solve_elapsed_time_t *elapsed_time);
+solve_elapsed_time_t str_to_solve_elapsed_time(const char *str);
 
 solve_timer_t *alloc_solve_timer(void);
 void free_solve_timer(solve_timer_t *solve_timer);
