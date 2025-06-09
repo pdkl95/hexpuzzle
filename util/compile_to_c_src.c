@@ -19,8 +19,17 @@
  *                                                                          *
  ****************************************************************************/
 
+#include "config.h"
+
+#include <assert.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stdbool.h>
+#include <string.h>
+#include <unistd.h>
+#include <errno.h>
+
 #include "raylib.h"
-#include "common.h"
 
 #ifdef HAVE_GETOPT_H
 # include <getopt.h>
