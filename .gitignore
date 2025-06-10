@@ -4,6 +4,7 @@ lib/gnulib/stdlib.h
 lib/gnulib/string.h
 lib/gnulib/strings.h
 lib/gnulib/sys/types.h
+lib/gnulib/time.h
 lib/gnulib/unistd.h
 fonts/*.c
 util/compile_to_c_src

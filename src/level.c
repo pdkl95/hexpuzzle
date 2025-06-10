@@ -322,6 +322,8 @@ static level_t *init_level(level_t *level)
     level->undo = NULL;
     level->next = NULL;
 
+    level->gen_param = NULL;
+
     level->seed = 0;
 
     level->enabled_tile_count = 0;
@@ -575,6 +577,7 @@ void destroy_level(level_t *level)
         SAFEFREE(level->filename);
         SAFEFREE(level->dirpath);
         SAFEFREE(level->savepath);
+        SAFEFREE(level->gen_param);
         SAFEFREE(level);
     }
 }

@@ -62,8 +62,8 @@
 #include "nvdata_finished.h"
 
 #include "solver.h"
-
 #include "classics.h"
+
 
 /* #if defined(PLATFORM_DESKTOP) */
 /* /\* good *\/ */
@@ -1303,6 +1303,13 @@ const char *game_source_button_lines[3] = {
     game_source_button_code_str
 };
 
+char copy_blueprint_button_copy_level_str[] = "Copy Lv.";
+char copy_blueprint_button_blueprint_str[] = "Blueprint";
+const char *copy_blueprint_button_lines[3] = {
+    copy_blueprint_button_copy_level_str,
+    copy_blueprint_button_blueprint_str
+};
+
 char edit_radius_label_text[] = "Radius";
 char edit_mode_label_text[] = "Mode";
 char edit_tool_label_text[] = "Edit Tool";
@@ -2251,6 +2258,14 @@ static void draw_gui_widgets(void)
 
     case GAME_MODE_RANDOM:
         standard_buttons();
+
+        set_bottom_double_right_side_button();
+
+        set_gui_narrow_font();
+        if (rsb_double_line_button(copy_blueprint_button_lines, 2, ICON_FILE_COPY)) {
+            gui_random_copy_blueprint_to_clipboard();
+        }
+        set_default_font();
         break;
 
     case GAME_MODE_BROWSER:

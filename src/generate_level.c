@@ -24,6 +24,7 @@
 #include "level.h"
 #include "collection.h"
 #include "generate_level.h"
+#include "blueprint_string.h"
 
 #include "pcg/pcg_basic.h"
 
@@ -676,13 +677,18 @@ struct level *generate_random_level(generate_level_param_t *param, const char *p
 
     rng_seed(gen_param.seed, gen_param.tile_radius);;
 
+    rng_seed(gen_param.seed, gen_param.tile_radius);;
+
     level_t *level = create_level(NULL);
     level_reset(level);
 
     level->seed = gen_param.seed;
     snprintf(level->name, NAME_MAXLEN, "%s", TextFormat("%d", gen_param.seed));
     if (options->verbose) {
-        infomsg("Generating random level \"%s\" for %s", level->name, purpose ? purpose : "(unknown)");
+        infomsg("Generating random level \"%s\" for %s\n<blueprint>%s</blueprint>",
+                level->name,
+                purpose ? purpose : "(unknown)",
+                serialize_generate_level_params(gen_param));
     }
 
     level_set_radius(level, options->create_level_radius);
@@ -705,6 +711,9 @@ struct level *generate_random_level(generate_level_param_t *param, const char *p
 
     level_use_unsolved_tile_pos(level);
     level_backup_unsolved_tiles(level);
+
+    level->gen_param = calloc(1, sizeof(generate_level_param_t));
+    memcpy(level->gen_param, &gen_param, sizeof(generate_level_param_t));
 
     return level;
 }

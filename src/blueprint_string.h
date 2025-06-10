@@ -1,6 +1,6 @@
 /****************************************************************************
  *                                                                          *
- * gui_random.h                                                             *
+ * blueprint_string.h                                                       *
  *                                                                          *
  * This file is part of hexpuzzle.                                          *
  *                                                                          *
@@ -19,30 +19,15 @@
  *                                                                          *
  ****************************************************************************/
 
-#ifndef GUI_RANDOM_H
-#define GUI_RANDOM_H
+#ifndef BLUEPRINT_STRING_H
+#define BLUEPRINT_STRING_H
 
-#include "cJSON/cJSON.h"
+#include "generate_level.h"
 
-void init_gui_random_minimal(void);
-void init_gui_random(void);
-void cleanup_gui_random(void);
-void resize_gui_random(void);
-void draw_gui_random(void);
+#define BLUEPRINT_STRING_MAXLEN 1024
 
-void regen_level_preview(void);
+const char *serialize_generate_level_params(generate_level_param_t param);
+bool deserialize_generate_level_params(const char *str, generate_level_param_t *result);;
 
-void save_gui_random_level(void);
-void play_gui_random_level(void);
-void play_gui_random_level_preview(void);
-
-bool create_level_from_json(cJSON *json);
-cJSON *create_level_to_json(void);
-
-void gui_random_copy_blueprint_to_clipboard(void);
-
-extern struct level *gui_random_level;
-extern struct level *gui_random_level_preview;
-
-#endif /*GUI_RANDOM_H*/
+#endif /*BLUEPRINT_STRING_H*/
 

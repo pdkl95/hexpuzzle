@@ -34,6 +34,7 @@
 #include "gui_popup_message.h"
 #include "raylib_gui_numeric.h"
 #include "generate_level.h"
+#include "blueprint_string.h"
 
 Rectangle gui_random_panel_rect;
 Rectangle gui_random_area_rect;
@@ -1006,4 +1007,22 @@ cJSON *create_level_to_json(void)
   create_level_to_json_error:
     cJSON_Delete(json);
     return NULL;
+}
+
+void gui_random_copy_blueprint_to_clipboard(void)
+{
+    if (!gui_random_level) {
+        return;
+    }
+
+    if (!gui_random_level->gen_param) {
+        return;
+    }
+
+    const char *blueprint = serialize_generate_level_params(*gui_random_level->gen_param);
+    if (blueprint) {
+        SetClipboardText(blueprint);
+        popup_message("Blueprint for level \"%s\" copied to clipboard.",
+                      gui_random_level->name);
+    }
 }

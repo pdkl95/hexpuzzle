@@ -45,6 +45,7 @@ struct collection;
 struct level;
 struct solver;
 struct undo;
+struct generate_level_param;
 
 typedef void (*level_fade_finished_cb_t)(struct level *level, void *data);
 
@@ -152,7 +153,9 @@ struct level {
 
     struct level *prev, *next;
 
-    struct level *orig_copy;;
+    struct level *orig_copy;
+
+    struct generate_level_param *gen_param;
 };
 typedef struct level level_t;
 

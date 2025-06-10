@@ -131,48 +131,49 @@ hexpuzzle_LDADD += \
 	$(CHIPMUNK_DIR)/libchipmunk.a
 endif
 
-hexpuzzle_SOURCES =                                          \
-	src/background.h           src/background.c          \
-	src/classics.h             src/classics.c            \
-	src/collection.h           src/collection.c          \
-	src/color.h                src/color.c               \
-	src/const.h                                          \
-	src/fonts.h                src/fonts.c               \
-	src/game_mode.h            src/game_mode.c           \
-	src/generate_level.h       src/generate_level.c      \
-	src/gui_browser.h          src/gui_browser.c         \
-	src/gui_collection.h       src/gui_collection.c      \
-	src/gui_dialog.h           src/gui_dialog.c          \
-	src/gui_help.h             src/gui_help.c            \
-	src/gui_options.h          src/gui_options.c         \
-	src/gui_popup_message.h    src/gui_popup_message.c   \
-	src/gui_random.h           src/gui_random.c          \
-	src/gui_title.h            src/gui_title.c           \
-	src/hex.h                  src/hex.c                 \
-	src/level.h                src/level.c               \
-	src/level_draw.h           src/level_draw.c          \
-	src/level_undo.h           src/level_undo.c          \
-	src/logging.h              src/logging.c             \
-	src/numeric.h              src/numeric.c             \
-	src/nvdata.h               src/nvdata.c              \
-	src/nvdata_finished.h      src/nvdata_finished.c     \
-	src/options.h              src/options.c             \
-	src/path.h                 src/path.c                \
-	src/range.h                src/range.c               \
-	src/raygui_impl.c 			             \
-	src/raygui_paged_list.h    src/raygui_paged_list.c   \
-	src/raylib_gui_numeric.h   src/raylib_gui_numeric.c  \
-	src/raylib_helper.h        src/raylib_helper.c       \
-	src/startup_action.h       src/startup_action.c      \
-	src/shader.h               src/shader.c              \
-	src/solve_timer.h          src/solve_timer.c         \
-	src/solver.h               src/solver.c              \
-	src/textures.h             src/textures.c            \
-	src/tile.h                 src/tile.c                \
-	src/tile_draw.h            src/tile_draw.c           \
-	src/tile_pos.h             src/tile_pos.c            \
-	src/util.h                 src/util.c                \
-	src/win_anim.h             src/win_anim.c            \
+hexpuzzle_SOURCES =                                           \
+	src/background.h           src/background.c           \
+	src/blueprint_string.h     src/blueprint_string.c     \
+	src/classics.h             src/classics.c             \
+	src/collection.h           src/collection.c           \
+	src/color.h                src/color.c                \
+	src/const.h                                           \
+	src/fonts.h                src/fonts.c                \
+	src/game_mode.h            src/game_mode.c            \
+	src/generate_level.h       src/generate_level.c       \
+	src/gui_browser.h          src/gui_browser.c          \
+	src/gui_collection.h       src/gui_collection.c       \
+	src/gui_dialog.h           src/gui_dialog.c           \
+	src/gui_help.h             src/gui_help.c             \
+	src/gui_options.h          src/gui_options.c          \
+	src/gui_popup_message.h    src/gui_popup_message.c    \
+	src/gui_random.h           src/gui_random.c           \
+	src/gui_title.h            src/gui_title.c            \
+	src/hex.h                  src/hex.c                  \
+	src/level.h                src/level.c                \
+	src/level_draw.h           src/level_draw.c           \
+	src/level_undo.h           src/level_undo.c           \
+	src/logging.h              src/logging.c              \
+	src/numeric.h              src/numeric.c              \
+	src/nvdata.h               src/nvdata.c               \
+	src/nvdata_finished.h      src/nvdata_finished.c      \
+	src/options.h              src/options.c              \
+	src/path.h                 src/path.c                 \
+	src/range.h                src/range.c                \
+	src/raygui_impl.c 			              \
+	src/raygui_paged_list.h    src/raygui_paged_list.c    \
+	src/raylib_gui_numeric.h   src/raylib_gui_numeric.c   \
+	src/raylib_helper.h        src/raylib_helper.c        \
+	src/startup_action.h       src/startup_action.c       \
+	src/shader.h               src/shader.c               \
+	src/solve_timer.h          src/solve_timer.c          \
+	src/solver.h               src/solver.c               \
+	src/textures.h             src/textures.c             \
+	src/tile.h                 src/tile.c                 \
+	src/tile_draw.h            src/tile_draw.c            \
+	src/tile_pos.h             src/tile_pos.c             \
+	src/util.h                 src/util.c                 \
+	src/win_anim.h             src/win_anim.c             \
 	src/win_anim_mode_config.h src/win_anim_mode_config.c \
 	src/common.h               src/main.c
 

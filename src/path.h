@@ -41,6 +41,10 @@ typedef enum path_type path_type_t;
 #define PATH_TYPE_MIN (PATH_TYPE_NONE)
 #define PATH_TYPE_MAX (PATH_TYPE_COUNT - 1)
 
+#define for_each_path_color(var) for (path_type_t var = (PATH_TYPE_NONE + 1); var < PATH_TYPE_COUNT; var++)
+#define each_path_color for_each_path_color(color)
+
+
 char *path_type_name(path_type_t type);
 
 struct path_int {

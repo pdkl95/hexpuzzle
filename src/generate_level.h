@@ -22,6 +22,8 @@
 #ifndef GENERATE_LEVEL_H
 #define GENERATE_LEVEL_H
 
+#include "range.h"
+
 enum generate_level_mode {
     GENERATE_LEVEL_BLANK                    = 0,
     GENERATE_LEVEL_RANDOM_CONNECT_TO_POINT  = 1
@@ -54,9 +56,6 @@ const char *symmetry_mode_string(symmetry_mode_t mode);
 symmetry_mode_t parse_symmetry_mode_string(const char *string);
 
 bool parse_random_seed_str(char *seedstr, uint64_t *dst);
-
-generate_level_param_t deserialize_generate_level_params(const char *str);
-const char *serialize_generate_level_params(generate_level_param_t param);
 
 struct level *generate_random_level(generate_level_param_t *param, const char *purpose);
 struct level *generate_random_level_simple(const char *purpose);
