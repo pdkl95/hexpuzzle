@@ -34,7 +34,7 @@ char hex_digit_str[] = "0123456789ABCDEF";
 
 static const char *serialize_color(generate_level_param_t *param)
 {
-    static char buf[3];
+    static char buf[BLUEPRINT_STRING_COLOR_MAXLEN];
     buf[0] = 'c';
     buf[2] = '\0';
 
@@ -46,6 +46,46 @@ static const char *serialize_color(generate_level_param_t *param)
 
     buf[1] = hex_digit_str[bits];
 
+    return buf;
+}
+
+static const char *serialize_tile_radius(generate_level_param_t *param)
+{
+    static char buf[BLUEPRINT_STRING_RADIUS_MAXLEN];
+    snprintf(buf,
+             BLUEPRINT_STRING_RADIUS_MAXLEN,
+             "r%X",
+             param->tile_radius);
+    return buf;
+}
+
+static const char *serialize_fixed(generate_level_param_t *param)
+{
+    static char buf[BLUEPRINT_STRING_FIXED_MAXLEN];
+    snprintf(buf,
+             BLUEPRINT_STRING_FIXED_MAXLEN,
+             "f%X",
+             param->fixed_count);
+    return buf;
+}
+
+static const char *serialize_hidden(generate_level_param_t *param)
+{
+    static char buf[BLUEPRINT_STRING_HIDDEN_MAXLEN];
+    snprintf(buf,
+             BLUEPRINT_STRING_HIDDEN_MAXLEN,
+             "h%X",
+             param->hidden_count);
+    return buf;
+}
+
+static const char *serialize_seed(generate_level_param_t *param)
+{
+    static char buf[BLUEPRINT_STRING_SEED_MAXLEN];
+    snprintf(buf,
+             BLUEPRINT_STRING_SEED_MAXLEN,
+             "s%lX",
+             param->seed);
     return buf;
 }
 
@@ -64,11 +104,27 @@ const char *serialize_generate_level_params(generate_level_param_t param)
     const char *color_str  = serialize_color(&param);
     if (!color_str) { goto serialize_failure; }
 
+    const char *radius_str  = serialize_tile_radius(&param);
+    if (!radius_str) { goto serialize_failure; }
+
+    const char *fixed_str  = serialize_fixed(&param);
+    if (!fixed_str) { goto serialize_failure; }
+
+    const char *hidden_str  = serialize_hidden(&param);
+    if (!hidden_str) { goto serialize_failure; }
+
+    const char *seed_str  = serialize_seed(&param);
+    if (!seed_str) { goto serialize_failure; }
+
     int ret = snprintf(buf,
                        BLUEPRINT_STRING_MAXLEN,
-                       "%s%s",
+                       "%s%s%s%s%s%s",
                        prefix_str,
-                       color_str);
+                       color_str,
+                       radius_str,
+                       fixed_str,
+                       hidden_str,
+                       seed_str);
 
     if (ret < 0) {
       serialize_failure:

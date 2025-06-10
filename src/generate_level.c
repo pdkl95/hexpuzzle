@@ -35,8 +35,6 @@ pcg32_random_t rng;
 generate_level_param_t gen_param;
 
 int tile_count = 0;
-int fixed_count = 0;
-int hidden_count = 0;
 
 int total_used_paths = 0;
 int total_possible_paths = 0;
@@ -612,7 +610,7 @@ static void mark_symmetric_fixed_and_hidden(level_t *level)
     hex_axial_t center_pos = level_get_center_tile_pos(level)->position;
     bool reflect = options->create_level_symmetry_mode == SYMMETRY_MODE_REFLECT;
 
-    for (int i=0; i<fixed_count; i++) {
+    for (int i=0; i<gen_param.fixed_count; i++) {
         tile_t *tile = rng_get_tile(level);
         tile->fixed = true;
         hex_axial_t rpos;
@@ -625,7 +623,7 @@ static void mark_symmetric_fixed_and_hidden(level_t *level)
         refl->fixed = true;
     }
 
-    for (int i=0; i<hidden_count; i++) {
+    for (int i=0; i<gen_param.hidden_count; i++) {
         tile_t *tile = rng_get_tile(level);
         mark_tile_hidden(tile);
 
@@ -642,12 +640,12 @@ static void mark_symmetric_fixed_and_hidden(level_t *level)
 
 static void mark_random_fixed_and_hidden(level_t *level)
 {
-    for (int i=0; i<fixed_count; i++) {
+    for (int i=0; i<gen_param.fixed_count; i++) {
         tile_t *tile = rng_get_tile(level);
         tile->fixed = true;
     }
 
-    for (int i=0; i<hidden_count; i++) {
+    for (int i=0; i<gen_param.hidden_count; i++) {
         mark_tile_hidden(rng_get_tile(level));
     }
 }
@@ -694,8 +692,8 @@ struct level *generate_random_level(generate_level_param_t *param, const char *p
     level_set_radius(level, options->create_level_radius);
     tile_count = level_get_enabled_tiles(level);
 
-    fixed_count  = rng_range(param->fixed);
-    hidden_count = rng_range(param->hidden);
+    gen_param.fixed_count  = rng_range(param->fixed);
+    gen_param.hidden_count = rng_range(param->hidden);
 
     generate_connect_to_point(level);
     if (gen_param.fill_all_tiles) {

@@ -41,6 +41,9 @@ struct generate_level_param {
     int_range_t fixed;
     int_range_t hidden;
 
+    int fixed_count;
+    int hidden_count;
+
     long path_density;
 
     bool color[PATH_TYPE_COUNT];
