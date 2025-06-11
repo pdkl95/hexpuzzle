@@ -30,11 +30,15 @@ enum generate_level_mode {
 };
 typedef enum generate_level_mode generate_level_mode_t;
 
+#define GENERATE_LEVEL_RANDOM GENERATE_LEVEL_RANDOM_CONNECT_TO_POINT
+
 struct generate_level_param {
     generate_level_mode_t mode;
 
     uint64_t seed;
     uint64_t series;
+
+    bool have_series;
 
     int tile_radius;
 
@@ -43,6 +47,9 @@ struct generate_level_param {
 
     int fixed_count;
     int hidden_count;
+
+    bool have_fixed_count;
+    bool have_hidden_count;
 
     long path_density;
 

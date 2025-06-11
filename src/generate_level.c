@@ -704,10 +704,6 @@ struct level *generate_random_level(generate_level_param_t *param, const char *p
 
     gen_param = *param;
 
-    rng_seed(gen_param.seed, gen_param.tile_radius);;
-
-    rng_seed(gen_param.seed, gen_param.tile_radius);;
-
     level_t *level = create_level(NULL);
     level_reset(level);
 
@@ -723,8 +719,37 @@ struct level *generate_random_level(generate_level_param_t *param, const char *p
     level_set_radius(level, options->create_level_radius);
     tile_count = level_get_enabled_tiles(level);
 
-    gen_param.fixed_count  = rng_range(param->fixed);
-    gen_param.hidden_count = rng_range(param->hidden);
+    if (gen_param.have_series) {
+        assert(gen_param.have_fixed_count);
+        assert(gen_param.have_hidden_count);
+
+        if (!gen_param.have_fixed_count ||
+            !gen_param.have_hidden_count) {
+            errmsg("param.have_series requires both have_fixed_count and have_hidden_count");
+            destroy_level(level);
+            return NULL;
+        }
+    } else {
+        gen_param.series = gen_param.tile_radius;
+        rng_seed(gen_param.seed, gen_param.series);
+
+        int random_fixed_count  = rng_range(param->fixed);
+        int random_hidden_count = rng_range(param->hidden);
+
+        if (!gen_param.have_fixed_count) {
+            gen_param.fixed_count  = random_fixed_count;
+            gen_param.have_fixed_count = true;
+        }
+        if (!gen_param.have_hidden_count) {
+            gen_param.hidden_count = random_hidden_count;
+            gen_param.have_hidden_count = true;
+        }
+
+        gen_param.series += 10 * gen_param.fixed_count;
+        gen_param.series += 108 * gen_param.hidden_count;
+    }
+
+    rng_seed(gen_param.seed, gen_param.series);
 
     generate_connect_to_point(level);
     if (gen_param.fill_all_tiles) {
@@ -744,19 +769,6 @@ struct level *generate_random_level(generate_level_param_t *param, const char *p
     level->gen_param = calloc(1, sizeof(generate_level_param_t));
     memcpy(level->gen_param, &gen_param, sizeof(generate_level_param_t));
 
-    generate_level_param_t copy_param = {0};
-    const char *bp = serialize_generate_level_params(gen_param);
-    if (deserialize_generate_level_params(bp, &copy_param)) {
-
-        printf("gen_param = ");
-        print_generate_level_param(&gen_param);
-
-        printf("copy_param = ");
-        print_generate_level_param(&copy_param);
-    } else {
-        printf("deserialize failed!\n");
-    }
-
     return level;
 }
 
@@ -773,6 +785,7 @@ struct level *generate_blank_level(void)
 struct level *generate_random_title_level(void)
 {
     generate_level_param_t param = {
+        .mode = GENERATE_LEVEL_RANDOM,
         .seed = rand(),
         .tile_radius = LEVEL_MAX_RADIUS,
         .color = { 0, true, true, true, true },
@@ -800,6 +813,7 @@ struct level *generate_random_level_simple(const char *purpose)
     }
 
     generate_level_param_t param = {
+        .mode = GENERATE_LEVEL_RANDOM,
         .seed = seed,
         .tile_radius = options->create_level_radius,
         .color = { 0, true, true, true, true },

@@ -1310,6 +1310,13 @@ const char *copy_blueprint_button_lines[3] = {
     copy_blueprint_button_blueprint_str
 };
 
+char paste_blueprint_button_paste_level_str[] = "Paste Lv.";
+char paste_blueprint_button_blueprint_str[] = "Blueprint";
+const char *paste_blueprint_button_lines[3] = {
+    paste_blueprint_button_paste_level_str,
+    paste_blueprint_button_blueprint_str
+};
+
 char edit_radius_label_text[] = "Radius";
 char edit_mode_label_text[] = "Mode";
 char edit_tool_label_text[] = "Edit Tool";
@@ -2124,6 +2131,11 @@ static inline void set_bottom_double_right_side_button(void)
     right_side_button.rect.y = window_size.y - right_side_button.double_line_y_offset;
 }
 
+static inline void shift_up_right_side_button(float yoffset)
+{
+    right_side_button.rect.y -= yoffset;
+}
+
 static inline void shift_down_right_side_button(float yoffset)
 {
     right_side_button.rect.y += yoffset;
@@ -2262,9 +2274,17 @@ static void draw_gui_widgets(void)
         set_bottom_double_right_side_button();
 
         set_gui_narrow_font();
+
+        shift_up_right_side_button(right_side_button.double_line_y_offset);
+
         if (rsb_double_line_button(copy_blueprint_button_lines, 2, ICON_FILE_COPY)) {
             gui_random_copy_blueprint_to_clipboard();
         }
+
+        if (rsb_double_line_button(paste_blueprint_button_lines, 2, ICON_FILE_COPY)) {
+            gui_random_paste_blueprint_from_clipboard();
+        }
+
         set_default_font();
         break;
 

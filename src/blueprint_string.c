@@ -99,6 +99,16 @@ static const char *serialize_seed(generate_level_param_t *param)
     return buf;
 }
 
+static const char *serialize_series(generate_level_param_t *param)
+{
+    static char buf[BLUEPRINT_STRING_SERIES_MAXLEN];
+    snprintf(buf,
+             BLUEPRINT_STRING_SERIES_MAXLEN,
+             "S%lX",
+             param->series);
+    return buf;
+}
+
 static const char *serialize_path_density(generate_level_param_t *param)
 {
     int density = (int)param->path_density;
@@ -181,12 +191,15 @@ const char *serialize_generate_level_params(generate_level_param_t param)
     const char *seed_str  = serialize_seed(&param);
     if (!seed_str) { goto serialize_failure; }
 
+    const char *series_str  = serialize_series(&param);
+    if (!series_str) { goto serialize_failure; }
+
     const char *suffix_str = serialize_suffix();
     if (!suffix_str) { goto serialize_failure; }
 
     int ret = snprintf(buf,
                        BLUEPRINT_STRING_MAXLEN,
-                       "%s%s%s%s%s%s%s%s%s%s%s",
+                       "%s%s%s%s%s%s%s%s%s%s%s%s",
                        prefix_str,
                        mode_str,
                        symmetry_str,
@@ -197,6 +210,7 @@ const char *serialize_generate_level_params(generate_level_param_t param)
                        hidden_str,
                        density_str,
                        seed_str,
+                       series_str,
                        suffix_str);
 
     if (ret < 0) {
@@ -408,6 +422,26 @@ static bool deserialize_seed(const char **strp, generate_level_param_t *param)
     return ret;
 }
 
+static bool deserialize_series(const char **strp, generate_level_param_t *param)
+{
+    const char *str = *strp;
+    int field_length = deserislize_get_hex_number_field_length(str);
+    if (str[0] != 'S') {
+        deserial_error(str, field_length, 0, "series", "expected 's'");
+        return false;
+    }
+
+    str++;
+    int value = 0;
+    bool ret = deserialize_get_hex_number(str, &value);
+    param->series = value;
+    param->have_series = true;
+
+    *strp += field_length;
+
+    return ret;
+}
+
 static bool deserialize_path_density(const char **strp, generate_level_param_t *param)
 {
     const char *str = *strp;
@@ -455,6 +489,7 @@ static bool deserialize_fixed(const char **strp, generate_level_param_t *param)
 
     str++;
     bool ret = deserialize_get_hex_number(str, &param->fixed_count);
+    param->have_fixed_count = true;
 
     *strp += field_length;
 
@@ -472,6 +507,7 @@ static bool deserialize_hidden(const char **strp, generate_level_param_t *param)
 
     str++;
     bool ret = deserialize_get_hex_number(str, &param->hidden_count);
+    param->have_hidden_count = true;
 
     *strp += field_length;
 
@@ -534,7 +570,9 @@ bool deserialize_generate_level_params(const char *str, generate_level_param_t *
     while (p && *p) {
         //printf("deserialize parse[%ld]: \"%.8s\"\n", p-str, p);
 
+#ifndef NDEBUG
         const char *loop_start_p = p;
+#endif
 
         switch (*p) {
         case 'p':
@@ -563,6 +601,10 @@ bool deserialize_generate_level_params(const char *str, generate_level_param_t *
 
         case 's':
             if (!deserialize_seed(&p, &param)) { return false; }
+            break;
+
+        case 'S':
+            if (!deserialize_series(&p, &param)) { return false; }
             break;
 
         case 'n':

@@ -183,6 +183,7 @@ static level_t *gen_random_level(const char *purpose)
 #endif
 
     generate_level_param_t param = {
+        .mode = GENERATE_LEVEL_RANDOM,
         .seed = seed,
         .tile_radius = options->create_level_radius,
         .color = {
@@ -215,6 +216,16 @@ static void regen_level(void)
     }
 
     gui_random_level = gen_random_level("regen");
+    played_level = false;
+}
+
+static void gen_level_with_params(generate_level_param_t param)
+{
+    if (gui_random_level) {
+        destroy_level(gui_random_level);
+    }
+
+    gui_random_level = generate_random_level(&param, "blueprint");
     played_level = false;
 }
 
@@ -1024,5 +1035,21 @@ void gui_random_copy_blueprint_to_clipboard(void)
         SetClipboardText(blueprint);
         popup_message("Blueprint for level \"%s\" copied to clipboard.",
                       gui_random_level->name);
+    }
+}
+
+void gui_random_paste_blueprint_from_clipboard(void)
+{
+    const char *blueprint = GetClipboardText();
+
+    if (options->verbose) {
+        infomsg("Received %d bytes from the clipboard: \"%s\"", strlen(blueprint), blueprint);
+    }
+
+    generate_level_param_t param = {0};
+    if (deserialize_generate_level_params(blueprint, &param)) {
+        gen_level_with_params(param);
+    } else {
+        popup_error_message("Blueprint string was not formatted correctly.");
     }
 }

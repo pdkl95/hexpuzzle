@@ -40,6 +40,7 @@ bool create_level_from_json(cJSON *json);
 cJSON *create_level_to_json(void);
 
 void gui_random_copy_blueprint_to_clipboard(void);
+void gui_random_paste_blueprint_from_clipboard(void);
 
 extern struct level *gui_random_level;
 extern struct level *gui_random_level_preview;
