@@ -339,7 +339,7 @@ static bool deserialize_colors(const char **strp, generate_level_param_t *param)
     param->color_count = 0;
 
     each_path_color {
-        int bit = 1 << color;
+        int bit = 1 << (color - 1);
         if (c & bit) {
             param->color[color] = true;
             param->color_count += 1;
@@ -482,13 +482,38 @@ static bool deserialize_fill(const char **strp, generate_level_param_t *param)
 {
     const char *str = *strp;
     if (str[0] != 'L') {
-        deserial_error(str, 1, 0, "hidden", "expected 'L'");
+        deserial_error(str, 1, 0, "fill_all_tiles", "expected 'L'");
         return false;
     }
 
     param->fill_all_tiles = true;
 
     *strp += 1;
+
+    return true;
+}
+
+static bool deserialize_symmetry_mode(const char **strp, generate_level_param_t *param)
+{
+    const char *str = *strp;
+    if (str[0] != 'y') {
+        deserial_error(str, 1, 0, "symmetry_mode", "expected 'y'");
+        return false;
+    }
+
+    switch (str[1]) {
+    case 'R':
+        param->symmetry_mode = SYMMETRY_MODE_REFLECT;
+        break;
+    case 'T':
+        param->symmetry_mode = SYMMETRY_MODE_ROTATE;
+        break;
+    default:
+        deserial_error(str, 2, 1, "symmetry_mode", "unknown symmetry mode type");
+        return false;
+    }
+
+    *strp += 2;
 
     return true;
 }
@@ -507,7 +532,8 @@ bool deserialize_generate_level_params(const char *str, generate_level_param_t *
     if (!deserialize_mode(&p, &param)) { return false; }
 
     while (p && *p) {
-        printf("deserialize parse[%ld]: \"%.8s\"\n", p-str, p);
+        //printf("deserialize parse[%ld]: \"%.8s\"\n", p-str, p);
+
         const char *loop_start_p = p;
 
         switch (*p) {
@@ -529,6 +555,10 @@ bool deserialize_generate_level_params(const char *str, generate_level_param_t *
 
         case 'L':
             if (!deserialize_fill(&p, &param)) { return false; }
+            break;
+
+        case 'y':
+            if (!deserialize_symmetry_mode(&p, &param)) { return false; }
             break;
 
         case 's':
