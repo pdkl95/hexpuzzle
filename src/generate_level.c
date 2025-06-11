@@ -39,6 +39,37 @@ int tile_count = 0;
 int total_used_paths = 0;
 int total_possible_paths = 0;
 
+static const char *color_flag_string(generate_level_param_t *param)
+{
+    static char buf[PATH_TYPE_COUNT + 1];
+    for (int i=0; i<PATH_TYPE_COUNT; i++) {
+        if (param->color[i]) {
+            buf[i] = 'T';
+        } else {
+            buf[i] = 'F';
+        }
+    }
+    buf[PATH_TYPE_COUNT] = '\0';
+    return buf;
+}
+
+void print_generate_level_param(generate_level_param_t *param)
+{
+    printf("<generate_level_param %p>\n", param);
+    printf("            mode = %d\n", param->mode);
+    printf("            seed = 0x%lX\n", param->seed);
+    printf("          series = 0x%lX\n", param->series);
+    printf("     tile_radius = %d\n", param->tile_radius);
+    printf("           fixed = %d (min=%d, max=%d)\n", param->fixed_count, param->fixed.min, param->fixed.max);
+    printf("          hidden = %d (min=%d, max=%d)\n", param->hidden_count, param->hidden.min, param->hidden.max);
+    printf("    path_density = %d\n", (int)param->path_density);
+    printf("           color = %s\n", color_flag_string(param));
+    printf("     color_count = %d\n", param->color_count);
+    printf("   symmetry_mode = %s\n", symmetry_mode_string(param->symmetry_mode));
+    printf("  fill_all_tiles = %s\n", param->fill_all_tiles ? "true" : "false");
+    printf("</generate_level_param>\n");
+}
+
 const char *symmetry_mode_string(symmetry_mode_t mode)
 {
     switch (mode) {
@@ -712,6 +743,19 @@ struct level *generate_random_level(generate_level_param_t *param, const char *p
 
     level->gen_param = calloc(1, sizeof(generate_level_param_t));
     memcpy(level->gen_param, &gen_param, sizeof(generate_level_param_t));
+
+    generate_level_param_t copy_param = {0};
+    const char *bp = serialize_generate_level_params(gen_param);
+    if (deserialize_generate_level_params(bp, &copy_param)) {
+
+        printf("gen_param = ");
+        print_generate_level_param(&gen_param);
+
+        printf("copy_param = ");
+        print_generate_level_param(&copy_param);
+    } else {
+        printf("deserialize failed!\n");
+    }
 
     return level;
 }

@@ -55,6 +55,8 @@ struct generate_level_param {
 };
 typedef struct generate_level_param generate_level_param_t;
 
+void print_generate_level_param(generate_level_param_t *param);
+
 const char *symmetry_mode_string(symmetry_mode_t mode);
 symmetry_mode_t parse_symmetry_mode_string(const char *string);
 

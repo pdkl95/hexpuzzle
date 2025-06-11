@@ -26,11 +26,12 @@
 
 #define BLUEPRINT_STRING_MAXLEN 1024
 
-#define BLUEPRINT_STRING_SEED_MAXLEN   (1 + 16 + 1)
-#define BLUEPRINT_STRING_COLOR_MAXLEN  (1 +  1 + 1)
-#define BLUEPRINT_STRING_RADIUS_MAXLEN (1 +  1 + 1)
-#define BLUEPRINT_STRING_FIXED_MAXLEN  (1 +  3 + 1)
-#define BLUEPRINT_STRING_HIDDEN_MAXLEN (1 +  3 + 1)
+#define BLUEPRINT_STRING_SEED_MAXLEN    (1 + 16 + 1)
+#define BLUEPRINT_STRING_DENSITY_MAXLEN (1 +  6 + 1)
+#define BLUEPRINT_STRING_COLOR_MAXLEN   (1 +  1 + 1)
+#define BLUEPRINT_STRING_RADIUS_MAXLEN  (1 +  1 + 1)
+#define BLUEPRINT_STRING_FIXED_MAXLEN   (1 +  3 + 1)
+#define BLUEPRINT_STRING_HIDDEN_MAXLEN  (1 +  3 + 1)
 
 const char *serialize_generate_level_params(generate_level_param_t param);
 bool deserialize_generate_level_params(const char *str, generate_level_param_t *result);;
