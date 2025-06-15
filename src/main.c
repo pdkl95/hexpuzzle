@@ -734,8 +734,43 @@ static void redo(void)
     default:
         warnmsg("REDO only works in PLAY of EDIT mode");
     }
+}
 
+static void clipboard_copy(void)
+{
+    switch (game_mode) {
+    case GAME_MODE_WIN_LEVEL:
+        /* fall through */
+    case GAME_MODE_PLAY_LEVEL:
+        if (current_level) {\
+            level_copy_blueprint_to_clipboard(current_level);
+        }
+        break;
 
+    case GAME_MODE_TITLE:
+        level_copy_blueprint_to_clipboard(title_bg_level);
+        break;
+
+    case GAME_MODE_RANDOM:
+        gui_random_copy_blueprint_to_clipboard();
+        break;
+
+    default:
+        warnmsg("REDO only works in PLAY of EDIT mode");
+    }
+}
+
+static void clipboard_paste(void)
+{
+    switch (game_mode) {
+    case GAME_MODE_RANDOM:
+        gui_random_paste_blueprint_from_clipboard();
+        break;
+
+    default:
+        /* do nothing */
+        break;
+    }
 }
 
 static void
@@ -1148,6 +1183,14 @@ handle_events(
 
     if (IsKeyPressed(KEY_R) || is_key_pressed_with_control_or_super(KEY_Y)) {
         redo();
+    }
+
+    if (is_key_pressed_with_control(KEY_C)) {
+        clipboard_copy();
+    }
+
+    if (is_key_pressed_with_control(KEY_V)) {
+        clipboard_paste();
     }
 
     if (mouse_input_is_enabled()) {

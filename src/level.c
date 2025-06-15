@@ -40,6 +40,7 @@
 #include "gui_random.h"
 #include "win_anim.h"
 #include "solver.h"
+#include "blueprint_string.h"
 
 
 //#define DEBUG_DRAG_AND_DROP 1
@@ -323,6 +324,7 @@ static level_t *init_level(level_t *level)
     level->next = NULL;
 
     level->gen_param = NULL;
+    level->blueprint = NULL;
 
     level->seed = 0;
 
@@ -578,6 +580,7 @@ void destroy_level(level_t *level)
         SAFEFREE(level->dirpath);
         SAFEFREE(level->savepath);
         SAFEFREE(level->gen_param);
+        SAFEFREE(level->blueprint);
         SAFEFREE(level);
     }
 }
@@ -2130,4 +2133,24 @@ long level_average_paths_per_tile(level_t *level)
     assert(enabled_tile_count > 0);
 
     return (100 * path_count) / enabled_tile_count;
+}
+
+void level_copy_blueprint_to_clipboard(level_t *level)
+{
+    assert_not_null(level);
+
+    const char *blueprint = NULL;
+    if (level->blueprint) {
+        blueprint = level->blueprint;
+    } else if (level->gen_param) {
+        blueprint = serialize_generate_level_params(*level->gen_param);
+    }
+
+    if (blueprint) {
+        SetClipboardText(blueprint);
+        popup_message("Blueprint for level \"%s\" copied to clipboard.",
+                      level->name);
+    } else {
+        warnmsg("Cannot copy level \"%s\" to the clipboard - missing blueprint string");
+    }
 }

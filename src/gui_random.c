@@ -1026,16 +1026,7 @@ void gui_random_copy_blueprint_to_clipboard(void)
         return;
     }
 
-    if (!gui_random_level->gen_param) {
-        return;
-    }
-
-    const char *blueprint = serialize_generate_level_params(*gui_random_level->gen_param);
-    if (blueprint) {
-        SetClipboardText(blueprint);
-        popup_message("Blueprint for level \"%s\" copied to clipboard.",
-                      gui_random_level->name);
-    }
+    level_copy_blueprint_to_clipboard(gui_random_level);
 }
 
 void gui_random_paste_blueprint_from_clipboard(void)

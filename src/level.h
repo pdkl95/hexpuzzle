@@ -70,6 +70,8 @@ struct level {
     char *id;
     bool have_id;
 
+    char *blueprint;
+
     uint64_t seed;
 
     char name[NAME_MAXLEN];
@@ -268,6 +270,7 @@ void level_update_tile_pops(level_t *level);
 void level_shuffle_tiles(level_t *level);
 void level_reset_win_anim(level_t *level);
 long level_average_paths_per_tile(level_t *level);
+void level_copy_blueprint_to_clipboard(level_t *level);
 
 extern level_t *current_level;
 

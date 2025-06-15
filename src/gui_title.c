@@ -63,7 +63,7 @@ float title1_voffset = -35.0f;
 float title2_voffset = -28.0f;
 float title2_hoffset = 5.0f;
 
-level_t *bg_level = NULL;
+level_t *title_bg_level = NULL;
 
 Color hexpanel_bg_color;
 Color shade_overlay_color;
@@ -114,8 +114,8 @@ void init_gui_title(void)
 
 void cleanup_gui_title(void)
 {
-    if (bg_level) {
-        destroy_level(bg_level);
+    if (title_bg_level) {
+        destroy_level(title_bg_level);
     }
 }
 
@@ -223,12 +223,12 @@ static inline void draw_version(void)
 
 void draw_gui_title(void)
 {
-    if (!bg_level) {
-        bg_level = generate_random_title_level();
+    if (!title_bg_level) {
+        title_bg_level = generate_random_title_level();
     }
 
     DrawPoly(       window_center, 6, hexpanel_size + 2.0f, hexpanel_rotation, hexpanel_bg_color);
-    level_draw_for_title(bg_level, bg_level_rect);
+    level_draw_for_title(title_bg_level, bg_level_rect);
     DrawPoly(       window_center, 6, hexpanel_size + 2.0f, hexpanel_rotation, shade_overlay_color);
 
     DrawPolyLinesEx(window_center, 6, hexpanel_size + 2.0f, hexpanel_rotation, 5.0f, text_shadow_color);

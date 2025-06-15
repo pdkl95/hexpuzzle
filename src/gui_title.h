@@ -28,6 +28,7 @@ void resize_gui_title(void);
 void draw_gui_title(void);
 
 extern Color shade_overlay_color;
+extern level_t *title_bg_level;
 
 #endif /*GUI_TITLE_H*/
 

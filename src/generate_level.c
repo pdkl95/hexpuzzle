@@ -769,6 +769,13 @@ struct level *generate_random_level(generate_level_param_t *param, const char *p
     level->gen_param = calloc(1, sizeof(generate_level_param_t));
     memcpy(level->gen_param, &gen_param, sizeof(generate_level_param_t));
 
+    const char *blueprint = serialize_generate_level_params(*level->gen_param);
+    if (blueprint) {
+        level->blueprint = strdup(blueprint);
+    } else {
+        warnmsg("failed to generate a blueprint string");
+    }
+
     return level;
 }
 
