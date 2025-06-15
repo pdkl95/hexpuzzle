@@ -2098,6 +2098,15 @@ void level_reset_win_anim(level_t *level)
     level->extra_rotate_level_speed    = 0.0f;
     level->extra_rotate_level_velocity = 0.0f;
 
+    /* level->finished = false; */
+
+    /* level->fade.active          = false; */
+    /* level->fade.target          = 0.0f; */
+    /* level->fade.value           = level->fade.target; */
+    /* level->fade.value_eased_out = level->fade.target; */
+    /* level->fade.value_eased_in  = level->fade.target; */
+    /* level->fade.rotate_speed    = 0.0f; */
+
     for (int i = 0; i < LEVEL_MAXTILES; i++) {
         tile_pos_t *solved_pos = &level->solved_positions[i];
         tile_pos_t *unsolved_pos = &level->unsolved_positions[i];
@@ -2105,8 +2114,6 @@ void level_reset_win_anim(level_t *level)
         tile_pos_reset_win_anim(solved_pos);
         tile_pos_reset_win_anim(unsolved_pos);
     }
-
-    //printf("level_reset_win_anim()\n");
 }
 
 long level_average_paths_per_tile(level_t *level)

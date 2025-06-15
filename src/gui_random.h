@@ -42,6 +42,8 @@ cJSON *create_level_to_json(void);
 void gui_random_copy_blueprint_to_clipboard(void);
 void gui_random_paste_blueprint_from_clipboard(void);
 
+void gui_random_reset_win_anim(void);
+
 extern struct level *gui_random_level;
 extern struct level *gui_random_level_preview;
 

@@ -1044,3 +1044,10 @@ void gui_random_paste_blueprint_from_clipboard(void)
         popup_error_message("Blueprint string was not formatted correctly.");
     }
 }
+
+void gui_random_reset_win_anim(void)
+{
+    if (gui_random_level) {
+        level_reset_win_anim(gui_random_level);
+    }
+}

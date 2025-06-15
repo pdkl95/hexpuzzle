@@ -34,9 +34,17 @@ extern bool do_postprocessing;
 extern float bloom_amount;
 extern float warp_amount;
 
+const char *win_anim_state_str(win_anim_state_t state);
+
 static void win_anim_set_state(win_anim_t *win_anim, win_anim_state_t new_state)
 {
     assert_not_null(win_anim);
+
+#if 0
+    printf("win_anim_set_state: %s -> %s\n",
+           win_anim_state_str(win_anim->state),
+           win_anim_state_str(new_state));
+#endif
 
     win_anim->state = new_state;
     win_anim->state_change_time = GetTime();
@@ -517,7 +525,7 @@ static bool win_anim_state_progress(win_anim_t *win_anim, float *progress, float
 
 void win_anim_update(win_anim_t *win_anim)
 {
-    if (!win_anim) {
+    if (!win_anim || !win_level_mode) {
         return;
     }
 
