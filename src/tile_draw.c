@@ -652,6 +652,13 @@ void tile_draw_corner_connections(tile_pos_t *pos, win_anim_mode_t win_mode)
 #endif
                 break;
 
+#ifdef USE_PHYSICS
+            case WIN_ANIM_MODE_PHYSICS_FALL:
+                /* fall through */
+            case WIN_ANIM_MODE_PHYSICS_SWIRL:
+                thickness *= 1.25;
+                /* fall through */
+#endif
             default:
                 DrawSplineSegmentBezierCubic(
                     pos_m_p,

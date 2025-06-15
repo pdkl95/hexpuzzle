@@ -53,7 +53,8 @@ struct tile {
 
     int path_count;
     path_type_t path[6];
-    path_type_t saved_path[6];
+    path_type_t hidden_saved_path[6];
+    path_type_t enabled_saved_path[6];
 
     path_type_t start_for_path_type;
 
@@ -72,7 +73,8 @@ struct path_state {
     tile_t *tile;
     hex_direction_t section;
     path_type_t path;
-    path_type_t saved_path;
+    path_type_t hidden_saved_path;
+    path_type_t enabled_saved_path;
 };
 typedef struct path_state path_state_t;
 

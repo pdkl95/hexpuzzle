@@ -93,6 +93,31 @@ void print_tile_unsolved_positionss(level_t *level)
     }
 }
 
+static void restore_previously_broken_paths(tile_pos_t *pos)
+{
+    each_direction {
+        hex_direction_t opp_dir =
+            hex_opposite_direction(dir);
+        tile_pos_t *neighbor = pos->neighbors[dir];
+
+        if (!neighbor) {
+            continue;
+        }
+
+        if (!neighbor->tile->enabled) {
+            continue;
+        }
+
+        if (pos->tile->enabled_saved_path[dir] != PATH_TYPE_NONE) {
+            pos->tile->path[dir] = pos->tile->enabled_saved_path[dir];
+            pos->tile->enabled_saved_path[dir] = PATH_TYPE_NONE;
+
+            neighbor->tile->path[opp_dir] = neighbor->tile->enabled_saved_path[opp_dir];
+            neighbor->tile->enabled_saved_path[opp_dir] = PATH_TYPE_NONE;
+        }
+    }
+}
+
 static void level_enable_solved_tile_callback(hex_axial_t axial, void *data)
 {
     level_t *level = (level_t *)data;
@@ -100,6 +125,7 @@ static void level_enable_solved_tile_callback(hex_axial_t axial, void *data)
     if (pos) {
         if (pos->tile) {
             pos->tile->enabled = true;
+            restore_previously_broken_paths(pos);
         } else {
             assert(false && "pos is missing tile");
         }
@@ -112,6 +138,7 @@ static void level_enable_unsolved_tile_callback(hex_axial_t axial, void *data)
     tile_pos_t *pos = level_get_solved_tile_pos(level, axial);
     if (pos) {
         pos->tile->enabled = true;
+        restore_previously_broken_paths(pos);
     }
 }
 
@@ -136,12 +163,35 @@ static void level_enable_current_tile_callback(hex_axial_t axial, void *data)
     }
 }
 
+static void remove_broken_paths(tile_pos_t *pos)
+{
+    each_direction {
+        hex_direction_t opp_dir =
+            hex_opposite_direction(dir);
+        tile_pos_t *neighbor = pos->neighbors[dir];
+
+        if (!neighbor) {
+            continue;
+        }
+
+        pos->tile->enabled_saved_path[dir] = pos->tile->path[dir];
+
+        if (pos->tile->path[dir] != PATH_TYPE_NONE) {
+            neighbor->tile->enabled_saved_path[opp_dir] = neighbor->tile->path[opp_dir];
+            neighbor->tile->path[opp_dir] = PATH_TYPE_NONE;
+
+            pos->tile->path[dir] = PATH_TYPE_NONE;
+        }
+    }
+}
+
 static void level_disable_solved_tile_callback(hex_axial_t axial, void *data)
 {
     level_t *level = (level_t *)data;
     tile_pos_t *pos = level_get_solved_tile_pos(level, axial);
     if (pos) {
         pos->tile->enabled = false;
+        remove_broken_paths(pos);
     }
 }
 
@@ -151,6 +201,7 @@ static void level_disable_unsolved_tile_callback(hex_axial_t axial, void *data)
     tile_pos_t *pos = level_get_solved_tile_pos(level, axial);
     if (pos) {
         pos->tile->enabled = false;
+        remove_broken_paths(pos);
     }
 }
 

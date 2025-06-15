@@ -178,12 +178,12 @@ void tile_pos_toggle_hidden(tile_pos_t *pos, bool add_undo)
         if (neighbor) {
             if (pos->tile->hidden) {
                 //printf("hide neighbor path at (%d, %d) dir %d to (%d, %d)\n", pos->position.q, pos->position.r, dir, neighbor->position.q, neighbor->position.r);
-                pos->tile->saved_path[dir] =  pos->tile->path[dir];
+                pos->tile->hidden_saved_path[dir] =  pos->tile->path[dir];
                 pos->tile->path[dir] = PATH_TYPE_NONE;;
                 neighbor->tile->path[opp_dir] = PATH_TYPE_NONE;
             } else {
-                pos->tile->path[dir] =  pos->tile->saved_path[dir];
-                pos->tile->saved_path[dir] = PATH_TYPE_NONE;;
+                pos->tile->path[dir] =  pos->tile->hidden_saved_path[dir];
+                pos->tile->hidden_saved_path[dir] = PATH_TYPE_NONE;;
                 neighbor->tile->path[opp_dir] = pos->tile->path[dir];;
                 //printf("show neighbor path at (%d, %d) dir %d to (%d, %d)\n", pos->position.q, pos->position.r, dir, neighbor->position.q, neighbor->position.r);
             }

@@ -742,7 +742,7 @@ static void clipboard_copy(void)
     case GAME_MODE_WIN_LEVEL:
         /* fall through */
     case GAME_MODE_PLAY_LEVEL:
-        if (current_level) {\
+        if (current_level) {
             level_copy_blueprint_to_clipboard(current_level);
         }
         break;

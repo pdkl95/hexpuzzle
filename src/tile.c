@@ -116,7 +116,8 @@ tile_t *init_tile(tile_t *tile)
 
     each_direction {
         tile->path[dir] = PATH_TYPE_NONE;
-        tile->saved_path[dir] = PATH_TYPE_NONE;
+        tile->hidden_saved_path[dir] = PATH_TYPE_NONE;
+        tile->enabled_saved_path[dir] = PATH_TYPE_NONE;
     }
 
 #if 0
@@ -299,18 +300,20 @@ tile_neighbor_paths_t tile_get_neighbor_paths(tile_t *tile)
         if (neighbor) { // && neighbor->enabled)
             assert_not_null(neighbor->tile);
 
-            paths.sections[dir].neighbor.section    = opposite_dir;
-            paths.sections[dir].neighbor.tile       = neighbor->tile;
-            paths.sections[dir].neighbor.path       = neighbor->tile->path[opposite_dir];
-            paths.sections[dir].neighbor.saved_path = neighbor->tile->saved_path[opposite_dir];
+            paths.sections[dir].neighbor.section            = opposite_dir;
+            paths.sections[dir].neighbor.tile               = neighbor->tile;
+            paths.sections[dir].neighbor.path               = neighbor->tile->path[opposite_dir];
+            paths.sections[dir].neighbor.hidden_saved_path  = neighbor->tile->hidden_saved_path[opposite_dir];
+            paths.sections[dir].neighbor.enabled_saved_path = neighbor->tile->enabled_saved_path[opposite_dir];
         } else {
             paths.sections[dir].neighbor.tile = NULL;
         }
  
-        paths.sections[dir].local.section    = dir;
-        paths.sections[dir].local.tile       = pos->tile;
-        paths.sections[dir].local.path       = pos->tile->path[dir];
-        paths.sections[dir].local.saved_path = pos->tile->saved_path[dir];
+        paths.sections[dir].local.section            = dir;
+        paths.sections[dir].local.tile               = pos->tile;
+        paths.sections[dir].local.path               = pos->tile->path[dir];
+        paths.sections[dir].local.hidden_saved_path  = pos->tile->hidden_saved_path[dir];
+        paths.sections[dir].local.enabled_saved_path = pos->tile->enabled_saved_path[dir];
     }
 
     return paths;
@@ -333,14 +336,16 @@ void tile_set_neighbor_paths(tile_t *tile, tile_neighbor_paths_t paths)
         //printf("dir(%d) ", dir);
         if (neighbor) {
             //print_tile(neighbor);
-            hex_direction_t section       = paths.sections[dir].neighbor.section;
-            neighbor->path[section]       = paths.sections[dir].neighbor.path;
-            neighbor->saved_path[section] = paths.sections[dir].neighbor.saved_path;
+            hex_direction_t section               = paths.sections[dir].neighbor.section;
+            neighbor->path[section]               = paths.sections[dir].neighbor.path;
+            neighbor->hidden_saved_path[section]  = paths.sections[dir].neighbor.hidden_saved_path;
+            neighbor->enabled_saved_path[section] = paths.sections[dir].neighbor.enabled_saved_path;
         }
 
-        hex_direction_t section   = paths.sections[dir].local.section;
-        tile->path[section]       = paths.sections[dir].local.path;
-        tile->saved_path[section] = paths.sections[dir].local.saved_path;
+        hex_direction_t section           = paths.sections[dir].local.section;
+        tile->path[section]               = paths.sections[dir].local.path;
+        tile->hidden_saved_path[section]  = paths.sections[dir].local.hidden_saved_path;
+        tile->enabled_saved_path[section] = paths.sections[dir].local.enabled_saved_path;
 
         tile_update_path_count(neighbor);;
     }
