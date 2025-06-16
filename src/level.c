@@ -2051,6 +2051,23 @@ static void level_fade_transition(level_t *level, level_fade_finished_cb_t callb
 #endif
 }
 
+static void  wait_events_fade_skip(level_t *level)
+{
+    level->fade.value           = level->fade.target;
+    level->fade.value_eased_out = level->fade.target;
+    level->fade.value_eased_in  = level->fade.target;
+
+#ifdef DEBUG_LEVEL_FADE
+    printf("wait_events_fade_skip(): SKIP fade_target = %f\n", level->fade.target);
+#endif
+
+    if (level->fade.finished_callback) {
+        level->fade.finished_callback(level, level->fade.finished_data);
+    }
+
+    level->fade.active = false;
+}
+
 void level_fade_in(level_t *level, level_fade_finished_cb_t callback, void *data)
 {
     assert_not_null(level);
@@ -2063,8 +2080,13 @@ void level_fade_in(level_t *level, level_fade_finished_cb_t callback, void *data
 #ifdef DEBUG_LEVEL_FADE
     printf("level_fade_in()\n");
 #endif
+
     level->fade.target = 1.0f;
     level_fade_transition(level, callback, data);
+
+    if (options->wait_events) {
+        wait_events_fade_skip(level);
+    }
 }
 
 void level_fade_out(level_t *level, level_fade_finished_cb_t callback, void *data)
@@ -2084,6 +2106,10 @@ void level_fade_out(level_t *level, level_fade_finished_cb_t callback, void *dat
 
     level->fade.target = 0.0f;
     level_fade_transition(level, callback, data);
+
+    if (options->wait_events) {
+        wait_events_fade_skip(level);
+    }
 }
 
 static void level_update_tile_pops_callback(hex_axial_t axial, void *data)

@@ -53,6 +53,9 @@ static void win_anim_set_state(win_anim_t *win_anim, win_anim_state_t new_state)
 const char *win_anim_mode_str(win_anim_mode_t mode)
 {
     switch (mode) {
+    case WIN_ANIM_MODE_NULL:
+        return "NULL";
+
     case WIN_ANIM_MODE_SIMPLE:
         return "SIMPLE";
 
@@ -105,12 +108,13 @@ void print_win_anim_modes(win_anim_t *win_anim)
 {
     for (win_anim_mode_t mode = 0; mode < WIN_ANIM_MODE_COUNT; mode++) {
         win_anim_mode_config_t *config = win_anim->mode_config;
-        printf("\tmode[%d] %s \"%s\"\t%d chances (%f%%)\n",
+        printf("\tmode[%d] %s %s  \"%s\"\t%d chances (%f%%)\n",
                mode,
                config->enabled ? "ON " : "OFF",
+               config->animated ? "ANIMATED" : "STATIC",
                win_anim_mode_str(mode),
                config->chances,
-               100.0f * ((float)win_anim_mode_config[mode].chances) / ((float)win_anim->total_mode_chances));
+               100.0f * ((float)win_anim_mode_config[mode].chances) / ((float)win_anim->total_mode_chances[config->animated]));
     }
 }
 
@@ -397,7 +401,7 @@ void init_win_anim(win_anim_t *win_anim, level_t *level)
 
     win_anim->level = level;
 
-    win_anim_select_random_mode(win_anim);
+    win_anim_select_random_mode(win_anim, options->animate_win);
 
 #ifdef DEBUG_TRACE_WIN_ANIM
 #ifndef DEBUG_BUILD
@@ -430,23 +434,26 @@ void init_win_anim(win_anim_t *win_anim, level_t *level)
     }
 }
 
-void win_anim_select_random_mode(win_anim_t *win_anim)
+void win_anim_select_random_mode(win_anim_t *win_anim, bool animated)
 {
 #ifdef DEBUG_TRACE_WIN_ANIM
-    win_anim_mode_t old_mode = win_anim->mode;;
+    win_anim_mode_t old_mode = win_anim->mode;
 #endif
 
-    win_anim->total_mode_chances = 0;
+    win_anim->total_mode_chances[animated] = 0;
     for (win_anim_mode_t mode = 0; mode < WIN_ANIM_MODE_COUNT; mode++) {
-        if (win_anim_mode_config[mode].enabled) {
-            win_anim->total_mode_chances += win_anim_mode_config[mode].chances;
+        if (win_anim_mode_config[mode].enabled &&
+            (win_anim_mode_config[mode].animated == animated)) {
+            win_anim->total_mode_chances[animated] += win_anim_mode_config[mode].chances;
         }
     }
 
-    int roll = global_rng_get(win_anim->total_mode_chances);
+    int roll = global_rng_get(win_anim->total_mode_chances[animated]);
     for (win_anim_mode_t mode = 0; mode < WIN_ANIM_MODE_COUNT; mode++) {
         assert(roll >= 0);
-        if (win_anim_mode_config[mode].enabled) {
+        if (win_anim_mode_config[mode].enabled &&
+            (win_anim_mode_config[mode].animated == animated)) {
+
             if (roll <= win_anim_mode_config[mode].chances) {
                 win_anim->mode = mode;
                 goto finish_select_random_mode;
@@ -460,6 +467,7 @@ void win_anim_select_random_mode(win_anim_t *win_anim)
     __builtin_unreachable();
 
   finish_select_random_mode:
+    //win_anim->mode = WIN_ANIM_MODE_NULL;
     //win_anim->mode = WIN_ANIM_MODE_SIMPLE;
     //win_anim->mode = WIN_ANIM_MODE_POPS;
     //win_anim->mode = WIN_ANIM_MODE_WAVES;
@@ -525,7 +533,8 @@ static bool win_anim_state_progress(win_anim_t *win_anim, float *progress, float
 
 void win_anim_update(win_anim_t *win_anim)
 {
-    if (!win_anim || !win_level_mode) {
+    if (!win_anim || !win_level_mode ||
+        (win_anim->mode_config && win_anim->mode_config->animated)) {
         return;
     }
 
@@ -539,7 +548,8 @@ void win_anim_update(win_anim_t *win_anim)
         return;
 
     case WIN_ANIM_STATE_STARTUP:
-        if (win_anim_state_progress(win_anim, &win_anim->activation, WIN_ANIM_STARTUP_TIME_INVERSE)) {
+        if (!win_anim->mode_config->do_fade ||
+            win_anim_state_progress(win_anim, &win_anim->activation, WIN_ANIM_STARTUP_TIME_INVERSE)) {
             win_anim_set_state(win_anim, WIN_ANIM_STATE_RUNNING);
             win_anim->activation = 1.0f;
         }
@@ -550,7 +560,8 @@ void win_anim_update(win_anim_t *win_anim)
         break;
 
     case WIN_ANIM_STATE_SHUTDOWN:
-        if (win_anim_state_progress(win_anim, &win_anim->activation, WIN_ANIM_SHUTDOWN_TIME_INVERSE)) {
+        if (!win_anim->mode_config->do_fade ||
+            win_anim_state_progress(win_anim, &win_anim->activation, WIN_ANIM_SHUTDOWN_TIME_INVERSE)) {
             win_anim_set_state(win_anim, WIN_ANIM_STATE_STANDBY);
             win_anim->activation = 0.0f;
         } else {
@@ -574,20 +585,25 @@ void win_anim_update(win_anim_t *win_anim)
         win_anim->level->background_transform_amount = 0.0f;
     }
 
+    if (win_anim->mode != WIN_ANIM_MODE_NULL) {
 #if 0
-    printf("progress = %3.2f. hue = %3.2f, fadein = %3.2f, other = %3.2f\n",
-           win_anim->fade[0],
-           win_anim->fade[1],
-           win_anim->fade[2],
-           win_anim->fade[3]);
+        printf("progress = %3.2f. hue = %3.2f, fadein = %3.2f, other = %3.2f\n",
+               win_anim->fade[0],
+               win_anim->fade[1],
+               win_anim->fade[2],
+               win_anim->fade[3]);
 #endif
 
-    SetShaderValue(win_border_shader,
-                   win_border_shader_loc.fade,
-                   &(win_anim->fade[0]),
-                   SHADER_UNIFORM_VEC4);
+        SetShaderValue(win_border_shader,
+                       win_border_shader_loc.fade,
+                       &(win_anim->fade[0]),
+                       SHADER_UNIFORM_VEC4);
+    }
 
     switch (win_anim->mode) {
+    case WIN_ANIM_MODE_NULL:
+        break;
+
     case WIN_ANIM_MODE_SIMPLE:
         win_anim_update_simple(win_anim);
         break;

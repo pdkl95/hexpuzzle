@@ -45,18 +45,19 @@ enum win_anim_state {
 typedef enum win_anim_state win_anim_state_t;
 
 enum win_anim_mode {
-    WIN_ANIM_MODE_SIMPLE        = 0,
-    WIN_ANIM_MODE_POPS          = 1,
-    WIN_ANIM_MODE_WAVES         = 2,
-    WIN_ANIM_MODE_SPIN          = 3,
+    WIN_ANIM_MODE_NULL          = 0,
+    WIN_ANIM_MODE_SIMPLE        = 1,
+    WIN_ANIM_MODE_POPS          = 2,
+    WIN_ANIM_MODE_WAVES         = 3,
+    WIN_ANIM_MODE_SPIN          = 4,
 #ifdef USE_PHYSICS
-    WIN_ANIM_MODE_PHYSICS_FALL  = 4,
-    WIN_ANIM_MODE_PHYSICS_SWIRL = 5
+    WIN_ANIM_MODE_PHYSICS_FALL  = 5,
+    WIN_ANIM_MODE_PHYSICS_SWIRL = 6
 #endif
 };
 typedef enum win_anim_mode win_anim_mode_t;
 
-#define WIN_ANIM_NON_PHYSICS_MODE_COUNT 4
+#define WIN_ANIM_NON_PHYSICS_MODE_COUNT 5
 
 #ifdef USE_PHYSICS
 # define WIN_ANIM_PHYSICS_MODE_COUNT 2
@@ -72,7 +73,7 @@ struct win_anim {
     int id;
     win_anim_mode_t mode;
     win_anim_mode_config_t *mode_config;
-    int total_mode_chances;
+    int total_mode_chances[2];
     bool use_background_3d;
     struct level *level;
     win_anim_state_t state;
@@ -94,7 +95,7 @@ win_anim_t *create_win_anim(struct level *level);
 void cleanup_win_anim(win_anim_t *win_anim);
 void destroy_win_anim(win_anim_t *win_anim);
 
-void win_anim_select_random_mode(win_anim_t *win_anim);
+void win_anim_select_random_mode(win_anim_t *win_anim, bool animated);
 void win_anim_update(win_anim_t *win_anim);
 void win_anim_draw(win_anim_t *win_anim);
 

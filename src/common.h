@@ -112,6 +112,8 @@ extern const char *progversion;
 #define float_div_100(x) (((float)(x)) / 100.0f)
 #define int_mul_100(x) ((int)(100.0f * (x)))
 
+extern bool render_next_frame_no_waiting;
+
 #include "const.h"
 #include "raylib_helper.h"
 #include "util.h"

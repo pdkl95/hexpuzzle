@@ -149,6 +149,10 @@ void solver_set_state(solver_t *solver, solver_state_t new_state)
     }
 
     solver->state = new_state;
+
+    if (new_state != SOLVER_STATE_IDLE) {
+        render_next_frame_no_waiting = true;
+    }
 }
 
 void solver_toggle_solve(solver_t *solver)
@@ -323,6 +327,8 @@ static bool update_move_anim(solver_t *solver)
 #ifdef DEBUG_SOLVER
     printf("solver: anim_progress = %f, cur_pos = <%d, %d>\n", solver->anim_progress, icur_pos.x, icur_pos.y);
 #endif
+
+    render_next_frame_no_waiting = true;
 
     if (solver->anim_progress >= 1.0) {
         stop_move_anim(solver);

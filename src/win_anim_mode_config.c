@@ -26,36 +26,55 @@
 win_anim_mode_config_t win_anim_mode_config[WIN_ANIM_MODE_COUNT];
 
 win_anim_mode_config_t default_win_anim_mode_config[WIN_ANIM_MODE_COUNT] = {
+    { /* WIN_ANIM_MODE_NULL */
+      .enabled        = true,
+      .chances        = 1,
+      .animated       = false,
+      .do_fade        = false,
+      .do_fade_rotate = false
+    },
     { /* WIN_ANIM_MODE_SIMPLE */
-      .enabled = true,
-      .chances = 4,
+      .enabled        = true,
+      .chances        = 4,
+      .animated       = true,
+      .do_fade        = true,
       .do_fade_rotate = true
     },
     { /* WIN_ANIM_MODE_POPS */
-      .enabled = true,
-      .chances = 10,
+      .enabled        = true,
+      .chances        = 10,
+      .animated       = true,
+      .do_fade        = true,
       .do_fade_rotate = true
     },
     { /* WIN_ANIM_MODE_WAVES */
-      .enabled = true,
-      .chances = 10,
+      .enabled        = true,
+      .chances        = 10,
+      .animated       = true,
+      .do_fade        = true,
       .do_fade_rotate = true
     },
     { /* WIN_ANIM_MODE_SPIN */
-      .enabled = true,
-      .chances = 8,
+      .enabled        = true,
+      .chances        = 8,
+      .animated       = true,
+      .do_fade        = true,
       .do_fade_rotate = true
     }
 #ifdef USE_PHYSICS
      ,
     { /* WIN_ANIM_MODE_PHYSICS_FALL */
-      .enabled = true,
-      .chances = 20,
+      .enabled        = true,
+      .chances        = 20,
+      .animated       = true,
+      .do_fade        = true,
       .do_fade_rotate = false
     },
     { /* WIN_ANIM_MODE_PHYSICS_SWIRL */
-      .enabled = true,
-      .chances = 23,
+      .enabled        = true,
+      .chances        = 23,
+      .animated       = true,
+      .do_fade        = true,
       .do_fade_rotate = true
     }
 #endif
@@ -94,7 +113,9 @@ bool win_anim_mode_config_from_json(win_anim_mode_config_t *config, cJSON *json)
                 STR(name));                                             \
     }
 
-    mk_bool_json(enabled, enabled);
+    mk_bool_json(enabled,        enabled);
+    mk_bool_json(animated,       animated);
+    mk_bool_json(do_fade,        do_fade);
     mk_bool_json(do_fade_rotate, do_fade_rotate);
 
 #undef mk_bool_json
@@ -123,8 +144,11 @@ cJSON *win_anim_mode_config_to_json(win_anim_mode_config_t *config)
         goto mode_json_error;                                             \
     }
 
-    mk_bool_json(enabled, enabled);
+    mk_bool_json(enabled,        enabled);
+    mk_bool_json(animated,       animated);
+    mk_bool_json(do_fade,        do_fade);
     mk_bool_json(do_fade_rotate, do_fade_rotate);
+
 #undef mk_bool_json
 
     return json;

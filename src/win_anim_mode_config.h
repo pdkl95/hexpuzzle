@@ -26,6 +26,9 @@ struct win_anim_mode_config {
     bool enabled;
     int chances;
 
+    bool animated;
+
+    bool do_fade;
     bool do_fade_rotate;
 };
 typedef struct win_anim_mode_config win_anim_mode_config_t;

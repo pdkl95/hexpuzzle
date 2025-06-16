@@ -92,6 +92,7 @@ bool demo_mode = false;
 int automatic_event_polling_semaphore = 0;
 bool mouse_input_accepted = true;
 bool event_waiting_active = false;
+bool render_next_frame_no_waiting = false;
 bool window_size_changed = false;
 bool first_resize = true;
 bool skip_next_resize_event = false;
@@ -948,6 +949,7 @@ static void handle_mouse_events(void)
     if (IsCursorOnScreen()) {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             mouse_left_click = true;
+            render_next_frame_no_waiting = true;
 
             double click_time = GetTime();
             if ((click_time - last_mouse_click_time) < ((float)options->double_click_ms) * 0.001f) {
@@ -975,6 +977,7 @@ static void handle_mouse_events(void)
 
         if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
             mouse_left_release = false;
+            render_next_frame_no_waiting = true;
             if (do_level_ui_interaction()) {
                 level_drag_stop(current_level);
             }
@@ -982,6 +985,7 @@ static void handle_mouse_events(void)
 
         if (IsMouseButtonPressed(MOUSE_BUTTON_RIGHT)) {
             mouse_right_click = true;
+            render_next_frame_no_waiting = true;
             if (do_level_ui_interaction()) {
                 if (edit_mode_solved) {
                     if (is_any_shift_down()) {
@@ -2780,7 +2784,7 @@ render_frame(
     SetShaderValue(postprocessing_shader, postprocessing_shader_loc.time, &current_time, SHADER_UNIFORM_FLOAT);
     SetShaderValue(background_shader, background_shader_loc.time, &current_time, SHADER_UNIFORM_FLOAT);
 
-    bool do_postprocessing_this_frame = do_postprocessing && options->use_postprocessing;
+    bool do_postprocessing_this_frame = do_postprocessing && options->use_postprocessing && !options->wait_events && options->animate_bg;
 
     if (do_postprocessing_this_frame) {
         BeginTextureMode(*scene_write_target);
@@ -2887,10 +2891,17 @@ render_frame(
 
     draw_cursor();
 
-    EndDrawing();
+    if (event_waiting_active && render_next_frame_no_waiting) {
+        DisableEventWaiting();
+        EndDrawing();
+        EnableEventWaiting();
+        render_next_frame_no_waiting = false;
+    } else {
+        EndDrawing();
+    }
 
     swap_scene_targets();
-
+    printf("frame = %d\n", frame_count);
     return true;
 }
 

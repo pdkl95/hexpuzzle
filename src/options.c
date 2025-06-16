@@ -107,7 +107,7 @@ static char help_text[] =
     "                                which is usually ~/.config/" PACKAGE_NAME "/)\n"
     "  -C, --no-config             Skip loading of all config files (\"Safe Mode\")\n"
     "\n"
-    "      --allow-edit-mode       Enable the edit button when browsing local files\n"
+    "  -E, --allow-edit-mode       Enable the edit button when browsing local files\n"
     "\n"
     "  -v, --verbose               More logging output (including raylib)\n"
     "\n"
