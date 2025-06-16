@@ -890,7 +890,12 @@ level_t *load_level_file(const char *filename)
     }
 
     level_t *level = load_level_string(filename, str, false);
-    level->savepath = strdup(filename);
+    if (level) {
+        level->savepath = strdup(filename);
+    } else {
+        errmsg("load_level_string(\"%s\") failed", filename);
+    }
+
     free(str);
     return level;
 }
@@ -1126,16 +1131,22 @@ bool level_from_json(level_t *level, cJSON *json)
     cJSON *unique_id_json = cJSON_GetObjectItem(json, "unique_id");
     if (!cJSON_IsString(unique_id_json)) {
         errmsg("Error parsing level JSON: 'unique_id' is not a String");
-        return false;
+        //return false;
+        gen_unique_id(level->unique_id);
+        warnmsg("Using newly generated 'unique_id' \"%s\" as a replacement", level->unique_id);
+    } else {
+        snprintf(level->unique_id, UNIQUE_ID_LENGTH, "%s", unique_id_json->valuestring);
     }
-    snprintf(level->unique_id, UNIQUE_ID_LENGTH, "%s", unique_id_json->valuestring);
 
     cJSON *name_json = cJSON_GetObjectItem(json, "name");
     if (!cJSON_IsString(name_json)) {
         errmsg("Error parsing level JSON: 'name' is not a String");
-        return false;
+        //return false;
+        snprintf(level->name, NAME_MAXLEN, "%s-%s", LEVEL_DEFAULT_NAME, level->unique_id);
+        warnmsg("Using newly generated 'name' \"%s\" derived from the 'unique_id' as a replacement", level->name);
+    } else {
+        snprintf(level->name, NAME_MAXLEN, "%s", name_json->valuestring);
     }
-    snprintf(level->name, NAME_MAXLEN, "%s", name_json->valuestring);
     level_update_id(level);
 
     cJSON *radius_json = cJSON_GetObjectItem(json, "radius");

@@ -29,7 +29,7 @@
 
 extern char *home_dir;
 
-void open_game_file(const char *path, bool edit);
+bool open_game_file(const char *path, bool edit);
 void open_classics_game_pack(int n);
 bool draw_level_preview(level_t *level, Rectangle bounds);
 void edit_new_blank_level(void);
@@ -43,6 +43,15 @@ enum gui_list_entry_type {
 };
 typedef enum gui_list_entry_type gui_list_entry_type_t;
 
+enum gui_list_entry_status {
+    ENTRY_STATUS_NULL = 0,
+    ENTRY_STATUS_NOT_LOADABLE,
+    ENTRY_STATUS_UNLOADED,
+    ENTRY_STATUS_LOAD_OK,
+    ENTRY_STATUS_LOAD_ERROR
+};
+typedef enum gui_list_entry_status gui_list_entry_status_t;
+
 struct gui_list_entry {
     int index;
 
@@ -54,6 +63,7 @@ struct gui_list_entry {
     char *icon_name;
 
     gui_list_entry_type_t type;
+    gui_list_entry_status_t status;
 
     level_t *level;
 };
@@ -199,6 +209,22 @@ const char *entry_type_str(gui_list_entry_type_t type)
     }
 }
 
+const char *entry_status_str(gui_list_entry_status_t status)
+{
+    switch (status) {
+    case ENTRY_STATUS_NOT_LOADABLE:
+        return "NOT_LOADABLE";
+    case ENTRY_STATUS_UNLOADED:
+        return "UNLOADED";
+    case ENTRY_STATUS_LOAD_OK:
+        return "LOAD_OK";
+    case ENTRY_STATUS_LOAD_ERROR:
+        return "LOAD_ERROR";
+    default:
+        return "NULL";
+    }
+}
+
 #if defined(PLATFORM_DESKTOP)
 static void free_local_files_data(void)
 {
@@ -244,6 +270,9 @@ static void prepare_gui_list_names(gui_list_vars_t *list)
     for (int i=0; i<list->count; i++) {
         gui_list_entry_t *entry = &(list->entries[i]);
         const char *icon_name = GuiIconText(entry->icon, entry->name);
+        if (entry->status == ENTRY_STATUS_LOAD_ERROR) {
+            icon_name = GuiIconText(ICON_CRACK, entry->name);
+        }
         entry->icon_name = strdup(icon_name);
         entry->index = i;
     }
@@ -266,6 +295,17 @@ static void prepare_gui_list_names(gui_list_vars_t *list)
                                    (const char **)list->names,
                                    list->count);
     }
+}
+
+static void rebuild_list_names(void)
+{
+    prepare_gui_list_names(&local_files);
+}
+
+static void fail_entry(gui_list_entry_t *entry)
+{
+    entry->status = ENTRY_STATUS_LOAD_ERROR;
+    rebuild_list_names();
 }
 
 #if defined(PLATFORM_DESKTOP)
@@ -322,6 +362,7 @@ void setup_browse_dir(void)
 
         char *fd;
         gui_list_entry_type_t type = ENTRY_TYPE_NULL;
+        gui_list_entry_status_t status = ENTRY_STATUS_UNLOADED;
         if (IsPathFile(path)) {
             fd = "FILE";
 
@@ -332,6 +373,7 @@ void setup_browse_dir(void)
                 type = ENTRY_TYPE_LEVEL_FILE;
                 icon = ICON_FILE;
             } else {
+                status = ENTRY_STATUS_NOT_LOADABLE;
                 if (options->verbose) {
                     infomsg("SCAN> %s (SKIP, UNKNOWN EXT)", name);
                 }
@@ -347,17 +389,19 @@ void setup_browse_dir(void)
             } else {
                 type = ENTRY_TYPE_DIR;
                 icon = ICON_FOLDER;
+                status = ENTRY_STATUS_NOT_LOADABLE;
             }
         }
 
         if (options->verbose) {
-            infomsg("SCAN> %s (%s, %s)", name, fd, entry_type_str(type));
+            infomsg("SCAN> %s (%s, %s, %s)", name, fd, entry_type_str(type), entry_status_str(status));
         }
 
-        entry->name = name;
-        entry->path = path;
-        entry->icon = icon;
-        entry->type = type;
+        entry->name   = name;
+        entry->path   = path;
+        entry->icon   = icon;
+        entry->type   = type;
+        entry->status = status;
 
         local_files.count++;
     }
@@ -407,6 +451,24 @@ void change_gui_browser_path_to_local_saved_levels(void)
 
 void open_entry(gui_list_entry_t *entry, bool edit)
 {
+    switch (entry->status) {
+    case ENTRY_STATUS_NULL:
+        assert(false && "gui_list_entry_status_t should never be NULL");
+        return;
+
+    case ENTRY_STATUS_NOT_LOADABLE:
+        errmsg("Cannot open entry \"%s\" - unknown file type", entry->path);
+        return;
+
+    case ENTRY_STATUS_LOAD_ERROR:
+        errmsg("Cannot open entry \"%s\" - unknown file type", entry->path);
+        return;
+
+    default:
+        /* do nothing */
+        break;
+    }
+
     switch (entry->type) {
     case ENTRY_TYPE_DIR:
         if (DirectoryExists(entry->path)) {
@@ -420,12 +482,16 @@ void open_entry(gui_list_entry_t *entry, bool edit)
         /* fall through */
     case ENTRY_TYPE_COLLECTION_FILE:
         if (FileExists(entry->path)) {
-            open_game_file(entry->path, edit);
+            if (!open_game_file(entry->path, edit)) {
+                fail_entry(entry);
+            }
+        } else {
+            fail_entry(entry);
         }
         break;
 
     default:
-        errmsg("Cannot open \"%s\": NULL entr6y type.", entry->path);
+        errmsg("Cannot open \"%s\": NULL entry type.", entry->path);
     }
 }
 
@@ -436,10 +502,15 @@ void preview_entry(gui_list_entry_t *entry)
         return;
     }
 
+    if (entry->status == ENTRY_STATUS_LOAD_ERROR) {
+        return;
+    }
+
     if (!entry->level) {
         entry->level = load_level_file(entry->path);
 
         if (!entry->level) {
+            fail_entry(entry);
             return;
         }
     }

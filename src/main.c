@@ -167,7 +167,7 @@ char const * file_filter_patterns[2] = {
 bool return_from_level(void);
 void gui_setup(void);
 #if defined(PLATFORM_DESKTOP)
-void open_game_file(const char *path, bool edit);
+bool open_game_file(const char *path, bool edit);
 #endif
 
 static void seed_global_rng(void)
@@ -520,7 +520,7 @@ void create_new_level(void)
 }
 
 #if defined(PLATFORM_DESKTOP)
-void open_game_file(const char *path, bool edit)
+bool open_game_file(const char *path, bool edit)
 {
     if (options->verbose) {
         infomsg("Loading: \"%s\"", path);
@@ -528,7 +528,7 @@ void open_game_file(const char *path, bool edit)
     collection_t *collection = load_collection_path(path);
     if (!collection) {
         errmsg("Cannot open \"%s\"", path);
-        return;
+        return false;
     }
     if (current_collection) {
         destroy_collection(current_collection);
@@ -539,6 +539,8 @@ void open_game_file(const char *path, bool edit)
     if (edit) {
         collection_mode = GAME_MODE_EDIT_COLLECTION;
     }
+
+    bool ret = true;
 
     if (IS_LEVEL_FILENAME(path)) {
         level_t *level = collection_find_level_by_filename(current_collection, path);
@@ -556,6 +558,7 @@ void open_game_file(const char *path, bool edit)
             }
         } else {
             errmsg("Failed to open file \"%s\"", path);
+            ret = false;
         }
     } else if (IS_COLLECTION_FILENAME(path)) {
         if (options->verbose) {
@@ -568,8 +571,11 @@ void open_game_file(const char *path, bool edit)
         }
         set_game_mode(collection_mode);
     } else {
-        assert(0);
+        errmsg("Failed to open file \"%s\" - unknown file type", path);
+        ret = false;
     }
+
+    return ret;
 }
 
 static void play_game_file(const char *path)
