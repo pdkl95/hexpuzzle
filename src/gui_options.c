@@ -66,13 +66,33 @@ char options_use_physics_text[] = "Use Physics Engine";
 char options_use_physics_desc_text[] = "Some win animations use a physics engine, which can use a lot of CPU time.";
 #endif
 
+char options_disabled_reason_wait_events[] = "Always off when -w/--wait-events is enabled";
+char options_disabled_reason_no_animate_win[] = "Requires \"Animate Winning Levels\"";
+
 struct gui_bool_option {
     bool *opt;
+    bool opt_saved;
+    bool opt_have_saved_value;
+
     Rectangle *rect;
     char *label;
     char *desc;
+
+    bool disabled;
+    const char *disabled_reason;
 };
 typedef struct gui_bool_option gui_bool_option_t;
+
+enum graphics_option_index {
+    GRAPHICS_OPTION_USE_SOLVE_TIMER    = 0,
+    GRAPHICS_OPTION_ANIMATE_BG         = 1,
+    GRAPHICS_OPTION_ANIMATE_WIN        = 2,
+    GRAPHICS_OPTION_USE_PHYSICS        = 3,
+    GRAPHICS_OPTION_USE_POSTPROCESSING = 4,
+    GRAPHICS_OPTION_SHOW_LEVEL_PREVIEW = 5,
+    GRAPHICS_OPTION_SHOW_TOOLTIPS      = 6
+};
+typedef enum graphics_option_index graphics_option_index_t;
 
 gui_bool_option_t graphics_options[] = {
     {
@@ -187,6 +207,48 @@ void show_status_beside(bool status_value, Rectangle neighbor)
     show_status(status, status_rect);
 }
 
+static void enable_graphics_option(int index)
+{
+    if (graphics_options[index].opt_have_saved_value) {
+        *graphics_options[index].opt = graphics_options[index].opt_saved;
+        graphics_options[index].opt_have_saved_value = false;
+    }
+
+    graphics_options[index].disabled = false;
+    graphics_options[index].disabled_reason = NULL;
+}
+
+static void disable_graphics_option(int index, const char *reason)
+{
+    graphics_options[index].opt_saved = *graphics_options[index].opt;
+    graphics_options[index].opt_have_saved_value = true;
+
+    *graphics_options[index].opt = false;
+    graphics_options[index].disabled = true;
+    graphics_options[index].disabled_reason = reason;
+}
+
+static void check_disabled_graphics_option(void)
+{
+    for (int i=0; i<NUM_BOOL_OPTIONS; i++) {
+        enable_graphics_option(i);
+    }
+
+    if (options->wait_events) {
+        disable_graphics_option(GRAPHICS_OPTION_ANIMATE_BG,
+                                options_disabled_reason_wait_events);
+        disable_graphics_option(GRAPHICS_OPTION_ANIMATE_WIN,
+                                options_disabled_reason_wait_events);
+    }
+
+    if (!options->animate_win) {
+        disable_graphics_option(GRAPHICS_OPTION_USE_PHYSICS,
+                                options_disabled_reason_no_animate_win);
+        disable_graphics_option(GRAPHICS_OPTION_USE_POSTPROCESSING,
+                                options_disabled_reason_no_animate_win);
+    }
+}
+
 void init_gui_options(void)
 {
     options_tabbar_text[0] = "Graphics";
@@ -207,13 +269,18 @@ void init_gui_options(void)
                  "%s", GuiIconText(ICON_UNDO_FILL, NULL));
     }
 
-    graphics_options[0].opt = &options->use_solve_timer;
-    graphics_options[1].opt = &options->animate_bg;
-    graphics_options[2].opt = &options->animate_win;
-    graphics_options[3].opt = &options->use_physics;
-    graphics_options[4].opt = &options->use_postprocessing;
-    graphics_options[5].opt = &options->show_level_previews;
-    graphics_options[6].opt = &options->show_tooltips;
+    graphics_options[GRAPHICS_OPTION_USE_SOLVE_TIMER   ].opt = &options->use_solve_timer;
+    graphics_options[GRAPHICS_OPTION_ANIMATE_BG        ].opt = &options->animate_bg;
+    graphics_options[GRAPHICS_OPTION_ANIMATE_WIN       ].opt = &options->animate_win;
+    graphics_options[GRAPHICS_OPTION_USE_PHYSICS       ].opt = &options->use_physics;
+    graphics_options[GRAPHICS_OPTION_USE_POSTPROCESSING].opt = &options->use_postprocessing;
+    graphics_options[GRAPHICS_OPTION_SHOW_LEVEL_PREVIEW].opt = &options->show_level_previews;
+    graphics_options[GRAPHICS_OPTION_SHOW_TOOLTIPS     ].opt = &options->show_tooltips;
+
+    for (int i=0; i<NUM_BOOL_OPTIONS; i++) {
+        graphics_options[i].opt_saved = *graphics_options[i].opt;
+        graphics_options[i].opt_have_saved_value = false;
+    }
 
     resize_gui_options();
 }
@@ -394,6 +461,8 @@ void resize_gui_options(void)
 
         color_opt_y_offset += TOOL_BUTTON_HEIGHT + RAYGUI_ICON_SIZE;
     }
+
+    check_disabled_graphics_option();
 }
 
 void draw_gui_graphics_options(void)
@@ -406,8 +475,29 @@ void draw_gui_graphics_options(void)
     for (int i=0; i<NUM_BOOL_OPTIONS; i++) {
         gui_bool_option_t *opt = &(graphics_options[i]);
 
+        if (opt->disabled) {
+           GuiDisable();
+        }
+
+        bool old_value = *opt->opt;
+
         GuiToggle(*opt->rect, opt->label, opt->opt);
         show_status_beside(*opt->opt, *opt->rect);
+
+        if (opt->disabled) {
+            if (opt->disabled_reason) {
+                Rectangle ttrect = *opt->rect;
+                ttrect.x -= 100;
+                ttrect.x = MAX(ttrect.x, WINDOW_MARGIN);
+                ttrect.width += opt->rect->x - ttrect.x;
+                tooltip(ttrect, opt->disabled_reason);
+            }
+            GuiEnable();
+        }
+
+        if (*opt->opt != old_value) {
+            check_disabled_graphics_option();
+        }
 
         if (CheckCollisionPointRec(mouse_positionf, *opt->rect)) {
             desc = opt->desc;

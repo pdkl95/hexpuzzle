@@ -2901,7 +2901,7 @@ render_frame(
     }
 
     swap_scene_targets();
-    printf("frame = %d\n", frame_count);
+
     return true;
 }
 
