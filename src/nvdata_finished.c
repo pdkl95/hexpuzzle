@@ -126,7 +126,7 @@ void nvdata_mark_finished(struct level *level)
 {
     assert_not_null(level);
 
-    if (!level->finished) {
+    if (!level->finished || demo_mode) {
         return;
     }
 
@@ -156,7 +156,7 @@ bool nvdata_is_finished(struct level *level)
 {
     assert_not_null(level);
 
-    if (!level->have_id) {
+    if (!level->have_id || demo_mode) {
         return false;
     }
 

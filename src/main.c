@@ -2527,6 +2527,10 @@ static void draw_gui_widgets(void)
 
 static void draw_solve_timer(void)
 {
+    if (demo_mode) {
+        return;
+    }
+
     const char *str = NULL;
     Color text_color = WHITE;
     Color border_color = { 0x77, 0xDF, 0x73, 0xcc };
