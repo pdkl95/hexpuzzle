@@ -27,7 +27,7 @@
 struct level;
 
 typedef struct finished_level {
-    char id[UNIQUE_ID_LENGTH];
+    char id[ID_MAXLEN];
     time_t win_time;
 
     char rb_color;

@@ -442,9 +442,9 @@ void win_anim_select_random_mode(win_anim_t *win_anim, bool animated)
 
     win_anim->total_mode_chances[animated] = 0;
     for (win_anim_mode_t mode = 0; mode < WIN_ANIM_MODE_COUNT; mode++) {
-        if (win_anim_mode_config[mode].enabled &&
-            (win_anim_mode_config[mode].animated == animated)) {
-            win_anim->total_mode_chances[animated] += win_anim_mode_config[mode].chances;
+        if (win_anim_mode_config[mode].enabled) {
+            win_anim->total_mode_chances[win_anim_mode_config[mode].animated] +=
+                win_anim_mode_config[mode].chances;
         }
     }
 
@@ -453,7 +453,6 @@ void win_anim_select_random_mode(win_anim_t *win_anim, bool animated)
         assert(roll >= 0);
         if (win_anim_mode_config[mode].enabled &&
             (win_anim_mode_config[mode].animated == animated)) {
-
             if (roll <= win_anim_mode_config[mode].chances) {
                 win_anim->mode = mode;
                 goto finish_select_random_mode;
@@ -478,7 +477,7 @@ void win_anim_select_random_mode(win_anim_t *win_anim, bool animated)
     win_anim->mode_config = &(win_anim_mode_config[win_anim->mode]);
 
 #ifdef DEBUG_TRACE_WIN_ANIM
-    infomsg("win_anim[%02d] NEW RANDOM MODE <old:%s => new:%s>", win_anim->id, win_anim_mode_str(old_mode), win_anim_mode_str(win_anim->mode));
+    infomsg("win_anim[%02d] NEW RANDOM MODE <old:%s> => <new:%s>", win_anim->id, win_anim_mode_str(old_mode), win_anim_mode_str(win_anim->mode));
 #endif
 }
 
@@ -534,7 +533,7 @@ static bool win_anim_state_progress(win_anim_t *win_anim, float *progress, float
 void win_anim_update(win_anim_t *win_anim)
 {
     if (!win_anim || !win_level_mode ||
-        (win_anim->mode_config && win_anim->mode_config->animated)) {
+        (win_anim->mode_config && !win_anim->mode_config->animated)) {
         return;
     }
 

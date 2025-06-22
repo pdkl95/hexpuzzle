@@ -433,7 +433,7 @@ void tile_draw_win_anim(tile_pos_t *pos)
 }
 
 extern float bloom_amount;
-#define MIN_CORNER_DIST_SQR 120.0f
+#define MIN_CORNER_DIST_SQR 150.0f
 void tile_draw_corner_connections(tile_pos_t *pos, win_anim_mode_t win_mode)
 {
     tile_t *tile = pos->tile;
@@ -491,15 +491,17 @@ void tile_draw_corner_connections(tile_pos_t *pos, win_anim_mode_t win_mode)
         p2 = Vector2Add(p2, neighbor->extra_translate);
         p3 = Vector2Add(p3, neighbor->extra_translate);
 
-        bool is_pop = false;
+        //bool is_pop = false;
+        bool is_pop = win_mode == WIN_ANIM_MODE_POPS;
 
         if (is_pop) {
             float cdist_sqr = Vector2DistanceSqr(p1, p2);
             if (cdist_sqr > MIN_CORNER_DIST_SQR) {
-                color.a = (unsigned char)(255.0f * MAX(pos->extra_magnitude, neighbor->extra_magnitude));
+                //color.a = (unsigned char)(255.0f * MAX(pos->extra_magnitude, neighbor->extra_magnitude));
+                //color.b = 0.0;
 
-                float thickness = 3.0;
-                //thickness += pos->extra_magnitude * 0.1;
+                float thickness = 0.75;
+                thickness += pos->extra_magnitude * 0.05;
                 DrawSplineSegmentCatmullRom(p0, p1, p2, p3, thickness, color);
             }
         }
