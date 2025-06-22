@@ -183,19 +183,21 @@ void action_unpack_collection(void)
 
 bool run_startup_action(void)
 {
+#if 0
     if (options->startup_action != STARTUP_ACTION_NONE) {
-        // options->verbose = true;
+        options->verbose = true;
     }
+#endif
 
     switch (options->startup_action) {
     case STARTUP_ACTION_DEMO_SOLVE:
-        /* fall through */
+        fallthrough;
     case STARTUP_ACTION_DEMO_WIN_ANIM:
-        /* fall through */
+        fallthrough;
     case STARTUP_ACTION_PLAY:
-        /* fall through */
+        fallthrough;
     case STARTUP_ACTION_RANDOM:
-        /* fall through */
+        fallthrough;
     case STARTUP_ACTION_EDIT:
         return false;
 
@@ -212,7 +214,7 @@ bool run_startup_action(void)
         return true;
 
     case STARTUP_ACTION_NONE:
-        /* fall through */
+        fallthrough;
     default:
         return false;
     }

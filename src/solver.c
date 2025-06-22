@@ -163,15 +163,15 @@ void solver_toggle_solve(solver_t *solver)
         break;
 
     case SOLVER_STATE_SOLVE_MOVING_TO_NEXT_TILE:
-        /* fall through */
+        fallthrough;
     case SOLVER_STATE_SOLVE:
-        /* fall through */
+        fallthrough;
     case SOLVER_STATE_SOLVE_MOVING:
         solver_set_state(solver, SOLVER_STATE_IDLE);
         break;
 
     case SOLVER_STATE_UNDO:
-        /* fall through */
+        fallthrough;
     case SOLVER_STATE_UNDO_MOVING:
         solver_set_state(solver, SOLVER_STATE_IDLE);
         break;
@@ -189,15 +189,15 @@ void solver_toggle_undo(solver_t *solver)
         break;
 
     case SOLVER_STATE_SOLVE_MOVING_TO_NEXT_TILE:
-        /* fall through */
+        fallthrough;
     case SOLVER_STATE_SOLVE:
-        /* fall through */
+        fallthrough;
     case SOLVER_STATE_SOLVE_MOVING:
         solver_set_state(solver, SOLVER_STATE_IDLE);
         break;
 
     case SOLVER_STATE_UNDO:
-        /* fall through */
+        fallthrough;
     case SOLVER_STATE_UNDO_MOVING:
         solver_set_state(solver, SOLVER_STATE_IDLE);
         break;

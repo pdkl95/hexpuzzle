@@ -69,16 +69,16 @@ solve_elapsed_time_t str_to_solve_elapsed_time(const char *str)
     switch (ret) {
     case 1:
         elapsed_time.sec = 0;
-        /* fall through */
+        fallthrough;
     case 2:
         elapsed_time.min = 0;
-        /* fall through */
+        fallthrough;
     case 3:
         elapsed_time.hr  = 0;
-        /* fall through */
+        fallthrough;
     case 4:
         elapsed_time.day = 0;
-        /* fall through */
+        fallthrough;
     case 5:
         /* all fields ok */
         elapsed_time.valid = true;

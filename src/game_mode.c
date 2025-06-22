@@ -280,7 +280,7 @@ void toggle_edit_mode(void)
         break;
 
     case GAME_MODE_WIN_LEVEL:
-        /* fall through */
+        fallthrough;
     case GAME_MODE_PLAY_LEVEL:
         set_game_mode(GAME_MODE_EDIT_LEVEL);
         break;

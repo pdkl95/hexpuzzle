@@ -424,7 +424,7 @@ void init_win_anim(win_anim_t *win_anim, level_t *level)
     switch (win_anim->mode) {
 #ifdef USE_PHYSICS
     case WIN_ANIM_MODE_PHYSICS_FALL:
-        /* fall through */
+        fallthrough;
     case WIN_ANIM_MODE_PHYSICS_SWIRL:
         init_physics(&win_anim->physics, level);
         break;
@@ -494,7 +494,7 @@ void cleanup_win_anim(win_anim_t *win_anim)
         switch (win_anim->mode) {
 #ifdef USE_PHYSICS
         case WIN_ANIM_MODE_PHYSICS_FALL:
-            /* fall through */
+            fallthrough;
         case WIN_ANIM_MODE_PHYSICS_SWIRL:
             cleanup_physics(&win_anim->physics);
             break;
@@ -621,7 +621,7 @@ void win_anim_update(win_anim_t *win_anim)
 
 #ifdef USE_PHYSICS
     case WIN_ANIM_MODE_PHYSICS_FALL:
-        /* fall through */
+        fallthrough;
     case WIN_ANIM_MODE_PHYSICS_SWIRL:
         physics_update(&win_anim->physics, win_anim->activation);
         win_anim_update_physics(win_anim);
@@ -654,7 +654,7 @@ void win_anim_start(win_anim_t *win_anim)
 
         switch (win_anim->mode) {
         case WIN_ANIM_MODE_SIMPLE:
-            /* fall through */
+            fallthrough;
         case WIN_ANIM_MODE_WAVES:
             if (global_rng_bool(11, 11)) {
                 win_anim->use_background_3d = true;
@@ -663,7 +663,7 @@ void win_anim_start(win_anim_t *win_anim)
 
 #ifdef USE_PHYSICS
         case WIN_ANIM_MODE_PHYSICS_FALL:
-            /* fall through */
+            fallthrough;
         case WIN_ANIM_MODE_PHYSICS_SWIRL:
             physics_start(&win_anim->physics);
             break;
@@ -694,7 +694,7 @@ void win_anim_stop(win_anim_t *win_anim)
         switch (win_anim->mode) {
 #ifdef USE_PHYSICS
         case WIN_ANIM_MODE_PHYSICS_FALL:
-            /* fall through */
+            fallthrough;
         case WIN_ANIM_MODE_PHYSICS_SWIRL:
             physics_stop(&win_anim->physics);
             break;

@@ -747,7 +747,7 @@ static void clipboard_copy(void)
 {
     switch (game_mode) {
     case GAME_MODE_WIN_LEVEL:
-        /* fall through */
+        fallthrough;
     case GAME_MODE_PLAY_LEVEL:
         if (current_level) {
             level_copy_blueprint_to_clipboard(current_level);
@@ -1157,14 +1157,14 @@ handle_events(
             break;
 
         case GAME_MODE_EDIT_LEVEL:
-            /* fall thrugh */
+            fallthrough;
         case GAME_MODE_WIN_LEVEL:
-            /* fall thrugh */
+            fallthrough;
         case GAME_MODE_PLAY_LEVEL:
             if (return_from_level()) {
                 break;
             }
-            /* fall through */
+            fallthrough;
         default:
 #if defined(PLATFORM_DESKTOP)
             running = false;
@@ -2743,7 +2743,7 @@ static void draw_gui(void)
         break;
 
     case GAME_MODE_PLAY_COLLECTION:
-        /* fall through */
+        fallthrough;
     case GAME_MODE_EDIT_COLLECTION:
         draw_gui_collection();
         break;
@@ -2811,7 +2811,7 @@ render_frame(
 
         switch (game_mode) {
         case GAME_MODE_WIN_LEVEL:
-            /* fall thrugh */
+            fallthrough;
         case GAME_MODE_PLAY_LEVEL:
             if (current_level) {
                 level_draw(current_level, level_finished);
@@ -2871,7 +2871,7 @@ render_frame(
 
         switch (game_mode) {
         case GAME_MODE_WIN_LEVEL:
-            /* fall thrugh */
+            fallthrough;
         case GAME_MODE_PLAY_LEVEL:
             if (options->use_solve_timer) {
                 draw_solve_timer();
@@ -3162,7 +3162,7 @@ static void start_given_file(void)
     case STARTUP_ACTION_DEMO_WIN_ANIM:
         options->cheat_autowin = true;
         warnmsg("DEMO WIN ANIM ENABLED: auto-win levels");
-        /* fall through */
+        fallthrough;
     case STARTUP_ACTION_DEMO_SOLVE:
         demo_mode = true;
         warnmsg("DEMO MODE ENABLED");

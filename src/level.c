@@ -2023,7 +2023,7 @@ static void level_fade_transition(level_t *level, level_fade_finished_cb_t callb
         case WIN_ANIM_MODE_POPS:
 
 #ifdef USE_PHYSICS
-            /* fall through */
+            fallthrough;
         case WIN_ANIM_MODE_PHYSICS_SWIRL:
 #endif
             /* force clockwise rotation when currently in a mode that already features clockwuse motion */

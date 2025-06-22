@@ -588,7 +588,7 @@ void tile_draw_corner_connections(tile_pos_t *pos, win_anim_mode_t win_mode)
 
             switch (win_mode) {
             case WIN_ANIM_MODE_POPS:
-                /* fall through */
+                fallthrough;
             case WIN_ANIM_MODE_WAVES:
 #if 0
                 pos_cw1_p  = pos->win.midpoint_path_cw[dir];
@@ -656,10 +656,10 @@ void tile_draw_corner_connections(tile_pos_t *pos, win_anim_mode_t win_mode)
 
 #ifdef USE_PHYSICS
             case WIN_ANIM_MODE_PHYSICS_FALL:
-                /* fall through */
+                fallthrough;
             case WIN_ANIM_MODE_PHYSICS_SWIRL:
                 thickness *= 1.25;
-                /* fall through */
+                fallthrough;
 #endif
             default:
                 DrawSplineSegmentBezierCubic(

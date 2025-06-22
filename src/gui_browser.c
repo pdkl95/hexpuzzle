@@ -477,9 +477,9 @@ void open_entry(gui_list_entry_t *entry, bool edit)
         break;
 
     case ENTRY_TYPE_COLLECTION_DIR:
-        /* fall through */
+        fallthrough;
     case ENTRY_TYPE_LEVEL_FILE:
-        /* fall through */
+        fallthrough;
     case ENTRY_TYPE_COLLECTION_FILE:
         if (FileExists(entry->path)) {
             if (!open_game_file(entry->path, edit)) {
@@ -615,9 +615,9 @@ void gui_browser_rename(gui_list_entry_t *entry)
 {
     switch (entry->type) {
         //case ENTRY_TYPE_COLLECTION_DIR:
-        /* fall through */
+        //fallthrough;
     case ENTRY_TYPE_LEVEL_FILE:
-        /* fall through */
+        fallthrough;
     case ENTRY_TYPE_COLLECTION_FILE:
         if (FileExists(entry->path)) {
             const char *filename = GetFileNameWithoutExt(entry->path);
@@ -1052,9 +1052,9 @@ void draw_gui_browser_local_level_file(void)
             break;
 
         case ENTRY_TYPE_LEVEL_FILE:
-            /* fall through */
+            fallthrough;
         case ENTRY_TYPE_COLLECTION_FILE:
-            /* fall through */
+            fallthrough;
         case ENTRY_TYPE_COLLECTION_DIR:
             break;
 

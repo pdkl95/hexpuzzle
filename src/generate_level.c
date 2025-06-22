@@ -688,7 +688,7 @@ static void mark_features(level_t *level)
         mark_random_fixed_and_hidden(level);
         break;
     case SYMMETRY_MODE_REFLECT:
-        /* fall through */
+        fallthrough;
     case SYMMETRY_MODE_ROTATE:
         mark_symmetric_fixed_and_hidden(level);
         break;

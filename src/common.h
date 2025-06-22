@@ -105,6 +105,13 @@ extern const char *progversion;
 # define UNUSED_FUNCTION(x) UNUSED_ ##x
 #endif
 
+#if __has_attribute(__fallthrough__)
+# define fallthrough                    __attribute__((__fallthrough__))
+#else
+# define fallthrough                    do {} while (0)  /* fallthrough */
+#endif
+
+
 //#define RANDOM_GEN_DEBUG
 //#define DEBUG_ID_AND_DIR
 //#define DEBUG_MOUSE_INPUT_STATE
