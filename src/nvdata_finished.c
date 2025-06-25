@@ -143,7 +143,7 @@ void nvdata_unmark_finished(struct level *level)
 
     struct finished_level e, *result;
     e.left = e.right = NULL;
-    snprintf(&e.id, ID_MAXLEN, "%s", level->id);
+    snprintf(&e.id, ID_MAXLEN, "%s", level->unique_id);
 
     if (options->verbose) {
         infomsg("UNMARK finished: \"%s\"", e.id);
@@ -157,12 +157,13 @@ bool nvdata_is_finished(struct level *level)
     assert_not_null(level);
 
     if (!level->have_id || demo_mode) {
+        printf("is_finished[%s]: have_id is false\n", level->name);
         return false;
     }
 
     struct finished_level e, *result;
     e.left = e.right = NULL;
-    snprintf(&e.id, ID_MAXLEN, "%s", level->id);
+    snprintf(&e.id, ID_MAXLEN, "%s", level->unique_id);
     return NULL != sglib_finished_level_find_member(finished_levels.tree, &e);
 }
 
