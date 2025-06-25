@@ -367,6 +367,7 @@ static level_t *init_level(level_t *level)
 
     level->id = NULL;
     level->filename = NULL;
+    level->dirpath = NULL;
     level->savepath = NULL;
     level->changed = false;
     level->solver = NULL;
@@ -839,7 +840,7 @@ level_t *load_level_string(const char *filename, const char *str, bool is_pack)
 
     if (level_parse_string(level, str)) {
         if (is_pack) {
-            level->dirpath = "{" COLLECTION_FILENAME_EXT "}";
+            level->dirpath = strdup(LEVEL_PACK_DIRPATH_MARKER);
             level->filename = strdup(filename);
         } else {
             level_set_file_path(level, filename);
@@ -862,7 +863,7 @@ level_t *load_level_json(const char *filename, cJSON *json, bool is_pack)
 
     if (level_from_json(level, json)) {
         if (is_pack) {
-            level->dirpath = "{" COLLECTION_FILENAME_EXT "}";
+            level->dirpath = strdup(LEVEL_PACK_DIRPATH_MARKER);
             level->filename = strdup(filename);
         } else {
             level_set_file_path(level, filename);

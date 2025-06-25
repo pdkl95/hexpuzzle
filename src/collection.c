@@ -241,9 +241,9 @@ bool collection_from_json(collection_t *collection, cJSON *json)
         return false;
     }
 
-    cJSON *unique_id_json = cJSON_GetObjectItem(json, "uni1ue_id");
+    cJSON *unique_id_json = cJSON_GetObjectItem(json, "unique_id");
     if (!cJSON_IsString(unique_id_json)) {
-        errmsg("Error parsing pack JSON: 'uni1ue_id' is not a String");
+        errmsg("Error parsing pack JSON: 'unique_id' is not a String");
         return false;
     }
     snprintf(collection->unique_id, UNIQUE_ID_LENGTH, "%s", unique_id_json->valuestring);
