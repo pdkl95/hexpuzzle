@@ -24,8 +24,6 @@
 
 #include "generate_level.h"
 
-#define BLUEPRINT_STRING_MAXLEN 1024
-
 #define BLUEPRINT_STRING_SEED_MAXLEN    (1 + 16 + 1)
 #define BLUEPRINT_STRING_SERIES_MAXLEN  BLUEPRINT_STRING_SEED_MAXLEN
 #define BLUEPRINT_STRING_DENSITY_MAXLEN (1 +  6 + 1)
@@ -33,6 +31,26 @@
 #define BLUEPRINT_STRING_RADIUS_MAXLEN  (1 +  1 + 1)
 #define BLUEPRINT_STRING_FIXED_MAXLEN   (1 +  3 + 1)
 #define BLUEPRINT_STRING_HIDDEN_MAXLEN  (1 +  3 + 1)
+
+#define BLUEPRINT_STRING_MAXLEN (         \
+        BLUEPRINT_STRING_PREFIX_LENGTH  + \
+        BLUEPRINT_STRING_SUFFIX_LENGTH  + \
+        BLUEPRINT_STRING_SEED_MAXLEN    + \
+        BLUEPRINT_STRING_SERIES_MAXLEN  + \
+        BLUEPRINT_STRING_DENSITY_MAXLEN + \
+        BLUEPRINT_STRING_COLOR_MAXLEN   + \
+        BLUEPRINT_STRING_RADIUS_MAXLEN  + \
+        BLUEPRINT_STRING_FIXED_MAXLEN   + \
+        BLUEPRINT_STRING_HIDDEN_MAXLEN  + \
+        1  /* for the '\0' at the end */  \
+    )
+
+typedef char blueprint_string_t[BLUEPRINT_STRING_MAXLEN];
+
+static inline void copy_blueprint_string(char *dst, const char *src)
+{
+    snprintf(dst, BLUEPRINT_STRING_MAXLEN, "%s", src);
+}
 
 const char *serialize_generate_level_params(generate_level_param_t param);
 bool deserialize_generate_level_params(const char *str, generate_level_param_t *result);;
