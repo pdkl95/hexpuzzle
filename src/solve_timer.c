@@ -31,72 +31,90 @@
 
 #define ELAPSED_TIME_FMT "%dms%ds%dm%dh%dd"
 
-char *solve_elapsed_time_to_str(solve_elapsed_time_t *elapsed_time)
+char *elapsed_time_parts_to_str(elapsed_time_parts_t *parts)
 {
-    static char buf[SOLVE_ELAPSED_TIME_STR_MAXLEN];
+    static char buf[ELAPSED_TIME_STR_MAXLEN];
 
     snprintf(buf,
-             SOLVE_ELAPSED_TIME_STR_MAXLEN,
+             ELAPSED_TIME_STR_MAXLEN,
              ELAPSED_TIME_FMT,
-             elapsed_time->ms,
-             elapsed_time->sec,
-             elapsed_time->min,
-             elapsed_time->hr,
-             elapsed_time->day);
+             parts->ms,
+             parts->sec,
+             parts->min,
+             parts->hr,
+             parts->day);
 
     return buf;
 }
 
-solve_elapsed_time_t str_to_solve_elapsed_time(const char *str)
+char *solve_elapsed_time_to_str(solve_elapsed_time_t *elapsed_time)
 {
-    solve_elapsed_time_t elapsed_time = {0};;
+    return elapsed_time_parts_to_str(&(elapsed_time->parts));
+}
 
+bool str_to_elapsed_time_parts(const char *str, elapsed_time_parts_t *parts)
+{
     errno = 0;
-    int ret = sscanf(str,
-                     ELAPSED_TIME_FMT,
-                     &elapsed_time.ms,
-                     &elapsed_time.sec,
-                     &elapsed_time.min,
-                     &elapsed_time.hr,
-                     &elapsed_time.day);
+    int scan_ret = sscanf(str,
+                          ELAPSED_TIME_FMT,
+                          &parts->ms,
+                          &parts->sec,
+                          &parts->min,
+                          &parts->hr,
+                          &parts->day);
 
     if (errno) {
-        ret = -1;
+        scan_ret = -1;
         errmsg("while trying to parse \"%s\" as an elapsed time: %s",
                str, strerror(errno));
     }
 
-    switch (ret) {
+    bool rv = false;
+
+    switch (scan_ret) {
     case 1:
-        elapsed_time.sec = 0;
+        parts->sec = 0;
         fallthrough;
     case 2:
-        elapsed_time.min = 0;
+        parts->min = 0;
         fallthrough;
     case 3:
-        elapsed_time.hr  = 0;
+        parts->hr  = 0;
         fallthrough;
     case 4:
-        elapsed_time.day = 0;
+        parts->day = 0;
         fallthrough;
     case 5:
         /* all fields ok */
-        elapsed_time.valid = true;
+        rv = true;
         break;
 
     default:
-        elapsed_time.valid = false;
-        elapsed_time.ms  = 0;
-        elapsed_time.sec = 0;
-        elapsed_time.min = 0;
-        elapsed_time.hr  = 0;
-        elapsed_time.day = 0;
+        parts->ms  = 0;
+        parts->sec = 0;
+        parts->min = 0;
+        parts->hr  = 0;
+        parts->day = 0;
+        rv = false;
         break;
+    }
+
+    return rv;
+}
+#undef ELAPSED_TIME_FMT
+
+solve_elapsed_time_t str_to_solve_elapsed_time(const char *str)
+{
+    solve_elapsed_time_t elapsed_time = {0};
+
+    if (str_to_elapsed_time_parts(str, &(elapsed_time.parts))) {
+        elapsed_time.valid = true;
+    } else {
+        elapsed_time.valid = false;
     }
 
     return elapsed_time;
 }
-#undef ELAPSED_TIME_FMT
 
 static inline void get_currernt_time(struct timespec *ts)
 {
@@ -181,23 +199,23 @@ void solve_timer_update(solve_timer_t *solve_timer)
 
     struct timespec et = solve_timer->elapsed_time.ts;
 
-    solve_timer->elapsed_time.day = et.tv_sec  / SECONDS_PER_DAY;
-    et.tv_sec -= solve_timer->elapsed_time.day * SECONDS_PER_DAY;
+    solve_timer->elapsed_time.parts.day = et.tv_sec  / SECONDS_PER_DAY;
+    et.tv_sec -= solve_timer->elapsed_time.parts.day * SECONDS_PER_DAY;
 
-    solve_timer->elapsed_time.hr  = et.tv_sec  / SECONDS_PER_HOUR;
-    et.tv_sec -= solve_timer->elapsed_time.hr  * SECONDS_PER_HOUR;
+    solve_timer->elapsed_time.parts.hr  = et.tv_sec  / SECONDS_PER_HOUR;
+    et.tv_sec -= solve_timer->elapsed_time.parts.hr  * SECONDS_PER_HOUR;
 
-    solve_timer->elapsed_time.min = et.tv_sec  / SECONDS_PER_MINUTE;
-    et.tv_sec -= solve_timer->elapsed_time.min * SECONDS_PER_MINUTE;
+    solve_timer->elapsed_time.parts.min = et.tv_sec  / SECONDS_PER_MINUTE;
+    et.tv_sec -= solve_timer->elapsed_time.parts.min * SECONDS_PER_MINUTE;
 
-    solve_timer->elapsed_time.sec = et.tv_sec;
+    solve_timer->elapsed_time.parts.sec = et.tv_sec;
 
-    assert(solve_timer->elapsed_time.ts.tv_sec == ((solve_timer->elapsed_time.day * SECONDS_PER_DAY) +
-                                                   (solve_timer->elapsed_time.hr  * SECONDS_PER_HOUR) +
-                                                   (solve_timer->elapsed_time.min * SECONDS_PER_MINUTE) +
-                                                   (solve_timer->elapsed_time.sec)));
+    assert(solve_timer->elapsed_time.ts.tv_sec == ((solve_timer->elapsed_time.parts.day * SECONDS_PER_DAY) +
+                                                   (solve_timer->elapsed_time.parts.hr  * SECONDS_PER_HOUR) +
+                                                   (solve_timer->elapsed_time.parts.min * SECONDS_PER_MINUTE) +
+                                                   (solve_timer->elapsed_time.parts.sec)));
 
-    solve_timer->elapsed_time.ms = et.tv_nsec / 1000000;
+    solve_timer->elapsed_time.parts.ms = et.tv_nsec / 1000000;
 }
 
 void solve_timer_reset(solve_timer_t *solve_timer)

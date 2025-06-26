@@ -22,6 +22,8 @@
 #ifndef RAYLIB_HELPER_H
 #define RAYLIB_HELPER_H
 
+struct cJSON;
+
 void printvec2(Vector2 v);
 void printrect(Rectangle r);
 void printcolorhex(Color c);
@@ -129,6 +131,14 @@ static inline bool is_key_pressed_with_control_or_super(int key)
     return IsKeyPressed(key) &&
         (is_any_control_down() || is_any_super_down());
 }
+
+/*** file I/O ***/
+
+bool WriteCompressedFile(const char *filepath, const void *data, int data_size);
+unsigned char *ReadCompressedFile(const char *filepath, int *data_size);
+
+bool WriteCompressedJSONFile(const char *filepath, struct cJSON *json);
+struct cJSON *ReadCompressedJSONFile(const char *filepath);
 
 /*** Constants ***/
 

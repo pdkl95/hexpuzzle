@@ -2546,25 +2546,25 @@ static void draw_solve_timer(void)
     if (solve_timer.valid) {
         solve_timer_update(&solve_timer);
 
-        if (solve_timer.elapsed_time.day > 0) {
+        if (solve_timer.elapsed_time.parts.day > 0) {
             str = TextFormat("%d %s, %02d:%02d:%02d.%03d",
-                             solve_timer.elapsed_time.day,
-                             ((solve_timer.elapsed_time.day == 1) ? "day" : "days"),
-                             solve_timer.elapsed_time.hr,
-                             solve_timer.elapsed_time.min,
-                             solve_timer.elapsed_time.sec,
-                             solve_timer.elapsed_time.ms);
-        } else if (solve_timer.elapsed_time.hr > 0) {
+                             solve_timer.elapsed_time.parts.day,
+                             ((solve_timer.elapsed_time.parts.day == 1) ? "day" : "days"),
+                             solve_timer.elapsed_time.parts.hr,
+                             solve_timer.elapsed_time.parts.min,
+                             solve_timer.elapsed_time.parts.sec,
+                             solve_timer.elapsed_time.parts.ms);
+        } else if (solve_timer.elapsed_time.parts.hr > 0) {
             str = TextFormat("%02d:%02d:%02d.%03d",
-                             solve_timer.elapsed_time.hr,
-                             solve_timer.elapsed_time.min,
-                             solve_timer.elapsed_time.sec,
-                             solve_timer.elapsed_time.ms);
+                             solve_timer.elapsed_time.parts.hr,
+                             solve_timer.elapsed_time.parts.min,
+                             solve_timer.elapsed_time.parts.sec,
+                             solve_timer.elapsed_time.parts.ms);
         } else {
             str = TextFormat("%02d:%02d.%03d",
-                             solve_timer.elapsed_time.min,
-                             solve_timer.elapsed_time.sec,
-                             solve_timer.elapsed_time.ms);
+                             solve_timer.elapsed_time.parts.min,
+                             solve_timer.elapsed_time.parts.sec,
+                             solve_timer.elapsed_time.parts.ms);
         }
 
         switch (game_mode) {
@@ -2577,9 +2577,16 @@ static void draw_solve_timer(void)
             break;
         }
 
+        if (current_level) {
+            current_level->elapsed_time = solve_timer.elapsed_time.parts;
+        }
 
     } else {
         /* invalid */
+
+        if (current_level) {
+            current_level->elapsed_time = ELAPSED_TIME_PARTS_NULL;
+        }
 
         switch (game_mode) {
         case GAME_MODE_WIN_LEVEL:

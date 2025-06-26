@@ -20,8 +20,80 @@
  ****************************************************************************/
 
 #include "common.h"
+
+#include "cJSON/cJSON.h"
+
 #include "raygui/raygui.h"
 #include "raylib_helper.h"
+
+bool WriteCompressedFile(const char *filepath, const void *data, int data_size)
+{
+    int compsize = 0;
+    unsigned char *compressed = CompressData(data, data_size, &compsize);
+    if (NULL == compressed) {
+        errmsg("Error compressing \"%s\" (%d bytes)", filepath, data_size);
+        return false;
+    }
+
+    bool ret = SaveFileData(filepath, compressed, compsize);
+    MemFree(compressed);
+    return ret;
+}
+
+unsigned char *ReadCompressedFile(const char *filepath, int *data_size)
+{
+    int compsize = 0;
+    unsigned char *compressed = LoadFileData(filepath, &compsize);
+    if (NULL == compressed) {
+        errmsg("Error loading \"%s\"", filepath);
+        return NULL;
+    }
+
+    //infomsg("Read %d bytes of compressed data from \"%s\"", compsize, filepath);
+
+    unsigned char *data = DecompressData(compressed, compsize, data_size);
+    UnloadFileData(compressed);
+    if ((NULL == data) || (*data_size < 1)) {
+        errmsg("Error decompressing \"%s\" (%d bytes)", filepath, data_size);
+        return NULL;
+    }
+
+    return data;
+}
+
+bool WriteCompressedJSONFile(const char *filepath, struct cJSON *json)
+{
+    char *json_str = cJSON_PrintUnformatted(json);
+    if (!json_str) {
+        return false;
+    }
+
+    bool ret = WriteCompressedFile(filepath, json_str, strlen(json_str));
+
+    SAFEFREE(json_str);
+
+    return ret;
+}
+
+struct cJSON *ReadCompressedJSONFile(const char *filepath)
+{
+    int size = 0;
+    unsigned char *json_str = ReadCompressedFile(filepath, &size);
+    if (NULL == json_str) {
+        return NULL;
+    }
+
+    cJSON *json = cJSON_Parse(( char *)json_str);
+
+    SAFEFREE(json_str);
+
+    if (NULL == json) {
+        errmsg("Error parsing \"%s\" as JSON", filepath);
+    }
+
+    return json;
+}
+
 
 typedef enum { BORDER = 0, BASE, TEXT, OTHER } GuiPropertyElement;
 

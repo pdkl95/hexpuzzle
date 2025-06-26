@@ -26,6 +26,7 @@
 #include "options.h"
 #include "level.h"
 #include "collection.h"
+#include "solve_timer.h"
 #include "nvdata_finished.h"
 
 char *nvdata_state_finished_levels_file_path = NULL;
@@ -106,14 +107,16 @@ void cleanup_nvdata_finished(void)
     SAFEFREE(nvdata_state_finished_levels_file_path);
 }
 
-void nvdata_mark_id_finished(char *id, time_t win_time)
+void nvdata_mark_id_finished(struct finished_level *entry)
 {
-    assert_not_null(id);
+    assert_not_null(entry);
 
     struct finished_level *e, *member;
     e = calloc(1, sizeof(struct finished_level));
-    snprintf(&e->id, ID_MAXLEN, "%s", id);
-    e->win_time = win_time;
+
+    snprintf(&e->id, ID_MAXLEN, "%s", entry->id);
+    e->win_time     = entry->win_time;
+    e->elapsed_time = entry->elapsed_time;
 
     if (options->verbose) {
         infomsg("MARK finished: \"%s\"", e->id);
@@ -130,7 +133,13 @@ void nvdata_mark_finished(struct level *level)
         return;
     }
 
-    nvdata_mark_id_finished(level->unique_id, level->win_time);
+    struct finished_level entry = {
+        .win_time     = level->win_time,
+        .elapsed_time = level->elapsed_time
+    };
+    snprintf(&entry.id, ID_MAXLEN, "%s", level->unique_id);
+
+    nvdata_mark_id_finished(&entry);
 }
 
 void nvdata_unmark_finished(struct level *level)
@@ -167,11 +176,85 @@ bool nvdata_is_finished(struct level *level)
     return NULL != sglib_finished_level_find_member(finished_levels.tree, &e);
 }
 
-void nvdata_finished_write(FILE *f)
+bool nvdata_finished_from_json(cJSON *json)
 {
+    if (!cJSON_IsObject(json)) {
+        errmsg("Error parsing nvdata finished level JSON: not an Object");
+        return false;
+    }
+
+    cJSON *finished_levels_json = cJSON_GetObjectItem(json, "finished_levels");
+    if (!cJSON_IsArray(finished_levels_json)) {
+        errmsg("Error parsing nvdata finished level JSON: 'finished_levels' is not an Array");
+        return false;
+    }
+
+    struct finished_level e = {0};
+    cJSON *level_json;
+    int count = 0;
+    cJSON_ArrayForEach(level_json, finished_levels_json) {
+        cJSON *id_json = cJSON_GetObjectItem(level_json, "id");
+        if (!cJSON_IsString(id_json)) {
+            errmsg("Error parsing nvdata finished level JSON [$d]: 'id' is not a String", count);
+            return false;
+        }
+        snprintf(&e.id, ID_MAXLEN, "%s", id_json->valuestring);
+
+        cJSON *elapsed_time_json = cJSON_GetObjectItem(level_json, "elapsed_time");
+        if (!cJSON_IsString(elapsed_time_json)) {
+            errmsg("Error parsing nvdata finished level JSON [$d]: 'elapsed_time' is not a String", count);
+            return false;
+        }
+        str_to_elapsed_time_parts(elapsed_time_json->valuestring, &e.elapsed_time);
+
+        cJSON *win_time_json = cJSON_GetObjectItem(level_json, "win_time");
+        if (!cJSON_IsString(id_json)) {
+            errmsg("Error parsing nvdata finished level JSON [$d]: 'win_time' is not a String", count);
+            return false;
+        }
+
+        struct tm win_tm = {0};
+        strptime(win_time_json->valuestring, "%F %T", &win_tm);
+        e.win_time = mktime(&win_tm);
+
+        if (current_collection) {
+            level_t *level = collection_find_level_by_unique_id(current_collection, e.id);
+            if (level) {
+                level->finished = true;
+                level->win_time     = e.win_time;
+                level->elapsed_time = e.elapsed_time;
+            }
+        }
+
+        nvdata_mark_id_finished(&e);
+
+        count++;
+    }
+
+    if (options->verbose) {
+        infomsg("Read %d level finished level IDs", count);
+    }
+
+    if (current_collection) {
+        collection_update_level_names(current_collection);
+    }
+
+    //print_finished_levels();
+
+    return true;
+}
+
+cJSON *nvdata_finished_to_json(void)
+{
+    cJSON *json = cJSON_CreateObject();
+
+    cJSON *finished_levels_json = cJSON_AddArrayToObject(json, "finished_levels");
+    if (finished_levels_json == NULL) {
+        goto json_err;
+    }
+
     struct finished_level *e = NULL;
     struct sglib_finished_level_iterator it;
-    int count = 0;
 
     for(e = sglib_finished_level_it_init_inorder(&it, finished_levels.tree);
         e != NULL;
@@ -182,14 +265,62 @@ void nvdata_finished_write(FILE *f)
 
         char win_time_str[256];
         strftime(win_time_str, sizeof(win_time_str), "%F %T", &win_tm);
-        fprintf(f, "%s\t%s\n", e->id, win_time_str);
-        count++;
-        //printf("WRITE \"%s\t%s\"\n", e->id, win_time_str);
+
+        char *elapsed_time_str = elapsed_time_parts_to_str(&e->elapsed_time);
+
+        cJSON *level_json = cJSON_CreateObject();
+
+        if (cJSON_AddStringToObject(level_json, "id", e->id) == NULL) {
+            goto json_err;
+        }
+
+        if (cJSON_AddStringToObject(level_json, "win_time", win_time_str) == NULL) {
+            goto json_err;
+        }
+
+        if (cJSON_AddStringToObject(level_json, "elapsed_time", elapsed_time_str) == NULL) {
+            goto json_err;
+        }
+
+        cJSON_AddItemToArray(finished_levels_json, level_json);
     }
 
-    if (options->verbose) {
-        infomsg("Wrote %d level IDs", count);
+    return json;
+
+  json_err:
+    cJSON_Delete(json);
+    return NULL;
+
+}
+
+bool nvdata_finished_load_from_file(const char *filepath)
+{
+    cJSON *json = ReadCompressedJSONFile(filepath);
+    if (NULL == json) {
+        return false;
     }
+
+    bool ret = nvdata_finished_from_json(json);
+
+    cJSON_Delete(json);
+
+    return ret;
+}
+
+bool nvdata_finished_save_to_file(const char *filepath)
+{
+    cJSON *json = nvdata_finished_to_json();
+    if (NULL == json) {
+        return false;
+    }
+
+    //print_cjson(json);
+
+    bool ret = WriteCompressedJSONFile(filepath, json);
+
+    cJSON_Delete(json);
+
+    return ret;
 }
 
 void load_nvdata_finished_levels(void)
@@ -202,81 +333,7 @@ void load_nvdata_finished_levels(void)
         return;
     }
 
-    FILE *f = fopen(nvdata_state_finished_levels_file_path, "r");
-    if (NULL == f) {
-        errmsg("Couldn't open finished level file \"%s\": %s",
-               nvdata_state_finished_levels_file_path, strerror(errno));
-        return;
-    }
-
-    char * line = NULL;
-    size_t len = 0;
-    int count = 0;
-
-    while ((getline(&line, &len, f)) != -1) {
-        assert_not_null(line);
-        line[strcspn(line, "\n")] = '\0';
-
-        char *win_time_str = line;
-        char *id_str = strsep(&win_time_str, "\t");
-
-#if 0
-        pstr(win_time_str);
-        pstr(id_str);
-#endif
-
-        char *errsrc = NULL;
-        if (!win_time_str) {
-            errsrc = "win_time";
-        }
-
-        if (!id_str) {
-            errsrc = "unique_id";
-        }
-
-        if (errsrc) {
-            warnmsg("While reading \"%s\", line %d: error parsing %s",
-                    nvdata_state_finished_levels_file_path,
-                    count + 1,
-                    errsrc);
-            goto load_finished_levels_cleanup;
-        }
-
-        struct tm win_tm = {0};
-        strptime(win_time_str, "%F %T", &win_tm);
-        time_t win_time = mktime(&win_tm);
-
-        if (strlen(line) >= 3) {
-            if (current_collection) {
-                level_t *level = collection_find_level_by_unique_id(current_collection, id_str);
-                if (level) {
-                    level->finished = true;
-                    level->win_time = win_time;
-                }
-            }
-
-            nvdata_mark_id_finished(line, win_time);
-
-            count++;
-        }
-    }
-
-  load_finished_levels_cleanup:
-    if (line) {
-        free(line);
-    }
-
-    fclose(f);
-
-    if (options->verbose) {
-        infomsg("Read %d level IDs", count);
-    }
-
-    if (current_collection) {
-        collection_update_level_names(current_collection);
-    }
-
-    //print_finished_levels();
+    nvdata_finished_load_from_file(nvdata_state_finished_levels_file_path);
 }
 
 void save_nvdata_finished_levels(void)
@@ -293,22 +350,16 @@ void save_nvdata_finished_levels(void)
         return;
     }
 
-    FILE *f = fopen(nvdata_state_finished_levels_file_path, "w");
-    if (NULL == f) {
-        errmsg("Couldn't open finished level file \"%s\": %s",
-               nvdata_state_finished_levels_file_path, strerror(errno));
-        return;
+    if (nvdata_finished_save_to_file(nvdata_state_finished_levels_file_path)) {
+        if (options->verbose) {
+            infomsg("Successfully saved finished level data \"%s\"",
+                    nvdata_state_finished_levels_file_path);
+        }
+        //print_finished_levels();
+    } else {
+        errmsg("Loading saved finished level data from \"%s\" failed!",
+               nvdata_state_finished_levels_file_path);
     }
-
-    nvdata_finished_write(f);
-
-    fclose(f);
-
-    if (options->verbose) {
-        infomsg("Finished level data saved in \"%s\"",
-                nvdata_state_finished_levels_file_path);
-    }
-    //print_finished_levels();
 }
 
 bool reset_nvdata_finished_levels(void)

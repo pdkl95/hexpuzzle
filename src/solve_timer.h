@@ -24,19 +24,27 @@
 
 #include <time.h>
 
-#define SOLVE_ELAPSED_TIME_STR_MAXLEN 256
+#define ELAPSED_TIME_STR_MAXLEN 256
 
-struct solve_elapsed_time {
-    bool valid;
-
-    struct timespec ts;
-
-    /* elapsed time parts */
+struct elapsed_time_parts {
     int day;
     int hr;
     int min;
     int sec;
     int ms;
+};
+typedef struct elapsed_time_parts elapsed_time_parts_t;
+
+#define ELAPSED_TIME_PARTS_NULL ((elapsed_time_parts_t){ .day = 0, .hr = 0, .min = 0, .sec = 0, .ms = 0 })
+
+char *elapsed_time_parts_to_str(elapsed_time_parts_t *parts);
+bool str_to_elapsed_time_parts(const char *str, elapsed_time_parts_t *parts);
+
+struct solve_elapsed_time {
+    bool valid;
+
+    struct timespec ts;
+    elapsed_time_parts_t parts;
 };
 typedef struct solve_elapsed_time solve_elapsed_time_t;
 

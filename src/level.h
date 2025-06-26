@@ -31,6 +31,7 @@
 
 #include "const.h"
 #include "hex.h"
+#include "solve_timer.h"
 #include "tile.h"
 #include "tile_pos.h"
 
@@ -126,6 +127,7 @@ struct level {
     bool changed;
 
     time_t win_time;
+    elapsed_time_parts_t elapsed_time;
 
     IconStr finished_status_icon;
     Color   finished_status_color;
