@@ -24,17 +24,64 @@
 
 #include "sglib/sglib.h"
 
+#include "blueprint_string.h"
+
 struct level;
+
+enum finished_level_flag {
+    FINISHED_LEVEL_FLAG_NULL         =      0,
+    FINISHED_LEVEL_FLAG_WIN_TIME     = 0x0001,
+    FINISHED_LEVEL_FLAG_ELAPSED_TIME = 0x0002,
+    FINISHED_LEVEL_FLAG_BLUEPRINT    = 0x0004
+};
+typedef enum finished_level_flag finished_level_flag_t;
 
 typedef struct finished_level {
     char id[ID_MAXLEN];
     time_t win_time;
     elapsed_time_parts_t elapsed_time;
 
+    blueprint_string_t blueprint;
+
+    uint16_t flags;
+
     char rb_color;
     struct finished_level *left;
     struct finished_level *right;
 } finished_level;
+
+static inline void finished_level_set_win_time(struct finished_level *fl, time_t value)
+{
+    fl->win_time = value;
+    fl->flags |= FINISHED_LEVEL_FLAG_WIN_TIME;
+}
+
+static inline void finished_level_set_elapsed_time(struct finished_level *fl, elapsed_time_parts_t *value)
+{
+    fl->elapsed_time = *value;
+    fl->flags |= FINISHED_LEVEL_FLAG_ELAPSED_TIME;
+}
+
+static inline void finished_level_set_blueprint(struct finished_level *fl, const char *value)
+{
+    copy_blueprint_string(fl->blueprint, value);
+    fl->flags |= FINISHED_LEVEL_FLAG_BLUEPRINT;
+}
+
+static inline void finished_level_clear_win_time(struct finished_level *fl)
+{
+    fl->flags &= ~FINISHED_LEVEL_FLAG_WIN_TIME;
+}
+
+static inline void finished_level_clear_elapsed_time(struct finished_level *fl)
+{
+    fl->flags &= ~FINISHED_LEVEL_FLAG_ELAPSED_TIME;
+}
+
+static inline void finished_level_clear_blueprint(struct finished_level *fl)
+{
+    fl->flags &= ~FINISHED_LEVEL_FLAG_BLUEPRINT;
+}
 
 int compare_finished_level(struct finished_level *a, struct finished_level *b);
 
