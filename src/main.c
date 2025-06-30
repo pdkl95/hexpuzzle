@@ -3147,7 +3147,11 @@ static void game_init(void)
 
     win_anim_mode_config_reset_to_defaut(&(win_anim_mode_config[0]));
 
-    load_nvdata();
+    if (options->safe_mode) {
+        infomsg("Safe Mode enabled - skipping loading config files");
+    } else {
+        load_nvdata();
+    }
 }
 
 #if defined(PLATFORM_DESKTOP)
