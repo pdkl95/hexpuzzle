@@ -1145,6 +1145,10 @@ handle_events(
             }
         }
 
+        if (is_key_pressed_with_control(KEY_C)) {
+            clipboard_copy();
+        }
+
         do_level_checks();
 
         return true;
@@ -2892,7 +2896,9 @@ render_frame(
         renderd_texture_last_frame = false;
     }
 
-    if (!demo_mode) {
+    if (demo_mode) {
+        draw_gui_popup_message();
+    } else {
         draw_gui();
 
         switch (game_mode) {
