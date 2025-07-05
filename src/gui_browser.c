@@ -26,11 +26,13 @@
 #include "raygui_paged_list.h"
 #include "gui_browser.h"
 #include "gui_dialog.h"
+#include "nvdata_finished.h"
 
 extern char *home_dir;
 
 bool open_game_file(const char *path, bool edit);
 void open_classics_game_pack(int n);
+bool open_blueprint(const char *blueprint);
 bool draw_level_preview(level_t *level, Rectangle bounds);
 void edit_new_blank_level(void);
 
@@ -39,7 +41,8 @@ enum gui_list_entry_type {
     ENTRY_TYPE_DIR,
     ENTRY_TYPE_LEVEL_FILE,
     ENTRY_TYPE_COLLECTION_FILE,
-    ENTRY_TYPE_COLLECTION_DIR
+    ENTRY_TYPE_COLLECTION_DIR,
+    ENTRY_TYPE_FINISHED_LEVEL
 };
 typedef enum gui_list_entry_type gui_list_entry_type_t;
 
@@ -66,6 +69,8 @@ struct gui_list_entry {
     gui_list_entry_status_t status;
 
     level_t *level;
+
+    struct finished_level *finished_level;
 };
 typedef struct gui_list_entry gui_list_entry_t;
 
@@ -137,6 +142,8 @@ char *local_files_rename_button_text = NULL;
 raygui_paged_list_t classics_gui_list;
 raygui_paged_list_t local_files_gui_list;
 raygui_paged_list_t local_files_gui_list_preview;
+raygui_paged_list_t history_gui_list;
+raygui_paged_list_t history_gui_list_preview;
 
 gui_list_entry_t classics_entries[] = {
     { .name = "01 - 10 (red)",    .path = NULL, .icon = ICON_SUITCASE, .icon_name = NULL },
@@ -185,6 +192,23 @@ gui_list_vars_t local_files = {
     .focus                 = -1
 };
 
+gui_list_vars_t history = {
+    .names                 = NULL,
+    .entries               = NULL,
+    .count                 = 0,
+    .list_rect             = &local_files_list_rect,
+    .list_rect_preview     = &local_files_list_with_preview_rect,
+    .btn_rect              = &browser_play_button_rect,
+    .btn_rect_preview      = &browser_play_button_with_preview_rect,
+    .edit_btn_rect         = &browser_edit_button_rect,
+    .edit_btn_rect_preview = &browser_edit_button_with_preview_rect,
+    .gui_list              = &history_gui_list,
+    .gui_list_preview      = &history_gui_list_preview,
+    .scroll_index          = -1,
+    .active                = -1,
+    .focus                 = -1
+};
+
 #define NUM_TABS 3
 const char *browser_tabbar_text[NUM_TABS];
 
@@ -192,6 +216,7 @@ int browser_active_tab = 0;
 
 level_t *browse_preview_level = NULL;
 bool defer_setup_browse_dir = false;
+bool defer_setup_browse_history = false;
 
 const char *entry_type_str(gui_list_entry_type_t type)
 {
@@ -204,6 +229,8 @@ const char *entry_type_str(gui_list_entry_type_t type)
         return "COLLECTION_FILE";
     case ENTRY_TYPE_COLLECTION_DIR:
         return "COLLECTION_DIR";
+    case ENTRY_TYPE_FINISHED_LEVEL:
+        return "FINISHED_LEVEL";
     default:
         return "NULL";
     }
@@ -226,22 +253,33 @@ const char *entry_status_str(gui_list_entry_status_t status)
 }
 
 #if defined(PLATFORM_DESKTOP)
-static void free_local_files_data(void)
+static void free_gui_list_vars_data(gui_list_vars_t *list)
 {
-    for (int i=0; i<local_files.count; i++) {
-        if (local_files.entries[i].level) {
-            destroy_level(local_files.entries[i].level);
-            local_files.entries[i].level = NULL;
+    for (int i=0; i<list->count; i++) {
+        if (list->entries[i].level) {
+            destroy_level(list->entries[i].level);
+            list->entries[i].level = NULL;
         }
-        SAFEFREE(local_files.entries[i].icon_name);
+        SAFEFREE(list->entries[i].icon_name);
     }
 
-    SAFEFREE(local_files.names);
-    SAFEFREE(local_files.entries);
+    SAFEFREE(list->names);
+    SAFEFREE(list->entries);
+}
+
+static void free_local_files_data(void)
+{
+    free_gui_list_vars_data(&local_files);
 
     UnloadDirectoryFiles(browse_file_list);
 }
+
+static void free_history_data(void)
+{
+    free_gui_list_vars_data(&history);
+}
 #endif
+
 int compare_entries(const void *p1, const void *p2)
 {
     gui_list_entry_t *e1 = (gui_list_entry_t *)p1;
@@ -490,6 +528,15 @@ void open_entry(gui_list_entry_t *entry, bool edit)
         }
         break;
 
+    case ENTRY_TYPE_FINISHED_LEVEL:
+        if (entry->finished_level &&
+            (entry->finished_level->flags & FINISHED_LEVEL_FLAG_BLUEPRINT)) {
+            if (!open_blueprint(entry->finished_level->blueprint)) {
+                fail_entry(entry);
+            }
+        }
+        break;
+
     default:
         errmsg("Cannot open \"%s\": NULL entry type.", entry->path);
     }
@@ -635,16 +682,71 @@ void gui_browser_rename(gui_list_entry_t *entry)
     }
 }
 
+void setup_browse_history(void)
+{
+    if (history.names) {
+        free_history_data();
+    }
+
+    if (options->verbose) {
+        infomsg("Scanning finished level history (count = %d)", finished_levels.count);
+    }
+
+    history.entries = calloc(finished_levels.count, sizeof(gui_list_entry_t));
+
+    history.count = 0;
+
+    struct finished_level *e = NULL;
+    struct sglib_finished_level_iterator it;
+
+    for(e = sglib_finished_level_it_init_inorder(&it, finished_levels.tree);
+        e != NULL;
+        e = sglib_finished_level_it_next(&it)
+    ) {
+        gui_list_entry_t *entry = &(history.entries[history.count]);
+        const char *name = e->id;;
+
+        entry->finished_level = e;
+
+        gui_list_entry_type_t type = ENTRY_TYPE_FINISHED_LEVEL;
+        gui_list_entry_status_t status = ENTRY_STATUS_LOAD_OK;
+        int icon = ICON_FILE;
+
+        if (!finished_level_has_blueprint(e)) {
+            status = ENTRY_STATUS_NOT_LOADABLE;
+            icon = ICON_NONE;
+        }
+
+        if (options->verbose) {
+            infomsg("SCAN> %s (%s, %s)", name, entry_type_str(type), entry_status_str(status));
+        }
+
+        entry->name   = name;
+        entry->path   = NULL;
+        entry->icon   = icon;
+        entry->type   = type;
+        entry->status = status;
+
+        history.count++;
+    }
+
+    history.scroll_index = -1;
+    history.active       = -1;
+    history.focus        = -1;
+
+    prepare_gui_list_names(&history);
+}
 #endif
 
 void init_gui_browser(void)
 {
     defer_setup_browse_dir = true;
+    defer_setup_browse_history = true;
 
     browser_tabbar_text[0] = "Classics";
 #if defined(PLATFORM_DESKTOP)
     browser_tabbar_text[1] = "Local Files";
-    browser_tabbar_text[2] = "Add File";
+    browser_tabbar_text[2] = "History";
 
     init_raygui_paged_list(local_files.gui_list,
                            &(local_files.scroll_index),
@@ -658,6 +760,15 @@ void init_gui_browser(void)
 
     change_gui_browser_path_to_local_saved_levels();
 
+    init_raygui_paged_list(history.gui_list,
+                           &(history.scroll_index),
+                           &(history.active),
+                           &(history.focus));
+
+    init_raygui_paged_list(history.gui_list_preview,
+                           &(history.scroll_index),
+                           &(history.active),
+                           &(history.focus));
 #else
     browser_tabbar_text[1] = NULL;
     browser_tabbar_text[2] = NULL;
@@ -676,8 +787,15 @@ void init_gui_browser(void)
 void cleanup_gui_browser(void)
 {
 #if defined(PLATFORM_DESKTOP)
+    cleanup_raygui_paged_list(history.gui_list_preview);
+    cleanup_raygui_paged_list(history.gui_list);
+
     cleanup_raygui_paged_list(local_files.gui_list_preview);
     cleanup_raygui_paged_list(local_files.gui_list);
+
+    if (history.names) {
+        free_history_data();
+    }
 
     if (local_files.names) {
         free_local_files_data();
@@ -880,6 +998,9 @@ void resize_gui_browser(void)
 #if defined(PLATFORM_DESKTOP)
     raygui_paged_list_resize(local_files.gui_list_preview, *local_files.list_rect_preview);
     raygui_paged_list_resize(local_files.gui_list,         *local_files.list_rect);
+
+    raygui_paged_list_resize(history.gui_list_preview, *local_files.list_rect_preview);
+    raygui_paged_list_resize(history.gui_list,         *local_files.list_rect);
 #endif
 
     local_files_new_button_rect.x -= raygui_paged_list_sidebar_width;
@@ -990,7 +1111,56 @@ static inline void draw_gui_browser_local_level_file_rename_button(gui_list_entr
     }
 
     if (disable_rename_btn) {
-        GuiDisable();
+        GuiEnable();
+    }
+}
+
+static void draw_gui_browser_entry_buttons(gui_list_vars_t *list, gui_list_entry_t *entry)
+{
+    int selected = -1;
+    int edit_selected = -1;
+
+    char *button_text =  browser_play_button_text;
+
+    if (list->active >= 0) {
+        switch (entry->type) {
+        case ENTRY_TYPE_DIR:
+            button_text = browser_open_button_text;
+            break;
+
+        case ENTRY_TYPE_LEVEL_FILE:
+            fallthrough;
+        case ENTRY_TYPE_COLLECTION_FILE:
+            fallthrough;
+        case ENTRY_TYPE_COLLECTION_DIR:
+            break;
+
+        default:
+            break;
+        }
+
+        selected = draw_gui_browser_big_button(list, button_text, false);
+
+        if  (options->allow_edit_mode) {
+            edit_selected = draw_gui_browser_big_button(list, browser_edit_button_text, true);
+        }
+    }
+
+    if (browse_preview_level) {
+        if (draw_level_preview(browse_preview_level, browser_preview_rect)) {
+            open_entry(entry, false);
+            return;
+        }
+    }
+
+    if (edit_selected > -1) {
+        if (entry) {
+            open_entry(entry, true);
+        }
+    } else if (selected > -1) {
+        if (entry) {
+            open_entry(entry, false);
+        }
     }
 }
 
@@ -1022,7 +1192,6 @@ void draw_gui_browser_local_level_file(void)
 
     draw_gui_browser_list(&local_files);
 
-    char *button_text =  browser_play_button_text;
     gui_list_entry_t *entry = &(local_files.entries[local_files.active]);
 
     level_t *old_browse_preview_level = browse_preview_level;
@@ -1042,49 +1211,36 @@ void draw_gui_browser_local_level_file(void)
     draw_gui_browser_local_level_file_new_button(entry);
     draw_gui_browser_local_level_file_rename_button(entry);
 
-    int selected = -1;
-    int edit_selected = -1;
+    draw_gui_browser_entry_buttons(&local_files, entry);
+}
 
-    if (local_files.active >= 0) {
-        switch (entry->type) {
-        case ENTRY_TYPE_DIR:
-            button_text = browser_open_button_text;
-            break;
-
-        case ENTRY_TYPE_LEVEL_FILE:
-            fallthrough;
-        case ENTRY_TYPE_COLLECTION_FILE:
-            fallthrough;
-        case ENTRY_TYPE_COLLECTION_DIR:
-            break;
-
-        default:
-            break;
-        }
-
-        selected = draw_gui_browser_big_button(&local_files, button_text, false);
-
-        if  (options->allow_edit_mode) {
-            edit_selected = draw_gui_browser_big_button(&local_files, browser_edit_button_text, true);
-        }
+void draw_gui_browser_finished_levels_history(void)
+{
+    if (defer_setup_browse_history) {
+        defer_setup_browse_history = false;
+        setup_browse_history();
     }
 
-    if (browse_preview_level) {
-        if (draw_level_preview(browse_preview_level, browser_preview_rect)) {
-            open_entry(entry, false);
-            return;
-        }
+    draw_gui_browser_list(&history);
+
+    gui_list_entry_t *entry = NULL;
+
+    level_t *old_browse_preview_level = browse_preview_level;
+
+    if (history.active >= 0) {
+        entry = &(history.entries[history.active]);
+        preview_entry(entry);
+    } else {
+        disable_preview();
     }
 
-    if (edit_selected > -1) {
-        if (entry) {
-            open_entry(entry, true);
-        }
-    } else if (selected > -1) {
-        if (entry) {
-            open_entry(entry, false);
-        }
+    if ((old_browse_preview_level != browse_preview_level) &&
+        history.active > -1) {
+        raygui_paged_list_t *gui_list = get_current_gui_list(&history);
+        raygui_paged_list_select_active_page(gui_list);
     }
+
+    draw_gui_browser_entry_buttons(&history, entry);
 }
 #endif
 
@@ -1092,7 +1248,7 @@ void draw_gui_browser(void)
 {
     GuiPanel(browser_panel_rect, browser_panel_text);
 
-    GuiSimpleTabBar(browser_tabbar_rect, browser_tabbar_text, 2, &browser_active_tab);
+    GuiSimpleTabBar(browser_tabbar_rect, browser_tabbar_text, NUM_TABS, &browser_active_tab);
 
     switch (browser_active_tab) {
     case 0:
@@ -1102,6 +1258,10 @@ void draw_gui_browser(void)
 #if defined(PLATFORM_DESKTOP)
     case 1:
         draw_gui_browser_local_level_file();
+        break;
+
+    case 2:
+        draw_gui_browser_finished_levels_history();
         break;
 #endif
     }

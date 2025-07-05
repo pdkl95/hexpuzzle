@@ -83,12 +83,28 @@ static inline void finished_level_clear_blueprint(struct finished_level *fl)
     fl->flags &= ~FINISHED_LEVEL_FLAG_BLUEPRINT;
 }
 
+static inline bool finished_level_has_win_time(struct finished_level *fl)
+{
+    return fl->flags & FINISHED_LEVEL_FLAG_WIN_TIME;
+}
+
+static inline bool finished_level_has_elapsed_time(struct finished_level *fl)
+{
+    return fl->flags & FINISHED_LEVEL_FLAG_ELAPSED_TIME;
+}
+
+static inline bool finished_level_has_blueprint(struct finished_level *fl)
+{
+    return fl->flags & FINISHED_LEVEL_FLAG_BLUEPRINT;
+}
+
 int compare_finished_level(struct finished_level *a, struct finished_level *b);
 
 SGLIB_DEFINE_RBTREE_PROTOTYPES(finished_level, left, right, rb_color, compare_finished_level);
 
 struct finished_levels {
     struct finished_level *tree;
+    int count;
 };
 typedef struct finished_levels finished_levels_t;
 
@@ -106,6 +122,8 @@ bool have_nvdata_finished_levels_data(void);
 
 extern char *nvdata_state_finished_levels_file_path;
 extern char *nvdata_state_finished_levels_backup_file_path;
+
+extern finished_levels_t finished_levels;
 
 #endif /*NVDATA_FINISHED_H*/
 

@@ -780,6 +780,25 @@ static void clipboard_paste(void)
     }
 }
 
+bool open_blueprint(const char *blueprint)
+{
+    if (!gui_random_load_blueprint(blueprint)) {
+        return false;
+    }
+
+    switch (game_mode) {
+    case GAME_MODE_RANDOM:
+        /* do nothing */
+        break;
+
+    default:
+        set_game_mode(GAME_MODE_RANDOM);
+        break;
+    }
+    
+    return true;
+}
+
 static void
 schedule_resize(
     void

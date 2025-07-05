@@ -1045,6 +1045,18 @@ void gui_random_paste_blueprint_from_clipboard(void)
     }
 }
 
+bool gui_random_load_blueprint(const char *blueprint)
+{
+    generate_level_param_t param = {0};
+    if (deserialize_generate_level_params(blueprint, &param)) {
+        gen_level_with_params(param);
+        return true;
+    } else {
+        popup_error_message("Blueprint string was not formatted correctly.");
+        return false;
+    }
+}
+
 void gui_random_reset_win_anim(void)
 {
     if (gui_random_level) {

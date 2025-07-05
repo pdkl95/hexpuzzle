@@ -76,7 +76,8 @@
 #define PATH_TYPE_COUNT 5
 #define PATH_COLOR_COUNT (PATH_TYPE_COUNT - 1)
 
-#define NAME_MAXLEN 22
+//#define NAME_MAXLEN 22
+#define NAME_MAXLEN 50
 #define UI_NAME_MAXLEN  (6 + NAME_MAXLEN)
 
 // ['#', '1', '2', '3', '#', '\0']

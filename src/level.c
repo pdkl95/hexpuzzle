@@ -333,6 +333,8 @@ static level_t *init_level(level_t *level)
     int i=0;
     for (int q=0; q<TILE_LEVEL_WIDTH; q++) {
         for (int r=0; r<TILE_LEVEL_HEIGHT; r++) {
+            assert(i < LEVEL_MAXTILES);
+
             hex_axial_t addr = {
                 .q = q,
                 .r = r

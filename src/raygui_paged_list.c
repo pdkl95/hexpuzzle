@@ -93,7 +93,12 @@ static void raygui_paged_list_prepare_text(raygui_paged_list_t *list)
 
     assert(list->items_per_page > 1);
 
-    list->page_count = (int)ceilf(((float)list->text_count) / ((float)list->items_per_page));
+    if (list->text_count > 0) {
+        list->page_count = (int)ceilf(((float)list->text_count) / ((float)list->items_per_page));
+    } else {
+        list->page_count = 1;
+    }
+
     list->first_page = 0;
     list->last_page  = list->page_count - 1;
 

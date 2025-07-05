@@ -155,7 +155,7 @@ char *strdup_xxd_include(unsigned char *buf, unsigned int len)
 
 static uint32_t rand32(void)
 {
-    return ((rand() & 0x3) << 30) | ((rand() & 0x7fff) << 15) | (rand() & 0x7fff);
+    return ((((uint32_t)rand()) & 0x3) << 30) | ((((uint32_t)rand()) & 0x7fff) << 15) | (((uint32_t)rand()) & 0x7fff);
 }
 
 const char *generate_unique_id(void)

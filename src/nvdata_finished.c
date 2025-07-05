@@ -46,7 +46,7 @@ void print_finished_levels(void)
     struct sglib_finished_level_iterator it;
     int count = 0;
 
-    printf("<finished_levels>\n");
+    printf("<finished_levels count=%d>\n", finished_levels.count);
 
     for(e = sglib_finished_level_it_init_inorder(&it, finished_levels.tree);
         e != NULL;
@@ -68,13 +68,24 @@ int compare_finished_level(struct finished_level *a, struct finished_level *b)
     assert_not_null(a);
     assert_not_null(b);
 
-    int rv = strcmp(a->id, b->id);
+    int rv = 0;
+
+    if ((a->flags & FINISHED_LEVEL_FLAG_WIN_TIME) &&
+        (a->flags & FINISHED_LEVEL_FLAG_WIN_TIME)) {
+        rv = ((int)(a->win_time - b->win_time));
+        if (rv != 0) {
+            return rv;
+        }
+    }
+
+    rv = strcmp(a->id, b->id);
     return rv;
 }
 
 void init_nvdata_finished(void)
 {
     finished_levels.tree = NULL;
+    finished_levels.count = 0;
 }
 
 void destroy_finished_level(struct finished_level *node)
@@ -98,6 +109,8 @@ static void destroy_finished_levels_tree(void)
         destroy_finished_level(finished_levels.tree);
         finished_levels.tree = NULL;
     }
+
+    finished_levels.count = 0;
 }
 
 void cleanup_nvdata_finished(void)
@@ -133,7 +146,11 @@ void nvdata_mark_id_finished(struct finished_level *entry)
         infomsg("MARK finished: \"%s\"", e->id);
     }
 
-    sglib_finished_level_add_if_not_member(&(finished_levels.tree), e, &member);
+    if (sglib_finished_level_add_if_not_member(&(finished_levels.tree), e, &member)) {
+        finished_levels.count++;
+    }
+
+    assert(finished_levels.count > 0);
 
     finished_levels_changed = true;
 }
@@ -174,7 +191,11 @@ void nvdata_unmark_finished(struct level *level)
         infomsg("UNMARK finished: \"%s\"", e.id);
     }
 
-    sglib_finished_level_delete_if_member(&(finished_levels.tree), &e, &result);
+    if (sglib_finished_level_delete_if_member(&(finished_levels.tree), &e, &result)) {
+        finished_levels.count--;
+    }
+
+    assert(finished_levels.count >= 0);
 
     finished_levels_changed = true;
 }
@@ -278,6 +299,10 @@ bool nvdata_finished_from_json(cJSON *json)
         nvdata_mark_id_finished(&e);
 
         count++;
+    }
+
+    if (count != finished_levels.count) {
+        warnmsg("Parsed %d finished level entries, but finished_levels.count = %d", count, finished_levels.count);
     }
 
     finished_levels_changed = false;

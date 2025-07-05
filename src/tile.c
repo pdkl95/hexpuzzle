@@ -179,6 +179,10 @@ int compare_tiles(const void *p1, const void *p2)
     if (!t1->enabled && t2->enabled) {
         return -1;
     }
+
+    //assert(t1->id < LEVEL_MAXTILES);
+    //assert(t2->id < LEVEL_MAXTILES);
+
     //BCMP(enabled);
     BCMP(hidden);
     BCMP(fixed);
