@@ -41,55 +41,57 @@ options_t *options = NULL;
 static char short_options[] = "Cc:d:e:EF:H:p:s:SwvVW:PR:UL::r::hj";
 
 static struct option long_options[] = {
-    {  "create-random-level",       no_argument, 0, 'L' },
-    {   "create-blank-level",       no_argument, 0, 'K' },
-    {            "no-config", required_argument, 0, 'C' },
-    {           "config-dir", required_argument, 0, 'c' },
-    {                  "fps", required_argument, 0, 'F' },
-    {               "height", required_argument, 0, 'H' },
-    {                "width", required_argument, 0, 'W' },
-    {         "level-radius", required_argument, 0, 'R' },
-    {      "level-min-fixed", required_argument, 0, '[' },
-    {      "level-max-fixed", required_argument, 0, ']' },
-    {     "level-min-hidden", required_argument, 0, '(' },
-    {     "level-max-hidden", required_argument, 0, ')' },
-    {         "path-density", required_argument, 0, 'd' },
-    {                 "seed", required_argument, 0, 's' },
-    {                 "play", required_argument, 0, 'p' },
-    {               "random", optional_argument, 0, 'r' },
-    {                 "edit", required_argument, 0, 'e' },
-    {        "cheat-autowin",       no_argument, 0, 'A' },
-    {         "cheat-solver",       no_argument, 0, 'S' },
-    {                "force",       no_argument, 0, '!' },
-    {                 "pack",       no_argument, 0, 'P' },
-    {               "unpack",       no_argument, 0, 'U' },
-    {           "animate-bg",       no_argument, 0, 'b' },
-    {        "no-animate-bg",       no_argument, 0, 'B' },
-    {          "animate-win",       no_argument, 0, 'i' },
-    {       "no-animate-win",       no_argument, 0, 'I' },
+    {    "create-random-level",       no_argument, 0, 'G' },
+    {     "create-blank-level",       no_argument, 0, 'K' },
+    {              "no-config", required_argument, 0, 'C' },
+    {             "config-dir", required_argument, 0, 'c' },
+    {                    "fps", required_argument, 0, 'F' },
+    {                 "height", required_argument, 0, 'H' },
+    {                  "width", required_argument, 0, 'W' },
+    {           "level-radius", required_argument, 0, 'R' },
+    {        "level-min-fixed", required_argument, 0, '[' },
+    {        "level-max-fixed", required_argument, 0, ']' },
+    {       "level-min-hidden", required_argument, 0, '(' },
+    {       "level-max-hidden", required_argument, 0, ')' },
+    {           "path-density", required_argument, 0, 'd' },
+    {                   "seed", required_argument, 0, 's' },
+    {                   "play", required_argument, 0, 'p' },
+    {                 "random", optional_argument, 0, 'r' },
+    {                   "edit", required_argument, 0, 'e' },
+    {          "cheat-autowin",       no_argument, 0, 'A' },
+    {           "cheat-solver",       no_argument, 0, 'S' },
+    {                  "force",       no_argument, 0, '!' },
+    {                   "pack",       no_argument, 0, 'P' },
+    {                 "unpack",       no_argument, 0, 'U' },
+    {             "animate-bg",       no_argument, 0, 'b' },
+    {          "no-animate-bg",       no_argument, 0, 'B' },
+    {            "animate-win",       no_argument, 0, 'i' },
+    {         "no-animate-win",       no_argument, 0, 'I' },
 #ifdef USE_PHYSICS
-    {          "use-physics",       no_argument, 0, 'y' },
-    {       "no-use-physics",       no_argument, 0, 'Y' },
+    {            "use-physics",       no_argument, 0, 'y' },
+    {         "no-use-physics",       no_argument, 0, 'Y' },
 #endif
-    {   "use-shader-effects",       no_argument, 0, 'x' },
-    {"no-use-shader-effects",       no_argument, 0, 'X' },
-    {      "use-solve-timer",       no_argument, 0, 'm' },
-    {   "no-use-solve-timer",       no_argument, 0, 'M' },
-    {        "show-previews",       no_argument, 0, '-' },
-    {     "no-show-previews",       no_argument, 0, '_' },
-    {        "show-tooltips",       no_argument, 0, 't' },
-    {     "no-show-tooltips",       no_argument, 0, 'T' },
-    {       "extra-rainbows",       no_argument, 0, ':' },
-    {    "no-extra-rainbows",       no_argument, 0, ';' },
-    {      "allow-edit-mode",       no_argument, 0, 'E' },
-    {                 "demo",       no_argument, 0, 'j' },
-    {             "demo-win",       no_argument, 0, 'J' },
-    {          "wait-events",       no_argument, 0, 'w' },
-    {              "verbose",       no_argument, 0, 'v' },
-    {              "version",       no_argument, 0, 'V' },
-    {                 "help",       no_argument, 0, 'h' },
-    {           "help-cheat",       no_argument, 0, '*' },
-    {                      0,                 0, 0,  0  }
+    {     "use-shader-effects",       no_argument, 0, 'x' },
+    {  "no-use-shader-effects",       no_argument, 0, 'X' },
+    {        "use-solve-timer",       no_argument, 0, 'm' },
+    {     "no-use-solve-timer",       no_argument, 0, 'M' },
+    {          "show-previews",       no_argument, 0, '-' },
+    {       "no-show-previews",       no_argument, 0, '_' },
+    {          "show-tooltips",       no_argument, 0, 't' },
+    {       "no-show-tooltips",       no_argument, 0, 'T' },
+    {    "log-finished-levels",       no_argument, 0, 'l' },
+    { "no-log-finished-levels",       no_argument, 0, 'L' },
+    {         "extra-rainbows",       no_argument, 0, ':' },
+    {      "no-extra-rainbows",       no_argument, 0, ';' },
+    {        "allow-edit-mode",       no_argument, 0, 'E' },
+    {                   "demo",       no_argument, 0, 'j' },
+    {               "demo-win",       no_argument, 0, 'J' },
+    {            "wait-events",       no_argument, 0, 'w' },
+    {                "verbose",       no_argument, 0, 'v' },
+    {                "version",       no_argument, 0, 'V' },
+    {                   "help",       no_argument, 0, 'h' },
+    {             "help-cheat",       no_argument, 0, '*' },
+    {                        0,                 0, 0,  0  }
 };
 
 static char usage_args[] = "[<file>." LEVEL_FILENAME_EXT  " | <file>." COLLECTION_FILENAME_EXT "]";
@@ -127,8 +129,10 @@ static char help_text[] =
     "   --no-use-solve-timer       Disable level solve time tracking\n"
     "      --show-previews         Enable showing small level previews (default: on)\n"
     "   --no-show-previews         Disable showing small level previews\n"
-    "      --show-tooltips         Enable popup tooltips on mouse-hover default: on)\n"
+    "      --show-tooltips         Enable popup tooltips on mouse-hover (default: on)\n"
     "   --no-show-tooltips         Disable popup tooltips\n"
+    "      --log-finished-levels   Enable ssving a log of finished levels (default: on)\n"
+    "   --no-log-finished-levels   Disable saving a log of finished levels\n"
     "\n"
     "  -W, --width=NUMBER          Window width (default: " STR(OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH) ")\n"
     "  -H, --height=NUMBER         Window height (default: " STR(OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT) ")\n"
@@ -434,6 +438,7 @@ options_set_defaults(
     options->use_solve_timer       = OPTIONS_DEFAULT_USE_SOLVE_TIMER;
     options->show_level_previews   = OPTIONS_DEFAULT_SHOW_LEVEL_PREVIEWS;
     options->show_tooltips         = OPTIONS_DEFAULT_SHOW_TOOLTIPS;
+    options->log_finished_levels   = OPTIONS_DEFAULT_LOG_FINISHED_LEVELS;
     options->extra_rainbows        = OPTIONS_DEFAULT_EXTRA_RAINBOWS;
     options->max_fps               = OPTIONS_DEFAULT_MAX_FPS;
     options->initial_window_width  = OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH;
@@ -449,6 +454,7 @@ options_set_defaults(
     options->load_state_use_solve_timer = true;
     options->load_state_show_level_previews = true;
     options->load_state_show_tooltips = true;
+    options->load_state_log_finished_levels = true;
     options->load_color_opt = true;
 
     options->safe_mode = false;
@@ -573,7 +579,7 @@ options_parse_args(
             warnmsg("CHEAT ENABLED: auto-solver tool is available");
             break;
 
-        case 'L':
+        case 'G':
             options->create_level_mode = CREATE_LEVEL_MODE_RANDOM;
             options->startup_action = STARTUP_ACTION_CREATE_LEVEL;
             break;
@@ -765,6 +771,16 @@ options_parse_args(
         case 'T':
             options->show_tooltips = false;
             options->load_state_show_tooltips = false;
+            break;
+
+        case 'l':
+            options->log_finished_levels = true;
+            options->load_state_log_finished_levels = false;
+            break;
+
+        case 'L':
+            options->log_finished_levels = false;
+            options->load_state_log_finished_levels = false;
             break;
 
         case ':':

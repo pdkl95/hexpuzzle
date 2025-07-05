@@ -338,6 +338,9 @@ static bool program_state_from_json(cJSON *json)
         if (options->load_state_show_tooltips) {
             mk_bool_json(show_tooltips, show_tooltips);
         }
+        if (options->load_state_log_finished_levels) {
+            mk_bool_json(log_finished_levels, log_finished_levels);
+        }
 #undef mk_bool_json
     }
 
@@ -512,6 +515,7 @@ static cJSON *program_state_to_json(void)
     mk_bool_json(use_solve_timer, use_solve_timer);
     mk_bool_json(show_level_previews, show_level_previews);
     mk_bool_json(show_tooltips, show_tooltips);
+    mk_bool_json(log_finished_levels, log_finished_levels);
 #undef mk_bool_json
 
     cJSON *win_anim_json = win_anim_config_to_json();

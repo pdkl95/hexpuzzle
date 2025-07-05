@@ -171,6 +171,14 @@
     #endif
 #endif
 
+#ifndef MAX_TEXT_BUFFER_LENGTH
+    #define MAX_TEXT_BUFFER_LENGTH 1024
+#endif
+
+#ifndef MAX_TEXTSPLIT_COUNT
+    #define MAX_TEXTSPLIT_COUNT 128
+#endif
+
 #define SOLVER_SOLVE_SWAP_TIME               0.2
 #define SOLVER_DEMO_SOLVE_SWAP_TIME          1.2
 #define SOLVER_DEMO_SOLVE_MOVE_POINTER_TIME  0.7

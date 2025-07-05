@@ -36,6 +36,7 @@ Rectangle options_anim_bg_rect;
 Rectangle options_anim_win_rect;
 Rectangle options_show_level_previews_rect;
 Rectangle options_show_tooltips_rect;
+Rectangle options_log_finished_levels_rect;
 Rectangle options_reset_finished_rect;
 Rectangle options_use_postprocessing_rect;
 Rectangle options_use_solve_timer_rect;
@@ -47,6 +48,7 @@ char options_anim_bg_text[]  = "Animate Background";
 char options_anim_win_text[] = "Animate Winning Levels";
 char options_show_level_previews_text[] = "Show Level Previews";
 char options_show_tooltips_text[] = "Show Tooltips";
+char options_log_finished_levels_text[] = "Log Finished Levels";
 char options_reset_finished_text[] = "Reset Level Finished Data";
 char options_color_edit_tooltip[] = "Select Color";
 char options_color_reset_tooltip[] = "Reset color back to default";
@@ -59,6 +61,7 @@ char options_use_postprocessing_desc_text[] = "Postpo4ssing shader effects (blur
 char options_use_solve_timer_desc_text[] = "A clock that tracks how long it takes to solve each level.";
 char options_show_level_previews_desc_text[] = "Show small level previews.";
 char options_show_tooltips_desc_text[] = "Show popup tooltips when hovering over some controls.";
+char options_log_finished_levels_desc_text[] = "Save the win time and blueprint string of finished levels in a browsable history log.";
 
 #ifdef USE_PHYSICS
 Rectangle options_use_physics_rect;
@@ -84,13 +87,14 @@ struct gui_bool_option {
 typedef struct gui_bool_option gui_bool_option_t;
 
 enum graphics_option_index {
-    GRAPHICS_OPTION_USE_SOLVE_TIMER    = 0,
-    GRAPHICS_OPTION_ANIMATE_BG         = 1,
-    GRAPHICS_OPTION_ANIMATE_WIN        = 2,
-    GRAPHICS_OPTION_USE_PHYSICS        = 3,
-    GRAPHICS_OPTION_USE_POSTPROCESSING = 4,
-    GRAPHICS_OPTION_SHOW_LEVEL_PREVIEW = 5,
-    GRAPHICS_OPTION_SHOW_TOOLTIPS      = 6
+    GRAPHICS_OPTION_USE_SOLVE_TIMER     = 0,
+    GRAPHICS_OPTION_ANIMATE_BG          = 1,
+    GRAPHICS_OPTION_ANIMATE_WIN         = 2,
+    GRAPHICS_OPTION_USE_PHYSICS         = 3,
+    GRAPHICS_OPTION_USE_POSTPROCESSING  = 4,
+    GRAPHICS_OPTION_SHOW_LEVEL_PREVIEW  = 5,
+    GRAPHICS_OPTION_SHOW_TOOLTIPS       = 6,
+    GRAPHICS_OPTION_LOG_FINISHED_LEVELS = 7
 };
 typedef enum graphics_option_index graphics_option_index_t;
 
@@ -131,6 +135,11 @@ gui_bool_option_t graphics_options[] = {
         .rect  = &options_show_tooltips_rect,
         .label = options_show_tooltips_text,
         .desc  = options_show_tooltips_desc_text
+    },
+    {
+        .rect  = &options_log_finished_levels_rect,
+        .label = options_log_finished_levels_text,
+        .desc  = options_log_finished_levels_desc_text
     }
 };
 #define NUM_BOOL_OPTIONS ((long)NUM_ELEMENTS(gui_bool_option_t, graphics_options))
@@ -269,13 +278,14 @@ void init_gui_options(void)
                  "%s", GuiIconText(ICON_UNDO_FILL, NULL));
     }
 
-    graphics_options[GRAPHICS_OPTION_USE_SOLVE_TIMER   ].opt = &options->use_solve_timer;
-    graphics_options[GRAPHICS_OPTION_ANIMATE_BG        ].opt = &options->animate_bg;
-    graphics_options[GRAPHICS_OPTION_ANIMATE_WIN       ].opt = &options->animate_win;
-    graphics_options[GRAPHICS_OPTION_USE_PHYSICS       ].opt = &options->use_physics;
-    graphics_options[GRAPHICS_OPTION_USE_POSTPROCESSING].opt = &options->use_postprocessing;
-    graphics_options[GRAPHICS_OPTION_SHOW_LEVEL_PREVIEW].opt = &options->show_level_previews;
-    graphics_options[GRAPHICS_OPTION_SHOW_TOOLTIPS     ].opt = &options->show_tooltips;
+    graphics_options[GRAPHICS_OPTION_USE_SOLVE_TIMER    ].opt = &options->use_solve_timer;
+    graphics_options[GRAPHICS_OPTION_ANIMATE_BG         ].opt = &options->animate_bg;
+    graphics_options[GRAPHICS_OPTION_ANIMATE_WIN        ].opt = &options->animate_win;
+    graphics_options[GRAPHICS_OPTION_USE_PHYSICS        ].opt = &options->use_physics;
+    graphics_options[GRAPHICS_OPTION_USE_POSTPROCESSING ].opt = &options->use_postprocessing;
+    graphics_options[GRAPHICS_OPTION_SHOW_LEVEL_PREVIEW ].opt = &options->show_level_previews;
+    graphics_options[GRAPHICS_OPTION_SHOW_TOOLTIPS      ].opt = &options->show_tooltips;
+    graphics_options[GRAPHICS_OPTION_LOG_FINISHED_LEVELS].opt = &options->log_finished_levels;
 
     for (int i=0; i<NUM_BOOL_OPTIONS; i++) {
         graphics_options[i].opt_saved = *graphics_options[i].opt;
@@ -297,7 +307,7 @@ void resize_gui_options(void)
     options_panel_rect.height = (window_size.y * options_panel_rect.x) / window_size.x;
 
     MINVAR(options_panel_rect.width,  350);
-    MINVAR(options_panel_rect.height, 440);
+    MINVAR(options_panel_rect.height, 500);
 
     options_panel_rect.x = (window_size.x / 2) - (options_panel_rect.width  / 2);
     options_panel_rect.y = (window_size.y / 2) - (options_panel_rect.height / 2);
@@ -379,9 +389,14 @@ void resize_gui_options(void)
     options_show_tooltips_rect.width = anim_text_size;
     options_show_tooltips_rect.height = TOOL_BUTTON_HEIGHT;
 
+    options_log_finished_levels_rect.x = options_area_rect.x;
+    options_log_finished_levels_rect.y = options_show_tooltips_rect.y + options_show_tooltips_rect.height + RAYGUI_ICON_SIZE;
+    options_log_finished_levels_rect.width = anim_text_size;
+    options_log_finished_levels_rect.height = TOOL_BUTTON_HEIGHT;
+
     Vector2 options_icon_scale_text_size = measure_gui_text(options_icon_scale_text);
-    options_icon_scale_rect.x = options_show_tooltips_rect.x + options_icon_scale_text_size.x;
-    options_icon_scale_rect.y = options_show_tooltips_rect.y + options_show_tooltips_rect.height + RAYGUI_ICON_SIZE;
+    options_icon_scale_rect.x = options_log_finished_levels_rect.x + options_icon_scale_text_size.x;
+    options_icon_scale_rect.y = options_log_finished_levels_rect.y + options_log_finished_levels_rect.height + RAYGUI_ICON_SIZE;
     options_icon_scale_rect.width = 90;
     options_icon_scale_rect.height = TOOL_BUTTON_HEIGHT;
     options_icon_scale_rect.x += (3 * BUTTON_MARGIN) - 1;
