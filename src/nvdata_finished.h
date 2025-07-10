@@ -29,13 +29,15 @@
 struct level;
 
 enum finished_level_flag {
-    FINISHED_LEVEL_FLAG_NULL         =      0,
     FINISHED_LEVEL_FLAG_NAME         = 0x0001,
     FINISHED_LEVEL_FLAG_WIN_TIME     = 0x0002,
     FINISHED_LEVEL_FLAG_ELAPSED_TIME = 0x0004,
-    FINISHED_LEVEL_FLAG_BLUEPRINT    = 0x0008
+    FINISHED_LEVEL_FLAG_BLUEPRINT    = 0x0008,
+    FINISHED_LEVEL_FLAG_SOLVER       = 0x0010
 };
 typedef enum finished_level_flag finished_level_flag_t;
+
+char *finished_level_flag_str(flags16_t flags);
 
 typedef struct finished_level {
     char id[ID_MAXLEN];
@@ -46,7 +48,7 @@ typedef struct finished_level {
 
     blueprint_string_t blueprint;
 
-    uint16_t flags;
+    flags16_t flags;
 
     char rb_color;
     struct finished_level *left;
@@ -77,6 +79,11 @@ static inline void finished_level_set_blueprint(struct finished_level *fl, const
     fl->flags |= FINISHED_LEVEL_FLAG_BLUEPRINT;
 }
 
+static inline void finished_level_set_solver(struct finished_level *fl)
+{
+    fl->flags |= FINISHED_LEVEL_FLAG_SOLVER;
+}
+
 static inline void finished_level_clear_name(struct finished_level *fl)
 {
     fl->flags &= ~FINISHED_LEVEL_FLAG_NAME;
@@ -97,6 +104,11 @@ static inline void finished_level_clear_blueprint(struct finished_level *fl)
     fl->flags &= ~FINISHED_LEVEL_FLAG_BLUEPRINT;
 }
 
+static inline void finished_level_clear_solver(struct finished_level *fl)
+{
+    fl->flags &= ~FINISHED_LEVEL_FLAG_SOLVER;
+}
+
 static inline bool finished_level_has_name(struct finished_level *fl)
 {
     return fl->flags & FINISHED_LEVEL_FLAG_NAME;
@@ -115,6 +127,11 @@ static inline bool finished_level_has_elapsed_time(struct finished_level *fl)
 static inline bool finished_level_has_blueprint(struct finished_level *fl)
 {
     return fl->flags & FINISHED_LEVEL_FLAG_BLUEPRINT;
+}
+
+static inline bool finished_level_has_solver(struct finished_level *fl)
+{
+    return fl->flags & FINISHED_LEVEL_FLAG_SOLVER;
 }
 
 int compare_finished_level(struct finished_level *a, struct finished_level *b);

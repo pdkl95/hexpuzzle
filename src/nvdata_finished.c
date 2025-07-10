@@ -40,6 +40,20 @@ SGLIB_DEFINE_RBTREE_FUNCTIONS(finished_level, left, right, rb_color, compare_fin
 finished_levels_t finished_levels;
 bool finished_levels_changed = false;
 
+char *finished_level_flag_str(flags16_t flags)
+{
+    static char buf[6] = {0};
+
+    buf[0] = (flags & FINISHED_LEVEL_FLAG_NAME)         ? 'N' : '-';
+    buf[1] = (flags & FINISHED_LEVEL_FLAG_WIN_TIME)     ? 'W' : '-';
+    buf[2] = (flags & FINISHED_LEVEL_FLAG_ELAPSED_TIME) ? 'E' : '-';
+    buf[3] = (flags & FINISHED_LEVEL_FLAG_BLUEPRINT)    ? 'B' : '-';
+    buf[4] = (flags & FINISHED_LEVEL_FLAG_SOLVER)       ? 'S' : '-';
+    buf[5] = '\0';
+
+    return buf;
+}
+
 void print_finished_levels(void)
 {
     struct finished_level *e = NULL;
@@ -70,8 +84,8 @@ int compare_finished_level(struct finished_level *a, struct finished_level *b)
 
     int rv = 0;
 
-    if ((a->flags & FINISHED_LEVEL_FLAG_WIN_TIME) &&
-        (a->flags & FINISHED_LEVEL_FLAG_WIN_TIME)) {
+    if (finished_level_has_win_time(a) &&
+        finished_level_has_win_time(b)) {
         rv = ((int)(a->win_time - b->win_time));
         if (rv != 0) {
             return rv;
@@ -130,20 +144,28 @@ void nvdata_mark_id_finished(struct finished_level *entry)
 
     snprintf(&e->id, ID_MAXLEN, "%s", entry->id);
 
-    if (entry->flags & FINISHED_LEVEL_FLAG_BLUEPRINT) {
+    if (finished_level_has_name(entry)) {
+        finished_level_set_name(e, entry->name);
+    }
+
+    if (finished_level_has_solver(entry)) {
+        finished_level_set_solver(e);
+    }
+
+    if (finished_level_has_blueprint(entry)) {
         finished_level_set_blueprint(e, entry->blueprint);
     }
 
-    if (entry->flags & FINISHED_LEVEL_FLAG_WIN_TIME) {
+    if (finished_level_has_win_time(entry)) {
         finished_level_set_win_time(e, entry->win_time);
     }
 
-    if (entry->flags & FINISHED_LEVEL_FLAG_ELAPSED_TIME) {
+    if (finished_level_has_elapsed_time(entry)) {
         finished_level_set_elapsed_time(e, &entry->elapsed_time);
     }
 
     if (options->verbose) {
-        infomsg("MARK finished: \"%s\"", e->id);
+        infomsg("MARK finished: id=\"%s\" flags=%s", e->id, finished_level_flag_str(e->flags));
     }
 
     if (sglib_finished_level_add_if_not_member(&(finished_levels.tree), e, &member)) {
@@ -169,6 +191,9 @@ void nvdata_mark_finished(struct level *level)
     finished_level_set_elapsed_time(&entry, &level->elapsed_time);
     if (level->blueprint) {
         finished_level_set_blueprint(&entry, level->blueprint);
+    }
+    if (level->solver) {
+        finished_level_set_solver(&entry);
     }
 
     snprintf(&entry.id, ID_MAXLEN, "%s", level->unique_id);
@@ -218,6 +243,8 @@ bool nvdata_is_finished(struct level *level)
 
 bool nvdata_finished_from_json(cJSON *json)
 {
+    bool new_changed_value = false;
+
     if (!cJSON_IsObject(json)) {
         errmsg("Error parsing nvdata finished level JSON: not an Object");
         return false;
@@ -259,6 +286,7 @@ bool nvdata_finished_from_json(cJSON *json)
                 warnmsg("Error parsing nvdata finished level JSON [%d]: 'name' is missing - using the 'id' field as substitute", count);
                 snprintf(&e.name, NAME_MAXLEN, "%s", e.id);
                 finished_level_set_name(&e, e.id);
+                new_changed_value = true;
             }
         } else {
             finished_level_clear_name(&e);
@@ -266,38 +294,56 @@ bool nvdata_finished_from_json(cJSON *json)
 
         if (finished_level_has_elapsed_time(&e)) {
             cJSON *elapsed_time_json = cJSON_GetObjectItem(level_json, "elapsed_time");
-            if (!cJSON_IsString(elapsed_time_json)) {
-                errmsg("Error parsing nvdata finished level JSON [%d]: 'elapsed_time' is not a String", count);
-                return false;
+            if (elapsed_time_json) {
+                if (!cJSON_IsString(elapsed_time_json)) {
+                    errmsg("Error parsing nvdata finished level JSON [%d]: 'elapsed_time' is not a String", count);
+                    return false;
+                }
+                elapsed_time_parts_t elapsed_time;
+                str_to_elapsed_time_parts(elapsed_time_json->valuestring, &elapsed_time);
+                finished_level_set_elapsed_time(&e, &elapsed_time);
+            } else {
+                warnmsg("While parsing nvdata finished level JSON [%d]: 'elapsed_time' flag is set but the String data field is missing. Clearing the misleading flag.", count);
+                finished_level_clear_elapsed_time(&e);
+                new_changed_value = true;
             }
-            elapsed_time_parts_t elapsed_time;
-            str_to_elapsed_time_parts(elapsed_time_json->valuestring, &elapsed_time);
-            finished_level_set_elapsed_time(&e, &elapsed_time);
         } else {
             finished_level_clear_elapsed_time(&e);
         }
 
         if (finished_level_has_win_time(&e)) {
             cJSON *win_time_json = cJSON_GetObjectItem(level_json, "win_time");
-            if (!cJSON_IsString(win_time_json)) {
-                errmsg("Error parsing nvdata finished level JSON [%d]: 'win_time' is not a String", count);
-                return false;
-            }
+            if (win_time_json) {
+                if (!cJSON_IsString(win_time_json)) {
+                    errmsg("Error parsing nvdata finished level JSON [%d]: 'win_time' is not a String", count);
+                    return false;
+                }
 
-            struct tm win_tm = {0};
-            strptime(win_time_json->valuestring, "%F %T", &win_tm);
-            finished_level_set_win_time(&e, mktime(&win_tm));
+                struct tm win_tm = {0};
+                strptime(win_time_json->valuestring, "%F %T", &win_tm);
+                finished_level_set_win_time(&e, mktime(&win_tm));
+            } else {
+                warnmsg("While parsing nvdata finished level JSON [%d]: 'win_time' flag is set but the String data field is missing. Clearing the misleading flag.", count);
+                finished_level_clear_win_time(&e);
+                new_changed_value = true;
+            }
         } else {
             finished_level_clear_win_time(&e);
         }
 
         if (finished_level_has_blueprint(&e)) {
             cJSON *blueprint_json = cJSON_GetObjectItem(level_json, "blueprint");
-            if (!cJSON_IsString(blueprint_json)) {
-                errmsg("Error parsing nvdata finished level JSON [%d]: 'blueprint' is not a String", count);
-                return false;
+            if (blueprint_json) {
+                if (!cJSON_IsString(blueprint_json)) {
+                    errmsg("Error parsing nvdata finished level JSON [%d]: 'blueprint' is not a String", count);
+                    return false;
+                }
+                finished_level_set_blueprint(&e, blueprint_json->valuestring);
+            } else {
+                warnmsg("While parsing nvdata finished level JSON [%d]: 'blueprint' flag is set but the String data field is missing. Clearing the misleading flag.", count);
+                finished_level_clear_blueprint(&e);
+                new_changed_value = true;
             }
-            finished_level_set_blueprint(&e, blueprint_json->valuestring);
         } else {
             finished_level_clear_blueprint(&e);
         }
@@ -320,7 +366,7 @@ bool nvdata_finished_from_json(cJSON *json)
         warnmsg("Parsed %d finished level entries, but finished_levels.count = %d", count, finished_levels.count);
     }
 
-    finished_levels_changed = false;
+    finished_levels_changed = new_changed_value;
 
     if (options->verbose) {
         infomsg("Read %d level finished level IDs", count);
@@ -344,8 +390,12 @@ cJSON *nvdata_finished_to_json(void)
         goto json_err;
     }
 
+    //printf(">> JSON encoding %d entries\n", finished_levels.count);
+
     struct finished_level *e = NULL;
     struct sglib_finished_level_iterator it;
+
+    int count = 0;
 
     for(e = sglib_finished_level_it_init_inorder(&it, finished_levels.tree);
         e != NULL;
@@ -359,31 +409,33 @@ cJSON *nvdata_finished_to_json(void)
 
         char *elapsed_time_str = elapsed_time_parts_to_str(&e->elapsed_time);
 
+        //printf("  [%d] id=\"%s\" flags=%s (%u)\n", count, e->id, finished_level_flag_str(e->flags), e->flags);
+
         cJSON *level_json = cJSON_CreateObject();
 
         if (cJSON_AddStringToObject(level_json, "id", e->id) == NULL) {
             goto json_err;
         }
 
-        if (finished_level_has_name(&e)) {
+        if (finished_level_has_name(e)) {
             if (cJSON_AddStringToObject(level_json, "name", e->name) == NULL) {
                 goto json_err;
             }
         }
 
-        if (finished_level_has_win_time(&e)) {
+        if (finished_level_has_win_time(e)) {
             if (cJSON_AddStringToObject(level_json, "win_time", win_time_str) == NULL) {
                 goto json_err;
             }
         }
 
-        if (finished_level_has_elapsed_time(&e)) {
+        if (finished_level_has_elapsed_time(e)) {
             if (cJSON_AddStringToObject(level_json, "elapsed_time", elapsed_time_str) == NULL) {
                 goto json_err;
             }
         }
 
-        if (finished_level_has_blueprint(&e)) {
+        if (finished_level_has_blueprint(e)) {
             if (cJSON_AddStringToObject(level_json, "blueprint", e->blueprint) == NULL) {
                 goto json_err;
             }
@@ -394,6 +446,8 @@ cJSON *nvdata_finished_to_json(void)
         }
 
         cJSON_AddItemToArray(finished_levels_json, level_json);
+
+        count++;
     }
 
     return json;
