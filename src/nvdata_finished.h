@@ -30,14 +30,17 @@ struct level;
 
 enum finished_level_flag {
     FINISHED_LEVEL_FLAG_NULL         =      0,
-    FINISHED_LEVEL_FLAG_WIN_TIME     = 0x0001,
-    FINISHED_LEVEL_FLAG_ELAPSED_TIME = 0x0002,
-    FINISHED_LEVEL_FLAG_BLUEPRINT    = 0x0004
+    FINISHED_LEVEL_FLAG_NAME         = 0x0001,
+    FINISHED_LEVEL_FLAG_WIN_TIME     = 0x0002,
+    FINISHED_LEVEL_FLAG_ELAPSED_TIME = 0x0004,
+    FINISHED_LEVEL_FLAG_BLUEPRINT    = 0x0008
 };
 typedef enum finished_level_flag finished_level_flag_t;
 
 typedef struct finished_level {
     char id[ID_MAXLEN];
+    char name[NAME_MAXLEN];
+
     time_t win_time;
     elapsed_time_parts_t elapsed_time;
 
@@ -49,6 +52,12 @@ typedef struct finished_level {
     struct finished_level *left;
     struct finished_level *right;
 } finished_level;
+
+static inline void finished_level_set_name(struct finished_level *fl, const char *value)
+{
+    snprintf(fl->name, NAME_MAXLEN, "%s", value);
+    fl->flags |= FINISHED_LEVEL_FLAG_NAME;
+}
 
 static inline void finished_level_set_win_time(struct finished_level *fl, time_t value)
 {
@@ -68,6 +77,11 @@ static inline void finished_level_set_blueprint(struct finished_level *fl, const
     fl->flags |= FINISHED_LEVEL_FLAG_BLUEPRINT;
 }
 
+static inline void finished_level_clear_name(struct finished_level *fl)
+{
+    fl->flags &= ~FINISHED_LEVEL_FLAG_NAME;
+}
+
 static inline void finished_level_clear_win_time(struct finished_level *fl)
 {
     fl->flags &= ~FINISHED_LEVEL_FLAG_WIN_TIME;
@@ -81,6 +95,11 @@ static inline void finished_level_clear_elapsed_time(struct finished_level *fl)
 static inline void finished_level_clear_blueprint(struct finished_level *fl)
 {
     fl->flags &= ~FINISHED_LEVEL_FLAG_BLUEPRINT;
+}
+
+static inline bool finished_level_has_name(struct finished_level *fl)
+{
+    return fl->flags & FINISHED_LEVEL_FLAG_NAME;
 }
 
 static inline bool finished_level_has_win_time(struct finished_level *fl)

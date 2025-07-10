@@ -629,3 +629,38 @@ bool deserialize_generate_level_params(const char *str, generate_level_param_t *
 
     return true;
 }
+
+const char *blueprint_string_prop_str(const char *str)
+{
+    static char buf[NAME_MAXLEN];
+
+    generate_level_param_t param;
+    if (!deserialize_generate_level_params(str, &param)) {
+        return NULL;
+    }
+
+    char hidden_buf[NAME_MAXLEN];
+    char  fixed_buf[NAME_MAXLEN];
+
+    if (param.have_hidden_count) {
+        snprintf(hidden_buf, NAME_MAXLEN, " %dh", param.hidden_count);
+    } else {
+        hidden_buf[0] = '\0';
+    }
+
+    if (param.have_fixed_count) {
+        snprintf(fixed_buf, NAME_MAXLEN, " %dh", param.fixed_count);
+    } else {
+        fixed_buf[0] = '\0';
+    }
+
+    snprintf(buf, NAME_MAXLEN,
+             "%dr%s%s%s",
+             param.tile_radius,
+             hidden_buf,
+             fixed_buf,
+             symmetry_mode_string_prop_str(param.symmetry_mode));
+
+    return buf;
+}
+

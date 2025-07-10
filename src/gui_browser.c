@@ -21,6 +21,7 @@
 
 #include "common.h"
 #include "options.h"
+#include "fonts.h"
 #include "level.h"
 #include "collection.h"
 #include "raygui_paged_list.h"
@@ -58,43 +59,24 @@ typedef enum gui_list_entry_status gui_list_entry_status_t;
 struct gui_list_entry {
     int index;
 
-    const char *name;
-    const char *path;
-
-    int icon;
-
-    char *icon_name;
-
     gui_list_entry_type_t type;
     gui_list_entry_status_t status;
 
     level_t *level;
-
-    struct finished_level *finished_level;
 };
 typedef struct gui_list_entry gui_list_entry_t;
 
-struct gui_list_vars {
-    char **names;
-    gui_list_entry_t *entries;
+struct gui_list_fspath_entry {
+    gui_list_entry_t common;
 
-    int count;
+    char *name;
+    char *path;
 
-    Rectangle *list_rect;
-    Rectangle *list_rect_preview;
-    Rectangle *btn_rect;
-    Rectangle *btn_rect_preview;
-    Rectangle *edit_btn_rect;
-    Rectangle *edit_btn_rect_preview;
+    int icon;
 
-    raygui_paged_list_t *gui_list;
-    raygui_paged_list_t *gui_list_preview;
-
-    int scroll_index;
-    int active;
-    int focus;
+    char *icon_name;
 };
-typedef struct gui_list_vars gui_list_vars_t;
+typedef struct gui_list_fspath_entry gui_list_fspath_entry_t;
 
 Rectangle browser_panel_rect;
 Rectangle browser_preview_rect;
@@ -145,17 +127,81 @@ raygui_paged_list_t local_files_gui_list_preview;
 raygui_paged_list_t history_gui_list;
 raygui_paged_list_t history_gui_list_preview;
 
-gui_list_entry_t classics_entries[] = {
+gui_list_fspath_entry_t classics_entries[] = {
     { .name = "01 - 10 (red)",    .path = NULL, .icon = ICON_SUITCASE, .icon_name = NULL },
     { .name = "11 - 20 (blue)",   .path = NULL, .icon = ICON_SUITCASE, .icon_name = NULL },
     { .name = "21 - 30 (green)",  .path = NULL, .icon = ICON_SUITCASE, .icon_name = NULL },
     { .name = "31 - 40 (yellow)", .path = NULL, .icon = ICON_SUITCASE, .icon_name = NULL }
 };
-#define NUM_CLASSICS_NAMES (sizeof(classics_entries)/sizeof(gui_list_entry_t))
+#define NUM_CLASSICS_NAMES NUM_ELEMENTS(gui_list_fspath_entry_t, classics_entries)
+
+enum history_column {
+    HISTORY_COLUMN_PLAY_TYPE = 0,
+    HISTORY_COLUMN_NAME      = 1,
+    HISTORY_COLUMN_WIN_DATE  = 2,
+    HISTORY_COLUMN_TIME      = 3,
+    HISTORY_COLUMN_EXTRA     = 4
+};
+typedef enum history_column history_column_t;
+
+raygui_cell_header_t history_headers[] = {
+    { .mode = RAYGUI_CELL_MODE_ICON,   // play type icon
+      .text = "" },
+    { .mode = RAYGUI_CELL_MODE_TEXT,
+      .text = "Name" },
+    { .mode = RAYGUI_CELL_MODE_TEXT,
+      .text = "Win Date" },
+    { .mode = RAYGUI_CELL_MODE_TEXT,
+      .text = "Time" },
+    { .mode = RAYGUI_CELL_MODE_TEXT_AND_ICON,
+      .text = "" }
+};
+#define NUM_HISTORY_COLUMNS ((int)NUM_ELEMENTS(raygui_cell_header_t, history_headers))
+
+struct gui_list_history_entry {
+    gui_list_entry_t common;
+
+    struct finished_level *finished_level;
+
+    raygui_cell_t cells[NUM_HISTORY_COLUMNS];
+
+    char name[NAME_MAXLEN];
+    char win_time[NAME_MAXLEN];
+    char elapsed_time[NAME_MAXLEN];
+    char extra[NAME_MAXLEN];
+};
+typedef struct gui_list_history_entry gui_list_history_entry_t;
+
+struct gui_list_vars {
+    char **names;
+    gui_list_entry_t *entries;
+
+    raygui_cell_header_t *history_headers;
+    raygui_cell_grid_t *history_grid;
+
+    int count;
+
+    Rectangle *list_rect;
+    Rectangle *list_rect_preview;
+    Rectangle *btn_rect;
+    Rectangle *btn_rect_preview;
+    Rectangle *edit_btn_rect;
+    Rectangle *edit_btn_rect_preview;
+
+    raygui_paged_list_t *gui_list;
+    raygui_paged_list_t *gui_list_preview;
+
+    int scroll_index;
+    int active;
+    int focus;
+};
+typedef struct gui_list_vars gui_list_vars_t;
 
 gui_list_vars_t classics = {
     .names                 = NULL,
-    .entries               = classics_entries,
+    .entries               = (gui_list_entry_t *)classics_entries,
+    .history_headers       = NULL,
+    .history_grid          = NULL,
     .count                 = NUM_CLASSICS_NAMES,
     .list_rect             = &browser_list_rect,
     .list_rect_preview     = &browser_list_with_preview_rect,
@@ -178,6 +224,8 @@ FilePathList browse_file_list;
 gui_list_vars_t local_files = {
     .names                 = NULL,
     .entries               = NULL,
+    .history_headers       = NULL,
+    .history_grid          = NULL,
     .count                 = 0,
     .list_rect             = &local_files_list_rect,
     .list_rect_preview     = &local_files_list_with_preview_rect,
@@ -195,6 +243,8 @@ gui_list_vars_t local_files = {
 gui_list_vars_t history = {
     .names                 = NULL,
     .entries               = NULL,
+    .history_grid          = NULL,
+    .history_headers       = history_headers,
     .count                 = 0,
     .list_rect             = &local_files_list_rect,
     .list_rect_preview     = &local_files_list_with_preview_rect,
@@ -252,15 +302,45 @@ const char *entry_status_str(gui_list_entry_status_t status)
     }
 }
 
+static inline gui_list_fspath_entry_t *get_gui_list_fspath_entry(gui_list_vars_t *list, int index)
+{
+    gui_list_fspath_entry_t *entries = (gui_list_fspath_entry_t *)list->entries;
+    return &(entries[index]);
+}
+
+static inline gui_list_history_entry_t *get_gui_list_history_entry(gui_list_vars_t *list, int index)
+{
+    gui_list_history_entry_t *entries = (gui_list_history_entry_t *)list->entries;
+    return &(entries[index]);
+}
+
 #if defined(PLATFORM_DESKTOP)
-static void free_gui_list_vars_data(gui_list_vars_t *list)
+static void free_gui_list_vars_fspath_data(gui_list_vars_t *list)
 {
     for (int i=0; i<list->count; i++) {
-        if (list->entries[i].level) {
-            destroy_level(list->entries[i].level);
-            list->entries[i].level = NULL;
+        gui_list_fspath_entry_t *e = get_gui_list_fspath_entry(list, i);
+        if (e->common.level) {
+            destroy_level(e->common.level);
+            e->common.level = NULL;
         }
-        SAFEFREE(list->entries[i].icon_name);
+
+        SAFEFREE(e->icon_name);
+        SAFEFREE(e->name);
+        SAFEFREE(e->path);
+    }
+
+    SAFEFREE(list->names);
+    SAFEFREE(list->entries);
+}
+
+static void free_gui_list_vars_history_data(gui_list_vars_t *list)
+{
+    for (int i=0; i<list->count; i++) {
+        gui_list_history_entry_t *e = get_gui_list_history_entry(list, i);
+        if (e->common.level) {
+            destroy_level(e->common.level);
+            e->common.level = NULL;
+        }
     }
 
     SAFEFREE(list->names);
@@ -269,29 +349,32 @@ static void free_gui_list_vars_data(gui_list_vars_t *list)
 
 static void free_local_files_data(void)
 {
-    free_gui_list_vars_data(&local_files);
+    free_gui_list_vars_fspath_data(&local_files);
 
     UnloadDirectoryFiles(browse_file_list);
 }
 
 static void free_history_data(void)
 {
-    free_gui_list_vars_data(&history);
+    free_gui_list_vars_history_data(&history);
 }
 #endif
 
-int compare_entries(const void *p1, const void *p2)
+int compare_fspath_entries(const void *p1, const void *p2)
 {
-    gui_list_entry_t *e1 = (gui_list_entry_t *)p1;
-    gui_list_entry_t *e2 = (gui_list_entry_t *)p2;
+    gui_list_fspath_entry_t *e1 = (gui_list_fspath_entry_t *)p1;
+    gui_list_fspath_entry_t *e2 = (gui_list_fspath_entry_t *)p2;
 
     assert_not_null(e1);
     assert_not_null(e2);
-    assert_not_null(e1->name);
-    assert_not_null(e1->name);
+    //assert_not_null(e1->name);
+    //assert_not_null(e1->name);
 
     int rv = e1->icon - e2->icon;
     if (rv) { return rv; }
+
+    if (!e1->name) { return -1; }
+    if (!e2->name) { return  1; }
 
     return strcmp(e1->name, e2->name);
 }
@@ -306,19 +389,20 @@ static void prepare_gui_list_names(gui_list_vars_t *list)
     list->names = calloc(list->count, sizeof(char *));
 
     for (int i=0; i<list->count; i++) {
-        gui_list_entry_t *entry = &(list->entries[i]);
+        gui_list_fspath_entry_t *entry = get_gui_list_fspath_entry(list, i);
         const char *icon_name = GuiIconText(entry->icon, entry->name);
-        if (entry->status == ENTRY_STATUS_LOAD_ERROR) {
+        if (entry->common.status == ENTRY_STATUS_LOAD_ERROR) {
             icon_name = GuiIconText(ICON_CRACK, entry->name);
         }
         entry->icon_name = strdup(icon_name);
-        entry->index = i;
+        entry->common.index = i;
     }
 
-    qsort(list->entries, list->count, sizeof(gui_list_entry_t), compare_entries);
+    gui_list_fspath_entry_t *entries = (gui_list_fspath_entry_t *)list->entries;
+    qsort(entries, list->count, sizeof(gui_list_fspath_entry_t), compare_fspath_entries);
 
     for (int i=0; i<list->count; i++) {
-        gui_list_entry_t *entry = &(list->entries[i]);
+        gui_list_fspath_entry_t *entry = get_gui_list_fspath_entry(list, i);
         list->names[i] = entry->icon_name;
     }
 
@@ -382,12 +466,15 @@ void setup_browse_dir(void)
     }
 
     browse_file_list = LoadDirectoryFilesEx(browse_path, NULL, false);
-    local_files.entries = calloc(browse_file_list.count, sizeof(gui_list_entry_t));
+    local_files.entries = calloc(browse_file_list.count, sizeof(gui_list_fspath_entry_t));
 
     local_files.count = 0;
     int icon = ICON_NONE;
     for (int i=0; i<(int)browse_file_list.count; i++) {
-        gui_list_entry_t *entry = &(local_files.entries[local_files.count]);
+        gui_list_fspath_entry_t *entry = get_gui_list_fspath_entry(&local_files, local_files.count);
+        assert(entry >= ((gui_list_fspath_entry_t *)(local_files.entries)));
+        assert(entry < ((gui_list_fspath_entry_t *)(local_files.entries)) + sizeof(gui_list_fspath_entry_t));
+
         char *path = browse_file_list.paths[i];
         const char *name = GetFileName(path);
 
@@ -435,11 +522,11 @@ void setup_browse_dir(void)
             infomsg("SCAN> %s (%s, %s, %s)", name, fd, entry_type_str(type), entry_status_str(status));
         }
 
-        entry->name   = name;
-        entry->path   = path;
+        entry->name   = strdup(name);
+        entry->path   = strdup(path);
         entry->icon   = icon;
-        entry->type   = type;
-        entry->status = status;
+        entry->common.type   = type;
+        entry->common.status = status;
 
         local_files.count++;
     }
@@ -487,6 +574,34 @@ void change_gui_browser_path_to_local_saved_levels(void)
     change_gui_browser_path(nvdata_default_browse_path);
 }
 
+static void open_dir_entry(gui_list_fspath_entry_t *entry, UNUSED bool edit)
+{
+    if (DirectoryExists(entry->path)) {
+        change_gui_browser_path(entry->path);
+    }
+}
+
+static void open_file_entry(gui_list_fspath_entry_t *entry, bool edit)
+{
+    if (FileExists(entry->path)) {
+        if (!open_game_file(entry->path, edit)) {
+            fail_entry((gui_list_entry_t *)entry);
+        }
+    } else {
+        fail_entry((gui_list_entry_t *)entry);
+    }
+}
+
+static void open_history_entry(gui_list_history_entry_t *entry, UNUSED bool edit)
+{
+    if (entry->finished_level &&
+        (entry->finished_level->flags & FINISHED_LEVEL_FLAG_BLUEPRINT)) {
+        if (!open_blueprint(entry->finished_level->blueprint)) {
+            fail_entry((gui_list_entry_t *)entry);
+        }
+    }
+}
+
 void open_entry(gui_list_entry_t *entry, bool edit)
 {
     switch (entry->status) {
@@ -495,11 +610,23 @@ void open_entry(gui_list_entry_t *entry, bool edit)
         return;
 
     case ENTRY_STATUS_NOT_LOADABLE:
-        errmsg("Cannot open entry \"%s\" - unknown file type", entry->path);
+        if (entry->type == ENTRY_TYPE_FINISHED_LEVEL) {
+            errmsg("Cannot open entry \"%s\" - no blueprint",
+                   ((gui_list_history_entry_t *)entry)->name);
+        } else {
+            errmsg("Cannot open entry \"%s\" - unknown file type",
+                   ((gui_list_fspath_entry_t *)entry)->path);
+        }
         return;
 
     case ENTRY_STATUS_LOAD_ERROR:
-        errmsg("Cannot open entry \"%s\" - unknown file type", entry->path);
+        if (entry->type == ENTRY_TYPE_FINISHED_LEVEL) {
+            errmsg("Cannot open entry \"%s\" - blueprint load error",
+                   ((gui_list_history_entry_t *)entry)->name);
+        } else {
+            errmsg("Cannot open entry \"%s\" - load error",
+                   ((gui_list_fspath_entry_t *)entry)->path);
+        }
         return;
 
     default:
@@ -509,9 +636,7 @@ void open_entry(gui_list_entry_t *entry, bool edit)
 
     switch (entry->type) {
     case ENTRY_TYPE_DIR:
-        if (DirectoryExists(entry->path)) {
-            change_gui_browser_path(entry->path);
-        }
+        open_dir_entry((gui_list_fspath_entry_t *)entry, edit);
         break;
 
     case ENTRY_TYPE_COLLECTION_DIR:
@@ -519,27 +644,39 @@ void open_entry(gui_list_entry_t *entry, bool edit)
     case ENTRY_TYPE_LEVEL_FILE:
         fallthrough;
     case ENTRY_TYPE_COLLECTION_FILE:
-        if (FileExists(entry->path)) {
-            if (!open_game_file(entry->path, edit)) {
-                fail_entry(entry);
-            }
-        } else {
-            fail_entry(entry);
-        }
+        open_file_entry((gui_list_fspath_entry_t *)entry, edit);
         break;
 
     case ENTRY_TYPE_FINISHED_LEVEL:
-        if (entry->finished_level &&
-            (entry->finished_level->flags & FINISHED_LEVEL_FLAG_BLUEPRINT)) {
-            if (!open_blueprint(entry->finished_level->blueprint)) {
-                fail_entry(entry);
-            }
-        }
+        open_history_entry((gui_list_history_entry_t *)entry, edit);
         break;
 
     default:
-        errmsg("Cannot open \"%s\": NULL entry type.", entry->path);
+        errmsg("Cannot open entry #%d - NULL entry type.", entry->index);
     }
+}
+
+static level_t *entry_load_level(gui_list_entry_t *entry)
+{
+    switch (entry->type) {
+    case ENTRY_TYPE_DIR:
+        fallthrough;
+    case ENTRY_TYPE_COLLECTION_DIR:
+        fallthrough;
+    case ENTRY_TYPE_LEVEL_FILE:
+        fallthrough;
+    case ENTRY_TYPE_COLLECTION_FILE:
+        return load_level_file(((gui_list_fspath_entry_t *)entry)->path);
+
+    case ENTRY_TYPE_FINISHED_LEVEL:
+        return generate_level_from_blueprint(
+            ((gui_list_history_entry_t *)entry)->finished_level->blueprint,
+            "browser_preview");
+
+    default:
+        errmsg("Cannot load level for entry #%d - NULL entry type.", entry->index);
+    }
+    return NULL;
 }
 
 void preview_entry(gui_list_entry_t *entry)
@@ -554,7 +691,7 @@ void preview_entry(gui_list_entry_t *entry)
     }
 
     if (!entry->level) {
-        entry->level = load_level_file(entry->path);
+        entry->level = entry_load_level(entry);
 
         if (!entry->level) {
             fail_entry(entry);
@@ -570,11 +707,16 @@ void disable_preview(void)
     browse_preview_level = NULL;;
 }
 
-gui_list_entry_t *find_entry_by_filename(gui_list_vars_t *list, const char *filename)
+gui_list_fspath_entry_t *find_entry_by_filename(gui_list_vars_t *list, const char *filename)
 {
     for (int i=0; i<list->count; i++) {
-        gui_list_entry_t *entry = &(list->entries[i]);
-        if (0 == strcmp(entry->name, filename)) {
+        gui_list_fspath_entry_t *entry = get_gui_list_fspath_entry(list, i);
+
+        if (entry->common.type == ENTRY_TYPE_FINISHED_LEVEL) {
+            continue;
+        }
+
+        if (0 == strcmp(((gui_list_fspath_entry_t *)entry)->name, filename)) {
             return entry;
         }
     }
@@ -584,15 +726,15 @@ gui_list_entry_t *find_entry_by_filename(gui_list_vars_t *list, const char *file
 
 void select_entry_by_filename(gui_list_vars_t *list, const char *filename)
 {
-    gui_list_entry_t *entry = find_entry_by_filename(list, filename);
+    gui_list_fspath_entry_t *entry = find_entry_by_filename(list, filename);
     if (entry) {
-        list->active = entry->index;
+        list->active = entry->common.index;
     } else {
         list->active = -1;
     }
 }
 
-void gui_browser_new(UNUSED gui_list_entry_t *entry)
+void gui_browser_new(UNUSED gui_list_fspath_entry_t *entry)
 {
     edit_new_blank_level();
 }
@@ -603,7 +745,7 @@ void gui_browser_rename_string_finished_cb(struct gui_dialog *dialog, void *data
         return;
     }
 
-    gui_list_entry_t *entry = (gui_list_entry_t *)data;
+    gui_list_fspath_entry_t *entry = (gui_list_fspath_entry_t *)data;
 
     char *oldname = strdup(concat_dir_and_filename(
                                browse_path,
@@ -658,9 +800,9 @@ void gui_browser_rename_string_finished_cb(struct gui_dialog *dialog, void *data
     FREE(oldname);
 }
 
-void gui_browser_rename(gui_list_entry_t *entry)
+void gui_browser_rename(gui_list_fspath_entry_t *entry)
 {
-    switch (entry->type) {
+    switch (entry->common.type) {
         //case ENTRY_TYPE_COLLECTION_DIR:
         //fallthrough;
     case ENTRY_TYPE_LEVEL_FILE:
@@ -692,42 +834,99 @@ void setup_browse_history(void)
         infomsg("Scanning finished level history (count = %d)", finished_levels.count);
     }
 
-    history.entries = calloc(finished_levels.count, sizeof(gui_list_entry_t));
+    history.count = finished_levels.count;
 
-    history.count = 0;
+    if (!history.history_grid) {
+        history.history_grid = create_raygui_cell_grid(history.history_headers, NUM_HISTORY_COLUMNS);
+    }
 
-    struct finished_level *e = NULL;
-    struct sglib_finished_level_iterator it;
+    if (history.entries) {
+        SAFEFREE(history.entries);
+    }
+    history.entries = calloc(finished_levels.count, sizeof(gui_list_history_entry_t));
 
-    for(e = sglib_finished_level_it_init_inorder(&it, finished_levels.tree);
-        e != NULL;
-        e = sglib_finished_level_it_next(&it)
+    raygui_cell_t **cell_rows = raygui_cell_grid_alloc_rows(history.history_grid, finished_levels.count);
+
+    struct finished_level * fl = NULL;
+    struct sglib_finished_level_iterator it;\
+
+    int count = 0;
+
+    for(fl = sglib_finished_level_it_init_inorder(&it, finished_levels.tree);
+        fl != NULL;
+        fl = sglib_finished_level_it_next(&it), count++
     ) {
-        gui_list_entry_t *entry = &(history.entries[history.count]);
-        const char *name = e->id;;
+        gui_list_history_entry_t *entry  = get_gui_list_history_entry(&history, count);
+        cell_rows[count] = entry->cells;
 
-        entry->finished_level = e;
+        entry->finished_level = fl;
 
         gui_list_entry_type_t type = ENTRY_TYPE_FINISHED_LEVEL;
         gui_list_entry_status_t status = ENTRY_STATUS_LOAD_OK;
-        int icon = ICON_FILE;
 
-        if (!finished_level_has_blueprint(e)) {
-            status = ENTRY_STATUS_NOT_LOADABLE;
-            icon = ICON_NONE;
+        for (int col=0; col<NUM_HISTORY_COLUMNS; col++) {
+            raygui_cell_header_t *header = &(history.history_headers[col]);
+            raygui_cell_t        *cell   = &(entry->cells[col]);
+
+            cell->mode   = header->mode;
+            cell->header = header;
+        }
+
+        {
+            raygui_cell_t *cell = &(entry->cells[HISTORY_COLUMN_NAME]);
+            cell->cell_text.text_src = entry->name;
+
+            if (finished_level_has_name(fl)) {
+                snprintf(entry->name, NAME_MAXLEN, "%s", fl->name);
+            } else {
+                entry->name[0] = '\0';
+            }
+        }
+
+        {
+            raygui_cell_t *cell = &(entry->cells[HISTORY_COLUMN_WIN_DATE]);
+            cell->cell_text.text_src = entry->win_time;
+
+            if (finished_level_has_win_time(fl)) {
+                struct tm *tm = gmtime(&(fl->win_time));
+                strftime(entry->win_time, NAME_MAXLEN, "%Y-%b-%d %H:%M", tm);
+            } else {
+                entry->win_time[0] = '\0';
+            }
+        }
+
+        {
+            raygui_cell_t *cell = &(entry->cells[HISTORY_COLUMN_TIME]);
+            cell->cell_text.text_src = entry->elapsed_time;
+
+            if (finished_level_has_elapsed_time(fl)) {
+                snprintf(entry->elapsed_time, NAME_MAXLEN, "%s",
+                         elapsed_time_parts_to_str(&fl->elapsed_time));
+            } else {
+                entry->elapsed_time[0] = '\0';
+            }
+        }
+
+        {
+            raygui_cell_t *cell = &(entry->cells[HISTORY_COLUMN_EXTRA]);
+            cell->cell_text_and_icon.text.text_src = entry->extra;
+
+            if (finished_level_has_blueprint(fl)) {
+                snprintf(entry->extra, NAME_MAXLEN, "%s", blueprint_string_prop_str(fl->blueprint));
+                cell->cell_text_and_icon.icon.icon = ICON_OK_TICK;
+            } else {
+                entry->extra[0] = '\n';
+                status = ENTRY_STATUS_NOT_LOADABLE;
+                cell->cell_text_and_icon.icon.icon = ICON_CROSS_SMALL;
+            }
         }
 
         if (options->verbose) {
-            infomsg("SCAN> %s (%s, %s)", name, entry_type_str(type), entry_status_str(status));
+            //infomsg("SCAN> %s (%s, %s)", name, entry_type_str(type), entry_status_str(status));
         }
 
-        entry->name   = name;
-        entry->path   = NULL;
-        entry->icon   = icon;
-        entry->type   = type;
-        entry->status = status;
-
-        history.count++;
+        entry->common.type   = type;
+        entry->common.status = status;
     }
 
     history.scroll_index = -1;
@@ -800,6 +999,8 @@ void cleanup_gui_browser(void)
     if (local_files.names) {
         free_local_files_data();
     }
+
+    SAFEFREE(history.history_grid);
 #endif
 
     cleanup_raygui_paged_list(classics.gui_list);
@@ -999,6 +1200,28 @@ void resize_gui_browser(void)
     raygui_paged_list_resize(local_files.gui_list_preview, *local_files.list_rect_preview);
     raygui_paged_list_resize(local_files.gui_list,         *local_files.list_rect);
 
+    char ex_name[]     = "12345678901234567890";
+    char ex_win_date[] = "2000-JAN-30 12:34";
+    const char *ex_time = TextFormat("%02d:%02d:%02d.%03d",
+                                     2,    //solve_timer.elapsed_time.parts.hr,
+                                     58,   //solve_timer.elapsed_time.parts.min,
+                                     48,   //solve_timer.elapsed_time.parts.sec,
+                                     234); //solve_timer.elapsed_time.parts.ms);
+
+    Vector2 ex_name_size     = measure_gui_narrow_text(ex_name);
+    Vector2 ex_win_date_size = measure_gui_narrow_text(ex_win_date);
+    Vector2 ex_time_size     = measure_gui_narrow_text(ex_time);
+
+    history_headers[HISTORY_COLUMN_PLAY_TYPE].width = RAYGUI_ICON_SIZE;
+    history_headers[HISTORY_COLUMN_NAME     ].width = ex_name_size.x + 2.0;
+    history_headers[HISTORY_COLUMN_WIN_DATE ].width = ex_win_date_size.x + 2.0;
+    history_headers[HISTORY_COLUMN_TIME     ].width = ex_time_size.x + 2.0;
+    history_headers[HISTORY_COLUMN_EXTRA    ].width =
+        local_files.list_rect->width
+        - history_headers[HISTORY_COLUMN_NAME].width
+        - history_headers[HISTORY_COLUMN_WIN_DATE].width
+        - history_headers[HISTORY_COLUMN_TIME].width;
+
     raygui_paged_list_resize(history.gui_list_preview, *local_files.list_rect_preview);
     raygui_paged_list_resize(history.gui_list,         *local_files.list_rect);
 #endif
@@ -1084,7 +1307,7 @@ void draw_gui_browser_classics(void)
 }
 
 #if defined(PLATFORM_DESKTOP)
-static inline void draw_gui_browser_local_level_file_new_button(gui_list_entry_t *entry)
+static inline void draw_gui_browser_local_level_file_new_button(gui_list_fspath_entry_t *entry)
 {
     Rectangle new_btn_rect = browse_preview_level
         ? local_files_new_button_with_preview_rect
@@ -1095,7 +1318,7 @@ static inline void draw_gui_browser_local_level_file_new_button(gui_list_entry_t
     }
 }
 
-static inline void draw_gui_browser_local_level_file_rename_button(gui_list_entry_t *entry)
+static inline void draw_gui_browser_local_level_file_rename_button(gui_list_fspath_entry_t *entry)
 {
     Rectangle rename_btn_rect = browse_preview_level
         ? local_files_rename_button_with_preview_rect
@@ -1192,12 +1415,12 @@ void draw_gui_browser_local_level_file(void)
 
     draw_gui_browser_list(&local_files);
 
-    gui_list_entry_t *entry = &(local_files.entries[local_files.active]);
+    gui_list_fspath_entry_t *entry = get_gui_list_fspath_entry(&local_files, local_files.active);
 
     level_t *old_browse_preview_level = browse_preview_level;
 
     if (local_files.active >= 0) {
-        preview_entry(entry);
+        preview_entry((gui_list_entry_t *)entry);
     } else {
         disable_preview();
     }
@@ -1211,7 +1434,7 @@ void draw_gui_browser_local_level_file(void)
     draw_gui_browser_local_level_file_new_button(entry);
     draw_gui_browser_local_level_file_rename_button(entry);
 
-    draw_gui_browser_entry_buttons(&local_files, entry);
+    draw_gui_browser_entry_buttons(&local_files, (gui_list_entry_t *)entry);
 }
 
 void draw_gui_browser_finished_levels_history(void)
@@ -1223,13 +1446,13 @@ void draw_gui_browser_finished_levels_history(void)
 
     draw_gui_browser_list(&history);
 
-    gui_list_entry_t *entry = NULL;
+    gui_list_history_entry_t *entry = NULL;
 
     level_t *old_browse_preview_level = browse_preview_level;
 
     if (history.active >= 0) {
-        entry = &(history.entries[history.active]);
-        preview_entry(entry);
+        entry = get_gui_list_history_entry(&history, history.active);
+        preview_entry((gui_list_entry_t *)entry);
     } else {
         disable_preview();
     }
@@ -1240,7 +1463,7 @@ void draw_gui_browser_finished_levels_history(void)
         raygui_paged_list_select_active_page(gui_list);
     }
 
-    draw_gui_browser_entry_buttons(&history, entry);
+    draw_gui_browser_entry_buttons(&history, (gui_list_entry_t *)entry);
 }
 #endif
 

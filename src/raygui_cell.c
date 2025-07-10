@@ -1,6 +1,6 @@
 /****************************************************************************
  *                                                                          *
- * blueprint_string.h                                                       *
+ * raygui_cell.c                                                            *
  *                                                                          *
  * This file is part of hexpuzzle.                                          *
  *                                                                          *
@@ -19,43 +19,50 @@
  *                                                                          *
  ****************************************************************************/
 
-#ifndef BLUEPRINT_STRING_H
-#define BLUEPRINT_STRING_H
+#include "common.h"
+#include "raygui_cell.h"
 
-#include "generate_level.h"
-
-#define BLUEPRINT_STRING_SEED_MAXLEN    (1 + 16 + 1)
-#define BLUEPRINT_STRING_SERIES_MAXLEN  BLUEPRINT_STRING_SEED_MAXLEN
-#define BLUEPRINT_STRING_DENSITY_MAXLEN (1 +  6 + 1)
-#define BLUEPRINT_STRING_COLOR_MAXLEN   (1 +  1 + 1)
-#define BLUEPRINT_STRING_RADIUS_MAXLEN  (1 +  1 + 1)
-#define BLUEPRINT_STRING_FIXED_MAXLEN   (1 +  3 + 1)
-#define BLUEPRINT_STRING_HIDDEN_MAXLEN  (1 +  3 + 1)
-
-#define BLUEPRINT_STRING_MAXLEN (         \
-        BLUEPRINT_STRING_PREFIX_LENGTH  + \
-        BLUEPRINT_STRING_SUFFIX_LENGTH  + \
-        BLUEPRINT_STRING_SEED_MAXLEN    + \
-        BLUEPRINT_STRING_SERIES_MAXLEN  + \
-        BLUEPRINT_STRING_DENSITY_MAXLEN + \
-        BLUEPRINT_STRING_COLOR_MAXLEN   + \
-        BLUEPRINT_STRING_RADIUS_MAXLEN  + \
-        BLUEPRINT_STRING_FIXED_MAXLEN   + \
-        BLUEPRINT_STRING_HIDDEN_MAXLEN  + \
-        1  /* for the '\0' at the end */  \
-    )
-
-typedef char blueprint_string_t[BLUEPRINT_STRING_MAXLEN];
-
-static inline void copy_blueprint_string(char *dst, const char *src)
+void draw_raygui_cell_at(struct raygui_cell *cell, Vector2 position)
 {
-    snprintf(dst, BLUEPRINT_STRING_MAXLEN, "%s", src);
+    Rectangle bounds = {
+        .x = position.x,
+        .y = position.y,
+        .width  = cell->size.x,
+        .height = cell->size.y
+    };
+
+    if (raygui_cell_has_tooltip(cell)) {
+        tooltip(bounds, cell->tooltip);
+    }
 }
 
-const char *serialize_generate_level_params(generate_level_param_t param);
-bool deserialize_generate_level_params(const char *str, generate_level_param_t *result);
 
-const char *blueprint_string_prop_str(const char *str);
+raygui_cell_grid_t *create_raygui_cell_grid(raygui_cell_header_t *headers, int header_count)
+{
+    raygui_cell_grid_t *grid = calloc(1, sizeof(raygui_cell_grid_t));
 
-#endif /*BLUEPRINT_STRING_H*/
+    grid->headers = headers;
+    grid->columns = header_count;
+
+    return grid;
+}
+
+void destroy_raygui_cell_grid(raygui_cell_grid_t *grid)
+{
+    if (grid) {
+        SAFEFREE(grid->cell);
+        SAFEFREE(grid);
+    }
+}
+
+raygui_cell_t **raygui_cell_grid_alloc_rows(raygui_cell_grid_t *grid, int rows)
+{
+    if (grid->cell) {
+        SAFEFREE(grid->cell);
+    }
+
+    grid->cell = calloc(rows, sizeof(raygui_cell_t *));
+
+    return grid->cell;
+}
 

@@ -84,6 +84,20 @@ const char *symmetry_mode_string(symmetry_mode_t mode)
     }
 }
 
+const char *symmetry_mode_string_prop_str(symmetry_mode_t mode)
+{
+    switch (mode) {
+    case SYMMETRY_MODE_NONE:
+        return "";
+    case SYMMETRY_MODE_REFLECT:
+        return " RFL";
+    case SYMMETRY_MODE_ROTATE:
+        return " ROT";
+    default:
+        __builtin_unreachable();
+    }
+}
+
 symmetry_mode_t parse_symmetry_mode_string(const char *string)
 {
     if (string) {
@@ -839,3 +853,14 @@ struct level *generate_random_level_simple(const char *purpose)
 
     return generate_random_level(&param, purpose);
 }
+
+struct level *generate_level_from_blueprint(const char *blueprint, const char *purpose)
+{
+    generate_level_param_t param = {0};
+    if (deserialize_generate_level_params(blueprint, &param)) {
+        return generate_random_level(&param, purpose);
+    } else {
+        return NULL;
+    }
+}
+

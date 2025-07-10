@@ -449,17 +449,17 @@ am__hexpuzzle_SOURCES_DIST = src/background.h src/background.c \
 	src/numeric.h src/numeric.c src/nvdata.h src/nvdata.c \
 	src/nvdata_finished.h src/nvdata_finished.c src/options.h \
 	src/options.c src/path.h src/path.c src/range.h src/range.c \
-	src/raygui_impl.c src/raygui_paged_list.h \
-	src/raygui_paged_list.c src/raylib_gui_numeric.h \
-	src/raylib_gui_numeric.c src/raylib_helper.h \
-	src/raylib_helper.c src/startup_action.h src/startup_action.c \
-	src/shader.h src/shader.c src/solve_timer.h src/solve_timer.c \
-	src/solver.h src/solver.c src/textures.h src/textures.c \
-	src/tile.h src/tile.c src/tile_draw.h src/tile_draw.c \
-	src/tile_pos.h src/tile_pos.c src/util.h src/util.c \
-	src/win_anim.h src/win_anim.c src/win_anim_mode_config.h \
-	src/win_anim_mode_config.c src/common.h src/main.c \
-	src/physics.h src/physics.c
+	src/raygui_cell.h src/raygui_cell.c src/raygui_impl.c \
+	src/raygui_paged_list.h src/raygui_paged_list.c \
+	src/raylib_gui_numeric.h src/raylib_gui_numeric.c \
+	src/raylib_helper.h src/raylib_helper.c src/startup_action.h \
+	src/startup_action.c src/shader.h src/shader.c \
+	src/solve_timer.h src/solve_timer.c src/solver.h src/solver.c \
+	src/textures.h src/textures.c src/tile.h src/tile.c \
+	src/tile_draw.h src/tile_draw.c src/tile_pos.h src/tile_pos.c \
+	src/util.h src/util.c src/win_anim.h src/win_anim.c \
+	src/win_anim_mode_config.h src/win_anim_mode_config.c \
+	src/common.h src/main.c src/physics.h src/physics.c
 @USE_PHYSICS_TRUE@am__objects_34 = src/hexpuzzle-physics.$(OBJEXT)
 am_hexpuzzle_OBJECTS = src/hexpuzzle-background.$(OBJEXT) \
 	src/hexpuzzle-blueprint_string.$(OBJEXT) \
@@ -484,6 +484,7 @@ am_hexpuzzle_OBJECTS = src/hexpuzzle-background.$(OBJEXT) \
 	src/hexpuzzle-nvdata_finished.$(OBJEXT) \
 	src/hexpuzzle-options.$(OBJEXT) src/hexpuzzle-path.$(OBJEXT) \
 	src/hexpuzzle-range.$(OBJEXT) \
+	src/hexpuzzle-raygui_cell.$(OBJEXT) \
 	src/hexpuzzle-raygui_impl.$(OBJEXT) \
 	src/hexpuzzle-raygui_paged_list.$(OBJEXT) \
 	src/hexpuzzle-raylib_gui_numeric.$(OBJEXT) \
@@ -1768,17 +1769,17 @@ hexpuzzle_SOURCES = src/background.h src/background.c \
 	src/numeric.h src/numeric.c src/nvdata.h src/nvdata.c \
 	src/nvdata_finished.h src/nvdata_finished.c src/options.h \
 	src/options.c src/path.h src/path.c src/range.h src/range.c \
-	src/raygui_impl.c src/raygui_paged_list.h \
-	src/raygui_paged_list.c src/raylib_gui_numeric.h \
-	src/raylib_gui_numeric.c src/raylib_helper.h \
-	src/raylib_helper.c src/startup_action.h src/startup_action.c \
-	src/shader.h src/shader.c src/solve_timer.h src/solve_timer.c \
-	src/solver.h src/solver.c src/textures.h src/textures.c \
-	src/tile.h src/tile.c src/tile_draw.h src/tile_draw.c \
-	src/tile_pos.h src/tile_pos.c src/util.h src/util.c \
-	src/win_anim.h src/win_anim.c src/win_anim_mode_config.h \
-	src/win_anim_mode_config.c src/common.h src/main.c \
-	$(am__append_5)
+	src/raygui_cell.h src/raygui_cell.c src/raygui_impl.c \
+	src/raygui_paged_list.h src/raygui_paged_list.c \
+	src/raylib_gui_numeric.h src/raylib_gui_numeric.c \
+	src/raylib_helper.h src/raylib_helper.c src/startup_action.h \
+	src/startup_action.c src/shader.h src/shader.c \
+	src/solve_timer.h src/solve_timer.c src/solver.h src/solver.c \
+	src/textures.h src/textures.c src/tile.h src/tile.c \
+	src/tile_draw.h src/tile_draw.c src/tile_pos.h src/tile_pos.c \
+	src/util.h src/util.c src/win_anim.h src/win_anim.c \
+	src/win_anim_mode_config.h src/win_anim_mode_config.c \
+	src/common.h src/main.c $(am__append_5)
 dist_EXTRA_hexpuzzle_SOURCES = \
 	src/data_classics_levels.h  \
 	src/data_fonts.h            \
@@ -2380,6 +2381,8 @@ src/hexpuzzle-path.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-range.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
+src/hexpuzzle-raygui_cell.$(OBJEXT): src/$(am__dirstamp) \
+	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-raygui_impl.$(OBJEXT): src/$(am__dirstamp) \
 	src/$(DEPDIR)/$(am__dirstamp)
 src/hexpuzzle-raygui_paged_list.$(OBJEXT): src/$(am__dirstamp) \
@@ -2528,6 +2531,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-path.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-physics.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-range.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raygui_cell.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raygui_impl.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raygui_paged_list.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@src/$(DEPDIR)/hexpuzzle-raylib_gui_numeric.Po@am__quote@
@@ -3680,6 +3684,20 @@ src/hexpuzzle-range.obj: src/range.c
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/range.c' object='src/hexpuzzle-range.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-range.obj `if test -f 'src/range.c'; then $(CYGPATH_W) 'src/range.c'; else $(CYGPATH_W) '$(srcdir)/src/range.c'; fi`
+
+src/hexpuzzle-raygui_cell.o: src/raygui_cell.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-raygui_cell.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-raygui_cell.Tpo -c -o src/hexpuzzle-raygui_cell.o `test -f 'src/raygui_cell.c' || echo '$(srcdir)/'`src/raygui_cell.c
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-raygui_cell.Tpo src/$(DEPDIR)/hexpuzzle-raygui_cell.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/raygui_cell.c' object='src/hexpuzzle-raygui_cell.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-raygui_cell.o `test -f 'src/raygui_cell.c' || echo '$(srcdir)/'`src/raygui_cell.c
+
+src/hexpuzzle-raygui_cell.obj: src/raygui_cell.c
+@am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-raygui_cell.obj -MD -MP -MF src/$(DEPDIR)/hexpuzzle-raygui_cell.Tpo -c -o src/hexpuzzle-raygui_cell.obj `if test -f 'src/raygui_cell.c'; then $(CYGPATH_W) 'src/raygui_cell.c'; else $(CYGPATH_W) '$(srcdir)/src/raygui_cell.c'; fi`
+@am__fastdepCC_TRUE@	$(AM_V_at)$(am__mv) src/$(DEPDIR)/hexpuzzle-raygui_cell.Tpo src/$(DEPDIR)/hexpuzzle-raygui_cell.Po
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	$(AM_V_CC)source='src/raygui_cell.c' object='src/hexpuzzle-raygui_cell.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCC_FALSE@	DEPDIR=$(DEPDIR) $(CCDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCC_FALSE@	$(AM_V_CC@am__nodep@)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -c -o src/hexpuzzle-raygui_cell.obj `if test -f 'src/raygui_cell.c'; then $(CYGPATH_W) 'src/raygui_cell.c'; else $(CYGPATH_W) '$(srcdir)/src/raygui_cell.c'; fi`
 
 src/hexpuzzle-raygui_impl.o: src/raygui_impl.c
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(hexpuzzle_CFLAGS) $(CFLAGS) -MT src/hexpuzzle-raygui_impl.o -MD -MP -MF src/$(DEPDIR)/hexpuzzle-raygui_impl.Tpo -c -o src/hexpuzzle-raygui_impl.o `test -f 'src/raygui_impl.c' || echo '$(srcdir)/'`src/raygui_impl.c

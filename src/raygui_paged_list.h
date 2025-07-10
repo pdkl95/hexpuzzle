@@ -22,10 +22,22 @@
 #ifndef RAYGUI_PAGED_LIST_H
 #define RAYGUI_PAGED_LIST_H
 
+#include "raygui_cell.h"
+
 struct raygui_paged_list;
 
-
 typedef void (*raygui_paged_list_selected_cb_t)(struct raygui_paged_list *list);
+
+#define MAX_PAGED_LIST_COLUMNS 8
+#define MAX_PAGED_LIST_COLUMN_TEXT_WIDTH UI_NAME_MAXLEN
+
+struct raygui_paged_list_column {
+    Rectangle bounds;
+    char name[NAME_MAXLEN];
+    float max_width;
+    bool active;
+};
+typedef struct raygui_paged_list_column raygui_paged_list_column_t;
 
 struct raygui_paged_list {
     Rectangle bounds;
@@ -44,6 +56,8 @@ struct raygui_paged_list {
     int page_count;
     int first_page;
     int last_page;
+
+    int active_columns;
 
     const char **text;
     int text_count;

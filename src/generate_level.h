@@ -65,12 +65,16 @@ typedef struct generate_level_param generate_level_param_t;
 void print_generate_level_param(generate_level_param_t *param);
 
 const char *symmetry_mode_string(symmetry_mode_t mode);
+const char *symmetry_mode_string_prop_str(symmetry_mode_t mode);
+
 symmetry_mode_t parse_symmetry_mode_string(const char *string);
 
 bool parse_random_seed_str(char *seedstr, uint64_t *dst);
 
 struct level *generate_random_level(generate_level_param_t *param, const char *purpose);
 struct level *generate_random_level_simple(const char *purpose);
+
+struct level *generate_level_from_blueprint(const char *blueprint, const char *purpose);
 
 struct level *generate_blank_level(void);
 struct level *generate_random_title_level(void);

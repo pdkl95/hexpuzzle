@@ -191,7 +191,7 @@ static inline void raygui_paged_list_draw_sidebar(raygui_paged_list_t *list)
     }
 }
 
-void raygui_paged_list_draw(raygui_paged_list_t *list)
+static void raygui_paged_list_draw_text_rows(raygui_paged_list_t *list)
 {
     assert_not_null(list);
 
@@ -301,6 +301,11 @@ void raygui_paged_list_draw(raygui_paged_list_t *list)
     Vector2 textpos = getVector2FromRectangle(list->gui_list_bounds);
     draw_panel_text(TextFormat("page = %d", list->page), textpos, YELLOW);
 #endif
+}
+
+void raygui_paged_list_draw(raygui_paged_list_t *list)
+{
+    raygui_paged_list_draw_text_rows(list);
 }
 
 int raygui_paged_list_draw_as_listview(Rectangle bounds, const char **text, int count, int *scrollIndex, int *active, int *focus)

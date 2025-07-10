@@ -159,11 +159,12 @@ void nvdata_mark_finished(struct level *level)
 {
     assert_not_null(level);
 
-    if (!level->finished || demo_mode) {
+    if (!level->finished || demo_mode || !options->log_finished_levels) {
         return;
     }
 
     struct finished_level entry = {0};
+    finished_level_set_name(&entry, level->name);
     finished_level_set_win_time(&entry, level->win_time);
     finished_level_set_elapsed_time(&entry, &level->elapsed_time);
     if (level->blueprint) {
@@ -179,7 +180,7 @@ void nvdata_unmark_finished(struct level *level)
 {
     assert_not_null(level);
 
-    if (!level->have_id) {
+    if (!level->have_id || !options->log_finished_levels) {
         return;
     }
 
@@ -241,15 +242,29 @@ bool nvdata_finished_from_json(cJSON *json)
 
         cJSON *flags_json = cJSON_GetObjectItem(level_json, "flags");
         if (!cJSON_IsNumber(flags_json)) {
-            printf(">>>\n");
-            print_cjson(flags_json);
-            printf("<<<\n");
             errmsg("Error parsing nvdata finished level JSON [%d]: 'flags' is not a Number", count);
             return false;
         }
         e.flags = flags_json->valueint;
 
-        if (e.flags & FINISHED_LEVEL_FLAG_ELAPSED_TIME) {
+        if (finished_level_has_name(&e)) {
+            cJSON *name_json = cJSON_GetObjectItem(level_json, "name");
+            if (name_json) {
+                if (!cJSON_IsString(name_json)) {
+                    errmsg("Error parsing nvdata finished level JSON [%d]: 'name' is not a String", count);
+                    return false;
+                }
+                finished_level_set_name(&e, name_json->valuestring);
+            } else {
+                warnmsg("Error parsing nvdata finished level JSON [%d]: 'name' is missing - using the 'id' field as substitute", count);
+                snprintf(&e.name, NAME_MAXLEN, "%s", e.id);
+                finished_level_set_name(&e, e.id);
+            }
+        } else {
+            finished_level_clear_name(&e);
+        }
+
+        if (finished_level_has_elapsed_time(&e)) {
             cJSON *elapsed_time_json = cJSON_GetObjectItem(level_json, "elapsed_time");
             if (!cJSON_IsString(elapsed_time_json)) {
                 errmsg("Error parsing nvdata finished level JSON [%d]: 'elapsed_time' is not a String", count);
@@ -262,7 +277,7 @@ bool nvdata_finished_from_json(cJSON *json)
             finished_level_clear_elapsed_time(&e);
         }
 
-        if (e.flags & FINISHED_LEVEL_FLAG_WIN_TIME) {
+        if (finished_level_has_win_time(&e)) {
             cJSON *win_time_json = cJSON_GetObjectItem(level_json, "win_time");
             if (!cJSON_IsString(win_time_json)) {
                 errmsg("Error parsing nvdata finished level JSON [%d]: 'win_time' is not a String", count);
@@ -276,7 +291,7 @@ bool nvdata_finished_from_json(cJSON *json)
             finished_level_clear_win_time(&e);
         }
 
-        if (e.flags & FINISHED_LEVEL_FLAG_BLUEPRINT) {
+        if (finished_level_has_blueprint(&e)) {
             cJSON *blueprint_json = cJSON_GetObjectItem(level_json, "blueprint");
             if (!cJSON_IsString(blueprint_json)) {
                 errmsg("Error parsing nvdata finished level JSON [%d]: 'blueprint' is not a String", count);
@@ -350,19 +365,25 @@ cJSON *nvdata_finished_to_json(void)
             goto json_err;
         }
 
-        if (e->flags & FINISHED_LEVEL_FLAG_WIN_TIME) {
+        if (finished_level_has_name(&e)) {
+            if (cJSON_AddStringToObject(level_json, "name", e->name) == NULL) {
+                goto json_err;
+            }
+        }
+
+        if (finished_level_has_win_time(&e)) {
             if (cJSON_AddStringToObject(level_json, "win_time", win_time_str) == NULL) {
                 goto json_err;
             }
         }
 
-        if (e->flags & FINISHED_LEVEL_FLAG_ELAPSED_TIME) {
+        if (finished_level_has_elapsed_time(&e)) {
             if (cJSON_AddStringToObject(level_json, "elapsed_time", elapsed_time_str) == NULL) {
                 goto json_err;
             }
         }
 
-        if (e->flags & FINISHED_LEVEL_FLAG_BLUEPRINT) {
+        if (finished_level_has_blueprint(&e)) {
             if (cJSON_AddStringToObject(level_json, "blueprint", e->blueprint) == NULL) {
                 goto json_err;
             }
@@ -428,6 +449,11 @@ void load_nvdata_finished_levels(void)
 
 void save_nvdata_finished_levels(void)
 {
+    if (!options->log_finished_levels) {
+        infomsg("Skipping saving finished level data (option \"log-finished-levels\" is disabled))");
+        return;
+    }
+
     if (demo_mode) {
         infomsg("Skipping saving finished level data (demo mode is enabled)");
         return;
