@@ -3043,7 +3043,7 @@ void raylib_trace_log_cb(int logLevel, const char *text, va_list args)
 
 void gfx_init(void)
 {
-    if (options->verbose) {
+    if (options->verbose_raylib) {
         SetTraceLogLevel(LOG_INFO);
         raylib_log_level = LOG_INFO;
     } else {

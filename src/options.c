@@ -112,6 +112,8 @@ static char help_text[] =
     "  -E, --allow-edit-mode       Enable the edit button when browsing local files\n"
     "\n"
     "  -v, --verbose               More logging output (including raylib)\n"
+    "                                Use -v/--verbose twice to also enable\n"
+    "                                verbose raylib log messages\n"
     "\n"
     "  -V, --version               Show version information and exit\n"
     "  -h, --help                  Show this help and exit\n"
@@ -427,6 +429,7 @@ options_set_defaults(
     assert_this(options);
 
     options->verbose               = OPTIONS_DEFAULT_VERBOSE;
+    options->verbose_raylib        = OPTIONS_DEFAULT_VERBOSE_RAYLIB;
     options->wait_events           = OPTIONS_DEFAULT_WAIT_EVENTS;
 
     options->allow_edit_mode       = OPTIONZ_DEFAULT_ALLOW_EDIT_MODE;
@@ -804,7 +807,11 @@ options_parse_args(
             break;
 
         case 'v':
-            options->verbose = true;
+            if (options->verbose) {
+                options->verbose_raylib = true;
+            } else {
+                options->verbose = true;
+            }
             break;
 
         case 'V':

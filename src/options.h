@@ -29,6 +29,7 @@
 #include "startup_action.h"
 
 #define OPTIONS_DEFAULT_VERBOSE false
+#define OPTIONS_DEFAULT_VERBOSE_RAYLIB false
 #define OPTIONS_DEFAULT_WAIT_EVENTS false
 #define OPTIONZ_DEFAULT_ALLOW_EDIT_MODE false
 #define OPTIONS_DEFAULT_ANIMATE_BG  true
@@ -88,6 +89,7 @@ typedef enum symmetry_mode symmetry_mode_t;
 struct options {
     bool safe_mode;
     bool verbose;
+    bool verbose_raylib;
     bool wait_events;
 
     color_option_t path_color[PATH_TYPE_COUNT];
