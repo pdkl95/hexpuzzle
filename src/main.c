@@ -107,6 +107,8 @@ Vector2 mouse_positionf;
 bool mouse_left_click  = false;
 bool mouse_left_release  = false;
 bool mouse_right_click = false;
+bool two_click_dnd_in_progress = false;
+double two_click_dnd_start_time = -100.0;
 bool mouse_left_doubleclick = true;
 double last_mouse_click_time = -100.0;
 int current_mouse_cursor = -1;
@@ -970,6 +972,7 @@ static void handle_mouse_events(void)
             mouse_left_click = true;
             render_next_frame_no_waiting = true;
 
+            
             double click_time = GetTime();
             if ((click_time - last_mouse_click_time) < ((float)options->double_click_ms) * 0.001f) {
                 mouse_left_doubleclick = true;
@@ -989,7 +992,21 @@ static void handle_mouse_events(void)
                 //} else if (edit_mode_unsolved) {
                 //    level_drag_start(current_level);
                 } else {
-                    level_drag_start(current_level);
+                    if (options->use_two_click_dnd) {
+                        if (two_click_dnd_in_progress) {
+                            // 2-click DND finish
+                            level_drag_stop(current_level);
+                            two_click_dnd_in_progress = false;
+                        } else {
+                            // 2-click DND start
+                            level_drag_start(current_level);
+                            two_click_dnd_in_progress = true;
+                            two_click_dnd_start_time = GetTime();
+                        }
+                    } else {
+                        // regular DND
+                        level_drag_start(current_level);
+                    }
                 }
             }
         }
@@ -998,7 +1015,25 @@ static void handle_mouse_events(void)
             mouse_left_release = false;
             render_next_frame_no_waiting = true;
             if (do_level_ui_interaction()) {
-                level_drag_stop(current_level);
+                if (options->use_two_click_dnd) {
+                    if (two_click_dnd_in_progress) {
+                        if (current_level) {
+                            if (current_level->drag_target &&
+                                current_level->hover &&
+                                current_level->drag_target != current_level->hover
+                            ) {
+                                // 2-click DND but a held drag event happened anyway
+                                level_drag_stop(current_level);
+                                two_click_dnd_in_progress = false;
+                            }
+                        } else {
+                            two_click_dnd_in_progress = false;
+                        }
+                    }
+                } else {
+                    // regular DND
+                    level_drag_stop(current_level);
+                }
             }
         }
 

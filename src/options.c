@@ -75,6 +75,8 @@ static struct option long_options[] = {
     {  "no-use-shader-effects",       no_argument, 0, 'X' },
     {        "use-solve-timer",       no_argument, 0, 'm' },
     {     "no-use-solve-timer",       no_argument, 0, 'M' },
+    {      "use-two-click-dnd",       no_argument, 0, '2' },
+    {   "no-use-two-click-dnd",       no_argument, 0, '@' },
     {          "show-previews",       no_argument, 0, '-' },
     {       "no-show-previews",       no_argument, 0, '_' },
     {          "show-tooltips",       no_argument, 0, 't' },
@@ -439,6 +441,7 @@ options_set_defaults(
     options->use_physics           = OPTIONS_DEFAULT_USE_PHYSICS;
     options->use_postprocessing    = OPTIONS_DEFAULT_USE_POSTPROCESSING;
     options->use_solve_timer       = OPTIONS_DEFAULT_USE_SOLVE_TIMER;
+    options->use_two_click_dnd     = OPTIONS_DEFAULT_USE_TWO_CLICK_DND;
     options->show_level_previews   = OPTIONS_DEFAULT_SHOW_LEVEL_PREVIEWS;
     options->show_tooltips         = OPTIONS_DEFAULT_SHOW_TOOLTIPS;
     options->log_finished_levels   = OPTIONS_DEFAULT_LOG_FINISHED_LEVELS;
@@ -455,6 +458,7 @@ options_set_defaults(
     options->load_state_use_physics = true;
     options->load_state_use_postprocessing = true;
     options->load_state_use_solve_timer = true;
+    options->load_state_use_two_click_dnd = true;
     options->load_state_show_level_previews = true;
     options->load_state_show_tooltips = true;
     options->load_state_log_finished_levels = true;
@@ -754,6 +758,16 @@ options_parse_args(
         case 'M':
             options->use_solve_timer = false;
             options->load_state_use_solve_timer = false;
+            break;
+
+        case '2':
+            options->use_two_click_dnd = true;
+            options->load_state_use_two_click_dnd = false;
+            break;
+
+        case '@':
+            options->use_two_click_dnd = false;
+            options->load_state_use_two_click_dnd = false;
             break;
 
         case '-':

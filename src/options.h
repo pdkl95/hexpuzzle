@@ -36,7 +36,8 @@
 #define OPTIONS_DEFAULT_ANIMATE_WIN true
 #define OPTIONS_DEFAULT_USE_PHYSICS true
 #define OPTIONS_DEFAULT_USE_POSTPROCESSING true
-#define OPTIONS_DEFAULT_USE_SOLVE_TIMER true
+#define OPTIONS_DEFAULT_USE_SOLVE_TIMER false
+#define OPTIONS_DEFAULT_USE_TWO_CLICK_DND false
 #define OPTIONS_DEFAULT_SHOW_LEVEL_PREVIEWS true
 #define OPTIONS_DEFAULT_SHOW_TOOLTIPS true
 #define OPTIONS_DEFAULT_LOG_FINISHED_LEVELS true
@@ -103,6 +104,7 @@ struct options {
     bool use_physics;
     bool use_postprocessing;
     bool use_solve_timer;
+    bool use_two_click_dnd;
     bool show_level_previews;
     bool show_tooltips;
     bool log_finished_levels;
@@ -112,6 +114,7 @@ struct options {
     bool load_state_use_physics;
     bool load_state_use_postprocessing;
     bool load_state_use_solve_timer;
+    bool load_state_use_two_click_dnd;
     bool load_state_show_level_previews;
     bool load_state_show_tooltips;
     bool load_state_log_finished_levels;

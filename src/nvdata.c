@@ -332,6 +332,9 @@ static bool program_state_from_json(cJSON *json)
         if (options->load_state_use_solve_timer) {
             mk_bool_json(use_solve_timer, use_solve_timer);
         }
+        if (options->load_state_use_two_click_dnd) {
+            mk_bool_json(use_two_click_dnd, use_two_click_dnd);
+        }
         if (options->load_state_show_level_previews) {
             mk_bool_json(show_level_previews, show_level_previews);
         }
@@ -513,6 +516,7 @@ static cJSON *program_state_to_json(void)
     mk_bool_json(use_physics, use_physics);
     mk_bool_json(use_postprocessing, use_postprocessing);
     mk_bool_json(use_solve_timer, use_solve_timer);
+    mk_bool_json(use_two_click_dnd, use_two_click_dnd);
     mk_bool_json(show_level_previews, show_level_previews);
     mk_bool_json(show_tooltips, show_tooltips);
     mk_bool_json(log_finished_levels, log_finished_levels);

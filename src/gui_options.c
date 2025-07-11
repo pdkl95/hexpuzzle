@@ -36,6 +36,7 @@ Rectangle options_anim_bg_rect;
 Rectangle options_anim_win_rect;
 Rectangle options_show_level_previews_rect;
 Rectangle options_show_tooltips_rect;
+Rectangle options_use_two_click_dnd_rect;
 Rectangle options_log_finished_levels_rect;
 Rectangle options_reset_finished_rect;
 Rectangle options_use_postprocessing_rect;
@@ -48,6 +49,7 @@ char options_anim_bg_text[]  = "Animate Background";
 char options_anim_win_text[] = "Animate Winning Levels";
 char options_show_level_previews_text[] = "Show Level Previews";
 char options_show_tooltips_text[] = "Show Tooltips";
+char options_use_two_click_dnd_text[] = "2-Click Drag-and-Drop";
 char options_log_finished_levels_text[] = "Log Finished Levels";
 char options_reset_finished_text[] = "Reset Level Finished Data";
 char options_color_edit_tooltip[] = "Select Color";
@@ -59,6 +61,7 @@ char options_anim_bg_desc_text[]  = "Disable if the animated background is too d
 char options_anim_win_desc_text[] = "Special effects animation that plays when a level is completed.";
 char options_use_postprocessing_desc_text[] = "Postpo4ssing shader effects (blur, warping)";
 char options_use_solve_timer_desc_text[] = "A clock that tracks how long it takes to solve each level.";
+char options_use_two_click_dnd_desc_text[] = "";
 char options_show_level_previews_desc_text[] = "Show small level previews.";
 char options_show_tooltips_desc_text[] = "Show popup tooltips when hovering over some controls.";
 char options_log_finished_levels_desc_text[] = "Save the win time and blueprint string of finished levels in a browsable history log.";
@@ -93,8 +96,9 @@ enum graphics_option_index {
     GRAPHICS_OPTION_USE_PHYSICS         = 3,
     GRAPHICS_OPTION_USE_POSTPROCESSING  = 4,
     GRAPHICS_OPTION_SHOW_LEVEL_PREVIEW  = 5,
-    GRAPHICS_OPTION_SHOW_TOOLTIPS       = 6,
-    GRAPHICS_OPTION_LOG_FINISHED_LEVELS = 7
+    GRAPHICS_OPTION_USE_TWO_CLICK_DND   = 6,
+    GRAPHICS_OPTION_SHOW_TOOLTIPS       = 7,
+    GRAPHICS_OPTION_LOG_FINISHED_LEVELS = 8
 };
 typedef enum graphics_option_index graphics_option_index_t;
 
@@ -130,6 +134,11 @@ gui_bool_option_t graphics_options[] = {
         .rect  = &options_show_level_previews_rect,
         .label = options_show_level_previews_text,
         .desc  = options_show_level_previews_desc_text
+    },
+    {
+        .rect  = &options_use_two_click_dnd_rect,
+        .label = options_use_two_click_dnd_text,
+        .desc  = options_use_two_click_dnd_desc_text
     },
     {
         .rect  = &options_show_tooltips_rect,
@@ -285,6 +294,7 @@ void init_gui_options(void)
     graphics_options[GRAPHICS_OPTION_USE_POSTPROCESSING ].opt = &options->use_postprocessing;
     graphics_options[GRAPHICS_OPTION_SHOW_LEVEL_PREVIEW ].opt = &options->show_level_previews;
     graphics_options[GRAPHICS_OPTION_SHOW_TOOLTIPS      ].opt = &options->show_tooltips;
+    graphics_options[GRAPHICS_OPTION_USE_TWO_CLICK_DND  ].opt = &options->use_two_click_dnd;
     graphics_options[GRAPHICS_OPTION_LOG_FINISHED_LEVELS].opt = &options->log_finished_levels;
 
     for (int i=0; i<NUM_BOOL_OPTIONS; i++) {
@@ -384,8 +394,13 @@ void resize_gui_options(void)
     options_show_level_previews_rect.width = anim_text_size;
     options_show_level_previews_rect.height = TOOL_BUTTON_HEIGHT;
 
+    options_use_two_click_dnd_rect.x = options_area_rect.x;
+    options_use_two_click_dnd_rect.y = options_show_level_previews_rect.y + options_show_level_previews_rect.height + RAYGUI_ICON_SIZE;
+    options_use_two_click_dnd_rect.width = anim_text_size;
+    options_use_two_click_dnd_rect.height = TOOL_BUTTON_HEIGHT;
+
     options_show_tooltips_rect.x = options_area_rect.x;
-    options_show_tooltips_rect.y = options_show_level_previews_rect.y + options_show_level_previews_rect.height + RAYGUI_ICON_SIZE;
+    options_show_tooltips_rect.y = options_use_two_click_dnd_rect.y + options_use_two_click_dnd_rect.height + RAYGUI_ICON_SIZE;
     options_show_tooltips_rect.width = anim_text_size;
     options_show_tooltips_rect.height = TOOL_BUTTON_HEIGHT;
 
