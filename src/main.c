@@ -3320,6 +3320,11 @@ main(
         return EXIT_FAILURE;
     }
 
+    if (options->verbose) {
+        show_version(PACKAGE_NAME ": ");
+        infomsg("");
+    }
+
 #if defined(PLATFORM_DESKTOP)
     if (run_startup_action()) {
         if (startup_action_ok) {

@@ -216,18 +216,20 @@ show_help_cheat(
     printf("%s\n", help_cheat_text);
 }
 
-void
-show_version(
-    void
-) {
-    printf("%s %s\n", PACKAGE_NAME, PACKAGE_VERSION);
-    printf("%s\n", PACKAGE_COPYRIGHT_STRING);
-    printf("License %s: %s\n", PACKAGE_LICENCE, PACKAGE_LICENCE_DESC);
-    printf("This is free software: you are free to change and redistribute it.\n");
-    printf("There is NO WARRANTY, to the extent permitted by law.\n");
-    printf("\n");
-    printf("Written by %s.\n", PACKAGE_AUTHOR);
-    printf("%s\n", PACKAGE_URL);
+void show_version(const char *prefix)
+{
+    if (!prefix) {
+        prefix = "";
+    }
+
+    printf("%s%s %s\n", prefix, PACKAGE_NAME, PACKAGE_VERSION);
+    printf("%s%s\n", prefix, PACKAGE_COPYRIGHT_STRING);
+    printf("%sLicense %s: %s\n", prefix, PACKAGE_LICENCE, PACKAGE_LICENCE_DESC);
+    printf("%sThis is free software: you are free to change and redistribute it.\n", prefix);
+    printf("%sThere is NO WARRANTY, to the extent permitted by law.\n", prefix);
+    printf("%s\n", prefix);
+    printf("%sWritten by %s.\n", prefix, PACKAGE_AUTHOR);
+    printf("%s%s\n", prefix, PACKAGE_URL);
 }
 
 static options_t *
@@ -829,7 +831,7 @@ options_parse_args(
             break;
 
         case 'V':
-            show_version();
+            show_version(NULL);
             exit(0);
             break;
 

@@ -172,6 +172,8 @@ void destroy_options(options_t *options);
 void options_set_defaults(options_t *options);
 bool options_parse_args(options_t *options, int argc, char *argv[]);
 
+void show_version(const char *prefix);
+
 extern options_t *options;
 
 #endif /*OPTIONS_H*/

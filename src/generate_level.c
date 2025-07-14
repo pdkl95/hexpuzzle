@@ -724,9 +724,10 @@ struct level *generate_random_level(generate_level_param_t *param, const char *p
     level->seed = gen_param.seed;
     snprintf(level->name, NAME_MAXLEN, "%s", TextFormat("%d", gen_param.seed));
     if (options->verbose) {
-        infomsg("Generating random level \"%s\" for %s\n<blueprint>%s</blueprint>",
+        infomsg("Generating random level \"%s\" for %s",
                 level->name,
-                purpose ? purpose : "(unknown)",
+                purpose ? purpose : "(unknown)");
+        infomsg("<blueprint>%s</blueprint>",
                 serialize_generate_level_params(gen_param));
     }
 
