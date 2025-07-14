@@ -41,6 +41,7 @@ raygui_paged_list_t *init_raygui_paged_list(raygui_paged_list_t *list, int *page
 
     memset(list, 0, sizeof(raygui_paged_list_t));
 
+    list->mode       = RAYGUI_PAGED_LIST_MODE_PLAIN_TEXT;
     list->page_index = page_index;
     list->active     = active;
     list->focus      = focus;
@@ -59,6 +60,11 @@ raygui_paged_list_t *create_raygui_paged_list(int *page_index, int *active, int 
 
 void cleanup_raygui_paged_list(UNUSED raygui_paged_list_t *list)
 {
+    if (list) {
+        if (list->cell_grid) {
+            destroy_raygui_cell_grid(list->cell_grid);
+        }
+    }
 }
 
 void destroy_raygui_paged_list(raygui_paged_list_t *list)
@@ -67,6 +73,33 @@ void destroy_raygui_paged_list(raygui_paged_list_t *list)
         cleanup_raygui_paged_list(list);
         SAFEFREE(list);
     }
+}
+
+void raygui_paged_list_use_columns(raygui_paged_list_t *list, raygui_cell_header_t *headers, int column_count)
+{
+    assert_not_null(list);
+    assert_not_null(headers);
+    assert(column_count > 0);
+    assert(column_count <= MAX_PAGED_LIST_COLUMNS);
+
+    list->mode = RAYGUI_PAGED_LIST_MODE_CELL_COLUMNS;
+
+    if (list->cell_grid) {
+        destroy_raygui_cell_grid(list->cell_grid);
+    }
+
+    list->cell_grid = create_raygui_cell_grid(headers, column_count);
+}
+
+void raygui_paged_list_alloc_column_cells(raygui_paged_list_t *list, int row_count)
+{
+    list->row_count = row_count;
+    raygui_cell_grid_alloc_cells(list->cell_grid, row_count);
+}
+
+void raygui_paged_list_free_column_cells(raygui_paged_list_t *list)
+{
+    raygui_cell_grid_free_cells(list->cell_grid);
 }
 
 void raygui_paged_list_goto_prev_page(raygui_paged_list_t *list)
@@ -85,16 +118,29 @@ void raygui_paged_list_goto_next_page(raygui_paged_list_t *list)
     }
 }
 
-static void raygui_paged_list_prepare_text(raygui_paged_list_t *list)
+static void raygui_paged_list_prepare_pagination(raygui_paged_list_t *list)
 {
-    if (!list->text || (list->items_per_page < 1)) {
+    assert_not_null(list);
+
+    switch (list->mode) {
+    case RAYGUI_PAGED_LIST_MODE_PLAIN_TEXT:
+        if (!list->text) {
+            return;
+        }
+        break;
+
+    case RAYGUI_PAGED_LIST_MODE_CELL_COLUMNS:
+        break;
+    }
+
+    if (list->items_per_page < 1) {
         return;
     }
 
     assert(list->items_per_page > 1);
 
-    if (list->text_count > 0) {
-        list->page_count = (int)ceilf(((float)list->text_count) / ((float)list->items_per_page));
+    if (list->row_count > 0) {
+        list->page_count = (int)ceilf(((float)list->row_count) / ((float)list->items_per_page));
     } else {
         list->page_count = 1;
     }
@@ -142,7 +188,7 @@ void raygui_paged_list_resize(raygui_paged_list_t *list, Rectangle bounds)
 
     assert(list->items_per_page > 0);
 
-    raygui_paged_list_prepare_text(list);
+    raygui_paged_list_prepare_pagination(list);
 }
 
 void raygui_paged_list_set_selected_callback(raygui_paged_list_t *list, raygui_paged_list_selected_cb_t selected_callback)
@@ -157,9 +203,9 @@ void raygui_paged_list_set_text(raygui_paged_list_t *list, const char **text, in
     assert_not_null(list);
 
     list->text = text;
-    list->text_count = count;
+    list->row_count = count;
 
-    raygui_paged_list_prepare_text(list);
+    raygui_paged_list_prepare_pagination(list);
 }
 
 static inline void raygui_paged_list_draw_sidebar(raygui_paged_list_t *list)
@@ -195,11 +241,18 @@ static void raygui_paged_list_draw_text_rows(raygui_paged_list_t *list)
 {
     assert_not_null(list);
 
-    assert(list->page_count > 0);
+    switch (list->mode) {
+    case RAYGUI_PAGED_LIST_MODE_PLAIN_TEXT:
+        assert(list->page_count > 0);
+        break;
+
+    case RAYGUI_PAGED_LIST_MODE_CELL_COLUMNS:
+        break;
+    }
 
     int start_idx = list->page * list->items_per_page;
     int end_idx = start_idx + list->items_per_page;
-    end_idx = MIN(end_idx, list->text_count);
+    end_idx = MIN(end_idx, list->row_count);
     int visible_items = end_idx - start_idx;
 
     GuiState state = GuiGetState();
@@ -243,57 +296,76 @@ static void raygui_paged_list_draw_text_rows(raygui_paged_list_t *list)
     int   border_width = GuiGetStyle(DEFAULT, BORDER_WIDTH);
     Color border_color = GetColor(GuiGetStyle(LISTVIEW, /*BORDER*/ 0 + state*3));
     Color color        = GetColor(GuiGetStyle(DEFAULT, BACKGROUND_COLOR));
+    Color darker_bg    = ColorBrightness(color, -0.25);
 
     GuiDrawRectangle(list->gui_list_bounds, border_width, border_color, color);
 
     const char **text = list->text;
 
-    for (int i = 0; ((i < visible_items) && (text != NULL)); i++) {
+#define DRAW_RECT(state) do {                                                   \
+        GuiDrawRectangle(item_bounds,                                           \
+                         GuiGetStyle(LISTVIEW, BORDER_WIDTH),                   \
+                         GetColor(GuiGetStyle(LISTVIEW, BORDER_COLOR_##state)), \
+                         GetColor(GuiGetStyle(LISTVIEW, BASE_COLOR_##state)));  \
+    } while(0)
+
+#define DRAW_TEXT(state) do {                                           \
+        switch (list->mode) {                                           \
+        case RAYGUI_PAGED_LIST_MODE_PLAIN_TEXT:                         \
+            GuiDrawText(text[start_idx + i],                            \
+                        row_bounds,                                     \
+                        GuiGetStyle(LISTVIEW, TEXT_ALIGNMENT),          \
+                        GetColor(GuiGetStyle(LISTVIEW,                  \
+                                             TEXT_COLOR_##state)));     \
+            break;                                                      \
+        case RAYGUI_PAGED_LIST_MODE_CELL_COLUMNS:                       \
+            raygui_cell_grid_draw_row(list->cell_grid,                  \
+                                      start_idx + i,                    \
+                                      row_bounds,                       \
+                                      TEXT_COLOR_##state);              \
+            break;                                                      \
+        default:                                                        \
+            assert(false && "bad mode");                                \
+        }                                                               \
+    } while(0)
+
+    bool darker = false;
+
+    for (int i = 0; i < visible_items; i++) {
+        if ((list->mode == RAYGUI_PAGED_LIST_MODE_PLAIN_TEXT) &&
+            (text == NULL)) {
+            break;
+        }
+
+        Rectangle row_bounds = GetTextBounds(DEFAULT, item_bounds);
+
+        if (darker) {
+            DrawRectangleRec(item_bounds, darker_bg);
+        }
+        darker = !darker;
+
         if (state == STATE_DISABLED) {
             if ((start_idx + i) == *list->active) {
-                GuiDrawRectangle(item_bounds,
-                                 GuiGetStyle(LISTVIEW, BORDER_WIDTH),
-                                 GetColor(GuiGetStyle(LISTVIEW, BORDER_COLOR_DISABLED)),
-                                 GetColor(GuiGetStyle(LISTVIEW, BASE_COLOR_DISABLED)));
+                DRAW_RECT(DISABLED);
             }
-
-            GuiDrawText(text[start_idx + i],
-                        GetTextBounds(DEFAULT, item_bounds),
-                        GuiGetStyle(LISTVIEW, TEXT_ALIGNMENT),
-                        GetColor(GuiGetStyle(LISTVIEW, TEXT_COLOR_DISABLED)));
+            DRAW_TEXT(DISABLED);
         } else {
             if ((start_idx + i) == *list->active) {
-                GuiDrawRectangle(item_bounds,
-                                 GuiGetStyle(LISTVIEW, BORDER_WIDTH),
-                                 GetColor(GuiGetStyle(LISTVIEW, BORDER_COLOR_PRESSED)),
-                                 GetColor(GuiGetStyle(LISTVIEW, BASE_COLOR_PRESSED)));
-
-                GuiDrawText(text[start_idx + i],
-                            GetTextBounds(DEFAULT, item_bounds),
-                            GuiGetStyle(LISTVIEW, TEXT_ALIGNMENT),
-                            GetColor(GuiGetStyle(LISTVIEW, TEXT_COLOR_PRESSED)));
-                
+                DRAW_RECT(PRESSED);
+                DRAW_TEXT(PRESSED);
             } else if (((start_idx + i) == *list->focus)) {
-                GuiDrawRectangle(item_bounds,
-                                 GuiGetStyle(LISTVIEW, BORDER_WIDTH),
-                                 GetColor(GuiGetStyle(LISTVIEW, BORDER_COLOR_FOCUSED)),
-                                 GetColor(GuiGetStyle(LISTVIEW, BASE_COLOR_FOCUSED)));
-
-                GuiDrawText(text[start_idx + i],
-                            GetTextBounds(DEFAULT, item_bounds),
-                            GuiGetStyle(LISTVIEW, TEXT_ALIGNMENT),
-                            GetColor(GuiGetStyle(LISTVIEW, TEXT_COLOR_FOCUSED)));
+                DRAW_RECT(FOCUSED);
+                DRAW_TEXT(FOCUSED);
             } else {
-                GuiDrawText(text[start_idx + i],
-                            GetTextBounds(DEFAULT, item_bounds),
-                            GuiGetStyle(LISTVIEW, TEXT_ALIGNMENT),
-                            GetColor(GuiGetStyle(LISTVIEW, TEXT_COLOR_NORMAL)));
+                DRAW_TEXT(NORMAL);
             }
         }
 
         item_bounds.y += (GuiGetStyle(LISTVIEW, LIST_ITEMS_HEIGHT) +
                           GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING));
     }
+#undef DRAW_RECT
+#undef DRAW_TEXT
 
     raygui_paged_list_draw_sidebar(list);
 

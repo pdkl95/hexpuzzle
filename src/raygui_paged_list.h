@@ -31,15 +31,15 @@ typedef void (*raygui_paged_list_selected_cb_t)(struct raygui_paged_list *list);
 #define MAX_PAGED_LIST_COLUMNS 8
 #define MAX_PAGED_LIST_COLUMN_TEXT_WIDTH UI_NAME_MAXLEN
 
-struct raygui_paged_list_column {
-    Rectangle bounds;
-    char name[NAME_MAXLEN];
-    float max_width;
-    bool active;
+enum raygui_paged_list_mode {
+    RAYGUI_PAGED_LIST_MODE_PLAIN_TEXT   = 0,
+    RAYGUI_PAGED_LIST_MODE_CELL_COLUMNS = 1
 };
-typedef struct raygui_paged_list_column raygui_paged_list_column_t;
+typedef enum raygui_paged_list_mode raygui_paged_list_mode_t;
 
 struct raygui_paged_list {
+    raygui_paged_list_mode_t mode;
+
     Rectangle bounds;
     Rectangle gui_list_bounds;
     Rectangle gui_item_bounds;
@@ -60,7 +60,8 @@ struct raygui_paged_list {
     int active_columns;
 
     const char **text;
-    int text_count;
+    int row_count;
+    raygui_cell_grid_t *cell_grid;
 
     int *page_index;
     int *active;
@@ -90,6 +91,16 @@ raygui_paged_list_t *create_raygui_paged_list(int *page_index,
                                               int *focus);
 void cleanup_raygui_paged_list(raygui_paged_list_t *list);
 void destroy_raygui_paged_list(raygui_paged_list_t *list);
+
+void raygui_paged_list_use_columns(raygui_paged_list_t *list, raygui_cell_header_t *headers, int column_count);
+
+void raygui_paged_list_alloc_column_cells(raygui_paged_list_t *list, int row_count);
+void raygui_paged_list_free_column_cells(raygui_paged_list_t *list);
+
+static inline raygui_cell_t *raygui_paged_list_get_cell(raygui_paged_list_t *list, int row, int column)
+{
+    return raygui_cell_grid_get_cell(list->cell_grid, row, column);
+}
 
 void raygui_paged_list_resize(raygui_paged_list_t *list, Rectangle bounds);
 

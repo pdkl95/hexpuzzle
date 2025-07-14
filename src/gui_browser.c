@@ -177,7 +177,6 @@ struct gui_list_vars {
     gui_list_entry_t *entries;
 
     raygui_cell_header_t *history_headers;
-    raygui_cell_grid_t *history_grid;
 
     int count;
 
@@ -201,7 +200,6 @@ gui_list_vars_t classics = {
     .names                 = NULL,
     .entries               = (gui_list_entry_t *)classics_entries,
     .history_headers       = NULL,
-    .history_grid          = NULL,
     .count                 = NUM_CLASSICS_NAMES,
     .list_rect             = &browser_list_rect,
     .list_rect_preview     = &browser_list_with_preview_rect,
@@ -225,7 +223,6 @@ gui_list_vars_t local_files = {
     .names                 = NULL,
     .entries               = NULL,
     .history_headers       = NULL,
-    .history_grid          = NULL,
     .count                 = 0,
     .list_rect             = &local_files_list_rect,
     .list_rect_preview     = &local_files_list_with_preview_rect,
@@ -243,7 +240,6 @@ gui_list_vars_t local_files = {
 gui_list_vars_t history = {
     .names                 = NULL,
     .entries               = NULL,
-    .history_grid          = NULL,
     .history_headers       = history_headers,
     .count                 = 0,
     .list_rect             = &local_files_list_rect,
@@ -681,7 +677,14 @@ static level_t *entry_load_level(gui_list_entry_t *entry)
 
 void preview_entry(gui_list_entry_t *entry)
 {
-    if (entry->type != ENTRY_TYPE_LEVEL_FILE) {
+    switch (entry->type) {
+    case ENTRY_TYPE_LEVEL_FILE:
+        break;
+
+    case ENTRY_TYPE_FINISHED_LEVEL:
+        break;
+
+    default:
         browse_preview_level = NULL;
         return;
     }
@@ -836,19 +839,16 @@ void setup_browse_history(void)
 
     history.count = finished_levels.count;
 
-    if (!history.history_grid) {
-        history.history_grid = create_raygui_cell_grid(history.history_headers, NUM_HISTORY_COLUMNS);
-    }
-
     if (history.entries) {
         SAFEFREE(history.entries);
     }
     history.entries = calloc(finished_levels.count, sizeof(gui_list_history_entry_t));
 
-    raygui_cell_t **cell_rows = raygui_cell_grid_alloc_rows(history.history_grid, finished_levels.count);
+    raygui_paged_list_alloc_column_cells(history.gui_list,         finished_levels.count);
+    raygui_paged_list_alloc_column_cells(history.gui_list_preview, finished_levels.count);
 
     struct finished_level * fl = NULL;
-    struct sglib_finished_level_iterator it;\
+    struct sglib_finished_level_iterator it;
 
     int count = 0;
 
@@ -857,24 +857,57 @@ void setup_browse_history(void)
         fl = sglib_finished_level_it_next(&it), count++
     ) {
         gui_list_history_entry_t *entry  = get_gui_list_history_entry(&history, count);
-        cell_rows[count] = entry->cells;
+        //cell_rows[count] = entry->cells;
 
         entry->finished_level = fl;
+        assert_not_null(entry->finished_level);
 
         gui_list_entry_type_t type = ENTRY_TYPE_FINISHED_LEVEL;
         gui_list_entry_status_t status = ENTRY_STATUS_LOAD_OK;
 
         for (int col=0; col<NUM_HISTORY_COLUMNS; col++) {
             raygui_cell_header_t *header = &(history.history_headers[col]);
-            raygui_cell_t        *cell   = &(entry->cells[col]);
+            raygui_cell_t *cell          = raygui_paged_list_get_cell(history.gui_list, count, col);
+            raygui_cell_t *cell_preview  = raygui_paged_list_get_cell(history.gui_list_preview, count, col);
 
             cell->mode   = header->mode;
             cell->header = header;
+
+            cell_preview->mode   = cell->mode;
+            cell_preview->header = cell->header;
         }
 
         {
-            raygui_cell_t *cell = &(entry->cells[HISTORY_COLUMN_NAME]);
-            cell->cell_text.text_src = entry->name;
+            raygui_cell_t *cell          = raygui_paged_list_get_cell(history.gui_list,
+                                                                      count,
+                                                                      HISTORY_COLUMN_PLAY_TYPE);
+            raygui_cell_t *cell_preview  = raygui_paged_list_get_cell(history.gui_list_preview,
+                                                                      count,
+                                                                      HISTORY_COLUMN_PLAY_TYPE);
+            if (finished_level_has_blueprint(fl)) {
+                cell->icon         = ICON_FILETYPE_TEXT;
+                cell_preview->icon = ICON_FILETYPE_TEXT;
+                cell->icon_color         = blueprint_color;
+                cell_preview->icon_color = blueprint_color;
+            } else {
+                entry->extra[0] = '\n';
+                status = ENTRY_STATUS_NOT_LOADABLE;
+                cell->icon               = ICON_CROSS_SMALL;
+                cell_preview->icon       = ICON_CROSS_SMALL;
+                cell->icon_color         = RED;
+                cell_preview->icon_color = RED;
+            }
+        }
+
+        {
+            raygui_cell_t *cell          = raygui_paged_list_get_cell(history.gui_list,
+                                                                      count,
+                                                                      HISTORY_COLUMN_NAME);
+            raygui_cell_t *cell_preview  = raygui_paged_list_get_cell(history.gui_list_preview,
+                                                                      count,
+                                                                      HISTORY_COLUMN_NAME);
+            cell->text = entry->name;
+            cell_preview->text = entry->name;
 
             if (finished_level_has_name(fl)) {
                 snprintf(entry->name, NAME_MAXLEN, "%s", fl->name);
@@ -884,8 +917,14 @@ void setup_browse_history(void)
         }
 
         {
-            raygui_cell_t *cell = &(entry->cells[HISTORY_COLUMN_WIN_DATE]);
-            cell->cell_text.text_src = entry->win_time;
+            raygui_cell_t *cell          = raygui_paged_list_get_cell(history.gui_list,
+                                                                      count,
+                                                                      HISTORY_COLUMN_WIN_DATE);
+            raygui_cell_t *cell_preview  = raygui_paged_list_get_cell(history.gui_list_preview,
+                                                                      count,
+                                                                      HISTORY_COLUMN_WIN_DATE);
+            cell->text         = entry->win_time;
+            cell_preview->text = entry->win_time;
 
             if (finished_level_has_win_time(fl)) {
                 struct tm *tm = gmtime(&(fl->win_time));
@@ -896,8 +935,15 @@ void setup_browse_history(void)
         }
 
         {
-            raygui_cell_t *cell = &(entry->cells[HISTORY_COLUMN_TIME]);
-            cell->cell_text.text_src = entry->elapsed_time;
+            raygui_cell_t *cell          = raygui_paged_list_get_cell(history.gui_list,
+                                                                      count,
+                                                                      HISTORY_COLUMN_TIME);
+            raygui_cell_t *cell_preview  = raygui_paged_list_get_cell(history.gui_list_preview,
+                                                                      count,
+                                                                      HISTORY_COLUMN_TIME);
+
+            cell->text         = entry->elapsed_time;
+            cell_preview->text = entry->elapsed_time;
 
             if (finished_level_has_elapsed_time(fl)) {
                 snprintf(entry->elapsed_time, NAME_MAXLEN, "%s",
@@ -907,22 +953,15 @@ void setup_browse_history(void)
             }
         }
 
-        {
-            raygui_cell_t *cell = &(entry->cells[HISTORY_COLUMN_EXTRA]);
-            cell->cell_text_and_icon.text.text_src = entry->extra;
-
-            if (finished_level_has_blueprint(fl)) {
-                snprintf(entry->extra, NAME_MAXLEN, "%s", blueprint_string_prop_str(fl->blueprint));
-                cell->cell_text_and_icon.icon.icon = ICON_OK_TICK;
-            } else {
-                entry->extra[0] = '\n';
-                status = ENTRY_STATUS_NOT_LOADABLE;
-                cell->cell_text_and_icon.icon.icon = ICON_CROSS_SMALL;
-            }
-        }
-
         if (options->verbose) {
-            //infomsg("SCAN> %s (%s, %s)", name, entry_type_str(type), entry_status_str(status));
+            infomsg("HIST[%d] \"%s\" \"%s\" \"%s\" \"%s\" (%s, %s)",
+                    count,
+                    entry->name,
+                    entry->win_time,
+                    entry->elapsed_time,
+                    entry->extra,
+                    entry_type_str(type),
+                    entry_status_str(status));
         }
 
         entry->common.type   = type;
@@ -933,7 +972,8 @@ void setup_browse_history(void)
     history.active       = -1;
     history.focus        = -1;
 
-    prepare_gui_list_names(&history);
+    raygui_paged_list_resize(history.gui_list_preview, *local_files.list_rect_preview);
+    raygui_paged_list_resize(history.gui_list,         *local_files.list_rect);
 }
 #endif
 
@@ -968,6 +1008,9 @@ void init_gui_browser(void)
                            &(history.scroll_index),
                            &(history.active),
                            &(history.focus));
+
+    raygui_paged_list_use_columns(history.gui_list,         history_headers, NUM_HISTORY_COLUMNS);
+    raygui_paged_list_use_columns(history.gui_list_preview, history_headers, NUM_HISTORY_COLUMNS);
 #else
     browser_tabbar_text[1] = NULL;
     browser_tabbar_text[2] = NULL;
@@ -999,8 +1042,6 @@ void cleanup_gui_browser(void)
     if (local_files.names) {
         free_local_files_data();
     }
-
-    SAFEFREE(history.history_grid);
 #endif
 
     cleanup_raygui_paged_list(classics.gui_list);

@@ -50,44 +50,19 @@ enum raygui_cell_mode {
 };
 typedef enum raygui_cell_mode raygui_cell_mode_t;
 
-struct raygui_cell_text {
-    char text[RAYGUI_CELL_TEXT_MAXLEN];
-    char *text_src;
-    Color color;
-};
-typedef struct raygui_cell_text raygui_cell_text_t;
-
-struct raygui_cell_icon {
-    int icon;
-    IconStr icon_str;
-    Color color;
-};
-typedef struct raygui_cell_icon raygui_cell_icon_t;
-
-struct raygui_cell_text_and_icon {
-    raygui_cell_text_t text;
-    raygui_cell_icon_t icon;
-};
-typedef struct raygui_cell_text_and_icon raygui_cell_text_and_icon_t;
-
 struct raygui_cell {
     raygui_cell_mode_t mode;
-
-    union {
-        raygui_cell_text_t          cell_text;
-        raygui_cell_icon_t          cell_icon;
-        raygui_cell_text_and_icon_t cell_text_and_icon;
-    };
-    
-    Vector2 size;
     char *tooltip;
 
     uint16_t flags;
 
-    struct raygui_cell_header *header;
+    char *text;
+    Color text_color;
 
-    struct raygui_cell *next_row_cell;
-    struct raygui_cell *next_column_cell;
+    int icon;
+    Color icon_color;
+
+    struct raygui_cell_header *header;
 };
 typedef struct raygui_cell raygui_cell_t;
 
@@ -97,19 +72,40 @@ struct raygui_cell_header {
     float width;
     char text[RAYGUI_CELL_TEXT_MAXLEN];
     char tooltip[RAYGUI_CELL_TOOLTIP_MAXLEN];
-
-    struct raygui_cell *first_column_cell;
 };
 typedef struct raygui_cell_header raygui_cell_header_t;
 
 struct raygui_cell_grid {
     raygui_cell_header_t *headers;
-    raygui_cell_t **cell;
+    raygui_cell_t *cells;
 
     int columns;
     int rows;
+
+    int cell_count;
 };
 typedef struct raygui_cell_grid raygui_cell_grid_t;
+
+static inline int raygui_cell_grid_cell_index(raygui_cell_grid_t *grid, int row, int column)
+{
+    assert_not_null(grid);
+    assert(   row >= 0);
+    assert(column >= 0);
+    assert(   row < grid->rows);
+    assert(column < grid->columns);
+
+    return (grid->columns * row) + column;
+}
+
+static inline raygui_cell_t *raygui_cell_grid_get_cell(raygui_cell_grid_t *grid, int row, int column)
+{
+    assert_not_null(grid);
+    assert_not_null(grid->cells);
+
+    int index = raygui_cell_grid_cell_index(grid, row, column);
+
+    return &(grid->cells[index]);
+}
 
 /**************************************************************/
 
@@ -179,12 +175,15 @@ static inline bool raygui_cell_has_tooltip(struct raygui_cell *cell)
 
 /**************************************************************/
 
-void draw_raygui_cell_at(struct raygui_cell *cell, Vector2 position);
+void draw_raygui_cell_at(struct raygui_cell *cell, Rectangle bounds, int state);
 
 raygui_cell_grid_t *create_raygui_cell_grid(raygui_cell_header_t *headers, int header_count);
 void destroy_raygui_cell_grid(raygui_cell_grid_t *grid);
 
-raygui_cell_t **raygui_cell_grid_alloc_rows(raygui_cell_grid_t *grid, int rows);
+void raygui_cell_grid_alloc_cells(raygui_cell_grid_t *grid, int rows);
+void raygui_cell_grid_free_cells(raygui_cell_grid_t *grid);
+
+void raygui_cell_grid_draw_row(raygui_cell_grid_t *grid, int row, Rectangle row_bounds, int state);
 
 #endif /*RAYGUI_CELL_H*/
 
