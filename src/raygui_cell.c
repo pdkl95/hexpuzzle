@@ -22,13 +22,24 @@
 #include "common.h"
 #include "raygui_cell.h"
 
+void raygui_cell_use_tooltip(struct raygui_cell *cell, const char *str)
+{
+    if (str) {
+        raygui_cell_set_tooltip(cell);
+        cell->tooltip = str;
+    } else {
+        raygui_cell_clear_tooltip(cell);
+        cell->tooltip = NULL;
+    }
+}
+
 void draw_raygui_cell_at(struct raygui_cell *cell, Rectangle bounds, int state)
 {
     Rectangle inner_bounds = {
         .x = bounds.x,
         .y = bounds.y,
-        .width  = cell->header->size.x,
-        .height = cell->header->size.y
+        .width  = cell->header->bounds.width,
+        .height = cell->header->bounds.height
     };
     Vector2 position = {
         .x = inner_bounds.x,
@@ -39,6 +50,35 @@ void draw_raygui_cell_at(struct raygui_cell *cell, Rectangle bounds, int state)
 
     BeginScissorMode(bounds.x, bounds.y, bounds.width, bounds.height);
     {
+        if (raygui_cell_has_border_left(cell)) {
+            DrawLine(bounds.x,
+                     bounds.y,
+                     bounds.x,
+                     bounds.y + bounds.height,
+                     cell->border_color);
+        }
+        if (raygui_cell_has_border_bottom(cell)) {
+            DrawLine(bounds.x,
+                     bounds.y + bounds.height,
+                     bounds.x + bounds.width,
+                     bounds.y + bounds.height,
+                     cell->border_color);
+        }
+        if (raygui_cell_has_border_right(cell)) {
+            DrawLine(bounds.x + bounds.width,
+                     bounds.y,
+                     bounds.x + bounds.width,
+                     bounds.y + bounds.height,
+                     cell->border_color);
+        }
+        if (raygui_cell_has_border_top(cell)) {
+            DrawLine(bounds.x,
+                     bounds.y,
+                     bounds.x + bounds.width,
+                     bounds.y,
+                     cell->border_color);
+        }
+
         switch (cell->mode) {
         case RAYGUI_CELL_MODE_NULL:
             break;
@@ -146,3 +186,17 @@ void raygui_cell_grid_draw_row(raygui_cell_grid_t *grid, int row, Rectangle row_
     }
 }
 
+static void grid_drae_header(raygui_cell_header_t *header)
+{
+    GuiStatusBar(header->bounds, header->text);
+}
+
+void raygui_cell_grid_draw_headers(raygui_cell_grid_t *grid)
+{
+    assert_not_null(grid);
+
+    for (int col=0; col<grid->columns; col++) {
+        raygui_cell_header_t *header = raygui_cell_grid_get_header(grid, col);
+        grid_drae_header(header);
+    }
+}

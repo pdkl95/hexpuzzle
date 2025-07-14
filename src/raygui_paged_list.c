@@ -46,6 +46,9 @@ raygui_paged_list_t *init_raygui_paged_list(raygui_paged_list_t *list, int *page
     list->active     = active;
     list->focus      = focus;
 
+    list->sidebar_width = ICON_BUTTON_SIZE;
+    list->sidebar_margin_width = list->sidebar_width + PANEL_INNER_MARGIN;
+
     memcpy(list->prev_button_text, GuiIconText(ICON_ARROW_UP_FILL,   NULL), ICON_STR_MAXLEN);
     memcpy(list->next_button_text, GuiIconText(ICON_ARROW_DOWN_FILL, NULL), ICON_STR_MAXLEN);
 
@@ -153,10 +156,9 @@ static void raygui_paged_list_prepare_pagination(raygui_paged_list_t *list)
 
     list->gui_sidebar_bounds.width = ICON_BUTTON_SIZE;
 
-    float sidebar_size = list->gui_sidebar_bounds.width + PANEL_INNER_MARGIN;
-    raygui_paged_list_sidebar_width = sidebar_size;
+    raygui_paged_list_sidebar_width = list->sidebar_margin_width;
 
-    list->gui_list_bounds.width -= sidebar_size;
+    list->gui_list_bounds.width -= list->sidebar_margin_width;
     list->gui_sidebar_bounds.x  += list->gui_list_bounds.width + PANEL_INNER_MARGIN;
 
     list->gui_prev_button_bounds = list->gui_sidebar_bounds;
@@ -183,6 +185,33 @@ void raygui_paged_list_resize(raygui_paged_list_t *list, Rectangle bounds)
 
     list->row_height = GuiGetStyle(LISTVIEW, LIST_ITEMS_HEIGHT)
         + GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING);
+
+    switch (list->mode) {
+    case RAYGUI_PAGED_LIST_MODE_PLAIN_TEXT:
+        break;
+
+    case RAYGUI_PAGED_LIST_MODE_CELL_COLUMNS:
+        list->header_height  = list->row_height + (2 * GuiGetStyle(DEFAULT, BORDER_WIDTH));
+        list->header_bounds  = list->bounds;
+
+        list->bounds.y      += list->header_height;
+        list->bounds.height -= list->header_height;
+
+        list->header_bounds.height = list->header_height;
+        list->header_bounds.width -= list->sidebar_margin_width;
+
+        Rectangle hdr_rect = list->header_bounds;
+        for (int i=0; i<list->cell_grid->columns; i++) {
+            raygui_cell_header_t *header = raygui_cell_grid_get_header(list->cell_grid, i);
+
+            hdr_rect.width = header->width;
+            header->bounds = hdr_rect;
+
+            hdr_rect.x += hdr_rect.width + 1;
+        }
+
+        break;
+    }
 
     list->items_per_page = (int)floorf(list->bounds.height / ((float)list->row_height));
 
@@ -241,12 +270,15 @@ static void raygui_paged_list_draw_text_rows(raygui_paged_list_t *list)
 {
     assert_not_null(list);
 
+    bool cell_mode = false;
+
     switch (list->mode) {
     case RAYGUI_PAGED_LIST_MODE_PLAIN_TEXT:
         assert(list->page_count > 0);
         break;
 
     case RAYGUI_PAGED_LIST_MODE_CELL_COLUMNS:
+        cell_mode = true;
         break;
     }
 
@@ -299,6 +331,10 @@ static void raygui_paged_list_draw_text_rows(raygui_paged_list_t *list)
     Color darker_bg    = ColorBrightness(color, -0.25);
 
     GuiDrawRectangle(list->gui_list_bounds, border_width, border_color, color);
+
+    if (cell_mode) {
+        raygui_cell_grid_draw_headers(list->cell_grid);
+    }
 
     const char **text = list->text;
 

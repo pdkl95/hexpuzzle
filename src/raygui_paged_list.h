@@ -40,7 +40,11 @@ typedef enum raygui_paged_list_mode raygui_paged_list_mode_t;
 struct raygui_paged_list {
     raygui_paged_list_mode_t mode;
 
+    float sidebar_width;
+    float sidebar_margin_width;
+
     Rectangle bounds;
+    Rectangle header_bounds;
     Rectangle gui_list_bounds;
     Rectangle gui_item_bounds;
     Rectangle gui_sidebar_bounds;
@@ -50,6 +54,7 @@ struct raygui_paged_list {
     IconStr prev_button_text;
     IconStr next_button_text;
 
+    int header_height;
     int row_height;
     int items_per_page;
     int page;

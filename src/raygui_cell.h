@@ -29,16 +29,18 @@ struct raygui_cell_header;
 #define RAYGUI_CELL_TEXT_AND_ICON_MAXLEN \
     (RAYGUI_CELL_TEXT_MAXLEN + ICON_STR_MAXLEN)
 
-#define RAYGUI_CELL_TOOLTIP_MAXLEN NAME_MAXLEN
-
 /*********************************************************/
 
 enum raygui_cell_flag {
-    RAYGUI_CELL_FLAG_NULL      =      0,
-    RAYGUI_CELL_FLAG_ERROR     = 0x0001,
-    RAYGUI_CELL_FLAG_NO_DATA   = 0x0002,
-    RAYGUI_CELL_FLAG_INACTIVE  = 0x0004,
-    RAYGUI_CELL_FLAG_TOOLTIP   = 0x0008
+    RAYGUI_CELL_FLAG_NULL           =      0,
+    RAYGUI_CELL_FLAG_ERROR          = 0x0001,
+    RAYGUI_CELL_FLAG_NO_DATA        = 0x0002,
+    RAYGUI_CELL_FLAG_INACTIVE       = 0x0004,
+    RAYGUI_CELL_FLAG_TOOLTIP        = 0x0008,
+    RAYGUI_CELL_FLAG_BORDER_LEFT    = 0x0010,
+    RAYGUI_CELL_FLAG_BORDER_BOTTOM  = 0x0020,
+    RAYGUI_CELL_FLAG_BORDER_RIGHT   = 0x0040,
+    RAYGUI_CELL_FLAG_BORDER_TOP     = 0x0080
 };
 typedef enum raygui_cell_flag raygui_cell_flag_t;
 
@@ -52,7 +54,7 @@ typedef enum raygui_cell_mode raygui_cell_mode_t;
 
 struct raygui_cell {
     raygui_cell_mode_t mode;
-    char *tooltip;
+    const char *tooltip;
 
     uint16_t flags;
 
@@ -62,16 +64,17 @@ struct raygui_cell {
     int icon;
     Color icon_color;
 
+    Color border_color;
+
     struct raygui_cell_header *header;
 };
 typedef struct raygui_cell raygui_cell_t;
 
 struct raygui_cell_header {
     raygui_cell_mode_t mode;
-    Vector2 size;
+    Rectangle bounds;
     float width;
     char text[RAYGUI_CELL_TEXT_MAXLEN];
-    char tooltip[RAYGUI_CELL_TOOLTIP_MAXLEN];
 };
 typedef struct raygui_cell_header raygui_cell_header_t;
 
@@ -107,71 +110,46 @@ static inline raygui_cell_t *raygui_cell_grid_get_cell(raygui_cell_grid_t *grid,
     return &(grid->cells[index]);
 }
 
+static inline raygui_cell_header_t *raygui_cell_grid_get_header(raygui_cell_grid_t *grid, int column)
+{
+    assert_not_null(grid);
+    assert_not_null(grid->headers);
+
+    return &(grid->headers[column]);
+}
+
 /**************************************************************/
 
-static inline void raygui_cell_set_error(struct raygui_cell *cell)
-{
-    cell->flags |= RAYGUI_CELL_FLAG_ERROR;
-}
-
-static inline void raygui_cell_clear_error(struct raygui_cell *cell)
-{
-    cell->flags &= ~RAYGUI_CELL_FLAG_ERROR;
-}
-
-static inline bool raygui_cell_has_error(struct raygui_cell *cell)
-{
-    return cell->flags & RAYGUI_CELL_FLAG_ERROR;
-}
-
-
-static inline void raygui_cell_set_no_data(struct raygui_cell *cell)
-{
-    cell->flags |= RAYGUI_CELL_FLAG_NO_DATA;
-}
-
-static inline void raygui_cell_clear_no_data(struct raygui_cell *cell)
-{
-    cell->flags &= ~RAYGUI_CELL_FLAG_NO_DATA;
-}
-
-static inline bool raygui_cell_has_no_data(struct raygui_cell *cell)
-{
-    return cell->flags & RAYGUI_CELL_FLAG_NO_DATA;
-}
+#define CELL_BIT_FLAG_FUNCS(upname, lowname)                                 \
+    static inline void raygui_cell_set_##lowname(struct raygui_cell *cell)   \
+    {                                                                        \
+        cell->flags |= RAYGUI_CELL_FLAG_##upname;                            \
+    }                                                                        \
+                                                                             \
+    static inline void raygui_cell_clear_##lowname(struct raygui_cell *cell) \
+    {                                                                        \
+        cell->flags &= ~RAYGUI_CELL_FLAG_##upname;                           \
+    }                                                                        \
+                                                                             \
+    static inline bool raygui_cell_has_##lowname(struct raygui_cell *cell)   \
+    {                                                                        \
+        return cell->flags & RAYGUI_CELL_FLAG_##upname;                      \
+    }
 
 
-static inline void raygui_cell_set_inactive(struct raygui_cell *cell)
-{
-    cell->flags |= RAYGUI_CELL_FLAG_INACTIVE;
-}
+CELL_BIT_FLAG_FUNCS(ERROR,    error)
+CELL_BIT_FLAG_FUNCS(NO_DATA,  no_data)
+CELL_BIT_FLAG_FUNCS(INACTIVE, inactive)
+CELL_BIT_FLAG_FUNCS(TOOLTIP,  tooltip)
 
-static inline void raygui_cell_clear_inactive(struct raygui_cell *cell)
-{
-    cell->flags &= ~RAYGUI_CELL_FLAG_INACTIVE;
-}
+CELL_BIT_FLAG_FUNCS(BORDER_LEFT,   border_left)
+CELL_BIT_FLAG_FUNCS(BORDER_BOTTOM, border_bottom)
+CELL_BIT_FLAG_FUNCS(BORDER_RIGHT,  border_right)
+CELL_BIT_FLAG_FUNCS(BORDER_TOP,    border_top)
 
-static inline bool raygui_cell_has_inactive(struct raygui_cell *cell)
-{
-    return cell->flags & RAYGUI_CELL_FLAG_INACTIVE;
-}
+#undef CELL_BIT_FLAG_FUNCS
 
-
-static inline void raygui_cell_set_tooltip(struct raygui_cell *cell, const char *str)
-{
-    snprintf(cell->tooltip, RAYGUI_CELL_TOOLTIP_MAXLEN, "%s", str);
-    cell->flags |= RAYGUI_CELL_FLAG_TOOLTIP;
-}
-
-static inline void raygui_cell_clear_tooltip(struct raygui_cell *cell)
-{
-    cell->flags &= ~RAYGUI_CELL_FLAG_TOOLTIP;
-}
-
-static inline bool raygui_cell_has_tooltip(struct raygui_cell *cell)
-{
-    return cell->flags & RAYGUI_CELL_FLAG_TOOLTIP;
-}
+void raygui_cell_use_tooltip(struct raygui_cell *cell, const char *str);
 
 /**************************************************************/
 
@@ -184,6 +162,7 @@ void raygui_cell_grid_alloc_cells(raygui_cell_grid_t *grid, int rows);
 void raygui_cell_grid_free_cells(raygui_cell_grid_t *grid);
 
 void raygui_cell_grid_draw_row(raygui_cell_grid_t *grid, int row, Rectangle row_bounds, int state);
+void raygui_cell_grid_draw_headers(raygui_cell_grid_t *grid);
 
 #endif /*RAYGUI_CELL_H*/
 

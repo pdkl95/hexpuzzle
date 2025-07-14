@@ -100,11 +100,14 @@ Rectangle local_files_new_button_rect;
 Rectangle local_files_rename_button_rect;
 Rectangle local_files_new_button_with_preview_rect;
 Rectangle local_files_rename_button_with_preview_rect;
+Rectangle history_list_rect;
+Rectangle history_list_with_preview_rect;
 
 char browser_panel_text[] = "Browse Levels";
 char browser_play_button_text[] = "Play";
 char browser_edit_button_text[] = "Edit";
 char browser_open_button_text[] = "Open";
+char browser_have_blueprint_tooltip_text[] = "Have level-regen Blueprint";
 
 char local_files_dir_label_text[] = "Directory";
 char local_files_up_button_text_str[] = "Up";
@@ -242,8 +245,8 @@ gui_list_vars_t history = {
     .entries               = NULL,
     .history_headers       = history_headers,
     .count                 = 0,
-    .list_rect             = &local_files_list_rect,
-    .list_rect_preview     = &local_files_list_with_preview_rect,
+    .list_rect             = &history_list_rect,
+    .list_rect_preview     = &history_list_with_preview_rect,
     .btn_rect              = &browser_play_button_rect,
     .btn_rect_preview      = &browser_play_button_with_preview_rect,
     .edit_btn_rect         = &browser_edit_button_rect,
@@ -875,6 +878,19 @@ void setup_browse_history(void)
 
             cell_preview->mode   = cell->mode;
             cell_preview->header = cell->header;
+
+            if (col > 0) {
+                raygui_cell_set_border_left(cell);
+                raygui_cell_set_border_left(cell_preview);
+            }
+
+            if (count > 0) {
+                raygui_cell_set_border_top(cell);
+                raygui_cell_set_border_top(cell_preview);
+            }
+
+            cell->border_color = GRAY;
+            cell_preview->border_color = cell->border_color;;
         }
 
         {
@@ -889,6 +905,8 @@ void setup_browse_history(void)
                 cell_preview->icon = ICON_FILETYPE_TEXT;
                 cell->icon_color         = blueprint_color;
                 cell_preview->icon_color = blueprint_color;
+
+                raygui_cell_use_tooltip(cell, browser_have_blueprint_tooltip_text);
             } else {
                 entry->extra[0] = '\n';
                 status = ENTRY_STATUS_NOT_LOADABLE;
@@ -896,6 +914,7 @@ void setup_browse_history(void)
                 cell_preview->icon       = ICON_CROSS_SMALL;
                 cell->icon_color         = RED;
                 cell_preview->icon_color = RED;
+                raygui_cell_use_tooltip(cell, NULL);
             }
         }
 
@@ -972,8 +991,8 @@ void setup_browse_history(void)
     history.active       = -1;
     history.focus        = -1;
 
-    raygui_paged_list_resize(history.gui_list_preview, *local_files.list_rect_preview);
-    raygui_paged_list_resize(history.gui_list,         *local_files.list_rect);
+    raygui_paged_list_resize(history.gui_list_preview, *history.list_rect_preview);
+    raygui_paged_list_resize(history.gui_list,         *history.list_rect);
 }
 #endif
 
@@ -1082,6 +1101,8 @@ void resize_gui_browser(void)
     browser_area_rect.y      = browser_tabbar_rect.y + browser_tabbar_rect.height + PANEL_INNER_MARGIN;
     browser_area_rect.width  = browser_tabbar_rect.width - (2 * PANEL_INNER_MARGIN);
     browser_area_rect.height = panel_bottom - (2 * PANEL_INNER_MARGIN) - browser_area_rect.y;
+
+    float high_area_rect_y = browser_area_rect.y;
 
     float area_bottom = browser_area_rect.y + browser_area_rect.height;
 
@@ -1231,6 +1252,15 @@ void resize_gui_browser(void)
         + PANEL_INNER_MARGIN;
     local_files_list_with_preview_rect.height -= list_preview_delta;
 
+    history_list_rect              = local_files_list_rect;
+    history_list_with_preview_rect = local_files_list_with_preview_rect;
+
+    float upper_extra = history_list_rect.y - high_area_rect_y - PANEL_INNER_MARGIN;
+    history_list_rect.y                   -= upper_extra;
+    history_list_rect.height              += upper_extra;
+    history_list_with_preview_rect.y      -= upper_extra;
+    history_list_with_preview_rect.height += upper_extra;
+
     if (main_gui_area_rect.width < 1.0) {
         return;
     }
@@ -1253,18 +1283,20 @@ void resize_gui_browser(void)
     Vector2 ex_win_date_size = measure_gui_narrow_text(ex_win_date);
     Vector2 ex_time_size     = measure_gui_narrow_text(ex_time);
 
-    history_headers[HISTORY_COLUMN_PLAY_TYPE].width = RAYGUI_ICON_SIZE;
+    int padding = 2 * GuiGetStyle(DEFAULT, TEXT_PADDING);
+
+    history_headers[HISTORY_COLUMN_PLAY_TYPE].width = RAYGUI_ICON_SIZE + padding;
     history_headers[HISTORY_COLUMN_NAME     ].width = ex_name_size.x + 2.0;
-    history_headers[HISTORY_COLUMN_WIN_DATE ].width = ex_win_date_size.x + 2.0;
-    history_headers[HISTORY_COLUMN_TIME     ].width = ex_time_size.x + 2.0;
+    history_headers[HISTORY_COLUMN_WIN_DATE ].width = ex_win_date_size.x + 2.0 + padding;
+    history_headers[HISTORY_COLUMN_TIME     ].width = ex_time_size.x + 2.0 + padding;
     history_headers[HISTORY_COLUMN_EXTRA    ].width =
         local_files.list_rect->width
         - history_headers[HISTORY_COLUMN_NAME].width
         - history_headers[HISTORY_COLUMN_WIN_DATE].width
         - history_headers[HISTORY_COLUMN_TIME].width;
 
-    raygui_paged_list_resize(history.gui_list_preview, *local_files.list_rect_preview);
-    raygui_paged_list_resize(history.gui_list,         *local_files.list_rect);
+    raygui_paged_list_resize(history.gui_list_preview, *history.list_rect_preview);
+    raygui_paged_list_resize(history.gui_list,         *history.list_rect);
 #endif
 
     local_files_new_button_rect.x -= raygui_paged_list_sidebar_width;
