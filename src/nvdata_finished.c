@@ -460,7 +460,7 @@ cJSON *nvdata_finished_to_json(void)
 
 bool nvdata_finished_load_from_file(const char *filepath)
 {
-    cJSON *json = ReadCompressedJSONFile(filepath);
+    cJSON *json = ReadPossiblyCompressedJSONFile(filepath);
     if (NULL == json) {
         return false;
     }

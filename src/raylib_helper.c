@@ -26,8 +26,16 @@
 #include "raygui/raygui.h"
 #include "raylib_helper.h"
 
-bool WriteCompressedFile(const char *filepath, const void *data, int data_size)
+bool WriteCompressedFile(const char *filepath, const void *data, int data_size, const char *magic)
 {
+    assert_not_null(filepath);
+    assert_not_null(data);
+    assert_not_null(magic);
+
+    int magiclen = strlen(magic);
+    assert(magiclen > 3);
+    assert(magiclen <= 32);
+
     int compsize = 0;
     unsigned char *compressed = CompressData(data, data_size, &compsize);
     if (NULL == compressed) {
@@ -35,31 +43,59 @@ bool WriteCompressedFile(const char *filepath, const void *data, int data_size)
         return false;
     }
 
-    bool ret = SaveFileData(filepath, compressed, compsize);
-    MemFree(compressed);
+    int compfilesize = compsize + magiclen;
+    unsigned char *filedata = MemRealloc(compressed, compfilesize);
+    compressed += magiclen;
+    memmove(compressed, filedata, compsize);
+    memcpy(filedata, magic, magiclen);
+
+    bool ret = SaveFileData(filepath, filedata, compfilesize);
+    MemFree(filedata);
     return ret;
 }
 
-unsigned char *ReadCompressedFile(const char *filepath, int *data_size)
+unsigned char *ReadCompressedFile(const char *filepath, int *data_size, const char *magic)
 {
-    int compsize = 0;
-    unsigned char *compressed = LoadFileData(filepath, &compsize);
-    if (NULL == compressed) {
+    assert_not_null(filepath);
+    assert_not_null(data_size);
+    assert_not_null(magic);
+
+    int magiclen = strlen(magic);
+    assert(magiclen > 3);
+    assert(magiclen <= 32);
+
+    int compfilesize = 0;
+    unsigned char *filedata = LoadFileData(filepath, &compfilesize);
+    if (NULL == filedata) {
         errmsg("Error loading \"%s\"", filepath);
         return NULL;
     }
 
     //infomsg("Read %d bytes of compressed data from \"%s\"", compsize, filepath);
+    if (0 != memcmp(filedata, magic, magiclen)) {
+        errmsg("Error loading \"%s\" - file does not start with %d byte magic identifier \"%s\"",
+               filepath, magiclen, magic);
+        UnloadFileData(filedata);
+        return NULL;
+    }
+
+    int compsize = compfilesize - magiclen;
+    unsigned char *compressed = filedata + magiclen;
 
     unsigned char *data = DecompressData(compressed, compsize, data_size);
-    UnloadFileData(compressed);
+    UnloadFileData(filedata);
     if ((NULL == data) || (*data_size < 1)) {
-        errmsg("Error decompressing \"%s\" (%d bytes)", filepath, data_size);
+        errmsg("Error decompressing \"%s\"", filepath);
         return NULL;
     }
 
     return data;
 }
+
+#ifndef COMPRESSED_JSON_MAGIC
+# define COMPRESSED_JSON_MAGIC PACKAGE_NAME ":json/deflate:"
+#endif
+const char *magio_json_deflate = COMPRESSED_JSON_MAGIC;
 
 bool WriteCompressedJSONFile(const char *filepath, struct cJSON *json)
 {
@@ -68,7 +104,7 @@ bool WriteCompressedJSONFile(const char *filepath, struct cJSON *json)
         return false;
     }
 
-    bool ret = WriteCompressedFile(filepath, json_str, strlen(json_str));
+    bool ret = WriteCompressedFile(filepath, json_str, strlen(json_str), magio_json_deflate);
 
     SAFEFREE(json_str);
 
@@ -78,7 +114,7 @@ bool WriteCompressedJSONFile(const char *filepath, struct cJSON *json)
 struct cJSON *ReadCompressedJSONFile(const char *filepath)
 {
     int size = 0;
-    unsigned char *json_str = ReadCompressedFile(filepath, &size);
+    unsigned char *json_str = ReadCompressedFile(filepath, &size, magio_json_deflate);
     if (NULL == json_str) {
         return NULL;
     }
@@ -94,6 +130,61 @@ struct cJSON *ReadCompressedJSONFile(const char *filepath)
     return json;
 }
 
+struct cJSON *ReadPossiblyCompressedJSONFile(const char *filepath)
+{
+    assert_not_null(filepath);
+
+    int magiclen = strlen(magio_json_deflate);
+    assert(magiclen > 3);
+    assert(magiclen <= 32);
+
+    int compfilesize = 0;
+    unsigned char *filedata = LoadFileData(filepath, &compfilesize);
+    if (NULL == filedata) {
+        errmsg("Error loading \"%s\"", filepath);
+        return NULL;
+    }
+
+    unsigned char *data = NULL;
+
+    if (0 == memcmp(filedata, magio_json_deflate, magiclen)) {
+        /* file is compressed */
+
+        int compsize = compfilesize - magiclen;
+        unsigned char *compressed = filedata + magiclen;
+        int data_size = 0;
+        data = DecompressData(compressed, compsize, &data_size);
+        if ((NULL == data) || (data_size < 1)) {
+            errmsg("Error decompressing \"%s\"", filepath);
+            data = NULL;
+        }
+
+    } else if ((filedata[0] == '{') && (filedata[compfilesize - 1] == '}')) {
+        /* file is (probaly) JSON */
+        // just pass 'data' straight to cJSON_Parse */
+        data = filedata;
+    } else {
+        /* cannot parse file */
+        errmsg("Error decompressing \"%s\"", filepath);
+        data = NULL;
+    }
+
+    if (data) {
+        cJSON *json = cJSON_Parse(( char *)data);
+
+        if (NULL == json) {
+            errmsg("Error parsing \"%s\" as JSON", filepath);
+        }
+
+        SAFEFREE(data);
+        UnloadFileData(filedata);
+        return json;
+    } else {
+        SAFEFREE(data);
+        UnloadFileData(filedata);
+        return NULL;
+    }
+}
 
 typedef enum { BORDER = 0, BASE, TEXT, OTHER } GuiPropertyElement;
 

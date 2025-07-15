@@ -129,10 +129,13 @@ void destroy_raygui_cell_grid(raygui_cell_grid_t *grid)
 void raygui_cell_grid_alloc_cells(raygui_cell_grid_t *grid, int rows)
 {
     assert_not_null(grid);
-    assert(rows > 0);
     assert(grid->columns > 0);
 
     grid->rows = rows;
+
+    if (rows < 1) {
+        return;
+    }
 
     int new_cell_count = grid->rows * grid->columns;
 

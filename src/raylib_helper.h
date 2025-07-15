@@ -134,11 +134,12 @@ static inline bool is_key_pressed_with_control_or_super(int key)
 
 /*** file I/O ***/
 
-bool WriteCompressedFile(const char *filepath, const void *data, int data_size);
-unsigned char *ReadCompressedFile(const char *filepath, int *data_size);
+bool WriteCompressedFile(const char *filepath, const void *data, int data_size, const char *magic);
+unsigned char *ReadCompressedFile(const char *filepath, int *data_size, const char *magic);
 
 bool WriteCompressedJSONFile(const char *filepath, struct cJSON *json);
 struct cJSON *ReadCompressedJSONFile(const char *filepath);
+struct cJSON *ReadPossiblyCompressedJSONFile(const char *filepath);
 
 /*** Constants ***/
 

@@ -1936,6 +1936,20 @@ void level_win(level_t *level)
         regen_level_preview();
     }
 
+    switch (solve_timer.state) {
+    case SOLVE_TIMER_STATE_RESET:
+        assert(false && "solve timer shouldn't be in the RESET state");
+        break;
+
+    case SOLVE_TIMER_STATE_RUNNING:
+        solve_timer_stop(&solve_timer);
+        fallthrough;
+
+    case SOLVE_TIMER_STATE_PAUSED:
+        level->elapsed_time = solve_timer.elapsed_time.parts;
+        break;
+    }
+
     nvdata_mark_finished(level);
 
     if (level->collection) {
