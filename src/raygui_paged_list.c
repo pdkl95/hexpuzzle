@@ -174,9 +174,9 @@ static void raygui_paged_list_prepare_pagination(raygui_paged_list_t *list)
         - list->gui_next_button_bounds.height;
 
     list->gui_item_bounds.x = list->gui_list_bounds.x + GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING);
-    list->gui_item_bounds.y = list->gui_list_bounds.y + GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING) + GuiGetStyle(DEFAULT, BORDER_WIDTH);
+    list->gui_item_bounds.y = list->gui_list_bounds.y + GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING) + GuiGetStyle(DEFAULT, BORDER_WIDTH) - 4.0f;
     list->gui_item_bounds.width = list->gui_list_bounds.width - 2*GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING) - GuiGetStyle(DEFAULT, BORDER_WIDTH);
-    list->gui_item_bounds.height = (float)GuiGetStyle(LISTVIEW, LIST_ITEMS_HEIGHT);
+    list->gui_item_bounds.height = (float)GuiGetStyle(LISTVIEW, LIST_ITEMS_HEIGHT) - 1.0f;
 }
 
 void raygui_paged_list_resize(raygui_paged_list_t *list, Rectangle bounds)
@@ -234,7 +234,7 @@ void raygui_paged_list_resize(raygui_paged_list_t *list, Rectangle bounds)
             header->inner_bounds.width  = header->bounds.width  - header->padding.left - header->padding.right;
             header->inner_bounds.height = header->bounds.height - header->padding.top  - header->padding.bottom;
 
-            hdr_rect.x += header->bounds.width + 1;
+            hdr_rect.x += header->bounds.width;
         }
 
         break;
@@ -320,6 +320,8 @@ static void raygui_paged_list_draw_text_rows(raygui_paged_list_t *list)
     bool slider_dragging = GuiIsSliderDragging();
 
     Rectangle item_bounds = list->gui_item_bounds;
+    //item_bounds.x      += 1.0f;
+    //item_bounds.height += 2.0f;
 
     if ((state != STATE_DISABLED) && !locked && !slider_dragging) {
         if (CheckCollisionPointRec(mouse_positionf, list->gui_list_bounds)) {

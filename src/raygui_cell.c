@@ -35,6 +35,8 @@ void raygui_cell_use_tooltip(struct raygui_cell *cell, const char *str)
 
 void draw_raygui_cell_border_at(struct raygui_cell *cell, Rectangle bounds, UNUSED int state)
 {
+    bounds.y -= 4.0f;
+
     if (raygui_cell_has_border_left(cell)) {
         DrawLine(bounds.x,
                  bounds.y,

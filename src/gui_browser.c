@@ -1262,6 +1262,9 @@ void resize_gui_browser(void)
     history_list_with_preview_rect.y      -= upper_extra;
     history_list_with_preview_rect.height += upper_extra;
 
+    history_list_rect.y                   -= 1.0f;
+    history_list_with_preview_rect.y      -= 1.0f;
+
     if (main_gui_area_rect.width < 1.0) {
         return;
     }
@@ -1284,7 +1287,7 @@ void resize_gui_browser(void)
     for (int col=0; col<NUM_HISTORY_COLUMNS; col++) {
         raygui_cell_header_t *header = &(history.history_headers[col]);
 
-        header->padding.left   = text_padding + 1.0f;
+        header->padding.left   = text_padding + 4.0f;
         header->padding.right  = text_padding;
         header->padding.top    = top_bottom_padding + 1.0f;
         header->padding.bottom = top_bottom_padding;
@@ -1294,6 +1297,8 @@ void resize_gui_browser(void)
     history_headers[HISTORY_COLUMN_NAME     ].width = ex_name_size.x + 2.0;
     history_headers[HISTORY_COLUMN_WIN_DATE ].width = ex_win_date_size.x + 2.0;
     history_headers[HISTORY_COLUMN_TIME     ].width = -1.0;
+
+    history_headers[HISTORY_COLUMN_PLAY_TYPE].padding.left -= 3.0f;
 
     raygui_paged_list_resize(history.gui_list_preview, *history.list_rect_preview);
     raygui_paged_list_resize(history.gui_list,         *history.list_rect);
