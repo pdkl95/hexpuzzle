@@ -33,52 +33,49 @@ void raygui_cell_use_tooltip(struct raygui_cell *cell, const char *str)
     }
 }
 
-void draw_raygui_cell_at(struct raygui_cell *cell, Rectangle bounds, int state)
+void draw_raygui_cell_border_at(struct raygui_cell *cell, Rectangle bounds, UNUSED int state)
 {
-    Rectangle inner_bounds = {
-        .x = bounds.x,
-        .y = bounds.y,
-        .width  = cell->header->bounds.width,
-        .height = cell->header->bounds.height
-    };
+    if (raygui_cell_has_border_left(cell)) {
+        DrawLine(bounds.x,
+                 bounds.y,
+                 bounds.x,
+                 bounds.y + bounds.height,
+                 cell->border_color);
+    }
+    if (raygui_cell_has_border_bottom(cell)) {
+        DrawLine(bounds.x,
+                 bounds.y + bounds.height,
+                 bounds.x + bounds.width,
+                 bounds.y + bounds.height,
+                 cell->border_color);
+    }
+    if (raygui_cell_has_border_right(cell)) {
+        DrawLine(bounds.x + bounds.width,
+                 bounds.y,
+                 bounds.x + bounds.width,
+                 bounds.y + bounds.height,
+                 cell->border_color);
+    }
+    if (raygui_cell_has_border_top(cell)) {
+        DrawLine(bounds.x,
+                 bounds.y,
+                 bounds.x + bounds.width,
+                 bounds.y,
+                 cell->border_color);
+    }
+}
+
+void draw_raygui_cell_content_at(struct raygui_cell *cell, Rectangle bounds, int state)
+{
     Vector2 position = {
-        .x = inner_bounds.x,
-        .y = inner_bounds.y
+        .x = bounds.x,
+        .y = bounds.y
     };
 
     Color state_color = GetColor(GuiGetStyle(LISTVIEW, state));
 
     BeginScissorMode(bounds.x, bounds.y, bounds.width, bounds.height);
     {
-        if (raygui_cell_has_border_left(cell)) {
-            DrawLine(bounds.x,
-                     bounds.y,
-                     bounds.x,
-                     bounds.y + bounds.height,
-                     cell->border_color);
-        }
-        if (raygui_cell_has_border_bottom(cell)) {
-            DrawLine(bounds.x,
-                     bounds.y + bounds.height,
-                     bounds.x + bounds.width,
-                     bounds.y + bounds.height,
-                     cell->border_color);
-        }
-        if (raygui_cell_has_border_right(cell)) {
-            DrawLine(bounds.x + bounds.width,
-                     bounds.y,
-                     bounds.x + bounds.width,
-                     bounds.y + bounds.height,
-                     cell->border_color);
-        }
-        if (raygui_cell_has_border_top(cell)) {
-            DrawLine(bounds.x,
-                     bounds.y,
-                     bounds.x + bounds.width,
-                     bounds.y,
-                     cell->border_color);
-        }
-
         switch (cell->mode) {
         case RAYGUI_CELL_MODE_NULL:
             break;
@@ -88,11 +85,11 @@ void draw_raygui_cell_at(struct raygui_cell *cell, Rectangle bounds, int state)
             break;
 
         case RAYGUI_CELL_MODE_ICON:
-            GuiDrawIcon(cell->icon, inner_bounds.x, inner_bounds.y, 1, cell->icon_color);
+            GuiDrawIcon(cell->icon, bounds.x, bounds.y, 1, cell->icon_color);
             break;
 
         case RAYGUI_CELL_MODE_TEXT_AND_ICON:
-            GuiDrawIcon(cell->icon, inner_bounds.x, inner_bounds.y, 1, cell->icon_color);
+            GuiDrawIcon(cell->icon, bounds.x, bounds.y, 1, cell->icon_color);
             draw_gui_text(cell->text, position, state_color);
             break;
 
@@ -158,36 +155,40 @@ void raygui_cell_grid_free_cells(raygui_cell_grid_t *grid)
     grid->rows = -1;
 }
 
-void raygui_cell_grid_draw_row(raygui_cell_grid_t *grid, int row, Rectangle row_bounds, int state)
+void raygui_cell_grid_draw_row(raygui_cell_grid_t *grid, int row, float y, int state)
 {
     assert_not_null(grid);
     assert(row >= 0);
     assert(row < grid->rows);
 
-    float xoffset = 0.0f;
-
     for (int col=0; col<grid->columns; col++) {
-        //raygui_cell_header_t *header = &(grid->headers[col]);
         raygui_cell_t *cell = raygui_cell_grid_get_cell(grid, row, col);
+        if (cell->header->hide) {
+            //continue;
+            break;
+        }
 
-        Rectangle bounds = {
-            .x      = row_bounds.x + xoffset,
-            .y      = row_bounds.y,
-            .width  = cell->header->width,
-            .height = row_bounds.height
-        };
+        Rectangle bounds = cell->header->bounds;
+        float header_outer_y = bounds.y;
+        bounds.y = y;
 
-        //DrawRectangleLinesEx(bounds, 1.0, GetColor(GuiGetStyle(LISTVIEW, state)));
-        draw_raygui_cell_at(cell, bounds, state);
+        Rectangle inner_bounds = cell->header->inner_bounds;
+        float header_inner_y = inner_bounds.y;
+        inner_bounds.y = y + (header_inner_y - header_outer_y);
 
-        xoffset += bounds.width
-            + GuiGetStyle(LISTVIEW, LIST_ITEMS_SPACING)
-            + GuiGetStyle(DEFAULT, BORDER_WIDTH);
+        draw_raygui_cell_border_at( cell,       bounds, state);
+        draw_raygui_cell_content_at(cell, inner_bounds, state);
+        //DrawRectangleRec(      bounds, ColorAlpha(LIME,0.3));
+        //DrawRectangleRec(inner_bounds, ColorAlpha(YELLOW,0.3));
     }
 }
 
-static void grid_drae_header(raygui_cell_header_t *header)
+static void grid_draw_header(raygui_cell_header_t *header)
 {
+    if (header->hide) {
+        return;
+    }
+
     GuiStatusBar(header->bounds, header->text);
 }
 
@@ -197,6 +198,6 @@ void raygui_cell_grid_draw_headers(raygui_cell_grid_t *grid)
 
     for (int col=0; col<grid->columns; col++) {
         raygui_cell_header_t *header = raygui_cell_grid_get_header(grid, col);
-        grid_drae_header(header);
+        grid_draw_header(header);
     }
 }

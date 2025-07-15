@@ -81,6 +81,7 @@ typedef struct solve_timer solve_timer_t;
 
 char *solve_elapsed_time_to_str(solve_elapsed_time_t *elapsed_time);
 solve_elapsed_time_t str_to_solve_elapsed_time(const char *str);
+const char *elapsed_time_parts_to_readable_string(elapsed_time_parts_t *elapsed_time_parts);
 
 solve_timer_t *alloc_solve_timer(void);
 void free_solve_timer(solve_timer_t *solve_timer);

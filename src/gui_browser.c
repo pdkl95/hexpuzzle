@@ -142,8 +142,7 @@ enum history_column {
     HISTORY_COLUMN_PLAY_TYPE = 0,
     HISTORY_COLUMN_NAME      = 1,
     HISTORY_COLUMN_WIN_DATE  = 2,
-    HISTORY_COLUMN_TIME      = 3,
-    HISTORY_COLUMN_EXTRA     = 4
+    HISTORY_COLUMN_TIME      = 3
 };
 typedef enum history_column history_column_t;
 
@@ -151,13 +150,11 @@ raygui_cell_header_t history_headers[] = {
     { .mode = RAYGUI_CELL_MODE_ICON,   // play type icon
       .text = "" },
     { .mode = RAYGUI_CELL_MODE_TEXT,
-      .text = "Name" },
+      .text = "Name/Seed" },
     { .mode = RAYGUI_CELL_MODE_TEXT,
       .text = "Win Date" },
     { .mode = RAYGUI_CELL_MODE_TEXT,
-      .text = "Time" },
-    { .mode = RAYGUI_CELL_MODE_TEXT_AND_ICON,
-      .text = "" }
+      .text = "Time" }
 };
 #define NUM_HISTORY_COLUMNS ((int)NUM_ELEMENTS(raygui_cell_header_t, history_headers))
 
@@ -171,7 +168,6 @@ struct gui_list_history_entry {
     char name[NAME_MAXLEN];
     char win_time[NAME_MAXLEN];
     char elapsed_time[NAME_MAXLEN];
-    char extra[NAME_MAXLEN];
 };
 typedef struct gui_list_history_entry gui_list_history_entry_t;
 
@@ -879,16 +875,22 @@ void setup_browse_history(void)
             cell_preview->mode   = cell->mode;
             cell_preview->header = cell->header;
 
-            if (col > 0) {
+            if (col > -10) {
                 raygui_cell_set_border_left(cell);
                 raygui_cell_set_border_left(cell_preview);
             }
 
-            if (count > 0) {
+#if 0
+            if (count > -10) {
                 raygui_cell_set_border_top(cell);
                 raygui_cell_set_border_top(cell_preview);
             }
 
+            raygui_cell_set_border_bottom(cell);
+            raygui_cell_set_border_bottom(cell_preview);
+            raygui_cell_set_border_right(cell);
+            raygui_cell_set_border_right(cell_preview);
+#endif
             cell->border_color = GRAY;
             cell_preview->border_color = cell->border_color;;
         }
@@ -901,21 +903,21 @@ void setup_browse_history(void)
                                                                       count,
                                                                       HISTORY_COLUMN_PLAY_TYPE);
             if (finished_level_has_blueprint(fl)) {
-                cell->icon         = ICON_FILETYPE_TEXT;
-                cell_preview->icon = ICON_FILETYPE_TEXT;
-                cell->icon_color         = blueprint_color;
-                cell_preview->icon_color = blueprint_color;
+                cell->icon       = ICON_FILETYPE_TEXT;
+                cell->icon_color = blueprint_color;
 
                 raygui_cell_use_tooltip(cell, browser_have_blueprint_tooltip_text);
             } else {
-                entry->extra[0] = '\n';
                 status = ENTRY_STATUS_NOT_LOADABLE;
-                cell->icon               = ICON_CROSS_SMALL;
-                cell_preview->icon       = ICON_CROSS_SMALL;
-                cell->icon_color         = RED;
-                cell_preview->icon_color = RED;
+
+                cell->icon       = ICON_CROSS_SMALL;
+                cell->icon_color = RED;
+
                 raygui_cell_use_tooltip(cell, NULL);
             }
+
+            cell_preview->icon       = cell->icon;
+            cell_preview->icon_color = cell->icon_color;
         }
 
         {
@@ -966,19 +968,18 @@ void setup_browse_history(void)
 
             if (finished_level_has_elapsed_time(fl)) {
                 snprintf(entry->elapsed_time, NAME_MAXLEN, "%s",
-                         elapsed_time_parts_to_str(&fl->elapsed_time));
+                         elapsed_time_parts_to_readable_string(&fl->elapsed_time));
             } else {
                 entry->elapsed_time[0] = '\0';
             }
         }
 
         if (options->verbose) {
-            infomsg("HIST[%d] \"%s\" \"%s\" \"%s\" \"%s\" (%s, %s)",
+            infomsg("HIST[%d] \"%s\" \"%s\" \"%s\" (%s, %s)",
                     count,
                     entry->name,
                     entry->win_time,
                     entry->elapsed_time,
-                    entry->extra,
                     entry_type_str(type),
                     entry_status_str(status));
         }
@@ -1273,27 +1274,26 @@ void resize_gui_browser(void)
 
     char ex_name[]     = "12345678901234567890";
     char ex_win_date[] = "2000-JAN-30 12:34";
-    const char *ex_time = TextFormat("%02d:%02d:%02d.%03d",
-                                     2,    //solve_timer.elapsed_time.parts.hr,
-                                     58,   //solve_timer.elapsed_time.parts.min,
-                                     48,   //solve_timer.elapsed_time.parts.sec,
-                                     234); //solve_timer.elapsed_time.parts.ms);
 
-    Vector2 ex_name_size     = measure_gui_narrow_text(ex_name);
-    Vector2 ex_win_date_size = measure_gui_narrow_text(ex_win_date);
-    Vector2 ex_time_size     = measure_gui_narrow_text(ex_time);
+    Vector2 ex_name_size     = measure_gui_text(ex_name);
+    Vector2 ex_win_date_size = measure_gui_text(ex_win_date);
 
-    int padding = 2 * GuiGetStyle(DEFAULT, TEXT_PADDING);
+    float text_padding = GuiGetStyle(DEFAULT, TEXT_PADDING);
+    float top_bottom_padding = text_padding + GuiGetStyle(STATUSBAR, BORDER_WIDTH);
 
-    history_headers[HISTORY_COLUMN_PLAY_TYPE].width = RAYGUI_ICON_SIZE + padding;
+    for (int col=0; col<NUM_HISTORY_COLUMNS; col++) {
+        raygui_cell_header_t *header = &(history.history_headers[col]);
+
+        header->padding.left   = text_padding + 1.0f;
+        header->padding.right  = text_padding;
+        header->padding.top    = top_bottom_padding + 1.0f;
+        header->padding.bottom = top_bottom_padding;
+    }
+
+    history_headers[HISTORY_COLUMN_PLAY_TYPE].width = RAYGUI_ICON_SIZE;
     history_headers[HISTORY_COLUMN_NAME     ].width = ex_name_size.x + 2.0;
-    history_headers[HISTORY_COLUMN_WIN_DATE ].width = ex_win_date_size.x + 2.0 + padding;
-    history_headers[HISTORY_COLUMN_TIME     ].width = ex_time_size.x + 2.0 + padding;
-    history_headers[HISTORY_COLUMN_EXTRA    ].width =
-        local_files.list_rect->width
-        - history_headers[HISTORY_COLUMN_NAME].width
-        - history_headers[HISTORY_COLUMN_WIN_DATE].width
-        - history_headers[HISTORY_COLUMN_TIME].width;
+    history_headers[HISTORY_COLUMN_WIN_DATE ].width = ex_win_date_size.x + 2.0;
+    history_headers[HISTORY_COLUMN_TIME     ].width = -1.0;
 
     raygui_paged_list_resize(history.gui_list_preview, *history.list_rect_preview);
     raygui_paged_list_resize(history.gui_list,         *history.list_rect);

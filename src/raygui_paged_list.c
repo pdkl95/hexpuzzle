@@ -201,13 +201,40 @@ void raygui_paged_list_resize(raygui_paged_list_t *list, Rectangle bounds)
         list->header_bounds.width -= list->sidebar_margin_width;
 
         Rectangle hdr_rect = list->header_bounds;
+        float max_x = list->header_bounds.x + list->header_bounds.width;
         for (int i=0; i<list->cell_grid->columns; i++) {
             raygui_cell_header_t *header = raygui_cell_grid_get_header(list->cell_grid, i);
 
-            hdr_rect.width = header->width;
             header->bounds = hdr_rect;
 
-            hdr_rect.x += hdr_rect.width + 1;
+            float hdr_width = header->width;
+            if (hdr_width < 0.0f) {
+                hdr_width = max_x - header->bounds.x;
+            }
+
+            header->bounds.width =
+                hdr_width
+                + header->padding.left
+                + header->padding.right;
+
+            if (header->bounds.x >= max_x) {
+                header->hide = true;
+            } else {
+                header->hide = false;
+
+                float header_max_x = header->bounds.x + header->bounds.width;
+                if (header_max_x > max_x) {
+                    float trim_width = header_max_x - max_x;
+                    header->bounds.width -= trim_width;
+                }
+            }
+
+            header->inner_bounds.x      = header->bounds.x + header->padding.left;
+            header->inner_bounds.y      = header->bounds.y + header->padding.top;
+            header->inner_bounds.width  = header->bounds.width  - header->padding.left - header->padding.right;
+            header->inner_bounds.height = header->bounds.height - header->padding.top  - header->padding.bottom;
+
+            hdr_rect.x += header->bounds.width + 1;
         }
 
         break;
@@ -349,7 +376,7 @@ static void raygui_paged_list_draw_text_rows(raygui_paged_list_t *list)
         switch (list->mode) {                                           \
         case RAYGUI_PAGED_LIST_MODE_PLAIN_TEXT:                         \
             GuiDrawText(text[start_idx + i],                            \
-                        row_bounds,                                     \
+                        GetTextBounds(DEFAULT, item_bounds),            \
                         GuiGetStyle(LISTVIEW, TEXT_ALIGNMENT),          \
                         GetColor(GuiGetStyle(LISTVIEW,                  \
                                              TEXT_COLOR_##state)));     \
@@ -357,7 +384,7 @@ static void raygui_paged_list_draw_text_rows(raygui_paged_list_t *list)
         case RAYGUI_PAGED_LIST_MODE_CELL_COLUMNS:                       \
             raygui_cell_grid_draw_row(list->cell_grid,                  \
                                       start_idx + i,                    \
-                                      row_bounds,                       \
+                                      item_bounds.y,                    \
                                       TEXT_COLOR_##state);              \
             break;                                                      \
         default:                                                        \
@@ -372,8 +399,6 @@ static void raygui_paged_list_draw_text_rows(raygui_paged_list_t *list)
             (text == NULL)) {
             break;
         }
-
-        Rectangle row_bounds = GetTextBounds(DEFAULT, item_bounds);
 
         if (darker) {
             DrawRectangleRec(item_bounds, darker_bg);

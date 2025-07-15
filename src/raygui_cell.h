@@ -52,6 +52,14 @@ enum raygui_cell_mode {
 };
 typedef enum raygui_cell_mode raygui_cell_mode_t;
 
+struct raygui_cell_padding {
+    float left;
+    float bottom;
+    float right;
+    float top;
+};
+typedef struct raygui_cell_padding raygui_cell_padding_t;
+
 struct raygui_cell {
     raygui_cell_mode_t mode;
     const char *tooltip;
@@ -72,8 +80,11 @@ typedef struct raygui_cell raygui_cell_t;
 
 struct raygui_cell_header {
     raygui_cell_mode_t mode;
+    bool hide;
     Rectangle bounds;
+    Rectangle inner_bounds;
     float width;
+    raygui_cell_padding_t padding;
     char text[RAYGUI_CELL_TEXT_MAXLEN];
 };
 typedef struct raygui_cell_header raygui_cell_header_t;
@@ -161,7 +172,7 @@ void destroy_raygui_cell_grid(raygui_cell_grid_t *grid);
 void raygui_cell_grid_alloc_cells(raygui_cell_grid_t *grid, int rows);
 void raygui_cell_grid_free_cells(raygui_cell_grid_t *grid);
 
-void raygui_cell_grid_draw_row(raygui_cell_grid_t *grid, int row, Rectangle row_bounds, int state);
+void raygui_cell_grid_draw_row(raygui_cell_grid_t *grid, int row, float y, int state);
 void raygui_cell_grid_draw_headers(raygui_cell_grid_t *grid);
 
 #endif /*RAYGUI_CELL_H*/

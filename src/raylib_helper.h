@@ -162,6 +162,9 @@ Color ColorLerp(Color start, Color end, float amount);
 
 bool ColorEq(Color a, Color b);
 
+#define NormColor(r,g,b,a) (Vector4){ .x = (r), .y = (g), .z = (b), .w = (a) }
+#define RGBAf(r,g,b,a) ColorFromNormalized(NormColor((r),(g),(b),(a)))
+#define RGBf(r,g,b) ColorFromNormalized(NormColor((r),(g),(b),1.0f))
 #define HSV(h,s,v) (Vector3){ .x = (h), .y = (s), .z = (v) }
 
 Color ColorRelHSV(Color color, Vector3 relhsv);
@@ -169,6 +172,11 @@ Color ColorRelHSV(Color color, Vector3 relhsv);
 static inline Color ColorRelSaturation(Color color, float relsat)
 {
     return ColorRelHSV(color, HSV(0.0f, relsat, 0.0f));
+}
+
+static inline Color ColorRelHue(Color color, float relhue)
+{
+    return ColorRelHSV(color, HSV(relhue, 0.0f, 0.0f));
 }
 
 /*** Misc Math ***/
@@ -220,6 +228,32 @@ Vector2 RectangleCenter(Rectangle rect);
 Rectangle ExpandRectangle(Rectangle rect, float margin);
 Rectangle ExpandRectangleWH(Rectangle rect, float width_margin, float height_margin);
 Rectangle move_rect_to_screen_center(Rectangle rect);
+
+static inline Rectangle RectangleMoveX(Rectangle rect, float xoffset)
+{
+    rect.x += xoffset;
+    return rect;
+}
+
+static inline Rectangle RectangleMoveY(Rectangle rect, float yoffset)
+{
+    rect.y += yoffset;
+    return rect;
+}
+
+static inline Rectangle RectangleMove(Rectangle rect, float xoffset, float yoffset)
+{
+    rect.x += xoffset;
+    rect.y += yoffset;
+    return rect;
+}
+
+static inline Rectangle RectangleMoveV(Rectangle rect, Vector2 offset)
+{
+    rect.x += offset.x;
+    rect.y += offset.y;
+    return rect;
+}
 
 /*** Double Buffered Textures ***/
 

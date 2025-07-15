@@ -52,6 +52,34 @@ char *solve_elapsed_time_to_str(solve_elapsed_time_t *elapsed_time)
     return elapsed_time_parts_to_str(&(elapsed_time->parts));
 }
 
+const char *elapsed_time_parts_to_readable_string(elapsed_time_parts_t *elapsed_time_parts)
+{
+    const char *str = NULL;
+
+    if (elapsed_time_parts->day > 0) {
+        str = TextFormat("%d %s, %02d:%02d:%02d.%03d",
+                         elapsed_time_parts->day,
+                         ((elapsed_time_parts->day == 1) ? "day" : "days"),
+                         elapsed_time_parts->hr,
+                         elapsed_time_parts->min,
+                         elapsed_time_parts->sec,
+                         elapsed_time_parts->ms);
+    } else if (elapsed_time_parts->hr > 0) {
+        str = TextFormat("%02d:%02d:%02d.%03d",
+                         elapsed_time_parts->hr,
+                         elapsed_time_parts->min,
+                         elapsed_time_parts->sec,
+                         elapsed_time_parts->ms);
+    } else {
+        str = TextFormat("%02d:%02d.%03d",
+                         elapsed_time_parts->min,
+                         elapsed_time_parts->sec,
+                         elapsed_time_parts->ms);
+    }
+
+    return str;
+}
+
 bool str_to_elapsed_time_parts(const char *str, elapsed_time_parts_t *parts)
 {
     errno = 0;
