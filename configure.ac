@@ -4,14 +4,14 @@ m4_define([project_name], [hexpuzzle])
 m4_define([project_url], [https://github.com/pdkl95/]project_name)
 m4_define([project_email], pdkl95@gmail.com)
 m4_define([project_author], [Brent Sanders])
-m4_define([project_copyright_year], [2023])
+m4_define([project_copyright_year], [2025])
 m4_define([project_licence], [GPLv3+])
 m4_define([project_licence_desc], [GNU GPL version 3 or later <http://gnu.org/licences/gpl.html>])
 
 
 dnl Release Version
 m4_define([project_major_version], [0])
-m4_define([project_minor_version], [1])
+m4_define([project_minor_version], [9])
 m4_define([project_micro_version], [0])
 m4_define([project_version], project_major_version.project_minor_version.project_micro_version)
 
