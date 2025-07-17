@@ -481,7 +481,12 @@ bool nvdata_finished_save_to_file(const char *filepath)
 
     //print_cjson(json);
 
-    bool ret = WriteCompressedJSONFile(filepath, json);
+    bool ret = false;
+    if (options->compress_finished_levels_dat) {
+        ret = WriteCompressedJSONFile(filepath, json);
+    } else {
+        ret = WriteUncompressedJSONFile(filepath, json);
+    }
 
     cJSON_Delete(json);
 

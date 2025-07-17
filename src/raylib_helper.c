@@ -97,6 +97,20 @@ unsigned char *ReadCompressedFile(const char *filepath, int *data_size, const ch
 #endif
 const char *magio_json_deflate = COMPRESSED_JSON_MAGIC;
 
+bool WriteUncompressedJSONFile(const char *filepath, struct cJSON *json)
+{
+    char *json_str = cJSON_Print(json);
+    if (!json_str) {
+        return false;
+    }
+
+    bool ret = SaveFileData(filepath, json_str, strlen(json_str));
+
+    SAFEFREE(json_str);
+
+    return ret;
+}
+
 bool WriteCompressedJSONFile(const char *filepath, struct cJSON *json)
 {
     char *json_str = cJSON_PrintUnformatted(json);
@@ -176,12 +190,20 @@ struct cJSON *ReadPossiblyCompressedJSONFile(const char *filepath)
             errmsg("Error parsing \"%s\" as JSON", filepath);
         }
 
-        SAFEFREE(data);
-        UnloadFileData(filedata);
+        if (data == filedata) {
+            UnloadFileData(filedata);
+        } else {
+            SAFEFREE(data);
+            UnloadFileData(filedata);
+        }
         return json;
     } else {
-        SAFEFREE(data);
-        UnloadFileData(filedata);
+        if (data == filedata) {
+            UnloadFileData(filedata);
+        } else {
+            SAFEFREE(data);
+            UnloadFileData(filedata);
+        }
         return NULL;
     }
 }

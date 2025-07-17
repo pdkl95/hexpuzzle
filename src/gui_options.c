@@ -317,7 +317,7 @@ void resize_gui_options(void)
     options_panel_rect.height = (window_size.y * options_panel_rect.x) / window_size.x;
 
     MINVAR(options_panel_rect.width,  350);
-    MINVAR(options_panel_rect.height, 500);
+    MINVAR(options_panel_rect.height, 520);
 
     options_panel_rect.x = (window_size.x / 2) - (options_panel_rect.width  / 2);
     options_panel_rect.y = (window_size.y / 2) - (options_panel_rect.height / 2);

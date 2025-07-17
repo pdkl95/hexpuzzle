@@ -299,22 +299,22 @@ static bool program_state_from_json(cJSON *json)
 
         cJSON *bool_json = NULL;
 
-#define mk_bool_json(field, name)                                        \
-    bool_json = cJSON_GetObjectItem(ui_json, STR(name));                 \
-    if (bool_json) {                                                     \
-        if (cJSON_IsBool(bool_json)) {                                   \
-            if (cJSON_IsTrue(bool_json)) {                               \
-                options->field = true;                                   \
-            } else {                                                     \
-                options->field = false;                                  \
-            }                                                            \
-        } else {                                                         \
-            errmsg("Program state JSON['graphics']['%s'] is not a BOOL", \
-                   STR(name));                                           \
-        }                                                                \
-    } else {                                                             \
-        warnmsg("Program state JSON['graphics'] is missing \"%s\"",      \
-                STR(name));                                              \
+#define mk_bool_json(field, name)                                  \
+    bool_json = cJSON_GetObjectItem(ui_json, STR(name));           \
+    if (bool_json) {                                               \
+        if (cJSON_IsBool(bool_json)) {                             \
+            if (cJSON_IsTrue(bool_json)) {                         \
+                options->field = true;                             \
+            } else {                                               \
+                options->field = false;                            \
+            }                                                      \
+        } else {                                                   \
+            errmsg("Program state JSON['ui']['%s'] is not a BOOL", \
+                   STR(name));                                     \
+        }                                                          \
+    } else {                                                       \
+        warnmsg("Program state JSON['ui'] is missing \"%s\"",      \
+                STR(name));                                        \
     }
 
         if (options->load_state_animate_bg) {
@@ -343,6 +343,9 @@ static bool program_state_from_json(cJSON *json)
         }
         if (options->load_state_log_finished_levels) {
             mk_bool_json(log_finished_levels, log_finished_levels);
+        }
+        if (options->load_state_log_finished_levels) {
+            mk_bool_json(compress_finished_levels_dat, compress_finished_levels_dat);
         }
 #undef mk_bool_json
     }
@@ -507,7 +510,7 @@ static cJSON *program_state_to_json(void)
         bool_json = cJSON_AddFalseToObject(ui_json, STR(name));   \
     }                                                                   \
     if (!bool_json) {                                                   \
-        errmsg("Error adding bool \"%s\" to JSON.graphics", STR(name)); \
+        errmsg("Error adding bool \"%s\" to JSON.ui", STR(name)); \
         goto to_json_error;                                             \
     }
 
@@ -520,6 +523,7 @@ static cJSON *program_state_to_json(void)
     mk_bool_json(show_level_previews, show_level_previews);
     mk_bool_json(show_tooltips, show_tooltips);
     mk_bool_json(log_finished_levels, log_finished_levels);
+    mk_bool_json(compress_finished_levels_dat, compress_finished_levels_dat);
 #undef mk_bool_json
 
     cJSON *win_anim_json = win_anim_config_to_json();

@@ -41,59 +41,61 @@ options_t *options = NULL;
 static char short_options[] = "Cc:d:e:EF:H:p:s:SwvVW:PR:UL::r::hj";
 
 static struct option long_options[] = {
-    {    "create-random-level",       no_argument, 0, 'G' },
-    {     "create-blank-level",       no_argument, 0, 'K' },
-    {              "no-config", required_argument, 0, 'C' },
-    {             "config-dir", required_argument, 0, 'c' },
-    {                    "fps", required_argument, 0, 'F' },
-    {                 "height", required_argument, 0, 'H' },
-    {                  "width", required_argument, 0, 'W' },
-    {           "level-radius", required_argument, 0, 'R' },
-    {        "level-min-fixed", required_argument, 0, '[' },
-    {        "level-max-fixed", required_argument, 0, ']' },
-    {       "level-min-hidden", required_argument, 0, '(' },
-    {       "level-max-hidden", required_argument, 0, ')' },
-    {           "path-density", required_argument, 0, 'd' },
-    {                   "seed", required_argument, 0, 's' },
-    {                   "play", required_argument, 0, 'p' },
-    {                 "random", optional_argument, 0, 'r' },
-    {                   "edit", required_argument, 0, 'e' },
-    {          "cheat-autowin",       no_argument, 0, 'A' },
-    {           "cheat-solver",       no_argument, 0, 'S' },
-    {                  "force",       no_argument, 0, '!' },
-    {                   "pack",       no_argument, 0, 'P' },
-    {                 "unpack",       no_argument, 0, 'U' },
-    {             "animate-bg",       no_argument, 0, 'b' },
-    {          "no-animate-bg",       no_argument, 0, 'B' },
-    {            "animate-win",       no_argument, 0, 'i' },
-    {         "no-animate-win",       no_argument, 0, 'I' },
+    {         "create-random-level",       no_argument, 0, 'G' },
+    {          "create-blank-level",       no_argument, 0, 'K' },
+    {                   "no-config", required_argument, 0, 'C' },
+    {                  "config-dir", required_argument, 0, 'c' },
+    {                         "fps", required_argument, 0, 'F' },
+    {                      "height", required_argument, 0, 'H' },
+    {                       "width", required_argument, 0, 'W' },
+    {                "level-radius", required_argument, 0, 'R' },
+    {             "level-min-fixed", required_argument, 0, '[' },
+    {             "level-max-fixed", required_argument, 0, ']' },
+    {            "level-min-hidden", required_argument, 0, '(' },
+    {            "level-max-hidden", required_argument, 0, ')' },
+    {                "path-density", required_argument, 0, 'd' },
+    {                        "seed", required_argument, 0, 's' },
+    {                        "play", required_argument, 0, 'p' },
+    {                      "random", optional_argument, 0, 'r' },
+    {                        "edit", required_argument, 0, 'e' },
+    {               "cheat-autowin",       no_argument, 0, 'A' },
+    {                "cheat-solver",       no_argument, 0, 'S' },
+    {                       "force",       no_argument, 0, '!' },
+    {                        "pack",       no_argument, 0, 'P' },
+    {                      "unpack",       no_argument, 0, 'U' },
+    {                  "animate-bg",       no_argument, 0, 'b' },
+    {               "no-animate-bg",       no_argument, 0, 'B' },
+    {                 "animate-win",       no_argument, 0, 'i' },
+    {              "no-animate-win",       no_argument, 0, 'I' },
 #ifdef USE_PHYSICS
-    {            "use-physics",       no_argument, 0, 'y' },
-    {         "no-use-physics",       no_argument, 0, 'Y' },
+    {                 "use-physics",       no_argument, 0, 'y' },
+    {              "no-use-physics",       no_argument, 0, 'Y' },
 #endif
-    {     "use-shader-effects",       no_argument, 0, 'x' },
-    {  "no-use-shader-effects",       no_argument, 0, 'X' },
-    {        "use-solve-timer",       no_argument, 0, 'm' },
-    {     "no-use-solve-timer",       no_argument, 0, 'M' },
-    {      "use-two-click-dnd",       no_argument, 0, '2' },
-    {   "no-use-two-click-dnd",       no_argument, 0, '@' },
-    {          "show-previews",       no_argument, 0, '-' },
-    {       "no-show-previews",       no_argument, 0, '_' },
-    {          "show-tooltips",       no_argument, 0, 't' },
-    {       "no-show-tooltips",       no_argument, 0, 'T' },
-    {    "log-finished-levels",       no_argument, 0, 'l' },
-    { "no-log-finished-levels",       no_argument, 0, 'L' },
-    {         "extra-rainbows",       no_argument, 0, ':' },
-    {      "no-extra-rainbows",       no_argument, 0, ';' },
-    {        "allow-edit-mode",       no_argument, 0, 'E' },
-    {                   "demo",       no_argument, 0, 'j' },
-    {               "demo-win",       no_argument, 0, 'J' },
-    {            "wait-events",       no_argument, 0, 'w' },
-    {                "verbose",       no_argument, 0, 'v' },
-    {                "version",       no_argument, 0, 'V' },
-    {                   "help",       no_argument, 0, 'h' },
-    {             "help-cheat",       no_argument, 0, '*' },
-    {                        0,                 0, 0,  0  }
+    {          "use-shader-effects",       no_argument, 0, 'x' },
+    {       "no-use-shader-effects",       no_argument, 0, 'X' },
+    {             "use-solve-timer",       no_argument, 0, 'm' },
+    {          "no-use-solve-timer",       no_argument, 0, 'M' },
+    {           "use-two-click-dnd",       no_argument, 0, '2' },
+    {        "no-use-two-click-dnd",       no_argument, 0, '@' },
+    {               "show-previews",       no_argument, 0, '-' },
+    {            "no-show-previews",       no_argument, 0, '_' },
+    {               "show-tooltips",       no_argument, 0, 't' },
+    {            "no-show-tooltips",       no_argument, 0, 'T' },
+    {         "log-finished-levels",       no_argument, 0, 'l' },
+    {      "no-log-finished-levels",       no_argument, 0, 'L' },
+    {    "compress-finished-levels",       no_argument, 0, '3' },
+    { "no-compress-finished-levels",       no_argument, 0, '#' },
+    {              "extra-rainbows",       no_argument, 0, ':' },
+    {           "no-extra-rainbows",       no_argument, 0, ';' },
+    {             "allow-edit-mode",       no_argument, 0, 'E' },
+    {                        "demo",       no_argument, 0, 'j' },
+    {                    "demo-win",       no_argument, 0, 'J' },
+    {                 "wait-events",       no_argument, 0, 'w' },
+    {                     "verbose",       no_argument, 0, 'v' },
+    {                     "version",       no_argument, 0, 'V' },
+    {                        "help",       no_argument, 0, 'h' },
+    {                  "help-cheat",       no_argument, 0, '*' },
+    {                             0,                 0, 0,  0  }
 };
 
 static char usage_args[] = "[<file>." LEVEL_FILENAME_EXT  " | <file>." COLLECTION_FILENAME_EXT "]";
@@ -137,6 +139,8 @@ static char help_text[] =
     "   --no-show-tooltips         Disable popup tooltips\n"
     "      --log-finished-levels   Enable ssving a log of finished levels (default: on)\n"
     "   --no-log-finished-levels   Disable saving a log of finished levels\n"
+    "      --compress-finished-levels  Enable compressing finished_levels.dat (default: on)\n"
+    "   --no-compress-finished-levels  Save finished_levels.dat as uncompressed JSON\n"
     "\n"
     "  -W, --width=NUMBER          Window width (default: " STR(OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH) ")\n"
     "  -H, --height=NUMBER         Window height (default: " STR(OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT) ")\n"
@@ -432,28 +436,29 @@ options_set_defaults(
 ) {
     assert_this(options);
 
-    options->verbose               = OPTIONS_DEFAULT_VERBOSE;
-    options->verbose_raylib        = OPTIONS_DEFAULT_VERBOSE_RAYLIB;
-    options->wait_events           = OPTIONS_DEFAULT_WAIT_EVENTS;
+    options->verbose                      = OPTIONS_DEFAULT_VERBOSE;
+    options->verbose_raylib               = OPTIONS_DEFAULT_VERBOSE_RAYLIB;
+    options->wait_events                  = OPTIONS_DEFAULT_WAIT_EVENTS;
 
-    options->allow_edit_mode       = OPTIONZ_DEFAULT_ALLOW_EDIT_MODE;
+    options->allow_edit_mode              = OPTIONZ_DEFAULT_ALLOW_EDIT_MODE;
 
-    options->animate_bg            = OPTIONS_DEFAULT_ANIMATE_BG;
-    options->animate_win           = OPTIONS_DEFAULT_ANIMATE_WIN;
-    options->use_physics           = OPTIONS_DEFAULT_USE_PHYSICS;
-    options->use_postprocessing    = OPTIONS_DEFAULT_USE_POSTPROCESSING;
-    options->use_solve_timer       = OPTIONS_DEFAULT_USE_SOLVE_TIMER;
-    options->use_two_click_dnd     = OPTIONS_DEFAULT_USE_TWO_CLICK_DND;
-    options->show_level_previews   = OPTIONS_DEFAULT_SHOW_LEVEL_PREVIEWS;
-    options->show_tooltips         = OPTIONS_DEFAULT_SHOW_TOOLTIPS;
-    options->log_finished_levels   = OPTIONS_DEFAULT_LOG_FINISHED_LEVELS;
-    options->extra_rainbows        = OPTIONS_DEFAULT_EXTRA_RAINBOWS;
-    options->max_fps               = OPTIONS_DEFAULT_MAX_FPS;
-    options->initial_window_width  = OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH;
-    options->initial_window_height = OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT;
-    options->cursor_scale          = OPTIONS_DEFAULT_CURSOR_SCALE;
-    options->double_click_ms       = OPTIONS_DEFAULT_DOUBLE_CLICK_MS;
-    options->max_win_radius        = OPTIONS_DEFAULT_MAX_WIN_RADIUS;
+    options->animate_bg                   = OPTIONS_DEFAULT_ANIMATE_BG;
+    options->animate_win                  = OPTIONS_DEFAULT_ANIMATE_WIN;
+    options->use_physics                  = OPTIONS_DEFAULT_USE_PHYSICS;
+    options->use_postprocessing           = OPTIONS_DEFAULT_USE_POSTPROCESSING;
+    options->use_solve_timer              = OPTIONS_DEFAULT_USE_SOLVE_TIMER;
+    options->use_two_click_dnd            = OPTIONS_DEFAULT_USE_TWO_CLICK_DND;
+    options->show_level_previews          = OPTIONS_DEFAULT_SHOW_LEVEL_PREVIEWS;
+    options->show_tooltips                = OPTIONS_DEFAULT_SHOW_TOOLTIPS;
+    options->log_finished_levels          = OPTIONS_DEFAULT_LOG_FINISHED_LEVELS;
+    options->compress_finished_levels_dat = OPTIONS_DEFAULT_COMPRESS_FINISHED_LEVELS_DAT;
+    options->extra_rainbows               = OPTIONS_DEFAULT_EXTRA_RAINBOWS;
+    options->max_fps                      = OPTIONS_DEFAULT_MAX_FPS;
+    options->initial_window_width         = OPTIONS_DEFAULT_INITIAL_WINDOW_WIDTH;
+    options->initial_window_height        = OPTIONS_DEFAULT_INITIAL_WINDOW_HEIGHT;
+    options->cursor_scale                 = OPTIONS_DEFAULT_CURSOR_SCALE;
+    options->double_click_ms              = OPTIONS_DEFAULT_DOUBLE_CLICK_MS;
+    options->max_win_radius               = OPTIONS_DEFAULT_MAX_WIN_RADIUS;
 
     options->load_state_animate_bg  = true;
     options->load_state_animate_win = true;
@@ -464,6 +469,7 @@ options_set_defaults(
     options->load_state_show_level_previews = true;
     options->load_state_show_tooltips = true;
     options->load_state_log_finished_levels = true;
+    options->load_state_compress_finished_levels_dat = true;
     options->load_color_opt = true;
 
     options->safe_mode = false;
@@ -800,6 +806,16 @@ options_parse_args(
         case 'L':
             options->log_finished_levels = false;
             options->load_state_log_finished_levels = false;
+            break;
+
+        case '3':
+            options->compress_finished_levels_dat = true;
+            options->load_state_compress_finished_levels_dat = false;
+            break;
+
+        case '#':
+            options->compress_finished_levels_dat = false;
+            options->load_state_compress_finished_levels_dat = false;
             break;
 
         case ':':

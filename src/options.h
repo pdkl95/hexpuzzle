@@ -41,6 +41,7 @@
 #define OPTIONS_DEFAULT_SHOW_LEVEL_PREVIEWS true
 #define OPTIONS_DEFAULT_SHOW_TOOLTIPS true
 #define OPTIONS_DEFAULT_LOG_FINISHED_LEVELS true
+#define OPTIONS_DEFAULT_COMPRESS_FINISHED_LEVELS_DAT true
 #define OPTIONS_DEFAULT_EXTRA_RAINBOWS false
 #define OPTIONS_DEFAULT_FPS 30
 #define OPTIONS_DEFAULT_MAX_FPS 30
@@ -108,6 +109,7 @@ struct options {
     bool show_level_previews;
     bool show_tooltips;
     bool log_finished_levels;
+    bool compress_finished_levels_dat;
     bool extra_rainbows;
     bool load_state_animate_bg;
     bool load_state_animate_win;
@@ -118,6 +120,7 @@ struct options {
     bool load_state_show_level_previews;
     bool load_state_show_tooltips;
     bool load_state_log_finished_levels;
+    bool load_state_compress_finished_levels_dat;
 
     long max_fps;
     long initial_window_width;
