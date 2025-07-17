@@ -175,6 +175,7 @@ void nvdata_mark_id_finished(struct finished_level *entry)
     assert(finished_levels.count > 0);
 
     finished_levels_changed = true;
+    rebuild_history_browser = true;
 }
 
 void nvdata_mark_finished(struct level *level)
@@ -224,6 +225,7 @@ void nvdata_unmark_finished(struct level *level)
     assert(finished_levels.count >= 0);
 
     finished_levels_changed = true;
+    rebuild_history_browser = true;
 }
 
 bool nvdata_is_finished(struct level *level)

@@ -267,6 +267,7 @@ static inline void tooltip(Rectangle bounds, const char *text)
 extern solve_timer_t solve_timer;
 
 extern bool demo_mode;
+extern bool rebuild_history_browser;
 
 int popup_message(const char *fmt, ...);
 int popup_info_message(const char *fmt, ...);

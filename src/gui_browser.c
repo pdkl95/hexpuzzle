@@ -31,6 +31,8 @@
 
 extern char *home_dir;
 
+bool rebuild_history_browser = true;
+
 bool open_game_file(const char *path, bool edit);
 void open_classics_game_pack(int n);
 bool open_blueprint(const char *blueprint);
@@ -676,6 +678,8 @@ static level_t *entry_load_level(gui_list_entry_t *entry)
 
 void preview_entry(gui_list_entry_t *entry)
 {
+    assert_not_null(entry);
+
     switch (entry->type) {
     case ENTRY_TYPE_LEVEL_FILE:
         break;
@@ -688,8 +692,17 @@ void preview_entry(gui_list_entry_t *entry)
         return;
     }
 
-    if (entry->status == ENTRY_STATUS_LOAD_ERROR) {
+    switch (entry->status) {
+    case ENTRY_STATUS_LOAD_ERROR:
         return;
+
+    case ENTRY_STATUS_NOT_LOADABLE:
+        browse_preview_level = NULL;
+        return;
+
+    default:
+        /* do nothing */
+        break;
     }
 
     if (!entry->level) {
@@ -1423,6 +1436,19 @@ static void draw_gui_browser_entry_buttons(gui_list_vars_t *list, gui_list_entry
 
     char *button_text =  browser_play_button_text;
 
+    if (entry) {
+        switch (entry->status) {
+        case ENTRY_STATUS_NULL:
+            fallthrough;
+        case ENTRY_STATUS_NOT_LOADABLE:
+            fallthrough;
+        case ENTRY_STATUS_LOAD_ERROR:
+            return;
+        default:
+            break;
+        }
+    }
+
     if (list->active >= 0) {
         switch (entry->type) {
         case ENTRY_TYPE_DIR:
@@ -1517,8 +1543,9 @@ void draw_gui_browser_local_level_file(void)
 
 void draw_gui_browser_finished_levels_history(void)
 {
-    if (defer_setup_browse_history) {
+    if (defer_setup_browse_history || rebuild_history_browser) {
         defer_setup_browse_history = false;
+        rebuild_history_browser = false;
         setup_browse_history();
     }
 

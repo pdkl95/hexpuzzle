@@ -731,7 +731,7 @@ struct level *generate_random_level(generate_level_param_t *param, const char *p
                 serialize_generate_level_params(gen_param));
     }
 
-    level_set_radius(level, options->create_level_radius);
+    level_set_radius(level, param->tile_radius);
     tile_count = level_get_enabled_tiles(level);
 
     if (gen_param.have_series) {
