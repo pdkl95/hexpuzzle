@@ -2293,6 +2293,7 @@ static bool game_mode_button(void *ptr, game_mode_t mode, int line_count, int ic
 
         Rectangle bg_rect = ExpandRectangle(src_rect,
                                             BUTTON_SELECTED_HIGHLIGHT_THICKNESS);
+        bg_rect.height += 1.0f;
         DrawRectangleRounded(bg_rect,
                              BUTTON_SELECTED_HIGHLIGHT_ROUNDNESS,
                              BUTTON_SELECTED_HIGHLIGHT_SEGMENTS,

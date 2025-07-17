@@ -432,13 +432,17 @@ void resize_gui_random(void)
     gui_random_symmetry_button_rotate_bg_rect  = ExpandRectangle(gui_random_symmetry_button_rotate_rect,
                                                                  symmetry_highlight_thickness);
 
-    gui_random_symmetry_button_none_bg_rect.x        -= 1.0;
-    gui_random_symmetry_button_reflect_bg_rect.x     -= 1.0;
-    gui_random_symmetry_button_rotate_bg_rect.x      -= 1.0;
+    gui_random_symmetry_button_none_bg_rect.x         -= 1.0;
+    gui_random_symmetry_button_reflect_bg_rect.x      -= 1.0;
+    gui_random_symmetry_button_rotate_bg_rect.x       -= 1.0;
 
-    gui_random_symmetry_button_none_bg_rect.width    += 1.0;
-    gui_random_symmetry_button_reflect_bg_rect.width += 1.0;
-    gui_random_symmetry_button_rotate_bg_rect.width  += 1.0;
+    gui_random_symmetry_button_none_bg_rect.width     += 1.0;
+    gui_random_symmetry_button_reflect_bg_rect.width  += 1.0;
+    gui_random_symmetry_button_rotate_bg_rect.width   += 1.0;
+
+    gui_random_symmetry_button_none_bg_rect.height    += 1.0;
+    gui_random_symmetry_button_reflect_bg_rect.height += 1.0;
+    gui_random_symmetry_button_rotate_bg_rect.height  += 1.0;
 
     gui_random_area_rect.y      += gui_random_symmetry_label_rect.height + RAYGUI_ICON_SIZE;
     gui_random_area_rect.height -= gui_random_symmetry_label_rect.height + RAYGUI_ICON_SIZE;
