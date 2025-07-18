@@ -51,11 +51,13 @@ char options_show_level_previews_text[] = "Show Level Previews";
 char options_show_tooltips_text[] = "Show Tooltips";
 char options_use_two_click_dnd_text[] = "2-Click Drag-and-Drop";
 char options_log_finished_levels_text[] = "Log Finished Levels";
-char options_reset_finished_text[] = "Reset Level Finished Data";
-char options_color_edit_tooltip[] = "Select Color";
-char options_color_reset_tooltip[] = "Reset color back to default";
+char options_reset_finished_text[] = "Expunge Finished Level Data";
 char options_use_postprocessing_text[] = "Use Shader Effects";
 char options_use_solve_timer_text[] = "Solve Time Clock";
+
+char options_color_edit_tooltip[] = "Select Color";
+char options_color_reset_tooltip[] = "Reset color back to default";
+char options_reset_finished_text_tooltip[] = "WARNING: Permanent!";
 
 char options_anim_bg_desc_text[]  = "Disable if the animated background is too distracting.";
 char options_anim_win_desc_text[] = "Special effects animation that plays when a level is completed.";
@@ -84,29 +86,67 @@ struct gui_bool_option {
     char *label;
     char *desc;
 
+    Vector2 label_text_size;
+
     bool disabled;
     const char *disabled_reason;
 };
 typedef struct gui_bool_option gui_bool_option_t;
 
-enum graphics_option_index {
-    GRAPHICS_OPTION_USE_SOLVE_TIMER     = 0,
-    GRAPHICS_OPTION_ANIMATE_BG          = 1,
-    GRAPHICS_OPTION_ANIMATE_WIN         = 2,
-    GRAPHICS_OPTION_USE_PHYSICS         = 3,
-    GRAPHICS_OPTION_USE_POSTPROCESSING  = 4,
-    GRAPHICS_OPTION_SHOW_LEVEL_PREVIEW  = 5,
-    GRAPHICS_OPTION_USE_TWO_CLICK_DND   = 6,
-    GRAPHICS_OPTION_SHOW_TOOLTIPS       = 7,
-    GRAPHICS_OPTION_LOG_FINISHED_LEVELS = 8
+struct gui_bool_option_list {
+    gui_bool_option_t *options;
+    int count;
+    float max_label_text_width;
 };
-typedef enum graphics_option_index graphics_option_index_t;
+typedef struct gui_bool_option_list gui_bool_option_list_t;
 
-gui_bool_option_t graphics_options[] = {
+enum game_option_index {
+    GAME_OPTION_USE_SOLVE_TIMER     = 0,
+    GAME_OPTION_USE_TWO_CLICK_DND   = 1,
+    GAME_OPTION_SHOW_LEVEL_PREVIEW  = 2
+};
+typedef enum game_option_index game_option_index_t;
+
+gui_bool_option_t _game_options[] = {
     {
         .rect  = &options_use_solve_timer_rect,
         .label = options_use_solve_timer_text,
         .desc  = options_use_solve_timer_desc_text
+    },
+    {
+        .rect  = &options_use_two_click_dnd_rect,
+        .label = options_use_two_click_dnd_text,
+        .desc  = options_use_two_click_dnd_desc_text
+    },
+        {
+        .rect  = &options_show_level_previews_rect,
+        .label = options_show_level_previews_text,
+        .desc  = options_show_level_previews_desc_text
+    }
+};
+#define NUM_GAME_OPTIONS ((long)NUM_ELEMENTS(gui_bool_option_t, _game_options))
+
+enum ui_option_index {
+#ifdef USE_PHYSICS
+    UI_OPTION_SHOW_TOOLTIPS       = 0,
+    UI_OPTION_ANIMATE_BG          = 1,
+    UI_OPTION_ANIMATE_WIN         = 2,
+    UI_OPTION_USE_PHYSICS         = 3,
+    UI_OPTION_USE_POSTPROCESSING  = 4
+#else
+    UI_OPTION_SHOW_TOOLTIPS       = 0,
+    UI_OPTION_ANIMATE_BG          = 1,
+    UI_OPTION_ANIMATE_WIN         = 2,
+    UI_OPTION_USE_POSTPROCESSING  = 3
+#endif
+};
+typedef enum ui_option_index ui_option_index_t;
+
+gui_bool_option_t _ui_options[] = {
+    {
+        .rect  = &options_show_tooltips_rect,
+        .label = options_show_tooltips_text,
+        .desc  = options_show_tooltips_desc_text
     },
     {
         .rect  = &options_anim_bg_rect,
@@ -129,29 +169,39 @@ gui_bool_option_t graphics_options[] = {
         .rect  = &options_use_postprocessing_rect,
         .label = options_use_postprocessing_text,
         .desc  = options_use_postprocessing_desc_text
-    },
-    {
-        .rect  = &options_show_level_previews_rect,
-        .label = options_show_level_previews_text,
-        .desc  = options_show_level_previews_desc_text
-    },
-    {
-        .rect  = &options_use_two_click_dnd_rect,
-        .label = options_use_two_click_dnd_text,
-        .desc  = options_use_two_click_dnd_desc_text
-    },
-    {
-        .rect  = &options_show_tooltips_rect,
-        .label = options_show_tooltips_text,
-        .desc  = options_show_tooltips_desc_text
-    },
+    }
+};
+#define NUM_UI_OPTIONS ((long)NUM_ELEMENTS(gui_bool_option_t, _ui_options))
+
+enum data_option_index {
+    DATA_OPTION_LOG_FINISHED_LEVELS = 0
+};
+typedef enum graphics_option_index graphics_option_index_t;
+
+gui_bool_option_t _data_options[] = {
     {
         .rect  = &options_log_finished_levels_rect,
         .label = options_log_finished_levels_text,
         .desc  = options_log_finished_levels_desc_text
     }
 };
-#define NUM_BOOL_OPTIONS ((long)NUM_ELEMENTS(gui_bool_option_t, graphics_options))
+#define NUM_DATA_OPTIONS ((long)NUM_ELEMENTS(gui_bool_option_t, _data_options))
+
+
+gui_bool_option_list_t game_options = {
+    .options = _game_options,
+    .count   = NUM_GAME_OPTIONS
+};
+
+gui_bool_option_list_t ui_options = {
+    .options = _ui_options,
+    .count   = NUM_UI_OPTIONS
+};
+
+gui_bool_option_list_t data_options = {
+    .options = _data_options,
+    .count   = NUM_DATA_OPTIONS
+};
 
 //                         8 =    5 2   1
 //                           "Color N"'\0'
@@ -193,7 +243,7 @@ options_status_t options_status_off = {
     .color = RED
 };
 
-#define NUM_TABS 3
+#define NUM_TABS 4
 
 const char *options_tabbar_text[NUM_TABS];
 
@@ -221,57 +271,87 @@ void show_status_beside(bool status_value, Rectangle neighbor)
         .height = neighbor.height
     };
 
-
     show_status(status, status_rect);
 }
 
-static void enable_graphics_option(int index)
+static void enable_bool_option(gui_bool_option_list_t *list, int index)
 {
-    if (graphics_options[index].opt_have_saved_value) {
-        *graphics_options[index].opt = graphics_options[index].opt_saved;
-        graphics_options[index].opt_have_saved_value = false;
+    assert_not_null(list);
+
+    if (list->options[index].opt_have_saved_value) {
+        *list->options[index].opt = list->options[index].opt_saved;
+        list->options[index].opt_have_saved_value = false;
     }
 
-    graphics_options[index].disabled = false;
-    graphics_options[index].disabled_reason = NULL;
+    list->options[index].disabled = false;
+    list->options[index].disabled_reason = NULL;
 }
 
-static void disable_graphics_option(int index, const char *reason)
+static void disable_bool_option(gui_bool_option_list_t *list, int index, const char *reason)
 {
-    graphics_options[index].opt_saved = *graphics_options[index].opt;
-    graphics_options[index].opt_have_saved_value = true;
+    assert_not_null(list);
 
-    *graphics_options[index].opt = false;
-    graphics_options[index].disabled = true;
-    graphics_options[index].disabled_reason = reason;
+    list->options[index].opt_saved = *list->options[index].opt;
+    list->options[index].opt_have_saved_value = true;
+
+    *list->options[index].opt = false;
+    list->options[index].disabled = true;
+    list->options[index].disabled_reason = reason;
 }
 
-static void check_disabled_graphics_option(void)
+static void enable_list_of_bool_options(gui_bool_option_list_t *list)
 {
-    for (int i=0; i<NUM_BOOL_OPTIONS; i++) {
-        enable_graphics_option(i);
+    assert_not_null(list);
+
+    for (int i=0; i<list->count; i++) {
+        enable_bool_option(list, i);
     }
+}
+
+static void check_disabled_options(void)
+{
+    enable_list_of_bool_options(&game_options);
+    enable_list_of_bool_options(&ui_options);
+    enable_list_of_bool_options(&data_options);
 
     if (options->wait_events) {
-        disable_graphics_option(GRAPHICS_OPTION_ANIMATE_BG,
-                                options_disabled_reason_wait_events);
-        disable_graphics_option(GRAPHICS_OPTION_ANIMATE_WIN,
-                                options_disabled_reason_wait_events);
+        disable_bool_option(&ui_options,
+                            UI_OPTION_ANIMATE_BG,
+                            options_disabled_reason_wait_events);
+        disable_bool_option(&ui_options,
+                            UI_OPTION_ANIMATE_WIN,
+                            options_disabled_reason_wait_events);
     }
 
     if (!options->animate_win) {
-        disable_graphics_option(GRAPHICS_OPTION_USE_PHYSICS,
-                                options_disabled_reason_no_animate_win);
-        disable_graphics_option(GRAPHICS_OPTION_USE_POSTPROCESSING,
-                                options_disabled_reason_no_animate_win);
+        disable_bool_option(&ui_options,
+                            UI_OPTION_USE_PHYSICS,
+                            options_disabled_reason_no_animate_win);
+        disable_bool_option(&ui_options,
+                            UI_OPTION_USE_POSTPROCESSING,
+                            options_disabled_reason_no_animate_win);
+    }
+}
+
+static void init_bool_option_list(gui_bool_option_list_t *list)
+{
+    assert_not_null(list);
+
+    for (int i=0; i<list->count; i++) {
+        gui_bool_option_t *opt = &(list->options[i]);
+        assert_not_null(opt);
+
+        opt->opt_saved = *opt->opt;
+        opt->opt_have_saved_value = false;
     }
 }
 
 void init_gui_options(void)
 {
-    options_tabbar_text[0] = "Graphics";
-    options_tabbar_text[1] = "Colors";
-    options_tabbar_text[2] = "Data";
+    options_tabbar_text[0] = "Game";
+    options_tabbar_text[1] = "UI";
+    options_tabbar_text[2] = "Colors";
+    options_tabbar_text[3] = "Data";
 
     options_active_tab = 0;
 
@@ -287,20 +367,21 @@ void init_gui_options(void)
                  "%s", GuiIconText(ICON_UNDO_FILL, NULL));
     }
 
-    graphics_options[GRAPHICS_OPTION_USE_SOLVE_TIMER    ].opt = &options->use_solve_timer;
-    graphics_options[GRAPHICS_OPTION_ANIMATE_BG         ].opt = &options->animate_bg;
-    graphics_options[GRAPHICS_OPTION_ANIMATE_WIN        ].opt = &options->animate_win;
-    graphics_options[GRAPHICS_OPTION_USE_PHYSICS        ].opt = &options->use_physics;
-    graphics_options[GRAPHICS_OPTION_USE_POSTPROCESSING ].opt = &options->use_postprocessing;
-    graphics_options[GRAPHICS_OPTION_SHOW_LEVEL_PREVIEW ].opt = &options->show_level_previews;
-    graphics_options[GRAPHICS_OPTION_SHOW_TOOLTIPS      ].opt = &options->show_tooltips;
-    graphics_options[GRAPHICS_OPTION_USE_TWO_CLICK_DND  ].opt = &options->use_two_click_dnd;
-    graphics_options[GRAPHICS_OPTION_LOG_FINISHED_LEVELS].opt = &options->log_finished_levels;
+    _game_options[GAME_OPTION_USE_SOLVE_TIMER    ].opt = &options->use_solve_timer;
+    _game_options[GAME_OPTION_USE_TWO_CLICK_DND  ].opt = &options->use_two_click_dnd;
+    _game_options[GAME_OPTION_SHOW_LEVEL_PREVIEW ].opt = &options->show_level_previews;
 
-    for (int i=0; i<NUM_BOOL_OPTIONS; i++) {
-        graphics_options[i].opt_saved = *graphics_options[i].opt;
-        graphics_options[i].opt_have_saved_value = false;
-    }
+    _ui_options[UI_OPTION_SHOW_TOOLTIPS      ].opt = &options->show_tooltips;
+    _ui_options[UI_OPTION_ANIMATE_BG         ].opt = &options->animate_bg;
+    _ui_options[UI_OPTION_ANIMATE_WIN        ].opt = &options->animate_win;
+    _ui_options[UI_OPTION_USE_PHYSICS        ].opt = &options->use_physics;
+    _ui_options[UI_OPTION_USE_POSTPROCESSING ].opt = &options->use_postprocessing;
+
+    _data_options[DATA_OPTION_LOG_FINISHED_LEVELS].opt = &options->log_finished_levels;
+
+    init_bool_option_list(&game_options);
+    init_bool_option_list(&ui_options);
+    init_bool_option_list(&data_options);
 
     resize_gui_options();
 }
@@ -311,13 +392,43 @@ void cleanup_gui_options(void)
     SAFEFREE(options_status_off.icon_text);
 }
 
+static float resize_bool_option_list(gui_bool_option_list_t *list, Rectangle bounds)
+{
+    assert_not_null(list);
+
+    list->max_label_text_width = 0.0f;
+
+    for (int i=0; i<list->count; i++) {
+        gui_bool_option_t *opt = &(list->options[i]);
+        assert_not_null(opt);
+        assert_not_null(opt->label);
+
+        opt->label_text_size = measure_gui_text(opt->label);
+        list->max_label_text_width = MAX(list->max_label_text_width, opt->label_text_size.x);
+    }
+
+    for (int i=0; i<list->count; i++) {
+        gui_bool_option_t *opt = &(list->options[i]);
+
+        opt->rect->x      = bounds.x;
+        opt->rect->y      = bounds.y;
+        opt->rect->width  = list->max_label_text_width;
+        opt->rect->height = TOOL_BUTTON_HEIGHT;
+
+        bounds.y += opt->rect->height;
+        bounds.y += RAYGUI_ICON_SIZE;
+    }
+
+    return bounds.y;
+}
+
 void resize_gui_options(void)
 {
     options_panel_rect.width  = window_size.x * 0.65;
     options_panel_rect.height = (window_size.y * options_panel_rect.x) / window_size.x;
 
     MINVAR(options_panel_rect.width,  350);
-    MINVAR(options_panel_rect.height, 520);
+    MINVAR(options_panel_rect.height, 400);
 
     options_panel_rect.x = (window_size.x / 2) - (options_panel_rect.width  / 2);
     options_panel_rect.y = (window_size.y / 2) - (options_panel_rect.height / 2);
@@ -334,84 +445,20 @@ void resize_gui_options(void)
     options_area_rect.width  = options_tabbar_rect.width - (2 * PANEL_INNER_MARGIN);
     options_area_rect.height = panel_bottom - (2 * RAYGUI_ICON_SIZE) - options_area_rect.y;
 
+    UNUSED
+    float game_bool_option_list_bottom = resize_bool_option_list(&game_options, options_area_rect);
+    float   ui_bool_option_list_bottom = resize_bool_option_list(&ui_options, options_area_rect);
+    float data_bool_option_list_bottom = resize_bool_option_list(&data_options, options_area_rect);
+
     Vector2 options_reset_finished_text_size = measure_gui_text(options_reset_finished_text);
     options_reset_finished_rect.x = options_area_rect.x;
-    options_reset_finished_rect.y = options_area_rect.y;
+    options_reset_finished_rect.y = data_bool_option_list_bottom + RAYGUI_ICON_SIZE;
     options_reset_finished_rect.width = options_reset_finished_text_size.x + (4 * BUTTON_MARGIN);;
     options_reset_finished_rect.height = TOOL_BUTTON_HEIGHT;
 
-#define mktext(name) \
-    Vector2 options_##name##_text_size = measure_gui_text(options_##name##_text); \
-    anim_text_size = MAX(anim_text_size, options_##name##_text_size.x);
-
-    float anim_text_size = 0.0f;
-    mktext(use_solve_timer);
-    mktext(anim_bg);
-    mktext(anim_win);
-#ifdef USE_PHYSICS
-    mktext(use_physics);
-#endif
-    mktext(use_postprocessing);
-    mktext(show_level_previews);
-    mktext(show_tooltips);
-#undef mktext
-
-    anim_text_size += 4 * BUTTON_MARGIN;
-
-    options_use_solve_timer_rect.x = options_area_rect.x;
-    options_use_solve_timer_rect.y = options_area_rect.y;
-    options_use_solve_timer_rect.width = anim_text_size;
-    options_use_solve_timer_rect.height = TOOL_BUTTON_HEIGHT;
-
-    options_anim_bg_rect.x = options_area_rect.x;
-    options_anim_bg_rect.y = options_use_solve_timer_rect.y + options_use_solve_timer_rect.height + RAYGUI_ICON_SIZE;
-    options_anim_bg_rect.width = anim_text_size;
-    options_anim_bg_rect.height = TOOL_BUTTON_HEIGHT;
-
-    options_anim_win_rect.x = options_area_rect.x;
-    options_anim_win_rect.y = options_anim_bg_rect.y + options_anim_bg_rect.height + RAYGUI_ICON_SIZE;
-    options_anim_win_rect.width = anim_text_size;
-    options_anim_win_rect.height = TOOL_BUTTON_HEIGHT;
-
-#ifdef USE_PHYSICS
-    options_use_physics_rect.x = options_area_rect.x;
-    options_use_physics_rect.y = options_anim_win_rect.y + options_anim_win_rect.height + RAYGUI_ICON_SIZE;
-    options_use_physics_rect.width = anim_text_size;
-    options_use_physics_rect.height = TOOL_BUTTON_HEIGHT;
-#endif
-
-    options_use_postprocessing_rect.x = options_area_rect.x;
-#ifdef USE_PHYSICS
-    options_use_postprocessing_rect.y = options_use_physics_rect.y + options_use_physics_rect.height + RAYGUI_ICON_SIZE;
-#else
-    options_use_postprocessing_rect.y = options_anim_win_rect.y + options_anim_win_rect.height + RAYGUI_ICON_SIZE;
-#endif
-    options_use_postprocessing_rect.width = anim_text_size;
-    options_use_postprocessing_rect.height = TOOL_BUTTON_HEIGHT;
-
-    options_show_level_previews_rect.x = options_area_rect.x;
-    options_show_level_previews_rect.y = options_use_postprocessing_rect.y + options_use_postprocessing_rect.height + RAYGUI_ICON_SIZE;
-    options_show_level_previews_rect.width = anim_text_size;
-    options_show_level_previews_rect.height = TOOL_BUTTON_HEIGHT;
-
-    options_use_two_click_dnd_rect.x = options_area_rect.x;
-    options_use_two_click_dnd_rect.y = options_show_level_previews_rect.y + options_show_level_previews_rect.height + RAYGUI_ICON_SIZE;
-    options_use_two_click_dnd_rect.width = anim_text_size;
-    options_use_two_click_dnd_rect.height = TOOL_BUTTON_HEIGHT;
-
-    options_show_tooltips_rect.x = options_area_rect.x;
-    options_show_tooltips_rect.y = options_use_two_click_dnd_rect.y + options_use_two_click_dnd_rect.height + RAYGUI_ICON_SIZE;
-    options_show_tooltips_rect.width = anim_text_size;
-    options_show_tooltips_rect.height = TOOL_BUTTON_HEIGHT;
-
-    options_log_finished_levels_rect.x = options_area_rect.x;
-    options_log_finished_levels_rect.y = options_show_tooltips_rect.y + options_show_tooltips_rect.height + RAYGUI_ICON_SIZE;
-    options_log_finished_levels_rect.width = anim_text_size;
-    options_log_finished_levels_rect.height = TOOL_BUTTON_HEIGHT;
-
     Vector2 options_icon_scale_text_size = measure_gui_text(options_icon_scale_text);
     options_icon_scale_rect.x = options_log_finished_levels_rect.x + options_icon_scale_text_size.x;
-    options_icon_scale_rect.y = options_log_finished_levels_rect.y + options_log_finished_levels_rect.height + RAYGUI_ICON_SIZE;
+    options_icon_scale_rect.y = ui_bool_option_list_bottom;
     options_icon_scale_rect.width = 90;
     options_icon_scale_rect.height = TOOL_BUTTON_HEIGHT;
     options_icon_scale_rect.x += (3 * BUTTON_MARGIN) - 1;
@@ -492,18 +539,18 @@ void resize_gui_options(void)
         color_opt_y_offset += TOOL_BUTTON_HEIGHT + RAYGUI_ICON_SIZE;
     }
 
-    check_disabled_graphics_option();
+    check_disabled_options();
 }
 
-void draw_gui_graphics_options(void)
+static void draw_bool_opt_list(gui_bool_option_list_t *list)
 {
     char *desc = NULL;
 
     int prev_align = GuiGetStyle(TOGGLE, TEXT_ALIGNMENT);
     GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
 
-    for (int i=0; i<NUM_BOOL_OPTIONS; i++) {
-        gui_bool_option_t *opt = &(graphics_options[i]);
+    for (int i=0; i<list->count; i++) {
+        gui_bool_option_t *opt = &(list->options[i]);
 
         if (opt->disabled) {
            GuiDisable();
@@ -526,7 +573,7 @@ void draw_gui_graphics_options(void)
         }
 
         if (*opt->opt != old_value) {
-            check_disabled_graphics_option();
+            check_disabled_options();
         }
 
         if (CheckCollisionPointRec(mouse_positionf, *opt->rect)) {
@@ -546,6 +593,21 @@ void draw_gui_graphics_options(void)
         GuiSetStyle(DEFAULT, TEXT_WRAP_MODE, old_wrap);
     }
 
+    GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, prev_align);
+}
+
+static void draw_gui_game_options(void)
+{
+    draw_bool_opt_list(&game_options);
+}
+
+static void draw_gui_ui_options(void)
+{
+    draw_bool_opt_list(&ui_options);
+
+    int prev_align = GuiGetStyle(TOGGLE, TEXT_ALIGNMENT);
+    GuiSetStyle(TOGGLE, TEXT_ALIGNMENT, TEXT_ALIGN_LEFT);
+
     int old_cursor_scale = options->cursor_scale;
     int cursor_scale     = options->cursor_scale;
     GuiSpinner(options_icon_scale_rect, options_icon_scale_text, &cursor_scale, CURSOR_MIN_SCALE, CURSOR_MAX_SCALE, false);
@@ -561,7 +623,7 @@ static void pick_color_finished(gui_dialog_t *dialog, UNUSED void *data)
     color_option_set(dialog->color_opt, dialog->color);
 }
 
-void draw_gui_color_option(gui_color_option_t *gui_opt, color_option_t *c_opt)
+static void draw_gui_color_option(gui_color_option_t *gui_opt, color_option_t *c_opt)
 {
     GuiLabel(gui_opt->label_rect, gui_opt->label_text);
 
@@ -592,7 +654,7 @@ void draw_gui_color_option(gui_color_option_t *gui_opt, color_option_t *c_opt)
     }
 }
 
-void draw_gui_color_options(void)
+static void draw_gui_color_options(void)
 {
     for (int i=1; i<PATH_TYPE_COUNT; i++) {
         draw_gui_color_option(&(color_options[i]),
@@ -600,12 +662,16 @@ void draw_gui_color_options(void)
     }
 }
 
-void draw_gui_data_options(void)
+static void draw_gui_data_options(void)
 {
     bool do_disable = !have_nvdata_finished_levels_data();
 
+    draw_bool_opt_list(&data_options);
+
     if (do_disable) {
         GuiDisable();
+    } else {
+        tooltip(options_reset_finished_rect, options_reset_finished_text_tooltip);
     }
 
     if (GuiButton(options_reset_finished_rect, options_reset_finished_text)) {
@@ -627,14 +693,18 @@ void draw_gui_options(void)
 
     switch (options_active_tab) {
     case 0:
-        draw_gui_graphics_options();
+        draw_gui_game_options();
         break;
 
     case 1:
-        draw_gui_color_options();
+        draw_gui_ui_options();
         break;
 
     case 2:
+        draw_gui_color_options();
+        break;
+
+    case 3:
         draw_gui_data_options();
         break;
     }
