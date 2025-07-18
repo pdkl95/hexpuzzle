@@ -105,10 +105,20 @@ static void find_nvdata_dir(void)
     find_or_create_dir(nvdata_dir, "local storage");
 }
 
-static bool program_state_from_json(cJSON *json)
+static bool program_state_from_json(cJSON *root_json)
 {
-    if (!cJSON_IsObject(json)) {
+    if (!cJSON_IsObject(root_json)) {
         errmsg("Error parsing program state JSON: not an Object");
+        return false;
+    }
+
+    cJSON *json = cJSON_GetObjectItem(root_json, PROJECT_STATE_JSON_NAMESPACE);
+    if (!json) {
+        errmsg("Error parsing program state JSON: missing root object \"" PROJECT_STATE_JSON_NAMESPACE  "\"");
+        return false;
+    }
+    if (!cJSON_IsObject(json)) {
+        errmsg("Error parsing program state JSON: root object \"" PROJECT_STATE_JSON_NAMESPACE "\" is not an Object");
         return false;
     }
 
@@ -245,6 +255,8 @@ static bool program_state_from_json(cJSON *json)
         }
     }
 
+    cJSON *bool_json = NULL;
+
     cJSON *ui_json = cJSON_GetObjectItem(json, "ui");
     if (ui_json) {
         cJSON *cursor_size_json = cJSON_GetObjectItem(ui_json, "cursor_size");
@@ -297,10 +309,8 @@ static bool program_state_from_json(cJSON *json)
             }
         }
 
-        cJSON *bool_json = NULL;
-
-#define mk_bool_json(field, name)                                  \
-    bool_json = cJSON_GetObjectItem(ui_json, STR(name));           \
+#define mk_bool_json_group(group, field, name)                     \
+    bool_json = cJSON_GetObjectItem(group##_json, STR(name));      \
     if (bool_json) {                                               \
         if (cJSON_IsBool(bool_json)) {                             \
             if (cJSON_IsTrue(bool_json)) {                         \
@@ -309,46 +319,59 @@ static bool program_state_from_json(cJSON *json)
                 options->field = false;                            \
             }                                                      \
         } else {                                                   \
-            errmsg("Program state JSON['ui']['%s'] is not a BOOL", \
-                   STR(name));                                     \
+            errmsg("Program state JSON['%s']['%s'] is not a BOOL", \
+                   STR(group), STR(name));                         \
         }                                                          \
     } else {                                                       \
-        warnmsg("Program state JSON['ui'] is missing \"%s\"",      \
-                STR(name));                                        \
+        warnmsg("Program state JSON['%s'] is missing \"%s\"",      \
+                STR(group), STR(name));                            \
     }
 
+#define mk_bool_ui_json(field, name) mk_bool_json_group(ui, field, name)
         if (options->load_state_animate_bg) {
-            mk_bool_json(animate_bg, animate_background);
+            mk_bool_ui_json(animate_bg, animate_background);
         }
         if (options->load_state_animate_win) {
-            mk_bool_json(animate_win, animate_win);
+            mk_bool_ui_json(animate_win, animate_win);
         }
         if (options->load_state_use_physics) {
-            mk_bool_json(use_physics, use_physics);
+            mk_bool_ui_json(use_physics, use_physics);
         }
         if (options->load_state_use_postprocessing) {
-            mk_bool_json(use_postprocessing, use_postprocessing);
-        }
-        if (options->load_state_use_solve_timer) {
-            mk_bool_json(use_solve_timer, use_solve_timer);
-        }
-        if (options->load_state_use_two_click_dnd) {
-            mk_bool_json(use_two_click_dnd, use_two_click_dnd);
-        }
-        if (options->load_state_show_level_previews) {
-            mk_bool_json(show_level_previews, show_level_previews);
+            mk_bool_ui_json(use_postprocessing, use_postprocessing);
         }
         if (options->load_state_show_tooltips) {
-            mk_bool_json(show_tooltips, show_tooltips);
+            mk_bool_ui_json(show_tooltips, show_tooltips);
         }
-        if (options->load_state_log_finished_levels) {
-            mk_bool_json(log_finished_levels, log_finished_levels);
-        }
-        if (options->load_state_log_finished_levels) {
-            mk_bool_json(compress_finished_levels_dat, compress_finished_levels_dat);
-        }
-#undef mk_bool_json
     }
+
+#define mk_bool_game_json(field, name) mk_bool_json_group(game, field, name)
+    cJSON *game_json = cJSON_GetObjectItem(json, "game");
+    if (game_json) {
+        if (options->load_state_use_solve_timer) {
+            mk_bool_game_json(use_solve_timer, use_solve_timer);
+        }
+        if (options->load_state_use_two_click_dnd) {
+            mk_bool_game_json(use_two_click_dnd, use_two_click_dnd);
+        }
+        if (options->load_state_show_level_previews) {
+            mk_bool_game_json(show_level_previews, show_level_previews);
+        }
+    }
+#undef mk_bool_game_json
+
+#define mk_bool_data_json(field, name) mk_bool_json_group(data, field, name)
+    cJSON *data_json = cJSON_GetObjectItem(json, "data");
+    if (data_json) {
+        if (options->load_state_log_finished_levels) {
+            mk_bool_data_json(log_finished_levels, log_finished_levels);
+        }
+        if (options->load_state_log_finished_levels) {
+            mk_bool_data_json(compress_finished_levels_dat, compress_finished_levels_dat);
+        }
+    }
+#undef mk_bool_data_json
+#undef mk_bool_json_group
 
     cJSON *win_anim_json = cJSON_GetObjectItem(json, "win_animation");
     if (win_anim_json) {
@@ -412,7 +435,13 @@ static void load_nvdata_program_state(void)
 
 static cJSON *program_state_to_json(void)
 {
-    cJSON *json = cJSON_CreateObject();
+    cJSON *json_root = cJSON_CreateObject();
+
+    cJSON *json = cJSON_AddObjectToObject(json_root, PROJECT_STATE_JSON_NAMESPACE);
+    if (!json) {
+        errmsg("Error adding \"" PROJECT_STATE_JSON_NAMESPACE "\" object to JSON");
+        goto to_json_error;
+    }
 
     if (cJSON_AddNumberToObject(json, "version", state_version) == NULL) {
         errmsg("Error adding \"version\" to JSON");
@@ -475,9 +504,21 @@ static cJSON *program_state_to_json(void)
         }
     }
 
+    cJSON *game_json = cJSON_AddObjectToObject(json, "game");
+    if (!game_json) {
+        errmsg("Error adding \"game\" object to JSON");
+        goto to_json_error;
+    }
+
     cJSON *ui_json = cJSON_AddObjectToObject(json, "ui");
     if (!ui_json) {
         errmsg("Error adding \"ui\" object to JSON");
+        goto to_json_error;
+    }
+
+    cJSON *data_json = cJSON_AddObjectToObject(json, "data");
+    if (!data_json) {
+        errmsg("Error adding \"data\" object to JSON");
         goto to_json_error;
     }
 
@@ -503,27 +544,28 @@ static cJSON *program_state_to_json(void)
 
     cJSON *bool_json = NULL;
 
-#define mk_bool_json(field, name)                                       \
+#define mk_bool_json(group, field, name)                                \
     if (options->field) {                                               \
-        bool_json = cJSON_AddTrueToObject(ui_json, STR(name));    \
+        bool_json = cJSON_AddTrueToObject(group##_json, STR(name));     \
     } else {                                                            \
-        bool_json = cJSON_AddFalseToObject(ui_json, STR(name));   \
+        bool_json = cJSON_AddFalseToObject(group##_json, STR(name));    \
     }                                                                   \
     if (!bool_json) {                                                   \
-        errmsg("Error adding bool \"%s\" to JSON.ui", STR(name)); \
+        errmsg("Error adding bool \"%s\" to JSON.%s",                   \
+               STR(name), STR(group));                                  \
         goto to_json_error;                                             \
     }
 
-    mk_bool_json(animate_bg, animate_background);
-    mk_bool_json(animate_win, animate_win);
-    mk_bool_json(use_physics, use_physics);
-    mk_bool_json(use_postprocessing, use_postprocessing);
-    mk_bool_json(use_solve_timer, use_solve_timer);
-    mk_bool_json(use_two_click_dnd, use_two_click_dnd);
-    mk_bool_json(show_level_previews, show_level_previews);
-    mk_bool_json(show_tooltips, show_tooltips);
-    mk_bool_json(log_finished_levels, log_finished_levels);
-    mk_bool_json(compress_finished_levels_dat, compress_finished_levels_dat);
+    mk_bool_json(game, show_level_previews, show_level_previews);
+    mk_bool_json(game, use_solve_timer, use_solve_timer);
+    mk_bool_json(game, use_two_click_dnd, use_two_click_dnd);
+    mk_bool_json(ui, show_tooltips, show_tooltips);
+    mk_bool_json(ui, animate_bg, animate_background);
+    mk_bool_json(ui, animate_win, animate_win);
+    mk_bool_json(ui, use_physics, use_physics);
+    mk_bool_json(ui, use_postprocessing, use_postprocessing);
+    mk_bool_json(data, log_finished_levels, log_finished_levels);
+    mk_bool_json(data, compress_finished_levels_dat, compress_finished_levels_dat);
 #undef mk_bool_json
 
     cJSON *win_anim_json = win_anim_config_to_json();
@@ -550,7 +592,7 @@ static cJSON *program_state_to_json(void)
         goto to_json_error;
     }
 
-    return json;
+    return json_root;
 
   to_json_error:
     if (json) {
