@@ -243,12 +243,22 @@ bool nvdata_is_finished(struct level *level)
     return NULL != sglib_finished_level_find_member(finished_levels.tree, &e);
 }
 
-bool nvdata_finished_from_json(cJSON *json)
+bool nvdata_finished_from_json(cJSON *root_json)
 {
     bool new_changed_value = false;
 
-    if (!cJSON_IsObject(json)) {
+    if (!cJSON_IsObject(root_json)) {
         errmsg("Error parsing nvdata finished level JSON: not an Object");
+        return false;
+    }
+
+    cJSON *json = cJSON_GetObjectItem(root_json, PROJECT_FINISHED_LEVEL_LOG_JSON_NAMESPACE);
+    if (!json) {
+        errmsg("Error parsing nvdata finished level JSON: root object \"" PROJECT_FINISHED_LEVEL_LOG_JSON_NAMESPACE "\" is missing");
+        return false;
+    }
+    if (!cJSON_IsObject(json)) {
+        errmsg("Error parsing nvdata finished level JSON: root object \"" PROJECT_FINISHED_LEVEL_LOG_JSON_NAMESPACE "\" is not an Object");
         return false;
     }
 
@@ -385,7 +395,12 @@ bool nvdata_finished_from_json(cJSON *json)
 
 cJSON *nvdata_finished_to_json(void)
 {
-    cJSON *json = cJSON_CreateObject();
+    cJSON *root_json = cJSON_CreateObject();
+
+    cJSON *json = cJSON_AddObjectToObject(root_json, PROJECT_FINISHED_LEVEL_LOG_JSON_NAMESPACE);
+    if (json == NULL) {
+        goto json_err;
+    }
 
     cJSON *finished_levels_json = cJSON_AddArrayToObject(json, "finished_levels");
     if (finished_levels_json == NULL) {
@@ -452,10 +467,10 @@ cJSON *nvdata_finished_to_json(void)
         count++;
     }
 
-    return json;
+    return root_json;
 
   json_err:
-    cJSON_Delete(json);
+    cJSON_Delete(root_json);
     return NULL;
 
 }

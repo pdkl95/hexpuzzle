@@ -435,9 +435,9 @@ static void load_nvdata_program_state(void)
 
 static cJSON *program_state_to_json(void)
 {
-    cJSON *json_root = cJSON_CreateObject();
+    cJSON *root_json = cJSON_CreateObject();
 
-    cJSON *json = cJSON_AddObjectToObject(json_root, PROJECT_STATE_JSON_NAMESPACE);
+    cJSON *json = cJSON_AddObjectToObject(root_json, PROJECT_STATE_JSON_NAMESPACE);
     if (!json) {
         errmsg("Error adding \"" PROJECT_STATE_JSON_NAMESPACE "\" object to JSON");
         goto to_json_error;
@@ -592,11 +592,11 @@ static cJSON *program_state_to_json(void)
         goto to_json_error;
     }
 
-    return json_root;
+    return root_json;
 
   to_json_error:
     if (json) {
-        cJSON_Delete(json);
+        cJSON_Delete(root_json);
     }
     return NULL;
 }
