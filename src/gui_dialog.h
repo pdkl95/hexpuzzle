@@ -88,6 +88,7 @@ static inline bool gui_dialog_active(void)
 void gui_dialog_clesr(gui_dialog_t *dialog, gui_dialog_type_t type);
 void gui_dialog_pick_color(struct color_option *c_opt, gui_dialog_finished_cb_t callback, void *data);
 void gui_dialog_ask_for_string(const char *title, const char *question, const char *default_string, gui_dialog_finished_cb_t callback, void *data);
+void gui_dialog_ask_yn(const char *title, const char *question, gui_dialog_finished_cb_t callback, void *data);
 
 #endif /*GUI_DIALOG_H*/
 

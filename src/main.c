@@ -2734,6 +2734,10 @@ static void draw_gui_tooltip(void)
         return;
     }
 
+    if (modal_ui_active) {
+        return;
+    }
+
     Vector2 text_size = MeasureTextEx(GuiGetFont(),
                                       tooltip_text,
                                       (float)GuiGetStyle(DEFAULT, TEXT_SIZE),

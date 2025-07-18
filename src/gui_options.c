@@ -576,7 +576,8 @@ static void draw_bool_opt_list(gui_bool_option_list_t *list)
             check_disabled_options();
         }
 
-        if (CheckCollisionPointRec(mouse_positionf, *opt->rect)) {
+        if (!gui_dialog_active()
+            && CheckCollisionPointRec(mouse_positionf, *opt->rect)) {
             desc = opt->desc;
         }
     }
@@ -662,6 +663,15 @@ static void draw_gui_color_options(void)
     }
 }
 
+static void expunge_finished_level_dat_dialog_cb(gui_dialog_t *dialog, UNUSED void *data)
+{
+    if (dialog->status) {
+        if (reset_nvdata_finished_levels()) {
+            popup_message("Erased finished level data.");
+        }
+    }
+}
+
 static void draw_gui_data_options(void)
 {
     bool do_disable = !have_nvdata_finished_levels_data();
@@ -675,8 +685,12 @@ static void draw_gui_data_options(void)
     }
 
     if (GuiButton(options_reset_finished_rect, options_reset_finished_text)) {
-        if (reset_nvdata_finished_levels()) {
-            popup_message("Erased finished level data.");
+        if (!current_dialog) {
+            gui_dialog_ask_yn(
+                "Expunge finished level log?",
+                "Permanently delete the finished level log (the history tab in the browser)?",
+                expunge_finished_level_dat_dialog_cb,
+                NULL);
         }
     }
 

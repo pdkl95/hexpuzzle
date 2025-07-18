@@ -257,14 +257,14 @@ void gui_dialog_finish(void)
 
 void gui_dialog_ok(void)
 {
-    printf("ok\n");
+    //printf("ok\n");
     current_dialog->status = true;
     gui_dialog_finish();
 }
 
 void gui_dialog_cancel(void)
 {
-    printf("cancel\n");
+    //printf("cancel\n");
     current_dialog->status = false;
     gui_dialog_finish();
 }
@@ -379,6 +379,24 @@ void gui_dialog_ask_for_string(const char *title, const char *question, const ch
     if (default_string) {
         dialog.default_input = (char *)default_string;
     }
+    if (title) {
+        dialog.title = title;
+    }
+    dialog.question = question;
+    dialog.callback = callback;
+    dialog.callback_data = data;
+    gui_dialog_show(&dialog);
+}
+
+void gui_dialog_ask_yn(const char *title, const char *question, gui_dialog_finished_cb_t callback, void *data)
+{
+    assert_not_null(question);
+
+    if (current_dialog) {
+        return;
+    }
+
+    gui_dialog_clesr(&dialog, GUI_DIALOG_YN);
     if (title) {
         dialog.title = title;
     }
