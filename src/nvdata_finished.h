@@ -153,6 +153,7 @@ bool nvdata_is_finished(struct level *level);
 void nvdata_finished_write(FILE *f);
 void load_nvdata_finished_levels(void);
 void save_nvdata_finished_levels(void);
+void force_save_nvdata_finished_levels(void);
 bool reset_nvdata_finished_levels(void);
 bool have_nvdata_finished_levels_data(void);
 

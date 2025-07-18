@@ -37,7 +37,7 @@
 #include "gui_browser.h"
 #include "gui_random.h"
 
-uint16_t state_version = 1;
+uint16_t state_file_version = 1;
 
 char *local_config_dir = NULL;
 char *nvdata_dir = NULL;
@@ -129,9 +129,9 @@ static bool program_state_from_json(cJSON *root_json)
             return false;
         }
 
-        if (version_json->valueint != state_version) {
+        if (version_json->valueint != state_file_version) {
             errmsg("Program state JSON is version %d, expected %d",
-                   version_json->valueint, state_version);
+                   version_json->valueint, state_file_version);
         }
     } else {
         warnmsg("Program state JSON is missing \"version\"");
@@ -443,7 +443,7 @@ static cJSON *program_state_to_json(void)
         goto to_json_error;
     }
 
-    if (cJSON_AddNumberToObject(json, "version", state_version) == NULL) {
+    if (cJSON_AddNumberToObject(json, "version", state_file_version) == NULL) {
         errmsg("Error adding \"version\" to JSON");
         goto to_json_error;
     }

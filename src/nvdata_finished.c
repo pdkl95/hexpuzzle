@@ -29,6 +29,8 @@
 #include "solve_timer.h"
 #include "nvdata_finished.h"
 
+uint16_t history_log_file_version = 1;
+
 char *nvdata_state_finished_levels_file_path = NULL;
 char *nvdata_state_finished_levels_backup_file_path = NULL;
 
@@ -262,6 +264,21 @@ bool nvdata_finished_from_json(cJSON *root_json)
         return false;
     }
 
+    cJSON *version_json = cJSON_GetObjectItem(json, "history_log_version");
+    if (version_json) {
+        if (!cJSON_IsNumber(version_json)) {
+            errmsg("Error parsing program state: JSON['history_log_version'] is not a Number");
+            return false;
+        }
+
+        if (version_json->valueint != history_log_file_version) {
+            errmsg("Program state JSON is version %d, expected %d",
+                   version_json->valueint, history_log_file_version);
+        }
+    } else {
+        warnmsg("Program state JSON is missing \"history_log_version\"");
+    }
+
     cJSON *finished_levels_json = cJSON_GetObjectItem(json, "finished_levels");
     if (!cJSON_IsArray(finished_levels_json)) {
         errmsg("Error parsing nvdata finished level JSON: 'finished_levels' is not an Array");
@@ -402,6 +419,11 @@ cJSON *nvdata_finished_to_json(void)
         goto json_err;
     }
 
+    if (cJSON_AddNumberToObject(json, "history_log_version", history_log_file_version) == NULL) {
+        errmsg("Error adding \"history_loh_version\" to JSON");
+        goto json_err;
+    }
+
     cJSON *finished_levels_json = cJSON_AddArrayToObject(json, "finished_levels");
     if (finished_levels_json == NULL) {
         goto json_err;
@@ -523,6 +545,21 @@ void load_nvdata_finished_levels(void)
     nvdata_finished_load_from_file(nvdata_state_finished_levels_file_path);
 }
 
+void force_save_nvdata_finished_levels(void)
+{
+    if (nvdata_finished_save_to_file(nvdata_state_finished_levels_file_path)) {
+        if (options->verbose) {
+            infomsg("Successfully saved finished level data \"%s\"",
+                    nvdata_state_finished_levels_file_path);
+        }
+        //print_finished_levels();
+        finished_levels_changed = false;
+    } else {
+        errmsg("Loading saved finished level data from \"%s\" failed!",
+               nvdata_state_finished_levels_file_path);
+    }
+}
+
 void save_nvdata_finished_levels(void)
 {
     if (!options->log_finished_levels) {
@@ -549,17 +586,7 @@ void save_nvdata_finished_levels(void)
         return;
     }
 
-    if (nvdata_finished_save_to_file(nvdata_state_finished_levels_file_path)) {
-        if (options->verbose) {
-            infomsg("Successfully saved finished level data \"%s\"",
-                    nvdata_state_finished_levels_file_path);
-        }
-        //print_finished_levels();
-        finished_levels_changed = false;
-    } else {
-        errmsg("Loading saved finished level data from \"%s\" failed!",
-               nvdata_state_finished_levels_file_path);
-    }
+    force_save_nvdata_finished_levels();
 }
 
 bool reset_nvdata_finished_levels(void)

@@ -38,6 +38,7 @@ Rectangle options_show_level_previews_rect;
 Rectangle options_show_tooltips_rect;
 Rectangle options_use_two_click_dnd_rect;
 Rectangle options_log_finished_levels_rect;
+Rectangle options_compress_finished_levels_dat_rect;
 Rectangle options_reset_finished_rect;
 Rectangle options_use_postprocessing_rect;
 Rectangle options_use_solve_timer_rect;
@@ -51,6 +52,7 @@ char options_show_level_previews_text[] = "Show Level Previews";
 char options_show_tooltips_text[] = "Show Tooltips";
 char options_use_two_click_dnd_text[] = "2-Click Drag-and-Drop";
 char options_log_finished_levels_text[] = "Log Finished Levels";
+char options_compress_finished_levels_dat_text[] = "Compress History Log";
 char options_reset_finished_text[] = "Expunge Finished Level Data";
 char options_use_postprocessing_text[] = "Use Shader Effects";
 char options_use_solve_timer_text[] = "Solve Time Clock";
@@ -63,10 +65,11 @@ char options_anim_bg_desc_text[]  = "Disable if the animated background is too d
 char options_anim_win_desc_text[] = "Special effects animation that plays when a level is completed.";
 char options_use_postprocessing_desc_text[] = "Postpo4ssing shader effects (blur, warping)";
 char options_use_solve_timer_desc_text[] = "A clock that tracks how long it takes to solve each level.";
-char options_use_two_click_dnd_desc_text[] = "";
+char options_use_two_click_dnd_desc_text[] = "Click on two tiles to swap them. Alternative to drag-n-drop.";
 char options_show_level_previews_desc_text[] = "Show small level previews.";
 char options_show_tooltips_desc_text[] = "Show popup tooltips when hovering over some controls.";
 char options_log_finished_levels_desc_text[] = "Save the win time and blueprint string of finished levels in a browsable history log.";
+char options_compress_finished_levels_dat_desc_text[] = "Disables compression of the history log file \"finished levels.dat\". Unless you are interested in using the history log as raw uncompressed JSON, leave this enabled";
 
 #ifdef USE_PHYSICS
 Rectangle options_use_physics_rect;
@@ -174,7 +177,8 @@ gui_bool_option_t _ui_options[] = {
 #define NUM_UI_OPTIONS ((long)NUM_ELEMENTS(gui_bool_option_t, _ui_options))
 
 enum data_option_index {
-    DATA_OPTION_LOG_FINISHED_LEVELS = 0
+    DATA_OPTION_LOG_FINISHED_LEVELS          = 0,
+    DATA_OPTION_COMPRESS_FINISHED_LEVELS_DAT = 1
 };
 typedef enum graphics_option_index graphics_option_index_t;
 
@@ -183,6 +187,11 @@ gui_bool_option_t _data_options[] = {
         .rect  = &options_log_finished_levels_rect,
         .label = options_log_finished_levels_text,
         .desc  = options_log_finished_levels_desc_text
+    },
+    {
+        .rect  = &options_compress_finished_levels_dat_rect,
+        .label = options_compress_finished_levels_dat_text,
+        .desc  = options_compress_finished_levels_dat_desc_text
     }
 };
 #define NUM_DATA_OPTIONS ((long)NUM_ELEMENTS(gui_bool_option_t, _data_options))
@@ -378,7 +387,7 @@ void init_gui_options(void)
     _ui_options[UI_OPTION_USE_POSTPROCESSING ].opt = &options->use_postprocessing;
 
     _data_options[DATA_OPTION_LOG_FINISHED_LEVELS].opt = &options->log_finished_levels;
-
+    _data_options[DATA_OPTION_COMPRESS_FINISHED_LEVELS_DAT].opt = &options->compress_finished_levels_dat;
     init_bool_option_list(&game_options);
     init_bool_option_list(&ui_options);
     init_bool_option_list(&data_options);
@@ -407,6 +416,8 @@ static float resize_bool_option_list(gui_bool_option_list_t *list, Rectangle bou
         list->max_label_text_width = MAX(list->max_label_text_width, opt->label_text_size.x);
     }
 
+    list->max_label_text_width += RAYGUI_ICON_SIZE;;
+
     for (int i=0; i<list->count; i++) {
         gui_bool_option_t *opt = &(list->options[i]);
 
@@ -427,7 +438,7 @@ void resize_gui_options(void)
     options_panel_rect.width  = window_size.x * 0.65;
     options_panel_rect.height = (window_size.y * options_panel_rect.x) / window_size.x;
 
-    MINVAR(options_panel_rect.width,  350);
+    MINVAR(options_panel_rect.width,  380);
     MINVAR(options_panel_rect.height, 400);
 
     options_panel_rect.x = (window_size.x / 2) - (options_panel_rect.width  / 2);
@@ -676,7 +687,13 @@ static void draw_gui_data_options(void)
 {
     bool do_disable = !have_nvdata_finished_levels_data();
 
+    bool old_compress_finished_levels_dat = options->compress_finished_levels_dat;
+
     draw_bool_opt_list(&data_options);
+
+    if (old_compress_finished_levels_dat != options->compress_finished_levels_dat) {
+        force_save_nvdata_finished_levels();
+    }
 
     if (do_disable) {
         GuiDisable();
