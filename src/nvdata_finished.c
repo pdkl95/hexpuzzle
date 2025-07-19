@@ -313,7 +313,15 @@ bool nvdata_finished_from_json(cJSON *root_json)
                 finished_level_set_name(&e, name_json->valuestring);
             } else {
                 warnmsg("Error parsing nvdata finished level JSON [%d]: 'name' is missing - using the 'id' field as substitute", count);
-                snprintf(&e.name, NAME_MAXLEN, "%s", e.id);
+                int n = snprintf(&e.name, NAME_MAXLEN, "%s", e.id);
+                if (n < 0) {
+                    assert(false && "snprintf failed?!");
+                    return false;
+                }
+                if ((size_t)n < strlen(e.id)) {
+                    warnmsg("'id' field was truncated; %d characters lost", strlen(e.id) - n);
+                }
+
                 finished_level_set_name(&e, e.id);
                 new_changed_value = true;
             }
