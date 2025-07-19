@@ -75,3 +75,12 @@ EXTRA_DIST = \
 	README.textile \
 	LICENSE.txt \
 	VERSION.txt
+
+
+NO_ALLOC_SIZE_LARGER_THAN =
+if CC_IS_GCC
+NO_ALLOC_SIZE_LARGER_THAN += -Wno-alloc-size-larger-than
+endif
+
+src/libchipmunk_a-cpBBTree.$(OBJEXT): CFLAGS += $(NO_ALLOC_SIZE_LARGER_THAN)
+

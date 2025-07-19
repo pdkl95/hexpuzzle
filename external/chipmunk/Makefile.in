@@ -88,6 +88,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+@CC_IS_GCC_TRUE@am__append_1 = -Wno-alloc-size-larger-than
 subdir = external/chipmunk
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/gnulib/00gnulib.m4 \
@@ -1369,6 +1370,7 @@ EXTRA_DIST = \
 	LICENSE.txt \
 	VERSION.txt
 
+NO_ALLOC_SIZE_LARGER_THAN = $(am__append_1)
 all: all-am
 
 .SUFFIXES:
@@ -2189,6 +2191,8 @@ uninstall-am:
 
 .PRECIOUS: Makefile
 
+
+src/libchipmunk_a-cpBBTree.$(OBJEXT): CFLAGS += $(NO_ALLOC_SIZE_LARGER_THAN)
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
