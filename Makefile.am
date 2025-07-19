@@ -80,6 +80,11 @@ noinst_LIBRARIES = \
 
 bin_PROGRAMS = hexpuzzle
 
+if ! BUILD_DEBUG
+all-local: hexpuzzle$(EXEEXT)
+	$(STRIP) -R .comment hexpuzzle$(EXEEXT)
+endif
+
 COMMON_PROG_CFLAGS += \
 	-I$(top_srcdir)/src \
 	$(ALL_PKG_CFLAGS) \

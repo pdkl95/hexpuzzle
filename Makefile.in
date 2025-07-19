@@ -4247,7 +4247,8 @@ distcleancheck: distclean
 check-am: all-am
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-recursive
-all-am: Makefile $(LIBRARIES) $(PROGRAMS) config.h
+@BUILD_DEBUG_TRUE@all-local:
+all-am: Makefile $(LIBRARIES) $(PROGRAMS) config.h all-local
 installdirs: installdirs-recursive
 installdirs-am:
 	for dir in "$(DESTDIR)$(bindir)"; do \
@@ -4382,7 +4383,7 @@ uninstall-am: uninstall-binPROGRAMS
 .MAKE: $(am__recursive_targets) all check install install-am \
 	install-strip
 
-.PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am \
+.PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am all-local \
 	am--refresh check check-am clean clean-binPROGRAMS \
 	clean-cscope clean-generic clean-local clean-noinstLIBRARIES \
 	cscope cscopelist-am ctags ctags-am dist dist-all dist-bzip2 \
@@ -4407,6 +4408,9 @@ uninstall-am: uninstall-binPROGRAMS
 XXD ?= xxd
 
 @USE_CHIPMUNK_TRUE@	MAYBE_USE_CHIPMUNK = $(CHIPMUNK_DIR)
+
+@BUILD_DEBUG_FALSE@all-local: hexpuzzle$(EXEEXT)
+@BUILD_DEBUG_FALSE@	$(STRIP) -R .comment hexpuzzle$(EXEEXT)
 
 @BUILD_WEB_TRUE@clean-local:
 @BUILD_WEB_TRUE@	rm -f hexpuzzle.js hexpuzzle.wasm
