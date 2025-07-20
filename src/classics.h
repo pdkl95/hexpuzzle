@@ -22,7 +22,40 @@
 #ifndef CLASSICS_H
 #define CLASSICS_H
 
+struct collection;
+struct level;
+
+struct classic_level_nameref {
+    name_str_t collection_id;
+    unique_id_t level_unique_id;
+};
+typedef struct classic_level_nameref classic_level_nameref_t;
+#define CLASSIC_LEVEL_NAMEREF(collection_id, level_unique_id) \
+    ((classic_level_nameref_t){                               \
+        .collection_id   = collection_id,                     \
+        .level_unique_id = level_unique_id                    \
+    })
+
+struct classic_collection {
+    int index;
+    char *id;
+    char *filename;
+    unsigned char *data;
+    unsigned int *dlen;
+    struct collection *collection;
+};
+typedef struct classic_collection classic_collection_t;
+
+extern classic_collection_t classic_collections[];
+
+
+const char *classic_level_nameref_string(classic_level_nameref_t *ref);
+
 void open_classics_game_pack(int n);
+
+int open_classic_level_nameref(classic_level_nameref_t *ref);
+
+struct level *find_classic_level_by_nameref(classic_level_nameref_t *ref);
 
 #endif /*CLASSICS_H*/
 

@@ -47,6 +47,7 @@ struct level;
 struct solver;
 struct undo;
 struct generate_level_param;
+struct classic_collection;
 
 typedef void (*level_fade_finished_cb_t)(struct level *level, void *data);
 
@@ -75,8 +76,8 @@ struct level {
 
     uint64_t seed;
 
-    char name[NAME_MAXLEN];
-    char name_backup[NAME_MAXLEN];
+    name_str_t name;
+    name_str_t name_backup;
 
     int radius;
 
@@ -160,6 +161,8 @@ struct level {
     struct level *orig_copy;
 
     struct generate_level_param *gen_param;
+
+    struct classic_collection *classic_collection;
 };
 typedef struct level level_t;
 

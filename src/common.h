@@ -192,9 +192,17 @@ typedef char unique_id_t[UNIQUE_ID_LENGTH];
 #define set_unique_id(dst, src) memcpy((dst), (src), UNIQUE_ID_LENGTH)
 #define gen_unique_id(dst) set_unique_id(dst, generate_unique_id())
 
+#define copy_unique_id(dst, src) set_unique_id(dst, src)
+
 typedef uint16_t flags16_t;
 
 typedef char IconStr[ICON_STR_MAXLEN];
+typedef char name_str_t[NAME_MAXLEN];
+
+static inline void copy_name(name_str_t dst, name_str_t src)
+{
+    snprintf(dst, NAME_MAXLEN, "%s", src);
+}
 
 enum ui_result {
     UI_RESULT_PENDING = -1,

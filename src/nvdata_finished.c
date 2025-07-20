@@ -158,6 +158,16 @@ void nvdata_mark_id_finished(struct finished_level *entry)
         finished_level_set_blueprint(e, entry->blueprint);
     }
 
+    if (finished_level_has_classic(entry)) {
+        finished_level_set_classic(e,
+                                   entry->classic_nameref.collection_id,
+                                   entry->classic_nameref.level_unique_id);
+    }
+
+    if (finished_level_has_fspath(entry)) {
+        finished_level_set_fspath(e, entry->fspath);
+    }
+
     if (finished_level_has_win_time(entry)) {
         finished_level_set_win_time(e, entry->win_time);
     }
@@ -192,9 +202,16 @@ void nvdata_mark_finished(struct level *level)
     finished_level_set_name(&entry, level->name);
     finished_level_set_win_time(&entry, level->win_time);
     finished_level_set_elapsed_time(&entry, &level->elapsed_time);
+
     if (level->blueprint) {
         finished_level_set_blueprint(&entry, level->blueprint);
+    } else if (level->classic_collection) {
+        finished_level_set_classic(&entry, level->classic_collection->id, level->unique_id);
+        printf("mark finished CLASSIC: \"%s\"\n", classic_level_nameref_string(&entry.classic_nameref));
+    } else {
+        errmsg("don't know how to encode level into a finished_level entry");
     }
+
     if (level->solver) {
         finished_level_set_solver(&entry);
     }
@@ -385,6 +402,52 @@ bool nvdata_finished_from_json(cJSON *root_json)
             finished_level_clear_blueprint(&e);
         }
 
+        if (finished_level_has_classic(&e)) {
+            cJSON *classic_collection_json = cJSON_GetObjectItem(level_json, "classic_collection");
+            cJSON *classic_level_json = cJSON_GetObjectItem(level_json, "classic_level");
+            if (classic_collection_json && classic_level_json) {
+                if (!cJSON_IsString(classic_collection_json)) {
+                    errmsg("Error parsing nvdata finished level JSON [%d]: 'classic_collection' is not a String", count);
+                    return false;
+                }
+                if (!cJSON_IsString(classic_level_json)) {
+                    errmsg("Error parsing nvdata finished level JSON [%d]: 'classic_level' is not a String", count);
+                    return false;
+                }
+                finished_level_set_classic(&e,
+                                           classic_collection_json->valuestring,
+                                           classic_level_json->valuestring);
+            } else {
+                if (!classic_collection_json) {
+                    warnmsg("While parsing nvdata finished level JSON [%d]: 'classic' flag is set but the String data field 'classic_collection' is missing.", count);
+                }
+                if (!classic_level_json) {
+                    warnmsg("While parsing nvdata finished level JSON [%d]: 'classic' flag is set but the String data field 'classic_level' is missing.", count);
+                }
+                finished_level_clear_classic(&e);
+                new_changed_value = true;
+            }
+        } else {
+            finished_level_clear_classic(&e);
+        }
+
+        if (finished_level_has_fspath(&e)) {
+            cJSON *fspath_json = cJSON_GetObjectItem(level_json, "fspath");
+            if (fspath_json) {
+                if (!cJSON_IsString(fspath_json)) {
+                    errmsg("Error parsing nvdata finished level JSON [%d]: 'fspath' is not a String", count);
+                    return false;
+                }
+                finished_level_set_fspath(&e, NULL); //fspath_json->valuestring
+            } else {
+                warnmsg("While parsing nvdata finished level JSON [%d]: 'fspath' flag is set but the String data field is missing. Clearing the misleading flag.", count);
+                finished_level_clear_fspath(&e);
+                new_changed_value = true;
+            }
+        } else {
+            finished_level_clear_fspath(&e);
+        }
+
         if (current_collection) {
             level_t *level = collection_find_level_by_unique_id(current_collection, e.id);
             if (level) {
@@ -485,6 +548,23 @@ cJSON *nvdata_finished_to_json(void)
         if (finished_level_has_blueprint(e)) {
             if (cJSON_AddStringToObject(level_json, "blueprint", e->blueprint) == NULL) {
                 goto json_err;
+            }
+        }
+
+        if (finished_level_has_classic(e)) {
+            if (cJSON_AddStringToObject(level_json, "classic_collection", e->classic_nameref.collection_id) == NULL) {
+                goto json_err;
+            }
+            if (cJSON_AddStringToObject(level_json, "classic_level", e->classic_nameref.level_unique_id) == NULL) {
+                goto json_err;
+            }
+        }
+
+        if (finished_level_has_fspath(e)) {
+            if (e->fspath) {
+                if (cJSON_AddStringToObject(level_json, "fspath", e->fspath) == NULL) {
+                    goto json_err;
+                }
             }
         }
 

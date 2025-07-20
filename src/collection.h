@@ -39,6 +39,8 @@ struct collection {
     int filename_seq;
 
     bool is_pack;
+    bool is_classic;
+    bool prevent_destroy;
 
     level_t *levels;
     int level_count;

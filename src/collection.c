@@ -85,8 +85,10 @@ static collection_t *alloc_collection(void)
     collection->gui_list_active = -1;
     collection->gui_list_focus = -1;
 
-    collection->changed = false;
-    collection->is_pack = false;
+    collection->changed         = false;
+    collection->is_pack         = false;
+    collection->is_classic      = false;
+    collection->prevent_destroy = false;
 
     return collection;
 }
@@ -375,6 +377,10 @@ collection_t *load_collection_path(const char *path)
 void destroy_collection(collection_t *collection)
 {
     if (collection) {
+        if (collection->prevent_destroy) {
+            return;
+        }
+
         if (collection->next) {
             destroy_collection(collection->next);
         }

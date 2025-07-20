@@ -110,6 +110,7 @@ char browser_play_button_text[] = "Play";
 char browser_edit_button_text[] = "Edit";
 char browser_open_button_text[] = "Open";
 char browser_have_blueprint_tooltip_text[] = "Have level-regen Blueprint";
+char browser_have_classic_tooltip_text[] = "Have Classic Level";
 
 char local_files_dir_label_text[] = "Directory";
 char local_files_up_button_text_str[] = "Up";
@@ -591,11 +592,21 @@ static void open_file_entry(gui_list_fspath_entry_t *entry, bool edit)
 
 static void open_history_entry(gui_list_history_entry_t *entry, UNUSED bool edit)
 {
-    if (entry->finished_level &&
-        (entry->finished_level->flags & FINISHED_LEVEL_FLAG_BLUEPRINT)) {
+    if (finished_level_has_blueprint(entry->finished_level)) {
         if (!open_blueprint(entry->finished_level->blueprint)) {
             fail_entry((gui_list_entry_t *)entry);
         }
+    } else if (finished_level_has_classic(entry->finished_level)) {
+        level_t *level = find_classic_level_by_nameref(&entry->finished_level->classic_nameref);
+        if (level) {
+            level_play(level);
+        } else {
+            fail_entry((gui_list_entry_t *)entry);
+        }
+    } else if (finished_level_has_fspath(entry->finished_level)) {
+        fail_entry((gui_list_entry_t *)entry);
+    } else {
+        fail_entry((gui_list_entry_t *)entry);
     }
 }
 
@@ -653,6 +664,19 @@ void open_entry(gui_list_entry_t *entry, bool edit)
     }
 }
 
+static level_t *entry_load_finished_level(gui_list_history_entry_t *entry)
+{
+    if (finished_level_has_blueprint(entry->finished_level)) {
+        return generate_level_from_blueprint(entry->finished_level->blueprint, "browser_preview");
+    } else if (finished_level_has_classic(entry->finished_level)) {
+        return find_classic_level_by_nameref(&entry->finished_level->classic_nameref);
+    } else if (finished_level_has_fspath(entry->finished_level)) {
+        return NULL;
+    } else {
+        return NULL;
+    }
+}
+
 static level_t *entry_load_level(gui_list_entry_t *entry)
 {
     switch (entry->type) {
@@ -666,9 +690,7 @@ static level_t *entry_load_level(gui_list_entry_t *entry)
         return load_level_file(((gui_list_fspath_entry_t *)entry)->path);
 
     case ENTRY_TYPE_FINISHED_LEVEL:
-        return generate_level_from_blueprint(
-            ((gui_list_history_entry_t *)entry)->finished_level->blueprint,
-            "browser_preview");
+        return entry_load_finished_level((gui_list_history_entry_t *)entry);
 
     default:
         errmsg("Cannot load level for entry #%d - NULL entry type.", entry->index);
@@ -920,6 +942,12 @@ void setup_browse_history(void)
                 cell->icon_color = blueprint_color;
 
                 raygui_cell_use_tooltip(cell, browser_have_blueprint_tooltip_text);
+            } else if (finished_level_has_classic(fl)) {
+                cell->icon       = ICON_FILE;
+                cell->icon_color = GREEN;
+
+                raygui_cell_use_tooltip(cell, browser_have_classic_tooltip_text);
+            } else if (finished_level_has_fspath(fl)) {
             } else {
                 status = ENTRY_STATUS_NOT_LOADABLE;
 
