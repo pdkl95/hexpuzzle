@@ -36,6 +36,7 @@
 #include "nvdata_finished.h"
 #include "gui_browser.h"
 #include "gui_random.h"
+#include "fsdir.h"
 
 uint16_t state_file_version = 1;
 
@@ -164,6 +165,29 @@ static bool program_state_from_json(cJSON *root_json)
         } else {
             errmsg("Error parsing program state: JSON['current_level_save_file_json'] is NULL");
         }
+    }
+
+    cJSON *level_search_locations_json = cJSON_GetObjectItem(json, "level_search_locations");
+    if (level_search_locations_json) {
+        if (cJSON_IsArray(level_search_locations_json)) {
+            reset_search_dirs();
+\
+            cJSON *dir_json = NULL;
+            int count=0;
+            cJSON_ArrayForEach(dir_json, level_search_locations_json) {
+                if (cJSON_IsString(dir_json)) {
+                    add_search_dir(dir_json->valuestring);
+                } else {
+                    errmsg("Error parsing program state: JSON['level_search_locations'][%d] is not an String", count);
+                }
+                count++;
+            }
+        } else {
+            errmsg("Error parsing program state: JSON['level_search_locations'] is not an Array");
+            return false;
+        }
+    } else {
+        add_default_search_dir();
     }
 
     cJSON *window_json = cJSON_GetObjectItem(json, "window");
@@ -453,6 +477,32 @@ static cJSON *program_state_to_json(void)
             errmsg("Error adding \"current_level_save_file\" to JSON");
             goto to_json_error;
         }
+    }
+
+    cJSON *search_dirs_json = cJSON_AddArrayToObject(json, "level_search_locations");
+    if (search_dirs_json) {
+        struct fsdir *e = NULL;
+        struct sglib_fsdir_iterator it;
+        int dircount = 0;
+        for(e = sglib_fsdir_it_init(&it, search_dirs);
+            e != NULL;
+            e = sglib_fsdir_it_next(&it)
+        ) {
+            cJSON *dir_json = cJSON_CreateString(e->path);
+            if (dir_json) {
+                if (!cJSON_AddItemToArray(search_dirs_json, dir_json)) {
+                    errmsg("Error adding \"level_search_locations\"[%d] to JSON", dircount);
+                    goto to_json_error;
+                }
+            } else {
+                errmsg("Error creating JSON String \"%s\" for \"level_search_locations\"[%d] to JSON", e->path, dircount);
+                goto to_json_error;
+            }
+            dircount++;
+        }
+    } else {
+        errmsg("Error adding \"level_search_locations\" Array to JSON");
+        goto to_json_error;
     }
 
     cJSON *window_json = cJSON_AddObjectToObject(json, "window");

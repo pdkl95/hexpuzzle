@@ -198,11 +198,29 @@ typedef uint16_t flags16_t;
 
 typedef char IconStr[ICON_STR_MAXLEN];
 typedef char name_str_t[NAME_MAXLEN];
+typedef char filename_t[FILENAME_MAXLEN];
+typedef char full_path_t[FULL_PATH_MAXLEN];
 
 static inline void copy_name(name_str_t dst, name_str_t src)
 {
     snprintf(dst, NAME_MAXLEN, "%s", src);
 }
+
+static inline void copy_filename(filename_t dst, filename_t src)
+{
+    snprintf(dst, FILENAME_MAXLEN, "%s", src);
+}
+
+static inline void copy_full_path(full_path_t dst, full_path_t src)
+{
+    snprintf(dst, FULL_PATH_MAXLEN, "%s", src);
+}
+
+struct fileref {
+    filename_t filename;
+    unique_id_t level_unique_id;
+};
+typedef struct fileref fileref_t;
 
 enum ui_result {
     UI_RESULT_PENDING = -1,

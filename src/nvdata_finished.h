@@ -36,7 +36,8 @@ enum finished_level_flag {
     FINISHED_LEVEL_FLAG_BLUEPRINT    = 0x0008,
     FINISHED_LEVEL_FLAG_SOLVER       = 0x0010,
     FINISHED_LEVEL_FLAG_CLASSIC      = 0x0020,
-    FINISHED_LEVEL_FLAG_FSPATH       = 0x0040
+    FINISHED_LEVEL_FLAG_FILEREF      = 0x0040,
+    FINISHED_LEVEL_FLAG_COLLECTION   = 0x0080
 };
 typedef enum finished_level_flag finished_level_flag_t;
 
@@ -52,7 +53,7 @@ typedef struct finished_level {
     union {
         blueprint_string_t blueprint;
         classic_level_nameref_t classic_nameref;
-        const char *fspath;
+        fileref_t fileref;
     };
 
     flags16_t flags;
@@ -87,7 +88,7 @@ static inline void finished_level_set_elapsed_time(struct finished_level *fl, el
 
 static inline void finished_level_set_blueprint(struct finished_level *fl, const char *value)
 {
-    assert_finished_level_flag_excludes(fl, FINISHED_LEVEL_FLAG_CLASSIC | FINISHED_LEVEL_FLAG_FSPATH);
+    assert_finished_level_flag_excludes(fl, FINISHED_LEVEL_FLAG_CLASSIC | FINISHED_LEVEL_FLAG_FILEREF);
     copy_blueprint_string(fl->blueprint, value);
     fl->flags |= FINISHED_LEVEL_FLAG_BLUEPRINT;
 }
@@ -99,17 +100,23 @@ static inline void finished_level_set_solver(struct finished_level *fl)
 
 static inline void finished_level_set_classic(struct finished_level *fl, name_str_t collection_id, unique_id_t level_unique_id)
 {
-    assert_finished_level_flag_excludes(fl, FINISHED_LEVEL_FLAG_BLUEPRINT | FINISHED_LEVEL_FLAG_FSPATH);
+    assert_finished_level_flag_excludes(fl, FINISHED_LEVEL_FLAG_BLUEPRINT | FINISHED_LEVEL_FLAG_FILEREF);
     copy_name(fl->classic_nameref.collection_id, collection_id);
     copy_unique_id(fl->classic_nameref.level_unique_id, level_unique_id);
     fl->flags |= FINISHED_LEVEL_FLAG_CLASSIC;
 }
 
-static inline void finished_level_set_fspath(struct finished_level *fl, const char *value)
+static inline void finished_level_set_collection(struct finished_level *fl)
+{
+    fl->flags |= FINISHED_LEVEL_FLAG_COLLECTION;
+}
+
+static inline void finished_level_set_fileref(struct finished_level *fl, filename_t filename, unique_id_t level_unique_id)
 {
     assert_finished_level_flag_excludes(fl, FINISHED_LEVEL_FLAG_BLUEPRINT | FINISHED_LEVEL_FLAG_CLASSIC);
-    fl->fspath = value;
-    fl->flags |= FINISHED_LEVEL_FLAG_FSPATH;
+    copy_filename(fl->fileref.filename, filename);
+    copy_unique_id(fl->fileref.level_unique_id, level_unique_id);
+    fl->flags |= FINISHED_LEVEL_FLAG_FILEREF;
 }
 
 static inline void finished_level_clear_name(struct finished_level *fl)
@@ -142,9 +149,14 @@ static inline void finished_level_clear_classic(struct finished_level *fl)
     fl->flags &= ~FINISHED_LEVEL_FLAG_CLASSIC;
 }
 
-static inline void finished_level_clear_fspath(struct finished_level *fl)
+static inline void finished_level_clear_fileref(struct finished_level *fl)
 {
-    fl->flags &= ~FINISHED_LEVEL_FLAG_FSPATH;
+    fl->flags &= ~FINISHED_LEVEL_FLAG_FILEREF;
+}
+
+static inline void finished_level_clear_collection(struct finished_level *fl)
+{
+    fl->flags &= ~FINISHED_LEVEL_FLAG_COLLECTION;
 }
 
 static inline bool finished_level_has_name(struct finished_level *fl)
@@ -177,9 +189,14 @@ static inline bool finished_level_has_classic(struct finished_level *fl)
     return fl->flags & FINISHED_LEVEL_FLAG_CLASSIC;
 }
 
-static inline bool finished_level_has_fspath(struct finished_level *fl)
+static inline bool finished_level_has_fileref(struct finished_level *fl)
 {
-    return fl->flags & FINISHED_LEVEL_FLAG_FSPATH;
+    return fl->flags & FINISHED_LEVEL_FLAG_FILEREF;
+}
+
+static inline bool finished_level_has_collection(struct finished_level *fl)
+{
+    return fl->flags & FINISHED_LEVEL_FLAG_COLLECTION;
 }
 
 int compare_finished_level(struct finished_level *a, struct finished_level *b);

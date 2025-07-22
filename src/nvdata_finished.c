@@ -164,8 +164,10 @@ void nvdata_mark_id_finished(struct finished_level *entry)
                                    entry->classic_nameref.level_unique_id);
     }
 
-    if (finished_level_has_fspath(entry)) {
-        finished_level_set_fspath(e, entry->fspath);
+    if (finished_level_has_fileref(entry)) {
+        finished_level_set_fileref(e,
+                                   entry->fileref.filename,
+                                   entry->fileref.level_unique_id);
     }
 
     if (finished_level_has_win_time(entry)) {
@@ -207,7 +209,24 @@ void nvdata_mark_finished(struct level *level)
         finished_level_set_blueprint(&entry, level->blueprint);
     } else if (level->classic_collection) {
         finished_level_set_classic(&entry, level->classic_collection->id, level->unique_id);
-        printf("mark finished CLASSIC: \"%s\"\n", classic_level_nameref_string(&entry.classic_nameref));
+    } else if (level->loaded_from_file) {
+        if (level->loadpath) {
+            finished_level_set_fileref(&entry,
+                                       (char *)GetFileName(level->loadpath),
+                                       level->unique_id);
+        } else {
+            warnmsg("cannot save a level fileref for level \"%s\" - missing 'loadpath'", level->id);
+        }
+    } else if (level->stored_in_collection) {
+        assert_not_null(level->collection);
+        if (level->collection->loadpath) {
+            finished_level_set_fileref(&entry,
+                                       (char *)GetFileName(level->collection->loadpath),
+                                       level->unique_id);
+            finished_level_set_collection(&entry);
+        } else {
+            warnmsg("cannot save a collection fileref for level \"%s\" - missing 'loadpath'", level->collection->id);
+        }
     } else {
         errmsg("don't know how to encode level into a finished_level entry");
     }
@@ -431,21 +450,33 @@ bool nvdata_finished_from_json(cJSON *root_json)
             finished_level_clear_classic(&e);
         }
 
-        if (finished_level_has_fspath(&e)) {
-            cJSON *fspath_json = cJSON_GetObjectItem(level_json, "fspath");
-            if (fspath_json) {
-                if (!cJSON_IsString(fspath_json)) {
-                    errmsg("Error parsing nvdata finished level JSON [%d]: 'fspath' is not a String", count);
+        if (finished_level_has_fileref(&e)) {
+            cJSON *filename_json = cJSON_GetObjectItem(level_json, "filename");
+            cJSON *level_unique_id_json = cJSON_GetObjectItem(level_json, "level_unique_id");
+            if (filename_json && level_unique_id_json) {
+                if (!cJSON_IsString(filename_json)) {
+                    errmsg("Error parsing nvdata finished level JSON [%d]: 'filename' is not a String", count);
                     return false;
                 }
-                finished_level_set_fspath(&e, NULL); //fspath_json->valuestring
+                if (!cJSON_IsString(level_unique_id_json)) {
+                    errmsg("Error parsing nvdata finished level JSON [%d]: 'level_unique_id_json' is not a String", count);
+                    return false;
+                }
+                finished_level_set_fileref(&e,
+                                           filename_json->valuestring,
+                                           level_unique_id_json->valuestring);
             } else {
-                warnmsg("While parsing nvdata finished level JSON [%d]: 'fspath' flag is set but the String data field is missing. Clearing the misleading flag.", count);
-                finished_level_clear_fspath(&e);
+                if (!filename_json) {
+                    warnmsg("While parsing nvdata finished level JSON [%d]: 'fileref' flag is set but the String data field 'filename' is missing.", count);
+                }
+                if (!level_unique_id_json) {
+                    warnmsg("While parsing nvdata finished level JSON [%d]: 'fileref' flag is set but the String data field 'level_unique_id' is missing.", count);
+                }
+                finished_level_clear_fileref(&e);
                 new_changed_value = true;
             }
         } else {
-            finished_level_clear_fspath(&e);
+            finished_level_clear_fileref(&e);
         }
 
         if (current_collection) {
@@ -560,11 +591,12 @@ cJSON *nvdata_finished_to_json(void)
             }
         }
 
-        if (finished_level_has_fspath(e)) {
-            if (e->fspath) {
-                if (cJSON_AddStringToObject(level_json, "fspath", e->fspath) == NULL) {
-                    goto json_err;
-                }
+        if (finished_level_has_fileref(e)) {
+            if (cJSON_AddStringToObject(level_json, "filename", e->fileref.filename) == NULL) {
+                goto json_err;
+            }
+            if (cJSON_AddStringToObject(level_json, "level_unique_id", e->fileref.level_unique_id) == NULL) {
+                goto json_err;
             }
         }
 

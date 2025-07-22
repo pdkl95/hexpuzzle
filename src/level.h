@@ -122,6 +122,7 @@ struct level {
     int drag_reset_total_frames;
     Vector2 drag_reset_vector;
 
+    char *loadpath;
     char *savepath;
     char *filename;
     char *dirpath;
@@ -133,6 +134,8 @@ struct level {
     IconStr finished_status_icon;
     Color   finished_status_color;
 
+    bool loaded_from_file;
+    bool stored_in_collection;
     bool unplayed;
     bool finished;
     float finished_fract;

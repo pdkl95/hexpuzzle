@@ -371,6 +371,7 @@ static level_t *init_level(level_t *level)
     level->filename = NULL;
     level->dirpath = NULL;
     level->savepath = NULL;
+    level->loadpath = NULL;
     level->changed = false;
     level->solver = NULL;
 
@@ -387,6 +388,8 @@ static level_t *init_level(level_t *level)
     level->finished_hue = 0.0f;
 
     level->unplayed = true;
+    level->stored_in_collection = false;
+    level->loaded_from_file = false;
 
     level->fade.active    = false;
     level->fade.do_rotate = true;
@@ -633,6 +636,7 @@ void destroy_level(level_t *level)
         SAFEFREE(level->filename);
         SAFEFREE(level->dirpath);
         SAFEFREE(level->savepath);
+        SAFEFREE(level->loadpath);
         SAFEFREE(level->gen_param);
         SAFEFREE(level->blueprint);
         SAFEFREE(level);
@@ -894,6 +898,8 @@ level_t *load_level_file(const char *filename)
 
     level_t *level = load_level_string(filename, str, false);
     if (level) {
+        level->loaded_from_file = true;
+        level->loadpath = strdup(filename);
         level->savepath = strdup(filename);
     } else {
         errmsg("load_level_string(\"%s\") failed", filename);

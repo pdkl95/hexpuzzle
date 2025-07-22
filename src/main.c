@@ -60,6 +60,7 @@
 
 #include "nvdata.h"
 #include "nvdata_finished.h"
+#include "fsdir.h"
 
 #include "solver.h"
 #include "classics.h"
@@ -3174,6 +3175,7 @@ static void game_init(void)
     }
 
     init_gui_options();
+    init_search_dirs();
     init_nvdata();
     init_gui_browser();
     init_gui_help();
@@ -3254,6 +3256,7 @@ static void game_cleanup(void)
     cleanup_gui_help();
     cleanup_gui_title();
     cleanup_nvdata();
+    cleanup_search_dirs();
     cleanup_gui_options();
 
     destroy_background(background);

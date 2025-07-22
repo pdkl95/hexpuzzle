@@ -144,6 +144,7 @@ hexpuzzle_SOURCES =                                           \
 	src/color.h                src/color.c                \
 	src/const.h                                           \
 	src/fonts.h                src/fonts.c                \
+	src/fsdir.h                src/fsdir.c                \
 	src/game_mode.h            src/game_mode.c            \
 	src/generate_level.h       src/generate_level.c       \
 	src/gui_browser.h          src/gui_browser.c          \
@@ -236,6 +237,7 @@ src/hexpuzzle-physac_impl.$(OBJEXT): CFLAGS += -Wno-sign-compare
 src/hexpuzzle-raygui_impl.$(OBJEXT): CFLAGS += -Wno-unused-parameter -Wno-unused-result
 src/hexpuzzle-nvdata_finished.$(OBJEXT): CFLAGS += $(NO_UNUSED_BUT_SET_OPT) -Wno-unused-variable -Wno-incompatible-pointer-types
 src/hexpuzzle-gui_popup_message.$(OBJEXT): CFLAGS += $(NO_UNUSED_BUT_SET_OPT) -Wno-unused-variable -Wno-incompatible-pointer-types -Wno-misleading-indentation
+src/hexpuzzle-fsdir.$(OBJEXT): CFLAGS += -Wno-unused-variable
 
 BUILT_SOURCES = \
 	util/compile_to_c_src \

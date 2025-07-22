@@ -76,6 +76,7 @@ static collection_t *alloc_collection(void)
     collection->levels = NULL;
     collection->prev = NULL;
     collection->next = NULL;
+    collection->loadpath = NULL;
 
     collection->filename_seq = 1;
 
@@ -85,10 +86,11 @@ static collection_t *alloc_collection(void)
     collection->gui_list_active = -1;
     collection->gui_list_focus = -1;
 
-    collection->changed         = false;
-    collection->is_pack         = false;
-    collection->is_classic      = false;
-    collection->prevent_destroy = false;
+    collection->changed          = false;
+    collection->is_pack          = false;
+    collection->is_classic       = false;
+    collection->prevent_destroy  = false;
+    collection->loaded_from_file = false;
 
     return collection;
 }
@@ -272,6 +274,7 @@ bool collection_from_json(collection_t *collection, cJSON *json)
         }
 
         level_t *level = load_level_json(level_json->string, level_json, true);
+        level->stored_in_collection = true;
         collection_add_level(collection, level);
     }
 
@@ -329,6 +332,10 @@ collection_t *load_collection_pack_file(const char *filename)
     unsigned char *compressed = LoadFileData(filename, &compsize);
 
     collection_t *collection = load_collection_pack_compressed_data(filename, compressed, compsize);
+    if (collection) {
+        collection->loaded_from_file = true;
+        collection->loadpath = strdup(filename);
+    }
 
     if (compressed) {
         UnloadFileData(compressed);
@@ -389,6 +396,7 @@ void destroy_collection(collection_t *collection)
             destroy_level(collection->levels);
         }
 
+        SAFEFREE(collection->loadpath);
         SAFEFREE(collection->dirpath);
         SAFEFREE(collection->filename);
     }

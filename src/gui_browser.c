@@ -27,7 +27,9 @@
 #include "raygui_paged_list.h"
 #include "gui_browser.h"
 #include "gui_dialog.h"
+#include "nvdata.h"
 #include "nvdata_finished.h"
+#include "fsdir.h"
 
 extern char *home_dir;
 
@@ -111,6 +113,8 @@ char browser_edit_button_text[] = "Edit";
 char browser_open_button_text[] = "Open";
 char browser_have_blueprint_tooltip_text[] = "Have level-regen Blueprint";
 char browser_have_classic_tooltip_text[] = "Have Classic Level";
+char browser_have_fileref_tooltip_text[] = "Have ." LEVEL_FILENAME_EXT " file";
+char browser_missing_fileref_tooltip_text[] = "Cannot find referenced ." LEVEL_FILENAME_EXT " file";
 
 char local_files_dir_label_text[] = "Directory";
 char local_files_up_button_text_str[] = "Up";
@@ -313,6 +317,14 @@ static inline gui_list_history_entry_t *get_gui_list_history_entry(gui_list_vars
 }
 
 #if defined(PLATFORM_DESKTOP)
+static bool fileref_exists(fileref_t *ref)
+{
+    assert_not_null(ref);
+
+    const char *path = find_file_in_search_dirs(ref->filename);
+    return !!path;
+}
+
 static void free_gui_list_vars_fspath_data(gui_list_vars_t *list)
 {
     for (int i=0; i<list->count; i++) {
@@ -590,6 +602,38 @@ static void open_file_entry(gui_list_fspath_entry_t *entry, bool edit)
     }
 }
 
+bool open_level_in_collection_file(const char *path, unique_id_t level_unique_id, bool edit)
+{
+    assert_not_null(path);
+    assert_not_null(level_unique_id);
+
+    assert_null(current_collection);
+    assert_null(current_level);
+
+    current_collection = load_collection_path(path);
+    if (!current_collection) {
+        return false;
+    }
+
+    level_t *level = collection_find_level_by_unique_id(current_collection, level_unique_id);
+    if (!current_level) {
+        errmsg("collection \"\" does not contain level id %s",
+               current_collection->id,
+               level_unique_id);
+        destroy_collection(current_collection);
+        current_collection = NULL;
+        return false;
+    }
+
+    if (edit) {
+        level_edit(level);
+    } else {
+        level_play(level);
+    }
+
+    return true;
+}
+
 static void open_history_entry(gui_list_history_entry_t *entry, UNUSED bool edit)
 {
     if (finished_level_has_blueprint(entry->finished_level)) {
@@ -597,14 +641,33 @@ static void open_history_entry(gui_list_history_entry_t *entry, UNUSED bool edit
             fail_entry((gui_list_entry_t *)entry);
         }
     } else if (finished_level_has_classic(entry->finished_level)) {
-        level_t *level = find_classic_level_by_nameref(&entry->finished_level->classic_nameref);
-        if (level) {
-            level_play(level);
+        if (!entry->common.level) {
+            entry->common.level = find_classic_level_by_nameref(&entry->finished_level->classic_nameref);
+        }
+        if (entry->common.level) {
+            level_play(entry->common.level);
         } else {
             fail_entry((gui_list_entry_t *)entry);
         }
-    } else if (finished_level_has_fspath(entry->finished_level)) {
-        fail_entry((gui_list_entry_t *)entry);
+    } else if (finished_level_has_fileref(entry->finished_level)) {
+        const char *path = find_file_in_search_dirs(entry->finished_level->fileref.filename);
+        if (path) {
+            if (finished_level_has_collection(entry->finished_level)) {
+                if (!open_level_in_collection_file(path, entry->finished_level->fileref.level_unique_id, edit)) {
+                    fail_entry((gui_list_entry_t *)entry);
+                }
+            } else {
+                if (!open_game_file(path, edit)) {
+                    fail_entry((gui_list_entry_t *)entry);
+                }
+            }
+        } else {
+            if (options->verbose) {
+                warnmsg("Cannot find \"%s\" in search dirs",
+                        entry->finished_level->fileref.filename);
+            }
+            fail_entry((gui_list_entry_t *)entry);
+        }
     } else {
         fail_entry((gui_list_entry_t *)entry);
     }
@@ -664,14 +727,24 @@ void open_entry(gui_list_entry_t *entry, bool edit)
     }
 }
 
+static level_t *find_level_by_fileref(fileref_t *ref)
+{
+    const char *path = find_file_in_search_dirs(ref->filename);
+    if (path) {
+        return load_level_file(path);
+    } else {
+        return NULL;
+    }
+}
+
 static level_t *entry_load_finished_level(gui_list_history_entry_t *entry)
 {
     if (finished_level_has_blueprint(entry->finished_level)) {
         return generate_level_from_blueprint(entry->finished_level->blueprint, "browser_preview");
     } else if (finished_level_has_classic(entry->finished_level)) {
         return find_classic_level_by_nameref(&entry->finished_level->classic_nameref);
-    } else if (finished_level_has_fspath(entry->finished_level)) {
-        return NULL;
+    } else if (finished_level_has_fileref(entry->finished_level)) {
+        return find_level_by_fileref(&entry->finished_level->fileref);
     } else {
         return NULL;
     }
@@ -938,22 +1011,28 @@ void setup_browse_history(void)
                                                                       count,
                                                                       HISTORY_COLUMN_PLAY_TYPE);
             if (finished_level_has_blueprint(fl)) {
-                cell->icon       = ICON_FILETYPE_TEXT;
+                cell->icon       = ICON_FILETYPE_IMAGE;
                 cell->icon_color = blueprint_color;
-
                 raygui_cell_use_tooltip(cell, browser_have_blueprint_tooltip_text);
             } else if (finished_level_has_classic(fl)) {
-                cell->icon       = ICON_FILE;
+                cell->icon       = ICON_FILETYPE_HOME;
                 cell->icon_color = GREEN;
-
                 raygui_cell_use_tooltip(cell, browser_have_classic_tooltip_text);
-            } else if (finished_level_has_fspath(fl)) {
+            } else if (finished_level_has_fileref(fl)) {
+                if (fileref_exists(&fl->fileref)) {
+                    cell->icon       = ICON_FILETYPE_TEXT;
+                    cell->icon_color = SKYBLUE;
+                    raygui_cell_use_tooltip(cell, browser_have_fileref_tooltip_text);
+                } else {
+                    status = ENTRY_STATUS_NOT_LOADABLE;
+                    cell->icon       = ICON_CROSS_SMALL;
+                    cell->icon_color = RED;
+                    raygui_cell_use_tooltip(cell, browser_missing_fileref_tooltip_text);
+                }
             } else {
                 status = ENTRY_STATUS_NOT_LOADABLE;
-
                 cell->icon       = ICON_CROSS_SMALL;
                 cell->icon_color = RED;
-
                 raygui_cell_use_tooltip(cell, NULL);
             }
 

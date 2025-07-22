@@ -155,6 +155,8 @@ struct options {
     bool load_state_create_level_symmetry_mode;
     bool load_state_create_level_minimum_path_density;
 
+    bool load_default_search_dir;
+
     char *file_path;
 
     /* cheat (debug) options */

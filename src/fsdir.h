@@ -1,6 +1,6 @@
 /****************************************************************************
  *                                                                          *
- * nvdata.h                                                                 *
+ * fsdir.h                                                                  *
  *                                                                          *
  * This file is part of hexpuzzle.                                          *
  *                                                                          *
@@ -19,18 +19,44 @@
  *                                                                          *
  ****************************************************************************/
 
-#ifndef NVDATA_H
-#define NVDATA_H
+#ifndef FSDIR_H
+#define FSDIR_H
 
-void init_nvdata(void);
-void cleanup_nvdata(void);
-void load_nvdata(void);
-void save_nvdata(void);
+#include "sglib/sglib.h"
 
-void save_current_level_with_nvdata(void);
+typedef struct fsdir {
+    int index;
 
-extern char *nvdata_dir;
-extern char *nvdata_default_browse_path;
+    full_path_t path;
 
-#endif /*NVDATA_H*/
+    bool exists;
+    bool enabled;
+
+    struct fsdir *next;
+    struct fsdir *prev;
+} fsdir;
+typedef struct fsdir fsdir_t;
+
+#define compare_fsdir(a, b) (((a)->index) - ((b)->index))
+
+SGLIB_DEFINE_DL_LIST_PROTOTYPES(fsdir, compare_fsdir, prev, next);
+
+fsdir_t *alloc_fsdir(void);
+void free_fsdir(fsdir_t *fsdir);
+void init_fsdir(fsdir_t *fsdir, const char *dirpath);
+fsdir_t *create_fsdir(const char *dirpath);
+void destroy_fsdir(fsdir_t *fsdir);
+
+void init_search_dirs(void);
+void cleanup_search_dirs(void);
+
+void reset_search_dirs(void);
+void add_search_dir(const char *dirpath);
+void add_default_search_dir(void);
+const char *find_file_in_search_dirs(const char *filename);
+
+extern fsdir_t *search_dirs;
+extern bool search_dirs_changed;
+
+#endif /*FSDIR_H*/
 

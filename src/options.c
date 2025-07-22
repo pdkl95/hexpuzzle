@@ -472,6 +472,8 @@ options_set_defaults(
     options->load_state_compress_finished_levels_dat = true;
     options->load_color_opt = true;
 
+    options->load_default_search_dir = true;
+
     options->safe_mode = false;
 
     options->force = false;

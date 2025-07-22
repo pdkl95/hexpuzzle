@@ -34,6 +34,7 @@ struct collection {
     char id[COLLECTION_ID_LENGTH];
     bool have_id;
 
+    char *loadpath;
     char *dirpath;
     char *filename;
     int filename_seq;
@@ -41,6 +42,7 @@ struct collection {
     bool is_pack;
     bool is_classic;
     bool prevent_destroy;
+    bool loaded_from_file;
 
     level_t *levels;
     int level_count;

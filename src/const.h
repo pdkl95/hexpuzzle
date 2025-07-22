@@ -89,6 +89,7 @@
 #define UNIQUE_ID_LENGTH 37
 #define COLLECTION_ID_LENGTH UNIQUE_ID_LENGTH
 #define ID_MAXLEN 255
+#define FILENAME_MAXLEN 96
 
 #define FINISHED_HUE_STEP 4.0
 #define FINISHED_ANIM_PREDELAY_LENGTH 0.5
@@ -172,6 +173,12 @@
     #else
         #define MAX_FILEPATH_LENGTH     4096
     #endif
+#endif
+
+#ifdef PATH_MAX
+# define FULL_PATH_MAXLEN PATH_MAX
+#else
+# define FULL_PATH_MAXLEN MAX_FILEPATH_LENGTH
 #endif
 
 #ifndef MAX_TEXT_BUFFER_LENGTH
