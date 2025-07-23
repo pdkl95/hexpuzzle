@@ -546,9 +546,11 @@ void collection_update_level_names(collection_t *collection)
 
     assert(n == collection->level_count);
 
+#if 0
     if (options->verbose) {
         collection_show_level_names(collection);
     }
+#endif
 }
 
 bool collection_level_name_exists(collection_t *collection, const char *name)

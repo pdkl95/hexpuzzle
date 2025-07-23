@@ -851,10 +851,12 @@ level_t *load_level_string(const char *filename, const char *str, bool is_pack)
         } else {
             level_set_file_path(level, filename);
         }
+#if 0
         if (options->verbose) {
             infomsg("Successfully loaded level file \"%s/%s\"",
                     level->dirpath, level->filename);
         }
+#endif
         return level;
     } else {
         errmsg("Error parsing level file \"%s\"",
@@ -874,10 +876,12 @@ level_t *load_level_json(const char *filename, cJSON *json, bool is_pack)
         } else {
             level_set_file_path(level, filename);
         }
+#if 0
         if (options->verbose) {
             infomsg("Successfully loaded level file \"%s/%s\"",
                     level->dirpath, level->filename);
         }
+#endif
         return level;
     } else {
         errmsg("Error parsing level JSON \"%s\"",

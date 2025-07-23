@@ -317,11 +317,22 @@ static inline gui_list_history_entry_t *get_gui_list_history_entry(gui_list_vars
 }
 
 #if defined(PLATFORM_DESKTOP)
+static const char *find_by_filename(const char *filename)
+{
+    assert_not_null(filename);
+
+    const char *path = concat_dir_and_filename(browse_path, filename);
+    if (!FileExists(path)) {
+        path = find_file_in_search_dirs(filename);
+    }
+    return path;
+}
+
 static bool fileref_exists(fileref_t *ref)
 {
     assert_not_null(ref);
 
-    const char *path = find_file_in_search_dirs(ref->filename);
+    const char *path = find_by_filename(ref->filename);
     return !!path;
 }
 
@@ -550,8 +561,6 @@ void setup_browse_dir(void)
 
 void change_gui_browser_path(const char *dir)
 {
-    move_search_dir(browse_path, dir);
-
     SAFEFREE(browse_path);
 
     browse_path = strdup(dir);
@@ -652,7 +661,7 @@ static void open_history_entry(gui_list_history_entry_t *entry, UNUSED bool edit
             fail_entry((gui_list_entry_t *)entry);
         }
     } else if (finished_level_has_fileref(entry->finished_level)) {
-        const char *path = find_file_in_search_dirs(entry->finished_level->fileref.filename);
+        const char *path = find_by_filename(entry->finished_level->fileref.filename);
         if (path) {
             if (finished_level_has_collection(entry->finished_level)) {
                 if (!open_level_in_collection_file(path, entry->finished_level->fileref.level_unique_id, edit)) {
@@ -733,7 +742,7 @@ void open_entry(gui_list_entry_t *entry, bool edit)
 
 static level_t *find_level_by_fileref(fileref_t *ref)
 {
-    const char *path = find_file_in_search_dirs(ref->filename);
+    const char *path = find_by_filename(ref->filename);
     if (path) {
         return load_level_file(path);
     } else {
@@ -1142,7 +1151,6 @@ void init_gui_browser(void)
                            &(local_files.focus));
 
     change_gui_browser_path_to_local_saved_levels();
-    add_search_dir(browse_path);
 
     init_raygui_paged_list(history.gui_list,
                            &(history.scroll_index),

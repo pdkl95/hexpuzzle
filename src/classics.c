@@ -92,12 +92,13 @@ static void load_classic_collection(classic_collection_t *cc)
         return;
     }
 
-    int len = (int)(*cc->dlen);
-
+#if 0
     if (options->verbose) {
-        infomsg("Load %d byte built-in level pack %d (\"%s\") from %p\n",
+        int len = (int)(*cc->dlen);
+        infomsg("Load %d byte built-in level pack %d (\"%s\") from %p",
                 len, cc->index, cc->filename, cc->data);
     }
+#endif
 
     cc->collection = load_collection_pack_compressed_data(cc->filename, cc->data, *cc->dlen);
     if (!cc->collection) {
