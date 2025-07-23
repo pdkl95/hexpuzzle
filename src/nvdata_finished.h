@@ -63,7 +63,11 @@ typedef struct finished_level {
     struct finished_level *right;
 } finished_level;
 
+#ifdef NDEBUG
+static inline void assert_finished_level_flag_excludes(UNUSED struct finished_level *fl, UNUSED flags16_t incompatible_flags)
+#else
 static inline void assert_finished_level_flag_excludes(struct finished_level *fl, flags16_t incompatible_flags)
+#endif
 {
     assert(0 == (fl->flags & incompatible_flags));
 }
