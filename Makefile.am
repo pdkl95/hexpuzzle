@@ -237,7 +237,7 @@ src/hexpuzzle-physac_impl.$(OBJEXT): CFLAGS += -Wno-sign-compare
 src/hexpuzzle-raygui_impl.$(OBJEXT): CFLAGS += -Wno-unused-parameter -Wno-unused-result
 src/hexpuzzle-nvdata_finished.$(OBJEXT): CFLAGS += $(NO_UNUSED_BUT_SET_OPT) -Wno-unused-variable -Wno-incompatible-pointer-types
 src/hexpuzzle-gui_popup_message.$(OBJEXT): CFLAGS += $(NO_UNUSED_BUT_SET_OPT) -Wno-unused-variable -Wno-incompatible-pointer-types -Wno-misleading-indentation
-src/hexpuzzle-fsdir.$(OBJEXT): CFLAGS += -Wno-unused-variable
+src/hexpuzzle-fsdir.$(OBJEXT): CFLAGS += -Wno-unused-variable -Wno-misleading-indentation
 
 BUILT_SOURCES = \
 	util/compile_to_c_src \
