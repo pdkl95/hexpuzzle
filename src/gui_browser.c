@@ -683,7 +683,9 @@ void open_entry(gui_list_entry_t *entry, bool edit)
         return;
 
     case ENTRY_STATUS_NOT_LOADABLE:
-        if (entry->type == ENTRY_TYPE_FINISHED_LEVEL) {
+        if (entry->type == ENTRY_TYPE_DIR) {
+            break;
+        } else if (entry->type == ENTRY_TYPE_FINISHED_LEVEL) {
             errmsg("Cannot open entry \"%s\" - no blueprint",
                    ((gui_list_history_entry_t *)entry)->name);
         } else {
@@ -1549,8 +1551,11 @@ static void draw_gui_browser_entry_buttons(gui_list_vars_t *list, gui_list_entry
     if (entry) {
         switch (entry->status) {
         case ENTRY_STATUS_NULL:
-            fallthrough;
+            return;
         case ENTRY_STATUS_NOT_LOADABLE:
+            if (entry->type == ENTRY_TYPE_DIR) {
+                break;
+            }
             fallthrough;
         case ENTRY_STATUS_LOAD_ERROR:
             return;
