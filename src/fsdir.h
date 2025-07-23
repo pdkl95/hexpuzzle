@@ -51,7 +51,8 @@ void init_search_dirs(void);
 void cleanup_search_dirs(void);
 
 void reset_search_dirs(void);
-void add_search_dir(const char *dirpath);
+bool move_search_dir(const char *oldpath, const char *newpath);
+bool add_search_dir(const char *dirpath);
 void add_default_search_dir(void);
 const char *find_file_in_search_dirs(const char *filename);
 

@@ -550,6 +550,8 @@ void setup_browse_dir(void)
 
 void change_gui_browser_path(const char *dir)
 {
+    move_search_dir(browse_path, dir);
+
     SAFEFREE(browse_path);
 
     browse_path = strdup(dir);
@@ -1138,6 +1140,7 @@ void init_gui_browser(void)
                            &(local_files.focus));
 
     change_gui_browser_path_to_local_saved_levels();
+    add_search_dir(browse_path);
 
     init_raygui_paged_list(history.gui_list,
                            &(history.scroll_index),

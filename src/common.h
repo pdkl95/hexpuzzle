@@ -201,17 +201,17 @@ typedef char name_str_t[NAME_MAXLEN];
 typedef char filename_t[FILENAME_MAXLEN];
 typedef char full_path_t[FULL_PATH_MAXLEN];
 
-static inline void copy_name(name_str_t dst, name_str_t src)
+static inline void copy_name(name_str_t dst, const name_str_t src)
 {
     snprintf(dst, NAME_MAXLEN, "%s", src);
 }
 
-static inline void copy_filename(filename_t dst, filename_t src)
+static inline void copy_filename(filename_t dst, const filename_t src)
 {
     snprintf(dst, FILENAME_MAXLEN, "%s", src);
 }
 
-static inline void copy_full_path(full_path_t dst, full_path_t src)
+static inline void copy_full_path(full_path_t dst, const full_path_t src)
 {
     snprintf(dst, FULL_PATH_MAXLEN, "%s", src);
 }

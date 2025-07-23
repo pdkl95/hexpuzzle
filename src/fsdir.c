@@ -83,6 +83,10 @@ void cleanup_search_dirs(void)
 
 void reset_search_dirs(void)
 {
+    if (options->verbose) {
+        infomsg("resetting search_dirs to an empty list");
+    }
+
     if (search_dirs) {
         fsdir_t *p = search_dirs->prev;
         while (p) {
@@ -103,8 +107,66 @@ void reset_search_dirs(void)
     }
 }
 
-void add_search_dir(const char *dirpath)
+fsdir_t *find_current_search_dir(const char *dirpath)
 {
+    assert_not_null(dirpath);
+
+    struct fsdir *e = NULL;
+    struct sglib_fsdir_iterator it;
+
+    for(e = sglib_fsdir_it_init(&it, search_dirs);
+        e != NULL;
+        e = sglib_fsdir_it_next(&it)
+    ) {
+        if (0 == strcmp(e->path, dirpath)) {
+            return e;
+        }
+    }
+
+    return NULL;
+}
+
+bool move_search_dir(const char *oldpath, const char *newpath)
+{
+    assert_not_null(newpath);
+
+    if (!oldpath) {
+        return add_search_dir(newpath);
+    }
+
+    fsdir_t *newdir = find_current_search_dir(newpath);
+    if (newdir) {
+        if (options->verbose) {
+            warnmsg("Cannot move search path \"%s\" to \"%s\" - new path already exists",
+                    oldpath, newpath);
+        }
+        return false;
+    }
+
+    fsdir_t *olddir = find_current_search_dir(oldpath);
+    if (!olddir) {
+        errmsg("Cannot move search path \"%s\" to \"%s\" - old path does not exist",
+               oldpath, newpath);
+        return false;
+    }
+
+    if (options->verbose) {
+        infomsg("changed search dir from \"%s\" to \"%s\"",
+                oldpath, newpath);
+    }
+
+    copy_full_path(olddir->path, newpath);
+
+    return true;
+}
+
+bool add_search_dir(const char *dirpath)
+{
+    fsdir_t *olddir = find_current_search_dir(dirpath);
+    if (olddir) {
+        return false;
+    }
+
     fsdir_t *dir = create_fsdir(dirpath);
     dir->index = sglib_fsdir_len(search_dirs);
     sglib_fsdir_add(&search_dirs, dir);
@@ -115,6 +177,8 @@ void add_search_dir(const char *dirpath)
     if (options->verbose) {
         infomsg("add search dir: \"%s\"", dir->path);
     }
+
+    return true;
 }
 
 void add_default_search_dir(void)
