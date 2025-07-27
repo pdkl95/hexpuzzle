@@ -138,7 +138,7 @@ bin_PROGRAMS = hexpuzzle$(EXEEXT)
 @USE_SYSTEM_RAYLIB_FALSE@am__append_1 = \
 @USE_SYSTEM_RAYLIB_FALSE@	external/libcombined_deps.a \
 @USE_SYSTEM_RAYLIB_FALSE@	external/raylib/libraylib.a \
-@USE_SYSTEM_RAYLIB_FALSE@	-lGL -lc -lm -lpthread -ldl -lrt
+@USE_SYSTEM_RAYLIB_FALSE@	$(PLATFORM_LIBS)
 
 #	-s ASYNCIFY
 @BUILD_DEBUG_TRUE@@BUILD_WEB_TRUE@am__append_2 = \
@@ -505,7 +505,8 @@ hexpuzzle_OBJECTS = $(am_hexpuzzle_OBJECTS)
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @USE_SYSTEM_RAYLIB_FALSE@am__DEPENDENCIES_3 =  \
 @USE_SYSTEM_RAYLIB_FALSE@	external/libcombined_deps.a \
-@USE_SYSTEM_RAYLIB_FALSE@	external/raylib/libraylib.a
+@USE_SYSTEM_RAYLIB_FALSE@	external/raylib/libraylib.a \
+@USE_SYSTEM_RAYLIB_FALSE@	$(am__DEPENDENCIES_1)
 hexpuzzle_DEPENDENCIES = $(am__DEPENDENCIES_2) $(am__DEPENDENCIES_3) \
 	$(am__append_4) lib/gnulib/libgnu.a $(am__DEPENDENCIES_1)
 hexpuzzle_LINK = $(CCLD) $(hexpuzzle_CFLAGS) $(CFLAGS) \
@@ -514,7 +515,7 @@ am_util_compile_to_c_src_OBJECTS =  \
 	util/util_compile_to_c_src-compile_to_c_src.$(OBJEXT)
 util_compile_to_c_src_OBJECTS = $(am_util_compile_to_c_src_OBJECTS)
 util_compile_to_c_src_DEPENDENCIES = $(am__DEPENDENCIES_2) \
-	external/raylib/libraylib.a
+	external/raylib/libraylib.a $(am__DEPENDENCIES_1)
 util_compile_to_c_src_LINK = $(CCLD) $(util_compile_to_c_src_CFLAGS) \
 	$(CFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 AM_V_P = $(am__v_P_@AM_V@)
@@ -1361,6 +1362,7 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
 PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
 PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
+PLATFORM_LIBS = @PLATFORM_LIBS@
 PRAGMA_COLUMNS = @PRAGMA_COLUMNS@
 PRAGMA_SYSTEM_HEADER = @PRAGMA_SYSTEM_HEADER@
 PRIPTR_PREFIX = @PRIPTR_PREFIX@
@@ -1793,7 +1795,7 @@ util_compile_to_c_src_SOURCES = util/compile_to_c_src.c
 util_compile_to_c_src_CFLAGS = $(COMMON_PROG_CFLAGS)
 util_compile_to_c_src_LDADD = $(COMMON_PROG_LDADD) \
 	external/raylib/libraylib.a \
-	-lGL -lc -lm -lpthread -ldl -lrt
+	$(PLATFORM_LIBS)
 
 NO_UNUSED_BUT_SET_OPT = $(am__append_6)
 BUILT_SOURCES = util/compile_to_c_src $(dist_EXTRA_hexpuzzle_SOURCES) \

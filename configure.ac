@@ -35,7 +35,7 @@ AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_HEADERS([config.h])
 
 AM_INIT_AUTOMAKE([1.13 foreign color-tests dist-xz subdir-objects -Wall -Werror])
-AM_MAINTAINER_MODE([enable])
+AM_MAINTAINER_MODE([disable])
 
 dnl =======================
 dnl ===  early options  ===
@@ -305,14 +305,16 @@ ALL_PKG_CFLAGS=""
 ALL_PKG_LIBS=""
 
 GLFW_OSX=""
+PLATFORM_LIBS=""
 
 AS_IF([test "x$enable_web" != "xyes"], [
     AS_IF([test "x$build_osx" = "xyes"], [
         dnl APP_CFLAGS="$APP_CFLAGS "
-        APP_LIBS="$APP_LIBS -framework OpenGL -framework Cocoa -framework IOKit -framework CoreAudio -framework CoreVideo"
+        PLATFORM_LIBS="$APP_LIBS -framework OpenGL -framework Cocoa -framework IOKit -framework CoreAudio -framework CoreVideo"
         GLFW_OSX="-x objective-c"
     ],[
         PKG_CHECK_MODULES([GL],     [gl     >= 10.0.4])
+        PLATFORM_LIBS="${GL_LIBS} -lc -lm -lpthread -ldl -lrt"
     ])
 ])
 
@@ -337,6 +339,7 @@ AS_IF([test "x$enable_web" = "xyes"], [
 ])
 
 AC_SUBST(GLFW_OSX)
+AC_SUBST(PLATFORM_LIBS)
 AC_SUBST(APP_CFLAGS)
 AC_SUBST(APP_LIBS)
 AC_SUBST(ALL_PKG_CFLAGS)

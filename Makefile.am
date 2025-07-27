@@ -102,7 +102,7 @@ if ! USE_SYSTEM_RAYLIB
 hexpuzzle_LDADD += \
 	external/libcombined_deps.a \
 	external/raylib/libraylib.a \
-	-lGL -lc -lm -lpthread -ldl -lrt
+	$(PLATFORM_LIBS)
 endif
 
 if BUILD_WEB
@@ -200,7 +200,7 @@ util_compile_to_c_src_SOURCES = util/compile_to_c_src.c
 util_compile_to_c_src_CFLAGS = $(COMMON_PROG_CFLAGS)
 util_compile_to_c_src_LDADD = $(COMMON_PROG_LDADD) \
 	external/raylib/libraylib.a \
-	-lGL -lc -lm -lpthread -ldl -lrt
+	$(PLATFORM_LIBS)
 
 src/data_classics_levels.h: $(CLASSICS_LEVELS)
 	$(AM_V_at)rm -f $@
