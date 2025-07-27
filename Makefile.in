@@ -675,6 +675,8 @@ AUTOCONF = @AUTOCONF@
 AUTOHEADER = @AUTOHEADER@
 AUTOMAKE = @AUTOMAKE@
 AWK = @AWK@
+BINDIST_NAME = @BINDIST_NAME@
+BINDIST_ZIP_NAME = @BINDIST_ZIP_NAME@
 BITSIZEOF_PTRDIFF_T = @BITSIZEOF_PTRDIFF_T@
 BITSIZEOF_SIG_ATOMIC_T = @BITSIZEOF_SIG_ATOMIC_T@
 BITSIZEOF_SIZE_T = @BITSIZEOF_SIZE_T@
@@ -1362,6 +1364,7 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
 PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
 PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
+PLATFORM_DIST_NAME = @PLATFORM_DIST_NAME@
 PLATFORM_LIBS = @PLATFORM_LIBS@
 PRAGMA_COLUMNS = @PRAGMA_COLUMNS@
 PRAGMA_SYSTEM_HEADER = @PRAGMA_SYSTEM_HEADER@
@@ -4269,8 +4272,7 @@ distcleancheck: distclean
 check-am: all-am
 check: $(BUILT_SOURCES)
 	$(MAKE) $(AM_MAKEFLAGS) check-recursive
-@BUILD_DEBUG_TRUE@all-local:
-all-am: Makefile $(LIBRARIES) $(PROGRAMS) config.h all-local
+all-am: Makefile $(LIBRARIES) $(PROGRAMS) config.h
 installdirs: installdirs-recursive
 installdirs-am:
 	for dir in "$(DESTDIR)$(bindir)"; do \
@@ -4405,7 +4407,7 @@ uninstall-am: uninstall-binPROGRAMS
 .MAKE: $(am__recursive_targets) all check install install-am \
 	install-strip
 
-.PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am all-local \
+.PHONY: $(am__recursive_targets) CTAGS GTAGS TAGS all all-am \
 	am--refresh check check-am clean clean-binPROGRAMS \
 	clean-cscope clean-generic clean-local clean-noinstLIBRARIES \
 	cscope cscopelist-am ctags ctags-am dist dist-all dist-bzip2 \
@@ -4430,9 +4432,6 @@ uninstall-am: uninstall-binPROGRAMS
 XXD ?= xxd
 
 @USE_CHIPMUNK_TRUE@	MAYBE_USE_CHIPMUNK = $(CHIPMUNK_DIR)
-
-@BUILD_DEBUG_FALSE@all-local: hexpuzzle$(EXEEXT)
-@BUILD_DEBUG_FALSE@	$(STRIP) -R .comment hexpuzzle$(EXEEXT)
 
 @BUILD_WEB_TRUE@clean-local:
 @BUILD_WEB_TRUE@	rm -f hexpuzzle.js hexpuzzle.wasm
@@ -4471,6 +4470,16 @@ src/hexpuzzle-fsdir.$(OBJEXT): CFLAGS += -Wno-unused-variable -Wno-misleading-in
 
 external/raylib/external_raylib_libraylib_a-rglfw.$(OBJEXT): CFLAGS += $(GLFW_OSX) -Wno-missing-field-initializers
 external/raylib/external_raylib_libraylib_a-rtextures.$(OBJEXT): CFLAGS += -Wno-array-bounds
+
+bindist: hexpuzzle$(EXEEXT)
+	$(am__remove_distdir)
+	mkdir $(distdir)
+	cp hexpuzzle$(EXEEXT) $(distdir)/hexpuzzle$(EXEEXT)
+	pandoc -f gfm --embed-resources=true  --standalon -t html5 -o $(distdir)/README.html $(top_srcdir)/README.md || cp $(top_srcdir)/README.md $(distdir)/README.txt
+	$(STRIP) -R .comment $(distdir)/hexpuzzle$(EXEEXT)
+	zip $(BINDIST_ZIP_NAME) $(distdir)/*
+	$(am__remove_distdir)
+	@echo "Binary distfile ready: $(BINDIST_ZIP_NAME)"
 
 # We need the following in order to create <alloca.h> when the system
 # doesn't have one that works with the given compiler.

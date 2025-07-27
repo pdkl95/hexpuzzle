@@ -80,11 +80,6 @@ noinst_LIBRARIES = \
 
 bin_PROGRAMS = hexpuzzle
 
-if ! BUILD_DEBUG
-all-local: hexpuzzle$(EXEEXT)
-	$(STRIP) -R .comment hexpuzzle$(EXEEXT)
-endif
-
 COMMON_PROG_CFLAGS += \
 	-I$(top_srcdir)/src \
 	$(ALL_PKG_CFLAGS) \
@@ -411,6 +406,15 @@ EXTRA_DIST += \
 external/raylib/external_raylib_libraylib_a-rglfw.$(OBJEXT): CFLAGS += $(GLFW_OSX) -Wno-missing-field-initializers
 external/raylib/external_raylib_libraylib_a-rtextures.$(OBJEXT): CFLAGS += -Wno-array-bounds
 
+bindist: hexpuzzle$(EXEEXT)
+	$(am__remove_distdir)
+	mkdir $(distdir)
+	cp hexpuzzle$(EXEEXT) $(distdir)/hexpuzzle$(EXEEXT)
+	pandoc -f gfm --embed-resources=true  --standalon -t html5 -o $(distdir)/README.html $(top_srcdir)/README.md || cp $(top_srcdir)/README.md $(distdir)/README.txt
+	$(STRIP) -R .comment $(distdir)/hexpuzzle$(EXEEXT)
+	zip $(BINDIST_ZIP_NAME) $(distdir)/*
+	$(am__remove_distdir)
+	@echo "Binary distfile ready: $(BINDIST_ZIP_NAME)"
 
 #########################################################
 # gnulib

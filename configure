@@ -638,6 +638,9 @@ ALL_PKG_LIBS
 ALL_PKG_CFLAGS
 APP_LIBS
 APP_CFLAGS
+BINDIST_ZIP_NAME
+BINDIST_NAME
+PLATFORM_DIST_NAME
 PLATFORM_LIBS
 GLFW_OSX
 RAYLIB_LIBS
@@ -1710,6 +1713,8 @@ HAVE_DECL_FCLOSEALL
 GL_COND_LIBTOOL_FALSE
 GL_COND_LIBTOOL_TRUE
 LIBOBJS
+BUILD_LINUX_FALSE
+BUILD_LINUX_TRUE
 BUILD_OSX_FALSE
 BUILD_OSX_TRUE
 XXD
@@ -8035,6 +8040,9 @@ fi
 
 
 build_osx=no
+build_linux=no
+
+PLATFORM_DIST_NAME="unknown"
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking if host OS requires special handling" >&5
 $as_echo_n "checking if host OS requires special handling... " >&6; }
@@ -8043,10 +8051,19 @@ case "${host_os}" in
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes (OSX options enabled))" >&5
 $as_echo "yes (OSX options enabled))" >&6; }
         build_osx=yes
+        PLATFORM_DIST_NAME="osx"
         ;;
-    *)
+    *linux*)
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
+        build_linux=yes
+        PLATFORM_DIST_NAME="linux"
+        ;;
+    *)
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: unknown" >&5
+$as_echo "unknown" >&6; }
+        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: This is an unknown platform - the build (esp. linking to the locsl OpenGL libs might fail)" >&5
+$as_echo "$as_me: WARNING: This is an unknown platform - the build (esp. linking to the locsl OpenGL libs might fail)" >&2;}
         ;;
 esac
 
@@ -8058,8 +8075,17 @@ else
   BUILD_OSX_FALSE=
 fi
 
+ if test "x$build_linux" = "xyes"; then
+  BUILD_LINUX_TRUE=
+  BUILD_LINUX_FALSE='#'
+else
+  BUILD_LINUX_TRUE='#'
+  BUILD_LINUX_FALSE=
+fi
 
 
+BINDIST_NAME="hexpuzzle-0.9.0-${PLATFORM_DIST_NAME}-${host_cpu}"
+BINDIST_ZIP_NAME="${BINDIST_NAME}.zip"
 
 
 
@@ -23733,6 +23759,9 @@ fi
 
 
 
+
+
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: " >&5
 $as_echo "$as_me: " >&6;}
 { $as_echo "$as_me:${as_lineno-$LINENO}: ----------------------" >&5
@@ -23945,6 +23974,10 @@ fi
 
 if test -z "${BUILD_OSX_TRUE}" && test -z "${BUILD_OSX_FALSE}"; then
   as_fn_error $? "conditional \"BUILD_OSX\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_LINUX_TRUE}" && test -z "${BUILD_LINUX_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_LINUX\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${GL_COND_LIBTOOL_TRUE}" && test -z "${GL_COND_LIBTOOL_FALSE}"; then

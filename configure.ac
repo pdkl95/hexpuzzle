@@ -183,21 +183,33 @@ dnl ========================================
 AC_CANONICAL_HOST
 
 build_osx=no
+build_linux=no
+
+PLATFORM_DIST_NAME="unknown"
 
 AC_MSG_CHECKING([if host OS requires special handling])
 case "${host_os}" in
     darwin*)
         AC_MSG_RESULT([yes (OSX options enabled))])
         build_osx=yes
+        PLATFORM_DIST_NAME="osx"
+        ;;
+    *linux*)
+        AC_MSG_RESULT([no])
+        build_linux=yes
+        PLATFORM_DIST_NAME="linux"
         ;;
     *)
-        AC_MSG_RESULT([no])
+        AC_MSG_RESULT([unknown])
+        AC_MSG_WARN([This is an unknown platform - the build (esp. linking to the locsl OpenGL libs might fail)])
         ;;
 esac
 
 AM_CONDITIONAL([BUILD_OSX], [test "x$build_osx" = "xyes"])
+AM_CONDITIONAL([BUILD_LINUX], [test "x$build_linux" = "xyes"])
 
-
+BINDIST_NAME="project_name-project_version-${PLATFORM_DIST_NAME}-${host_cpu}"
+BINDIST_ZIP_NAME="${BINDIST_NAME}.zip"
 
 dnl ===============================================================
 dnl ===  Export the project configuration into config.h macros  ===
@@ -340,6 +352,9 @@ AS_IF([test "x$enable_web" = "xyes"], [
 
 AC_SUBST(GLFW_OSX)
 AC_SUBST(PLATFORM_LIBS)
+AC_SUBST(PLATFORM_DIST_NAME)
+AC_SUBST(BINDIST_NAME)
+AC_SUBST(BINDIST_ZIP_NAME)
 AC_SUBST(APP_CFLAGS)
 AC_SUBST(APP_LIBS)
 AC_SUBST(ALL_PKG_CFLAGS)
