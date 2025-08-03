@@ -1,3 +1,5 @@
+hexpuzzle-*.zip
+hexpuzzle-*-*-*/
 lib/gnulib/stddef.h
 lib/gnulib/stdio.h
 lib/gnulib/stdlib.h

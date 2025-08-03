@@ -3,6 +3,19 @@
 A simple hex-tile puzzle game based on an old
 [flash game](https://www.kongregate.com/games/Moonkey/hexiom-connect).
 
+## Screenshots
+#### Title Screen
+
+![Title Screen](misc/screenshots/title.png)
+
+#### A Partially Solved Puzzle
+
+![A Partially Solved Puzzle](misc/screenshots/solve_in_progress.png)
+
+#### The Random Level Generator
+
+![The Random Level Generator](misc/screenshots/random_generator.png)
+
 ## Installing
 
 ### Dependencies
@@ -17,14 +30,20 @@ Download the project with git:
 
     git clone https://github.com/pdkl95/hexpuzzle.git
 
-or download and unpack the [zip arhive](https://github.com/pdkl95/hexpuzzle/archive/refs/heads/main.zip) provided by GitHub.
+or download and unpack the
+[zip arhive](https://github.com/pdkl95/hexpuzzle/archive/refs/heads/main.zip)
+provided by GitHub.
+
+Afterwords, move into the source directory.
+
+    cd hexpuzzle
 
 ### Building
 
     ./configure
     make
 
-See `./configure --help` for a list a build and install options.
+See `./configure --help` for a list of build and install options.
 
 ### Installing (optional)
 

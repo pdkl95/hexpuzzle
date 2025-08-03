@@ -406,15 +406,110 @@ EXTRA_DIST += \
 external/raylib/external_raylib_libraylib_a-rglfw.$(OBJEXT): CFLAGS += $(GLFW_OSX) -Wno-missing-field-initializers
 external/raylib/external_raylib_libraylib_a-rtextures.$(OBJEXT): CFLAGS += -Wno-array-bounds
 
-bindist: hexpuzzle$(EXEEXT)
-	$(am__remove_distdir)
-	mkdir $(distdir)
-	cp hexpuzzle$(EXEEXT) $(distdir)/hexpuzzle$(EXEEXT)
-	pandoc -f gfm --embed-resources=true  --standalon -t html5 -o $(distdir)/README.html $(top_srcdir)/README.md || cp $(top_srcdir)/README.md $(distdir)/README.txt
-	$(STRIP) -R .comment $(distdir)/hexpuzzle$(EXEEXT)
-	zip $(BINDIST_ZIP_NAME) $(distdir)/*
-	$(am__remove_distdir)
-	@echo "Binary distfile ready: $(BINDIST_ZIP_NAME)"
+
+#########################################################
+# screenshot thumbnails
+
+SCREENSHOT_DIR = $(top_srcdir)/misc/screenshots
+THUMBNAIL_DIR = $(SCREENSHOT_DIR)/t
+
+SCREENSHOTS = \
+	$(SCREENSHOT_DIR)/title.png \
+	$(SCREENSHOT_DIR)/solve_in_progress.png \
+	$(SCREENSHOT_DIR)/random_generator.png
+
+THUMBNAILS = \
+	$(THUMBNAIL_DIR)/title.png \
+	$(THUMBNAIL_DIR)/solve_in_progress.png \
+	$(THUMBNAIL_DIR)/random_generator.png
+
+IMAGEMAGICK_CONVERT        ?= convert
+IMAGEMAGICK_THUMBNAIL_OPTS ?= -thumbnail 25%
+IMAGEMAGICK_THUMBNAIL      ?= $(IMAGEMAGICK_CONVERT) $(IMAGEMAGICK_THUMBNAIL_OPTS)
+
+remove_thumbnail_dir = \
+  if test -d "$(THUMBNAIL_DIR)" ; then \
+    rm -rf "$(THUMBNAIL_DIR)" \
+  else : ; fi
+
+clean-thumbnails:
+	$(remove_thumbnail_dir)
+
+thumbnails:
+	$(remove_thumbnail_dir)
+	mkdir -p "$(THUMBNAIL_DIR)"
+	@for image in $(SCREENSHOT_DIR)/*.png ; do \
+	    echo $(IMAGEMAGICK_THUMBNAIL) $$image $(THUMBNAIL_DIR)/$$(basename $$image) ; \
+	    $(IMAGEMAGICK_THUMBNAIL) $$image $(THUMBNAIL_DIR)/$$(basename $$image) ; \
+	done
+
+$(THUMBNAILS): thumbnails
+
+.PHONY: thumbnails clean-thumbnails
+
+#########################################################
+# binary distribution util
+
+bindistdir   = $(BINDIST_NAME)
+bindist_zip  = $(BINDIST_ZIP_NAME)
+bindist_prog = $(bindistdir)/hexpuzzle$(EXEEXT)
+bindist_doc  = $(bindistdir)/README.html
+
+bindist_files = \
+	$(bindist_prog) \
+	$(bindist_doc)
+
+PANDOC ?= pandoc
+
+PANDOC_BINDIST_OPTS = \
+	-f gfm \
+	--embed-resources=true \
+	--standalone \
+	--section-divs=true \
+	--table-of-contents=true \
+	--toc-depth=2 \
+	--shift-heading-level-by=-1 \
+	--resource-path=$(top_srcdir) \
+	--css $(top_srcdir)/misc/README.css \
+	-V pagetitle="HexPuzzle" \
+	-t html5
+
+remove_bindistdir = \
+  if test -d "$(bindistdir)" ; then \
+    find "$(bindistdir)" -type d ! -perm -200 -exec chmod u+w {} ';' \
+      && rm -rf "$(bindistdir)" \
+      || { sleep 5 && rm -rf "$(bindistdir)"; }; \
+  else : ; fi
+
+$(bindistdir):
+	$(remove_bindistdir)
+	mkdir -p $@
+
+$(bindist_prog): hexpuzzle$(EXEEXT) $(bindistdir)
+	cp $< $@
+	@$(STRIP) -R .comment $@ \
+	  && echo "Stripped ELF .comment header from $(bindist_prog)" \
+	  || echo "WARNING: failed to strip ELF .comment header from $(bindist_prog) (\"$() -R .comment $(bindist_prog)\" returned $?)"
+
+$(bindist_doc): $(top_srcdir)/README.md $(bindistdir)
+	$(PANDOC) $(PANDOC_BINDIST_OPTS) -o $@ $<
+
+$(bindist_zip): $(bindist_files)
+	zip -9 $@ $^
+
+bindist: $(bindist_zip)
+	$(remove_bindistdir)
+	@echo
+	@echo "*** Binary distfile ready: $(bindist_zip)"
+	@echo
+
+clean-bindistdir:
+	$(remove_bindistdir)
+
+distclean-local: clean-bindistdir
+maintainer-clean-local: clean-bindistdir
+
+.PHONY: bindist clean-bindistdir
 
 #########################################################
 # gnulib

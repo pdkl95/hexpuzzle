@@ -156,11 +156,21 @@ AH_TEMPLATE([WINDOW_RESIZE_ENABLED], [Defined to 1 if window resizing is enabled
 AS_IF([test "x$enable_window_resize" = "xyes"],[AC_DEFINE([WINDOW_RESIZE_ENABLED],[1])])
 
 
+AC_CANONICAL_HOST
+
 dnl ========================================
 dnl ===  Compiler/Language Dependencies  ===
 dnl ========================================
 
-AC_PROG_CC
+cclist="gcc cc clang"
+
+if test `uname -s` = "Darwin"; then
+    cclist="clang gcc cc"
+fi
+
+dnl AC_PROG_CC([gcc clang cc])
+AC_PROG_CC($cclist)
+
 AC_USE_SYSTEM_EXTENSIONS
 
 gl_EARLY
@@ -176,11 +186,10 @@ AC_PATH_PROG(XXD, xxd)
 
 AC_PATH_PROG(STRIP, strip, :)
 
+
 dnl ========================================
 dnl ===  OS Detection  ===
 dnl ========================================
-
-AC_CANONICAL_HOST
 
 build_osx=no
 build_linux=no
@@ -208,8 +217,6 @@ esac
 AM_CONDITIONAL([BUILD_OSX], [test "x$build_osx" = "xyes"])
 AM_CONDITIONAL([BUILD_LINUX], [test "x$build_linux" = "xyes"])
 
-BINDIST_NAME="project_name-project_version-${PLATFORM_DIST_NAME}-${host_cpu}"
-BINDIST_ZIP_NAME="${BINDIST_NAME}.zip"
 
 dnl ===============================================================
 dnl ===  Export the project configuration into config.h macros  ===
@@ -344,6 +351,9 @@ AS_IF([test "x$enable_system_raylib" = "xyes"], [
 dnl ================
 dnl ===  Output  ===
 dnl ================
+
+BINDIST_NAME="project_name-project_version-${PLATFORM_DIST_NAME}-${host_cpu}"
+BINDIST_ZIP_NAME="${BINDIST_NAME}.zip"
 
 AS_IF([test "x$enable_web" = "xyes"], [
     EXEEXT=".html"
