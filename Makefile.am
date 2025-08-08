@@ -450,14 +450,18 @@ $(THUMBNAILS): thumbnails
 #########################################################
 # binary distribution util
 
-bindistdir   = $(BINDIST_NAME)
-bindist_zip  = $(BINDIST_ZIP_NAME)
-bindist_prog = $(bindistdir)/hexpuzzle$(EXEEXT)
-bindist_doc  = $(bindistdir)/README.html
+bindistdir      = $(BINDIST_NAME)
+bindist_zip     = $(BINDIST_ZIP_NAME)
+bindist_prog    = $(bindistdir)/hexpuzzle$(EXEEXT)
+bindist_doc     = $(bindistdir)/README.html
+bindist_license = $(bindistdir)/LICENSE
 
 bindist_files = \
 	$(bindist_prog) \
-	$(bindist_doc)
+	$(bindist_doc) \
+	$(bindist_license)
+
+bindist_doc_css = $(top_srcdir)/misc/README.css
 
 PANDOC ?= pandoc
 
@@ -470,7 +474,7 @@ PANDOC_BINDIST_OPTS = \
 	--toc-depth=2 \
 	--shift-heading-level-by=-1 \
 	--resource-path=$(top_srcdir) \
-	--css $(top_srcdir)/misc/README.css \
+	--css $(bindist_doc_css) \
 	-V pagetitle="HexPuzzle" \
 	-t html5
 
@@ -491,8 +495,11 @@ $(bindist_prog): hexpuzzle$(EXEEXT) $(bindistdir)
 	  && echo "Stripped ELF .comment header from $(bindist_prog)" \
 	  || echo "WARNING: failed to strip ELF .comment header from $(bindist_prog) (\"$() -R .comment $(bindist_prog)\" returned $?)"
 
-$(bindist_doc): $(top_srcdir)/README.md $(bindistdir)
+$(bindist_doc): $(top_srcdir)/README.md $(bindist_doc_css) $(SCREENSHOTS) $(bindistdir)
 	$(PANDOC) $(PANDOC_BINDIST_OPTS) -o $@ $<
+
+$(bindist_license): LICENSE
+	cp $< $@
 
 $(bindist_zip): $(bindist_files)
 	zip -9 $@ $^
@@ -506,10 +513,15 @@ bindist: $(bindist_zip)
 clean-bindistdir:
 	$(remove_bindistdir)
 
-distclean-local: clean-bindistdir
-maintainer-clean-local: clean-bindistdir
+clean-bindist-zip:
+	rm -f $(bindist_zip)
 
-.PHONY: bindist clean-bindistdir
+clean-bindist: clean-bindist-zip clean-bindistdir
+
+distclean-local: clean-bindistdir
+maintainer-clean-local: clean-bindist
+
+.PHONY: bindist clean-bindistdir clean-bindist-zip clean-bindist
 
 #########################################################
 # gnulib

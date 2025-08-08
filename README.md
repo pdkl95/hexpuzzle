@@ -1,7 +1,10 @@
 # HexPuzzle
 
-A simple hex-tile puzzle game based on an old
-[flash game](https://www.kongregate.com/games/Moonkey/hexiom-connect).
+A simple hex-tile puzzle game based on an old [flash game][fg].
+
+[fg]: https://www.kongregate.com/games/Moonkey/hexiom-connect
+
+* GitHub: <https://github.com/pdkl95/hexpuzzle>
 
 ## Screenshots
 #### Title Screen
@@ -26,13 +29,19 @@ A simple hex-tile puzzle game based on an old
 
 ### Downloading the source
 
+The [source code][source] and [pre-built Linux builds][release]
+are available on github.
+
+[source]:  https://github.com/pdkl95/hexpuzzle
+[release]: https://github.com/pdkl95/hexpuzzle/releases
+
 Download the project with git:
 
     git clone https://github.com/pdkl95/hexpuzzle.git
 
-or download and unpack the
-[zip arhive](https://github.com/pdkl95/hexpuzzle/archive/refs/heads/main.zip)
-provided by GitHub.
+or download and unpack the [zip arhive][ziparch] provided by GitHub.
+
+[ziparch]: https://github.com/pdkl95/hexpuzzle/archive/refs/heads/main.zip
 
 Afterwords, move into the source directory.
 
