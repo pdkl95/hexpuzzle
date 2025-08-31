@@ -19,7 +19,7 @@ A simple hex-tile puzzle game based on an old [flash game][fg].
 
 ![The Random Level Generator](misc/screenshots/random_generator.png)
 
-## Installing
+## Building & Installing
 
 ### Dependencies
 
@@ -166,5 +166,5 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
-You should have received a copy of the GNU General Public License
+You should have received a [copy](LICENSE) of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
