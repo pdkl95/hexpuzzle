@@ -10,8 +10,8 @@ m4_define([project_licence_desc], [GNU GPL version 3 or later <http://gnu.org/li
 
 
 dnl Release Version
-m4_define([project_major_version], [0])
-m4_define([project_minor_version], [9])
+m4_define([project_major_version], [1])
+m4_define([project_minor_version], [0])
 m4_define([project_micro_version], [0])
 m4_define([project_version], project_major_version.project_minor_version.project_micro_version)
 
