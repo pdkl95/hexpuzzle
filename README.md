@@ -19,6 +19,29 @@ A simple hex-tile puzzle game based on an old [flash game][fg].
 
 ![The Random Level Generator](misc/screenshots/random_generator.png)
 
+## Features
+
+* All of the "classic" levels from the [original game][fg]
+
+* A customizqbllle random level generator
+
+* Random level blueprint strings can be copied to/from the clipboard
+
+* Local finished level history
+
+* Several silly effects/animations that play upon wining a level (run
+with `--demo-win` to preview)
+
+* A level editor (run with `-E`/`--allow-edit-mode`)
+
+* Most features can be disabled
+
+### TODO
+
+* New non-random levels
+
+* The source needs a Lot of refactoring
+
 ## Building & Installing
 
 ### Dependencies
