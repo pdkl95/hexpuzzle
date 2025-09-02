@@ -1,3 +1,4 @@
+releases/
 hexpuzzle-*.zip
 hexpuzzle-*-*-*/
 lib/gnulib/stddef.h
