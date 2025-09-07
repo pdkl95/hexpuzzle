@@ -12,7 +12,7 @@ m4_define([project_licence_desc], [GNU GPL version 3 or later <http://gnu.org/li
 dnl Release Version
 m4_define([project_major_version], [1])
 m4_define([project_minor_version], [0])
-m4_define([project_micro_version], [0])
+m4_define([project_micro_version], [1])
 m4_define([project_version], project_major_version.project_minor_version.project_micro_version)
 
 AC_PREREQ([2.64])
@@ -34,7 +34,7 @@ AC_CONFIG_MACRO_DIRS([m4 m4/gnulib])
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_HEADERS([config.h])
 
-AM_INIT_AUTOMAKE([1.13 foreign color-tests dist-xz subdir-objects -Wall -Werror])
+AM_INIT_AUTOMAKE([1.13 foreign color-tests subdir-objects -Wall -Werror])
 AM_MAINTAINER_MODE([disable])
 
 dnl =======================

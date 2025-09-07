@@ -651,9 +651,9 @@ am__relativize = \
     dir1=`echo "$$dir1" | sed -e "$$sed_rest"`; \
   done; \
   reldir="$$dir2"
-DIST_ARCHIVES = $(distdir).tar.gz $(distdir).tar.xz
+DIST_ARCHIVES = $(distdir).tar.gz
 GZIP_ENV = --best
-DIST_TARGETS = dist-xz dist-gzip
+DIST_TARGETS = dist-gzip
 distuninstallcheck_listfiles = find . -type f -print
 am__distuninstallcheck_listfiles = $(distuninstallcheck_listfiles) \
   | sed 's|^\./|$(prefix)/|' | grep -v '$(infodir)/dir$$'
@@ -1993,6 +1993,14 @@ remove_bindistdir = \
       && rm -rf "$(bindistdir)" \
       || { sleep 5 && rm -rf "$(bindistdir)"; }; \
   else : ; fi
+
+
+#########################################################
+# release distribution util
+releasesdir = releases
+release_archives = \
+	$(DIST_ARCHIVES) \
+	$(bindist_zip)
 
 MOSTLYCLEANFILES = lib/gnulib/core lib/gnulib/*.stackdump \
 	$(am__append_10) $(am__append_12) $(am__append_17) \
@@ -4211,6 +4219,7 @@ dist-bzip2: distdir
 dist-lzip: distdir
 	tardir=$(distdir) && $(am__tar) | lzip -c $${LZIP_OPT--9} >$(distdir).tar.lz
 	$(am__post_remove_distdir)
+
 dist-xz: distdir
 	tardir=$(distdir) && $(am__tar) | XZ_OPT=$${XZ_OPT--e} xz -c >$(distdir).tar.xz
 	$(am__post_remove_distdir)
@@ -4583,6 +4592,24 @@ distclean-local: clean-bindistdir
 maintainer-clean-local: clean-bindist
 
 .PHONY: bindist clean-bindistdir clean-bindist-zip clean-bindist
+
+$(releasesdir):
+	@if ! [[ -d $(releasesdir) ]] ; then \
+	    echo mkdir -p $(releasesdir) ; \
+	    mkdir -p $(releasesdir) ; \
+	fi
+
+$(DIST_ARCHIVES): $(DIST_TARGETS)
+
+release: $(releasesdir) $(release_archives)
+	@for file in $(release_archives) ; do \
+	    echo mv "$${file}" $(releasesdir) ; \
+	    mv "$${file}" $(releasesdir) ; \
+	done
+	@echo "*** Archives ready for release:"
+	@for file in $(release_archives) ; do \
+	    echo "    $(releasesdir)/$${file}" ; \
+	done
 
 # We need the following in order to create <alloca.h> when the system
 # doesn't have one that works with the given compiler.

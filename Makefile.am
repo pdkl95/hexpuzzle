@@ -523,6 +523,35 @@ maintainer-clean-local: clean-bindist
 
 .PHONY: bindist clean-bindistdir clean-bindist-zip clean-bindist
 
+
+#########################################################
+# release distribution util
+
+releasesdir = releases
+
+release_archives = \
+	$(DIST_ARCHIVES) \
+	$(bindist_zip)
+
+$(releasesdir):
+	@if ! [[ -d $(releasesdir) ]] ; then \
+	    echo mkdir -p $(releasesdir) ; \
+	    mkdir -p $(releasesdir) ; \
+	fi
+
+$(DIST_ARCHIVES): $(DIST_TARGETS)
+
+release: $(releasesdir) $(release_archives)
+	@for file in $(release_archives) ; do \
+	    echo mv "$${file}" $(releasesdir) ; \
+	    mv "$${file}" $(releasesdir) ; \
+	done
+	@echo "*** Archives ready for release:"
+	@for file in $(release_archives) ; do \
+	    echo "    $(releasesdir)/$${file}" ; \
+	done
+
+
 #########################################################
 # gnulib
 
