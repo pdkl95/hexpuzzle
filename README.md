@@ -222,7 +222,7 @@ sglib
 
 stb
 :   <https://github.com/nothings/stb>\
-    [MIT License / Public Domain](external/stb/LICENCE)
+    [MIT License / Public Domain](external/stb/LICENSE)
 
 
 ### Other Included Resources
