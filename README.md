@@ -7,6 +7,7 @@ A simple hex-tile puzzle game based on an old [flash game][fg].
 * GitHub: <https://github.com/pdkl95/hexpuzzle>
 
 ## Screenshots
+
 #### Title Screen
 
 ![Title Screen](misc/screenshots/title.png)
@@ -23,14 +24,13 @@ A simple hex-tile puzzle game based on an old [flash game][fg].
 
 * All of the "classic" levels from the [original game][fg]
 
-* A customizqbllle random level generator
+* A customizable random level generator
 
 * Random level blueprint strings can be copied to/from the clipboard
 
 * Local finished level history
 
-* Several silly effects/animations that play upon wining a level (run
-with `--demo-win` to preview)
+* Several silly effects/animations that play upon wining a level (run with `--demo-win` to preview)
 
 * A level editor (run with `-E`/`--allow-edit-mode`)
 
@@ -39,6 +39,8 @@ with `--demo-win` to preview)
 ### TODO
 
 * New non-random levels
+
+* More random level generator algorithms?
 
 * The source needs a Lot of refactoring
 
@@ -179,15 +181,60 @@ ACTION OPTIONS
 
 ## License
 
-This program is free software: you can redistribute it and/or modify
+HexPuzzle is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
 the Free Software Foundation, either version 3 of the License, or
 (at your option) any later version.
 
-This program is distributed in the hope that it will be useful,
+HexPuzzle is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
 You should have received a [copy](LICENSE) of the GNU General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+along with HexPuzzle.  If not, see <https://www.gnu.org/licenses/>.
+
+### Included Software Libraries
+
+cJSON
+:   <https://github.com/DaveGamble/cJSON>\
+    [MIT License](external/cJSON/LICENSE)
+
+Chipmunk2D
+:   <https://github.com/slembcke/Chipmunk2D>\
+    [MIT License](external/chipmunk/LICENSE.txt)
+
+PCG Random Number Generation
+:   <https://www.pcg-random.org/>\
+    [Apache License](external/pcg/LICENSE.txt)
+
+raygui
+:   <https://github.com/raysan5/raygui>\
+    [zlib License](external/raygui/LICENSE)
+
+raylib
+:   <https://github.com/raysan5/raylib>\
+    [zlib License](external/raylib/LICENSE)
+
+sglib
+:   <https://sglib.sourceforge.net/doc/index.html>\
+    [MIT License](external/sglib/LICENSE)
+
+stb
+:   <https://github.com/nothings/stb>\
+    [MIT License / Public Domain](external/stb/LICENCE)
+
+
+### Other Included Resources
+
+`cabin_condensed_bold.ttf`
+:   <https://github.com/impallari/Cabin>\
+    [SIL OPEN FONT LICENSE Version 1.1](fonts/cabin_condensed/OFL.txt)
+
+`jockeyone_regular.ttf`
+:   <https://www.type-together.com/jockey-font>\
+    [SIL OPEN FONT LICENSE Version 1.1](fonts/jockeyone/OFL.txt)
+
+`ubuntu_medium.ttf`
+:   <https://design.ubuntu.com/font>\
+    [UBUNTU FONT LICENCE Version 1.0](fonts/ubuntu/LICENCE.txt)

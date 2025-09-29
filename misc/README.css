@@ -93,7 +93,7 @@ p, pre, table {
   margin: 0 2rem 1rem;
 }
 
-ol, ul {
+ol, ul, dl {
   list-style-position: inside;
   margin-left: 0;
   padding-left: 2rem;
@@ -103,10 +103,57 @@ li {
   padding-left: 0;
 }
 
+li + li {
+  margin-top: 1rem;
+}
+
 li > p {
-  display: inline;
-  margin: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-right: 0;
+  margin-left: 2rem;
   padding: 0;
+}
+
+li > p:first-child {
+  display: inline-block;
+  margin-left: 0;
+  margin-bottom: 0.1rem;
+  border-bottom: 1px #777 dashed;
+  padding-bottom: 2px
+}
+
+dd + dt {
+  margin-top: 1rem;
+}
+
+dt {
+  margin-left: 1rem;
+  font-weight: bold;
+}
+
+dt::before {
+  content: "";
+  border-color: transparent #111;
+  border-style: solid;
+  border-width: 0.35em 0 0.35em 0.45em;
+  display: block;
+  height: 0;
+  width: 0;
+  left: -1em;
+  top: 0.9em;
+  position: relative;
+}
+
+dd {
+  margin-top: 0.4rem;
+  margin-left: 1rem;
+  box-shadow: 1px 1px 4px -3px rgba(0,0,0,0.4) inset;
+  border: 1px inset rgba(180,180,180,0.5);
+  border-radius: 8px;
+  padding: 0.5em 0.7em;
+  background: #eee;
+  width: fit-content;
 }
 
 a {
@@ -144,6 +191,10 @@ p {
   margin: 0;
 }
 
+#TOC li {
+  margin-top: 0.2rem;
+}
+
 #TOC li > ul {
   margin-left: 1em;
 }
@@ -155,4 +206,20 @@ p {
 .level2 > h2 {
   width: fit-content;
   border-bottom-width: 2px;
+}
+
+section p {
+  max-width: 650px;
+}
+
+#screenshots h3 {
+  background: #e0e0e0;
+  padding: 2px 6px;
+  width: fit-content;
+  margin-left: 3rem;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+  border-left:  1px outset #dedede;
+  border-top:   1px outset #dedede;
+  border-right: 1px outset #dedede;
 }

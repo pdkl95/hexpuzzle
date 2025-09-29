@@ -463,6 +463,8 @@ bindist_files = \
 
 bindist_doc_css = $(top_srcdir)/misc/README.css
 
+bindist_license_file_prefix = https://raw.githubusercontent.com/pdkl95/hexpuzzle/main
+
 PANDOC ?= pandoc
 
 PANDOC_BINDIST_OPTS = \
@@ -497,6 +499,8 @@ $(bindist_prog): hexpuzzle$(EXEEXT) $(bindistdir)
 
 $(bindist_doc): $(top_srcdir)/README.md $(bindist_doc_css) $(SCREENSHOTS) $(bindistdir)
 	$(PANDOC) $(PANDOC_BINDIST_OPTS) -o $@ $<
+	sed -i -e 's|href="external/|href="$(bindist_license_file_prefix)/external/|' $@
+	sed -i -e 's|href="fonts/|href="$(bindist_license_file_prefix)/fonts/|' $@
 
 $(bindist_license): LICENSE
 	cp $< $@
