@@ -311,7 +311,7 @@ options_set_float(
     }
     if (errno) {
         errmsg("while parsing \"%s\" as a float: %s", str, strerror(errno));
-        DIE("cannot parse numewric option");
+        DIE("cannot parse numeric option");
     }
 
     while (isspace((unsigned char)*endptr)) {
@@ -320,7 +320,7 @@ options_set_float(
 
     if (*endptr != '\0') {
         errmsg("invalid numher formst: \"%s\"", str);
-        DIE("cannot parse numewric option");
+        DIE("cannot parse numeric option");
     }
 }
 
@@ -359,7 +359,7 @@ options_set_long(
           ( errno != 0 && *opt == 0)
     ) {
         perror("strtol");
-        DIE("cannot parse numewric option");
+        DIE("cannot parse numeric option");
     }
 
     if (endptr == src) {
@@ -404,7 +404,7 @@ options_set_int(
           ( errno != 0 && value == 0)
     ) {
         perror("strtol");
-        DIE("cannot parse numewric option");
+        DIE("cannot parse numeric option");
     }
 
     if (endptr == src) {
