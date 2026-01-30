@@ -442,11 +442,14 @@ void tile_draw_corner_connections(tile_pos_t *pos, win_anim_mode_t win_mode)
     }
 
     float fade = 1.0;
+#if 0
+    //broken?!
     if (current_level) {
         if (current_level->win_anim) {
             fade = current_level->win_anim->fade[2] * current_level->fade.value_eased_in;
         }
     }
+#endif
 
 #ifdef USE_PHYSICS
     physics_tile_t *pt = pos->tile->physics_tile;
@@ -658,7 +661,7 @@ void tile_draw_corner_connections(tile_pos_t *pos, win_anim_mode_t win_mode)
             case WIN_ANIM_MODE_PHYSICS_FALL:
                 fallthrough;
             case WIN_ANIM_MODE_PHYSICS_SWIRL:
-                thickness *= 1.25;
+                thickness *= 1.5;
                 fallthrough;
 #endif
             default:

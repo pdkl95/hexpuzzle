@@ -54,6 +54,7 @@ static void level_set_fade_transition(level_t *level, tile_pos_t *pos)
 
 static void level_set_transition(level_t *level, tile_pos_t *pos, bool do_fade, float fade_ammount)
 {
+    fade_ammount = 1.0;
     Vector2 extra_tvec = Vector2Scale(pos->extra_translate, ease_quad_out(fade_ammount));
     Vector2 tvec = Vector2Add(pos->win.center, Vector2Add(extra_tvec, pos->pop_translate));
 
@@ -100,6 +101,7 @@ static void level_draw_corner_connections(level_t *level, win_anim_mode_t win_mo
     }
     EndShaderMode();
 }
+extern float bloom_amount;
 
 void level_draw(level_t *level, bool finished)
 {

@@ -69,7 +69,7 @@ void init_physics(physics_t *physics, struct level *level)
 
     for (int i=0; i<4; i++) {
         cpShapeSetFriction(physics->wall[i], 1.0);
-        cpShapeSetElasticity(physics->wall[i], 0.75);
+        cpShapeSetElasticity(physics->wall[i], 0.0);
         cpSpaceAddShape(physics->space, physics->wall[i]);
     }
 

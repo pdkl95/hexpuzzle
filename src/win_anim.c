@@ -34,6 +34,8 @@ extern bool do_postprocessing;
 extern float bloom_amount;
 extern float warp_amount;
 
+float smooth_change(float current, float target, float step);
+
 const char *win_anim_state_str(win_anim_state_t state);
 
 static void win_anim_set_state(win_anim_t *win_anim, win_anim_state_t new_state)
@@ -598,6 +600,9 @@ void win_anim_update(win_anim_t *win_anim)
                        &(win_anim->fade[0]),
                        SHADER_UNIFORM_VEC4);
     }
+
+    bloom_amount = fminf(win_anim->run_time, 1.0f);
+    warp_amount = smooth_change(warp_amount, 0.0f, 0.01);
 
     switch (win_anim->mode) {
     case WIN_ANIM_MODE_NULL:
