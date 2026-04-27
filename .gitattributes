@@ -1,0 +1,15 @@
+Makefile.in linguist-generated
+aclocal.m4 linguist-generated
+config.h.in linguist-generated
+configure linguist-generated
+external/chipmunk/Makefile.in linguist-generated
+
+build-aux/** linguist-vendored
+external/** linguist-vendored
+fonts/** linguist-vendored
+lib/** linguist-vendored
+m4/** linguist-vendored
+src/ansi_colors.h linguist-vendored
+
+misc/README.css linguist-documentation
+
