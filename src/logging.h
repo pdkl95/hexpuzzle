@@ -25,6 +25,8 @@
 #define VMSG_IO_STREAM stdout
 #define VINFOMSG_IO_STREAM VMSG_IO_STREAM
 
+void use_color_logs(void);
+
 int infoprintf(const char *fmt, ...);
 
 void fvmsg_prefix(FILE *fh, const char *prefix);
@@ -133,5 +135,17 @@ int errmsg_with_location(
         errmsg(__VA_ARGS__);   \
         hcf();                 \
     } while(0)
+
+extern int raylib_log_level;
+void raylib_trace_log_cb(int logLevel, const char *text, va_list args);
+
+#ifdef DEBUG_BUILD
+void use_gl_debug_callback(void);
+void ignore_gl_debug_message(GLuint id);
+
+extern bool break_on_gl_error;
+#endif
+
+void log_show_version(void);
 
 #endif /*LOGGING_H*/

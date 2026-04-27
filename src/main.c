@@ -88,7 +88,6 @@ int debug_dir = 0;
 #endif
 
 bool running = true;
-int raylib_log_level = LOG_WARNING;
 bool demo_mode = false;
 int automatic_event_polling_semaphore = 0;
 bool mouse_input_accepted = true;
@@ -3030,39 +3029,6 @@ main_event_loop(
 }
 #endif
 
-static const char *raylih_log_type_string(int logLevel)
-{
-    switch (logLevel) {
-    case LOG_TRACE:   return "TRACE";
-    case LOG_DEBUG:   return "DEBUG";
-    case LOG_INFO:    return "INFO";
-    case LOG_WARNING: return "WARNING";
-    case LOG_ERROR:   return "ERROR";
-    case LOG_FATAL:   return "FATAL";
-    default:
-        __builtin_unreachable();
-        return "(NULL)";
-    }
-}
-
-void raylib_trace_log_cb(int logLevel, const char *text, va_list args)
-{
-    if (logLevel < raylib_log_level) {
-        return;
-    }
-
-    const char *type = raylih_log_type_string(logLevel);
-
-    printf("raylib: %s: ", type);
-    vprintf(text, args);
-    putchar('\n');
-    fflush(stdout);
-
-    if (logLevel == LOG_FATAL) {
-        exit(EXIT_FAILURE);
-    }
-}
-
 void gfx_init(void)
 {
     if (options->verbose_raylib) {
@@ -3263,6 +3229,41 @@ static void game_cleanup(void)
 }
 #endif
 
+bool should_use_color_logs(void)
+{
+    if (options->check_color_env_vars) {
+        char *force_color = getenv("FORCE_COLOR");
+
+        if (force_color != NULL && force_color[0] != '\0') {
+            return true;
+        }
+
+        char *no_color = getenv("NO_COLOR");
+
+        if (no_color != NULL && no_color[0] != '\0') {
+            return false;
+        }
+
+        char *clicolor_force = getenv("CLICOLOR_FORCE");
+
+        if (clicolor_force != NULL && clicolor_force[0] != '\0') {
+            return true;
+        }
+
+        char *clicolor = getenv("CLICOLOR");
+
+        if (clicolor != NULL && clicolor[0] != '\0') {
+            if (clicolor[0] == '0') {
+                return false;
+            } else {
+                return true;
+            }
+        }
+    }
+
+    return options->color_log;
+}
+
 int
 main(
     int   argc,
@@ -3309,8 +3310,12 @@ main(
         return EXIT_FAILURE;
     }
 
+    if (should_use_color_logs()) {
+        use_color_logs();
+    }
+
     if (options->verbose) {
-        show_version(PACKAGE_NAME ": ");
+        log_show_version();
         infomsg("");
     }
 

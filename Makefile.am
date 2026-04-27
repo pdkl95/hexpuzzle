@@ -132,6 +132,7 @@ hexpuzzle_LDADD += \
 endif
 
 hexpuzzle_SOURCES =                                           \
+	src/ansi_colors.h                                     \
 	src/background.h           src/background.c           \
 	src/blueprint_string.h     src/blueprint_string.c     \
 	src/classics.h             src/classics.c             \

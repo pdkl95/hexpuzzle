@@ -91,6 +91,8 @@ static struct option long_options[] = {
     {                        "demo",       no_argument, 0, 'j' },
     {                    "demo-win",       no_argument, 0, 'J' },
     {                 "wait-events",       no_argument, 0, 'w' },
+    {                   "color-log",       no_argument, 0, '>' },
+    {                "no-color-log",       no_argument, 0, '<' },
     {                     "verbose",       no_argument, 0, 'v' },
     {                     "version",       no_argument, 0, 'V' },
     {                        "help",       no_argument, 0, 'h' },
@@ -114,6 +116,9 @@ static char help_text[] =
     "  -C, --no-config             Skip loading of all config files (\"Safe Mode\")\n"
     "\n"
     "  -E, --allow-edit-mode       Enable the edit button when browsing local files\n"
+    "\n"
+    "      --color-log             Enable ANSI color in the log output (default: on)\n"
+    "   --no-color-log             Disable ANSI color in the log output\n"
     "\n"
     "  -v, --verbose               More logging output (including raylib)\n"
     "                                Use -v/--verbose twice to also enable\n"
@@ -439,6 +444,9 @@ options_set_defaults(
     options->verbose                      = OPTIONS_DEFAULT_VERBOSE;
     options->verbose_raylib               = OPTIONS_DEFAULT_VERBOSE_RAYLIB;
     options->wait_events                  = OPTIONS_DEFAULT_WAIT_EVENTS;
+
+    options->color_log                    = OPTIONS_DEFAULT_COLOR_LOG;
+    options->check_color_env_vars = true;
 
     options->allow_edit_mode              = OPTIONZ_DEFAULT_ALLOW_EDIT_MODE;
 
@@ -838,6 +846,16 @@ options_parse_args(
 
         case 'w':
             options->wait_events = true;
+            break;
+
+        case '>':
+            options->color_log = true;
+            options->check_color_env_vars = false;
+            break;
+
+        case '<':
+            options->color_log = false;
+            options->check_color_env_vars = false;
             break;
 
         case 'v':
