@@ -28,6 +28,8 @@
 
 #include "sglib/sglib.h"
 
+#define POPUP_MSG_EXTRA_LINE_SPACING 8
+
 #define compare_popup_msg(a, b) (((a)->id) - ((b)->id))
 
 SGLIB_DEFINE_DL_LIST_PROTOTYPES(popup_msg, compare_popup_msg, prev, next);
@@ -95,7 +97,9 @@ popup_msg *create_popup_msg(char *message)
     float state_progress;
 
 
+    SetTextLineSpacing(15 + POPUP_MSG_EXTRA_LINE_SPACING);
     msg->message_size = measure_panel_text(msg->message);
+    SetTextLineSpacing(15);
 
     popup_msg *last = sglib_popup_msg_get_last(message_queue);
     sglib_popup_msg_add_after(&last, msg);
@@ -228,6 +232,14 @@ static inline void draw_current_popup_message(void)
         current_message->message_size.y
         + (2 * PANEL_INNER_MARGIN);
 
+    char *p = &(current_message->message[0]);
+    while (*p) {
+        if (*p == '\n') {
+            bounds.height += POPUP_MSG_EXTRA_LINE_SPACING + 2;
+        }
+        p++;
+    }
+
     bounds.x = window_sizef.x - margin - bounds.width;
     bounds.y = window_sizef.y - margin - bounds.height + mode_yoffset;
 
@@ -241,7 +253,9 @@ static inline void draw_current_popup_message(void)
     DrawRectangleRounded(bounds, PANEL_ROUNDNES, 0, Fade(BLACK, current_message->fade));
     DrawRectangleRoundedLines(bounds, PANEL_ROUNDNES, 0, border_thickness, Fade(panel_edge_color, current_message->fade));
 
+    SetTextLineSpacing(15 + POPUP_MSG_EXTRA_LINE_SPACING);
     draw_panel_text(current_message->message, text_pos, Fade(WHITE, current_message->fade));
+    SetTextLineSpacing(15);
 }
 
 static inline void show_next_popup_message(void)
@@ -330,7 +344,9 @@ int vpopup_error_message(const char *fmt, va_list ap)
 
     int rv = safe_vasprintf(&message, fmt, ap);
 
-    errmsg("%s", message);
+    const char *nonl_message = string_replace_newlines(message, ' ');
+
+    errmsg("%s", nonl_message);
     safe_asprintf(&error_message, "ERROR: %s", message);
     FREE(message);
 

@@ -66,6 +66,26 @@ int mkdir_p(const char *dir, mode_t mode)
 }
 #endif
 
+const char *string_replace_char(const char *str, char from, char to)
+{
+    assert(strlen(str) < PATH_MAX);
+
+    static char buf[PATH_MAX];
+    snprintf(buf, PATH_MAX, "%s", str);
+
+    char *p = &(buf[0]);
+
+    while (*p) {
+        if (*p == from) {
+            *p = to;
+        }
+
+        p++;
+    }
+
+    return buf;
+}
+
 const char *directory_without_end_separator(const char *path)
 {
     static char buf[PATH_MAX];

@@ -897,7 +897,7 @@ void gui_browser_rename_string_finished_cb(struct gui_dialog *dialog, void *data
     }
 
     if (FileExists(newname)) {
-        popup_error_message("Cannot rename %s to %s: would clobber existing file",
+        popup_error_message("Cannot rename %s to %s:\nwould clobber existing file",
                             entry->name, dialog->string);
         goto rename_string_finished_cleanup;
     }
@@ -945,6 +945,28 @@ void gui_browser_rename(gui_list_fspath_entry_t *entry)
         /* do nothing */
         break;
     }
+}
+
+void gui_browser_chdir_string_finished_cb(struct gui_dialog *dialog, UNUSED void *data)
+{
+    if (!dialog->status) {
+        return;
+    }
+
+    if (DirectoryExists(dialog->string)) {
+        change_gui_browser_path(dialog->string);
+    } else {
+        popup_error_message("Cannot open directory:\n\"%s\"", dialog->string);
+    }
+}
+
+void gui_browser_chdir(void)
+{
+    gui_dialog_ask_for_string("Browse Directory",
+                              NULL,
+                              browse_path,
+                              gui_browser_chdir_string_finished_cb,
+                              NULL);
 }
 
 void setup_browse_history(void)
@@ -1614,6 +1636,28 @@ static void draw_gui_browser_entry_buttons(gui_list_vars_t *list, gui_list_entry
     }
 }
 
+static inline void draw_gui_browser_local_level_files_dir(void)
+{
+    bool hover = CheckCollisionPointRec(mouse_positionf, local_files_dir_rect);
+
+    GuiLabel(local_files_dir_label_rect, local_files_dir_label_text);
+
+    GuiState prev_state = GuiGetState();
+
+    if (hover) {
+        if (mouse_left_click) {
+            gui_browser_chdir();
+            GuiSetState(STATE_PRESSED);
+        } else {
+            GuiSetState(STATE_FOCUSED);
+        }
+    }
+
+    GuiStatusBar(local_files_dir_rect, browse_path);
+
+    GuiSetState(prev_state);
+}
+
 void draw_gui_browser_local_level_file(void)
 {
     if (defer_setup_browse_dir) {
@@ -1621,8 +1665,7 @@ void draw_gui_browser_local_level_file(void)
         setup_browse_dir();
     }
 
-    GuiLabel(local_files_dir_label_rect, local_files_dir_label_text);
-    GuiStatusBar(local_files_dir_rect, browse_path);
+    draw_gui_browser_local_level_files_dir();
 
     if (GuiButton(local_files_refresh_button_rect, local_files_refresh_button_text)) {
         setup_browse_dir();

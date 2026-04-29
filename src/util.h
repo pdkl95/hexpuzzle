@@ -52,6 +52,12 @@ static inline bool is_dir_separator(char c)
 #endif
 }
 
+const char *string_replace_char(const char *str, char from, char to);
+static inline const char *string_replace_newlines(const char *str, char to)
+{
+    return string_replace_char(str, '\n', to);
+}
+
 const char *directory_without_end_separator(const char *path);
 const char *concat_dir_and_filename(const char *dir, const char *filename);
 const char *concat_dir_and_filename_and_ext(const char *dir, const char *filename, const char *ext);
