@@ -2490,7 +2490,7 @@ Optional Features:
                           emconfigure!)
   --disable-chipmunk      Disable the Chipmunk physics engine
   --enable-system-raylib  Use a locally installed version of raylib instead of
-                          the version iincluded with hexpuzzle
+                          the version included with hexpuzzle
   --enable-window-resize  Enables resizing of the main window (BUGGY)
   --enable-dependency-tracking
                           do not reject slow dependency extractors
@@ -7783,8 +7783,8 @@ $as_echo "no" >&6; }
     *)
         { $as_echo "$as_me:${as_lineno-$LINENO}: result: unknown" >&5
 $as_echo "unknown" >&6; }
-        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: This is an unknown platform - the build (esp. linking to the locsl OpenGL libs might fail)" >&5
-$as_echo "$as_me: WARNING: This is an unknown platform - the build (esp. linking to the locsl OpenGL libs might fail)" >&2;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: This is an unknown platform - the build (esp. linking to the locsl OpenGL libs) might fail" >&5
+$as_echo "$as_me: WARNING: This is an unknown platform - the build (esp. linking to the locsl OpenGL libs) might fail" >&2;}
         ;;
 esac
 
@@ -23369,12 +23369,12 @@ if test -n "$RAYLIB_CFLAGS"; then
     pkg_cv_RAYLIB_CFLAGS="$RAYLIB_CFLAGS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"raylib >=  5.0.0\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "raylib >=  5.0.0") 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"raylib = 5.0.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "raylib = 5.0.0") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_RAYLIB_CFLAGS=`$PKG_CONFIG --cflags "raylib >=  5.0.0" 2>/dev/null`
+  pkg_cv_RAYLIB_CFLAGS=`$PKG_CONFIG --cflags "raylib = 5.0.0" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
@@ -23386,12 +23386,12 @@ if test -n "$RAYLIB_LIBS"; then
     pkg_cv_RAYLIB_LIBS="$RAYLIB_LIBS"
  elif test -n "$PKG_CONFIG"; then
     if test -n "$PKG_CONFIG" && \
-    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"raylib >=  5.0.0\""; } >&5
-  ($PKG_CONFIG --exists --print-errors "raylib >=  5.0.0") 2>&5
+    { { $as_echo "$as_me:${as_lineno-$LINENO}: \$PKG_CONFIG --exists --print-errors \"raylib = 5.0.0\""; } >&5
+  ($PKG_CONFIG --exists --print-errors "raylib = 5.0.0") 2>&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  pkg_cv_RAYLIB_LIBS=`$PKG_CONFIG --libs "raylib >=  5.0.0" 2>/dev/null`
+  pkg_cv_RAYLIB_LIBS=`$PKG_CONFIG --libs "raylib = 5.0.0" 2>/dev/null`
 		      test "x$?" != "x0" && pkg_failed=yes
 else
   pkg_failed=yes
@@ -23412,14 +23412,14 @@ else
         _pkg_short_errors_supported=no
 fi
         if test $_pkg_short_errors_supported = yes; then
-	        RAYLIB_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "raylib >=  5.0.0" 2>&1`
+	        RAYLIB_PKG_ERRORS=`$PKG_CONFIG --short-errors --print-errors --cflags --libs "raylib = 5.0.0" 2>&1`
         else
-	        RAYLIB_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "raylib >=  5.0.0" 2>&1`
+	        RAYLIB_PKG_ERRORS=`$PKG_CONFIG --print-errors --cflags --libs "raylib = 5.0.0" 2>&1`
         fi
 	# Put the nasty error message in config.log where it belongs
 	echo "$RAYLIB_PKG_ERRORS" >&5
 
-	as_fn_error $? "Package requirements (raylib >=  5.0.0) were not met:
+	as_fn_error $? "Package requirements (raylib = 5.0.0) were not met:
 
 $RAYLIB_PKG_ERRORS
 
@@ -25370,4 +25370,50 @@ if test -n "$ac_unrecognized_opts" && test "$enable_option_checking" != no; then
 $as_echo "$as_me: WARNING: unrecognized options: $ac_unrecognized_opts" >&2;}
 fi
 
+
+
+
+
+    if test "x$enable_web" = "xyes"; then :
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: " >&5
+$as_echo "$as_me: " >&6;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: The --enable-web option is not recommended!" >&5
+$as_echo "$as_me: WARNING: The --enable-web option is not recommended!" >&2;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Expect significant bugs, crashes, or build errors!" >&5
+$as_echo "$as_me: WARNING: Expect significant bugs, crashes, or build errors!" >&2;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Web builds were an early experiment that hasn't been touched in a long time." >&5
+$as_echo "$as_me: WARNING: Web builds were an early experiment that hasn't been touched in a long time." >&2;}
+
+fi
+
+
+
+    if test "x$enable_system_raylib" = "xyes"; then :
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: " >&5
+$as_echo "$as_me: " >&6;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: The --enable-system-raylib option is not recommended!" >&5
+$as_echo "$as_me: WARNING: The --enable-system-raylib option is not recommended!" >&2;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Expect significant bugs, crashes, or build errors!" >&5
+$as_echo "$as_me: WARNING: Expect significant bugs, crashes, or build errors!" >&2;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Dynamically linking to raylib should work, *IF-AND-ONLY-IF* the raylib .so/.dylib is version 5.0.0 and built with GRAPHICS_API_OPENGL_43 (we need OpenGL 4.3 for compute shaders." >&5
+$as_echo "$as_me: WARNING: Dynamically linking to raylib should work, *IF-AND-ONLY-IF* the raylib .so/.dylib is version 5.0.0 and built with GRAPHICS_API_OPENGL_43 (we need OpenGL 4.3 for compute shaders." >&2;}
+
+fi
+
+
+
+    if test "x$enable_window_resize" = "xyes"; then :
+
+        { $as_echo "$as_me:${as_lineno-$LINENO}: " >&5
+$as_echo "$as_me: " >&6;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: The --enable-window-resize option is not recommended!" >&5
+$as_echo "$as_me: WARNING: The --enable-window-resize option is not recommended!" >&2;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Expect significant bugs, crashes, or build errors!" >&5
+$as_echo "$as_me: WARNING: Expect significant bugs, crashes, or build errors!" >&2;}
+        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Window resizing is known to be broken and incomplete!" >&5
+$as_echo "$as_me: WARNING: Window resizing is known to be broken and incomplete!" >&2;}
+
+fi
 

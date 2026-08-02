@@ -85,8 +85,7 @@ AS_IF([test "x$enable_web" = "xyes"],[AC_DEFINE([WEB_BUILD],[1])])
 
 CFLAGS="$CFLAGS $OPTMODE"
 
-dnl >>> Use a locally installed version of chipmunk instead of
-dnl     the provided version in external/chipmunk
+dnl >>> Use chipmunk as the physics engine?
 
 AC_ARG_ENABLE([chipmunk],
     AS_HELP_STRING([--disable-chipmunk], [Disable the Chipmunk physics engine]))
@@ -128,7 +127,7 @@ dnl >>> Use a locally installed version of raylib instead of
 dnl     the provided version in external/raylib
 
 AC_ARG_ENABLE([system-raylib],
-    AS_HELP_STRING([--enable-system-raylib], [Use a locally installed version of raylib instead of the version iincluded with project_name]))
+    AS_HELP_STRING([--enable-system-raylib], [Use a locally installed version of raylib instead of the version included with project_name]))
 
 AS_IF([test "x$enable_system_raylib" = "xyes"], [
 ],[
@@ -139,7 +138,7 @@ AM_CONDITIONAL([USE_SYSTEM_RAYLIB], [test "x$enable_system_raylib" = "xyes"])
 
 
 dnl >>> Allow the main window to be resiszable,
-dnl     with the kayout6 dynamiclly adjusting
+dnl     with the kayout dynamiclly adjusting
 
 AC_ARG_ENABLE([window-resize],
     AS_HELP_STRING([--enable-window-resize], [Enables resizing of the main window (BUGGY)]))
@@ -210,7 +209,7 @@ case "${host_os}" in
         ;;
     *)
         AC_MSG_RESULT([unknown])
-        AC_MSG_WARN([This is an unknown platform - the build (esp. linking to the locsl OpenGL libs might fail)])
+        AC_MSG_WARN([This is an unknown platform - the build (esp. linking to the locsl OpenGL libs) might fail])
         ;;
 esac
 
@@ -338,7 +337,7 @@ AS_IF([test "x$enable_web" != "xyes"], [
 ])
 
 AS_IF([test "x$enable_system_raylib" = "xyes"], [
-    PKG_CHECK_MODULES([RAYLIB], [raylib >=  5.0.0])
+    PKG_CHECK_MODULES([RAYLIB], [raylib = 5.0.0])
 
     ALL_PKG_CFLAGS="$ALL_PKG_CFLAGS $RAYLIB_CFLAGS"
     ALL_PKG_LIBS="$ALL_PKG_LIBS $RAYLIB_LIBS"
@@ -398,3 +397,17 @@ AC_CONFIG_FILES([
 
 AC_OUTPUT
 
+AC_DEFUN([WARN_WHEN_ENABLED], [
+    AS_IF([test "x$enable_$1" = "xyes"], [
+        AC_MSG_NOTICE([])
+        AC_MSG_WARN([The --enable-$2 option is not recommended!])
+        AC_MSG_WARN([Expect significant bugs, crashes, or build errors!])
+        AC_MSG_WARN([$3])
+    ])
+])
+
+WARN_WHEN_ENABLED([web],[web],[Web builds were an early experiment that hasn't been touched in a long time.])
+
+WARN_WHEN_ENABLED([system_raylib],[system-raylib],[Dynamically linking to raylib should work, *IF-AND-ONLY-IF* the raylib .so/.dylib is version 5.0.0 and built with GRAPHICS_API_OPENGL_43 (we need OpenGL 4.3 for compute shaders.])
+
+WARN_WHEN_ENABLED([window_resize],[window-resize],[Window resizing is known to be broken and incomplete!])
