@@ -632,6 +632,15 @@ bool deserialize_generate_level_params(const char *str, generate_level_param_t *
 
 const char *blueprint_string_prop_str(const char *str)
 {
+#define BUFSIZE (((NAME_MAXLEN) * 2) + 1 + 4 + 1)
+/*                                     ^   ^   ^
+                                      /    |   |
+                  LEVEL_MAX_RADIUS ---    /    |
+     symmetry_mode_string_prop_str -------    /
+                              '\0' ------- ---
+ */
+    assert(LEVEL_MAX_RADIUS < 10);
+
     static char buf[NAME_MAXLEN];
 
     generate_level_param_t param;
@@ -654,7 +663,7 @@ const char *blueprint_string_prop_str(const char *str)
         fixed_buf[0] = '\0';
     }
 
-    snprintf(buf, NAME_MAXLEN,
+    snprintf(buf, BUFSIZE,
              "%dr%s%s%s",
              param.tile_radius,
              hidden_buf,
@@ -662,5 +671,7 @@ const char *blueprint_string_prop_str(const char *str)
              symmetry_mode_string_prop_str(param.symmetry_mode));
 
     return buf;
+
+#undef BUFSIZE
 }
 
